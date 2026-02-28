@@ -1,12 +1,17 @@
 # Codex Scripts
 
-> Shared runtime scripts synced to `~/.codex/shared-scripts` for cross-repository usage.
+> Codex MCP utility scripts and runtime-shared script composition notes.
 
 ---
 
 ## Introduction
 
-These scripts are synchronized by `scripts/runtime/bootstrap.ps1` into local runtime so agents can execute them in any project without copying scripts into each repository.
+This folder contains MCP utility scripts.
+
+`scripts/runtime/bootstrap.ps1` composes `~/.codex/shared-scripts` from:
+- `.codex/scripts/` (this folder)
+- `scripts/common/`
+- `scripts/security/`
 
 ---
 
@@ -15,7 +20,7 @@ These scripts are synchronized by `scripts/runtime/bootstrap.ps1` into local run
 - ✅ Render VS Code MCP template (`mcp.tamplate.jsonc`) from manifest
 - ✅ Apply MCP servers into local `~/.codex/config.toml`
 - ✅ Preserve non-MCP sections in local Codex config
-- ✅ Shared security vulnerability gates for .NET, frontend, and Rust
+- ✅ Shared security vulnerability gates synced from `scripts/security/`
 
 ---
 
@@ -95,23 +100,23 @@ pwsh -File (Join-Path $SecurityScriptsRoot 'Invoke-PreBuildSecurityGate.ps1') -R
 - Inputs: manifest path, output path.
 - Behavior: generates `{"servers": {...}}` JSON for VS Code MCP.
 
-`security/Invoke-PreBuildSecurityGate.ps1`
+`scripts/security/Invoke-PreBuildSecurityGate.ps1`
 - Inputs: repo root, stack toggles, severity threshold, warning-only mode.
 - Behavior: runs consolidated dependency vulnerability gate via stack-specific scripts with optional prerequisite installation.
 
-`security/Install-SecurityAuditPrerequisites.ps1`
+`scripts/security/Install-SecurityAuditPrerequisites.ps1`
 - Inputs: repo root, stack toggles, frontend manager mode, system install switch.
 - Behavior: validates and auto-installs missing audit prerequisites before gates.
 
-`security/Invoke-VulnerabilityAudit.ps1`
+`scripts/security/Invoke-VulnerabilityAudit.ps1`
 - Inputs: solution path, severity threshold.
 - Behavior: runs .NET package vulnerability audit.
 
-`security/Invoke-FrontendPackageVulnerabilityAudit.ps1`
+`scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1`
 - Inputs: frontend project path, package manager mode, severity threshold.
 - Behavior: runs npm/pnpm/yarn dependency vulnerability audit.
 
-`security/Invoke-RustPackageVulnerabilityAudit.ps1`
+`scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1`
 - Inputs: Rust project path, severity threshold.
 - Behavior: runs cargo-audit vulnerability check.
 

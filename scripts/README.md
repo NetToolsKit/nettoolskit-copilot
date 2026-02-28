@@ -139,7 +139,7 @@ scripts/
 - `.github/` -> `~/.github`
 - `.codex/skills/` -> `~/.codex/skills`
 - `.codex/mcp/` -> `~/.codex/shared-mcp`
-- `.codex/scripts/` -> `~/.codex/shared-scripts`
+- `.codex/scripts/` (root MCP tools) + `scripts/common/` + `scripts/security/` -> `~/.codex/shared-scripts`
 - `.codex/orchestration/` -> `~/.codex/shared-orchestration`
 
 MCP apply mode updates only `[mcp_servers.*]` sections in `~/.codex/config.toml`, preserving the rest.

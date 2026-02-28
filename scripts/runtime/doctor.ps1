@@ -7,7 +7,9 @@
     - .github -> ~/.github
     - .codex/skills -> ~/.codex/skills
     - .codex/mcp -> ~/.codex/shared-mcp
-    - .codex/scripts -> ~/.codex/shared-scripts
+    - .codex/scripts (root tools) -> ~/.codex/shared-scripts
+    - scripts/common -> ~/.codex/shared-scripts/common
+    - scripts/security -> ~/.codex/shared-scripts/security
     - .codex/orchestration -> ~/.codex/shared-orchestration
 
     For each mapping, reports:
@@ -47,7 +49,7 @@
     pwsh -File scripts/runtime/doctor.ps1 -SyncOnDrift
 
 .NOTES
-    Version: 1.2
+    Version: 1.3
     Requirements: PowerShell 7+.
 #>
 
@@ -265,9 +267,21 @@ function Invoke-Doctor {
             IgnoreExtraPrefixes = @()
         },
         [pscustomobject]@{
-            Name = '.codex/scripts -> runtime'
+            Name = '.codex/scripts (root tools) -> runtime'
             Source = Join-Path $ResolvedRepoRoot '.codex\scripts'
             Target = Join-Path $TargetCodexPath 'shared-scripts'
+            IgnoreExtraPrefixes = @('common\', 'common/', 'security\', 'security/')
+        },
+        [pscustomobject]@{
+            Name = 'scripts/common -> runtime'
+            Source = Join-Path $ResolvedRepoRoot 'scripts\common'
+            Target = Join-Path $TargetCodexPath 'shared-scripts\common'
+            IgnoreExtraPrefixes = @()
+        },
+        [pscustomobject]@{
+            Name = 'scripts/security -> runtime'
+            Source = Join-Path $ResolvedRepoRoot 'scripts\security'
+            Target = Join-Path $TargetCodexPath 'shared-scripts\security'
             IgnoreExtraPrefixes = @()
         },
         [pscustomobject]@{

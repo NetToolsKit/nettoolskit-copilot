@@ -10,6 +10,11 @@
     - <user-home>/.codex/shared-scripts
     - <user-home>/.codex/shared-orchestration
 
+    Shared-scripts are synchronized from:
+    - .codex/scripts (MCP utility scripts and docs)
+    - scripts/common (shared PowerShell helpers)
+    - scripts/security (shared security audit gates)
+
     When -ApplyMcpConfig is specified, applies MCP servers from the shared manifest
     into the local Codex config.toml file.
 
@@ -44,7 +49,7 @@
     pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 
 .NOTES
-    Version: 1.2
+    Version: 1.3
     Requirements: PowerShell 7+.
 #>
 
@@ -256,14 +261,21 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
 
 $sourceGithub = Join-Path $resolvedRepoRoot '.github'
 $sourceCodex = Join-Path $resolvedRepoRoot '.codex'
+$sourceScripts = Join-Path $resolvedRepoRoot 'scripts'
+$sourceCodexScripts = Join-Path $sourceCodex 'scripts'
+$sourceCommonScripts = Join-Path $sourceScripts 'common'
+$sourceSecurityScripts = Join-Path $sourceScripts 'security'
 
 Assert-PathPresent -Path $sourceGithub -Label 'source .github folder'
 Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
+Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
 
 Invoke-DirectorySync -Source $sourceGithub -Destination $TargetGithubPath -MirrorMode:$Mirror
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'skills') -Destination (Join-Path $TargetCodexPath 'skills') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
-Invoke-DirectorySync -Source (Join-Path $sourceCodex 'scripts') -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
+Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
+Invoke-DirectorySync -Source $sourceCommonScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\common') -MirrorMode:$Mirror
+Invoke-DirectorySync -Source $sourceSecurityScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\security') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'orchestration') -Destination (Join-Path $TargetCodexPath 'shared-orchestration') -MirrorMode:$Mirror
 
 $sharedReadme = Join-Path $sourceCodex 'README.md'
@@ -276,7 +288,7 @@ Write-StyledOutput 'Sync complete.'
 Write-StyledOutput ("  .github -> {0}" -f $TargetGithubPath)
 Write-StyledOutput ("  .codex/skills -> {0}" -f (Join-Path $TargetCodexPath 'skills'))
 Write-StyledOutput ("  .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
-Write-StyledOutput ("  .codex/scripts -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
+Write-StyledOutput ("  .codex/scripts + scripts/common + scripts/security -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
 Write-StyledOutput ("  .codex/orchestration -> {0}" -f (Join-Path $TargetCodexPath 'shared-orchestration'))
 
 if ($ApplyMcpConfig) {

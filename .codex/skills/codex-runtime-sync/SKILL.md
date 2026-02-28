@@ -8,7 +8,10 @@ description: Sync shared repo assets into local ~/.github and ~/.codex, and appl
 Use this skill to keep local runtime folders aligned with the versioned repository structure.
 
 This includes syncing the complete versioned `.github/` asset set (instructions, routing catalog, prompts, chatmodes, schemas, templates) into `~/.github`.
-It also syncs `.codex/scripts/` into `~/.codex/shared-scripts` so agents can run shared automation across any repository.
+It also composes `~/.codex/shared-scripts` from:
+- `.codex/scripts/` (MCP utility scripts)
+- `scripts/common/` (shared helpers)
+- `scripts/security/` (shared security gates)
 
 ## Sync Shared Assets
 
@@ -31,4 +34,6 @@ pwsh -File .codex/scripts/render-vscode-mcp.ps1 -OutputPath .vscode/mcp.tamplate
 ## Source Of Truth
 
 - `.codex/mcp/servers.manifest.json`
-- `.codex/scripts/*` (runtime-shared scripts)
+- `.codex/scripts/*` (MCP utilities)
+- `scripts/common/*` (runtime shared helpers)
+- `scripts/security/*` (runtime shared security scripts)

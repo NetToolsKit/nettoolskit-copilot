@@ -239,8 +239,7 @@ function Resolve-AuditScriptPath {
     }
 
     $candidateList = @(
-        (Resolve-PathFromRoot -RootPath $RootPath -PathValue ("scripts/security/{0}" -f $ScriptFileName)),
-        (Resolve-PathFromRoot -RootPath $RootPath -PathValue (".codex/scripts/security/{0}" -f $ScriptFileName))
+        (Resolve-PathFromRoot -RootPath $RootPath -PathValue ("scripts/security/{0}" -f $ScriptFileName))
     )
 
     foreach ($candidate in $candidateList) {
@@ -249,7 +248,7 @@ function Resolve-AuditScriptPath {
         }
     }
 
-    throw "Audit script not found for '$ScriptFileName'. Checked local security folder, scripts/security, and .codex/scripts/security."
+    throw "Audit script not found for '$ScriptFileName'. Checked local security folder and scripts/security."
 }
 
 # Converts absolute path to repository-relative path.
