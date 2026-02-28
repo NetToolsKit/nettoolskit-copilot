@@ -225,6 +225,8 @@ routing:
       - "github actions"
       - "azure devops"
     include:
+      - path: instructions/workflow-generation.instructions.md
+        reason: GitHub Actions workflow generation baseline (security, tests, vulnerabilities, quality)
       - path: instructions/docker.instructions.md
         reason: Dockerfile conventions
       - path: instructions/k8s.instructions.md

@@ -5,10 +5,14 @@
 .DESCRIPTION
     Detects the repository root and copies shared assets to:
     - <user-home>/.github
+    - <user-home>/.github/scripts
     - <user-home>/.codex/skills
     - <user-home>/.codex/shared-mcp
     - <user-home>/.codex/shared-scripts
     - <user-home>/.codex/shared-orchestration
+
+    Runtime .github/scripts are synchronized from:
+    - scripts (repository root scripts)
 
     Shared-scripts are synchronized from:
     - .codex/scripts (MCP utility scripts and docs)
@@ -49,7 +53,7 @@
     pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 
 .NOTES
-    Version: 1.3
+    Version: 1.4
     Requirements: PowerShell 7+.
 #>
 
@@ -271,6 +275,7 @@ Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
 Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
 
 Invoke-DirectorySync -Source $sourceGithub -Destination $TargetGithubPath -MirrorMode:$Mirror
+Invoke-DirectorySync -Source $sourceScripts -Destination (Join-Path $TargetGithubPath 'scripts') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'skills') -Destination (Join-Path $TargetCodexPath 'skills') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
@@ -286,6 +291,7 @@ if (Test-Path -LiteralPath $sharedReadme) {
 
 Write-StyledOutput 'Sync complete.'
 Write-StyledOutput ("  .github -> {0}" -f $TargetGithubPath)
+Write-StyledOutput ("  scripts -> {0}" -f (Join-Path $TargetGithubPath 'scripts'))
 Write-StyledOutput ("  .codex/skills -> {0}" -f (Join-Path $TargetCodexPath 'skills'))
 Write-StyledOutput ("  .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
 Write-StyledOutput ("  .codex/scripts + scripts/common + scripts/security -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))

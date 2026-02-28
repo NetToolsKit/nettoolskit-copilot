@@ -5,6 +5,7 @@
 .DESCRIPTION
     Compares source and runtime file sets for:
     - .github -> ~/.github
+    - scripts -> ~/.github/scripts
     - .codex/skills -> ~/.codex/skills
     - .codex/mcp -> ~/.codex/shared-mcp
     - .codex/scripts (root tools) -> ~/.codex/shared-scripts
@@ -49,7 +50,7 @@
     pwsh -File scripts/runtime/doctor.ps1 -SyncOnDrift
 
 .NOTES
-    Version: 1.3
+    Version: 1.4
     Requirements: PowerShell 7+.
 #>
 
@@ -252,6 +253,12 @@ function Invoke-Doctor {
             Name = '.github -> runtime'
             Source = Join-Path $ResolvedRepoRoot '.github'
             Target = $TargetGithubPath
+            IgnoreExtraPrefixes = @('scripts\', 'scripts/')
+        },
+        [pscustomobject]@{
+            Name = 'scripts -> runtime .github/scripts'
+            Source = Join-Path $ResolvedRepoRoot 'scripts'
+            Target = Join-Path $TargetGithubPath 'scripts'
             IgnoreExtraPrefixes = @()
         },
         [pscustomobject]@{

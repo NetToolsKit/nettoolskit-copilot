@@ -86,6 +86,7 @@
         "devops-containers"
       ],
       "expected_selected_paths": [
+        "instructions/workflow-generation.instructions.md",
         "instructions/docker.instructions.md",
         "instructions/k8s.instructions.md",
         "instructions/ci-cd-devops.instructions.md"
