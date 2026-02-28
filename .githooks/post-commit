@@ -141,6 +141,51 @@ run_optional_mcp_apply() {
   return 0
 }
 
+# Validates repository .vscode templates against global VS Code user files.
+# Controlled by:
+# - CODEX_SKIP_VSCODE_GLOBAL_CHECK=1
+# - CODEX_VSCODE_GLOBAL_USER_PATH=<absolute path>
+# - CODEX_SKIP_VSCODE_SNIPPET_CHECK=1
+run_vscode_global_check() {
+  cmd="$1"
+
+  if [ "${CODEX_SKIP_VSCODE_GLOBAL_CHECK:-0}" = "1" ]; then
+    echo "[post-commit] VS Code global check skipped (CODEX_SKIP_VSCODE_GLOBAL_CHECK=1)."
+    return 0
+  fi
+
+  echo "[post-commit] Validating .vscode templates against global VS Code User settings..."
+
+  if [ -n "${CODEX_VSCODE_GLOBAL_USER_PATH:-}" ]; then
+    if [ "${CODEX_SKIP_VSCODE_SNIPPET_CHECK:-0}" = "1" ]; then
+      if ! run_ps_file "$cmd" ./scripts/runtime/validate-vscode-global-alignment.ps1 -GlobalVscodeUserPath "$CODEX_VSCODE_GLOBAL_USER_PATH" -SkipSnippets; then
+        echo "[post-commit] Warning: VS Code global check failed." >&2
+        return 0
+      fi
+    else
+      if ! run_ps_file "$cmd" ./scripts/runtime/validate-vscode-global-alignment.ps1 -GlobalVscodeUserPath "$CODEX_VSCODE_GLOBAL_USER_PATH"; then
+        echo "[post-commit] Warning: VS Code global check failed." >&2
+        return 0
+      fi
+    fi
+  else
+    if [ "${CODEX_SKIP_VSCODE_SNIPPET_CHECK:-0}" = "1" ]; then
+      if ! run_ps_file "$cmd" ./scripts/runtime/validate-vscode-global-alignment.ps1 -SkipSnippets; then
+        echo "[post-commit] Warning: VS Code global check failed." >&2
+        return 0
+      fi
+    else
+      if ! run_ps_file "$cmd" ./scripts/runtime/validate-vscode-global-alignment.ps1; then
+        echo "[post-commit] Warning: VS Code global check failed." >&2
+        return 0
+      fi
+    fi
+  fi
+
+  echo "[post-commit] VS Code global check complete."
+  return 0
+}
+
 # Hook is best-effort: no hard failure if PowerShell is unavailable.
 PS_CMD="$(resolve_ps_cmd)"
 if [ -z "$PS_CMD" ]; then
@@ -150,5 +195,6 @@ fi
 
 run_sync "$PS_CMD"
 run_optional_mcp_apply "$PS_CMD"
+run_vscode_global_check "$PS_CMD"
 run_runtime_cleanup "$PS_CMD"
 exit 0

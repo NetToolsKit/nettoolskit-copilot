@@ -128,6 +128,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Mandatory: `instructions/workflow-optimization.instructions.md`, `instructions/powershell-execution.instructions.md`, `instructions/feedback-changelog.instructions.md`.
 - For `.github`: `instructions/copilot-instruction-creation.instructions.md`. Domain sets live in `instructions/*`.
 - SCM/CI: Azure DevOps primary; `.github` hosts agent/PR guidance.
+- For GitHub Actions in external repositories, use pinned script download from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of duplicating scripts in target repositories.
  - Branches like `feature/dynamicFilter` are ephemeral; avoid branch-specific rules.
 
 ## Overview

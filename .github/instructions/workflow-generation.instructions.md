@@ -7,6 +7,13 @@ priority: high
 - Standardize workflow generation for enterprise-grade CI/CD with deterministic security, testing, vulnerability, and code-quality coverage.
 - Keep workflows auditable, reproducible, and safe-by-default.
 
+# Shared Script Source Policy (External Repositories)
+- For GitHub Actions workflows in other repositories, do not copy shared scripts into the target repository.
+- Always consume shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions`.
+- Pin the source by immutable commit SHA or approved release tag.
+- Verify downloaded script checksum before execution.
+- Keep downloaded scripts in runner temp/workspace and execute from there.
+
 # Mandatory Workflow Security Baseline
 - Pin all `uses:` actions by full commit SHA and keep the source version in inline comments.
 - Use least-privilege `permissions` at workflow level and override per job only when needed.
@@ -28,6 +35,26 @@ priority: high
 - For dependency security, prefer the shared pre-build gate:
 ```powershell
 pwsh -NoLogo -NoProfile -File ./scripts/security/Invoke-PreBuildSecurityGate.ps1 `
+  -RepoRoot $PWD `
+  -WarningOnly:$true `
+  -AllowMissingCargoAudit
+```
+- For workflows in external repositories, fetch the same gate script from this repository at a pinned ref:
+```powershell
+$ref = '<pinned-commit-sha-or-tag>'
+$baseUrl = "https://raw.githubusercontent.com/ThiagoGuislotti/copilot-instructions/$ref"
+$scriptUrl = "$baseUrl/scripts/security/Invoke-PreBuildSecurityGate.ps1"
+$scriptPath = Join-Path $env:RUNNER_TEMP 'Invoke-PreBuildSecurityGate.ps1'
+
+Invoke-WebRequest -Uri $scriptUrl -OutFile $scriptPath
+
+$expectedHash = '<expected-sha256>'
+$actualHash = (Get-FileHash -LiteralPath $scriptPath -Algorithm SHA256).Hash
+if ($actualHash -ne $expectedHash) {
+  throw "Checksum validation failed for $scriptUrl"
+}
+
+pwsh -NoLogo -NoProfile -File $scriptPath `
   -RepoRoot $PWD `
   -WarningOnly:$true `
   -AllowMissingCargoAudit

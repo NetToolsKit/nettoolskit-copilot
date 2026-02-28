@@ -91,6 +91,7 @@ Follow this order of operations on every task:
 - Infrastructure and DevOps: instructions/docker.instructions.md; instructions/k8s.instructions.md; instructions/ci-cd-devops.instructions.md; instructions/workflow-generation.instructions.md; instructions/static-analysis-sonarqube.instructions.md (e.g., pipelines, security scans).
 - Security and vulnerabilities: instructions/security-vulnerabilities.instructions.md (e.g., OWASP/NIST-aligned controls for API, frontend, backend, database).
 - Dependency vulnerability automation scripts (shared runtime): ~/.codex/shared-scripts/security/Invoke-PreBuildSecurityGate.ps1; ~/.codex/shared-scripts/security/Invoke-VulnerabilityAudit.ps1; ~/.codex/shared-scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1; ~/.codex/shared-scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1.
+- For GitHub Actions in external repositories, consume shared scripts from pinned refs in `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - PowerShell script authoring: instructions/powershell-script-creation.instructions.md (e.g., script skeleton, root detection, mutation safety, exit codes).
 
 ## Testing and Documentation

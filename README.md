@@ -216,6 +216,7 @@ pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1
 
 - Runs `scripts/runtime/bootstrap.ps1 -Mirror` (best effort) to sync and clean drift in `~/.github` and managed `~/.codex` folders
 - If `.codex/mcp/servers.manifest.json` changed in `HEAD`, can optionally apply MCP config
+- Runs `scripts/runtime/validate-vscode-global-alignment.ps1` (best effort) to verify repository `.vscode` templates/snippets are contained in global VS Code User files
 - Runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort) to clean runtime garbage and stale session/history files by **LastWriteTime** (last update)
 
 ### post-merge
@@ -234,6 +235,9 @@ Environment variables:
 - `CODEX_APPLY_MCP_ON_POST_COMMIT=1`: enable MCP apply when manifest changed
 - `CODEX_BACKUP_MCP_CONFIG=1|0`: backup control before MCP apply (`1` default)
 - `CODEX_POST_COMMIT_MIRROR=0|1`: controls mirror cleanup on post-commit sync (`1` default)
+- `CODEX_SKIP_VSCODE_GLOBAL_CHECK=1`: skips `.vscode` containment check against global VS Code User files in `post-commit`
+- `CODEX_VSCODE_GLOBAL_USER_PATH=<path>`: overrides global VS Code User folder used by `post-commit` check
+- `CODEX_SKIP_VSCODE_SNIPPET_CHECK=1`: skips snippet containment checks in `post-commit`
 - `CODEX_SKIP_RUNTIME_CLEANUP=1`: skip automatic runtime cleanup in `post-commit` and `post-merge`
 - `CODEX_LOG_RETENTION_DAYS=<n>`: log retention window in days for automatic runtime cleanup (`30` default, by `LastWriteTime`)
 - `CODEX_INCLUDE_SESSIONS_CLEANUP=0|1`: enable cleanup for old session/history files (`1` default)
