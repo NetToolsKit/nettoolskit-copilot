@@ -821,6 +821,7 @@ $requiredFiles = @(
     '.github/governance/agent-skill-permissions.matrix.json',
     '.github/governance/supply-chain.baseline.json',
     '.github/governance/warning-baseline.json',
+    '.github/governance/shared-script-checksums.manifest.json',
     '.github/runbooks/README.md',
     '.github/runbooks/validation-failures.runbook.md',
     '.github/runbooks/runtime-drift.runbook.md',
@@ -845,11 +846,13 @@ $requiredFiles = @(
     'scripts/validation/validate-agent-skill-alignment.ps1',
     'scripts/validation/validate-agent-permissions.ps1',
     'scripts/validation/validate-security-baseline.ps1',
+    'scripts/validation/validate-shared-script-checksums.ps1',
     'scripts/validation/validate-warning-baseline.ps1',
     'scripts/validation/validate-supply-chain.ps1',
     'scripts/validation/validate-audit-ledger.ps1',
     'scripts/validation/validate-release-provenance.ps1',
     'scripts/validation/validate-all.ps1',
+    'scripts/governance/update-shared-script-checksums-manifest.ps1',
     'scripts/runtime/run-agent-pipeline.ps1',
     'scripts/runtime/clean-codex-runtime.ps1',
     'scripts/orchestration/stages/plan-stage.ps1',
@@ -870,10 +873,21 @@ if ($null -ne $schema) {
     }
 }
 
-$manifest = Test-JsonFile -Root $resolvedRepoRoot -Path '.codex/mcp/servers.manifest.json'
-if ($null -ne $manifest) {
-    if ($null -eq $manifest.servers -or @($manifest.servers).Count -eq 0) {
+$mcpManifest = Test-JsonFile -Root $resolvedRepoRoot -Path '.codex/mcp/servers.manifest.json'
+if ($null -ne $mcpManifest) {
+    if ($null -eq $mcpManifest.servers -or @($mcpManifest.servers).Count -eq 0) {
         Add-ValidationFailure 'MCP manifest must contain at least one server.'
+    }
+}
+
+$sharedChecksumsManifest = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/shared-script-checksums.manifest.json'
+if ($null -ne $sharedChecksumsManifest) {
+    if ([string] $sharedChecksumsManifest.hashAlgorithm -ne 'SHA256') {
+        Add-ValidationFailure "Shared script checksum manifest hashAlgorithm must be 'SHA256'."
+    }
+
+    if ($null -eq $sharedChecksumsManifest.entries -or @($sharedChecksumsManifest.entries).Count -eq 0) {
+        Add-ValidationFailure 'Shared script checksum manifest must contain at least one entry.'
     }
 }
 

@@ -10,6 +10,7 @@
     - validate-instructions
     - validate-policy
     - validate-security-baseline
+    - validate-shared-script-checksums
     - validate-agent-orchestration
     - validate-agent-skill-alignment
     - validate-agent-permissions
@@ -75,7 +76,7 @@
     pwsh -File scripts/validation/validate-all.ps1 -WarningOnly:$false -ValidationProfile enforced
 
 .NOTES
-    Version: 2.1
+    Version: 2.2
     Requirements: PowerShell 7+.
 #>
 
@@ -572,6 +573,11 @@ $baseCheckDefinitions['validate-security-baseline'] = [pscustomobject]@{
     script = 'scripts/validation/validate-security-baseline.ps1'
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
+$baseCheckDefinitions['validate-shared-script-checksums'] = [pscustomobject]@{
+    name = 'validate-shared-script-checksums'
+    script = 'scripts/validation/validate-shared-script-checksums.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
 $baseCheckDefinitions['validate-agent-orchestration'] = [pscustomobject]@{
     name = 'validate-agent-orchestration'
     script = 'scripts/validation/validate-agent-orchestration.ps1'
@@ -671,6 +677,7 @@ $defaultCheckOrder = @(
     'validate-instructions',
     'validate-policy',
     'validate-security-baseline',
+    'validate-shared-script-checksums',
     'validate-agent-orchestration',
     'validate-agent-skill-alignment',
     'validate-agent-permissions',

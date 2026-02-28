@@ -20,6 +20,7 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Multi-agent pipeline runner with guardrails and deterministic stage handoffs
 - ✅ Release governance checks (CODEOWNERS, changelog contracts, branch-protection baseline)
 - ✅ Security baseline checks (sensitive file patterns and secret-like content scanning)
+- ✅ Shared script checksum manifest governance for external workflow integrity
 - ✅ Release provenance checks (validation coverage, evidence files, git traceability, optional audit proof)
 - ✅ Validation profiles (`dev`, `release`, `enforced`) with warning-only execution policy
 - ✅ Hash-chained validation ledger for immutable local audit trail
@@ -114,7 +115,8 @@ scripts/
 │       ├── validate-stage.ps1
 │       └── review-stage.ps1
 ├── governance/
-│   └── set-branch-protection.ps1
+│   ├── set-branch-protection.ps1
+│   └── update-shared-script-checksums-manifest.ps1
 ├── git-hooks/
 │   └── setup-git-hooks.ps1
 ├── validation/
@@ -167,6 +169,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/validate-agent-skill-alignment.ps1` | Validates consistency among agent manifest, skills, pipeline stages, and eval requiredAgents. | `pwsh -File scripts/validation/validate-agent-skill-alignment.ps1` |
 | `validation/validate-agent-permissions.ps1` | Validates alignment between agent contracts and `.github/governance/agent-skill-permissions.matrix.json`. | `pwsh -File scripts/validation/validate-agent-permissions.ps1` |
 | `validation/validate-security-baseline.ps1` | Validates `.github/governance/security-baseline.json` (required governance paths, forbidden sensitive files, and secret-like pattern scanning). Runs in warning-only mode by default. | `pwsh -File scripts/validation/validate-security-baseline.ps1` |
+| `validation/validate-shared-script-checksums.ps1` | Validates `.github/governance/shared-script-checksums.manifest.json` against current files under configured script roots. | `pwsh -File scripts/validation/validate-shared-script-checksums.ps1` |
 | `validation/validate-warning-baseline.ps1` | Validates PSScriptAnalyzer warning volume against `.github/governance/warning-baseline.json`. | `pwsh -File scripts/validation/validate-warning-baseline.ps1` |
 | `validation/validate-supply-chain.ps1` | Validates dependency manifests against `.github/governance/supply-chain.baseline.json` and exports local SBOM artifact. | `pwsh -File scripts/validation/validate-supply-chain.ps1` |
 | `validation/validate-release-provenance.ps1` | Validates release provenance baseline (`requiredValidationChecks`, `requiredEvidenceFiles`, changelog recency, git traceability, optional audit report). Runs in warning-only mode by default. | `pwsh -File scripts/validation/validate-release-provenance.ps1` |
@@ -176,6 +179,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/export-enterprise-trends.ps1` | Exports trends dashboard artifacts (`warnings`, `vulnerabilities`, and validation performance) from ledger + latest reports. | `pwsh -File scripts/validation/export-enterprise-trends.ps1` |
 | `validation/test-routing-selection.ps1` | Runs deterministic golden tests for static routing behavior based on catalog + fixtures. | `pwsh -File scripts/validation/test-routing-selection.ps1` |
 | `governance/set-branch-protection.ps1` | Validates or applies branch protection from `.github/governance/branch-protection.baseline.json` using GitHub CLI. | `pwsh -File scripts/governance/set-branch-protection.ps1 -Apply` |
+| `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
 | `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
@@ -251,6 +255,9 @@ pwsh -File .\scripts\validation\validate-release-governance.ps1
 # validate security baseline (paths + secret-like content patterns)
 pwsh -File .\scripts\validation\validate-security-baseline.ps1
 
+# validate shared script checksum manifest integrity
+pwsh -File .\scripts\validation\validate-shared-script-checksums.ps1
+
 # validate release provenance baseline and evidence traceability
 pwsh -File .\scripts\validation\validate-release-provenance.ps1
 
@@ -271,6 +278,9 @@ pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
 
 # validate branch protection drift from baseline
 pwsh -File .\scripts\governance\set-branch-protection.ps1
+
+# regenerate shared script checksum manifest
+pwsh -File .\scripts\governance\update-shared-script-checksums-manifest.ps1
 
 # export consolidated audit report (JSON + logs)
 pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile release -StrictExtras

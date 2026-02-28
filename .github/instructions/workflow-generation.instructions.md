@@ -43,18 +43,49 @@ pwsh -NoLogo -NoProfile -File ./scripts/security/Invoke-PreBuildSecurityGate.ps1
 ```powershell
 $ref = '<pinned-commit-sha-or-tag>'
 $baseUrl = "https://raw.githubusercontent.com/ThiagoGuislotti/copilot-instructions/$ref"
-$scriptUrl = "$baseUrl/scripts/security/Invoke-PreBuildSecurityGate.ps1"
-$scriptPath = Join-Path $env:RUNNER_TEMP 'Invoke-PreBuildSecurityGate.ps1'
+$manifestUrl = "$baseUrl/.github/governance/shared-script-checksums.manifest.json"
+$downloadRoot = Join-Path $env:RUNNER_TEMP 'copilot-instructions'
+$manifestPath = Join-Path $downloadRoot 'shared-script-checksums.manifest.json'
 
-Invoke-WebRequest -Uri $scriptUrl -OutFile $scriptPath
+New-Item -ItemType Directory -Path $downloadRoot -Force | Out-Null
+Invoke-WebRequest -Uri $manifestUrl -OutFile $manifestPath
+$manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json -Depth 100
 
-$expectedHash = '<expected-sha256>'
-$actualHash = (Get-FileHash -LiteralPath $scriptPath -Algorithm SHA256).Hash
-if ($actualHash -ne $expectedHash) {
-  throw "Checksum validation failed for $scriptUrl"
+$manifestMap = @{}
+foreach ($entry in $manifest.entries) {
+  $manifestMap[[string]$entry.path] = ([string]$entry.sha256).ToLowerInvariant()
 }
 
-pwsh -NoLogo -NoProfile -File $scriptPath `
+$requiredScripts = @(
+  'scripts/common/console-style.ps1',
+  'scripts/security/Install-SecurityAuditPrerequisites.ps1',
+  'scripts/security/Invoke-VulnerabilityAudit.ps1',
+  'scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1',
+  'scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1',
+  'scripts/security/Invoke-PreBuildSecurityGate.ps1'
+)
+
+foreach ($relativePath in $requiredScripts) {
+  $url = "$baseUrl/$relativePath"
+  $target = Join-Path $downloadRoot $relativePath
+  $targetDirectory = Split-Path -Path $target -Parent
+  New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
+
+  Invoke-WebRequest -Uri $url -OutFile $target
+
+  if (-not $manifestMap.ContainsKey($relativePath)) {
+    throw "Manifest missing checksum entry for $relativePath"
+  }
+
+  $expectedHash = $manifestMap[$relativePath]
+  $actualHash = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToLowerInvariant()
+  if ($actualHash -ne $expectedHash) {
+    throw "Checksum validation failed for $relativePath"
+  }
+}
+
+$gateScriptPath = Join-Path $downloadRoot 'scripts/security/Invoke-PreBuildSecurityGate.ps1'
+pwsh -NoLogo -NoProfile -File $gateScriptPath `
   -RepoRoot $PWD `
   -WarningOnly:$true `
   -AllowMissingCargoAudit
