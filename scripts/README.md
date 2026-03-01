@@ -365,7 +365,6 @@ Validation ledger and SBOM artifacts are written under `.temp/audit/`.
 
 ## References
 
-- `.codex/README.md`
 - `.codex/scripts/README.md`
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`

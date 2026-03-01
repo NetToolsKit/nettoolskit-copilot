@@ -547,7 +547,6 @@ function Get-MarkdownFilesForValidation {
         'scripts/README.md',
         '.github/AGENTS.md',
         '.github/copilot-instructions.md',
-        '.codex/README.md',
         '.codex/mcp/README.md',
         '.codex/scripts/README.md',
         '.codex/orchestration/README.md',
