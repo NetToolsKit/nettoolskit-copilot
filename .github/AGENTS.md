@@ -179,7 +179,7 @@ Monorepo of libraries, modules, and samples for robust .NET services using Clean
 
 ## Domain Instruction References
 - Development: `instructions/clean-architecture-code.instructions.md`, `instructions/dotnet-csharp.instructions.md`, `instructions/backend.instructions.md`, `instructions/api-high-performance-security.instructions.md`, `instructions/frontend.instructions.md`, `instructions/vue-quasar.instructions.md`, `instructions/ui-ux.instructions.md`
-- Data: `instructions/orm.instructions.md`, `instructions/database.instructions.md`, `instructions/data-privacy-compliance.instructions.md`, `instructions/microservices-performance.instructions.md`
+- Data: `instructions/orm.instructions.md`, `instructions/database.instructions.md`, `instructions/database-configuration-operations.instructions.md`, `instructions/data-privacy-compliance.instructions.md`, `instructions/microservices-performance.instructions.md`
 - Infrastructure: `instructions/docker.instructions.md`, `instructions/k8s.instructions.md`, `instructions/ci-cd-devops.instructions.md`, `instructions/workflow-generation.instructions.md`, `instructions/static-analysis-sonarqube.instructions.md`, `instructions/observability-sre.instructions.md`, `instructions/platform-reliability-resilience.instructions.md`, `instructions/powershell-script-creation.instructions.md`
 - Security: `instructions/security-vulnerabilities.instructions.md`, `instructions/api-high-performance-security.instructions.md`, `instructions/data-privacy-compliance.instructions.md`
 - Testing: `instructions/e2e-testing.instructions.md`

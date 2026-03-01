@@ -76,7 +76,8 @@
       ],
       "expected_selected_paths": [
         "instructions/database.instructions.md",
-        "instructions/orm.instructions.md"
+        "instructions/orm.instructions.md",
+        "instructions/database-configuration-operations.instructions.md"
       ]
     },
     {

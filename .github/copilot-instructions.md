@@ -86,7 +86,7 @@ Follow this order of operations on every task:
 - Frontend and UI/UX: instructions/frontend.instructions.md; instructions/vue-quasar.instructions.md; instructions/vue-quasar-architecture.instructions.md; instructions/ui-ux.instructions.md (e.g., i18n pt-BR, responsive design, feature-first Clean Architecture).
 
 ## Data and Infrastructure
-- Data/ORM/Databases: instructions/orm.instructions.md; instructions/database.instructions.md (e.g., EF Core, migrations).
+- Data/ORM/Databases: instructions/orm.instructions.md; instructions/database.instructions.md; instructions/database-configuration-operations.instructions.md (e.g., EF Core, migrations, connection/pooling/failover operations).
 - Privacy and data protection: instructions/data-privacy-compliance.instructions.md (e.g., PII handling, minimization, retention/deletion, compliance controls).
 - Microservices and performance: instructions/microservices-performance.instructions.md; instructions/platform-reliability-resilience.instructions.md (e.g., async patterns, caching, resilience, chaos, DR readiness).
 - Infrastructure and DevOps: instructions/docker.instructions.md; instructions/k8s.instructions.md; instructions/ci-cd-devops.instructions.md; instructions/workflow-generation.instructions.md; instructions/static-analysis-sonarqube.instructions.md (e.g., pipelines, security scans).

@@ -196,7 +196,7 @@ routing:
         when: changes include pipelines/workflows
 
   - id: database-orm
-    tags: [database, orm, ef-core, migrations, sql]
+    tags: [database, orm, ef-core, migrations, sql, db-config, pooling, failover]
     triggers:
       - "database"
       - "sql"
@@ -206,11 +206,22 @@ routing:
       - "repository"
       - "entity framework"
       - "index"
+      - "db config"
+      - "database configuration"
+      - "connection string"
+      - "pooling"
+      - "max pool size"
+      - "min pool size"
+      - "command timeout"
+      - "failover"
+      - "read replica"
     include:
       - path: instructions/database.instructions.md
         reason: Database patterns and schema guidance
       - path: instructions/orm.instructions.md
         reason: ORM patterns and repository/context conventions
+      - path: instructions/database-configuration-operations.instructions.md
+        reason: Runtime database configuration, pooling, failover, and recovery operations baseline
 
   - id: devops-containers
     tags: [devops, docker, containers, k8s, kubernetes, pipeline, cicd]
