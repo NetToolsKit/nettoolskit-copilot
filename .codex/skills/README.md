@@ -69,13 +69,25 @@ Use skill: `codex-runtime-sync`
 
 Use skills: `dotnet-backend-engineer`, `frontend-vue-quasar-engineer`, `rust-engineer`, `task-planner`
 
-### Example 5: Security Gate Before Build
+### Example 5: High-Performance Secure API
+
+Use skills: `api-performance-security-engineer`, `security-vulnerability-engineer`
+
+### Example 6: Security Gate Before Build
 
 Use skills: `software-engineer`, `devops-platform-engineer`, `test-engineer` with:
 - `~/.codex/shared-scripts/security/Invoke-PreBuildSecurityGate.ps1`
 - `~/.codex/shared-scripts/security/Invoke-VulnerabilityAudit.ps1`
 - `~/.codex/shared-scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1`
 - `~/.codex/shared-scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1`
+
+### Example 7: Reliability, Chaos, and Observability
+
+Use skills: `resilience-chaos-engineer`, `sre-observability-engineer`
+
+### Example 8: Privacy and Compliance
+
+Use skill: `privacy-compliance-engineer`
 
 ---
 
@@ -95,6 +107,10 @@ Use skills: `software-engineer`, `devops-platform-engineer`, `test-engineer` wit
 - `security-vulnerability-engineer`
 - `rust-engineer`
 - `task-planner`
+- `api-performance-security-engineer`
+- `sre-observability-engineer`
+- `privacy-compliance-engineer`
+- `resilience-chaos-engineer`
 
 ### Layout
 

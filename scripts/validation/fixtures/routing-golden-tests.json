@@ -134,6 +134,57 @@
       ]
     },
     {
+      "id": "observability-sre-route",
+      "request": "Define SLO and SLI with OpenTelemetry and burn rate alerts for incident response.",
+      "expected_route_ids": [
+        "observability-sre"
+      ],
+      "expected_selected_paths": [
+        "instructions/observability-sre.instructions.md",
+        "instructions/backend.instructions.md",
+        "instructions/microservices-performance.instructions.md"
+      ]
+    },
+    {
+      "id": "api-high-performance-security-route",
+      "request": "Tune p99 latency budget with rate limit throttling, throughput targets, and idempotency key controls.",
+      "expected_route_ids": [
+        "api-high-performance-security"
+      ],
+      "expected_selected_paths": [
+        "instructions/api-high-performance-security.instructions.md",
+        "instructions/backend.instructions.md",
+        "instructions/security-vulnerabilities.instructions.md",
+        "instructions/dotnet-csharp.instructions.md"
+      ]
+    },
+    {
+      "id": "data-privacy-compliance-route",
+      "request": "Apply privacy by design with LGPD, GDPR, PII masking, and data retention controls.",
+      "expected_route_ids": [
+        "data-privacy-compliance"
+      ],
+      "expected_selected_paths": [
+        "instructions/data-privacy-compliance.instructions.md",
+        "instructions/security-vulnerabilities.instructions.md",
+        "instructions/database.instructions.md",
+        "instructions/backend.instructions.md"
+      ]
+    },
+    {
+      "id": "platform-reliability-resilience-route",
+      "request": "Plan resilience with chaos engineering, fault injection, graceful degradation, and RTO RPO validation.",
+      "expected_route_ids": [
+        "platform-reliability-resilience"
+      ],
+      "expected_selected_paths": [
+        "instructions/platform-reliability-resilience.instructions.md",
+        "instructions/microservices-performance.instructions.md",
+        "instructions/ci-cd-devops.instructions.md",
+        "instructions/k8s.instructions.md"
+      ]
+    },
+    {
       "id": "rust-route",
       "request": "Run cargo test and improve rust crate organization.",
       "expected_route_ids": [

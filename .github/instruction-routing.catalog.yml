@@ -272,6 +272,93 @@ routing:
       - path: instructions/security-vulnerabilities.instructions.md
         reason: Cross-layer vulnerability prevention and security hardening baseline
 
+  - id: observability-sre
+    tags: [observability, sre, telemetry, slo, sli, o11y]
+    triggers:
+      - "observability"
+      - "sre"
+      - "sli"
+      - "slo"
+      - "error budget"
+      - "burn rate"
+      - "opentelemetry"
+      - "golden signals"
+      - "incident response"
+      - "runbook"
+    include:
+      - path: instructions/observability-sre.instructions.md
+        reason: SLO/SLI, telemetry design, alerting, dashboards, and incident-readiness baseline
+      - path: instructions/backend.instructions.md
+        reason: API and backend runtime observability integration
+      - path: instructions/microservices-performance.instructions.md
+        reason: Distributed runtime performance and operational scaling considerations
+
+  - id: api-high-performance-security
+    tags: [api, performance, security, rate-limit, resilience]
+    triggers:
+      - "rate limit"
+      - "throttling"
+      - "p99 latency"
+      - "latency budget"
+      - "throughput"
+      - "idempotency key"
+      - "abuse protection"
+      - "request size limit"
+      - "performance api"
+    include:
+      - path: instructions/api-high-performance-security.instructions.md
+        reason: High-performance and secure API implementation baseline
+      - path: instructions/backend.instructions.md
+        reason: Backend API conventions and resilience patterns
+      - path: instructions/security-vulnerabilities.instructions.md
+        reason: Cross-layer vulnerability prevention and hardening controls
+      - path: instructions/dotnet-csharp.instructions.md
+        reason: .NET/C# implementation conventions when API is in C#
+
+  - id: data-privacy-compliance
+    tags: [privacy, compliance, lgpd, gdpr, pii, data-protection]
+    triggers:
+      - "privacy"
+      - "lgpd"
+      - "gdpr"
+      - "pii"
+      - "data minimization"
+      - "data retention"
+      - "consent management"
+      - "data subject request"
+      - "privacy by design"
+    include:
+      - path: instructions/data-privacy-compliance.instructions.md
+        reason: Privacy-by-design and data protection lifecycle controls
+      - path: instructions/security-vulnerabilities.instructions.md
+        reason: Security controls that protect confidentiality and integrity
+      - path: instructions/database.instructions.md
+        reason: Data-layer enforcement for retention, masking, and access control
+      - path: instructions/backend.instructions.md
+        reason: API/service enforcement for privacy policies and data handling
+
+  - id: platform-reliability-resilience
+    tags: [reliability, resilience, chaos, dr, rto, rpo]
+    triggers:
+      - "chaos engineering"
+      - "fault injection"
+      - "resilience"
+      - "rto"
+      - "rpo"
+      - "graceful degradation"
+      - "disaster recovery"
+      - "error budget burn"
+      - "reliability"
+    include:
+      - path: instructions/platform-reliability-resilience.instructions.md
+        reason: Reliability objectives, resilience patterns, chaos, and DR baseline
+      - path: instructions/microservices-performance.instructions.md
+        reason: Runtime scaling and performance behavior under stress
+      - path: instructions/ci-cd-devops.instructions.md
+        reason: Progressive delivery, rollback, and reliability gates in pipelines
+      - path: instructions/k8s.instructions.md
+        reason: Platform-level reliability controls for orchestrated workloads
+
   - id: frontend-vue
     tags: [frontend, vue, quasar, ui, ux]
     triggers:

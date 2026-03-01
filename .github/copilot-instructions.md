@@ -87,9 +87,11 @@ Follow this order of operations on every task:
 
 ## Data and Infrastructure
 - Data/ORM/Databases: instructions/orm.instructions.md; instructions/database.instructions.md (e.g., EF Core, migrations).
-- Microservices and performance: instructions/microservices-performance.instructions.md (e.g., async patterns, caching).
+- Privacy and data protection: instructions/data-privacy-compliance.instructions.md (e.g., PII handling, minimization, retention/deletion, compliance controls).
+- Microservices and performance: instructions/microservices-performance.instructions.md; instructions/platform-reliability-resilience.instructions.md (e.g., async patterns, caching, resilience, chaos, DR readiness).
 - Infrastructure and DevOps: instructions/docker.instructions.md; instructions/k8s.instructions.md; instructions/ci-cd-devops.instructions.md; instructions/workflow-generation.instructions.md; instructions/static-analysis-sonarqube.instructions.md (e.g., pipelines, security scans).
-- Security and vulnerabilities: instructions/security-vulnerabilities.instructions.md (e.g., OWASP/NIST-aligned controls for API, frontend, backend, database).
+- Observability and SRE: instructions/observability-sre.instructions.md (e.g., SLI/SLO, telemetry quality, alerting, runbooks, incident readiness).
+- Security and vulnerabilities: instructions/security-vulnerabilities.instructions.md; instructions/api-high-performance-security.instructions.md (e.g., OWASP/NIST-aligned controls and high-performance secure API patterns with rate limiting and abuse protection).
 - Dependency vulnerability automation scripts (shared runtime): ~/.codex/shared-scripts/security/Invoke-PreBuildSecurityGate.ps1; ~/.codex/shared-scripts/security/Invoke-VulnerabilityAudit.ps1; ~/.codex/shared-scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1; ~/.codex/shared-scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1.
 - For GitHub Actions in external repositories, consume shared scripts from pinned refs in `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
