@@ -16,6 +16,7 @@
     - validate-agent-permissions
     - validate-routing-coverage
     - validate-readme-standards
+    - validate-compatibility-lifecycle-policy
     - validate-powershell-standards
     - validate-shell-hooks
     - validate-runtime-script-tests
@@ -603,6 +604,11 @@ $baseCheckDefinitions['validate-readme-standards'] = [pscustomobject]@{
     script = 'scripts/validation/validate-readme-standards.ps1'
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
+$baseCheckDefinitions['validate-compatibility-lifecycle-policy'] = [pscustomobject]@{
+    name = 'validate-compatibility-lifecycle-policy'
+    script = 'scripts/validation/validate-compatibility-lifecycle-policy.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
 
 $powershellArgs = @{ RepoRoot = $resolvedRepoRoot }
 if ($IncludeAllPowershellScripts) {
@@ -683,6 +689,7 @@ $defaultCheckOrder = @(
     'validate-agent-permissions',
     'validate-routing-coverage',
     'validate-readme-standards',
+    'validate-compatibility-lifecycle-policy',
     'validate-powershell-standards',
     'validate-shell-hooks',
     'validate-runtime-script-tests',

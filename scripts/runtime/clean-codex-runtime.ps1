@@ -279,10 +279,14 @@ $directoryTargets = @(
 
 $sessionFiles = @()
 if ($IncludeSessions) {
-    $sessionFiles = Get-ExpiredSessionFile -SessionsPath $sessionsPath -RetentionDays $SessionRetentionDays
+    $sessionFiles = @(
+        Get-ExpiredSessionFile -SessionsPath $sessionsPath -RetentionDays $SessionRetentionDays
+    )
 }
 
-$expiredLogFiles = Get-ExpiredFileByRetention -RootPath $logPath -RetentionDays $LogRetentionDays
+$expiredLogFiles = @(
+    Get-ExpiredFileByRetention -RootPath $logPath -RetentionDays $LogRetentionDays
+)
 $sandboxLogExpired = $false
 if (Test-Path -LiteralPath $sandboxLogPath -PathType Leaf) {
     $sandboxLogCutoff = (Get-Date).AddDays(-1 * $LogRetentionDays)

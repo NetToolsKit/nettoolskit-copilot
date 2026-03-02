@@ -3,7 +3,7 @@
     Runs automated tests for critical runtime scripts.
 
 .DESCRIPTION
-    Executes Pester test suites under `scripts/tests/pester` that validate
+    Executes runtime test scripts under `scripts/tests/runtime` that validate
     contracts and smoke behavior for critical runtime scripts.
 
     Exit code:
@@ -27,7 +27,7 @@
 
 .NOTES
     Version: 1.0
-    Requirements: PowerShell 7+, Pester 5+ (optional in warning-only mode).
+    Requirements: PowerShell 7+.
 #>
 
 param(
@@ -120,62 +120,43 @@ function Resolve-RepositoryRoot {
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 
-$testPath = Join-Path $resolvedRepoRoot 'scripts/tests/pester'
+$testPath = Join-Path $resolvedRepoRoot 'scripts/tests/runtime'
 if (-not (Test-Path -LiteralPath $testPath -PathType Container)) {
-    Add-ValidationFailure ("Pester test path not found: {0}" -f $testPath)
-}
-
-$pesterModule = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
-$skipReason = $null
-if ($null -eq $pesterModule) {
-    if ($script:IsWarningOnly) {
-        $skipReason = 'Pester module not found; runtime script tests skipped.'
-        Write-StyledOutput ("[INFO] {0}" -f $skipReason)
-    }
-    else {
-        Add-ValidationFailure 'Pester module not found. Install Pester 5+.'
-    }
-}
-elseif ([int]$pesterModule.Version.Major -lt 5) {
-    if ($script:IsWarningOnly) {
-        $skipReason = ("Pester version {0} detected; runtime tests require 5+. Tests skipped." -f $pesterModule.Version)
-        Write-StyledOutput ("[INFO] {0}" -f $skipReason)
-    }
-    else {
-        Add-ValidationFailure ("Unsupported Pester version {0}. Install Pester 5+." -f $pesterModule.Version)
-    }
+    Add-ValidationFailure ("Runtime test path not found: {0}" -f $testPath)
 }
 
 $passCount = 0
 $failCount = 0
 $skipCount = 0
 
-if (($null -ne $pesterModule) -and ([int]$pesterModule.Version.Major -ge 5) -and (Test-Path -LiteralPath $testPath -PathType Container)) {
-    Write-VerboseLog ("Running Pester tests in: {0}" -f $testPath)
-
-    try {
-        Import-Module -Name $pesterModule.Path -Force -ErrorAction Stop
-        $pesterCommand = Get-Command -Name 'Invoke-Pester' -ErrorAction Stop
-        $supportsCI = $pesterCommand.Parameters.ContainsKey('CI')
-        if ($supportsCI) {
-            $pesterResult = Invoke-Pester -Path $testPath -CI -PassThru
-        }
-        else {
-            $pesterResult = Invoke-Pester -Path $testPath -PassThru
-        }
-
-        if ($null -ne $pesterResult) {
-            $passCount = [int] $pesterResult.PassedCount
-            $failCount = [int] $pesterResult.FailedCount
-            $skipCount = [int] $pesterResult.SkippedCount
-        }
-
-        if ($failCount -gt 0) {
-            Add-ValidationFailure ("Runtime script tests failed: {0}" -f $failCount)
-        }
+if (Test-Path -LiteralPath $testPath -PathType Container) {
+    $testScripts = @(
+        Get-ChildItem -LiteralPath $testPath -Filter '*.ps1' -File
+    )
+    if ($testScripts.Count -eq 0) {
+        Add-ValidationFailure ("No runtime test scripts found in: {0}" -f $testPath)
     }
-    catch {
-        Add-ValidationFailure ("Pester execution failed: {0}" -f $_.Exception.Message)
+    else {
+        Write-VerboseLog ("Running runtime tests in: {0}" -f $testPath)
+        foreach ($testScript in $testScripts) {
+            Write-StyledOutput ("[RUN] runtime test: {0}" -f $testScript.Name)
+            try {
+                & $testScript.FullName -RepoRoot $resolvedRepoRoot | Out-Null
+                $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+                if ($exitCode -eq 0) {
+                    $passCount++
+                    Write-StyledOutput ("[OK] runtime test: {0}" -f $testScript.Name)
+                }
+                else {
+                    $failCount++
+                    Add-ValidationFailure ("Runtime test failed: {0} (exit code {1})" -f $testScript.Name, $exitCode)
+                }
+            }
+            catch {
+                $failCount++
+                Add-ValidationFailure ("Runtime test failed: {0} ({1})" -f $testScript.Name, $_.Exception.Message)
+            }
+        }
     }
 }
 
@@ -185,9 +166,6 @@ Write-StyledOutput ("  Warning-only mode: {0}" -f $script:IsWarningOnly)
 Write-StyledOutput ("  Passed tests: {0}" -f $passCount)
 Write-StyledOutput ("  Failed tests: {0}" -f $failCount)
 Write-StyledOutput ("  Skipped tests: {0}" -f $skipCount)
-if (-not [string]::IsNullOrWhiteSpace($skipReason)) {
-    Write-StyledOutput ("  Skip reason: {0}" -f $skipReason)
-}
 Write-StyledOutput ("  Warnings: {0}" -f $script:Warnings.Count)
 Write-StyledOutput ("  Failures: {0}" -f $script:Failures.Count)
 
