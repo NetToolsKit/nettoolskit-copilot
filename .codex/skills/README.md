@@ -55,7 +55,7 @@ Get-ChildItem "$env:USERPROFILE\.codex\skills"
 
 ### Example 1: Software Implementation
 
-Use skill: `software-engineer`
+Use skill: `dev-software-engineer`
 
 ### Example 2: Testing and Coverage
 
@@ -63,19 +63,19 @@ Use skill: `test-engineer`
 
 ### Example 3: Runtime Sync
 
-Use skill: `codex-runtime-sync`
+Use skill: `core-runtime-sync`
 
 ### Example 4: Domain Specialists
 
-Use skills: `dotnet-backend-engineer`, `frontend-vue-quasar-engineer`, `rust-engineer`, `task-planner`
+Use skills: `dev-dotnet-backend-engineer` (inherits `dev-software-engineer`), `dev-frontend-vue-quasar-engineer`, `dev-rust-engineer`, `plan-task-planner`
 
 ### Example 5: High-Performance Secure API
 
-Use skills: `api-performance-security-engineer`, `security-vulnerability-engineer`
+Use skills: `sec-api-performance-security-engineer`, `sec-security-vulnerability-engineer`
 
 ### Example 6: Security Gate Before Build
 
-Use skills: `software-engineer`, `devops-platform-engineer`, `test-engineer` with:
+Use skills: `dev-software-engineer`, `ops-devops-platform-engineer`, `test-engineer` with:
 - `~/.codex/shared-scripts/security/Invoke-PreBuildSecurityGate.ps1`
 - `~/.codex/shared-scripts/security/Invoke-VulnerabilityAudit.ps1`
 - `~/.codex/shared-scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1`
@@ -83,7 +83,7 @@ Use skills: `software-engineer`, `devops-platform-engineer`, `test-engineer` wit
 
 ### Example 7: Reliability, Chaos, and Observability
 
-Use skills: `resilience-chaos-engineer`, `sre-observability-engineer`
+Use skills: `ops-resilience-chaos-engineer`, `obs-sre-observability-engineer`
 
 ### Example 8: Privacy and Compliance
 
@@ -95,22 +95,22 @@ Use skill: `privacy-compliance-engineer`
 
 ### Available Skills
 
-- `repo-context-router`
-- `codex-runtime-sync`
-- `software-engineer`
+- `core-context-router`
+- `core-runtime-sync`
+- `dev-software-engineer` (base)
 - `test-engineer`
-- `code-review-engineer`
-- `devops-platform-engineer`
+- `review-code-engineer`
+- `ops-devops-platform-engineer`
 - `docs-release-engineer`
-- `dotnet-backend-engineer`
-- `frontend-vue-quasar-engineer`
-- `security-vulnerability-engineer`
-- `rust-engineer`
-- `task-planner`
-- `api-performance-security-engineer`
-- `sre-observability-engineer`
+- `dev-dotnet-backend-engineer` (extends `dev-software-engineer`)
+- `dev-frontend-vue-quasar-engineer`
+- `sec-security-vulnerability-engineer`
+- `dev-rust-engineer`
+- `plan-task-planner`
+- `sec-api-performance-security-engineer`
+- `obs-sre-observability-engineer`
 - `privacy-compliance-engineer`
-- `resilience-chaos-engineer`
+- `ops-resilience-chaos-engineer`
 
 ### Layout
 
@@ -149,7 +149,7 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 ## References
 
 - `.codex/README.md`
-- `.codex/skills/repo-context-router/SKILL.md`
-- `.codex/skills/codex-runtime-sync/SKILL.md`
+- `.codex/skills/core-context-router/SKILL.md`
+- `.codex/skills/core-runtime-sync/SKILL.md`
 - `.github/instruction-routing.catalog.yml`
 - `scripts/runtime/bootstrap.ps1`

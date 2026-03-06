@@ -14,7 +14,7 @@
     {
       "agentId": "planner",
       "role": "planner",
-      "skill": "task-planner",
+      "skill": "plan-task-planner",
       "allowedPathGlobs": [
         ".github/**",
         ".codex/**",
@@ -36,7 +36,7 @@
     {
       "agentId": "executor",
       "role": "executor",
-      "skill": "software-engineer",
+      "skill": "dev-software-engineer",
       "allowedPathGlobs": [
         "src/**",
         "scripts/**",
@@ -80,7 +80,7 @@
     {
       "agentId": "reviewer",
       "role": "reviewer",
-      "skill": "code-review-engineer",
+      "skill": "review-code-engineer",
       "allowedPathGlobs": [
         "src/**",
         "scripts/**",

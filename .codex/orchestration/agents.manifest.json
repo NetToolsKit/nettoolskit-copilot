@@ -9,9 +9,9 @@
   "agents": [
     {
       "id": "planner",
-      "displayName": "Task Planner",
+      "displayName": "Plan Task Planner",
       "role": "planner",
-      "skill": "task-planner",
+      "skill": "plan-task-planner",
       "model": "gpt-5",
       "tools": [
         "read",
@@ -41,9 +41,9 @@
     },
     {
       "id": "executor",
-      "displayName": "Software Engineer",
+      "displayName": "Dev Software Engineer",
       "role": "executor",
-      "skill": "software-engineer",
+      "skill": "dev-software-engineer",
       "model": "gpt-5",
       "tools": [
         "read",
@@ -108,9 +108,9 @@
     },
     {
       "id": "reviewer",
-      "displayName": "Code Review Engineer",
+      "displayName": "Review Code Engineer",
       "role": "reviewer",
-      "skill": "code-review-engineer",
+      "skill": "review-code-engineer",
       "model": "gpt-5",
       "tools": [
         "read",

@@ -1,6 +1,0 @@
-interface:
-  display_name: "SRE Observability Engineer"
-  short_description: "Implement SLO-driven observability and incident readiness."
-  default_prompt: "Use $sre-observability-engineer to implement observability and SRE controls with measurable SLO outcomes."
-policy:
-  allow_implicit_invocation: true

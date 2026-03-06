@@ -1,6 +1,0 @@
-interface:
-  display_name: "Codex Runtime Sync"
-  short_description: "Sync repo assets to local Codex runtime."
-  default_prompt: "Use $codex-runtime-sync to synchronize shared assets and MCP settings to local runtime."
-policy:
-  allow_implicit_invocation: true

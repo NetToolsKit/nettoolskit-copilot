@@ -1,6 +1,0 @@
-interface:
-  display_name: "Software Engineer"
-  short_description: "Implement and refactor repository code safely."
-  default_prompt: "Use $software-engineer to implement this change with minimal context and aligned tests."
-policy:
-  allow_implicit_invocation: true
