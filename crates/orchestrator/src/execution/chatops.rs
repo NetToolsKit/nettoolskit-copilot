@@ -886,6 +886,8 @@ pub async fn execute_chatops_envelope(
         );
         return Err(ChatOpsExecutionError::Unauthorized(error.to_string()));
     }
+    let control_envelope = build_chatops_control_envelope(envelope, &intent, audit_store)?;
+
     if matches!(intent, ChatOpsIntent::Help) {
         let help_message = "ChatOps commands: help | list | watch <task-id> | cancel <task-id> | submit <intent> <payload>";
         let notification = ChatOpsNotification {
@@ -902,11 +904,11 @@ pub async fn execute_chatops_envelope(
             envelope,
             ChatOpsAuditKind::NotificationSent,
             ChatOpsAuditContext {
-                internal_command: None,
-                control_envelope: None,
+                internal_command: Some(chatops_help_internal_command()),
+                control_envelope: Some(&control_envelope),
                 task_id: None,
                 exit_status: Some("success"),
-                note: "help notification sent",
+                note: "help notification sent with typed control metadata",
             },
         );
         return Ok(ExitStatus::Success);
@@ -915,29 +917,22 @@ pub async fn execute_chatops_envelope(
     let internal_command = intent
         .to_internal_command()
         .expect("non-help intent should always map to command");
-    let (status, control_envelope, task_id, execution_note) =
-        match build_chatops_control_envelope(envelope, &intent, audit_store)? {
-            Some(control_envelope) => {
-                let submission = process_control_envelope(control_envelope.clone()).await;
-                let note = if submission.task_id.is_some() {
-                    "command executed through typed ChatOps control plane"
-                } else {
-                    "typed ChatOps control plane rejected task admission"
-                };
-                (
-                    submission.exit_status,
-                    Some(control_envelope),
-                    submission.task_id,
-                    note,
-                )
-            }
-            None => (
-                process_command(&internal_command).await,
-                None,
-                None,
-                "command executed through task pipeline",
-            ),
-        };
+    let (status, task_id, execution_note) = match intent {
+        ChatOpsIntent::TaskSubmit { .. } => {
+            let submission = process_control_envelope(control_envelope.clone()).await;
+            let note = if submission.task_id.is_some() {
+                "command executed through typed ChatOps control plane"
+            } else {
+                "typed ChatOps control plane rejected task admission"
+            };
+            (submission.exit_status, submission.task_id, note)
+        }
+        _ => (
+            process_command(&internal_command).await,
+            None,
+            "command executed through task pipeline with typed control metadata",
+        ),
+    };
 
     append_audit(
         audit_store,
@@ -945,7 +940,7 @@ pub async fn execute_chatops_envelope(
         ChatOpsAuditKind::CommandExecuted,
         ChatOpsAuditContext {
             internal_command: Some(&internal_command),
-            control_envelope: control_envelope.as_ref(),
+            control_envelope: Some(&control_envelope),
             task_id: task_id.as_deref(),
             exit_status: Some(status.to_string().as_str()),
             note: execution_note,
@@ -973,7 +968,7 @@ pub async fn execute_chatops_envelope(
         ChatOpsAuditKind::NotificationSent,
         ChatOpsAuditContext {
             internal_command: Some(&internal_command),
-            control_envelope: control_envelope.as_ref(),
+            control_envelope: Some(&control_envelope),
             task_id: task_id.as_deref(),
             exit_status: Some(status.to_string().as_str()),
             note: "result notification sent",
@@ -1053,26 +1048,54 @@ fn build_chatops_status_message(
     }
 }
 
+fn chatops_help_internal_command() -> &'static str {
+    "help"
+}
+
 fn build_chatops_control_envelope(
     envelope: &ChatOpsCommandEnvelope,
     intent: &ChatOpsIntent,
     audit_store: Option<&ChatOpsLocalAuditStore>,
-) -> Result<Option<ControlEnvelope>, ChatOpsExecutionError> {
-    let ChatOpsIntent::TaskSubmit {
-        intent: task_intent,
-        payload,
-    } = intent
-    else {
-        return Ok(None);
+) -> Result<ControlEnvelope, ChatOpsExecutionError> {
+    let (task_kind, title, payload) = match intent {
+        ChatOpsIntent::TaskSubmit {
+            intent: task_intent,
+            payload,
+        } => {
+            let Some(task_kind) = TaskIntentKind::from_alias(task_intent) else {
+                return Err(ChatOpsExecutionError::Parse(format!(
+                    "unsupported ChatOps task intent: {task_intent}"
+                )));
+            };
+            (
+                task_kind,
+                format!("{} task", task_kind.as_str()),
+                payload.trim().to_string(),
+            )
+        }
+        ChatOpsIntent::TaskList => (
+            TaskIntentKind::CommandExecution,
+            "task list command".to_string(),
+            "/task list".to_string(),
+        ),
+        ChatOpsIntent::TaskWatch { task_id } => (
+            TaskIntentKind::CommandExecution,
+            "task watch command".to_string(),
+            format!("/task watch {}", task_id.trim()),
+        ),
+        ChatOpsIntent::TaskCancel { task_id } => (
+            TaskIntentKind::CommandExecution,
+            "task cancel command".to_string(),
+            format!("/task cancel {}", task_id.trim()),
+        ),
+        ChatOpsIntent::Help => (
+            TaskIntentKind::CommandExecution,
+            "help command".to_string(),
+            chatops_help_internal_command().to_string(),
+        ),
     };
 
-    let Some(task_kind) = TaskIntentKind::from_alias(task_intent) else {
-        return Err(ChatOpsExecutionError::Parse(format!(
-            "unsupported ChatOps task intent: {task_intent}"
-        )));
-    };
-
-    let mut scopes = vec!["task.submit".to_string()];
+    let mut scopes = vec![chatops_base_scope(intent).to_string()];
     scopes.extend(intent.authorization_scopes());
     scopes.push(format!("platform:{}", envelope.platform.as_str()));
 
@@ -1085,24 +1108,29 @@ fn build_chatops_control_envelope(
     .with_authentication(format!("chatops_{}", envelope.platform.as_str()))
     .with_scopes(scopes);
     let session = SessionContext::new(SessionKind::ChatOps, envelope.derived_session_id(), true);
-    let task = TaskIntent::new(
-        task_kind,
-        format!("{} task", task_kind.as_str()),
-        payload.trim(),
-    );
-    let mut control = ControlEnvelope::new(
-        envelope.resolved_request_id(),
-        RuntimeMode::Service,
-        operator,
-        session,
-        task,
-    )
-    .with_policy(build_chatops_control_policy(audit_store));
-    if let Some(correlation_id) = envelope.correlation_id.clone() {
-        control = control.with_correlation_id(correlation_id);
-    }
+    let task = TaskIntent::new(task_kind, title, payload);
+    let request_id = envelope.resolved_request_id();
+    let correlation_id = envelope
+        .correlation_id
+        .clone()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| request_id.clone());
+    let mut control =
+        ControlEnvelope::new(request_id, RuntimeMode::Service, operator, session, task)
+            .with_policy(build_chatops_control_policy(audit_store));
+    control = control.with_correlation_id(correlation_id);
 
-    Ok(Some(control))
+    Ok(control)
+}
+
+fn chatops_base_scope(intent: &ChatOpsIntent) -> &'static str {
+    match intent {
+        ChatOpsIntent::TaskSubmit { .. } => "task.submit",
+        ChatOpsIntent::TaskList
+        | ChatOpsIntent::TaskWatch { .. }
+        | ChatOpsIntent::TaskCancel { .. } => "task.manage",
+        ChatOpsIntent::Help => "help",
+    }
 }
 
 fn build_chatops_control_policy(
@@ -1362,8 +1390,7 @@ mod tests {
         };
 
         let control = build_chatops_control_envelope(&envelope, &intent, None)
-            .expect("control envelope should build")
-            .expect("submit intent should produce typed envelope");
+            .expect("control envelope should build");
 
         assert_eq!(control.request_id, "discord-req-001");
         assert_eq!(control.correlation_id.as_deref(), Some("corr-42"));
@@ -1386,6 +1413,38 @@ mod tests {
             .scopes
             .iter()
             .any(|scope| scope == "submit:ai-plan"));
+    }
+
+    #[test]
+    fn build_chatops_control_envelope_for_non_submit_intent_uses_command_execution_metadata() {
+        let envelope = ChatOpsCommandEnvelope::new(
+            ChatOpsPlatform::Telegram,
+            "channel-42",
+            "user-99",
+            "watch task-123",
+            91,
+        )
+        .with_request_id("telegram-req-002");
+        let intent = ChatOpsIntent::TaskWatch {
+            task_id: "task-123".to_string(),
+        };
+
+        let control = build_chatops_control_envelope(&envelope, &intent, None)
+            .expect("control envelope should build");
+
+        assert_eq!(control.request_id, "telegram-req-002");
+        assert_eq!(control.correlation_id.as_deref(), Some("telegram-req-002"));
+        assert_eq!(control.operator.id, "telegram:user-99");
+        assert_eq!(control.operator.channel_id.as_deref(), Some("channel-42"));
+        assert_eq!(control.task.kind, TaskIntentKind::CommandExecution);
+        assert_eq!(control.task.title, "task watch command");
+        assert_eq!(control.task.payload, "/task watch task-123");
+        assert!(control
+            .operator
+            .scopes
+            .iter()
+            .any(|scope| scope == "task.manage"));
+        assert!(control.operator.scopes.iter().any(|scope| scope == "watch"));
     }
 
     #[tokio::test]
@@ -1439,6 +1498,103 @@ mod tests {
         let notifications = notifier.snapshot();
         assert_eq!(notifications.len(), 1);
         assert!(notifications[0].message_text.contains("task `task-"));
+    }
+
+    #[tokio::test]
+    async fn execute_chatops_envelope_list_records_typed_control_metadata_without_task_admission() {
+        let dir = tempfile::tempdir().expect("temp dir");
+        let audit_store = ChatOpsLocalAuditStore::from_path(dir.path().join("chatops-audit.jsonl"));
+        let policy = ChatOpsAuthorizationPolicy::new(
+            vec!["user-1".to_string()],
+            vec!["channel-1".to_string()],
+        );
+        let notifier = RecordingChatOpsNotifier::new();
+        let envelope = ChatOpsCommandEnvelope::new(
+            ChatOpsPlatform::Telegram,
+            "channel-1",
+            "user-1",
+            "list",
+            124,
+        )
+        .with_request_id("telegram-req-003");
+
+        let status = execute_chatops_envelope(&envelope, &policy, &notifier, Some(&audit_store))
+            .await
+            .expect("authorized list should execute");
+        assert_eq!(status, ExitStatus::Success);
+
+        let entries = audit_store
+            .load_latest(16)
+            .expect("audit entries should be readable");
+        let executed = entries
+            .iter()
+            .find(|entry| entry.kind == ChatOpsAuditKind::CommandExecuted)
+            .expect("executed entry should exist");
+        assert_eq!(executed.request_id.as_deref(), Some("telegram-req-003"));
+        assert_eq!(executed.correlation_id.as_deref(), Some("telegram-req-003"));
+        assert_eq!(executed.operator_id.as_deref(), Some("telegram:user-1"));
+        assert_eq!(
+            executed.session_id.as_deref(),
+            Some("chatops-telegram-user-1-channel-1")
+        );
+        assert_eq!(executed.transport, Some(IngressTransport::TelegramPolling));
+        assert_eq!(executed.task_id, None);
+        assert!(executed.internal_command.as_deref() == Some("/task list"));
+        assert!(executed.note.contains("typed control metadata"));
+    }
+
+    #[tokio::test]
+    async fn execute_chatops_envelope_help_records_typed_control_metadata() {
+        let dir = tempfile::tempdir().expect("temp dir");
+        let audit_store = ChatOpsLocalAuditStore::from_path(dir.path().join("chatops-audit.jsonl"));
+        let policy = ChatOpsAuthorizationPolicy::new(
+            vec!["user-1".to_string()],
+            vec!["channel-1".to_string()],
+        );
+        let notifier = RecordingChatOpsNotifier::new();
+        let envelope = ChatOpsCommandEnvelope::new(
+            ChatOpsPlatform::Discord,
+            "channel-1",
+            "user-1",
+            "help",
+            125,
+        )
+        .with_request_id("discord-req-003");
+
+        let status = execute_chatops_envelope(&envelope, &policy, &notifier, Some(&audit_store))
+            .await
+            .expect("help should execute");
+        assert_eq!(status, ExitStatus::Success);
+
+        let entries = audit_store
+            .load_latest(16)
+            .expect("audit entries should be readable");
+        let notification = entries
+            .iter()
+            .find(|entry| entry.kind == ChatOpsAuditKind::NotificationSent)
+            .expect("notification entry should exist");
+        assert_eq!(notification.request_id.as_deref(), Some("discord-req-003"));
+        assert_eq!(
+            notification.correlation_id.as_deref(),
+            Some("discord-req-003")
+        );
+        assert_eq!(notification.operator_id.as_deref(), Some("discord:user-1"));
+        assert_eq!(
+            notification.session_id.as_deref(),
+            Some("chatops-discord-user-1-channel-1")
+        );
+        assert_eq!(
+            notification.transport,
+            Some(IngressTransport::DiscordPolling)
+        );
+        assert_eq!(notification.internal_command.as_deref(), Some("help"));
+        assert!(notification
+            .note
+            .contains("help notification sent with typed control metadata"));
+
+        let notifications = notifier.snapshot();
+        assert_eq!(notifications.len(), 1);
+        assert!(notifications[0].message_text.contains("ChatOps commands"));
     }
 
     #[tokio::test]

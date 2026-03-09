@@ -7,32 +7,30 @@ async fn test_template_caching() {
     let engine = TemplateEngine::new();
     let data = json!({"name": "Test"});
 
-    // Act - First render: cache miss
-    let start = std::time::Instant::now();
+    // Act - First render should populate the cache.
     let result1 = engine
         .render_from_string("Hello {{name}}!", &data, "cached_test".to_string())
         .await;
-    let duration1 = start.elapsed();
+    let (cache_size_after_first_render, _) = engine.cache_stats();
 
-    // Act - Second render: cache hit
-    let start = std::time::Instant::now();
+    // Act - Second render should reuse the existing compiled template.
     let result2 = engine
         .render_from_string("Hello {{name}}!", &data, "cached_test".to_string())
         .await;
-    let duration2 = start.elapsed();
+    let (cache_size_after_second_render, _) = engine.cache_stats();
 
     // Assert
     assert!(result1.is_ok());
     assert!(result2.is_ok());
-    // Critical: Cache hit should be at least 2x faster
-    assert!(
-        duration2 < duration1 / 2,
-        "Cache hit ({:?}) should be faster than miss ({:?})",
-        duration2,
-        duration1
+    assert_eq!(result1.unwrap(), result2.unwrap());
+    assert_eq!(
+        cache_size_after_first_render, 1,
+        "First render should populate exactly one cached template"
     );
-    let (cache_size, _) = engine.cache_stats();
-    assert_eq!(cache_size, 1, "Cache should contain 1 template");
+    assert_eq!(
+        cache_size_after_second_render, 1,
+        "Second render should reuse the cached template instead of growing the cache"
+    );
 }
 
 #[tokio::test]

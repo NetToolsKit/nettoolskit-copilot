@@ -24,8 +24,9 @@ use nettoolskit_core::ai_context::{
 };
 use nettoolskit_core::file_search::{search_files, SearchConfig};
 use nettoolskit_core::{
-    AppConfig, ColorMode, CommandEntry, ControlEnvelope, RuntimeMode, TaskAuditEvent,
-    TaskExecutionStatus, TaskIntent, TaskIntentKind, UnicodeMode,
+    AppConfig, ApprovalState, ColorMode, CommandEntry, ControlEnvelope, ControlPolicyContext,
+    IngressTransport, OperatorContext, OperatorKind, RuntimeMode, SessionContext, SessionKind,
+    TaskAuditEvent, TaskExecutionStatus, TaskIntent, TaskIntentKind, UnicodeMode,
 };
 use nettoolskit_otel::{next_correlation_id, Metrics, Timer};
 use nettoolskit_task_worker::{
@@ -4643,10 +4644,38 @@ async fn handle_task_submit(parts: &[&str]) -> ExitStatus {
 
     let runtime_mode = AppConfig::load().general.runtime_mode;
     let title = format!("{} task", task_intent_kind_label(intent_kind));
-    let intent = TaskIntent::new(intent_kind, title, payload);
-    submit_task_intent(intent, runtime_mode, None)
-        .await
-        .exit_status
+    let control_envelope =
+        build_cli_task_control_envelope(intent_kind, title, payload.as_str(), runtime_mode);
+    process_control_envelope(control_envelope).await.exit_status
+}
+
+fn build_cli_task_control_envelope(
+    intent_kind: TaskIntentKind,
+    title: String,
+    payload: &str,
+    runtime_mode: RuntimeMode,
+) -> ControlEnvelope {
+    let request_id = next_correlation_id("cli-task");
+    let operator = OperatorContext::new(
+        OperatorKind::LocalHuman,
+        "local-cli-operator",
+        IngressTransport::Cli,
+    )
+    .with_authentication("local_process")
+    .with_scopes([
+        "task.submit".to_string(),
+        format!("submit:{}", task_intent_kind_label(intent_kind)),
+    ]);
+    let session = SessionContext::new(
+        SessionKind::CliInteractive,
+        format!("cli-session-{request_id}"),
+        false,
+    );
+    let task = TaskIntent::new(intent_kind, title, payload.trim());
+
+    ControlEnvelope::new(request_id.clone(), runtime_mode, operator, session, task)
+        .with_correlation_id(request_id)
+        .with_policy(ControlPolicyContext::new(ApprovalState::NotRequired, true))
 }
 
 fn handle_task_list() -> ExitStatus {
@@ -7810,6 +7839,62 @@ mod tests {
 
         clear_service_policy_env_vars();
         assert_eq!(status, ExitStatus::Success);
+    }
+
+    #[tokio::test]
+    async fn process_task_command_submit_cli_persists_control_metadata_in_record_and_audit() {
+        let _guard = env_test_guard().await;
+        std::env::remove_var("NTK_RUNTIME_MODE");
+        std::env::set_var("NTK_AI_PROVIDER", "mock");
+        clear_service_policy_env_vars();
+        reset_service_submission_budget_for_tests();
+        std::env::set_var(NTK_TOOL_SCOPE_ALLOWED_TOOLS_ENV, "ai.plan");
+
+        let payload_marker = format!("cli-control-envelope-test-{}", current_unix_timestamp_ms());
+        let parts = vec!["/task", "submit", "ai-plan", payload_marker.as_str()];
+        let status = process_task_command(&parts).await;
+
+        std::env::remove_var("NTK_AI_PROVIDER");
+        std::env::remove_var(NTK_TOOL_SCOPE_ALLOWED_TOOLS_ENV);
+
+        assert_eq!(status, ExitStatus::Success);
+        let record = with_task_registry(|registry| {
+            registry
+                .values()
+                .filter(|task| task.runtime_mode == RuntimeMode::Cli)
+                .filter(|task| task.intent.payload.contains(payload_marker.as_str()))
+                .max_by_key(|task| task.updated_at_unix_ms)
+                .cloned()
+        })
+        .expect("cli task should exist in registry");
+
+        let control = record
+            .control_envelope
+            .clone()
+            .expect("cli task should persist control envelope");
+        assert_eq!(control.runtime_mode, RuntimeMode::Cli);
+        assert_eq!(control.operator.kind, OperatorKind::LocalHuman);
+        assert_eq!(control.operator.id, "local-cli-operator");
+        assert_eq!(control.operator.transport, IngressTransport::Cli);
+        assert_eq!(
+            control.operator.authentication.as_deref(),
+            Some("local_process")
+        );
+        assert_eq!(control.session.kind, SessionKind::CliInteractive);
+        assert!(control.session.id.starts_with("cli-session-cli-task-"));
+        assert_eq!(control.task.kind, TaskIntentKind::AiPlan);
+        assert_eq!(control.task.payload, payload_marker);
+        assert_eq!(
+            control.correlation_id.as_deref(),
+            Some(control.request_id.as_str())
+        );
+
+        let audits = list_task_audit_events(&record.id);
+        let submitted = audits
+            .iter()
+            .find(|event| event.message.contains("Task submitted"))
+            .expect("submission audit event should exist");
+        assert_eq!(submitted.control.as_ref(), Some(&control));
     }
 
     #[tokio::test]

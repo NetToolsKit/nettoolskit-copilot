@@ -80,6 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added typed control-plane contracts in `nettoolskit-core` (`OperatorContext`, `SessionContext`, `ControlPolicyContext`, `ControlEnvelope`) with normalized transport/operator metadata and serialization-safe tests.
 - Added first end-to-end service adoption of the shared control-plane model: `/task/submit` now derives request/session/operator metadata from HTTP headers, returns `task_id` plus envelope metadata in accepted responses, and persists the admitted envelope into downstream task registry/audit events.
 - Added first ChatOps adoption of the shared control-plane model: remote `submit` intents now derive typed request/operator/session metadata, flow through `process_control_envelope`, and persist normalized metadata (`request_id`, `correlation_id`, `operator_id`, `session_id`, `transport`, `task_id`) into ChatOps audit records.
+- Added local CLI adoption of the shared control-plane model for `/task submit`, so local task admission now persists normalized request/operator/session metadata into task registry and audit events before execution.
+- Expanded ChatOps control-plane attribution to non-submit commands (`help`, `list`, `watch`, `cancel`), so remote management actions now derive typed request/operator/session/correlation metadata even when execution reuses the existing command handlers.
 
 ### Decisions
 - **DEC-0001 (Accepted, 2026-02-28): Modular workspace boundaries**

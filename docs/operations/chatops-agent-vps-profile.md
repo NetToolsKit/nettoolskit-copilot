@@ -113,7 +113,7 @@ Examples:
 
 - CI dual-runtime gate executes ChatOps VPS smoke profile (`cargo test -p nettoolskit-orchestrator --test test_suite chatops_vps_smoke_profile_`).
 - Service endpoint tests validate Telegram/Discord ingress paths (`/chatops/telegram/webhook`, `/chatops/discord/interactions`) for valid/invalid payloads and disabled-mode behavior.
-- ChatOps `submit` commands now enter the same typed control-plane path as service HTTP task admission, so local audit trails carry normalized request/operator/session/task metadata for remote execution.
+- ChatOps `submit`, `list`, `watch`, `cancel`, and `help` commands now derive typed control-plane metadata, so local audit trails carry normalized request/operator/session attribution even when execution stays on the existing management handlers.
 - The smoke test uses a local Telegram-compatible mock HTTP server and validates:
   - ingress polling (`getUpdates`)
   - command execution routing (`list` -> `/task list`)

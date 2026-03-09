@@ -14,21 +14,13 @@ all-features = true
 
 # ─── Advisories ──────────────────────────────────────────────────
 [advisories]
-# Deny any crate with a known security vulnerability
-vulnerability = "deny"
-# Warn on unmaintained crates
-unmaintained = "warn"
+# Only fail for unmaintained direct workspace dependencies.
+unmaintained = "workspace"
 # Warn on crates that have been yanked
 yanked = "warn"
-# Warn on crates with open notices
-notice = "warn"
 
 # ─── Licenses ────────────────────────────────────────────────────
 [licenses]
-# Deny unlicensed crates
-unlicensed = "deny"
-# Deny copyleft-licensed crates
-copyleft = "deny"
 # Allow common permissive licenses
 allow = [
     "MIT",

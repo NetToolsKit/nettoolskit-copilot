@@ -14,8 +14,8 @@ This is intentionally local-first. Remote control is supported, but persistent s
 Implementation note:
 
 - The baseline typed contracts `OperatorContext`, `SessionContext`, `ControlPolicyContext`, and `ControlEnvelope` now exist in [runtime.rs](../../crates/core/src/runtime.rs).
-- HTTP service ingress now emits the shared envelope for `/task/submit`, and ChatOps `submit` intents now derive the same typed envelope before task admission.
-- Non-submit ChatOps actions (`list`, `watch`, `cancel`, `help`) still use the legacy command path and remain a follow-up adoption slice.
+- Local CLI `/task submit`, HTTP `/task/submit`, and ChatOps `submit` intents now emit the shared envelope before task admission.
+- ChatOps `list`, `watch`, `cancel`, and `help` now derive typed request/operator/session metadata as well; those actions still execute through the existing command handlers, but attribution no longer depends on raw string-only audit fields.
 
 ## Design Goals
 
@@ -214,16 +214,16 @@ The target architecture should converge on a transport-neutral envelope like thi
 ```
 
 This envelope is now represented by `ControlEnvelope` in `nettoolskit-core`.
-It is not fully emitted by every ingress yet, so future phases should wire CLI, remaining ChatOps actions, and gateway transports to submit this same semantic model end to end.
+It now covers local `/task submit`, service HTTP `/task/submit`, ChatOps `submit`, and ChatOps non-submit management commands for attribution. Future phases should focus on richer CLI session propagation, outward notification correlation, and gateway transports that reuse this same semantic model end to end.
 
 ## Transport Mapping
 
 | Transport | Current state | Identity source | Session source | Future direction |
 |---|---|---|---|---|
-| Local CLI | implemented | local process/user context | CLI snapshot session | keep as primary local operator mode |
+| Local CLI | implemented | local process/user context | derived `cli-session-*` envelope id for `/task submit`; snapshot session remains separate interactive state | primary local operator mode; next refinement is attaching real interactive session ids everywhere |
 | Service HTTP | implemented | bearer token plus optional `x-ntk-operator-id` | per-request `x-request-id` or `x-ntk-session-id` | typed envelope metadata is emitted on `/task/submit` and now persists into task audit/registry |
-| Telegram webhook/polling | implemented | platform user + channel + webhook security | derived `chatops-telegram-<user>-<channel>` for submit intents | typed envelope now drives `submit`; non-submit actions still use legacy command routing |
-| Discord interactions/polling | implemented | platform user + channel + signature | derived `chatops-discord-<user>-<channel>` for submit intents | typed envelope now drives `submit`; non-submit actions still use legacy command routing |
+| Telegram webhook/polling | implemented | platform user + channel + webhook security | derived `chatops-telegram-<user>-<channel>` for all task/help commands | typed envelope now attributes both submit and non-submit ChatOps actions; execution still reuses existing handlers where task admission is not needed |
+| Discord interactions/polling | implemented | platform user + channel + signature | derived `chatops-discord-<user>-<channel>` for all task/help commands | typed envelope now attributes both submit and non-submit ChatOps actions; execution still reuses existing handlers where task admission is not needed |
 | Gateway/WebSocket | not implemented | not yet available | not yet available | add multi-client control plane without changing task semantics |
 
 ## Authorization and Approval Model
@@ -284,10 +284,9 @@ Those remain future phases built on top of this specification.
 
 ## Implementation Follow-Up After This Spec
 
-1. Finish adopting typed `ControlEnvelope` for non-submit ChatOps actions and local CLI task ingress.
-2. Attach `operator_id`, `session_id`, and `correlation_id` consistently to all audit trails and outward notifications.
-3. Introduce a formal approval state machine for mutating AI and repository actions.
-4. Add optional gateway/WebSocket transport that reuses the same control envelope instead of inventing a second control path.
+1. Attach `operator_id`, `session_id`, and `correlation_id` consistently to all audit trails and outward notifications.
+2. Refine local CLI control envelopes to reuse real interactive session ids instead of per-request derived ids where available.
+3. Add optional gateway/WebSocket transport that reuses the same control envelope instead of inventing a second control path.
 
 ## Reference Inputs
 

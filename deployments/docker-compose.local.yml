@@ -11,9 +11,12 @@ services:
       NTK_RUNTIME_MODE: service
       NTK_LOG_LEVEL: info
       NTK_SERVICE_AUTH_TOKEN: local-service-token
+      NTK_SERVICE_ALLOWED_INTENTS: ai-ask,ai-plan,ai-explain,ai-apply-dry-run,repo-workflow
       NTK_TASK_MAX_CONCURRENCY: "2"
       NTK_TASK_MAX_RETRIES: "2"
       NTK_TASK_QUEUE_CAPACITY: "128"
+      NTK_TOOL_SCOPE_ALLOWED_TOOLS: ai.plan
+      NTK_TOOL_SCOPE_INTENT_AI_PLAN_TOOLS: ai.plan
       XDG_DATA_HOME: /var/lib/ntk
       XDG_CONFIG_HOME: /var/lib/ntk/config
     volumes:

@@ -2,6 +2,8 @@
 //!
 //! Validates `get_current_directory` function for home path substitution
 
+use std::env;
+
 use nettoolskit_core::path_utils::directory::get_current_directory;
 
 // Basic Functionality Tests
@@ -17,23 +19,24 @@ fn test_get_current_directory_returns_non_empty() {
 
 #[test]
 fn test_get_current_directory_contains_tilde_when_in_home() {
-    // Arrange
-    // This test checks if we're in a subdirectory of home
-
-    // Act
     let dir = get_current_directory();
+    let current_dir = env::current_dir().expect("Current directory should be available");
+    let current_dir_str = current_dir.to_string_lossy().to_string();
+    let home_var = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
 
-    // Assert
-    // Should either be "~" or start with "~/" or "~\"
-    let has_home_substitute = dir == "~" || dir.starts_with("~/") || dir.starts_with("~\\");
-
-    // Note: This might fail if running outside home directory, which is acceptable
-    if std::env::var("HOME").is_ok() || std::env::var("USERPROFILE").is_ok() {
-        // If we have a home var, we should be able to process it
-        assert!(
-            has_home_substitute || !dir.contains("home") && !dir.contains("Users"),
-            "Directory should use ~ for home or not contain home path: {dir}"
-        );
+    if let Ok(home) = env::var(home_var) {
+        if let Some(relative) = current_dir_str.strip_prefix(&home) {
+            assert_eq!(
+                dir,
+                format!("~{relative}"),
+                "Directory under home should use tilde substitution"
+            );
+        } else {
+            assert_eq!(
+                dir, current_dir_str,
+                "Directory outside home should remain absolute"
+            );
+        }
     }
 }
 

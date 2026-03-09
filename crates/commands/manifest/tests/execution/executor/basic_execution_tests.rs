@@ -49,7 +49,9 @@ async fn test_async_executor_dry_run_vs_actual() {
         dry_run: false,
     };
     let actual_result = executor.execute(actual_config).await;
-    assert!(actual_result.is_ok());
+    if let Err(error) = &actual_result {
+        panic!("actual execution failed: {error:?}");
+    }
 
     assert!(!output_dir.exists() || output_dir.read_dir().unwrap().next().is_none());
 }

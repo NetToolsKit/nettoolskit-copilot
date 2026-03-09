@@ -335,7 +335,7 @@ impl AppConfig {
     /// - Windows: `%APPDATA%\ntk\config.toml`
     #[must_use]
     pub fn default_config_path() -> Option<PathBuf> {
-        dirs::config_dir().map(|d| d.join("ntk").join("config.toml"))
+        default_config_base_dir().map(|d| d.join("ntk").join("config.toml"))
     }
 
     /// Get the default data directory for NTK
@@ -344,7 +344,7 @@ impl AppConfig {
     /// - Windows: `%APPDATA%\ntk\data`
     #[must_use]
     pub fn default_data_dir() -> Option<PathBuf> {
-        dirs::data_dir().map(|d| d.join("ntk"))
+        default_data_base_dir().map(|d| d.join("ntk"))
     }
 
     /// Save current configuration to the default path
@@ -483,10 +483,59 @@ fn detect_unicode_support() -> bool {
     }
 }
 
+fn default_config_base_dir() -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        env::var_os("APPDATA").map(PathBuf::from)
+    }
+
+    #[cfg(not(windows))]
+    {
+        env::var_os("XDG_CONFIG_HOME")
+            .map(PathBuf::from)
+            .or_else(|| resolve_home_dir().map(|home| home.join(".config")))
+    }
+}
+
+fn default_data_base_dir() -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        env::var_os("APPDATA").map(PathBuf::from)
+    }
+
+    #[cfg(not(windows))]
+    {
+        env::var_os("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .or_else(|| resolve_home_dir().map(|home| home.join(".local").join("share")))
+    }
+}
+
+fn resolve_home_dir() -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        env::var_os("USERPROFILE").map(PathBuf::from).or_else(|| {
+            match (env::var_os("HOMEDRIVE"), env::var_os("HOMEPATH")) {
+                (Some(drive), Some(path)) => Some(PathBuf::from(format!(
+                    "{}{}",
+                    drive.to_string_lossy(),
+                    path.to_string_lossy()
+                ))),
+                _ => None,
+            }
+        })
+    }
+
+    #[cfg(not(windows))]
+    {
+        env::var_os("HOME").map(PathBuf::from)
+    }
+}
+
 /// Expand `~` prefix in path strings to the user's home directory
 fn expand_tilde(path: &str) -> PathBuf {
     if let Some(rest) = path.strip_prefix("~/") {
-        if let Some(home) = dirs::home_dir() {
+        if let Some(home) = resolve_home_dir() {
             return home.join(rest);
         }
     }
@@ -684,7 +733,7 @@ verbose = true
 
         // Tilde expansion depends on home dir being available
         let expanded = expand_tilde("~/templates");
-        if let Some(home) = dirs::home_dir() {
+        if let Some(home) = resolve_home_dir() {
             assert_eq!(expanded, home.join("templates"));
         }
     }

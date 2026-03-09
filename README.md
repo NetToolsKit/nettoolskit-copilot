@@ -106,7 +106,7 @@ Formal control-plane, session, and operator contracts are documented in:
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
 
 This document defines the current local-first runtime boundary and the target contract for future gateway/operator expansion.
-The HTTP service ingress now derives request, operator, and session metadata from `/task/submit` headers using the shared control-plane contracts, and ChatOps `submit` intents now reuse that same typed control-plane path before task admission.
+Local CLI `/task submit`, HTTP `/task/submit`, and ChatOps task commands now derive the same typed control-plane metadata, with normalized request, operator, session, and audit attribution across submit and non-submit ingress paths.
 
 ---
 

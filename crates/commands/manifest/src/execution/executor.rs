@@ -2,7 +2,7 @@
 use crate::core::error::{ManifestError, ManifestResult};
 use crate::core::models::{ApplyModeKind, ExecutionSummary, ManifestDocument};
 use crate::parsing::ManifestParser;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 /// Configuration for manifest execution
 #[derive(Debug, Clone)]
@@ -58,6 +58,28 @@ impl ManifestExecutor {
         })
     }
 
+    fn resolve_solution_root(output_root: &Path, solution_root: &Path) -> PathBuf {
+        if solution_root.is_absolute() {
+            return solution_root.to_path_buf();
+        }
+
+        let mut normalized = PathBuf::new();
+        for component in solution_root.components() {
+            match component {
+                Component::CurDir => {}
+                Component::Normal(segment) => normalized.push(segment),
+                Component::ParentDir => normalized.push(".."),
+                Component::RootDir | Component::Prefix(_) => {}
+            }
+        }
+
+        if normalized.as_os_str().is_empty() {
+            output_root.to_path_buf()
+        } else {
+            output_root.join(normalized)
+        }
+    }
+
     /// Main async execution logic - orchestrates specialized modules
     async fn execute_async(
         manifest: ManifestDocument,
@@ -87,7 +109,8 @@ impl ManifestExecutor {
         let templates_root = Self::locate_templates_root(&config.manifest_path)?;
 
         // Setup paths
-        let solution_root = config.output_root.join(&manifest.solution.root);
+        let solution_root =
+            Self::resolve_solution_root(&config.output_root, &manifest.solution.root);
         summary
             .notes
             .push(format!("Solution root: {}", solution_root.display()));
@@ -306,5 +329,35 @@ impl ManifestExecutor {
 impl Default for ManifestExecutor {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ManifestExecutor;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn resolve_solution_root_treats_current_directory_as_output_root() {
+        let output_root = Path::new("target/generated");
+
+        assert_eq!(
+            ManifestExecutor::resolve_solution_root(output_root, Path::new(".")),
+            PathBuf::from("target/generated")
+        );
+        assert_eq!(
+            ManifestExecutor::resolve_solution_root(output_root, Path::new("./")),
+            PathBuf::from("target/generated")
+        );
+    }
+
+    #[test]
+    fn resolve_solution_root_preserves_nested_relative_paths() {
+        let output_root = Path::new("target/generated");
+
+        assert_eq!(
+            ManifestExecutor::resolve_solution_root(output_root, Path::new("./src/app")),
+            PathBuf::from("target/generated/src/app")
+        );
     }
 }
