@@ -158,7 +158,10 @@ Monorepo of libraries, modules, and samples for robust .NET services using Clean
 - Assert behavior (CQRS handlers, EF Core, REST). Ensure tests pass locally.
 
 ## Commits & PRs
-- Commits in EN, imperative, ≤72 chars; optional scope (e.g., `DynamicQuery:`).
+- Commits in EN, imperative, ≤72 chars, and must follow semantic prefixes such as `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`, `build:`, or `ci:`.
+- When a logically complete item is finished, always return a suggested commit message to the user.
+- When the current changes are stable and ready to persist, explicitly tell the user that the work is ready to commit.
+- For large tasks, identify stable intermediate milestones and notify the user when a commit checkpoint has been reached.
 - PRs: Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration.
 - List Applied instructions paths and deviations; require green build/tests; no secrets. Session tracking: `project | file | component/method | action`.
 

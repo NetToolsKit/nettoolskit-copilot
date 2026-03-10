@@ -109,6 +109,9 @@ Follow this order of operations on every task:
 - Use a short preamble to indicate key instructions before tool/command calls; omit in purely informational answers.
 - For auditing, consolidate the full list of instructions in PR/commit body or CHANGELOG.md.
 - When requested, include an Applied instructions section with the actually used set.
+- After finishing a logically complete item, return a suggested commit message in English using semantic commit prefixes such as `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`, `build:`, or `ci:`.
+- When the current state is stable and ready for persistence, explicitly tell the user that the work is ready to commit.
+- For large tasks, surface stable intermediate commit checkpoints as soon as they are reached.
 
 # Security
 - No secrets in repo; use User Secrets/Azure Key Vault; typed options via IOptions.

@@ -1,3 +1,31 @@
+## [1.1.8] - 2026-03-10
+
+### Changed
+- Updated commit guidance to require semantic commit prefixes for suggested commit messages and ready-to-commit notifications:
+  - `feat:`
+  - `fix:`
+  - `docs:`
+  - `refactor:`
+  - `test:`
+  - `chore:`
+  - `perf:`
+  - `build:`
+  - `ci:`
+- Updated instruction files:
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+
+## [1.1.7] - 2026-03-10
+
+### Changed
+- Updated commit workflow guidance so agents now:
+  - return a suggested commit message when a logical item is finished
+  - explicitly signal when the current state is ready to commit
+  - surface stable intermediate commit checkpoints during large tasks
+- Updated instruction files:
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+
 ## [1.1.6] - 2026-02-27
 
 ### Added
