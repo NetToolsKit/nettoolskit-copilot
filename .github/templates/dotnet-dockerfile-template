@@ -8,7 +8,7 @@
 # Use: [ENV_VARS_WORKER] = environment variables for Worker/Console (DOTNET_ENVIRONMENT)
 
 #=====================================================================================================================================
-# Args 
+# Args
 ARG VERSION=[VERSION]
 
 #=====================================================================================================================================
@@ -16,7 +16,7 @@ ARG VERSION=[VERSION]
 FROM mcr.microsoft.com/dotnet/sdk:$VERSION AS build
 WORKDIR /src
 
-# Args 
+# Args
 ARG LINUXARQ=linux-musl-x64
 ARG PROJECT_NAME="[PROJECT_NAME]"
 
@@ -84,7 +84,7 @@ ENV DOTNET_EnableDiagnostics=0
 # ENV ASPNETCORE_URLS=http://+:8080
 # ENV ASPNETCORE_ENVIRONMENT=Production
 
-# For Worker/Console projects  
+# For Worker/Console projects
 # [ENV_VARS_WORKER]
 # ENV DOTNET_ENVIRONMENT=Production
 

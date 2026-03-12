@@ -20,6 +20,15 @@
 ### Removed
 - [REMOVED_ITEM]: [REASON_FOR_REMOVAL]
 
+### Breaking
+- [BREAKING_CHANGE]: [IMPACT_AND_MIGRATION_NOTE]
+
+### Feedback Integration
+- Issue context: [ISSUE_ID_OR_CONTEXT]
+- Problem identified: [PROBLEM_STATEMENT]
+- Solution applied: [SOLUTION_SUMMARY]
+- Workspace impact: [IMPACT_SCOPE]
+
 ---
 
 ### Pattern Guidelines:

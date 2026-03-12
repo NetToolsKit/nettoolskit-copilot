@@ -36,7 +36,6 @@
       "files": [
         "README.md",
         "scripts/README.md",
-        ".codex/README.md",
         ".codex/orchestration/README.md",
         ".codex/skills/README.md",
         ".github/**/*.md"

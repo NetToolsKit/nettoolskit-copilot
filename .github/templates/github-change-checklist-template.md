@@ -1,48 +1,27 @@
-# ✅ Checklist: .github Change
+# GitHub Change Validation Checklist
 
-**Modified file**: `.github/[FILE_PATH]`
+**Changed file**: `.github/[FILE_PATH]`
 **Date**: `YYYY-MM-DD`
-**Change type**: [New feature / Fix / Update / Removal]
+**Change type**: `[Added | Changed | Fixed | Removed]`
 
-## 📋 Mandatory Checklist
+## Scope Review
+- [ ] Change scope and impacted files are identified
+- [ ] Related instructions, prompts, templates, routes, or schemas were reviewed
+- [ ] Backward-compatibility impact was assessed
 
-### ✅ 1. README.md
-- [ ] Affected section identified: `[README_SECTION]`
-- [ ] Information updated (table/list/documentation)
-- [ ] Usage example added/updated (if applicable)
-- [ ] Links and references corrected
+## Documentation and Mapping
+- [ ] `.github/copilot-instructions.md` was updated when global guidance changed
+- [ ] `README.md` was updated when usage, onboarding, or repository structure changed
+- [ ] `CHANGELOG.md` was updated when the change should remain in versioned history
+- [ ] Cross-references and links were verified
 
-### ✅ 2. CHANGELOG.md  
-- [ ] Entry created in format: `## [X.Y.Z] - YYYY-MM-DD`
-- [ ] Appropriate category: [Added / Changed / Fixed / Removed / Breaking]
-- [ ] Specific file mentioned: `.github/[FILE]`
-- [ ] Clear impact description
+## Validation
+- [ ] `pwsh -File scripts/validation/validate-instruction-metadata.ps1 -RepoRoot .`
+- [ ] `pwsh -File scripts/validation/validate-instructions.ps1 -RepoRoot .`
+- [ ] Additional targeted validation was executed when the change affected scripts, templates, routing, or governance artifacts
+- [ ] EOF and trailing-whitespace rules were verified
 
-### ✅ 3. Structure verification
-- [ ] File structure: naming follows pattern `[area].instructions.md` or `[name]-template.md`
-- [ ] Cross-references: update `copilot-instructions.md` with new file
-- [ ] Validation: run `.\scripts\copilot.ps1` after changes
-- [ ] `applyTo` globs: verify they make sense for file context
-- [ ] **CRITICAL**: NO files with empty lines at the end
-- [ ] Working links: test references between files
-
-## 📝 CHANGELOG Entry Template
-
-```markdown
-## [X.Y.Z] - YYYY-MM-DD
-
-### [CATEGORY]
-- `.github/[FILE]`: [CHANGE_DESCRIPTION]
-  - `[SPECIFIC_COMPONENT]`: [DETAILS]
-```
-
-## 🎯 README Update Template
-
-**For mapping table**:
-```markdown
-| [AREA] | [FOLDERS] | `.github/instructions/[FILE]` | `[GLOB]` | [DESCRIPTION] |
-```
-
-**For templates list**:
-```markdown
-| [NAME] | `.github/templates/[FILE]` | [USAGE] |
+## Change Notes
+- Context: [CONTEXT]
+- Risk: [RISK_OR_NONE]
+- Follow-up: [FOLLOW_UP_OR_NONE]

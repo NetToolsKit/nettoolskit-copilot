@@ -159,6 +159,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/validate-policy.ps1` | Validates policy contracts declared in `.github/policies/*.json` (required files/directories/hooks). | `pwsh -File scripts/validation/validate-policy.ps1` |
 | `validation/validate-release-governance.ps1` | Validates release-governance baseline (`CHANGELOG`, `CODEOWNERS`, branch-protection baseline, governance docs). | `pwsh -File scripts/validation/validate-release-governance.ps1` |
 | `validation/validate-readme-standards.ps1` | Validates README structure/formatting using `.github/governance/readme-standards.baseline.json`. | `pwsh -File scripts/validation/validate-readme-standards.ps1` |
+| `validation/validate-template-standards.ps1` | Validates shared templates against `.github/governance/template-standards.baseline.json`, including required/forbidden patterns and referenced script/doc paths. | `pwsh -File scripts/validation/validate-template-standards.ps1` |
 | `validation/validate-compatibility-lifecycle-policy.ps1` | Validates `COMPATIBILITY.md` Support Lifecycle/EOL table semantics (reference date, ordering, EOL + 1 day, status). | `pwsh -File scripts/validation/validate-compatibility-lifecycle-policy.ps1` |
 | `validation/validate-powershell-standards.ps1` | Validates script standards for PowerShell files (help, param block, function docs, approved verbs). | `pwsh -File scripts/validation/validate-powershell-standards.ps1` |
 | `validation/validate-shell-hooks.ps1` | Validates `.githooks/*` shell syntax with `sh -n` and optional `shellcheck`. | `pwsh -File scripts/validation/validate-shell-hooks.ps1` |
@@ -246,6 +247,9 @@ pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
 
 # validate routing catalog coverage against golden fixtures
 pwsh -File .\scripts\validation\validate-routing-coverage.ps1
+
+# validate shared templates against the template baseline
+pwsh -File .\scripts\validation\validate-template-standards.ps1
 
 # validate COMPATIBILITY lifecycle policy
 pwsh -File .\scripts\validation\validate-compatibility-lifecycle-policy.ps1

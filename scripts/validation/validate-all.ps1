@@ -16,6 +16,7 @@
     - validate-agent-permissions
     - validate-routing-coverage
     - validate-readme-standards
+    - validate-template-standards
     - validate-compatibility-lifecycle-policy
     - validate-powershell-standards
     - validate-shell-hooks
@@ -604,6 +605,11 @@ $baseCheckDefinitions['validate-readme-standards'] = [pscustomobject]@{
     script = 'scripts/validation/validate-readme-standards.ps1'
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
+$baseCheckDefinitions['validate-template-standards'] = [pscustomobject]@{
+    name = 'validate-template-standards'
+    script = 'scripts/validation/validate-template-standards.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
 $baseCheckDefinitions['validate-compatibility-lifecycle-policy'] = [pscustomobject]@{
     name = 'validate-compatibility-lifecycle-policy'
     script = 'scripts/validation/validate-compatibility-lifecycle-policy.ps1'
@@ -689,6 +695,7 @@ $defaultCheckOrder = @(
     'validate-agent-permissions',
     'validate-routing-coverage',
     'validate-readme-standards',
+    'validate-template-standards',
     'validate-compatibility-lifecycle-policy',
     'validate-powershell-standards',
     'validate-shell-hooks',

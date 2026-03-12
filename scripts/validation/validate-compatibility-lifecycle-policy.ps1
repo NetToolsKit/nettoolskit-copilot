@@ -59,6 +59,7 @@ $script:Warnings = New-Object System.Collections.Generic.List[string]
 # -------------------------------
 # Helpers
 # -------------------------------
+# Registers a validation warning without failing immediately.
 function Add-ValidationFailure {
     param(
         [string] $Message
@@ -74,6 +75,7 @@ function Add-ValidationFailure {
     Write-StyledOutput ("[FAIL] {0}" -f $Message)
 }
 
+# Registers a non-fatal validation warning.
 function Add-ValidationWarning {
     param(
         [string] $Message
@@ -83,6 +85,7 @@ function Add-ValidationWarning {
     Write-StyledOutput ("[WARN] {0}" -f $Message)
 }
 
+# Writes per-row diagnostics when detailed output is enabled.
 function Write-Detail {
     param(
         [string] $Message
@@ -93,6 +96,7 @@ function Write-Detail {
     }
 }
 
+# Resolves a path relative to repository root.
 function Resolve-RepoPath {
     param(
         [string] $Root,
@@ -106,6 +110,7 @@ function Resolve-RepoPath {
     return [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
 }
 
+# Resolves repository root from input and fallback candidates.
 function Resolve-RepositoryRoot {
     param(
         [string] $RequestedRoot
@@ -143,6 +148,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Extracts the markdown section body for a specific heading.
 function Get-SectionBody {
     param(
         [string] $Content,
@@ -159,6 +165,7 @@ function Get-SectionBody {
     return $null
 }
 
+# Splits a markdown table row into normalized columns.
 function Convert-TableRow {
     param(
         [string] $Line
@@ -182,6 +189,7 @@ function Convert-TableRow {
     return @($parts | ForEach-Object { $_.Trim() })
 }
 
+# Detects markdown separator rows such as | --- | --- |.
 function Test-SeparationRow {
     param(
         [string[]] $Columns
@@ -201,6 +209,7 @@ function Test-SeparationRow {
     return $true
 }
 
+# Parses a compatibility lifecycle date using English month formats.
 function Convert-CompatibilityDate {
     param(
         [string] $Value,
@@ -234,6 +243,7 @@ function Convert-CompatibilityDate {
     return $success
 }
 
+# Normalizes status text for case-insensitive comparisons.
 function Convert-StatusText {
     param(
         [string] $Value

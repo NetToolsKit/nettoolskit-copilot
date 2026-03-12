@@ -813,6 +813,7 @@ $requiredFiles = @(
     '.github/prompts/route-instructions.prompt.md',
     '.github/schemas/instruction-routing.catalog.schema.json',
     '.github/governance/readme-standards.baseline.json',
+    '.github/governance/template-standards.baseline.json',
     '.github/governance/architecture-boundaries.baseline.json',
     '.github/governance/security-baseline.json',
     '.github/governance/release-provenance.baseline.json',
@@ -837,6 +838,7 @@ $requiredFiles = @(
     '.codex/orchestration/evals/golden-tests.json',
     'scripts/validation/validate-agent-orchestration.ps1',
     'scripts/validation/validate-readme-standards.ps1',
+    'scripts/validation/validate-template-standards.ps1',
     'scripts/validation/validate-powershell-standards.ps1',
     'scripts/validation/validate-dotnet-standards.ps1',
     'scripts/validation/validate-architecture-boundaries.ps1',
@@ -887,6 +889,13 @@ if ($null -ne $sharedChecksumsManifest) {
 
     if ($null -eq $sharedChecksumsManifest.entries -or @($sharedChecksumsManifest.entries).Count -eq 0) {
         Add-ValidationFailure 'Shared script checksum manifest must contain at least one entry.'
+    }
+}
+
+$templateStandardsBaseline = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/template-standards.baseline.json'
+if ($null -ne $templateStandardsBaseline) {
+    if ($null -eq $templateStandardsBaseline.templateRules -or @($templateStandardsBaseline.templateRules).Count -eq 0) {
+        Add-ValidationFailure 'Template standards baseline must contain at least one templateRules entry.'
     }
 }
 

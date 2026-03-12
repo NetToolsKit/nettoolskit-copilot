@@ -3,14 +3,34 @@ applyTo: "**/README.md"
 priority: medium
 ---
 
-# Template Usage
-ALWAYS use template .github/templates/readme-template.md as base for standard structure.
+# README Baseline
+Use `.github/templates/readme-template.md` as the default starting point.
+This file defines the generic README baseline only.
+If a higher-priority repository-specific README instruction exists, that file may narrow or override section set, order, and examples policy.
 
-# Required Structure
-Introduction, Table of Contents, Installation, Quick Start, Usage Examples, API Reference, Build and Tests, Contributing, Dependencies, References.
+# README Types
 
-# Introduction
-Problem solved, context, technical approach; key features with checkmarks.
+## Repository README
+Focus on repository overview, navigation, build/test entry points, contribution guidance, dependencies, and references.
+Do not force package-installation sections into the root README when repository-specific rules say otherwise.
+
+## Package or App README
+Prefer these sections when they are applicable:
+Introduction, Table of Contents or Contents, Installation, Quick Start, Usage Examples, API Reference, Build and Tests, Contributing, Dependencies, References.
+If a section does not apply, remove it instead of filling it with weak placeholder text.
+
+# Content Expectations
+- Introduction explains problem, context, and technical approach.
+- Features section, when present, uses checkmark bullets.
+- Table of Contents or Contents links the main sections that actually exist in the file.
+- When stable subsections exist under a section, `Contents` must include nested anchor links for those subsection entries in the same order.
+- The default README template must keep nested `Contents` items for `Usage Examples` and `API Reference` subsections unless those subsections are intentionally removed from the document.
+- Installation shows real setup commands and package references.
+- Quick Start stays minimal and runnable.
+- Usage Examples cover typical and advanced scenarios with real code.
+- API Reference uses real signatures, parameters, and returns.
+- Build and Tests shows real repository commands when the README type requires operational guidance.
+- References link to changelog, related packages, docs, issues, or external technical material.
 
 ```markdown
 ## Features
@@ -18,47 +38,16 @@ Problem solved, context, technical approach; key features with checkmarks.
 - ✅ Dynamic query building with LINQ expressions
 - ✅ Type-safe filtering and sorting
 - ✅ Extensible validator framework
-- ✅ Multi-target .NET 8.0 and .NET 9.0 support
 ```
 
-# Table of Contents
-Links to all main sections.
-
-# Installation
-.NET CLI commands and PackageReference.
 ```bash
 dotnet add package NetToolsKit.DynamicQuery
-```
-
-# Quick Start
-Minimal example in 3–5 lines.
-```csharp
-var query = QueryBuilder.Create<User>()
-    .Where(u => u.Age > 18)
-    .OrderBy(u => u.Name);
-```
-
-# Usage Examples
-Typical and advanced cases with full code.
-
-# API Reference
-Key signatures, parameters and returns.
-
-# Build and Tests
-```bash
 dotnet build
 dotnet test --filter "Category=Unit"
-dotnet format
 ```
 
-# Contributing
-Git flow, guidelines, semantic commits.
-
-# Dependencies
-Separate runtime and development.
-
-# References
-Technical links, issues, changelog.
-
 # Format
-Sections with separators (---); fenced code blocks; checkmarks for features; keep concise and practical.
+- Keep README content concise, practical, and directly actionable.
+- Use fenced code blocks with correct language tags.
+- Use section separators (`---`) when they improve readability and match repository style.
+- Prefer real examples over invented APIs or placeholder prose.

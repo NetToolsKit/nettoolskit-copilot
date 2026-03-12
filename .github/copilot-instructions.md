@@ -67,6 +67,12 @@ Follow this order of operations on every task:
 - Use this file for global rules and technology mappings.
 - Follow domain-specific files in instructions/*.md for technical details.
 
+# Validation Checklist Policy
+- Every non-trivial task must define a concrete validation checklist before or during implementation.
+- The checklist must be scope-specific and cover only the relevant checks for the task (for example: build, tests, docs, security, migrations, runtime behavior, links, formatting).
+- Final task reporting must include checklist status using `passed`, `pending`, or `blocked`.
+- If a validation item cannot be executed, keep it in the checklist and state why it remained pending or blocked.
+
 # Mandatory Instructions
 
 ## Always Applied

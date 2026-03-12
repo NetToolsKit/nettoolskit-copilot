@@ -2,11 +2,14 @@
 
 > [BRIEF_ONE_LINE_DESCRIPTION]
 
+Remove sections that do not apply.
+If a repository-specific README instruction exists, it overrides this baseline template.
+
 ---
 
 ## Introduction
 
-[PROBLEM_CONTEXT_DESCRIPTION]. Briefly explain the technical or architectural approach adopted (e.g., [TECHNICAL_APPROACH]).
+[PROBLEM_CONTEXT_DESCRIPTION]. Briefly explain the technical or architectural approach adopted (for example: [TECHNICAL_APPROACH]).
 
 ---
 
@@ -32,6 +35,9 @@
     - [Extension Methods](#extension-methods)
     - [Enums](#enums)
     - [Data Shapes](#data-shapes)
+- [Build and Tests](#build-and-tests)
+- [Contributing](#contributing)
+- [Dependencies](#dependencies)
 - [References](#references)
 - [License](#license)
 
@@ -53,19 +59,19 @@ dotnet add package [PACKAGE_NAME]
 
 ## Quick Start
 
-Minimal usage in 3–5 lines:
+Minimal usage in 3-5 lines:
 
 ```csharp
 // [BASIC_EXAMPLE_DESCRIPTION]
-var [VARIABLE] = new [MAIN_CLASS]();
-var result = [VARIABLE].[MAIN_METHOD]([PARAMETERS]);
+var [variable] = new [MAIN_CLASS]();
+var result = [variable].[MAIN_METHOD]([PARAMETERS]);
 ```
 
 ---
 
 ## Usage Examples
 
-_Aim for ≥ 70% coverage of key public APIs listed in the API Reference below._
+Aim for >= 70% coverage of key public APIs listed in the API Reference below.
 
 ### Example 1: [MAIN_USE_CASE]
 
@@ -83,21 +89,21 @@ var result = service.[PROCESS_METHOD]([INPUT_PARAMETER]);
 
 ```csharp
 // [COMPLEX_SCENARIO_DESCRIPTION]
-var [FILTER_VARIABLE] = new [FILTER_CLASS]
+var [filterVariable] = new [FILTER_CLASS]
 {
     [PROPERTY_1] = "[VALUE_1]",
     [PROPERTY_2] = [ENUM_VALUE].[OPTION],
     [PROPERTY_3] = "[VALUE_3]"
 };
 
-var results = service.[SEARCH_METHOD]([FILTER_VARIABLE]);
+var results = service.[SEARCH_METHOD]([filterVariable]);
 ```
 
 ---
 
 ## API Reference
 
-_Use real names and signatures from the codebase; add only the APIs meant for consumer use._
+Use real names and signatures from the codebase; add only the APIs meant for consumer use.
 
 ### Main Types / Services
 
@@ -119,9 +125,7 @@ public static class [EXTENSIONS_CLASS]
 
 ### Enums
 
-_Provide a table for each public enum exposed by the package._
-
-ExampleEnum
+Provide a table for each public enum exposed by the package.
 
 | Value | Description |
 | --- | --- |
@@ -130,9 +134,7 @@ ExampleEnum
 
 ### Data Shapes
 
-_Document key request/response payloads used in examples (schemas)._ Use a table with Field, Description, and Example.
-
-Example Request
+Document key request or response payloads used in examples with a table.
 
 | Field | Description | Example |
 | --- | --- | --- |
@@ -141,12 +143,37 @@ Example Request
 
 ---
 
+## Build and Tests
+
+Use this section when the README needs operational commands for contributors or maintainers.
+
+```bash
+dotnet build
+dotnet test --filter "Category=Unit"
+```
+
+---
+
+## Contributing
+
+- [CONTRIBUTING_RULE_1]
+- [CONTRIBUTING_RULE_2]
+- [CONTRIBUTING_RULE_3]
+
+---
+
+## Dependencies
+
+- Runtime: [RUNTIME_DEPENDENCIES]
+- Development: [DEVELOPMENT_DEPENDENCIES]
+
+---
+
 ## References
 
 - [Official .NET Documentation](https://learn.microsoft.com/dotnet/)
 - [TECHNICAL_REFERENCE_1](link)
 - [TECHNICAL_REFERENCE_2](link)
-- [TECHNICAL_REFERENCE_3](link)
 - [GitHub Issues]([ISSUES_LINK])
 
 ---

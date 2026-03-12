@@ -65,9 +65,9 @@ Follow the **Mandatory Context Files** list above.
 
 ## Execution Flow for Development Tasks
 1. Task Analysis: Load mandatory context files, identify domain, analyze scope
-2. Planning: Create execution plan for non-trivial tasks, validate architecture
+2. Planning: Create execution plan for non-trivial tasks
 3. Implementation: Follow established templates and patterns, maintain standards
-4. Validation: Verify compilation, run tests, confirm architectural compliance
+4. Validation: Execute relevant checks, verify compilation, run tests, and confirm architectural compliance
 
 ### For Multi-Task Requests
 - Apply Task-Based Execution Methodology (see below)

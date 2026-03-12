@@ -161,7 +161,7 @@ Calculation observations and assumptions:
 
 **UUCW:**
 - Case1 n=2 → 1.34
-- Case2 n=4 → 2.00  
+- Case2 n=4 → 2.00
 - Case3 n=5 → 2.25
 - UUCW = 5.59
 

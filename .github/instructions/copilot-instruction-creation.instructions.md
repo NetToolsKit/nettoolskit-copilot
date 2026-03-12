@@ -6,12 +6,11 @@ priority: high
 # Instruction Creation Standards
 
 ## Content Format
-- Prefer plain text over complex formatting
+- Prefer concise markdown over ornamental formatting
 - Allow bullet lists when they improve clarity (e.g., references, checklists)
-- Use markdown headings strategically with hierarchy (# always, ## sparingly, ### last resort)
-- Do not use inline code backticks for paths, types or commands
+- Use markdown headings with a simple, consistent hierarchy
+- Use inline code for paths, commands, globs, filenames, identifiers, and types when it improves precision
 - Header must follow template exactly
-- Semicolon-separated single-line paragraphs are preferred
 - Actionable information only
 - Pattern [area].instructions.md
 - Examples inline prefixed with "Example:"
@@ -26,7 +25,7 @@ Technical content with code blocks when needed
 
 ## Heading Hierarchy
 - Use # for primary sections to provide clear document structure
-- Use ## sparingly for important subsections that need emphasis
+- Use ## for meaningful subsections when they improve navigation
 - Use ### only as last resort for detailed breakdowns
 - Avoid deeper nesting
 - Ensure logical information hierarchy
@@ -57,11 +56,14 @@ Content for detailed breakdowns
 - English only for consistency
 - Precise technical terms over generic language
 - Avoid filler words and redundancy
-- Context before objective in explanations
+- Match the style already established in the repository instead of inventing a competing instruction style
+- Context before objective in explanations when that improves comprehension
 - Measurable acceptance criteria when applicable
+- Add a `Validation Checklist` or `Verification Checklist` section when the instruction defines concrete deliverables, acceptance rules, or reviewable outcomes
+- Do not remove an existing checklist unless another instruction or global rule explicitly replaces it
 ```markdown
 Example paragraph structure:
-Single line with specific technical guidance; semicolon separators for related concepts.
+Single line with specific technical guidance.
 
 Next paragraph covers different aspect.
 - Bullet point for specific requirement
@@ -102,10 +104,10 @@ public class OrderService : IOrderService
 - Enforce EOF rule (no trailing blank line/newline)
 - Allow bullet lists as stated above
 - Use markdown headings strategically (# for main sections, ## for subsections, ### for detailed breakdowns)
-- Never use inline code backticks for paths, types or commands
+- Use inline code consistently when it makes paths, commands, filenames, globs, or identifiers easier to read
 ```markdown
-Correct: The OrderService class in Domain layer
-Incorrect: The `OrderService` class in `Domain` layer
+Correct: Update `copilot-instructions.md` after adding a new instruction file
+Avoid: excessive backticks in plain prose that do not improve precision
 ```
 
 # Logical Structure and Organization
@@ -213,7 +215,7 @@ Example metrics to track:
 ## File References
 - Update copilot-instructions.md with new instruction reference
 - In copilot-instructions.md prefer bullet lists for readability
-- Never wrap paths or types in backticks in instruction files
+- Use backticks for paths, commands, and identifiers when it improves precision and scanability
 - Verify the inheritance hierarchy remains logical
 - Confirm no conflicts with existing instructions
 - Test integration with existing workflows
