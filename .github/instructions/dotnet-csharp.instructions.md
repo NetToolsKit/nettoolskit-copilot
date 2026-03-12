@@ -22,6 +22,7 @@ priority: high
 - #region spacing: ALWAYS add ONE blank line between `#endregion` and the next `#region`. Never place them adjacent without separation.
 - ALWAYS use template .github/templates/dotnet-class-template.cs for classes
 - ALWAYS use template .github/templates/dotnet-interface-template.cs for interfaces
+- Do not assemble new classes or interfaces directly from the inline examples in this instruction; use the templates as the concrete file skeleton and treat examples here as partial guidance only.
 - Small focused methods
 - Single responsibility classes
 - Avoid god classes
@@ -100,6 +101,7 @@ catch (SqlException ex)
 - AAA with minimal duplication
 - Prefer test data builders, isolated mocks and deterministic assertions
 - ALWAYS use template .github/templates/dotnet-unit-test-template.cs
+- Do not assemble full unit test files directly from the inline examples in this instruction; use the template as the canonical structure.
 - File layout: tests/<Project>.UnitTests/Tests/*Tests.cs
 - Categories/output: organize by domain category (Requests, Stream, Notifications, Commands, Queries, Pipeline, Concurrency, etc.)
 - For xUnit use ITestOutputHelper; for NUnit use TestContext
@@ -109,6 +111,7 @@ catch (SqlException ex)
 ## Integration Tests
 - AAA with minimal duplication
 - ALWAYS use template .github/templates/dotnet-integration-test-template.cs
+- Do not assemble full integration test files directly from the inline examples in this instruction; use the template as the canonical structure.
 - File layout: tests/<Project>.IntegrationTests/Tests/*Tests.cs
 - Use explicit ordering ONLY when sequencing is required by shared state or workflow stages.
 

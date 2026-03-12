@@ -5,6 +5,7 @@ priority: medium
 
 # Multi-stage Builds
 - ALWAYS use template .github/templates/dotnet-dockerfile-template as base for .NET projects
+- Do not assemble a full Dockerfile directly from the snippets in this instruction when the template applies; use the template as the concrete starting point and treat snippets here as partial patterns.
 - stages build/publish/base/final
 - copy only required artifacts
 - fixed NetToolsKit layout (src/, samples/, eng/, .build/)
@@ -114,6 +115,7 @@ ENTRYPOINT ["dotnet", "MyApp.dll"]
 
 # Docker Compose
 - ALWAYS use template .github/templates/docker-compose-template.yml
+- Do not assemble a full docker-compose file directly from the snippets in this instruction when the template applies; use the template as the concrete starting point and treat snippets here as partial patterns.
 - strict order: image → hostname → container_name → restart → deploy → networks → command → healthcheck → ports → volumes → environment
 - naming [SERVICE_NAME]-[COMPONENT]-${COMPOSE_PROJECT_NAME}
 - network isolation

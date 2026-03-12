@@ -13,6 +13,7 @@ All code must follow these testing standards to ensure quality and maintainabili
 2. **Test Organization**: Use dedicated test files, not just inline tests
 3. **Test Naming**: Descriptive names following `test_[function]_[scenario]_[result]` pattern
 4. **Documentation**: All test files must have file-level doc comments
+5. **Template Precedence**: Start concrete test files from the applicable `.github/templates/rust-*-template.rs` file when one exists; treat inline examples in this instruction as partial guidance only
 
 ## File Organization
 

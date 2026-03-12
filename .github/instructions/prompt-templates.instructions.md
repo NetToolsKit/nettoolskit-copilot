@@ -148,6 +148,8 @@ Output: {"consensus": "...", "confidence": 0.0-1.0, "divergences": [...]}
 - `poml/prompt-engineering-poml.md` - Full POML guide
 
 ### Template Structure
+When a repository prompt file already exists for the requested workflow, update or extend that concrete file instead of copying the generic structure below verbatim.
+The generic structure below is normative guidance for prompt shape, not a replacement for repository-specific prompt files.
 Use `${input:variable:Description}` placeholders; include usage context; standardized structure; guiding comments for completion.
 
 ```markdown

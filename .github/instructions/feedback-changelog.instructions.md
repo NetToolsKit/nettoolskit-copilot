@@ -5,6 +5,7 @@ priority: high
 
 # Feedback Integration
 Use changelog-entry-template.md with feedback integration section; document issue + context + problem + solution in CHANGELOG format; semantic versioning with date; consolidate feedback tracking in version history.
+Do not assemble a final CHANGELOG entry directly from this instruction file; use `.github/templates/changelog-entry-template.md` as the concrete structure and treat examples here as illustrative only.
 
 # CHANGELOG Format
 - Format [version] YYYY-MM-DD

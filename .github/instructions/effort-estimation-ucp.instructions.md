@@ -5,6 +5,7 @@ priority: low
 
 # Template Usage
 ALWAYS use template .github/templates/effort-estimation-poc-mvp-template.md as base.
+Do not assemble the final estimation document directly from this instruction file; use the template for structure, placeholders, and section order.
 UCP (Use Case Points): requirements analysis and effort estimation for POC/MVP.
 Goal: define scope and estimate effort to evolve from POC to MVP using UCP.
 
@@ -15,6 +16,7 @@ Context, problem, personas, goals, metrics.
 - Prove technical/value hypothesis
 - Minimal scope, short timeline, clear success criteria
 - Outputs with minimal backlog, technical design, test plan and result
+- Inline snippets below are illustrative only and must not replace the template structure.
 ```typescript
 // POC design (front): hooks/composables first; minimal UI; loading/error/success states
 const { data, loading, error } = useApi('/endpoint');

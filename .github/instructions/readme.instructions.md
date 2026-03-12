@@ -7,6 +7,7 @@ priority: medium
 Use `.github/templates/readme-template.md` as the default starting point.
 This file defines the generic README baseline only.
 If a higher-priority repository-specific README instruction exists, that file may narrow or override section set, order, and examples policy.
+Do not assemble a README directly from this instruction file; use the template for concrete structure and placeholders.
 
 # README Types
 
@@ -32,22 +33,9 @@ If a section does not apply, remove it instead of filling it with weak placehold
 - Build and Tests shows real repository commands when the README type requires operational guidance.
 - References link to changelog, related packages, docs, issues, or external technical material.
 
-```markdown
-## Features
-
-- ✅ Dynamic query building with LINQ expressions
-- ✅ Type-safe filtering and sorting
-- ✅ Extensible validator framework
-```
-
-```bash
-dotnet add package NetToolsKit.DynamicQuery
-dotnet build
-dotnet test --filter "Category=Unit"
-```
-
 # Format
 - Keep README content concise, practical, and directly actionable.
 - Use fenced code blocks with correct language tags.
 - Use section separators (`---`) when they improve readability and match repository style.
 - Prefer real examples over invented APIs or placeholder prose.
+- Keep concrete placeholders, subsection anchors, and example scaffolding in `.github/templates/readme-template.md` instead of duplicating them here.

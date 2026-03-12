@@ -8,6 +8,7 @@ Standardize PowerShell scripts in scripts/ with the same structure and safety mo
 
 # Required Template
 - Start from .github/templates/powershell-script-template.ps1 for every new script under scripts/.
+- Do not assemble a final script directly from the example skeleton in this instruction; use the template as the executable starting point and treat examples here as partial guidance only.
 - For AI-assisted generation prefer .github/prompts/create-powershell-script.prompt.md first, then adapt as needed.
 - Start with comment-based help using SYNOPSIS, DESCRIPTION, PARAMETER, EXAMPLE, and NOTES.
 - Keep param block at the top of the executable body.
