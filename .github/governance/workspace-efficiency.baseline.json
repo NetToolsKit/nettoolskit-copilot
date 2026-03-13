@@ -59,7 +59,7 @@
     "git.autorefresh": false,
     "extensions.autoUpdate": false,
     "github.copilot.nextEditSuggestions.enabled": false,
-    "workbench.startupEditor": "agentSessionsWelcomePage",
+    "workbench.startupEditor": "welcomePage",
     "chat.emptyState.history.enabled": true
   },
   "recommendedNumericUpperBounds": {

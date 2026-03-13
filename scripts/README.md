@@ -191,6 +191,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
 | `runtime/sync-workspace-settings.ps1` | Generates or refreshes `.code-workspace` files from `.vscode/base.code-workspace` plus the approved `settings` block derived from `.vscode/settings.tamplate.jsonc` and `.github/governance/workspace-efficiency.baseline.json`. Preserves folders and merges workspace-specific extension recommendations with the shared base. | `pwsh -File scripts/runtime/sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api` |
+| `runtime/update-copilot-chat-titles.ps1` | Normalizes persisted GitHub Copilot chat titles to `<project-prefix> - <task summary>` using `%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json*`, with optional backups before writing. | `pwsh -File scripts/runtime/update-copilot-chat-titles.ps1 -Apply -CreateBackup` |
 | `runtime/healthcheck.ps1` | Runs `validate-all` (profile-aware) plus `runtime-doctor`, emits report/log, and defaults to warning-only mode. | `pwsh -File scripts/runtime/healthcheck.ps1 -ValidationProfile release` |
 | `runtime/self-heal.ps1` | Runs controlled repair flow (bootstrap + optional templates) and validates final state via healthcheck. | `pwsh -File scripts/runtime/self-heal.ps1 -Mirror -StrictExtras` |
 | `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, and budget guardrails; writes run artifacts under `.temp/runs/<traceId>/`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change"` |
@@ -232,6 +233,9 @@ pwsh -File .\scripts\runtime\sync-vscode-global-snippets.ps1
 
 # generate or refresh a workspace from the shared base and settings baseline
 pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api
+
+# normalize persisted Copilot chat titles with the current project/workspace prefix
+pwsh -File .\scripts\runtime\update-copilot-chat-titles.ps1 -Apply -CreateBackup
 
 # run enterprise healthcheck with strict runtime guarantees
 pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras

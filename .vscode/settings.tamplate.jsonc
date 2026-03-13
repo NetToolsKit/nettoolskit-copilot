@@ -161,7 +161,7 @@
     // WORKBENCH - General VS Code interface
     // https://code.visualstudio.com/docs/getstarted/userinterface
     "window.restoreWindows": "all",
-    "workbench.startupEditor": "agentSessionsWelcomePage",
+    "workbench.startupEditor": "welcomePage",
     "workbench.editor.pinnedTabsOnSeparateRow": true,
     "workbench.iconTheme": "material-icon-theme",
     "workbench.secondarySideBar.defaultVisibility": "visible",
@@ -450,6 +450,7 @@
     // Chat & AI Configuration
     "chat.agent.maxRequests": 1000,
     "chat.emptyState.history.enabled": true,
+    "chat.restoreLastPanelSession": true,
     "chat.useAgentsMdFile": true,
     "chat.useNestedAgentsMdFiles": false,
     "chat.mcp.gallery.enabled": true,

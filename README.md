@@ -142,6 +142,12 @@ To avoid exposing machine-specific information (for example `<HOME_PATH>/...`) i
 - Use environment variables for runtime locations: `$env:USERPROFILE`, `$HOME`, `$env:REPO_ROOT`.
 - Use placeholders in shared docs: `<REPO_ROOT>`, `<GITHUB_RUNTIME_PATH>`, `<CODEX_RUNTIME_PATH>`.
 - Do not hardcode personal absolute paths in tracked files, prompts, or snippets.
+- For chat runtime storage examples on Windows, keep paths parameterized:
+  - `"%USERPROFILE%\\.codex\\session_index.jsonl"`
+  - `"%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json"`
+  - `"%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.jsonl"`
+  - `"%APPDATA%\\Code\\User\\globalStorage\\emptyWindowChatSessions\\*.json"`
+  - `"%APPDATA%\\Code\\User\\globalStorage\\emptyWindowChatSessions\\*.jsonl"`
 
 ### PowerShell Example (Safe Defaults)
 

@@ -73,6 +73,18 @@ Follow this order of operations on every task:
 - Final task reporting must include checklist status using `passed`, `pending`, or `blocked`.
 - If a validation item cannot be executed, keep it in the checklist and state why it remained pending or blocked.
 
+# Chat Session Naming and Runtime Paths
+- Start each new Copilot or Codex chat by normalizing the session title to `<project-prefix> - <task summary>` as soon as the client or runtime allows it.
+- The project prefix must come from the active workspace or repository name; do not omit it and do not duplicate it when the title is already prefixed.
+- Prefer workspace-scoped Copilot sessions over empty-window sessions for project work so the title stays attached to the correct project scope.
+- When scripting or documenting chat runtime storage, never hardcode personal absolute paths in tracked files. Use parameterized paths such as:
+  - `"%USERPROFILE%\\.codex\\session_index.jsonl"`
+  - `"%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json"`
+  - `"%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.jsonl"`
+  - `"%APPDATA%\\Code\\User\\globalStorage\\emptyWindowChatSessions\\*.json"`
+  - `"%APPDATA%\\Code\\User\\globalStorage\\emptyWindowChatSessions\\*.jsonl"`
+- If Copilot session titles need bulk normalization, use `scripts/runtime/update-copilot-chat-titles.ps1` instead of editing unrelated session payload fields by hand.
+
 # Mandatory Instructions
 
 ## Always Applied

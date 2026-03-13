@@ -107,7 +107,8 @@ try {
 
         Write-TextFile -Path $templatePath -Content @'
 {
-  "workbench.startupEditor": "agentSessionsWelcomePage",
+  "workbench.startupEditor": "welcomePage",
+  "chat.restoreLastPanelSession": true,
   "chat.instructionsFilesLocations": {
     "%USERPROFILE%\\.github\\": true
   }
@@ -123,7 +124,8 @@ try {
         & $scriptPath -RepoRoot $resolvedRepoRoot -WorkspaceVscodePath $workspaceVscodePath -GlobalVscodeUserPath $globalUserPath -CreateBackup | Out-Null
 
         $targetContent = Get-Content -Raw -LiteralPath $targetPath
-        Assert-True -Condition ($targetContent -match 'agentSessionsWelcomePage') -Message 'Global settings sync must render template values.'
+        Assert-True -Condition ($targetContent -match '"workbench.startupEditor": "welcomePage"') -Message 'Global settings sync must render the standard welcome page startup value.'
+        Assert-True -Condition ($targetContent -match '"chat.restoreLastPanelSession": true') -Message 'Global settings sync must preserve chat restore settings.'
         Assert-True -Condition ($targetContent -notmatch '%USERPROFILE%') -Message 'Global settings sync must replace runtime placeholders.'
         Assert-True -Condition ($targetContent -match [regex]::Escape('.github')) -Message 'Global settings sync must preserve rendered instruction paths.'
 

@@ -28,7 +28,7 @@ priority: high
   - `scm.repositories.visible` reduced from the global default
   - `chat.agent.maxRequests` reduced from the global default
 - Keep chat-session continuity settings aligned with the shared template unless a repository has a strong reason not to:
-  - `workbench.startupEditor = agentSessionsWelcomePage`
+  - `workbench.startupEditor = welcomePage`
   - `chat.emptyState.history.enabled = true`
 - Keep `window.restoreWindows = all` in the user/global settings template; do not try to force this one through workspace-only policy.
 - Do not copy unrelated editor, UI, formatter, language, or extension settings from the shared template into workspace scope when the global baseline already provides them.
@@ -72,7 +72,7 @@ priority: high
 - Generated workspaces should default to `git.autorefresh = false`; this is mandatory for secondary or review-only workspaces.
 - Generated workspaces should default to `extensions.autoUpdate = false`; this is mandatory for long-lived secondary workspaces.
 - Generated workspaces should default to `github.copilot.nextEditSuggestions.enabled = false`; this is mandatory for secondary workspaces when machine pressure is noticeable.
-- Generated workspaces should default to `workbench.startupEditor = agentSessionsWelcomePage` so the workspace reopens directly into the recent chat-session landing experience.
+- Generated workspaces should default to `workbench.startupEditor = welcomePage` so VS Code starts on the standard welcome screen instead of forcing the chat-session landing experience.
 - Generated workspaces should default to `chat.emptyState.history.enabled = true` so recent workspace-scoped sessions remain visible from the empty state.
 - Keep `scm.repositories.visible` small; prefer `4` or less.
 - Do not raise `chat.agent.maxRequests` in workspace scope; if overridden locally, keep it conservative.
