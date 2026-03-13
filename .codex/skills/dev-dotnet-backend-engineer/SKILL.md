@@ -9,7 +9,8 @@ description: Extend dev-software-engineer with .NET/C# backend specialization fo
 
 1. Load and apply `../dev-software-engineer/SKILL.md` as the base contract.
 2. Reuse the base workflow and safety rules unless this file defines a stricter override.
-3. Restrict domain scope to .NET backend, database, and ORM concerns only.
+3. Keep `.github/instructions/repository-operating-model.instructions.md` as the canonical repo-operating reference inherited from the base skill.
+4. Restrict domain scope to .NET backend, database, and ORM concerns only.
 
 ## Domain instruction delta (override base selection)
 

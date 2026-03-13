@@ -7,7 +7,7 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
 2. Load `.github/instructions/pr.instructions.md`.
 3. Route additional domain instructions with `.github/instruction-routing.catalog.yml` based on changed files.
 

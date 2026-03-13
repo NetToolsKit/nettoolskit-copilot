@@ -7,6 +7,11 @@ description: Sync shared repo assets into local ~/.github and ~/.codex, and appl
 
 Use this skill to keep local runtime folders aligned with the versioned repository structure.
 
+## Load minimal context first
+
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+2. Use the repository operating model as the canonical source for runtime projection responsibilities.
+
 This includes syncing the complete versioned `.github/` asset set (instructions, routing catalog, prompts, chatmodes, schemas, templates) into `~/.github`.
 It also composes `~/.codex/shared-scripts` from:
 - `.codex/scripts/` (MCP utility scripts)

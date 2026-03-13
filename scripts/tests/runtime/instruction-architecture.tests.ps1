@@ -122,6 +122,22 @@ try {
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing global core architecture reference should fail.'
         Remove-Item -LiteralPath $invalidAgentsPath -Force
 
+        $skillRoot = Join-Path $tempRoot 'skills'
+        $skillPath = Join-Path $skillRoot 'sample\SKILL.md'
+        Write-TextFile -Path $skillPath -Content @'
+---
+name: sample-skill
+description: temporary skill without canonical repo-operating reference
+---
+
+# Sample Skill
+
+Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
+'@
+        & $scriptPath -RepoRoot $resolvedRepoRoot -SkillRoot $skillRoot -WarningOnly:$false | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing skill canonical repository-operating reference should fail.'
+
         $promptRoot = Join-Path $tempRoot 'prompts'
         $promptPath = Join-Path $promptRoot 'ownership.prompt.md'
         Write-TextFile -Path $promptPath -Content @'
@@ -132,6 +148,34 @@ This prompt claims to be the single source of truth for the whole repository.
         & $scriptPath -RepoRoot $resolvedRepoRoot -PromptRoot $promptRoot -WarningOnly:$false -DetailedOutput | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Prompt ownership markers should warn but not fail.'
+
+        $routePromptPath = Join-Path $tempRoot 'route-instructions.prompt.md'
+        Write-TextFile -Path $routePromptPath -Content @'
+---
+description: Temporary route prompt
+mode: ask
+tools: ['readFile']
+---
+
+# Route Instructions
+
+Use the routing catalog and return JSON.
+'@
+        & $scriptPath -RepoRoot $resolvedRepoRoot -RoutePromptPath $routePromptPath -WarningOnly:$false | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Route prompt without deterministic hard cap should fail.'
+        Remove-Item -LiteralPath $routePromptPath -Force
+
+        $templateRoot = Join-Path $tempRoot 'templates'
+        $templatePath = Join-Path $templateRoot 'settings.tamplate.jsonc'
+        Write-TextFile -Path $templatePath -Content @'
+{
+  "//": "temporary template that wrongly claims to be the single source of truth"
+}
+'@
+        & $scriptPath -RepoRoot $resolvedRepoRoot -TemplateRoot $templateRoot -WarningOnly:$false | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Template ownership markers should warn but not fail.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

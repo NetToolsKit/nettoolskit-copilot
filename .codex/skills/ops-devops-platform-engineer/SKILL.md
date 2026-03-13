@@ -7,7 +7,7 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml`.
 3. Load infrastructure packs only for impacted files.
 

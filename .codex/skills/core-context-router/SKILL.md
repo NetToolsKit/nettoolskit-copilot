@@ -11,6 +11,7 @@ Use this skill when the task should follow the repo routing model before executi
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
+3. `.github/instructions/repository-operating-model.instructions.md`
 
 ## Route Then Execute
 

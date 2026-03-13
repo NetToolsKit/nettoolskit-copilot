@@ -32,6 +32,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - [Installation](#installation)
 - [Contribution Workflow](#contribution-workflow)
 - [Integration Matrix](#integration-matrix)
+- [Architecture Model](#architecture-model)
 - [Dev Container](#dev-container)
 - [Parameterization & Privacy](#parameterization--privacy)
 - [Git Hooks](#git-hooks)
@@ -102,6 +103,28 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 | VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
 | VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
 | VS Code workspaces | `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
+
+## Architecture Model
+
+The repository uses an explicit layered instruction architecture so context stays predictable and no single file silently becomes the owner of unrelated policy.
+
+### Layers
+
+- `Global core`: `.github/AGENTS.md` and `.github/copilot-instructions.md` stay short and define universal behavior only.
+- `Repository operating model`: `.github/instructions/repository-operating-model.instructions.md` owns repository topology, build/test/run, style, release, and domain map details.
+- `Cross-cutting policy`: `.github/instructions/authoritative-sources.instructions.md`, `.github/governance/*`, and `.github/policies/*` own rules that apply across domains.
+- `Domain instructions`: `.github/instructions/*.instructions.md` own stack-specific technical behavior.
+- `Prompts`: `.github/prompts/*` are execution helpers and must not become normative policy owners.
+- `Templates`: `.github/templates/*`, `.vscode/*.tamplate.jsonc`, `.vscode/snippets/*.tamplate.code-snippets`, and `.codex/mcp/*.template.*` define concrete artifact shapes only.
+- `Codex skills`: `.codex/skills/*/SKILL.md` specialize execution and must reference canonical repo instructions instead of duplicating policy.
+- `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, and the VS Code global profile.
+
+### Architecture Contracts
+
+- Keep the route-first model deterministic: `instruction-routing.catalog.yml` is the only routing source of truth.
+- Keep global context stable: avoid regrowing `AGENTS.md` and `copilot-instructions.md` with domain detail that belongs elsewhere.
+- Keep policy centralized: if a rule can be defined once in governance or a shared instruction, do not duplicate it in domain files, prompts, templates, or skills.
+- Keep runtime non-authoritative: local runtime folders are projections of the repository, never the source of truth.
 
 ## Dev Container
 

@@ -7,7 +7,7 @@ description: Plan and sequence complex implementation work into deterministic, t
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
 3. Load only planning/process files plus the domain packs needed by the plan.
 

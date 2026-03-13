@@ -61,6 +61,7 @@ param(
     [string] $AgentsPath = '.github/AGENTS.md',
     [string] $GlobalInstructionsPath = '.github/copilot-instructions.md',
     [string] $RoutingCatalogPath = '.github/instruction-routing.catalog.yml',
+    [string] $RoutePromptPath = '.github/prompts/route-instructions.prompt.md',
     [string] $PromptRoot = '.github/prompts',
     [string] $TemplateRoot = '.github/templates',
     [string] $SkillRoot = '.codex/skills',
@@ -247,6 +248,26 @@ function Get-OptionalPropertyValue {
     return $property.Value
 }
 
+# Resolves one architecture layer by id.
+function Get-ManifestLayerById {
+    param(
+        [object] $Manifest,
+        [string] $LayerId
+    )
+
+    if ($null -eq $Manifest) {
+        return $null
+    }
+
+    foreach ($layer in @($Manifest.layers)) {
+        if ([string] $layer.id -eq $LayerId) {
+            return $layer
+        }
+    }
+
+    return $null
+}
+
 # Converts an absolute path to a normalized repository-relative path.
 function Get-NormalizedRelativePath {
     param(
@@ -322,6 +343,57 @@ function Test-ManifestStructure {
 
     if ([int] $Manifest.version -lt 1) {
         Add-ValidationFailure 'Instruction ownership manifest version must be >= 1.'
+    }
+
+    $exceptions = @((Get-OptionalPropertyValue -InputObject $Manifest -Name 'intentionalGlobalExceptions'))
+    if ($exceptions.Count -eq 0) {
+        Add-ValidationFailure 'Instruction ownership manifest must list intentional global exceptions.'
+    }
+    else {
+        foreach ($exception in $exceptions) {
+            $concern = [string] (Get-OptionalPropertyValue -InputObject $exception -Name 'concern')
+            $ownedBy = [string] (Get-OptionalPropertyValue -InputObject $exception -Name 'ownedBy')
+            if ([string]::IsNullOrWhiteSpace($concern) -or [string]::IsNullOrWhiteSpace($ownedBy)) {
+                Add-ValidationFailure 'Each intentional global exception must define concern and ownedBy.'
+            }
+        }
+    }
+
+    $constraints = Get-OptionalPropertyValue -InputObject $Manifest -Name 'architectureConstraints'
+    if ($null -eq $constraints) {
+        Add-ValidationFailure 'Instruction ownership manifest must define architectureConstraints.'
+    }
+    else {
+        $globalCoreMaxChars = Get-OptionalPropertyValue -InputObject $constraints -Name 'globalCoreMaxChars'
+        if ($null -eq $globalCoreMaxChars) {
+            Add-ValidationFailure 'architectureConstraints.globalCoreMaxChars is required.'
+        }
+        else {
+            $agentsLimit = Get-OptionalPropertyValue -InputObject $globalCoreMaxChars -Name 'AGENTS.md'
+            $globalLimit = Get-OptionalPropertyValue -InputObject $globalCoreMaxChars -Name 'copilot-instructions.md'
+            if ($null -eq $agentsLimit -or $null -eq $globalLimit) {
+                Add-ValidationFailure 'architectureConstraints.globalCoreMaxChars must define AGENTS.md and copilot-instructions.md.'
+            }
+        }
+
+        $routingConstraints = Get-OptionalPropertyValue -InputObject $constraints -Name 'routing'
+        if ($null -eq $routingConstraints) {
+            Add-ValidationFailure 'architectureConstraints.routing is required.'
+        }
+        else {
+            if ($null -eq (Get-OptionalPropertyValue -InputObject $routingConstraints -Name 'maxAlwaysFiles')) {
+                Add-ValidationFailure 'architectureConstraints.routing.maxAlwaysFiles is required.'
+            }
+
+            if ($null -eq (Get-OptionalPropertyValue -InputObject $routingConstraints -Name 'maxSelectedFiles')) {
+                Add-ValidationFailure 'architectureConstraints.routing.maxSelectedFiles is required.'
+            }
+
+            $requiredAlwaysPaths = @(ConvertTo-StringArray -Value (Get-OptionalPropertyValue -InputObject $routingConstraints -Name 'requiredAlwaysPaths'))
+            if ($requiredAlwaysPaths.Count -eq 0) {
+                Add-ValidationFailure 'architectureConstraints.routing.requiredAlwaysPaths must define at least one path.'
+            }
+        }
     }
 
     $layers = @($Manifest.layers)
@@ -422,22 +494,60 @@ function Test-GlobalCoreReferences {
     }
 }
 
-# Scans prompts, templates, or skills for ownership markers that should stay elsewhere.
-function Test-OwnershipMarkers {
+# Returns all files under an explicit scan root.
+function Get-FilesFromScanRoot {
     param(
-        [string] $Root,
         [string] $TargetRoot,
-        [string[]] $ForbiddenMarkers,
         [string] $Label
     )
 
     if (-not (Test-Path -LiteralPath $TargetRoot)) {
         Add-ValidationFailure ("Missing {0} root: {1}" -f $Label, $TargetRoot)
+        return @()
+    }
+
+    return @(Get-ChildItem -Path $TargetRoot -Recurse -File)
+}
+
+# Resolves files for ownership scanning from either a custom root or the manifest layer patterns.
+function Get-OwnershipScanFiles {
+    param(
+        [string] $Root,
+        [object] $Manifest,
+        [string] $LayerId,
+        [string] $ResolvedOverrideRoot,
+        [string] $ResolvedDefaultRoot,
+        [string] $Label
+    )
+
+    if ($ResolvedOverrideRoot -ne $ResolvedDefaultRoot) {
+        return @(Get-FilesFromScanRoot -TargetRoot $ResolvedOverrideRoot -Label $Label)
+    }
+
+    $layer = Get-ManifestLayerById -Manifest $Manifest -LayerId $LayerId
+    if ($null -eq $layer) {
+        Add-ValidationFailure ("Instruction ownership manifest is missing layer '{0}'." -f $LayerId)
+        return @()
+    }
+
+    return @(Get-MatchingFilesForLayer -Root $Root -Layer $layer | ForEach-Object { Get-Item -LiteralPath $_ })
+}
+
+# Scans prompts, templates, or skills for ownership markers that should stay elsewhere.
+function Test-OwnershipMarkers {
+    param(
+        [string] $Root,
+        [System.IO.FileInfo[]] $Files,
+        [string[]] $ForbiddenMarkers,
+        [string] $Label
+    )
+
+    if ($Files.Count -eq 0) {
+        Add-ValidationFailure ("No files found for {0} ownership scan." -f $Label)
         return
     }
 
-    $files = Get-ChildItem -Path $TargetRoot -Recurse -File
-    foreach ($file in $files) {
+    foreach ($file in $Files) {
         $content = Get-Content -Raw -LiteralPath $file.FullName
         $relativePath = Get-NormalizedRelativePath -Root $Root -Path $file.FullName
 
@@ -449,6 +559,132 @@ function Test-OwnershipMarkers {
     }
 }
 
+# Warns when global core files regrow past agreed architecture budgets.
+function Test-GlobalCoreBudget {
+    param(
+        [object] $Manifest,
+        [string] $AgentsContent,
+        [string] $GlobalContent
+    )
+
+    $constraints = Get-OptionalPropertyValue -InputObject $Manifest -Name 'architectureConstraints'
+    if ($null -eq $constraints) {
+        return
+    }
+
+    $globalCoreMaxChars = Get-OptionalPropertyValue -InputObject $constraints -Name 'globalCoreMaxChars'
+    if ($null -eq $globalCoreMaxChars) {
+        return
+    }
+
+    $agentsLimit = [int] (Get-OptionalPropertyValue -InputObject $globalCoreMaxChars -Name 'AGENTS.md')
+    $globalLimit = [int] (Get-OptionalPropertyValue -InputObject $globalCoreMaxChars -Name 'copilot-instructions.md')
+
+    if ($AgentsContent.Length -gt $agentsLimit) {
+        Add-ValidationWarning ("AGENTS.md exceeds global-core budget: {0} > {1} characters." -f $AgentsContent.Length, $agentsLimit)
+    }
+
+    if ($GlobalContent.Length -gt $globalLimit) {
+        Add-ValidationWarning ("copilot-instructions.md exceeds global-core budget: {0} > {1} characters." -f $GlobalContent.Length, $globalLimit)
+    }
+}
+
+# Extracts the mandatory always-path entries from the routing catalog text.
+function Get-RoutingAlwaysPaths {
+    param(
+        [string] $RoutingCatalogContent
+    )
+
+    $lines = $RoutingCatalogContent -split "\r?\n"
+    $alwaysPaths = New-Object System.Collections.Generic.List[string]
+    $insideAlways = $false
+
+    foreach ($line in $lines) {
+        if (-not $insideAlways) {
+            if ($line -match '^always:\s*$') {
+                $insideAlways = $true
+            }
+
+            continue
+        }
+
+        if ($line -match '^[A-Za-z0-9_-]+:\s*$') {
+            break
+        }
+
+        if ($line -match '^\s*-\s+path:\s*(.+?)\s*$') {
+            $pathValue = $Matches[1].Trim().Trim("'`"")
+            if (-not [string]::IsNullOrWhiteSpace($pathValue)) {
+                $alwaysPaths.Add($pathValue) | Out-Null
+            }
+        }
+    }
+
+    return @($alwaysPaths)
+}
+
+# Validates routing stays deterministic and within the agreed context budget.
+function Test-RoutingDiscipline {
+    param(
+        [object] $Manifest,
+        [string] $RoutingCatalogContent,
+        [string] $RoutePromptContent
+    )
+
+    $constraints = Get-OptionalPropertyValue -InputObject $Manifest -Name 'architectureConstraints'
+    if ($null -eq $constraints) {
+        return
+    }
+
+    $routingConstraints = Get-OptionalPropertyValue -InputObject $constraints -Name 'routing'
+    if ($null -eq $routingConstraints) {
+        return
+    }
+
+    $maxAlwaysFiles = [int] (Get-OptionalPropertyValue -InputObject $routingConstraints -Name 'maxAlwaysFiles')
+    $maxSelectedFiles = [int] (Get-OptionalPropertyValue -InputObject $routingConstraints -Name 'maxSelectedFiles')
+    $requiredAlwaysPaths = @(ConvertTo-StringArray -Value (Get-OptionalPropertyValue -InputObject $routingConstraints -Name 'requiredAlwaysPaths'))
+    $alwaysPaths = @(Get-RoutingAlwaysPaths -RoutingCatalogContent $RoutingCatalogContent)
+
+    if ($alwaysPaths.Count -gt $maxAlwaysFiles) {
+        Add-ValidationWarning ("Routing catalog 'always' section exceeds budget: {0} > {1} paths." -f $alwaysPaths.Count, $maxAlwaysFiles)
+    }
+
+    foreach ($requiredPath in $requiredAlwaysPaths) {
+        if ($alwaysPaths -notcontains $requiredPath) {
+            Add-ValidationFailure ("Routing catalog 'always' section is missing required path: {0}" -f $requiredPath)
+        }
+    }
+
+    $hardCapPattern = "Hard cap: at most {0} selected instruction files (excluding mandatory)." -f $maxSelectedFiles
+    if ($RoutePromptContent -notmatch [regex]::Escape($hardCapPattern)) {
+        Add-ValidationFailure ("Route prompt is missing deterministic hard-cap text: {0}" -f $hardCapPattern)
+    }
+}
+
+# Ensures every repository-owned skill points to the canonical repository operating model.
+function Test-SkillCanonicalReferences {
+    param(
+        [string] $Root,
+        [string] $TargetRoot,
+        [string] $RequiredPattern
+    )
+
+    if (-not (Test-Path -LiteralPath $TargetRoot)) {
+        Add-ValidationFailure ("Missing skill root: {0}" -f $TargetRoot)
+        return
+    }
+
+    $skillFiles = Get-ChildItem -Path $TargetRoot -Recurse -Filter 'SKILL.md' -File
+    foreach ($skillFile in $skillFiles) {
+        $content = Get-Content -Raw -LiteralPath $skillFile.FullName
+        if ($content -notmatch $RequiredPattern) {
+            $relativePath = Get-NormalizedRelativePath -Root $Root -Path $skillFile.FullName
+            Add-ValidationFailure ("Skill is missing canonical repository-operating reference: {0}" -f $relativePath)
+        }
+    }
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 
@@ -456,6 +692,7 @@ $resolvedManifestPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $Manifest
 $resolvedAgentsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $AgentsPath
 $resolvedGlobalInstructionsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $GlobalInstructionsPath
 $resolvedRoutingCatalogPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $RoutingCatalogPath
+$resolvedRoutePromptPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $RoutePromptPath
 $resolvedPromptRoot = Resolve-RepoPath -Root $resolvedRepoRoot -Path $PromptRoot
 $resolvedTemplateRoot = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TemplateRoot
 $resolvedSkillRoot = Resolve-RepoPath -Root $resolvedRepoRoot -Path $SkillRoot
@@ -470,12 +707,27 @@ if ($null -ne $manifest) {
 $agentsContent = Read-TextFile -Path $resolvedAgentsPath -Label 'AGENTS.md'
 $globalInstructionsContent = Read-TextFile -Path $resolvedGlobalInstructionsPath -Label 'copilot-instructions.md'
 $routingCatalogContent = Read-TextFile -Path $resolvedRoutingCatalogPath -Label 'instruction routing catalog'
+$routePromptContent = Read-TextFile -Path $resolvedRoutePromptPath -Label 'route instructions prompt'
 
 if ($null -ne $agentsContent -and $null -ne $globalInstructionsContent -and $null -ne $routingCatalogContent) {
     Test-GlobalCoreReferences `
         -AgentsContent $agentsContent `
         -GlobalContent $globalInstructionsContent `
         -RoutingContent $routingCatalogContent
+}
+
+if ($null -ne $manifest -and $null -ne $agentsContent -and $null -ne $globalInstructionsContent) {
+    Test-GlobalCoreBudget `
+        -Manifest $manifest `
+        -AgentsContent $agentsContent `
+        -GlobalContent $globalInstructionsContent
+}
+
+if ($null -ne $manifest -and $null -ne $routingCatalogContent -and $null -ne $routePromptContent) {
+    Test-RoutingDiscipline `
+        -Manifest $manifest `
+        -RoutingCatalogContent $routingCatalogContent `
+        -RoutePromptContent $routePromptContent
 }
 
 if ($null -ne $manifest) {
@@ -487,17 +739,43 @@ if ($null -ne $manifest) {
 
         switch ([string] $layer.id) {
             'prompts' {
-                Test-OwnershipMarkers -Root $resolvedRepoRoot -TargetRoot $resolvedPromptRoot -ForbiddenMarkers $forbiddenMarkers -Label 'Prompt file'
+                $promptFiles = @(Get-OwnershipScanFiles `
+                    -Root $resolvedRepoRoot `
+                    -Manifest $manifest `
+                    -LayerId 'prompts' `
+                    -ResolvedOverrideRoot $resolvedPromptRoot `
+                    -ResolvedDefaultRoot (Resolve-RepoPath -Root $resolvedRepoRoot -Path '.github/prompts') `
+                    -Label 'prompt')
+                Test-OwnershipMarkers -Root $resolvedRepoRoot -Files $promptFiles -ForbiddenMarkers $forbiddenMarkers -Label 'Prompt file'
             }
             'templates' {
-                Test-OwnershipMarkers -Root $resolvedRepoRoot -TargetRoot $resolvedTemplateRoot -ForbiddenMarkers $forbiddenMarkers -Label 'Template file'
+                $templateFiles = @(Get-OwnershipScanFiles `
+                    -Root $resolvedRepoRoot `
+                    -Manifest $manifest `
+                    -LayerId 'templates' `
+                    -ResolvedOverrideRoot $resolvedTemplateRoot `
+                    -ResolvedDefaultRoot (Resolve-RepoPath -Root $resolvedRepoRoot -Path '.github/templates') `
+                    -Label 'template')
+                Test-OwnershipMarkers -Root $resolvedRepoRoot -Files $templateFiles -ForbiddenMarkers $forbiddenMarkers -Label 'Template file'
             }
             'codex-skills' {
-                Test-OwnershipMarkers -Root $resolvedRepoRoot -TargetRoot $resolvedSkillRoot -ForbiddenMarkers $forbiddenMarkers -Label 'Skill file'
+                $skillFiles = @(Get-OwnershipScanFiles `
+                    -Root $resolvedRepoRoot `
+                    -Manifest $manifest `
+                    -LayerId 'codex-skills' `
+                    -ResolvedOverrideRoot $resolvedSkillRoot `
+                    -ResolvedDefaultRoot (Resolve-RepoPath -Root $resolvedRepoRoot -Path '.codex/skills') `
+                    -Label 'skill')
+                Test-OwnershipMarkers -Root $resolvedRepoRoot -Files $skillFiles -ForbiddenMarkers $forbiddenMarkers -Label 'Skill file'
             }
         }
     }
 }
+
+Test-SkillCanonicalReferences `
+    -Root $resolvedRepoRoot `
+    -TargetRoot $resolvedSkillRoot `
+    -RequiredPattern 'repository-operating-model\.instructions\.md'
 
 Write-Host ''
 Write-Host 'Instruction architecture validation summary'

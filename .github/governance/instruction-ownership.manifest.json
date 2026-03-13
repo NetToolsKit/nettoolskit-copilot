@@ -1,5 +1,38 @@
 {
   "version": 1,
+  "intentionalGlobalExceptions": [
+    {
+      "concern": "Agent selection, mandatory context bootstrap, and instruction precedence must remain globally visible.",
+      "ownedBy": "global-core"
+    },
+    {
+      "concern": "Enterprise-first default behavior and universal execution quality gates must remain globally visible.",
+      "ownedBy": "global-core"
+    },
+    {
+      "concern": "Repository-level routing entry point and minimal-context contract must remain globally visible.",
+      "ownedBy": "global-core"
+    }
+  ],
+  "architectureConstraints": {
+    "globalCoreMaxChars": {
+      "AGENTS.md": 9000,
+      "copilot-instructions.md": 9000
+    },
+    "routing": {
+      "maxAlwaysFiles": 7,
+      "maxSelectedFiles": 5,
+      "requiredAlwaysPaths": [
+        "AGENTS.md",
+        "copilot-instructions.md",
+        "instructions/repository-operating-model.instructions.md",
+        "instructions/workflow-optimization.instructions.md",
+        "instructions/authoritative-sources.instructions.md",
+        "instructions/powershell-execution.instructions.md",
+        "instructions/feedback-changelog.instructions.md"
+      ]
+    }
+  },
   "layers": [
     {
       "id": "global-core",
@@ -57,6 +90,7 @@
       "description": "Concrete artifact skeletons that must not become normative policy owners.",
       "pathPatterns": [
         ".github/templates/*",
+        ".vscode/base.code-workspace",
         ".vscode/*.tamplate.jsonc",
         ".vscode/snippets/*.tamplate.code-snippets",
         ".codex/mcp/*.template.*"
