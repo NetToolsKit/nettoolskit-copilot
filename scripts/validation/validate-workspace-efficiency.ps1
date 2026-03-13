@@ -306,6 +306,46 @@ function Convert-ToDisplayPath {
     return $Path
 }
 
+# Returns true when the workspace file is a versioned template rather than an active workspace.
+function Test-IsTemplateWorkspacePath {
+    param(
+        [string] $WorkspaceDisplayPath,
+        [object] $Baseline
+    )
+
+    $templatePaths = Convert-ToStringArray -Value (Get-DirectPropertyValue -InputObject $Baseline -PropertyName 'templateWorkspacePaths')
+    $normalizedDisplayPath = ConvertTo-PathKey -Path $WorkspaceDisplayPath
+
+    foreach ($templatePath in $templatePaths) {
+        $normalizedTemplatePath = ConvertTo-PathKey -Path $templatePath
+        if ($normalizedDisplayPath -eq $normalizedTemplatePath) {
+            return $true
+        }
+
+        $templateLeaf = Split-Path -Path $normalizedTemplatePath -Leaf
+        $displayLeaf = Split-Path -Path $normalizedDisplayPath -Leaf
+        if ($templateLeaf -eq $normalizedTemplatePath -and $displayLeaf -eq $templateLeaf) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+# Returns true when the input object declares a direct property.
+function Test-DirectPropertyExists {
+    param(
+        [object] $InputObject,
+        [string] $PropertyName
+    )
+
+    if ($null -eq $InputObject) {
+        return $false
+    }
+
+    return $null -ne $InputObject.PSObject.Properties[$PropertyName]
+}
+
 # Validates one boolean or scalar setting against expected literal value.
 function Test-RequiredLiteralSetting {
     param(
@@ -504,6 +544,19 @@ function Test-WorkspaceFile {
     }
 
     $folderList = @((Get-DirectPropertyValue -InputObject $workspaceDocument -PropertyName 'folders'))
+    if (Test-IsTemplateWorkspacePath -WorkspaceDisplayPath $workspaceDisplayPath -Baseline $Baseline) {
+        if (-not (Test-DirectPropertyExists -InputObject $workspaceDocument -PropertyName 'folders')) {
+            Add-ValidationFailure ("Template workspace must declare a folders array: {0}" -f $workspaceDisplayPath)
+            return
+        }
+
+        if ($folderList.Count -gt 0) {
+            Add-ValidationWarning ("Template workspace should keep folders empty so it remains reusable: {0}" -f $workspaceDisplayPath)
+        }
+
+        return
+    }
+
     $settingsObject = Get-DirectPropertyValue -InputObject $workspaceDocument -PropertyName 'settings'
     if ($null -eq $settingsObject) {
         Add-ValidationFailure ("Workspace must define a settings object: {0}" -f $workspaceDisplayPath)

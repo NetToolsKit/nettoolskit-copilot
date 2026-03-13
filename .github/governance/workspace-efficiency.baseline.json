@@ -3,6 +3,9 @@
   "workspaceFileGlobs": [
     "**/*.code-workspace"
   ],
+  "templateWorkspacePaths": [
+    ".vscode/base.code-workspace"
+  ],
   "requiredSettings": {
     "git.autofetch": false,
     "files.watcherExclude": {

@@ -618,6 +618,7 @@ None. This is a documentation and policy repository.
 ### Internal Documentation
 
 - [CHANGELOG](./CHANGELOG.md) - Version history
+- [COMPATIBILITY](./COMPATIBILITY.md) - Support lifecycle and EOL policy
 - [CONTRIBUTING](./CONTRIBUTING.md) - Contribution workflow and validation guidance
 
 ---

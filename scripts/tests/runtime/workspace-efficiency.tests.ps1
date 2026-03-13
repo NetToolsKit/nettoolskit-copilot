@@ -150,6 +150,37 @@ try {
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Valid workspace should pass.'
 
+        $templateBaselinePath = Join-Path $tempRoot 'workspace-template.baseline.json'
+        Write-TextFile -Path $templateBaselinePath -Content @'
+{
+  "version": 1,
+  "templateWorkspacePaths": [
+    "template-base.code-workspace"
+  ],
+  "requiredSettings": {},
+  "forbiddenSettings": {},
+  "recommendedSettings": {},
+  "recommendedNumericUpperBounds": {},
+  "heuristics": {}
+}
+'@
+        $templateWorkspace = Join-Path $tempRoot 'template-base.code-workspace'
+        Write-TextFile -Path $templateWorkspace -Content @'
+{
+  "folders": [],
+  "extensions": {
+    "recommendations": [
+      "mhutchie.git-graph"
+    ]
+  }
+}
+'@
+        & $scriptPath -RepoRoot $resolvedRepoRoot -BaselinePath $templateBaselinePath -WorkspaceSearchRoot $templateWorkspace -WarningOnly:$false | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Template workspace without settings should pass when declared in baseline.'
+        Remove-Item -LiteralPath $templateWorkspace -Force
+        Remove-Item -LiteralPath $templateBaselinePath -Force
+
         $missingSettingsWorkspace = Join-Path $tempRoot 'missing-settings.code-workspace'
         Write-TextFile -Path $missingSettingsWorkspace -Content @'
 {
