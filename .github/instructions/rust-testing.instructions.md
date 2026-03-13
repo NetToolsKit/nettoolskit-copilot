@@ -469,8 +469,7 @@ Before completing ANY test-related work, verify:
 - **Templates:** `.github/templates/*_template.rs`
 - **Full Guide:** `tools/nettoolskit-cli/docs/test-templates.md`
 - **Standards Analysis:** `tools/nettoolskit-cli/docs/test-standards-analysis.md`
-- **Rust Book Testing:** https://doc.rust-lang.org/book/ch11-00-testing.html
-- **Tokio Testing:** https://tokio.rs/tokio/topics/testing
+- **Official External Docs:** use `instructions/authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
 
 ## Enforcement
 

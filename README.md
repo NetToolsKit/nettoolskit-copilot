@@ -8,6 +8,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Multi-Stack Coverage:** .NET/C#, Rust, Vue.js/Quasar, Docker, Kubernetes, databases
 - ✅ **Architecture Patterns:** Clean Architecture, CQRS, DDD, microservices
 - ✅ **Convention Standardization:** Code style, test patterns, commits, file organization
+- ✅ **Authoritative Source Policy:** Repository context first, then official docs by stack
 - ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns

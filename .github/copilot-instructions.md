@@ -67,6 +67,12 @@ Follow this order of operations on every task:
 - Use this file for global rules and technology mappings.
 - Follow domain-specific files in instructions/*.md for technical details.
 
+# Authoritative Sources Policy
+- Use repository context first for project-specific behavior, architecture, scripts, templates, and conventions.
+- For external platform, framework, SDK, API, CLI, or tool behavior, follow `instructions/authoritative-sources.instructions.md`.
+- Use `.github/governance/authoritative-source-map.json` as the single source of truth for stack-specific official documentation domains.
+- Do not duplicate official documentation domain lists across domain instruction files.
+
 # Validation Checklist Policy
 - Every non-trivial task must define a concrete validation checklist before or during implementation.
 - The checklist must be scope-specific and cover only the relevant checks for the task (for example: build, tests, docs, security, migrations, runtime behavior, links, formatting).
@@ -89,6 +95,7 @@ Follow this order of operations on every task:
 
 ## Always Applied
 - AGENTS.md (agents and context policy)
+- instructions/authoritative-sources.instructions.md
 - instructions/workflow-optimization.instructions.md
 - instructions/powershell-execution.instructions.md
 - instructions/feedback-changelog.instructions.md

@@ -26,6 +26,8 @@ always:
   # Mandatory instruction files (always applied)
   - path: instructions/workflow-optimization.instructions.md
     reason: Task breakdown and token efficiency
+  - path: instructions/authoritative-sources.instructions.md
+    reason: Resolve external technical behavior with repository context first and official docs second
   - path: instructions/powershell-execution.instructions.md
     reason: When running or writing PowerShell
   - path: instructions/feedback-changelog.instructions.md

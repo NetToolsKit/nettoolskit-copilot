@@ -15,6 +15,7 @@
     - validate-agent-skill-alignment
     - validate-agent-permissions
     - validate-routing-coverage
+    - validate-authoritative-source-policy
     - validate-readme-standards
     - validate-template-standards
     - validate-workspace-efficiency
@@ -601,6 +602,11 @@ $baseCheckDefinitions['validate-routing-coverage'] = [pscustomobject]@{
     script = 'scripts/validation/validate-routing-coverage.ps1'
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
+$baseCheckDefinitions['validate-authoritative-source-policy'] = [pscustomobject]@{
+    name = 'validate-authoritative-source-policy'
+    script = 'scripts/validation/validate-authoritative-source-policy.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
 $baseCheckDefinitions['validate-readme-standards'] = [pscustomobject]@{
     name = 'validate-readme-standards'
     script = 'scripts/validation/validate-readme-standards.ps1'
@@ -700,6 +706,7 @@ $defaultCheckOrder = @(
     'validate-agent-skill-alignment',
     'validate-agent-permissions',
     'validate-routing-coverage',
+    'validate-authoritative-source-policy',
     'validate-readme-standards',
     'validate-template-standards',
     'validate-workspace-efficiency',

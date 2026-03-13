@@ -125,8 +125,9 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 ## Scope & References
 - Repo-wide; subfolder `AGENTS.md` may specialize. Direct prompts override.
 - Core: `copilot-instructions.md`. Language policy: EN code/commits, pt-BR UI via i18n, EN DB schema.
-- Mandatory: `instructions/workflow-optimization.instructions.md`, `instructions/powershell-execution.instructions.md`, `instructions/feedback-changelog.instructions.md`.
+- Mandatory: `instructions/authoritative-sources.instructions.md`, `instructions/workflow-optimization.instructions.md`, `instructions/powershell-execution.instructions.md`, `instructions/feedback-changelog.instructions.md`.
 - For `.github`: `instructions/copilot-instruction-creation.instructions.md`. Domain sets live in `instructions/*`.
+- Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
 - SCM/CI: Azure DevOps primary; `.github` hosts agent/PR guidance.
 - For GitHub Actions in external repositories, use pinned script download from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of duplicating scripts in target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.

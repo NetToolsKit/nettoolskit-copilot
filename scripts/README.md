@@ -165,6 +165,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/validate-policy.ps1` | Validates policy contracts declared in `.github/policies/*.json` (required files/directories/hooks). | `pwsh -File scripts/validation/validate-policy.ps1` |
 | `validation/validate-release-governance.ps1` | Validates release-governance baseline (`CHANGELOG`, `CODEOWNERS`, branch-protection baseline, governance docs). | `pwsh -File scripts/validation/validate-release-governance.ps1` |
 | `validation/validate-readme-standards.ps1` | Validates README structure/formatting using `.github/governance/readme-standards.baseline.json`. | `pwsh -File scripts/validation/validate-readme-standards.ps1` |
+| `validation/validate-authoritative-source-policy.ps1` | Validates the centralized official-doc policy, the stack-to-domain map in `.github/governance/authoritative-source-map.json`, and required references from global instruction files and routing. | `pwsh -File scripts/validation/validate-authoritative-source-policy.ps1` |
 | `validation/validate-template-standards.ps1` | Validates shared templates against `.github/governance/template-standards.baseline.json`, including required/forbidden patterns and referenced script/doc paths. | `pwsh -File scripts/validation/validate-template-standards.ps1` |
 | `validation/validate-workspace-efficiency.ps1` | Validates `.code-workspace` files against `.github/governance/workspace-efficiency.baseline.json`, covering watcher/search excludes, Git throttling, and multi-folder heuristics for Codex/Copilot usage. | `pwsh -File scripts/validation/validate-workspace-efficiency.ps1 -WorkspaceSearchRoot .\workspaces` |
 | `validation/validate-compatibility-lifecycle-policy.ps1` | Validates `COMPATIBILITY.md` Support Lifecycle/EOL table semantics (reference date, ordering, EOL + 1 day, status). | `pwsh -File scripts/validation/validate-compatibility-lifecycle-policy.ps1` |
@@ -274,6 +275,9 @@ pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
 
 # validate routing catalog coverage against golden fixtures
 pwsh -File .\scripts\validation\validate-routing-coverage.ps1
+
+# validate centralized official-doc source routing policy
+pwsh -File .\scripts\validation\validate-authoritative-source-policy.ps1
 
 # validate shared templates against the template baseline
 pwsh -File .\scripts\validation\validate-template-standards.ps1

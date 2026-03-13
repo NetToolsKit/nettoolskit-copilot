@@ -940,8 +940,10 @@ $requiredFiles = @(
     '.github/AGENTS.md',
     '.github/copilot-instructions.md',
     '.github/instruction-routing.catalog.yml',
+    '.github/instructions/authoritative-sources.instructions.md',
     '.github/prompts/route-instructions.prompt.md',
     '.github/schemas/instruction-routing.catalog.schema.json',
+    '.github/governance/authoritative-source-map.json',
     '.github/governance/readme-standards.baseline.json',
     '.github/governance/template-standards.baseline.json',
     '.github/governance/workspace-efficiency.baseline.json',
@@ -970,6 +972,7 @@ $requiredFiles = @(
     '.codex/orchestration/evals/golden-tests.json',
     'scripts/validation/validate-agent-orchestration.ps1',
     'scripts/validation/validate-readme-standards.ps1',
+    'scripts/validation/validate-authoritative-source-policy.ps1',
     'scripts/validation/validate-template-standards.ps1',
     'scripts/validation/validate-workspace-efficiency.ps1',
     'scripts/validation/validate-powershell-standards.ps1',
@@ -998,6 +1001,7 @@ $requiredFiles = @(
     'scripts/orchestration/stages/review-stage.ps1',
     'scripts/tests/runtime/vscode-global-settings-sync.tests.ps1',
     'scripts/tests/runtime/vscode-global-snippets-sync.tests.ps1',
+    'scripts/tests/runtime/authoritative-source-policy.tests.ps1',
     'scripts/tests/runtime/workspace-efficiency.tests.ps1',
     'scripts/tests/runtime/workspace-settings-sync.tests.ps1'
 )
@@ -1029,6 +1033,13 @@ if ($null -ne $sharedChecksumsManifest) {
 
     if ($null -eq $sharedChecksumsManifest.entries -or @($sharedChecksumsManifest.entries).Count -eq 0) {
         Add-ValidationFailure 'Shared script checksum manifest must contain at least one entry.'
+    }
+}
+
+$authoritativeSourceMap = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/authoritative-source-map.json'
+if ($null -ne $authoritativeSourceMap) {
+    if ($null -eq $authoritativeSourceMap.stackRules -or @($authoritativeSourceMap.stackRules).Count -eq 0) {
+        Add-ValidationFailure 'Authoritative source map must contain at least one stackRules entry.'
     }
 }
 
