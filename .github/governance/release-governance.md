@@ -30,6 +30,15 @@ At minimum:
 - Catch-all owner rule (`* owner`)
 - Governance path ownership for `.github/`, `.githooks/`, and `scripts/`
 
+## Contribution Intake
+
+Community intake artifacts are part of the release governance baseline:
+- `CONTRIBUTING.md`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/ISSUE_TEMPLATE/*`
+
+These files are validated through the governance and provenance baselines so onboarding and contribution flow do not drift away from the versioned runtime model.
+
 ## Release Checklist
 
 1. Run baseline validations:

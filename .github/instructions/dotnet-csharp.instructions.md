@@ -26,7 +26,7 @@ priority: high
 - Small focused methods
 - Single responsibility classes
 - Avoid god classes
-- Ensure namespaces match folder structure exactly and no trailing empty line at EOF
+- Ensure namespaces match folder structure exactly; for .NET files follow the repository default EOF policy from `.editorconfig` (`insert_final_newline = false`) and never leave a trailing empty line at EOF
 ```csharp
 // follow .github/templates/dotnet-class-template.cs and .github/templates/dotnet-interface-template.cs when creating new types
 // Replace placeholders, keep PascalCase naming, remove unused usings

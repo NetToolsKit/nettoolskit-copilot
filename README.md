@@ -29,6 +29,8 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 ## Table of Contents
 
 - [Installation](#installation)
+- [Contribution Workflow](#contribution-workflow)
+- [Integration Matrix](#integration-matrix)
 - [Dev Container](#dev-container)
 - [Parameterization & Privacy](#parameterization--privacy)
 - [Git Hooks](#git-hooks)
@@ -69,11 +71,36 @@ git clone https://github.com/ThiagoGuislotti/copilot-instructions.git
 cd copilot-instructions
 ```
 
+### One-Step Local Onboarding
+
+```powershell
+pwsh -File .\scripts\runtime\install.ps1 -CreateSettingsBackup
+```
+
 ### Cross-Platform Prerequisites
 
 - PowerShell 7+ (`pwsh`) installed on Windows, Linux, or macOS.
 - Git installed and available in `PATH`.
 - Optional on Linux/macOS: ensure `chmod` is available (used by hook setup).
+
+## Contribution Workflow
+
+Use the repository-managed community flow instead of ad-hoc issue and PR descriptions.
+
+- Read [CONTRIBUTING.md](./CONTRIBUTING.md) before changing versioned runtime assets.
+- Use `.github/PULL_REQUEST_TEMPLATE.md` for pull requests.
+- Use `.github/ISSUE_TEMPLATE/*` for bugs, new skill requests, runtime sync problems, and validation gaps.
+- Keep repository changes in `<REPO_ROOT>`; use sync scripts to propagate runtime state afterward.
+
+## Integration Matrix
+
+| Integration target | Versioned source of truth | Runtime target |
+| --- | --- | --- |
+| Copilot instructions and prompts | `.github/` | `%USERPROFILE%\\.github` |
+| Codex skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` | `%USERPROFILE%\\.codex` |
+| VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
+| VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
+| VS Code workspaces | `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
 
 ## Dev Container
 
@@ -108,6 +135,9 @@ copilot-instructions/
 
 ```powershell
 pwsh -File ./scripts/runtime/bootstrap.ps1
+
+# one-step local onboarding wrapper
+pwsh -File ./scripts/runtime/install.ps1 -CreateSettingsBackup
 
 # optional: also apply shared MCP servers to ~/.codex/config.toml
 pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
@@ -564,6 +594,7 @@ None. This is a documentation and policy repository.
 ### Internal Documentation
 
 - [CHANGELOG](./CHANGELOG.md) - Version history
+- [CONTRIBUTING](./CONTRIBUTING.md) - Contribution workflow and validation guidance
 
 ---
 

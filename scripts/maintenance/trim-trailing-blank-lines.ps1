@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Removes trailing blank lines and trailing whitespace from text files.
 
@@ -6,7 +6,8 @@
     Scans text files (skipping binaries and excluded folders) and normalizes the end-of-file:
         • Removes trailing spaces/tabs at the end of the file.
         • Removes every blank line after the last line of content.
-        • Keeps the file without an extra newline, matching repository conventions.
+        • Applies the repository EOF policy:
+          - text files end on the last content character with no final newline
 
     When executed inside a Git repository, it prefers `git ls-files` to respect ignore rules.
     Otherwise it falls back to a filesystem scan starting from -Path (or the current directory)
@@ -38,7 +39,7 @@
     pwsh -File scripts/maintenance/trim-trailing-blank-lines.ps1 -Path "scripts/README.md"
 
 .NOTES
-    Version: 1.1
+    Version: 1.3
     Requirements: PowerShell 7+, Git CLI (optional, for faster discovery).
 #>
 
@@ -166,7 +167,7 @@ function Test-IsProcessableFile ([string] $fullPath, [string[]] $excludedExtensi
 $BinaryExtensions = @(
     '.dll', '.exe', '.pdb', '.png', '.jpg', '.jpeg', '.gif', '.ico',
     '.zip', '.7z', '.rar', '.pdf', '.mp4', '.mp3', '.wav', '.ogg', '.webp', '.bmp',
-    '.ttf', '.otf', '.woff', '.woff2', '.snk', '.nupkg', '.sln', '.rs'
+    '.ttf', '.otf', '.woff', '.woff2', '.snk', '.nupkg', '.sln'
 )
 
 $ExcludeDirs = @(

@@ -148,7 +148,7 @@ Monorepo of libraries, modules, and samples for robust .NET services using Clean
 ## Style
 - Namespaces mirror folders (`src/NetToolsKit.DynamicQuery/*` -> `NetToolsKit.DynamicQuery`). C#: PascalCase types, camelCase locals/params, UPPER_SNAKE_CASE constants.
 - Prefer `sealed` when appropriate; clean `using`; UTF-8 without BOM; public APIs with XML docs; avoid inline comments unless asked.
-- EOF: `instructions/*.md` and Codex outputs without final newline; others follow `.editorconfig` (final newline). No trailing whitespace.
+- EOF: never leave trailing blank lines at the end of any file. Repository default from `.editorconfig` is `insert_final_newline = false`, including Rust/TOML/lock files unless a future file-specific rule explicitly says otherwise. No trailing whitespace.
 
 ## UI Guidelines
 - UI strings via i18n (pt-BR). HTTP APIs: plural nouns, standard status codes, `application/problem+json` for errors.

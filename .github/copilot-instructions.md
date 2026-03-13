@@ -143,5 +143,6 @@ Follow this order of operations on every task:
 
 # STYLE (EOF and whitespace)
 - Do not leave a trailing blank line at the end of files.
-- For files under `instructions/*.md` and Copilot/Codex instruction outputs: do NOT include a final newline (consistent with AGENTS.md).
-- For other files, follow `.editorconfig` rules (final newline usually enforced); always avoid trailing whitespace.
+- For files under `instructions/*.md` and Copilot/Codex instruction outputs: do NOT include a final newline.
+- For the rest of the repository, follow `.editorconfig` exactly: current repository policy is `insert_final_newline = false`, including Rust/TOML/lock files unless a future file-specific rule explicitly opts in.
+- Never add an extra empty line at EOF just because a file was edited; always avoid trailing whitespace.

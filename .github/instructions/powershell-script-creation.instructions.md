@@ -53,6 +53,7 @@ Standardize PowerShell scripts in scripts/ with the same structure and safety mo
 - Avoid duplicated path resolution logic across the script.
 - Keep script idempotent whenever feasible.
 - Use UTF-8 encoding for file writes unless target format requires otherwise.
+- Respect repository EOF policy from `.editorconfig`: PowerShell files use `crlf`, do not end with a trailing blank line, and do not add a final newline unless a file-specific rule explicitly requires it.
 
 # Example Skeleton
 ```powershell
