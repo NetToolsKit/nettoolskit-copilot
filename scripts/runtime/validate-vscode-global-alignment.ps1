@@ -9,7 +9,7 @@
     Containment mappings:
     - .vscode/settings.tamplate.jsonc -> <global-user>/settings.json
     - .vscode/mcp.tamplate.jsonc -> <global-user>/mcp.json
-    - .vscode/snippets/*.code-snippets -> <global-user>/snippets/*.code-snippets
+    - .vscode/snippets/*.tamplate.code-snippets -> <global-user>/snippets/*.code-snippets
 
     The comparison is subset-based:
     - Every key/value from source must exist in target.
@@ -349,6 +349,77 @@ function ConvertTo-DisplayValue {
     }
 }
 
+# Normalizes path-like strings so template placeholders can match runtime paths.
+function ConvertTo-NormalizedComparableString {
+    param(
+        [string] $Value
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return $Value
+    }
+
+    $normalized = $Value.Trim()
+    $homePath = Resolve-UserHomePath
+    if (-not [string]::IsNullOrWhiteSpace($homePath)) {
+        $normalized = $normalized.Replace('%USERPROFILE%', $homePath)
+        $normalized = $normalized.Replace('${env:USERPROFILE}', $homePath)
+        $normalized = $normalized.Replace('$env:USERPROFILE', $homePath)
+        $normalized = $normalized.Replace('$HOME', $homePath)
+    }
+
+    if ($normalized -notmatch '^[a-zA-Z][a-zA-Z0-9+\-.]*://') {
+        $normalized = $normalized.Replace('/', '\')
+        if ($normalized.Length -gt 3) {
+            $normalized = $normalized.TrimEnd('\')
+        }
+    }
+
+    if ($IsWindows) {
+        return $normalized.ToLowerInvariant()
+    }
+
+    return $normalized
+}
+
+# Tests whether two strings are equivalent after placeholder and path normalization.
+function Test-EquivalentStringValue {
+    param(
+        [string] $ExpectedString,
+        [string] $ActualString
+    )
+
+    if ([string]::Equals($ExpectedString, $ActualString, [System.StringComparison]::Ordinal)) {
+        return $true
+    }
+
+    return [string]::Equals(
+        (ConvertTo-NormalizedComparableString -Value $ExpectedString),
+        (ConvertTo-NormalizedComparableString -Value $ActualString),
+        [System.StringComparison]::Ordinal
+    )
+}
+
+# Returns the actual dictionary key that matches the expected key.
+function Get-MatchingDictionaryKey {
+    param(
+        [object] $Dictionary,
+        [string] $ExpectedKey
+    )
+
+    if (Test-DictionaryContainsKey -Dictionary $Dictionary -Key $ExpectedKey) {
+        return $ExpectedKey
+    }
+
+    foreach ($candidateKey in (Get-DictionaryKeyList -Dictionary $Dictionary)) {
+        if (Test-EquivalentStringValue -ExpectedString $ExpectedKey -ActualString ([string] $candidateKey)) {
+            return [string] $candidateKey
+        }
+    }
+
+    return $null
+}
+
 # Recursively validates that ExpectedValue is contained inside ActualValue.
 function Test-JsonSubset {
     param(
@@ -376,14 +447,15 @@ function Test-JsonSubset {
         $keys = Get-DictionaryKeyList -Dictionary $ExpectedValue
         foreach ($key in $keys) {
             $childPath = if ([string]::IsNullOrWhiteSpace($CurrentPath)) { $key } else { "{0}.{1}" -f $CurrentPath, $key }
-            if (-not (Test-DictionaryContainsKey -Dictionary $ActualValue -Key $key)) {
+            $matchedKey = Get-MatchingDictionaryKey -Dictionary $ActualValue -ExpectedKey $key
+            if ($null -eq $matchedKey) {
                 $IssueCollector.Add(("Path '{0}' is missing in target." -f $childPath)) | Out-Null
                 $isContained = $false
                 continue
             }
 
             $expectedChild = Get-DictionaryValue -Dictionary $ExpectedValue -Key $key
-            $actualChild = Get-DictionaryValue -Dictionary $ActualValue -Key $key
+            $actualChild = Get-DictionaryValue -Dictionary $ActualValue -Key $matchedKey
             if (-not (Test-JsonSubset -ExpectedValue $expectedChild -ActualValue $actualChild -CurrentPath $childPath -IssueCollector $IssueCollector)) {
                 $isContained = $false
             }
@@ -425,7 +497,7 @@ function Test-JsonSubset {
     }
 
     if ($ExpectedValue -is [string]) {
-        $matched = ($ActualValue -is [string]) -and ([string]::Equals($ExpectedValue, $ActualValue, [System.StringComparison]::Ordinal))
+        $matched = ($ActualValue -is [string]) -and (Test-EquivalentStringValue -ExpectedString $ExpectedValue -ActualString $ActualValue)
         if (-not $matched) {
             $IssueCollector.Add(("Path '{0}' mismatch. expected={1}, actual={2}" -f $CurrentPath, (ConvertTo-DisplayValue -Value $ExpectedValue), (ConvertTo-DisplayValue -Value $ActualValue))) | Out-Null
         }
@@ -498,6 +570,23 @@ function Invoke-FileContainmentCheck {
     }
 }
 
+# Converts a snippet template file name into the global target file name.
+function Get-GlobalSnippetFileName {
+    param(
+        [string] $TemplateFileName
+    )
+
+    if ([string]::IsNullOrWhiteSpace($TemplateFileName)) {
+        throw 'Template file name is required.'
+    }
+
+    if ($TemplateFileName -notmatch '\.tamplate\.code-snippets$') {
+        throw "Snippet template file name must end with '.tamplate.code-snippets': $TemplateFileName"
+    }
+
+    return ($TemplateFileName -replace '\.tamplate(?=\.code-snippets$)', '')
+}
+
 # Prints a standardized report for a file containment check.
 function Write-ContainmentReport {
     param(
@@ -558,10 +647,11 @@ if (-not $SkipSnippets) {
         Add-ValidationFailure ("Workspace snippet folder not found: {0}" -f $sourceSnippetsPath)
     }
     else {
-        $snippetFiles = @(Get-ChildItem -LiteralPath $sourceSnippetsPath -File -Filter '*.code-snippets' | Sort-Object Name)
+        $snippetFiles = @(Get-ChildItem -LiteralPath $sourceSnippetsPath -File -Filter '*.tamplate.code-snippets' | Sort-Object Name)
         foreach ($snippetFile in $snippetFiles) {
-            $targetSnippetFile = Join-Path $targetSnippetsPath $snippetFile.Name
-            $mappingName = ("snippet -> global snippet ({0})" -f $snippetFile.Name)
+            $targetSnippetName = Get-GlobalSnippetFileName -TemplateFileName $snippetFile.Name
+            $targetSnippetFile = Join-Path $targetSnippetsPath $targetSnippetName
+            $mappingName = ("snippet template -> global snippet ({0} -> {1})" -f $snippetFile.Name, $targetSnippetName)
             $reports.Add((Invoke-FileContainmentCheck -Name $mappingName -SourceFilePath $snippetFile.FullName -TargetFilePath $targetSnippetFile)) | Out-Null
         }
     }

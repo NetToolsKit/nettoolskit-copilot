@@ -323,6 +323,7 @@ Before committing code:
 - [ ] Test names are descriptive
 - [ ] File-level doc comments exist
 - [ ] All tests pass: `cargo test`
+- [ ] `target/` was pruned or cleaned when stale, oversized, or outside the active crate/profile scope
 - [ ] No `#[ignore]` without documented reason
 - [ ] Temporary files cleaned up (use TempDir)
 
@@ -459,6 +460,7 @@ Before completing ANY test-related work, verify:
 - [ ] test_suite.rs imports ALL test modules (no orphaned files)
 - [ ] Shared utilities in `tests/common/` or similar
 - [ ] No `[[test]]` sections in Cargo.toml
+- [ ] `target/` does not retain obsolete outputs unrelated to the active build/test scope
 - [ ] Run `cargo test --package <crate>` to confirm all tests execute
 - [ ] Verify test count matches expected (no missing tests)
 

@@ -238,6 +238,59 @@ function Test-JsonFile {
     }
 }
 
+# Converts JSON-like objects into a hashtable keyed by property name.
+function ConvertTo-PropertyMap {
+    param(
+        [object] $Value
+    )
+
+    $result = @{}
+    if ($null -eq $Value) {
+        return $result
+    }
+
+    if ($Value -is [System.Collections.IDictionary]) {
+        foreach ($key in $Value.Keys) {
+            $result[[string] $key] = $Value[$key]
+        }
+
+        return $result
+    }
+
+    foreach ($property in $Value.PSObject.Properties) {
+        $result[[string] $property.Name] = $property.Value
+    }
+
+    return $result
+}
+
+# Gets a direct property value from a JSON-like object when present.
+function Get-JsonPropertyValue {
+    param(
+        [object] $InputObject,
+        [string] $PropertyName
+    )
+
+    if ($null -eq $InputObject) {
+        return $null
+    }
+
+    if ($InputObject -is [System.Collections.IDictionary]) {
+        if ($InputObject.Contains($PropertyName)) {
+            return $InputObject[$PropertyName]
+        }
+
+        return $null
+    }
+
+    $property = $InputObject.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return $property.Value
+}
+
 # Recursively extracts string values from nested objects and arrays.
 function Get-StringValuesFromObject {
     param(
@@ -477,6 +530,83 @@ function Test-RequiredFile {
         }
 
         Write-StyledOutput ("[OK] Required file: {0}" -f $required)
+    }
+}
+
+# Validates that workspace-generation rules only diverge from the shared VS Code template in approved local throttles.
+function Test-WorkspaceTemplateCompatibility {
+    param(
+        [object] $WorkspaceBaseline,
+        [object] $VscodeSettings
+    )
+
+    if ($null -eq $WorkspaceBaseline -or $null -eq $VscodeSettings) {
+        return
+    }
+
+    $requiredSettings = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'requiredSettings')
+    $recommendedSettings = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'recommendedSettings')
+    $recommendedBounds = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'recommendedNumericUpperBounds')
+    $forbiddenSettings = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'forbiddenSettings')
+    $templateWatcherExclude = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName 'files.watcherExclude')
+    $templateSearchExclude = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName 'search.exclude')
+
+    $approvedWorkspaceDivergence = @(
+        'git.autofetch',
+        'git.openRepositoryInParentFolders',
+        'git.autorefresh',
+        'extensions.autoUpdate',
+        'github.copilot.nextEditSuggestions.enabled',
+        'scm.repositories.visible',
+        'chat.agent.maxRequests'
+    )
+
+    $requiredWatcherKeys = @((Get-JsonPropertyValue -InputObject $requiredSettings['files.watcherExclude'] -PropertyName 'requiredKeys'))
+    foreach ($key in $requiredWatcherKeys) {
+        if (-not $templateWatcherExclude.ContainsKey([string] $key) -or -not [bool] $templateWatcherExclude[[string] $key]) {
+            Add-ValidationFailure ("Workspace efficiency baseline requires watcher exclude '{0}' but VS Code template does not provide it." -f $key)
+        }
+    }
+
+    $requiredSearchKeys = @((Get-JsonPropertyValue -InputObject $requiredSettings['search.exclude'] -PropertyName 'requiredKeys'))
+    foreach ($key in $requiredSearchKeys) {
+        if (-not $templateSearchExclude.ContainsKey([string] $key) -or -not [bool] $templateSearchExclude[[string] $key]) {
+            Add-ValidationFailure ("Workspace efficiency baseline requires search exclude '{0}' but VS Code template does not provide it." -f $key)
+        }
+    }
+
+    foreach ($settingName in $requiredSettings.Keys) {
+        if ($settingName -in @('files.watcherExclude', 'search.exclude')) {
+            continue
+        }
+
+        if ($settingName -notin $approvedWorkspaceDivergence) {
+            $templateValue = Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName $settingName
+            if ($null -ne $templateValue -and ([string] $templateValue -ne [string] $requiredSettings[$settingName])) {
+                Add-ValidationFailure ("Workspace baseline setting '{0}' diverges from VS Code template without approval." -f $settingName)
+            }
+        }
+    }
+
+    foreach ($settingName in $recommendedSettings.Keys) {
+        if ($settingName -notin $approvedWorkspaceDivergence) {
+            $templateValue = Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName $settingName
+            if ($null -ne $templateValue -and ([string] $templateValue -ne [string] $recommendedSettings[$settingName])) {
+                Add-ValidationFailure ("Workspace recommended setting '{0}' diverges from VS Code template without approval." -f $settingName)
+            }
+        }
+    }
+
+    foreach ($settingName in $recommendedBounds.Keys) {
+        if ($settingName -notin $approvedWorkspaceDivergence) {
+            Add-ValidationFailure ("Workspace numeric override '{0}' is not in the approved divergence list." -f $settingName)
+        }
+    }
+
+    foreach ($settingName in $forbiddenSettings.Keys) {
+        if ($settingName -notin $approvedWorkspaceDivergence) {
+            Add-ValidationFailure ("Workspace forbidden setting '{0}' is not in the approved divergence list." -f $settingName)
+        }
     }
 }
 
@@ -814,6 +944,7 @@ $requiredFiles = @(
     '.github/schemas/instruction-routing.catalog.schema.json',
     '.github/governance/readme-standards.baseline.json',
     '.github/governance/template-standards.baseline.json',
+    '.github/governance/workspace-efficiency.baseline.json',
     '.github/governance/architecture-boundaries.baseline.json',
     '.github/governance/security-baseline.json',
     '.github/governance/release-provenance.baseline.json',
@@ -822,6 +953,7 @@ $requiredFiles = @(
     '.github/governance/supply-chain.baseline.json',
     '.github/governance/warning-baseline.json',
     '.github/governance/shared-script-checksums.manifest.json',
+    '.vscode/base.code-workspace',
     '.github/runbooks/README.md',
     '.github/runbooks/validation-failures.runbook.md',
     '.github/runbooks/runtime-drift.runbook.md',
@@ -839,6 +971,7 @@ $requiredFiles = @(
     'scripts/validation/validate-agent-orchestration.ps1',
     'scripts/validation/validate-readme-standards.ps1',
     'scripts/validation/validate-template-standards.ps1',
+    'scripts/validation/validate-workspace-efficiency.ps1',
     'scripts/validation/validate-powershell-standards.ps1',
     'scripts/validation/validate-dotnet-standards.ps1',
     'scripts/validation/validate-architecture-boundaries.ps1',
@@ -855,11 +988,16 @@ $requiredFiles = @(
     'scripts/validation/validate-all.ps1',
     'scripts/governance/update-shared-script-checksums-manifest.ps1',
     'scripts/runtime/run-agent-pipeline.ps1',
+    'scripts/runtime/sync-vscode-global-snippets.ps1',
+    'scripts/runtime/sync-workspace-settings.ps1',
     'scripts/runtime/clean-codex-runtime.ps1',
     'scripts/orchestration/stages/plan-stage.ps1',
     'scripts/orchestration/stages/implement-stage.ps1',
     'scripts/orchestration/stages/validate-stage.ps1',
-    'scripts/orchestration/stages/review-stage.ps1'
+    'scripts/orchestration/stages/review-stage.ps1',
+    'scripts/tests/runtime/vscode-global-snippets-sync.tests.ps1',
+    'scripts/tests/runtime/workspace-efficiency.tests.ps1',
+    'scripts/tests/runtime/workspace-settings-sync.tests.ps1'
 )
 
 Test-RequiredFile -Root $resolvedRepoRoot -RequiredFiles $requiredFiles
@@ -899,10 +1037,32 @@ if ($null -ne $templateStandardsBaseline) {
     }
 }
 
-$codexCliSnippets = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/snippets/codex-cli.code-snippets'
-$copilotSnippets = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/snippets/copilot.code-snippets'
+$workspaceEfficiencyBaseline = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/workspace-efficiency.baseline.json'
+if ($null -ne $workspaceEfficiencyBaseline) {
+    if ($null -eq $workspaceEfficiencyBaseline.requiredSettings) {
+        Add-ValidationFailure 'Workspace efficiency baseline must contain requiredSettings.'
+    }
+
+    if ($null -eq $workspaceEfficiencyBaseline.heuristics) {
+        Add-ValidationFailure 'Workspace efficiency baseline must contain heuristics.'
+    }
+}
+
+$codexCliSnippets = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/snippets/codex-cli.tamplate.code-snippets'
+$copilotSnippets = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/snippets/copilot.tamplate.code-snippets'
+$vscodeBaseWorkspace = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/base.code-workspace'
 $vscodeSettings = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/settings.tamplate.jsonc'
 $vscodeMcp = Test-JsonFile -Root $resolvedRepoRoot -Path '.vscode/mcp.tamplate.jsonc'
+
+if ($null -ne $vscodeBaseWorkspace) {
+    if ($null -eq $vscodeBaseWorkspace.folders) {
+        Add-ValidationFailure 'VS Code base workspace must contain a folders property.'
+    }
+
+    if ($null -eq $vscodeBaseWorkspace.extensions -or $null -eq $vscodeBaseWorkspace.extensions.recommendations -or @($vscodeBaseWorkspace.extensions.recommendations).Count -eq 0) {
+        Add-ValidationFailure 'VS Code base workspace must contain at least one extension recommendation.'
+    }
+}
 
 $orchestrationJsonFiles = @(
     '.github/schemas/agent.contract.schema.json',
@@ -928,9 +1088,10 @@ if ($null -ne $vscodeMcp) {
 }
 
 Test-VscodeSettingsReference -Root $resolvedRepoRoot -Settings $vscodeSettings
+Test-WorkspaceTemplateCompatibility -WorkspaceBaseline $workspaceEfficiencyBaseline -VscodeSettings $vscodeSettings
 Test-SnippetReference -Root $resolvedRepoRoot -SnippetFiles @{
-    '.vscode/snippets/codex-cli.code-snippets' = $codexCliSnippets
-    '.vscode/snippets/copilot.code-snippets' = $copilotSnippets
+    '.vscode/snippets/codex-cli.tamplate.code-snippets' = $codexCliSnippets
+    '.vscode/snippets/copilot.tamplate.code-snippets' = $copilotSnippets
 }
 
 $skillStats = Test-SkillDefinition -Root $resolvedRepoRoot

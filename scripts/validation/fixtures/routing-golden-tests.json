@@ -210,6 +210,16 @@
       ]
     },
     {
+      "id": "developer-workspace-route",
+      "request": "Create an efficient VS Code workspace for Codex and Copilot with optimized workspace settings.",
+      "expected_route_ids": [
+        "developer-workspace"
+      ],
+      "expected_selected_paths": [
+        "instructions/vscode-workspace-efficiency.instructions.md"
+      ]
+    },
+    {
       "id": "no-match-route",
       "request": "Tell me a random joke.",
       "expected_route_ids": [],

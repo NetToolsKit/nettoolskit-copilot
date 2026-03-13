@@ -17,6 +17,7 @@
     - validate-routing-coverage
     - validate-readme-standards
     - validate-template-standards
+    - validate-workspace-efficiency
     - validate-compatibility-lifecycle-policy
     - validate-powershell-standards
     - validate-shell-hooks
@@ -610,6 +611,11 @@ $baseCheckDefinitions['validate-template-standards'] = [pscustomobject]@{
     script = 'scripts/validation/validate-template-standards.ps1'
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
+$baseCheckDefinitions['validate-workspace-efficiency'] = [pscustomobject]@{
+    name = 'validate-workspace-efficiency'
+    script = 'scripts/validation/validate-workspace-efficiency.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
 $baseCheckDefinitions['validate-compatibility-lifecycle-policy'] = [pscustomobject]@{
     name = 'validate-compatibility-lifecycle-policy'
     script = 'scripts/validation/validate-compatibility-lifecycle-policy.ps1'
@@ -696,6 +702,7 @@ $defaultCheckOrder = @(
     'validate-routing-coverage',
     'validate-readme-standards',
     'validate-template-standards',
+    'validate-workspace-efficiency',
     'validate-compatibility-lifecycle-policy',
     'validate-powershell-standards',
     'validate-shell-hooks',

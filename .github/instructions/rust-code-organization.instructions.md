@@ -11,6 +11,15 @@ Mirror src/ structure in tests/ exactly; production code in src/, tests in tests
 > **Rule:** Test file structure MUST mirror source file structure.
 > **Rule:** Files are organized by **module/functionality**, NOT by type. A file named `config.rs` can contain `LinearConfig`, `BsgsConfig`, and related types.
 > **Rule:** Only split into separate files when a file exceeds ~300-500 lines or when types have distinct responsibilities.
+> **Rule:** `target/` is disposable build output and must be kept lean; retain only artifacts needed for the active workspace, target triple, and profile.
+
+## Build Artifact Hygiene
+- Never treat `target/` as durable project state; do not rely on stale artifacts across task changes, branch switches, toolchain updates, or release/debug profile changes.
+- Clean stale Rust outputs proactively when `target/` grows abnormally, when switching workspace context, or before handing work off for validation/release.
+- Prefer scoped cleanup first when possible: `cargo clean -p <crate>`, `cargo clean --profile <profile>`, or pruning obsolete `target/<triple>/<profile>` folders that are no longer part of the active build.
+- Use full `cargo clean` when the directory is bloated, inconsistent, or shared across incompatible builds/features.
+- When multiple Rust repositories are active on the same machine, prefer a repository-specific `CARGO_TARGET_DIR` to avoid cross-project accumulation and accidental reuse.
+- Never commit `target/`; keep only the outputs required by the current build/test session.
 
 ## Documentation Standards
 Doc comments must be complete and self-explanatory; describe purpose, inputs, outputs, errors, side effects, and invariants; avoid restating identifiers.

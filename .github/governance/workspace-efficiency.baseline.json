@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "workspaceFileGlobs": [
+    "**/*.code-workspace"
+  ],
+  "requiredSettings": {
+    "git.autofetch": false,
+    "files.watcherExclude": {
+      "requiredKeys": [
+        "**/.git/objects/**",
+        "**/.git/subtree-cache/**",
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/target/**",
+        "**/bin/**",
+        "**/obj/**",
+        "**/coverage/**",
+        "**/.temp/**",
+        "**/artifacts/**",
+        "**/.next/**",
+        "**/.nuxt/**",
+        "**/.output/**",
+        "**/.turbo/**",
+        "**/.cache/**",
+        "**/.parcel-cache/**",
+        "**/.svelte-kit/**",
+        "**/.venv/**"
+      ]
+    },
+    "search.exclude": {
+      "requiredKeys": [
+        "**/node_modules",
+        "**/dist",
+        "**/build",
+        "**/target",
+        "**/bin",
+        "**/obj",
+        "**/coverage",
+        "**/.temp",
+        "**/artifacts",
+        "**/.next",
+        "**/.nuxt",
+        "**/.output",
+        "**/.turbo",
+        "**/.cache",
+        "**/.parcel-cache",
+        "**/.svelte-kit",
+        "**/.venv"
+      ]
+    }
+  },
+  "forbiddenSettings": {
+    "git.openRepositoryInParentFolders": [
+      "always"
+    ]
+  },
+  "recommendedSettings": {
+    "git.autorefresh": false,
+    "extensions.autoUpdate": false,
+    "github.copilot.nextEditSuggestions.enabled": false
+  },
+  "recommendedNumericUpperBounds": {
+    "scm.repositories.visible": 4,
+    "chat.agent.maxRequests": 400
+  },
+  "heuristics": {
+    "maxFolderCountWarning": 4,
+    "warnWhenMultipleProductFolders": true,
+    "warnWhenSupportFoldersMixedWithProductFolders": true,
+    "supportFolderPatterns": [
+      "(?i)(?:^|[\\\\/])\\.github$",
+      "(?i)(?:^|[\\\\/])\\.codex$",
+      "(?i)(?:^|[\\\\/])copilot-instructions$",
+      "(?i)AppData[\\\\/]Roaming[\\\\/]Code[\\\\/]User$"
+    ]
+  }
+}

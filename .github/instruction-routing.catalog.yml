@@ -245,6 +245,21 @@ routing:
       - path: instructions/ci-cd-devops.instructions.md
         reason: CI/CD conventions and gates
 
+  - id: developer-workspace
+    tags: [vscode, workspace, code-workspace, copilot, codex, performance]
+    triggers:
+      - "workspace"
+      - "code-workspace"
+      - "vs code workspace"
+      - "workspace performance"
+      - "copilot workspace"
+      - "codex workspace"
+      - "workspace settings"
+      - "workspace efficiency"
+    include:
+      - path: instructions/vscode-workspace-efficiency.instructions.md
+        reason: Efficient VS Code workspace composition and settings for multi-window AI usage
+
   - id: quality-static-analysis
     tags: [quality, lint, static-analysis, sonar]
     triggers:

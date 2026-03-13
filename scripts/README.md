@@ -104,6 +104,8 @@ scripts/
 │   ├── bootstrap.ps1
 │   ├── doctor.ps1
 │   ├── apply-vscode-templates.ps1
+│   ├── sync-vscode-global-snippets.ps1
+│   ├── sync-workspace-settings.ps1
 │   ├── healthcheck.ps1
 │   ├── self-heal.ps1
 │   ├── run-agent-pipeline.ps1
@@ -160,6 +162,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/validate-release-governance.ps1` | Validates release-governance baseline (`CHANGELOG`, `CODEOWNERS`, branch-protection baseline, governance docs). | `pwsh -File scripts/validation/validate-release-governance.ps1` |
 | `validation/validate-readme-standards.ps1` | Validates README structure/formatting using `.github/governance/readme-standards.baseline.json`. | `pwsh -File scripts/validation/validate-readme-standards.ps1` |
 | `validation/validate-template-standards.ps1` | Validates shared templates against `.github/governance/template-standards.baseline.json`, including required/forbidden patterns and referenced script/doc paths. | `pwsh -File scripts/validation/validate-template-standards.ps1` |
+| `validation/validate-workspace-efficiency.ps1` | Validates `.code-workspace` files against `.github/governance/workspace-efficiency.baseline.json`, covering watcher/search excludes, Git throttling, and multi-folder heuristics for Codex/Copilot usage. | `pwsh -File scripts/validation/validate-workspace-efficiency.ps1 -WorkspaceSearchRoot .\workspaces` |
 | `validation/validate-compatibility-lifecycle-policy.ps1` | Validates `COMPATIBILITY.md` Support Lifecycle/EOL table semantics (reference date, ordering, EOL + 1 day, status). | `pwsh -File scripts/validation/validate-compatibility-lifecycle-policy.ps1` |
 | `validation/validate-powershell-standards.ps1` | Validates script standards for PowerShell files (help, param block, function docs, approved verbs). | `pwsh -File scripts/validation/validate-powershell-standards.ps1` |
 | `validation/validate-shell-hooks.ps1` | Validates `.githooks/*` shell syntax with `sh -n` and optional `shellcheck`. | `pwsh -File scripts/validation/validate-shell-hooks.ps1` |
@@ -185,6 +188,8 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
+| `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
+| `runtime/sync-workspace-settings.ps1` | Generates or refreshes `.code-workspace` files from `.vscode/base.code-workspace` plus the approved `settings` block derived from `.vscode/settings.tamplate.jsonc` and `.github/governance/workspace-efficiency.baseline.json`. Preserves folders and merges workspace-specific extension recommendations with the shared base. | `pwsh -File scripts/runtime/sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api` |
 | `runtime/healthcheck.ps1` | Runs `validate-all` (profile-aware) plus `runtime-doctor`, emits report/log, and defaults to warning-only mode. | `pwsh -File scripts/runtime/healthcheck.ps1 -ValidationProfile release` |
 | `runtime/self-heal.ps1` | Runs controlled repair flow (bootstrap + optional templates) and validates final state via healthcheck. | `pwsh -File scripts/runtime/self-heal.ps1 -Mirror -StrictExtras` |
 | `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, and budget guardrails; writes run artifacts under `.temp/runs/<traceId>/`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change"` |
@@ -218,6 +223,12 @@ pwsh -File .\scripts\runtime\doctor.ps1
 # apply VS Code active files from versioned templates
 pwsh -File .\scripts\runtime\apply-vscode-templates.ps1 -Force
 
+# synchronize canonical VS Code snippets into the global user profile
+pwsh -File .\scripts\runtime\sync-vscode-global-snippets.ps1
+
+# generate or refresh a workspace from the shared base and settings baseline
+pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api
+
 # run enterprise healthcheck with strict runtime guarantees
 pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras
 
@@ -250,6 +261,9 @@ pwsh -File .\scripts\validation\validate-routing-coverage.ps1
 
 # validate shared templates against the template baseline
 pwsh -File .\scripts\validation\validate-template-standards.ps1
+
+# validate VS Code .code-workspace files for efficient Codex/Copilot usage
+pwsh -File .\scripts\validation\validate-workspace-efficiency.ps1 -WorkspaceSearchRoot .\workspaces
 
 # validate COMPATIBILITY lifecycle policy
 pwsh -File .\scripts\validation\validate-compatibility-lifecycle-policy.ps1

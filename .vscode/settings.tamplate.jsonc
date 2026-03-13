@@ -16,12 +16,14 @@
 //   Lines 491-end: Terminal auto-approve, telemetry, and extension-specific settings
 //
 // Copilot File References:
-//   Update paths to point to your %USERPROFILE%\.github folder structure:
+//   Update paths to point to your %USERPROFILE% shared instruction runtime:
 //   %USERPROFILE%\.github\
 //   ├── AGENTS.md
 //   ├── copilot-instructions.md
 //   ├── chatmodes\*.chatmode.md
 //   └── instructions\*.instructions.md
+//   %USERPROFILE%\.codex\skills\
+//   └── <skill-name>\SKILL.md
 //
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 {
@@ -164,19 +166,37 @@
         "**/.metals": true,
         "**/target/**": true,
         "**/.next/**": true,
+        "**/.nuxt/**": true,
+        "**/.output/**": true,
+        "**/.turbo/**": true,
+        "**/.cache/**": true,
+        "**/.parcel-cache/**": true,
+        "**/.svelte-kit/**": true,
         "**/bin/**": true,
         "**/obj/**": true,
+        "**/coverage/**": true,
+        "**/.temp/**": true,
+        "**/artifacts/**": true,
         "**/.venv/**": true
     },
     "search.exclude": {
         "**/node_modules": true,
         "**/dist": true,
         "**/build": true,
+        "**/target": true,
         "**/.next": true,
+        "**/.nuxt": true,
+        "**/.output": true,
+        "**/.turbo": true,
+        "**/.cache": true,
+        "**/.parcel-cache": true,
+        "**/.svelte-kit": true,
         "**/coverage": true,
-        "**/bin/**": true,
-        "**/obj/**": true,
-        "**/.venv/**": true
+        "**/.temp": true,
+        "**/artifacts": true,
+        "**/bin": true,
+        "**/obj": true,
+        "**/.venv": true
     },
 
     // VERSION CONTROL (GIT) - Integrated Git settings
@@ -335,7 +355,7 @@
     // COPILOT & AI CHAT CONFIGURATION
     // ═══════════════════════════════════════════════════════════════════════════════════════════════
     // Consolidated GitHub Copilot, AI Chat, and file reference settings.
-    // Update paths below to point to your %USERPROFILE%\.github folder structure.
+    // Update paths below to point to your %USERPROFILE% shared instruction runtime.
     // ═══════════════════════════════════════════════════════════════════════════════════════════════
 
     // Copilot Enable Settings
@@ -365,8 +385,7 @@
         "%USERPROFILE%\\.github\\templates\\": true,
         "%USERPROFILE%\\.github\\chatmodes\\": true,
         "%USERPROFILE%\\.github\\prompts\\": true,
-        "%USERPROFILE%\\.codex\\skills\\": true,
-        "%USERPROFILE%\\.aitk\\instructions\\": true
+        "%USERPROFILE%\\.codex\\skills\\": true
     },
 
     // Copilot Custom Instructions - File references for code review, commits, and PRs
@@ -375,6 +394,7 @@
         { "file": "%USERPROFILE%\\.github\\AGENTS.md" },
         { "file": "%USERPROFILE%\\.github\\copilot-instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\workflow-optimization.instructions.md" },
+        { "file": "%USERPROFILE%\\.github\\instructions\\vscode-workspace-efficiency.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\powershell-execution.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\dotnet-csharp.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\clean-architecture-code.instructions.md" },
@@ -499,7 +519,7 @@
     // TELEMETRY & PRIVACY - Privacy and data collection settings
     // https://code.visualstudio.com/docs/getstarted/telemetry
     "telemetry.telemetryLevel": "off",
-    "redhat.telemetry.enabled": false,
+    "redhat.telemetry.enabled": false
 
     // SPECIFIC EXTENSIONS - Installed extension settings
     // https://code.visualstudio.com/docs/editor/extension-marketplace#_extension-details
