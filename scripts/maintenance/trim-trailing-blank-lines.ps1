@@ -4,9 +4,9 @@
 
 .DESCRIPTION
     Scans text files (skipping binaries and excluded folders) and normalizes the end-of-file:
-        • Removes trailing spaces/tabs at the end of the file.
-        • Removes every blank line after the last line of content.
-        • Applies the repository EOF policy:
+        - Removes trailing spaces/tabs at the end of the file.
+        - Removes every blank line after the last line of content.
+        - Applies the repository EOF policy:
           - text files end on the last content character with no final newline
 
     When executed inside a Git repository, it prefers `git ls-files` to respect ignore rules.
