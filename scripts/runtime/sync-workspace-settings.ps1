@@ -294,6 +294,8 @@ function New-WorkspaceSettingsObject {
         'git.autorefresh' = [bool] $recommendedSettings['git.autorefresh']
         'extensions.autoUpdate' = [bool] $recommendedSettings['extensions.autoUpdate']
         'github.copilot.nextEditSuggestions.enabled' = [bool] $recommendedSettings['github.copilot.nextEditSuggestions.enabled']
+        'workbench.startupEditor' = [string] $recommendedSettings['workbench.startupEditor']
+        'chat.emptyState.history.enabled' = [bool] $recommendedSettings['chat.emptyState.history.enabled']
         'scm.repositories.visible' = [int] $recommendedBounds['scm.repositories.visible']
         'chat.agent.maxRequests' = [int] $recommendedBounds['chat.agent.maxRequests']
         'files.watcherExclude' = [pscustomobject] $watcherExclude

@@ -988,6 +988,7 @@ $requiredFiles = @(
     'scripts/validation/validate-all.ps1',
     'scripts/governance/update-shared-script-checksums-manifest.ps1',
     'scripts/runtime/run-agent-pipeline.ps1',
+    'scripts/runtime/sync-vscode-global-settings.ps1',
     'scripts/runtime/sync-vscode-global-snippets.ps1',
     'scripts/runtime/sync-workspace-settings.ps1',
     'scripts/runtime/clean-codex-runtime.ps1',
@@ -995,6 +996,7 @@ $requiredFiles = @(
     'scripts/orchestration/stages/implement-stage.ps1',
     'scripts/orchestration/stages/validate-stage.ps1',
     'scripts/orchestration/stages/review-stage.ps1',
+    'scripts/tests/runtime/vscode-global-settings-sync.tests.ps1',
     'scripts/tests/runtime/vscode-global-snippets-sync.tests.ps1',
     'scripts/tests/runtime/workspace-efficiency.tests.ps1',
     'scripts/tests/runtime/workspace-settings-sync.tests.ps1'

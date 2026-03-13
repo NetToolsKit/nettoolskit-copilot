@@ -14,6 +14,8 @@ For `.code-workspace`, the repository uses `base.code-workspace` as the shared i
 
 For snippets, the repository uses `*.tamplate.code-snippets` files so they follow the same template-first versioning pattern used by `settings` and `mcp`. During sync, the `.tamplate` segment is removed before writing to the global VS Code profile.
 
+For global VS Code settings, the repository uses `settings.tamplate.jsonc` as the versioned source of truth. The runtime sync renders `%USERPROFILE%` and writes the final `settings.json` into the global VS Code profile.
+
 ---
 
 ## Features
@@ -22,6 +24,7 @@ For snippets, the repository uses `*.tamplate.code-snippets` files so they follo
 - ✅ Template-first MCP config via `mcp.tamplate.jsonc`
 - ✅ Base workspace pseudo-inheritance via `base.code-workspace`
 - ✅ Template-first Copilot/Codex snippets under `snippets/`
+- ✅ Rendered global VS Code settings sync via `scripts/runtime/sync-vscode-global-settings.ps1`
 - ✅ Validation integrated in `scripts/validation/validate-instructions.ps1`
 
 ---
@@ -84,7 +87,13 @@ pwsh -File .\scripts\runtime\apply-vscode-templates.ps1 -Force
 pwsh -File .\scripts\runtime\sync-vscode-global-snippets.ps1
 ```
 
-### Example 5: Generate a workspace from the shared base and settings baseline
+### Example 5: Render the versioned settings template into the global VS Code profile
+
+```powershell
+pwsh -File .\scripts\runtime\sync-vscode-global-settings.ps1 -CreateBackup
+```
+
+### Example 6: Generate a workspace from the shared base and settings baseline
 
 ```powershell
 pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath C:\Users\me\Projects\api.code-workspace -FolderPath src\Api
@@ -100,6 +109,7 @@ pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath C:\Users
 - `snippets/codex-cli.tamplate.code-snippets`: versioned Codex CLI snippet template synchronized into the global profile.
 - `snippets/copilot.tamplate.code-snippets`: versioned Copilot chat/workflow snippet template synchronized into the global profile.
 - `scripts/runtime/apply-vscode-templates.ps1`: applies templates into active `settings.json` and `mcp.json`.
+- `scripts/runtime/sync-vscode-global-settings.ps1`: renders `settings.tamplate.jsonc` into the global VS Code user profile.
 - `scripts/runtime/sync-vscode-global-snippets.ps1`: synchronizes canonical snippets into the global VS Code user profile.
 - `scripts/runtime/sync-workspace-settings.ps1`: merges `base.code-workspace` with target workspaces and regenerates the approved workspace `settings` block.
 
@@ -119,6 +129,7 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 - Do not commit active `settings.json` or `mcp.json`.
 - When MCP servers change, regenerate `mcp.tamplate.jsonc` from manifest.
 - Apply templates locally when needed with `scripts/runtime/apply-vscode-templates.ps1`.
+- Sync the global VS Code settings from `settings.tamplate.jsonc` with `scripts/runtime/sync-vscode-global-settings.ps1`.
 - Treat `base.code-workspace` as the shared workspace inheritance baseline.
 - Treat `.vscode/snippets/*.tamplate.code-snippets` as the versioned snippet source and sync them into the global profile when they change.
 
@@ -137,6 +148,7 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 - `.codex/scripts/render-vscode-mcp.ps1`
 - `.vscode/base.code-workspace`
 - `scripts/runtime/apply-vscode-templates.ps1`
+- `scripts/runtime/sync-vscode-global-settings.ps1`
 - `scripts/runtime/sync-vscode-global-snippets.ps1`
 - `scripts/runtime/sync-workspace-settings.ps1`
 - `scripts/validation/validate-instructions.ps1`

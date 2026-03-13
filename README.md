@@ -122,6 +122,12 @@ To apply active VS Code workspace files from templates:
 
 ```powershell
 pwsh -File ./scripts/runtime/apply-vscode-templates.ps1 -Force
+
+# render the versioned global VS Code settings template into Code/User/settings.json
+pwsh -File ./scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup
+
+# synchronize versioned snippets into Code/User/snippets
+pwsh -File ./scripts/runtime/sync-vscode-global-snippets.ps1
 ```
 
 ---
