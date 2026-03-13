@@ -120,72 +120,15 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Enhanced collaboration between human and AI agents
 - Systematic approach aligned with Clean Architecture principles
 
-# Repository Guidelines
-
-## Scope & References
-- Repo-wide; subfolder `AGENTS.md` may specialize. Direct prompts override.
-- Core: `copilot-instructions.md`. Language policy: EN code/commits, pt-BR UI via i18n, EN DB schema.
-- Mandatory: `instructions/authoritative-sources.instructions.md`, `instructions/workflow-optimization.instructions.md`, `instructions/powershell-execution.instructions.md`, `instructions/feedback-changelog.instructions.md`.
-- For `.github`: `instructions/copilot-instruction-creation.instructions.md`. Domain sets live in `instructions/*`.
+# Repository Operating Model
+- Repo-specific topology, commands, style, release process, and domain instruction map live in:
+  - `copilot-instructions.md`
+  - `instructions/repository-operating-model.instructions.md`
+- Mandatory repo-wide instructions are:
+  - `instructions/repository-operating-model.instructions.md`
+  - `instructions/authoritative-sources.instructions.md`
+  - `instructions/workflow-optimization.instructions.md`
+  - `instructions/powershell-execution.instructions.md`
+  - `instructions/feedback-changelog.instructions.md`
 - Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
-- SCM/CI: Azure DevOps primary; `.github` hosts agent/PR guidance.
-- For GitHub Actions in external repositories, use pinned script download from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of duplicating scripts in target repositories.
-- Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
- - Branches like `feature/dynamicFilter` are ephemeral; avoid branch-specific rules.
-
-## Overview
-Monorepo of libraries, modules, and samples for robust .NET services using Clean Architecture and CQRS: mediator via `NetToolsKit.Mediator`, EF Core, ASP.NET Core, and worker patterns.
-
-## Structure
-- `src/` libraries; `modules/` features (Authentication, Services, Tools); `samples/src/Rent.Service.*` (Domain/Application/Infrastructure/Api/Worker); `tests/` mirrors; `native/`; `benchmarks/`; `.github/`.
-
-## Build, Test & Run
-- `dotnet build NetToolsKit.sln`; targeted: `dotnet build -f net8.0|net9.0`.
-- Tests: `dotnet test --filter "Category=Unit"`; module integration: `dotnet test modules/Authentication --filter "Category=Integration"`.
-- Run sample API: `dotnet run --project samples/src/Rent.Service.Api`.
-- Pack/format/security: `dotnet pack -c Release`; `dotnet format`; `dotnet list package --vulnerable`; shared gate scripts from `~/.codex/shared-scripts/security` (prefer `Invoke-PreBuildSecurityGate.ps1`).
-- Runtime sync: `pwsh -File scripts/runtime/bootstrap.ps1` mirrors `.github` and `scripts` into `~/.github` (including `~/.github/scripts`), and syncs `.codex` runtime assets into `~/.codex`.
-
-## Style
-- Namespaces mirror folders (`src/NetToolsKit.DynamicQuery/*` -> `NetToolsKit.DynamicQuery`). C#: PascalCase types, camelCase locals/params, UPPER_SNAKE_CASE constants.
-- Prefer `sealed` when appropriate; clean `using`; UTF-8 without BOM; public APIs with XML docs; avoid inline comments unless asked.
-- EOF: never leave trailing blank lines at the end of any file. Repository default from `.editorconfig` is `insert_final_newline = false`, including Rust/TOML/lock files unless a future file-specific rule explicitly says otherwise. No trailing whitespace.
-
-## UI Guidelines
-- UI strings via i18n (pt-BR). HTTP APIs: plural nouns, standard status codes, `application/problem+json` for errors.
-
-## Testing
-- Projects `{Project}.Tests`; files `{TypeName}Tests.cs`. Categories: `Unit`, `Integration`.
-- Assert behavior (CQRS handlers, EF Core, REST). Ensure tests pass locally.
-
-## Commits & PRs
-- Commits in EN, imperative, ≤72 chars, and must follow semantic prefixes such as `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`, `build:`, or `ci:`.
-- When a logically complete item is finished, always return a suggested commit message to the user.
-- When the current changes are stable and ready to persist, explicitly tell the user that the work is ready to commit.
-- For large tasks, identify stable intermediate milestones and notify the user when a commit checkpoint has been reached.
-- PRs: Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration.
-- List Applied instructions paths and deviations; require green build/tests; no secrets. Session tracking: `project | file | component/method | action`.
-
-## Transparency
-- List applied instructions only when executing plans/commands/patches. Use a short preamble before tool calls. Consolidate full instruction list in PR/CHANGELOG when applicable.
-
-## Agent Workflow (Copilot -> Codex)
-- Copilot: small edits/refactors/tests/docs. Codex: deterministic single-file gen, infra/pipeline YAML.
-- For non-trivial tasks: short plan; preamble before tool calls. Response: TOOL SELECTION + confidence | rationale | if Codex: exact command | validation.
-- Validate: namespace, TFMs, XML docs, sealed, usings, EOF; fix via Copilot if needed.
-
-## Patterns
-- Multi-target .NET 8/9 with consistent public API; use `#if` only when necessary. Vulnerabilities: use stack-specific audit scripts under `scripts/security/` before build/package. Test attributes: xUnit `[Trait("Category","Unit")]`, NUnit `[Category("Integration")]`.
-
-## Security & Changelog
-- No secrets in repo; use User Secrets/Azure Key Vault; typed options via `IOptions`.
-- CHANGELOG: single source at root `CHANGELOG.md` for `.github` and project changes; entries with `[X.Y.Z]` and `YYYY-MM-DD`.
-
-## Domain Instruction References
-- Development: `instructions/clean-architecture-code.instructions.md`, `instructions/dotnet-csharp.instructions.md`, `instructions/backend.instructions.md`, `instructions/api-high-performance-security.instructions.md`, `instructions/frontend.instructions.md`, `instructions/vue-quasar.instructions.md`, `instructions/ui-ux.instructions.md`
-- Data: `instructions/orm.instructions.md`, `instructions/database.instructions.md`, `instructions/database-configuration-operations.instructions.md`, `instructions/data-privacy-compliance.instructions.md`, `instructions/microservices-performance.instructions.md`
-- Infrastructure: `instructions/docker.instructions.md`, `instructions/k8s.instructions.md`, `instructions/ci-cd-devops.instructions.md`, `instructions/workflow-generation.instructions.md`, `instructions/static-analysis-sonarqube.instructions.md`, `instructions/observability-sre.instructions.md`, `instructions/platform-reliability-resilience.instructions.md`, `instructions/powershell-script-creation.instructions.md`
-- Developer workspace: `instructions/vscode-workspace-efficiency.instructions.md`
-- Security: `instructions/security-vulnerabilities.instructions.md`, `instructions/api-high-performance-security.instructions.md`, `instructions/data-privacy-compliance.instructions.md`
-- Testing: `instructions/e2e-testing.instructions.md`
-- Documentation: `instructions/readme.instructions.md`, `instructions/prompt-templates.instructions.md`, `instructions/effort-estimation-ucp.instructions.md`, `instructions/pr.instructions.md`
+- For `.github` authoring, include `instructions/copilot-instruction-creation.instructions.md`.

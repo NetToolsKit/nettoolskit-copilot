@@ -941,9 +941,11 @@ $requiredFiles = @(
     '.github/copilot-instructions.md',
     '.github/instruction-routing.catalog.yml',
     '.github/instructions/authoritative-sources.instructions.md',
+    '.github/instructions/repository-operating-model.instructions.md',
     '.github/prompts/route-instructions.prompt.md',
     '.github/schemas/instruction-routing.catalog.schema.json',
     '.github/governance/authoritative-source-map.json',
+    '.github/governance/instruction-ownership.manifest.json',
     '.github/governance/readme-standards.baseline.json',
     '.github/governance/template-standards.baseline.json',
     '.github/governance/workspace-efficiency.baseline.json',
@@ -973,6 +975,7 @@ $requiredFiles = @(
     'scripts/validation/validate-agent-orchestration.ps1',
     'scripts/validation/validate-readme-standards.ps1',
     'scripts/validation/validate-authoritative-source-policy.ps1',
+    'scripts/validation/validate-instruction-architecture.ps1',
     'scripts/validation/validate-template-standards.ps1',
     'scripts/validation/validate-workspace-efficiency.ps1',
     'scripts/validation/validate-powershell-standards.ps1',
@@ -1002,6 +1005,7 @@ $requiredFiles = @(
     'scripts/tests/runtime/vscode-global-settings-sync.tests.ps1',
     'scripts/tests/runtime/vscode-global-snippets-sync.tests.ps1',
     'scripts/tests/runtime/authoritative-source-policy.tests.ps1',
+    'scripts/tests/runtime/instruction-architecture.tests.ps1',
     'scripts/tests/runtime/workspace-efficiency.tests.ps1',
     'scripts/tests/runtime/workspace-settings-sync.tests.ps1'
 )
@@ -1040,6 +1044,13 @@ $authoritativeSourceMap = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/g
 if ($null -ne $authoritativeSourceMap) {
     if ($null -eq $authoritativeSourceMap.stackRules -or @($authoritativeSourceMap.stackRules).Count -eq 0) {
         Add-ValidationFailure 'Authoritative source map must contain at least one stackRules entry.'
+    }
+}
+
+$instructionOwnershipManifest = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/instruction-ownership.manifest.json'
+if ($null -ne $instructionOwnershipManifest) {
+    if ($null -eq $instructionOwnershipManifest.layers -or @($instructionOwnershipManifest.layers).Count -eq 0) {
+        Add-ValidationFailure 'Instruction ownership manifest must contain at least one layer.'
     }
 }
 

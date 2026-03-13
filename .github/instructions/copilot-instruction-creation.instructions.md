@@ -169,6 +169,7 @@ Examples:
 ## Avoiding Redundancy
 - Never repeat global rules from copilot-instructions.md
 - Centralize globals in copilot-instructions.md only
+- Keep repo topology, build/test/run commands, style, release process, and domain instruction mapping in `instructions/repository-operating-model.instructions.md`; do not regrow `AGENTS.md` or `copilot-instructions.md` with duplicated repo-operating detail
 - Do not embed or repeat official documentation domain lists in new instruction files; reference `instructions/authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
 - Use explicit inheritance when applicable
 - Ensure specialization without overlap

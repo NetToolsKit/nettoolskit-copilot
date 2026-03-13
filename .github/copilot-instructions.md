@@ -17,6 +17,7 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 # Hierarchy and Scope
 - Global rules live here and are always applied.
+- Repository-specific operating rules live in `instructions/repository-operating-model.instructions.md`.
 - Domain instruction files extend these rules; do not duplicate globals.
 - Prefer the most specific domain rule when conflicts occur.
 - Map and reference new instruction files here.
@@ -64,7 +65,8 @@ Follow this order of operations on every task:
 
 ## How to use
 - Start with AGENTS.md for solution-specific details (stack, folders, commands).
-- Use this file for global rules and technology mappings.
+- Use this file for global rules, precedence, and always-applied policies.
+- Use `instructions/repository-operating-model.instructions.md` for repo topology, build/test/run commands, style, release, and domain instruction mapping.
 - Follow domain-specific files in instructions/*.md for technical details.
 
 # Authoritative Sources Policy
@@ -95,6 +97,7 @@ Follow this order of operations on every task:
 
 ## Always Applied
 - AGENTS.md (agents and context policy)
+- instructions/repository-operating-model.instructions.md
 - instructions/authoritative-sources.instructions.md
 - instructions/workflow-optimization.instructions.md
 - instructions/powershell-execution.instructions.md
@@ -103,30 +106,9 @@ Follow this order of operations on every task:
 ## Only for .github Changes
 - instructions/copilot-instruction-creation.instructions.md
 
-# Domain Instructions
-
-## Development
-- C#/.NET: instructions/dotnet-csharp.instructions.md (e.g., namespaces, sealed classes, XML docs).
-- Architecture and backend: instructions/clean-architecture-code.instructions.md; instructions/backend.instructions.md (e.g., CQRS, mediator patterns).
-- Frontend and UI/UX: instructions/frontend.instructions.md; instructions/vue-quasar.instructions.md; instructions/vue-quasar-architecture.instructions.md; instructions/ui-ux.instructions.md (e.g., i18n pt-BR, responsive design, feature-first Clean Architecture).
-
-## Data and Infrastructure
-- Data/ORM/Databases: instructions/orm.instructions.md; instructions/database.instructions.md; instructions/database-configuration-operations.instructions.md (e.g., EF Core, migrations, connection/pooling/failover operations).
-- Privacy and data protection: instructions/data-privacy-compliance.instructions.md (e.g., PII handling, minimization, retention/deletion, compliance controls).
-- Microservices and performance: instructions/microservices-performance.instructions.md; instructions/platform-reliability-resilience.instructions.md (e.g., async patterns, caching, resilience, chaos, DR readiness).
-- Infrastructure and DevOps: instructions/docker.instructions.md; instructions/k8s.instructions.md; instructions/ci-cd-devops.instructions.md; instructions/workflow-generation.instructions.md; instructions/static-analysis-sonarqube.instructions.md (e.g., pipelines, security scans).
-- Developer workspace and VS Code: instructions/vscode-workspace-efficiency.instructions.md (e.g., efficient `.code-workspace` design, Git/watcher throttling, shared AI context layout).
-- Observability and SRE: instructions/observability-sre.instructions.md (e.g., SLI/SLO, telemetry quality, alerting, runbooks, incident readiness).
-- Security and vulnerabilities: instructions/security-vulnerabilities.instructions.md; instructions/api-high-performance-security.instructions.md (e.g., OWASP/NIST-aligned controls and high-performance secure API patterns with rate limiting and abuse protection).
-- Dependency vulnerability automation scripts (shared runtime): ~/.codex/shared-scripts/security/Invoke-PreBuildSecurityGate.ps1; ~/.codex/shared-scripts/security/Invoke-VulnerabilityAudit.ps1; ~/.codex/shared-scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1; ~/.codex/shared-scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1.
-- For GitHub Actions in external repositories, consume shared scripts from pinned refs in `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
-- Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
-- PowerShell script authoring: instructions/powershell-script-creation.instructions.md (e.g., script skeleton, root detection, mutation safety, exit codes).
-
-## Testing and Documentation
-- Rust organization and testing: instructions/rust-code-organization.instructions.md (e.g., mirror src/ structure, no inline tests, test_suite.rs entry point); instructions/rust-testing.instructions.md (e.g., error_tests.rs mandatory, coverage requirements, templates).
-- E2E testing: instructions/e2e-testing.instructions.md (e.g., Playwright, test categories).
-- Documentation and processes: instructions/readme.instructions.md; instructions/pr.instructions.md; instructions/prompt-templates.instructions.md; instructions/effort-estimation-ucp.instructions.md (e.g., README creation with template, PR guidelines, changelog versioning).
+# Repository and Domain Rules
+- Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
+- Use domain instructions from that map according to the active route and file scope.
 
 # Transparency
 
@@ -139,17 +121,5 @@ Follow this order of operations on every task:
 - When the current state is stable and ready for persistence, explicitly tell the user that the work is ready to commit.
 - For large tasks, surface stable intermediate commit checkpoints as soon as they are reached.
 
-# Security
-- No secrets in repo; use User Secrets/Azure Key Vault; typed options via IOptions.
-
-# Changelog
-- Single source: root CHANGELOG.md for .github and project changes
-- Process: instructions/feedback-changelog.instructions.md
-- Mandatory versioning: every CHANGELOG entry must include semantic version [X.Y.Z] and date YYYY-MM-DD; no [Unreleased] accumulation; immediate versioning on changes.
-- Release tagging for rollback: after commit, create and push matching tag `copilot-vX.Y.Z` (for example: `git tag -a copilot-v1.1.3 -m "copilot instructions 1.1.3"` and `git push origin copilot-v1.1.3`).
-
-# STYLE (EOF and whitespace)
-- Do not leave a trailing blank line at the end of files.
-- For files under `instructions/*.md` and Copilot/Codex instruction outputs: do NOT include a final newline.
-- For the rest of the repository, follow `.editorconfig` exactly: current repository policy is `insert_final_newline = false`, including Rust/TOML/lock files unless a future file-specific rule explicitly opts in.
-- Never add an extra empty line at EOF just because a file was edited; always avoid trailing whitespace.
+# Repository Style, Security, and Release
+- Follow `instructions/repository-operating-model.instructions.md` for style, EOF policy, security handling, commit/PR expectations, and changelog rules.
