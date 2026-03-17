@@ -15,8 +15,8 @@
     - merges shared recommendations from the base workspace `extensions` block
     - carries missing top-level defaults from the base workspace when creating/updating files
     - replaces only the `settings` object
-    - copies required watcher/search excludes from the shared template
-    - applies approved local throttles for multi-window Codex/Copilot usage
+    - removes duplicated settings already covered by the global VS Code template
+    - applies only approved local overrides for multi-window Codex/Copilot usage
 
     When the workspace file does not exist, provide `-FolderPath` to create it.
 
@@ -210,6 +210,23 @@ function Get-JsonPropertyValue {
     return $property.Value
 }
 
+# Converts null, scalar, or arrays to a string array.
+function Convert-ToStringArray {
+    param(
+        [object] $Value
+    )
+
+    if ($null -eq $Value) {
+        return @()
+    }
+
+    if ($Value -is [string]) {
+        return @([string] $Value)
+    }
+
+    return @($Value | ForEach-Object { [string] $_ })
+}
+
 # Merges string arrays while preserving first-seen order and uniqueness.
 function Merge-UniqueStringValues {
     param(
@@ -239,10 +256,10 @@ function Merge-WorkspaceExtensions {
         [object] $BaseExtensions
     )
 
-    $existingRecommendations = @((Get-JsonPropertyValue -InputObject $ExistingExtensions -PropertyName 'recommendations'))
-    $baseRecommendations = @((Get-JsonPropertyValue -InputObject $BaseExtensions -PropertyName 'recommendations'))
-    $existingUnwanted = @((Get-JsonPropertyValue -InputObject $ExistingExtensions -PropertyName 'unwantedRecommendations'))
-    $baseUnwanted = @((Get-JsonPropertyValue -InputObject $BaseExtensions -PropertyName 'unwantedRecommendations'))
+    $existingRecommendations = Convert-ToStringArray -Value (Get-JsonPropertyValue -InputObject $ExistingExtensions -PropertyName 'recommendations')
+    $baseRecommendations = Convert-ToStringArray -Value (Get-JsonPropertyValue -InputObject $BaseExtensions -PropertyName 'recommendations')
+    $existingUnwanted = Convert-ToStringArray -Value (Get-JsonPropertyValue -InputObject $ExistingExtensions -PropertyName 'unwantedRecommendations')
+    $baseUnwanted = Convert-ToStringArray -Value (Get-JsonPropertyValue -InputObject $BaseExtensions -PropertyName 'unwantedRecommendations')
 
     [string[]] $mergedRecommendations = Merge-UniqueStringValues -PrimaryValues $existingRecommendations -SecondaryValues $baseRecommendations
     [string[]] $mergedUnwanted = Merge-UniqueStringValues -PrimaryValues $existingUnwanted -SecondaryValues $baseUnwanted
@@ -263,44 +280,98 @@ function Merge-WorkspaceExtensions {
     return [pscustomobject] $extensions
 }
 
-# Builds the allowed workspace settings subset from template and baseline.
-function New-WorkspaceSettingsObject {
+# Resolves one workspace folder path relative to its file.
+function Resolve-WorkspaceFolderPath {
     param(
-        [object] $SettingsTemplate,
+        [string] $WorkspaceFilePath,
+        [string] $FolderPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($FolderPath)) {
+        return $null
+    }
+
+    $workspaceDirectory = Split-Path -Path $WorkspaceFilePath -Parent
+    if ([System.IO.Path]::IsPathRooted($FolderPath)) {
+        return [System.IO.Path]::GetFullPath($FolderPath)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $workspaceDirectory $FolderPath))
+}
+
+# Returns true when the workspace should apply local git.autorefresh throttling.
+function Test-IsHeavyWorkspace {
+    param(
+        [string] $WorkspaceFilePath,
+        [object[]] $FolderList,
         [object] $WorkspaceBaseline
     )
 
-    $templateWatcherExclude = Convert-ToPropertyMap -Value (Get-JsonPropertyValue -InputObject $SettingsTemplate -PropertyName 'files.watcherExclude')
-    $templateSearchExclude = Convert-ToPropertyMap -Value (Get-JsonPropertyValue -InputObject $SettingsTemplate -PropertyName 'search.exclude')
-    $requiredSettings = Convert-ToPropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'requiredSettings')
-    $recommendedSettings = Convert-ToPropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'recommendedSettings')
+    $heuristics = Convert-ToPropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'heuristics')
+    $supportPatterns = Convert-ToStringArray -Value $heuristics['supportFolderPatterns']
+    $supportFolderCount = 0
+    $productFolderCount = 0
+
+    foreach ($folderItem in @($FolderList)) {
+        if ($null -eq $folderItem) {
+            continue
+        }
+
+        $folderPath = [string] (Get-JsonPropertyValue -InputObject $folderItem -PropertyName 'path')
+        if ([string]::IsNullOrWhiteSpace($folderPath)) {
+            continue
+        }
+
+        $resolvedFolderPath = Resolve-WorkspaceFolderPath -WorkspaceFilePath $WorkspaceFilePath -FolderPath $folderPath
+        $isSupportFolder = $false
+        foreach ($pattern in $supportPatterns) {
+            if ($resolvedFolderPath -match $pattern -or $folderPath -match $pattern) {
+                $isSupportFolder = $true
+                break
+            }
+        }
+
+        if ($isSupportFolder) {
+            $supportFolderCount++
+        }
+        else {
+            $productFolderCount++
+        }
+    }
+
+    if (@($FolderList).Count -gt 1) {
+        return $true
+    }
+
+    if ($supportFolderCount -gt 0) {
+        return $true
+    }
+
+    if ($productFolderCount -gt 1) {
+        return $true
+    }
+
+    return $false
+}
+
+# Builds the allowed workspace settings subset from baseline and workspace composition.
+function New-WorkspaceSettingsObject {
+    param(
+        [object] $WorkspaceBaseline,
+        [string] $WorkspaceFilePath,
+        [object[]] $FolderList
+    )
+
     $recommendedBounds = Convert-ToPropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'recommendedNumericUpperBounds')
-
-    $watcherExclude = [ordered]@{}
-    foreach ($key in @((Get-JsonPropertyValue -InputObject $requiredSettings['files.watcherExclude'] -PropertyName 'requiredKeys'))) {
-        $keyName = [string] $key
-        $watcherExclude[$keyName] = if ($templateWatcherExclude.Contains($keyName)) { [bool] $templateWatcherExclude[$keyName] } else { $true }
-    }
-
-    $searchExclude = [ordered]@{}
-    foreach ($key in @((Get-JsonPropertyValue -InputObject $requiredSettings['search.exclude'] -PropertyName 'requiredKeys'))) {
-        $keyName = [string] $key
-        $searchExclude[$keyName] = if ($templateSearchExclude.Contains($keyName)) { [bool] $templateSearchExclude[$keyName] } else { $true }
-    }
-
-    return [pscustomobject] ([ordered]@{
-        'git.autofetch' = [bool] $requiredSettings['git.autofetch']
-        'git.openRepositoryInParentFolders' = 'never'
-        'git.autorefresh' = [bool] $recommendedSettings['git.autorefresh']
-        'extensions.autoUpdate' = [bool] $recommendedSettings['extensions.autoUpdate']
-        'github.copilot.nextEditSuggestions.enabled' = [bool] $recommendedSettings['github.copilot.nextEditSuggestions.enabled']
-        'workbench.startupEditor' = [string] $recommendedSettings['workbench.startupEditor']
-        'chat.emptyState.history.enabled' = [bool] $recommendedSettings['chat.emptyState.history.enabled']
-        'scm.repositories.visible' = [int] $recommendedBounds['scm.repositories.visible']
+    $settings = [ordered]@{
         'chat.agent.maxRequests' = [int] $recommendedBounds['chat.agent.maxRequests']
-        'files.watcherExclude' = [pscustomobject] $watcherExclude
-        'search.exclude' = [pscustomobject] $searchExclude
-    })
+    }
+
+    if (Test-IsHeavyWorkspace -WorkspaceFilePath $WorkspaceFilePath -FolderList $FolderList -WorkspaceBaseline $WorkspaceBaseline) {
+        $settings['git.autorefresh'] = $false
+    }
+
+    return [pscustomobject] $settings
 }
 
 # Creates a new workspace document with supplied folders.
@@ -448,13 +519,11 @@ $resolvedSettingsTemplatePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $
 $resolvedBaseWorkspacePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $BaseWorkspacePath
 
 $workspaceBaseline = Read-JsonFile -Path $resolvedBaselinePath -Label 'workspace-efficiency baseline'
-$settingsTemplate = Read-JsonFile -Path $resolvedSettingsTemplatePath -Label 'VS Code settings template'
 $baseWorkspaceDocument = Read-JsonFile -Path $resolvedBaseWorkspacePath -Label 'base workspace'
-$workspaceSettings = New-WorkspaceSettingsObject -SettingsTemplate $settingsTemplate -WorkspaceBaseline $workspaceBaseline
-
 $workspaceExists = Test-Path -LiteralPath $resolvedWorkspacePath -PathType Leaf
 if ($workspaceExists) {
     $workspaceDocument = Read-JsonFile -Path $resolvedWorkspacePath -Label 'workspace file'
+    $workspaceSettings = New-WorkspaceSettingsObject -WorkspaceBaseline $workspaceBaseline -WorkspaceFilePath $resolvedWorkspacePath -FolderList @($workspaceDocument.folders)
     $updatedDocument = Set-WorkspaceSettings -WorkspaceDocument $workspaceDocument -BaseWorkspaceDocument $baseWorkspaceDocument -SettingsObject $workspaceSettings
     Write-WorkspaceDocument -Path $resolvedWorkspacePath -Document $updatedDocument
     Write-StyledOutput ("[OK] Workspace settings synchronized: {0}" -f $resolvedWorkspacePath)
@@ -465,6 +534,8 @@ else {
         throw 'Workspace file does not exist. Provide -FolderPath to create a new workspace.'
     }
 
+    $folderItems = @($FolderPath | ForEach-Object { [pscustomobject] ([ordered]@{ path = [string] $_ }) })
+    $workspaceSettings = New-WorkspaceSettingsObject -WorkspaceBaseline $workspaceBaseline -WorkspaceFilePath $resolvedWorkspacePath -FolderList $folderItems
     $newDocument = New-WorkspaceDocument -BaseWorkspaceDocument $baseWorkspaceDocument -FolderPaths $FolderPath -SettingsObject $workspaceSettings
     Write-WorkspaceDocument -Path $resolvedWorkspacePath -Document $newDocument
     Write-StyledOutput ("[OK] Workspace created with synchronized settings: {0}" -f $resolvedWorkspacePath)

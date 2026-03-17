@@ -109,7 +109,7 @@ Follow this order of operations on every task:
 
 # Repository and Domain Rules
 - Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
-- Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `.temp/planning/`.
+- Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `planning/`.
 - Use domain instructions from that map according to the active route and file scope.
 
 # Transparency

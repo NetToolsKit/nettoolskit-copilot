@@ -216,17 +216,28 @@
         "*.swift": "swift"
     },
     "files.exclude": {
-        "**/.git": false
+        "**/.git": true,
+        "**/.vs": true,
+        "**/TestResults": true,
+        "**/packages": true,
+        "**/BenchmarkDotNet.Artifacts": true,
+        "**/.sonarqube": true
     },
 
     // PERFORMANCE - Performance optimizations and exclusions
     // https://code.visualstudio.com/docs/setup/setup-overview#_advanced-functionality
     "files.watcherExclude": {
+        "**/.git/**": true,
         "**/node_modules/**": true,
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
+        "**/.vs/**": true,
+        "**/TestResults/**": true,
+        "**/packages/**": true,
         "**/dist/**": true,
         "**/build/**": true,
+        "**/BenchmarkDotNet.Artifacts/**": true,
+        "**/.sonarqube/**": true,
         "**/.bloop": true,
         "**/.metals": true,
         "**/target/**": true,
@@ -245,9 +256,15 @@
         "**/.venv/**": true
     },
     "search.exclude": {
+        "**/.git": true,
         "**/node_modules": true,
+        "**/.vs": true,
+        "**/TestResults": true,
+        "**/packages": true,
         "**/dist": true,
         "**/build": true,
+        "**/BenchmarkDotNet.Artifacts": true,
+        "**/.sonarqube": true,
         "**/target": true,
         "**/.next": true,
         "**/.nuxt": true,
@@ -267,19 +284,19 @@
     // VERSION CONTROL (GIT) - Integrated Git settings
     // https://code.visualstudio.com/docs/sourcecontrol/overview
     "git.enableSmartCommit": true,
-    "git.autofetch": true,
-    "git.openRepositoryInParentFolders": "always",
+    "git.autofetch": false,
+    "git.openRepositoryInParentFolders": "never",
     "git.confirmSync": false,
     "git.decorations.enabled": true,
     "git.showPushSuccessNotification": true,
     "git.allowForcePush": false,
     "git.branchProtection": ["main", "master", "develop"],
-    "git.detectWorktrees": true,
+    "git.detectWorktrees": false,
     "git.enabled": true,
     "git.autorefresh": true,
-    "git.detectSubmodules": true,
+    "git.detectSubmodules": false,
     "git.detectSubmodulesLimit": 10,
-    "scm.repositories.visible": 10,
+    "scm.repositories.visible": 4,
     "scm.defaultViewMode": "tree",
     "scm.defaultViewSortKey": "name",
     "scm.repositories.sortOrder": "discovery time",
@@ -305,7 +322,7 @@
 
     // EXTENSIONS - Extension management
     // https://code.visualstudio.com/docs/editor/extension-marketplace
-    "extensions.autoUpdate": true,
+    "extensions.autoUpdate": false,
     "extensions.ignoreRecommendations": false,
     "docker.extension.enableComposeLanguageServer": false,
     "jupyter.askForKernelRestart": false,
@@ -422,8 +439,7 @@
         "javascriptreact",
         "typescript",
         "typescriptreact",
-        "vue",
-        "html"
+        "vue"
     ],
 
     // ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -443,7 +459,7 @@
     },
     "github.copilot.advanced": {},
     "github.copilot.chat.localeOverride": "pt-br",
-    "github.copilot.nextEditSuggestions.enabled": true,
+    "github.copilot.nextEditSuggestions.enabled": false,
     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
     "chatgpt.localeOverride": "pt-BR",
 
@@ -459,12 +475,7 @@
     // Chat instruction file locations - Folders containing .md instruction files
     // https://code.visualstudio.com/docs/copilot/customization
     "chat.instructionsFilesLocations": {
-        "%USERPROFILE%\\.github\\": true,
-        "%USERPROFILE%\\.github\\instructions\\": true,
-        "%USERPROFILE%\\.github\\templates\\": true,
-        "%USERPROFILE%\\.github\\chatmodes\\": true,
-        "%USERPROFILE%\\.github\\prompts\\": true,
-        "%USERPROFILE%\\.codex\\skills\\": true
+        "%USERPROFILE%\\.github\\": true
     },
 
     // Copilot Custom Instructions - File references for code review, commits, and PRs

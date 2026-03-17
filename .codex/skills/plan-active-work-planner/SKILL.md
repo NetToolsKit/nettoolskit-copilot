@@ -1,6 +1,6 @@
 ---
 name: plan-active-work-planner
-description: Create or update active planning documents under `.temp/planning/plans-active`, then define the execution slices, validations, specialist handoff, and closeout expectations. Use when the task is non-trivial, multi-step, or explicitly asks for planning.
+description: Create or update active planning documents under `planning/active`, then define the execution slices, validations, specialist handoff, and closeout expectations. Use when the task is non-trivial, multi-step, or explicitly asks for planning.
 ---
 
 # Active Work Planner
@@ -16,7 +16,7 @@ description: Create or update active planning documents under `.temp/planning/pl
 
 ## Responsibilities
 
-- create or update the active planning document under `.temp/planning/plans-active/`
+- create or update the active planning document under `planning/active/`
 - keep scope, ordered tasks, validations, risks, and closeout rules explicit
 - name the plan with a stable slug and reuse the same file when continuing the same workstream
 - declare the recommended specialist and whether tester, reviewer, and release closeout are mandatory

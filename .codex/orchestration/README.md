@@ -15,7 +15,7 @@ This folder defines the contract layer for planner, context-token-optimizer, spe
 - ✅ Versioned agent contracts with explicit roles, tool scopes, and budgets
 - ✅ Deterministic pipeline orchestration with planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout handoffs and completion criteria
 - ✅ Real sequential stage dispatch through `codex exec` with schema-validated outputs
-- ✅ Versioned planning artifacts under `.temp/planning/` for active and completed plan history
+- ✅ Versioned planning artifacts under `planning/` for active and completed plan history
 - ✅ Standard run artifacts for traceability and post-run analysis
 - ✅ Persisted run state for retry diagnostics and execution auditing under `.temp/runs/<traceId>/`
 - ✅ Golden eval fixtures for regression checks on orchestration behavior

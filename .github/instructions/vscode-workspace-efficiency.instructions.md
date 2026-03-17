@@ -18,21 +18,28 @@ priority: high
 - Treat `.vscode/settings.tamplate.jsonc` as the source of truth for the global VS Code `settings.json`; render it into the user profile with `scripts/runtime/sync-vscode-global-settings.ps1` instead of maintaining the global file by hand.
 - Because VS Code does not support native inheritance from an external `.vscode/settings.json` into `.code-workspace`, use `scripts/runtime/sync-workspace-settings.ps1` plus `.vscode/base.code-workspace` as the repository-supported pseudo-inheritance mechanism.
 - Treat `.vscode/base.code-workspace` as the shared base for workspace-level `extensions` recommendations and any approved top-level defaults that should be inherited into generated workspaces.
-- `scripts/runtime/sync-workspace-settings.ps1` must merge the base workspace with the target workspace, preserve `folders`, preserve workspace-specific recommendations, and regenerate the approved `settings` block from the shared template and workspace baseline.
-- Generated `.code-workspace` files may intentionally be stricter than the shared template only for approved local throttles that reduce machine pressure:
-  - `git.autofetch = false`
-  - `git.openRepositoryInParentFolders` must not be `always`
+- `scripts/runtime/sync-workspace-settings.ps1` must merge the base workspace with the target workspace, preserve `folders`, preserve workspace-specific recommendations, and regenerate only the approved local override block.
+- Generated `.code-workspace` files must inherit the repository-managed global baseline whenever possible and may intentionally be stricter only for approved local throttles that reduce machine pressure:
   - `git.autorefresh = false`
+  - `chat.agent.maxRequests` reduced from the global default
+- Keep global Git/SCM and extension throttles in the shared template:
+  - `git.autofetch = false`
+  - `git.detectWorktrees = false`
+  - `git.detectSubmodules = false`
+  - `git.openRepositoryInParentFolders = never`
   - `extensions.autoUpdate = false`
   - `github.copilot.nextEditSuggestions.enabled = false`
-  - `scm.repositories.visible` reduced from the global default
-  - `chat.agent.maxRequests` reduced from the global default
-- Keep chat-session continuity settings aligned with the shared template unless a repository has a strong reason not to:
+  - `scm.repositories.visible` kept conservative
+- Keep high-cost repository metadata hidden and excluded globally:
+  - hide `.git` and `.vs` from Explorer
+  - exclude `.git`, `.vs`, `TestResults`, `packages`, `BenchmarkDotNet.Artifacts`, and `.sonarqube` from watcher/search scope
+- Keep chat-session continuity settings aligned with the shared template:
   - `workbench.startupEditor = welcomePage`
   - `chat.emptyState.history.enabled = true`
 - Keep `window.restoreWindows = all` in the user/global settings template; do not try to force this one through workspace-only policy.
 - Do not copy unrelated editor, UI, formatter, language, or extension settings from the shared template into workspace scope when the global baseline already provides them.
-- For generated workspaces, carry only the required output excludes plus the approved local throttles; do not clone the full global settings template into the workspace file.
+- Do not duplicate `files.watcherExclude` or `search.exclude` in workspace scope when the global template already provides the required excludes.
+- For generated workspaces, carry only approved local overrides; do not clone the global template into the workspace file.
 - Do not attempt manual inheritance hacks inside `.code-workspace` files; the supported pattern is base workspace plus sync script.
 
 # Workspace Composition
@@ -43,51 +50,32 @@ priority: high
 - Do not mix multiple heavy product codebases with shared AI/config folders in the same always-open workspace.
 
 # Required Workspace Settings
-- Every `.code-workspace` file must define a `settings` object instead of relying only on global defaults.
-- Always set `git.autofetch` to `false` in generated workspaces to avoid multiplied background fetch load across windows.
-- Never set `git.openRepositoryInParentFolders` to `always` in workspace scope.
-- Add `files.watcherExclude` entries for high-churn output trees:
-  - `**/.git/objects/**`
-  - `**/.git/subtree-cache/**`
-  - `**/node_modules/**`
-  - `**/dist/**`
-  - `**/build/**`
-  - `**/target/**`
-  - `**/bin/**`
-  - `**/obj/**`
-  - `**/coverage/**`
-  - `**/.temp/**`
-  - `**/artifacts/**`
-  - `**/.next/**`
-  - `**/.nuxt/**`
-  - `**/.output/**`
-  - `**/.turbo/**`
-  - `**/.cache/**`
-  - `**/.parcel-cache/**`
-  - `**/.svelte-kit/**`
-  - `**/.venv/**`
-- Add `search.exclude` entries for the same output trees using the non-recursive key form expected by VS Code search settings.
+- Every `.code-workspace` file should keep a minimal `settings` object only when it needs local overrides.
+- Effective workspace behavior must resolve to:
+  - `git.autofetch = false`
+  - `git.openRepositoryInParentFolders` not equal to `always`
+  - required watcher/search excludes present through the global template or explicit local override
+- Do not restate global defaults in workspace scope unless the workspace must pin a stricter value.
 
 # Recommended Workspace Throttles
-- Generated workspaces should default to `git.autorefresh = false`; this is mandatory for secondary or review-only workspaces.
-- Generated workspaces should default to `extensions.autoUpdate = false`; this is mandatory for long-lived secondary workspaces.
-- Generated workspaces should default to `github.copilot.nextEditSuggestions.enabled = false`; this is mandatory for secondary workspaces when machine pressure is noticeable.
-- Generated workspaces should default to `workbench.startupEditor = welcomePage` so VS Code starts on the standard welcome screen instead of forcing the chat-session landing experience.
-- Generated workspaces should default to `chat.emptyState.history.enabled = true` so recent workspace-scoped sessions remain visible from the empty state.
-- Keep `scm.repositories.visible` small; prefer `4` or less.
+- Heavy or multi-folder workspaces should override `git.autorefresh = false`.
+- Single-product workspaces may inherit `git.autorefresh` from the global baseline when machine pressure is acceptable.
 - Do not raise `chat.agent.maxRequests` in workspace scope; if overridden locally, keep it conservative.
 
 # Shared AI Context Strategy
 - Use one dedicated configuration workspace for `.github`, `.codex`, `copilot-instructions`, and global VS Code User assets.
 - Keep product workspaces free of those shared folders unless the task is specifically editing the shared instruction system.
-- Maintain global `chat.instructionsFilesLocations` and Copilot instruction file references so instruction discovery still works without opening the shared folders in every workspace.
+- Maintain a minimal global `chat.instructionsFilesLocations` set so instruction discovery still works without opening the shared folders in every workspace.
+- Prefer `%USERPROFILE%\\.github\\` as the single recursive discovery root.
+- Do not enable duplicated subfolder roots under `.github`.
+- Do not enable `%USERPROFILE%\\.codex\\skills\\` in global instruction discovery unless you have measured and justified the extra cost.
 
 # Validation Checklist
-- [ ] Workspace has a `settings` object
-- [ ] `git.autofetch` is disabled locally
-- [ ] `git.openRepositoryInParentFolders` is not `always`
-- [ ] `files.watcherExclude` covers the required build/output directories
-- [ ] `search.exclude` covers the required build/output directories
+- [ ] Workspace keeps only local overrides that are not already provided by the global template
+- [ ] Effective `git.autofetch` is disabled
+- [ ] Effective `git.openRepositoryInParentFolders` is not `always`
+- [ ] Effective watcher/search excludes cover the required build/output directories
+- [ ] `git.autorefresh = false` is applied to heavy or multi-folder workspaces
 - [ ] Workspace does not duplicate shared AI/config folders unnecessarily
 - [ ] Workspace folder count is justified for the active task
 - [ ] Shared instruction discovery is provided by global settings or by a dedicated config workspace

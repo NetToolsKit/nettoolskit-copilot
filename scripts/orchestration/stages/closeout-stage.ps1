@@ -349,7 +349,7 @@ $completedPlanMetadataPath = Join-Path $stageArtifactsDirectory 'completed-plan.
 $completedPlanPath = $null
 $planMoved = $false
 if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWhiteSpace($activePlanPath) -and (Test-Path -LiteralPath $activePlanPath -PathType Leaf)) {
-    $completedPlansDirectory = Join-Path $resolvedRepoRoot '.temp/planning/plans-completed'
+    $completedPlansDirectory = Join-Path $resolvedRepoRoot 'planning/completed'
     New-Item -ItemType Directory -Path $completedPlansDirectory -Force | Out-Null
     $completedPlanPath = Join-Path $completedPlansDirectory ([System.IO.Path]::GetFileName($activePlanPath))
     Move-Item -LiteralPath $activePlanPath -Destination $completedPlanPath -Force

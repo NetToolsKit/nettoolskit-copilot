@@ -1,12 +1,11 @@
 <#
 .SYNOPSIS
-    Validates the versioned planning workspace structure under .temp/planning.
+    Validates the versioned planning workspace structure under planning/.
 
 .DESCRIPTION
     Enforces the repository contract for versioned planning artifacts under
-    `.temp/planning`, including required directories, tracked placeholder files,
-    and `.gitignore` exceptions that keep planning versioned while the rest of
-    `.temp` stays ignored.
+    `planning/`, including required directories, tracked placeholder files,
+    and absence of legacy `.temp/planning` drift.
 
 .PARAMETER RepoRoot
     Repository root used to resolve the planning workspace structure.
@@ -65,9 +64,9 @@ $warnings = New-Object System.Collections.Generic.List[string]
 $failures = New-Object System.Collections.Generic.List[string]
 
 $requiredFiles = @(
-    '.temp/planning/README.md',
-    '.temp/planning/plans-active/.gitkeep',
-    '.temp/planning/plans-completed/.gitkeep'
+    'planning/README.md',
+    'planning/active/.gitkeep',
+    'planning/completed/.gitkeep'
 )
 
 foreach ($relativePath in $requiredFiles) {
@@ -78,9 +77,9 @@ foreach ($relativePath in $requiredFiles) {
 }
 
 $requiredDirectories = @(
-    '.temp/planning',
-    '.temp/planning/plans-active',
-    '.temp/planning/plans-completed'
+    'planning',
+    'planning/active',
+    'planning/completed'
 )
 
 foreach ($relativePath in $requiredDirectories) {
@@ -90,17 +89,9 @@ foreach ($relativePath in $requiredDirectories) {
     }
 }
 
-$gitIgnorePath = Join-Path $resolvedRepoRoot '.gitignore'
-if (Test-Path -LiteralPath $gitIgnorePath -PathType Leaf) {
-    $gitIgnoreContent = Get-Content -Raw -LiteralPath $gitIgnorePath
-    foreach ($requiredPattern in @('.temp/*', '!.temp/planning/', '!.temp/planning/**')) {
-        if ($gitIgnoreContent -notmatch [regex]::Escape($requiredPattern)) {
-            Add-ValidationMessage -Message (".gitignore missing planning pattern: {0}" -f $requiredPattern) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
-        }
-    }
-}
-else {
-    Add-ValidationMessage -Message 'Missing .gitignore for planning workspace validation.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+$legacyPlanningPath = Join-Path $resolvedRepoRoot '.temp/planning'
+if (Test-Path -LiteralPath $legacyPlanningPath) {
+    Add-ValidationMessage -Message 'Legacy planning workspace found under .temp/planning. Move versioned planning artifacts to planning/.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
 }
 
 Write-Host ''

@@ -96,53 +96,7 @@ try {
     { "path": "App" }
   ],
   "settings": {
-    "git.autofetch": false,
-    "git.openRepositoryInParentFolders": "never",
-    "git.autorefresh": false,
-    "extensions.autoUpdate": false,
-    "github.copilot.nextEditSuggestions.enabled": false,
-    "scm.repositories.visible": 3,
-    "chat.agent.maxRequests": 200,
-    "files.watcherExclude": {
-      "**/.git/objects/**": true,
-      "**/.git/subtree-cache/**": true,
-      "**/node_modules/**": true,
-      "**/dist/**": true,
-      "**/build/**": true,
-      "**/target/**": true,
-      "**/bin/**": true,
-      "**/obj/**": true,
-      "**/coverage/**": true,
-      "**/.temp/**": true,
-      "**/artifacts/**": true,
-      "**/.next/**": true,
-      "**/.nuxt/**": true,
-      "**/.output/**": true,
-      "**/.turbo/**": true,
-      "**/.cache/**": true,
-      "**/.parcel-cache/**": true,
-      "**/.svelte-kit/**": true,
-      "**/.venv/**": true
-    },
-    "search.exclude": {
-      "**/node_modules": true,
-      "**/dist": true,
-      "**/build": true,
-      "**/target": true,
-      "**/bin": true,
-      "**/obj": true,
-      "**/coverage": true,
-      "**/.temp": true,
-      "**/artifacts": true,
-      "**/.next": true,
-      "**/.nuxt": true,
-      "**/.output": true,
-      "**/.turbo": true,
-      "**/.cache": true,
-      "**/.parcel-cache": true,
-      "**/.svelte-kit": true,
-      "**/.venv": true
-    }
+    "chat.agent.maxRequests": 200
   }
 }
 '@
@@ -201,48 +155,8 @@ try {
     { "path": "App" }
   ],
   "settings": {
-    "git.autofetch": false,
     "git.openRepositoryInParentFolders": "always",
-    "files.watcherExclude": {
-      "**/.git/objects/**": true,
-      "**/.git/subtree-cache/**": true,
-      "**/node_modules/**": true,
-      "**/dist/**": true,
-      "**/build/**": true,
-      "**/target/**": true,
-      "**/bin/**": true,
-      "**/obj/**": true,
-      "**/coverage/**": true,
-      "**/.temp/**": true,
-      "**/artifacts/**": true,
-      "**/.next/**": true,
-      "**/.nuxt/**": true,
-      "**/.output/**": true,
-      "**/.turbo/**": true,
-      "**/.cache/**": true,
-      "**/.parcel-cache/**": true,
-      "**/.svelte-kit/**": true,
-      "**/.venv/**": true
-    },
-    "search.exclude": {
-      "**/node_modules": true,
-      "**/dist": true,
-      "**/build": true,
-      "**/target": true,
-      "**/bin": true,
-      "**/obj": true,
-      "**/coverage": true,
-      "**/.temp": true,
-      "**/artifacts": true,
-      "**/.next": true,
-      "**/.nuxt": true,
-      "**/.output": true,
-      "**/.turbo": true,
-      "**/.cache": true,
-      "**/.parcel-cache": true,
-      "**/.svelte-kit": true,
-      "**/.venv": true
-    }
+    "chat.agent.maxRequests": 200
   }
 }
 '@
@@ -259,48 +173,7 @@ try {
     { "path": "./App" }
   ],
   "settings": {
-    "git.autofetch": false,
-    "git.openRepositoryInParentFolders": "never",
-    "files.watcherExclude": {
-      "**/.git/objects/**": true,
-      "**/.git/subtree-cache/**": true,
-      "**/node_modules/**": true,
-      "**/dist/**": true,
-      "**/build/**": true,
-      "**/target/**": true,
-      "**/bin/**": true,
-      "**/obj/**": true,
-      "**/coverage/**": true,
-      "**/.temp/**": true,
-      "**/artifacts/**": true,
-      "**/.next/**": true,
-      "**/.nuxt/**": true,
-      "**/.output/**": true,
-      "**/.turbo/**": true,
-      "**/.cache/**": true,
-      "**/.parcel-cache/**": true,
-      "**/.svelte-kit/**": true,
-      "**/.venv/**": true
-    },
-    "search.exclude": {
-      "**/node_modules": true,
-      "**/dist": true,
-      "**/build": true,
-      "**/target": true,
-      "**/bin": true,
-      "**/obj": true,
-      "**/coverage": true,
-      "**/.temp": true,
-      "**/artifacts": true,
-      "**/.next": true,
-      "**/.nuxt": true,
-      "**/.output": true,
-      "**/.turbo": true,
-      "**/.cache": true,
-      "**/.parcel-cache": true,
-      "**/.svelte-kit": true,
-      "**/.venv": true
-    }
+    "chat.agent.maxRequests": 200
   }
 }
 '@
@@ -320,54 +193,29 @@ try {
     { "path": "AppB" }
   ],
   "settings": {
-    "git.autofetch": false,
-    "git.openRepositoryInParentFolders": "never",
-    "files.watcherExclude": {
-      "**/.git/objects/**": true,
-      "**/.git/subtree-cache/**": true,
-      "**/node_modules/**": true,
-      "**/dist/**": true,
-      "**/build/**": true,
-      "**/target/**": true,
-      "**/bin/**": true,
-      "**/obj/**": true,
-      "**/coverage/**": true,
-      "**/.temp/**": true,
-      "**/artifacts/**": true,
-      "**/.next/**": true,
-      "**/.nuxt/**": true,
-      "**/.output/**": true,
-      "**/.turbo/**": true,
-      "**/.cache/**": true,
-      "**/.parcel-cache/**": true,
-      "**/.svelte-kit/**": true,
-      "**/.venv/**": true
-    },
-    "search.exclude": {
-      "**/node_modules": true,
-      "**/dist": true,
-      "**/build": true,
-      "**/target": true,
-      "**/bin": true,
-      "**/obj": true,
-      "**/coverage": true,
-      "**/.temp": true,
-      "**/artifacts": true,
-      "**/.next": true,
-      "**/.nuxt": true,
-      "**/.output": true,
-      "**/.turbo": true,
-      "**/.cache": true,
-      "**/.parcel-cache": true,
-      "**/.svelte-kit": true,
-      "**/.venv": true
-    }
+    "chat.agent.maxRequests": 200
   }
 }
 '@
         & $scriptPath -RepoRoot $resolvedRepoRoot -WorkspaceSearchRoot $warningWorkspace -WarningOnly:$false | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Workspace heuristic warnings should not fail validation.'
+
+        $redundantSettingWorkspace = Join-Path $tempRoot 'redundant-setting.code-workspace'
+        Write-TextFile -Path $redundantSettingWorkspace -Content @'
+{
+  "folders": [
+    { "path": "App" }
+  ],
+  "settings": {
+    "extensions.autoUpdate": false,
+    "chat.agent.maxRequests": 200
+  }
+}
+'@
+        & $scriptPath -RepoRoot $resolvedRepoRoot -WorkspaceSearchRoot $redundantSettingWorkspace -WarningOnly:$false | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Workspace with redundant global settings should fail.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

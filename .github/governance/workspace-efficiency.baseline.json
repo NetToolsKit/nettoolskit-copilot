@@ -6,15 +6,37 @@
   "templateWorkspacePaths": [
     ".vscode/base.code-workspace"
   ],
+  "allowedWorkspaceOverrideSettings": [
+    "git.autorefresh",
+    "chat.agent.maxRequests"
+  ],
   "requiredSettings": {
     "git.autofetch": false,
+    "git.detectWorktrees": false,
+    "git.detectSubmodules": false,
+    "files.exclude": {
+      "requiredKeys": [
+        "**/.git",
+        "**/.vs",
+        "**/TestResults",
+        "**/packages",
+        "**/BenchmarkDotNet.Artifacts",
+        "**/.sonarqube"
+      ]
+    },
     "files.watcherExclude": {
       "requiredKeys": [
+        "**/.git/**",
         "**/.git/objects/**",
         "**/.git/subtree-cache/**",
+        "**/.vs/**",
+        "**/TestResults/**",
+        "**/packages/**",
         "**/node_modules/**",
         "**/dist/**",
         "**/build/**",
+        "**/BenchmarkDotNet.Artifacts/**",
+        "**/.sonarqube/**",
         "**/target/**",
         "**/bin/**",
         "**/obj/**",
@@ -33,9 +55,15 @@
     },
     "search.exclude": {
       "requiredKeys": [
+        "**/.git",
+        "**/.vs",
+        "**/TestResults",
+        "**/packages",
         "**/node_modules",
         "**/dist",
         "**/build",
+        "**/BenchmarkDotNet.Artifacts",
+        "**/.sonarqube",
         "**/target",
         "**/bin",
         "**/obj",
@@ -59,7 +87,6 @@
     ]
   },
   "recommendedSettings": {
-    "git.autorefresh": false,
     "extensions.autoUpdate": false,
     "github.copilot.nextEditSuggestions.enabled": false,
     "workbench.startupEditor": "welcomePage",

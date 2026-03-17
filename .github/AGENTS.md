@@ -70,8 +70,8 @@ Follow the **Mandatory Context Files** list above.
 4. Validation: Execute relevant checks, verify compilation, run tests, and confirm architectural compliance
 
 ## Sub-Agent Planning Chain
-- For non-trivial work, use the repository planning pattern under `.temp/planning/`.
-- Create or update an active plan in `.temp/planning/plans-active/` before implementation.
+- For non-trivial work, use the repository planning pattern under `planning/`.
+- Create or update an active plan in `planning/active/` before implementation.
 - Preferred chain for non-trivial work:
   1. planner
   2. context-token-optimizer

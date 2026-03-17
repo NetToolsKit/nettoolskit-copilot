@@ -416,7 +416,7 @@ end {
         $createdCompletedPlanPath = Join-Path $resolvedRepoRoot ([string] $completedPlanMetadata.completedPlanPath)
     }
     Assert-Equal -Actual $closeoutReport.status -Expected 'ready-for-commit' -Message 'Closeout stage should be commit-ready in fake flow.'
-    Assert-True (-not (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf)) 'Closeout stage should move the active plan out of plans-active.'
+    Assert-True (-not (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf)) 'Closeout stage should move the active plan out of planning/active.'
 
     Write-Host '[OK] agent orchestration engine tests passed.'
     exit 0
@@ -437,7 +437,7 @@ finally {
         Remove-Item -LiteralPath $createdCompletedPlanPath -Force -ErrorAction SilentlyContinue
     }
 
-    $completedPlansGitKeepPath = Join-Path $resolvedRepoRoot '.temp/planning/plans-completed/.gitkeep'
+    $completedPlansGitKeepPath = Join-Path $resolvedRepoRoot 'planning/completed/.gitkeep'
     if (-not (Test-Path -LiteralPath $completedPlansGitKeepPath -PathType Leaf)) {
         New-Item -ItemType File -Path $completedPlansGitKeepPath -Force | Out-Null
     }

@@ -356,7 +356,7 @@ if ($null -eq $planResult) {
 $taskPlanDataPath = Join-Path $stageArtifactsDirectory 'task-plan.json'
 $taskPlanPath = Join-Path $stageArtifactsDirectory 'task-plan.md'
 $contextPackPath = Join-Path $stageArtifactsDirectory 'context-pack.json'
-$planningDirectory = Join-Path $resolvedRepoRoot '.temp/planning/plans-active'
+$planningDirectory = Join-Path $resolvedRepoRoot 'planning/active'
 New-Item -ItemType Directory -Path $planningDirectory -Force | Out-Null
 $planSlug = Convert-ToPlanSlug -Text $requestContent
 $existingActivePlan = Get-ChildItem -LiteralPath $planningDirectory -File -Filter ("plan-*-{0}.md" -f $planSlug) |

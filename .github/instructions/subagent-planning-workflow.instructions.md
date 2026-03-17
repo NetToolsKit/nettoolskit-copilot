@@ -7,12 +7,12 @@ priority: high
 
 ## Purpose
 - Standardize how non-trivial work is planned, routed, executed, reviewed, and closed out with a deterministic sub-agent chain.
-- Keep planning artifacts versioned under `.temp/planning/` without mixing them into stable product documentation.
+- Keep planning artifacts versioned under `planning/` as first-class operational assets without mixing them into stable product documentation.
 
 ## Planning Workspace Contract
-- Use `.temp/planning/README.md` as the planning workspace guide.
-- Active plans live in `.temp/planning/plans-active/`.
-- Finished plans move to `.temp/planning/plans-completed/` only when the work is genuinely complete.
+- Use `planning/README.md` as the planning workspace guide.
+- Active plans live in `planning/active/`.
+- Finished plans move to `planning/completed/` only when the work is genuinely complete.
 - Plan files should use stable slugged names such as `plan-<scope>.md`.
 - Reuse and update an existing active plan when the request continues the same workstream instead of creating a duplicate file.
 
@@ -27,7 +27,7 @@ Create or update an active planning document when any of these are true:
 ## Mandatory Sub-Agent Chain
 For non-trivial work, prefer this execution chain unless the user explicitly asks for a lighter flow:
 1. `planner` agent
-   - create or update the active plan in `.temp/planning/plans-active/`
+   - create or update the active plan in `planning/active/`
    - define scope, ordered tasks, validations, risks, and closeout requirements
 2. `context-token-optimizer` agent
    - reduce token load by selecting the minimal context pack
@@ -61,4 +61,4 @@ Every active plan should define:
 - If the change affects stable documentation, update the relevant README in the same workstream.
 - Always return a suggested commit message when the work reaches a stable checkpoint.
 - If the change should be retained in release history, produce changelog-ready summary content following `instructions/feedback-changelog.instructions.md`.
-- Do not move a plan to `plans-completed/` until implementation, validation, review, and closeout are all materially complete.
+- Do not move a plan to `planning/completed/` until implementation, validation, review, and closeout are all materially complete.

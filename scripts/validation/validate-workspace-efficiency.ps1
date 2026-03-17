@@ -54,6 +54,7 @@
 param(
     [string] $RepoRoot,
     [string] $BaselinePath = '.github/governance/workspace-efficiency.baseline.json',
+    [string] $SettingsTemplatePath = '.vscode/settings.tamplate.jsonc',
     [string] $WorkspaceSearchRoot = '.',
     [bool] $WarningOnly = $true,
     [switch] $DetailedOutput,
@@ -215,6 +216,10 @@ function Convert-ToPropertyMap {
         return $result
     }
 
+    if (($Value -is [string]) -or ($Value -is [ValueType])) {
+        return $result
+    }
+
     if ($Value -is [hashtable]) {
         foreach ($key in $Value.Keys) {
             $result[[string] $key] = $Value[$key]
@@ -228,6 +233,38 @@ function Convert-ToPropertyMap {
     }
 
     return $result
+}
+
+# Merges two JSON-like objects so workspace settings can override the global template.
+function Merge-JsonObject {
+    param(
+        [object] $BaseObject,
+        [object] $OverrideObject
+    )
+
+    $baseMap = Convert-ToPropertyMap -Value $BaseObject
+    $overrideMap = Convert-ToPropertyMap -Value $OverrideObject
+    $merged = [ordered]@{}
+
+    foreach ($key in $baseMap.Keys) {
+        $merged[$key] = $baseMap[$key]
+    }
+
+    foreach ($key in $overrideMap.Keys) {
+        $baseValue = if ($merged.Contains($key)) { $merged[$key] } else { $null }
+        $overrideValue = $overrideMap[$key]
+        $baseValueMap = Convert-ToPropertyMap -Value $baseValue
+        $overrideValueMap = Convert-ToPropertyMap -Value $overrideValue
+
+        if ($baseValueMap.Count -gt 0 -and $overrideValueMap.Count -gt 0) {
+            $merged[$key] = [pscustomobject] (Merge-JsonObject -BaseObject $baseValue -OverrideObject $overrideValue)
+            continue
+        }
+
+        $merged[$key] = $overrideValue
+    }
+
+    return $merged
 }
 
 # Returns a direct property value when available.
@@ -532,7 +569,8 @@ function Test-WorkspaceFile {
     param(
         [string] $Root,
         [string] $WorkspaceFilePath,
-        [object] $Baseline
+        [object] $Baseline,
+        [object] $SettingsTemplate
     )
 
     $workspaceDisplayPath = Convert-ToDisplayPath -Root $Root -Path $WorkspaceFilePath
@@ -567,41 +605,57 @@ function Test-WorkspaceFile {
         return
     }
 
+    $allowedWorkspaceOverrides = Convert-ToStringArray -Value (Get-DirectPropertyValue -InputObject $Baseline -PropertyName 'allowedWorkspaceOverrideSettings')
+    $workspaceSettingMap = Convert-ToPropertyMap -Value $settingsObject
+    foreach ($settingName in $workspaceSettingMap.Keys) {
+        if ($settingName -notin $allowedWorkspaceOverrides) {
+            Add-ValidationFailure ("Workspace setting '{0}' is redundant in workspace scope; inherit it from the global template instead: {1}" -f $settingName, $workspaceDisplayPath)
+        }
+    }
+
+    $effectiveSettings = [pscustomobject] (Merge-JsonObject -BaseObject $SettingsTemplate -OverrideObject $settingsObject)
+
     $requiredSettingsMap = Convert-ToPropertyMap -Value $Baseline.requiredSettings
     foreach ($settingName in $requiredSettingsMap.Keys) {
         $ruleValue = $requiredSettingsMap[$settingName]
         $ruleMap = Convert-ToPropertyMap -Value $ruleValue
         if ($ruleMap.ContainsKey('requiredKeys')) {
-            Test-RequiredObjectSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $settingsObject -SettingName $settingName -RuleObject $ruleValue
+            Test-RequiredObjectSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $effectiveSettings -SettingName $settingName -RuleObject $ruleValue
             continue
         }
 
-        Test-RequiredLiteralSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $settingsObject -SettingName $settingName -ExpectedValue $ruleValue
+        Test-RequiredLiteralSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $effectiveSettings -SettingName $settingName -ExpectedValue $ruleValue
     }
 
     $forbiddenSettingsMap = Convert-ToPropertyMap -Value $Baseline.forbiddenSettings
     foreach ($settingName in $forbiddenSettingsMap.Keys) {
         $forbiddenValues = Convert-ToStringArray -Value $forbiddenSettingsMap[$settingName]
-        Test-ForbiddenSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $settingsObject -SettingName $settingName -ForbiddenValues $forbiddenValues
+        Test-ForbiddenSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $effectiveSettings -SettingName $settingName -ForbiddenValues $forbiddenValues
     }
 
     $recommendedSettingsMap = Convert-ToPropertyMap -Value $Baseline.recommendedSettings
     foreach ($settingName in $recommendedSettingsMap.Keys) {
-        Test-RecommendedLiteralSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $settingsObject -SettingName $settingName -ExpectedValue $recommendedSettingsMap[$settingName]
+        Test-RecommendedLiteralSetting -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $effectiveSettings -SettingName $settingName -ExpectedValue $recommendedSettingsMap[$settingName]
     }
 
     $numericBoundsMap = Convert-ToPropertyMap -Value $Baseline.recommendedNumericUpperBounds
     foreach ($settingName in $numericBoundsMap.Keys) {
-        Test-RecommendedNumericBound -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $settingsObject -SettingName $settingName -UpperBound ([double] $numericBoundsMap[$settingName])
+        Test-RecommendedNumericBound -WorkspaceDisplayPath $workspaceDisplayPath -SettingsObject $effectiveSettings -SettingName $settingName -UpperBound ([double] $numericBoundsMap[$settingName])
     }
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $resolvedBaselinePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $BaselinePath
+$resolvedSettingsTemplatePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $SettingsTemplatePath
 $resolvedWorkspaceSearchRoot = Resolve-RepoPath -Root $resolvedRepoRoot -Path $WorkspaceSearchRoot
 
 $baseline = Read-JsonFile -Path $resolvedBaselinePath -Label 'workspace-efficiency baseline'
 if ($null -eq $baseline) {
+    exit 1
+}
+
+$settingsTemplate = Read-JsonFile -Path $resolvedSettingsTemplatePath -Label 'VS Code settings template'
+if ($null -eq $settingsTemplate) {
     exit 1
 }
 
@@ -621,12 +675,13 @@ else {
 }
 
 foreach ($workspaceFile in @($workspaceFiles | Select-Object -Unique | Sort-Object)) {
-    Test-WorkspaceFile -Root $resolvedRepoRoot -WorkspaceFilePath $workspaceFile -Baseline $baseline
+    Test-WorkspaceFile -Root $resolvedRepoRoot -WorkspaceFilePath $workspaceFile -Baseline $baseline -SettingsTemplate $settingsTemplate
 }
 
 Write-StyledOutput ''
 Write-StyledOutput 'Workspace efficiency validation summary'
 Write-StyledOutput ("  Repo root: {0}" -f $resolvedRepoRoot)
+Write-StyledOutput ("  Settings template: {0}" -f $resolvedSettingsTemplatePath)
 Write-StyledOutput ("  Workspace search root: {0}" -f $resolvedWorkspaceSearchRoot)
 Write-StyledOutput ("  Workspace files checked: {0}" -f @($workspaceFiles).Count)
 Write-StyledOutput ("  Warning-only mode: {0}" -f $script:IsWarningOnly)

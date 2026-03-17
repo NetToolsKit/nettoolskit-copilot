@@ -32,7 +32,7 @@
     ".github/schemas/agent.evals.schema.json",
     ".github/schemas/agent.stage-route-result.schema.json",
     ".github/schemas/agent.stage-closeout-result.schema.json",
-    ".temp/planning/README.md",
+    "planning/README.md",
     "scripts/validation/validate-instructions.ps1",
     "scripts/validation/validate-readme-standards.ps1",
     "scripts/validation/validate-authoritative-source-policy.ps1",

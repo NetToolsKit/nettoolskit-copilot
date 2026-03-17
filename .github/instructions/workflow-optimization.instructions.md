@@ -8,7 +8,7 @@ Split large tasks into manageable steps; avoid hard token limits; split by funct
 
 # Planning and Routing
 - For non-trivial work, route first and then follow `instructions/subagent-planning-workflow.instructions.md`.
-- Treat `.temp/planning/README.md`, `.temp/planning/plans-active/`, and `.temp/planning/plans-completed/` as the versioned planning workspace.
+- Treat `planning/README.md`, `planning/active/`, and `planning/completed/` as the versioned planning workspace.
 - Keep the context pack minimal, but do not omit mandatory instruction files or the planning workflow when the task needs staging.
 
 # Prioritization

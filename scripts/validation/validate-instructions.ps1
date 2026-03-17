@@ -548,18 +548,17 @@ function Test-WorkspaceTemplateCompatibility {
     $recommendedSettings = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'recommendedSettings')
     $recommendedBounds = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'recommendedNumericUpperBounds')
     $forbiddenSettings = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'forbiddenSettings')
+    $allowedWorkspaceOverrides = @((Get-JsonPropertyValue -InputObject $WorkspaceBaseline -PropertyName 'allowedWorkspaceOverrideSettings'))
+    $templateFilesExclude = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName 'files.exclude')
     $templateWatcherExclude = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName 'files.watcherExclude')
     $templateSearchExclude = ConvertTo-PropertyMap -Value (Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName 'search.exclude')
 
-    $approvedWorkspaceDivergence = @(
-        'git.autofetch',
-        'git.openRepositoryInParentFolders',
-        'git.autorefresh',
-        'extensions.autoUpdate',
-        'github.copilot.nextEditSuggestions.enabled',
-        'scm.repositories.visible',
-        'chat.agent.maxRequests'
-    )
+    $requiredFilesExcludeKeys = @((Get-JsonPropertyValue -InputObject $requiredSettings['files.exclude'] -PropertyName 'requiredKeys'))
+    foreach ($key in $requiredFilesExcludeKeys) {
+        if (-not $templateFilesExclude.ContainsKey([string] $key) -or -not [bool] $templateFilesExclude[[string] $key]) {
+            Add-ValidationFailure ("Workspace efficiency baseline requires files.exclude entry '{0}' but VS Code template does not provide it." -f $key)
+        }
+    }
 
     $requiredWatcherKeys = @((Get-JsonPropertyValue -InputObject $requiredSettings['files.watcherExclude'] -PropertyName 'requiredKeys'))
     foreach ($key in $requiredWatcherKeys) {
@@ -576,11 +575,11 @@ function Test-WorkspaceTemplateCompatibility {
     }
 
     foreach ($settingName in $requiredSettings.Keys) {
-        if ($settingName -in @('files.watcherExclude', 'search.exclude')) {
+        if ($settingName -in @('files.exclude', 'files.watcherExclude', 'search.exclude')) {
             continue
         }
 
-        if ($settingName -notin $approvedWorkspaceDivergence) {
+        if ($settingName -notin $allowedWorkspaceOverrides) {
             $templateValue = Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName $settingName
             if ($null -ne $templateValue -and ([string] $templateValue -ne [string] $requiredSettings[$settingName])) {
                 Add-ValidationFailure ("Workspace baseline setting '{0}' diverges from VS Code template without approval." -f $settingName)
@@ -589,7 +588,7 @@ function Test-WorkspaceTemplateCompatibility {
     }
 
     foreach ($settingName in $recommendedSettings.Keys) {
-        if ($settingName -notin $approvedWorkspaceDivergence) {
+        if ($settingName -notin $allowedWorkspaceOverrides) {
             $templateValue = Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName $settingName
             if ($null -ne $templateValue -and ([string] $templateValue -ne [string] $recommendedSettings[$settingName])) {
                 Add-ValidationFailure ("Workspace recommended setting '{0}' diverges from VS Code template without approval." -f $settingName)
@@ -598,14 +597,36 @@ function Test-WorkspaceTemplateCompatibility {
     }
 
     foreach ($settingName in $recommendedBounds.Keys) {
-        if ($settingName -notin $approvedWorkspaceDivergence) {
-            Add-ValidationFailure ("Workspace numeric override '{0}' is not in the approved divergence list." -f $settingName)
+        if ($settingName -in $allowedWorkspaceOverrides) {
+            continue
+        }
+
+        $templateValue = Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName $settingName
+        if ($null -eq $templateValue) {
+            continue
+        }
+
+        $templateNumber = 0.0
+        if (-not [double]::TryParse(([string] $templateValue), [ref] $templateNumber)) {
+            Add-ValidationFailure ("VS Code template numeric setting '{0}' is not numeric." -f $settingName)
+            continue
+        }
+
+        if ($templateNumber -gt [double] $recommendedBounds[$settingName]) {
+            Add-ValidationFailure ("VS Code template numeric setting '{0}' exceeds the approved bound {1}." -f $settingName, $recommendedBounds[$settingName])
         }
     }
 
     foreach ($settingName in $forbiddenSettings.Keys) {
-        if ($settingName -notin $approvedWorkspaceDivergence) {
-            Add-ValidationFailure ("Workspace forbidden setting '{0}' is not in the approved divergence list." -f $settingName)
+        $templateValue = Get-JsonPropertyValue -InputObject $VscodeSettings -PropertyName $settingName
+        if ($null -eq $templateValue) {
+            continue
+        }
+
+        foreach ($forbiddenValue in @($forbiddenSettings[$settingName])) {
+            if ([string] $templateValue -eq [string] $forbiddenValue) {
+                Add-ValidationFailure ("VS Code template setting '{0}' must not be '{1}'." -f $settingName, $forbiddenValue)
+            }
         }
     }
 }
@@ -983,7 +1004,7 @@ $requiredFiles = @(
     '.codex/orchestration/templates/handoff.template.json',
     '.codex/orchestration/templates/run-artifact.template.json',
     '.codex/orchestration/evals/golden-tests.json',
-    '.temp/planning/README.md',
+    'planning/README.md',
     'scripts/validation/validate-agent-orchestration.ps1',
     'scripts/validation/validate-planning-structure.ps1',
     'scripts/validation/validate-readme-standards.ps1',
