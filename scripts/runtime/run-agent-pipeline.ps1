@@ -77,6 +77,9 @@ param(
     [int] $RetryDelaySeconds = 2,
     [int] $MaxPipelineDurationSeconds = 0,
     [bool] $ContinueOnStageFailure = $true,
+    [ValidateSet('script-only', 'codex-exec')] [string] $ExecutionBackend,
+    [string] $DispatchCommand = 'codex',
+    [bool] $WriteRunState = $true,
     [switch] $DetailedOutput
 )
 
@@ -166,6 +169,21 @@ function Read-JsonFile {
     }
 
     return (Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json -Depth 200)
+}
+
+# Writes JSON content without trailing newline for deterministic artifacts.
+function Write-JsonFile {
+    param(
+        [string] $Path,
+        [object] $Value
+    )
+
+    $directory = Split-Path -Parent $Path
+    if (-not [string]::IsNullOrWhiteSpace($directory)) {
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    }
+
+    Set-Content -LiteralPath $Path -Value ($Value | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
 }
 
 # Returns optional object property value with fallback default.
@@ -368,6 +386,65 @@ function Write-HandoffArtifact {
     Set-Content -LiteralPath $handoffPath -Value ($handoff | ConvertTo-Json -Depth 60) -Encoding UTF8 -NoNewline
 }
 
+# Writes deterministic run-state metadata for orchestration resume and observability.
+function Write-RunStateArtifact {
+    param(
+        [string] $Path,
+        [string] $TraceIdValue,
+        [string] $PipelineId,
+        [string] $Status,
+        [string] $CurrentStageId,
+        [datetime] $StartedAt,
+        [System.Collections.Generic.List[object]] $StageResults,
+        [System.Collections.Generic.List[string]] $Warnings,
+        [System.Collections.Generic.List[string]] $Failures,
+        [hashtable] $ArtifactMap,
+        [hashtable] $AgentUsage,
+        [string] $Root
+    )
+
+    $artifactEntries = @()
+    foreach ($entry in $ArtifactMap.GetEnumerator()) {
+        $artifactPath = [string] $entry.Value
+        if (-not (Test-Path -LiteralPath $artifactPath -PathType Leaf)) {
+            continue
+        }
+
+        $artifactEntries += [ordered]@{
+            name = [string] $entry.Key
+            path = Convert-ToRepoRelativePath -Root $Root -Path $artifactPath
+        }
+    }
+
+    $usageEntries = @()
+    foreach ($agentId in ($AgentUsage.Keys | Sort-Object)) {
+        $usage = $AgentUsage[$agentId]
+        $usageEntries += [ordered]@{
+            agentId = $agentId
+            steps = [int] $usage.steps
+            durationMs = [int] $usage.durationMs
+            fileEdits = [int] $usage.fileEdits
+            tokenUsage = [int] $usage.tokenUsage
+        }
+    }
+
+    $state = [ordered]@{
+        traceId = $TraceIdValue
+        pipelineId = $PipelineId
+        status = $Status
+        currentStageId = $CurrentStageId
+        startedAt = $StartedAt.ToString('o')
+        updatedAt = (Get-Date).ToString('o')
+        stages = @($StageResults)
+        warnings = @($Warnings)
+        failures = @($Failures)
+        artifacts = $artifactEntries
+        agentUsage = $usageEntries
+    }
+
+    Write-JsonFile -Path $Path -Value $state
+}
+
 # -------------------------------
 # Main execution
 # -------------------------------
@@ -401,9 +478,11 @@ $defaultTimeoutValue = Get-OptionalPropertyValue -Object $defaultsConfig -Proper
 $defaultTimeoutMinutes = [int] $defaultTimeoutValue
 
 $runtimeConfig = Get-OptionalPropertyValue -Object $pipeline -PropertyName 'runtime'
+$runtimeExecutionBackendValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'executionBackend'
 $runtimeRetryDelayValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'defaultRetryDelaySeconds'
 $runtimeMaxDurationValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'maxPipelineDurationSeconds'
 $runtimeContinueOnFailureValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'continueOnStageFailure'
+$runtimeWriteRunStateValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'writeRunState'
 
 $effectiveRetryDelaySeconds = if ($RetryDelaySeconds -gt 0) {
     $RetryDelaySeconds
@@ -432,6 +511,23 @@ else {
     [bool] $ContinueOnStageFailure
 }
 
+$effectiveExecutionBackend = if (-not [string]::IsNullOrWhiteSpace($ExecutionBackend)) {
+    $ExecutionBackend
+}
+elseif (-not [string]::IsNullOrWhiteSpace([string] $runtimeExecutionBackendValue)) {
+    [string] $runtimeExecutionBackendValue
+}
+else {
+    'script-only'
+}
+
+$effectiveWriteRunState = if ($null -ne $runtimeWriteRunStateValue) {
+    [bool] $runtimeWriteRunStateValue
+}
+else {
+    [bool] $WriteRunState
+}
+
 $trace = if ([string]::IsNullOrWhiteSpace($TraceId)) {
     "run-{0}" -f (Get-Date -Format 'yyyyMMdd-HHmmss')
 }
@@ -443,6 +539,7 @@ $runDirectory = Join-Path $resolvedRunRoot $trace
 $artifactsDirectory = Join-Path $runDirectory 'artifacts'
 $stagesDirectory = Join-Path $runDirectory 'stages'
 $handoffsDirectory = Join-Path $runDirectory 'handoffs'
+$runStatePath = Join-Path $runDirectory 'run-state.json'
 
 New-Item -ItemType Directory -Path $artifactsDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $stagesDirectory -Force | Out-Null
@@ -478,6 +575,23 @@ Write-StyledOutput ("[INFO] Pipeline warning-only mode: {0}" -f $WarningOnly)
 Write-StyledOutput ("[INFO] Continue on stage failure: {0}" -f $effectiveContinueOnStageFailure)
 Write-StyledOutput ("[INFO] Retry delay seconds: {0}" -f $effectiveRetryDelaySeconds)
 Write-StyledOutput ("[INFO] Max pipeline duration seconds: {0}" -f $effectiveMaxPipelineDurationSeconds)
+Write-StyledOutput ("[INFO] Execution backend: {0}" -f $effectiveExecutionBackend)
+
+if ($effectiveWriteRunState) {
+    Write-RunStateArtifact `
+        -Path $runStatePath `
+        -TraceIdValue $trace `
+        -PipelineId ([string] $pipeline.id) `
+        -Status 'running' `
+        -CurrentStageId '' `
+        -StartedAt $pipelineStartedAt `
+        -StageResults $stageResults `
+        -Warnings $runWarnings `
+        -Failures $runFailures `
+        -ArtifactMap $artifactMap `
+        -AgentUsage $agentUsage `
+        -Root $resolvedRepoRoot
+}
 
 foreach ($stage in @($pipeline.stages)) {
     $stageId = [string] $stage.id
@@ -516,6 +630,10 @@ foreach ($stage in @($pipeline.stages)) {
     $agent = $agentMap[$agentId]
     $usage = $agentUsage[$agentId]
     $budget = $agent.budget
+    $stageStatePath = Join-Path $stagesDirectory ("{0}-state.json" -f $stageId)
+    $dispatchMode = [string] (Get-OptionalPropertyValue -Object $execution -PropertyName 'dispatchMode' -DefaultValue 'scripted')
+    $promptTemplatePathValue = [string] (Get-OptionalPropertyValue -Object $execution -PropertyName 'promptTemplatePath' -DefaultValue '')
+    $responseSchemaPathValue = [string] (Get-OptionalPropertyValue -Object $execution -PropertyName 'responseSchemaPath' -DefaultValue '')
 
     $attempt = 0
     $stageSucceeded = $false
@@ -525,6 +643,17 @@ foreach ($stage in @($pipeline.stages)) {
     $stageDurationMs = 0
     $producedArtifactNames = @()
     $changedDelta = @()
+    $stageExecutionDetails = [ordered]@{
+        backend = if ($dispatchMode -eq 'codex-exec') { $effectiveExecutionBackend } else { 'scripted' }
+        attempts = 0
+        dispatchMode = $dispatchMode
+        promptTemplatePath = $promptTemplatePathValue
+        responseSchemaPath = $responseSchemaPathValue
+        dispatchCount = 0
+        workItemCount = 0
+        changedFileCount = 0
+        stageStatePath = $null
+    }
 
     while ($attempt -lt $maxAttempts -and -not $stageSucceeded) {
         $attempt++
@@ -621,19 +750,29 @@ foreach ($stage in @($pipeline.stages)) {
         $beforeSet = if ($SkipGuardrails) { $null } else { Get-WorkingTreePathSet -Root $resolvedRepoRoot }
 
         $stageStartedAt = Get-Date
-        & $scriptPath `
-            -RepoRoot $resolvedRepoRoot `
-            -RunDirectory $runDirectory `
-            -TraceId $trace `
-            -StageId $stageId `
-            -AgentId $agentId `
-            -RequestPath $requestPath `
-            -InputArtifactManifestPath $inputManifestPath `
-            -OutputArtifactManifestPath $outputManifestPath `
-            -DetailedOutput:$DetailedOutput
+        $stageParameters = @{
+            RepoRoot = $resolvedRepoRoot
+            RunDirectory = $runDirectory
+            TraceId = $trace
+            StageId = $stageId
+            AgentId = $agentId
+            RequestPath = $requestPath
+            InputArtifactManifestPath = $inputManifestPath
+            OutputArtifactManifestPath = $outputManifestPath
+            AgentsManifestPath = $resolvedAgentsManifestPath
+            DispatchMode = $dispatchMode
+            PromptTemplatePath = $promptTemplatePathValue
+            ResponseSchemaPath = $responseSchemaPathValue
+            DispatchCommand = $DispatchCommand
+            ExecutionBackend = $effectiveExecutionBackend
+            StageStatePath = $stageStatePath
+            DetailedOutput = [bool] $DetailedOutput
+        }
+        & $scriptPath @stageParameters
         $stageExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         $stageFinishedAt = Get-Date
         $stageDurationMs = [int] ($stageFinishedAt - $stageStartedAt).TotalMilliseconds
+        $stageExecutionDetails.attempts = $attempt
 
         $timeoutSecondsValue = Get-OptionalPropertyValue -Object $execution -PropertyName 'timeoutSeconds' -DefaultValue 1800
         $timeoutSeconds = [int] $timeoutSecondsValue
@@ -666,6 +805,25 @@ foreach ($stage in @($pipeline.stages)) {
 
         $outputManifest = Read-JsonFile -Path $outputManifestPath
         $stageArtifactMap = Convert-ManifestToArtifactMap -Manifest $outputManifest -Root $resolvedRepoRoot
+        if (Test-Path -LiteralPath $stageStatePath -PathType Leaf) {
+            $stageState = Read-JsonFile -Path $stageStatePath
+            $stageExecutionDetails.backend = [string] (Get-OptionalPropertyValue -Object $stageState -PropertyName 'backend' -DefaultValue $stageExecutionDetails.backend)
+            $stageExecutionDetails.dispatchCount = [int] (Get-OptionalPropertyValue -Object $stageState -PropertyName 'dispatchCount' -DefaultValue 0)
+            $stageExecutionDetails.workItemCount = [int] (Get-OptionalPropertyValue -Object $stageState -PropertyName 'workItemCount' -DefaultValue 0)
+            $stageExecutionDetails.changedFileCount = [int] (Get-OptionalPropertyValue -Object $stageState -PropertyName 'changedFileCount' -DefaultValue 0)
+            $stageExecutionDetails.stageStatePath = Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $stageStatePath
+            $stateWarningValue = [string] (Get-OptionalPropertyValue -Object $stageState -PropertyName 'warning' -DefaultValue '')
+            if (-not [string]::IsNullOrWhiteSpace($stateWarningValue)) {
+                $runWarnings.Add(("Stage {0} fallback detail: {1}" -f $stageId, $stateWarningValue)) | Out-Null
+            }
+            $stateWarnings = @((Get-OptionalPropertyValue -Object $stageState -PropertyName 'warnings' -DefaultValue @()))
+            foreach ($stateWarning in $stateWarnings) {
+                $warningText = [string] $stateWarning
+                if (-not [string]::IsNullOrWhiteSpace($warningText)) {
+                    $runWarnings.Add(("Stage {0} warning: {1}" -f $stageId, $warningText)) | Out-Null
+                }
+            }
+        }
 
         $missingOutputs = @()
         foreach ($expectedOutputName in @($stage.outputArtifacts)) {
@@ -722,6 +880,9 @@ foreach ($stage in @($pipeline.stages)) {
             }
 
             $usage.fileEdits = [int] $usage.fileEdits + $changedDelta.Count
+            if ($changedDelta.Count -gt $stageExecutionDetails.changedFileCount) {
+                $stageExecutionDetails.changedFileCount = $changedDelta.Count
+            }
             if ([int] $usage.fileEdits -gt [int] $budget.maxFileEdits) {
                 $lastFailureMessage = ("Agent {0} exceeded maxFileEdits ({1}). Current={2}" -f $agentId, $budget.maxFileEdits, $usage.fileEdits)
                 Write-StyledOutput ("[ERROR] {0}" -f $lastFailureMessage)
@@ -796,6 +957,7 @@ foreach ($stage in @($pipeline.stages)) {
             warnings = 0
             failures = $stageFailureCount
         }
+        execution = [pscustomobject]$stageExecutionDetails
     }
     $stageResults.Add($stageResult) | Out-Null
 
@@ -819,6 +981,22 @@ foreach ($stage in @($pipeline.stages)) {
 
     if (-not $stageSucceeded -and $onFailure -eq 'stop' -and $effectiveContinueOnStageFailure) {
         $runWarnings.Add(("Stage {0} configured with stop-on-failure, but execution continued due ContinueOnStageFailure=true." -f $stageId)) | Out-Null
+    }
+
+    if ($effectiveWriteRunState) {
+        Write-RunStateArtifact `
+            -Path $runStatePath `
+            -TraceIdValue $trace `
+            -PipelineId ([string] $pipeline.id) `
+            -Status 'running' `
+            -CurrentStageId $stageId `
+            -StartedAt $pipelineStartedAt `
+            -StageResults $stageResults `
+            -Warnings $runWarnings `
+            -Failures $runFailures `
+            -ArtifactMap $artifactMap `
+            -AgentUsage $agentUsage `
+            -Root $resolvedRepoRoot
     }
 }
 
@@ -855,7 +1033,7 @@ $overallStatus = if (-not $hasStageFailures) {
     'success'
 }
 elseif ($WarningOnly) {
-    'warning'
+    'partial'
 }
 else {
     'failed'
@@ -891,6 +1069,22 @@ $runArtifact = [pscustomobject]@{
 }
 
 Set-Content -LiteralPath $runArtifactPath -Value ($runArtifact | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
+
+if ($effectiveWriteRunState) {
+    Write-RunStateArtifact `
+        -Path $runStatePath `
+        -TraceIdValue $trace `
+        -PipelineId ([string] $pipeline.id) `
+        -Status $overallStatus `
+        -CurrentStageId '' `
+        -StartedAt $pipelineStartedAt `
+        -StageResults $stageResults `
+        -Warnings $runWarnings `
+        -Failures $runFailures `
+        -ArtifactMap $artifactMap `
+        -AgentUsage $agentUsage `
+        -Root $resolvedRepoRoot
+}
 
 Write-StyledOutput ''
 Write-StyledOutput 'Agent pipeline execution summary'

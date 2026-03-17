@@ -205,6 +205,26 @@ function Test-JsonSchemaDocument {
     }
 }
 
+# Returns optional object property value with fallback default.
+function Get-OptionalPropertyValue {
+    param(
+        [object] $Object,
+        [string] $PropertyName,
+        [object] $DefaultValue = $null
+    )
+
+    if ($null -eq $Object -or [string]::IsNullOrWhiteSpace($PropertyName)) {
+        return $DefaultValue
+    }
+
+    $property = $Object.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        return $DefaultValue
+    }
+
+    return $property.Value
+}
+
 # Validates agent manifest integrity and skill references.
 function Test-AgentManifestIntegrity {
     param(
@@ -328,6 +348,32 @@ function Test-PipelineManifestIntegrity {
             $absoluteScriptPath = Resolve-RepoPath -Root $Root -Path $executionScriptPath
             if (-not (Test-Path -LiteralPath $absoluteScriptPath -PathType Leaf)) {
                 Add-ValidationFailure ("Pipeline stage {0} execution script not found: {1}" -f $stageId, $executionScriptPath)
+            }
+        }
+
+        $dispatchMode = [string] (Get-OptionalPropertyValue -Object $stage.execution -PropertyName 'dispatchMode' -DefaultValue 'scripted')
+        if ($dispatchMode -eq 'codex-exec') {
+            $promptTemplatePath = [string] (Get-OptionalPropertyValue -Object $stage.execution -PropertyName 'promptTemplatePath' -DefaultValue '')
+            $responseSchemaPath = [string] (Get-OptionalPropertyValue -Object $stage.execution -PropertyName 'responseSchemaPath' -DefaultValue '')
+
+            if ([string]::IsNullOrWhiteSpace($promptTemplatePath)) {
+                Add-ValidationFailure ("Pipeline stage {0} dispatchMode codex-exec requires promptTemplatePath." -f $stageId)
+            }
+            else {
+                $absolutePromptTemplatePath = Resolve-RepoPath -Root $Root -Path $promptTemplatePath
+                if (-not (Test-Path -LiteralPath $absolutePromptTemplatePath -PathType Leaf)) {
+                    Add-ValidationFailure ("Pipeline stage {0} prompt template not found: {1}" -f $stageId, $promptTemplatePath)
+                }
+            }
+
+            if ([string]::IsNullOrWhiteSpace($responseSchemaPath)) {
+                Add-ValidationFailure ("Pipeline stage {0} dispatchMode codex-exec requires responseSchemaPath." -f $stageId)
+            }
+            else {
+                $absoluteResponseSchemaPath = Resolve-RepoPath -Root $Root -Path $responseSchemaPath
+                if (-not (Test-Path -LiteralPath $absoluteResponseSchemaPath -PathType Leaf)) {
+                    Add-ValidationFailure ("Pipeline stage {0} response schema not found: {1}" -f $stageId, $responseSchemaPath)
+                }
             }
         }
 
@@ -543,10 +589,12 @@ Set-Location -Path $resolvedRepoRoot
 $requiredDirectories = @(
     '.codex/orchestration',
     '.codex/orchestration/pipelines',
+    '.codex/orchestration/prompts',
     '.codex/orchestration/templates',
     '.codex/orchestration/evals',
     '.github/schemas',
-    'scripts/orchestration/stages'
+    'scripts/orchestration/stages',
+    'scripts/orchestration/engine'
 )
 
 foreach ($relativeDirectory in $requiredDirectories) {
@@ -555,10 +603,17 @@ foreach ($relativeDirectory in $requiredDirectories) {
 
 $requiredFiles = @(
     'scripts/runtime/run-agent-pipeline.ps1',
+    'scripts/orchestration/engine/invoke-codex-dispatch.ps1',
     'scripts/orchestration/stages/plan-stage.ps1',
     'scripts/orchestration/stages/implement-stage.ps1',
     'scripts/orchestration/stages/validate-stage.ps1',
-    'scripts/orchestration/stages/review-stage.ps1'
+    'scripts/orchestration/stages/review-stage.ps1',
+    '.github/schemas/agent.stage-plan-result.schema.json',
+    '.github/schemas/agent.stage-implementation-result.schema.json',
+    '.github/schemas/agent.stage-review-result.schema.json',
+    '.codex/orchestration/prompts/planner-stage.prompt.md',
+    '.codex/orchestration/prompts/executor-task.prompt.md',
+    '.codex/orchestration/prompts/reviewer-stage.prompt.md'
 )
 
 foreach ($relativeFile in $requiredFiles) {

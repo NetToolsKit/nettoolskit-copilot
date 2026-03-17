@@ -22,6 +22,17 @@
       "validation": {
         "warnings": 0,
         "failures": 0
+      },
+      "execution": {
+        "backend": "scripted",
+        "attempts": 1,
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/planner-stage.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json",
+        "dispatchCount": 1,
+        "workItemCount": 2,
+        "changedFileCount": 0,
+        "stageStatePath": ".temp/runs/run-20260226-0001/stages/plan-state.json"
       }
     },
     {

@@ -17,7 +17,8 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ MCP apply mode integrated in bootstrap flow
 - ✅ Policy-as-code validation for instruction/runtime governance
 - ✅ Multi-agent contract and orchestration validation
-- ✅ Multi-agent pipeline runner with guardrails and deterministic stage handoffs
+- ✅ Multi-agent pipeline runner with guardrails, deterministic stage handoffs, and optional live `codex-exec` dispatch
+- ✅ Persisted orchestration run state for replay diagnostics and auditability
 - ✅ Release governance checks (CODEOWNERS, changelog contracts, branch-protection baseline)
 - ✅ Security baseline checks (sensitive file patterns and secret-like content scanning)
 - ✅ Shared script checksum manifest governance for external workflow integrity
@@ -69,6 +70,9 @@ pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras
 # Execute default multi-agent pipeline (writes artifacts to .temp/runs)
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Validate enterprise multi-agent flow"
 
+# Execute the same pipeline through the live Codex backend
+pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Validate enterprise multi-agent flow" -ExecutionBackend codex-exec
+
 # Enable local Git hooks (pre-commit + post-commit sync)
 pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
 ```
@@ -115,6 +119,8 @@ scripts/
 │   ├── run-agent-pipeline.ps1
 │   └── clean-codex-runtime.ps1
 ├── orchestration/
+│   ├── engine/
+│   │   └── invoke-codex-dispatch.ps1
 │   └── stages/
 │       ├── plan-stage.ps1
 │       ├── implement-stage.ps1
@@ -201,7 +207,8 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `runtime/update-copilot-chat-titles.ps1` | Normalizes persisted GitHub Copilot chat titles to `<project-prefix> - <task summary>` using `%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json*`, with optional backups before writing. | `pwsh -File scripts/runtime/update-copilot-chat-titles.ps1 -Apply -CreateBackup` |
 | `runtime/healthcheck.ps1` | Runs `validate-all` (profile-aware) plus `runtime-doctor`, emits report/log, and defaults to warning-only mode. | `pwsh -File scripts/runtime/healthcheck.ps1 -ValidationProfile release` |
 | `runtime/self-heal.ps1` | Runs controlled repair flow (bootstrap + optional templates) and validates final state via healthcheck. | `pwsh -File scripts/runtime/self-heal.ps1 -Mirror -StrictExtras` |
-| `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, and budget guardrails; writes run artifacts under `.temp/runs/<traceId>/`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change"` |
+| `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, and budget guardrails; supports `script-only` and live `codex-exec` backends; writes `run-artifact.json`, `run-state.json`, and stage artifacts under `.temp/runs/<traceId>/`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change" -ExecutionBackend codex-exec` |
+| `orchestration/engine/invoke-codex-dispatch.ps1` | Renders a stage prompt, invokes the local Codex CLI, captures JSON output, and persists dispatch logs/records for live planner, executor, and reviewer stages. | `pwsh -File scripts/orchestration/engine/invoke-codex-dispatch.ps1 -RepoRoot . -TraceId trace-001 -StageId plan -AgentId planner -PromptPath .temp\\planner.md -ResponseSchemaPath .github\\schemas\\agent.stage-plan-result.schema.json -ResultPath .temp\\planner-result.json -DispatchRecordPath .temp\\planner-dispatch.json` |
 | `runtime/clean-codex-runtime.ps1` | Cleans local Codex runtime garbage (`tmp`, `vendor_imports`) and prunes `log`/`sessions` files older than retention using `LastWriteTime` (default 30 days). | `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30 -Apply` |
 | `orchestration/stages/*.ps1` | Stage executors (`plan`, `implement`, `validate`, `review`) consumed by `run-agent-pipeline.ps1`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Smoke run"` |
 | `maintenance/clean-build-artifacts.ps1` | Deletes `.build`, `.deployment`, `bin`, and `obj` directories. Supports dry-run and prompts for confirmation. | `pwsh -File scripts/maintenance/clean-build-artifacts.ps1 -DryRun` |
@@ -255,6 +262,9 @@ pwsh -File .\scripts\runtime\self-heal.ps1 -Mirror -StrictExtras
 
 # execute default multi-agent pipeline and produce run artifact
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run pipeline smoke test"
+
+# execute default multi-agent pipeline with live planner/executor/reviewer dispatch
+pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run pipeline smoke test" -ExecutionBackend codex-exec
 
 # preview/runtime cleanup (no deletion)
 pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30

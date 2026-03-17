@@ -118,6 +118,14 @@ try {
     Assert-Contains -Collection $keys -Value 'SessionRetentionDays' -Message 'clean-codex-runtime missing SessionRetentionDays parameter.'
     Assert-Contains -Collection $keys -Value 'LogRetentionDays' -Message 'clean-codex-runtime missing LogRetentionDays parameter.'
 
+    $scriptPath = Join-Path $runtimeScriptRoot 'run-agent-pipeline.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RequestText' -Message 'run-agent-pipeline missing RequestText parameter.'
+    Assert-Contains -Collection $keys -Value 'ExecutionBackend' -Message 'run-agent-pipeline missing ExecutionBackend parameter.'
+    Assert-Contains -Collection $keys -Value 'DispatchCommand' -Message 'run-agent-pipeline missing DispatchCommand parameter.'
+    Assert-Contains -Collection $keys -Value 'WriteRunState' -Message 'run-agent-pipeline missing WriteRunState parameter.'
+
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $targetGithub = Join-Path $tempRoot '.github'
     $targetCodex = Join-Path $tempRoot '.codex'

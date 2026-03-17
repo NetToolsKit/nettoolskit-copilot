@@ -28,6 +28,9 @@
       "type": "string",
       "minLength": 1
     },
+    "runtime": {
+      "$ref": "#/$defs/runtime"
+    },
     "stages": {
       "type": "array",
       "minItems": 2,
@@ -119,10 +122,54 @@
           "type": "string",
           "minLength": 1
         },
+        "dispatchMode": {
+          "type": "string",
+          "enum": [
+            "scripted",
+            "codex-exec"
+          ]
+        },
+        "promptTemplatePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "responseSchemaPath": {
+          "type": "string",
+          "minLength": 1
+        },
         "timeoutSeconds": {
           "type": "integer",
           "minimum": 1,
           "maximum": 86400
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "executionBackend": {
+          "type": "string",
+          "enum": [
+            "script-only",
+            "codex-exec"
+          ]
+        },
+        "defaultRetryDelaySeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600
+        },
+        "maxPipelineDurationSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "continueOnStageFailure": {
+          "type": "boolean"
+        },
+        "writeRunState": {
+          "type": "boolean"
         }
       }
     },

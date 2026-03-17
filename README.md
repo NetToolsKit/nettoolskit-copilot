@@ -13,7 +13,8 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
-- ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, and allowed-path enforcement
+- ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, allowed-path enforcement, and optional live `codex-exec` dispatch
+- ✅ **Run-State Diagnostics:** Persisted `.temp/runs/<traceId>/run-state.json` snapshots for orchestration auditing and recovery analysis
 - ✅ **Unified Validation Suite:** Single `validate-all` command for hooks/CI governance checks
 - ✅ **Security Baseline Validation:** Local enforcement for sensitive files and secret-like content patterns
 - ✅ **Release Provenance Validation:** Local traceability checks for release evidence and validation coverage
@@ -353,6 +354,9 @@ pwsh -File ./scripts/validation/validate-agent-orchestration.ps1
 
 # execute default multi-agent pipeline and generate run artifacts
 pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate request"
+
+# execute the same pipeline with live sequential planner/executor/reviewer dispatch
+pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate request" -ExecutionBackend codex-exec
 
 # validate branch protection drift against baseline (no mutation)
 pwsh -File ./scripts/governance/set-branch-protection.ps1

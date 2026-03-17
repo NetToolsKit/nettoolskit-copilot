@@ -6,6 +6,7 @@
     Runs deterministic validation scripts and writes:
     - validation-report json artifact
     - output artifact manifest for handoff
+    - stage state metadata for orchestration observability
 
 .PARAMETER RepoRoot
     Repository root path.
@@ -31,15 +32,17 @@
 .PARAMETER OutputArtifactManifestPath
     Path where this stage writes its output artifact manifest.
 
+.PARAMETER StageStatePath
+    Optional path where stage execution metadata is written.
+
 .PARAMETER DetailedOutput
     Shows detailed diagnostics.
 
 .EXAMPLE
-    pwsh -File scripts/orchestration/stages/validate-stage.ps1 -RepoRoot . -RunDirectory .temp/runs/run-123 -TraceId run-123 -StageId validate -AgentId tester -RequestPath .temp/runs/run-123/artifacts/request.md -InputArtifactManifestPath .temp/runs/run-123/stages/implement-input.json -OutputArtifactManifestPath .temp/runs/run-123/stages/validate-output.json
+    pwsh -File .\scripts\orchestration\stages\validate-stage.ps1 -RepoRoot . -RunDirectory .temp\runs\trace-001 -TraceId trace-001 -StageId validate -AgentId tester -RequestPath .temp\runs\trace-001\request.txt -InputArtifactManifestPath .temp\runs\trace-001\stages\implement\output-artifacts.json -OutputArtifactManifestPath .temp\runs\trace-001\stages\validate\output-artifacts.json
 
 .NOTES
-    Version: 1.0
-    Requirements: PowerShell 7+.
+    This stage stays scripted in phase 1 and acts as the deterministic quality gate before review.
 #>
 
 param(
@@ -51,9 +54,17 @@ param(
     [Parameter(Mandatory = $true)] [string] $RequestPath,
     [Parameter(Mandatory = $true)] [string] $InputArtifactManifestPath,
     [Parameter(Mandatory = $true)] [string] $OutputArtifactManifestPath,
+    [string] $AgentsManifestPath,
+    [string] $DispatchMode = 'scripted',
+    [string] $PromptTemplatePath,
+    [string] $ResponseSchemaPath,
+    [string] $DispatchCommand = 'codex',
+    [string] $ExecutionBackend = 'script-only',
+    [string] $StageStatePath,
     [switch] $DetailedOutput
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
@@ -65,33 +76,26 @@ if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
 }
 $script:IsVerboseEnabled = [bool] $DetailedOutput
 
-# Writes verbose diagnostics for stage execution.
+# Emits verbose diagnostics only when detailed output is enabled.
 function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
+    param([string] $Message)
 
     if ($script:IsVerboseEnabled) {
         Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
     }
 }
 
-# Converts an absolute path to repository-relative path when possible.
+# Converts an absolute repository path into a stable relative artifact path.
 function Convert-ToRelativeRepoPath {
     param(
         [string] $Root,
         [string] $Path
     )
 
-    try {
-        return [System.IO.Path]::GetRelativePath($Root, $Path)
-    }
-    catch {
-        return $Path
-    }
+    return [System.IO.Path]::GetRelativePath($Root, $Path) -replace '\\', '/'
 }
 
-# Builds an artifact descriptor including checksum.
+# Builds a checksum-bearing artifact descriptor for the stage manifest.
 function Get-ArtifactDescriptor {
     param(
         [string] $Name,
@@ -107,7 +111,22 @@ function Get-ArtifactDescriptor {
     }
 }
 
-# Runs a validation script and returns status metadata.
+# Writes JSON deterministically without adding an implicit trailing newline.
+function Write-JsonFile {
+    param(
+        [string] $Path,
+        [object] $Value
+    )
+
+    $directory = Split-Path -Parent $Path
+    if (-not [string]::IsNullOrWhiteSpace($directory)) {
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    }
+
+    Set-Content -LiteralPath $Path -Value ($Value | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
+}
+
+# Executes one repository validation script and returns structured timing/output metadata.
 function Invoke-ValidationScript {
     param(
         [string] $Name,
@@ -133,7 +152,6 @@ function Invoke-ValidationScript {
     }
 
     $finishedAt = Get-Date
-
     return [pscustomobject]@{
         name = $Name
         script = (Convert-ToRelativeRepoPath -Root $Root -Path $ScriptPath)
@@ -151,6 +169,7 @@ $resolvedRunDirectory = [System.IO.Path]::GetFullPath($RunDirectory)
 $resolvedRequestPath = [System.IO.Path]::GetFullPath($RequestPath)
 $resolvedInputManifestPath = [System.IO.Path]::GetFullPath($InputArtifactManifestPath)
 $resolvedOutputManifestPath = [System.IO.Path]::GetFullPath($OutputArtifactManifestPath)
+$resolvedStageStatePath = if ([string]::IsNullOrWhiteSpace($StageStatePath)) { Join-Path $resolvedRunDirectory ('stages/{0}-state.json' -f $StageId) } else { [System.IO.Path]::GetFullPath($StageStatePath) }
 
 $stageArtifactsDirectory = Join-Path $resolvedRunDirectory 'artifacts'
 New-Item -ItemType Directory -Path $stageArtifactsDirectory -Force | Out-Null
@@ -206,8 +225,7 @@ $validationReport = [ordered]@{
     }
     checks = $results
 }
-
-Set-Content -LiteralPath $validationReportPath -Value ($validationReport | ConvertTo-Json -Depth 60) -Encoding UTF8 -NoNewline
+Write-JsonFile -Path $validationReportPath -Value $validationReport
 
 $outputManifestDirectory = Split-Path -Parent $resolvedOutputManifestPath
 if (-not [string]::IsNullOrWhiteSpace($outputManifestDirectory)) {
@@ -223,8 +241,18 @@ $outputManifest = [ordered]@{
         (Get-ArtifactDescriptor -Name 'validation-report' -Path $validationReportPath -Root $resolvedRepoRoot)
     )
 }
+Write-JsonFile -Path $resolvedOutputManifestPath -Value $outputManifest
 
-Set-Content -LiteralPath $resolvedOutputManifestPath -Value ($outputManifest | ConvertTo-Json -Depth 40) -Encoding UTF8 -NoNewline
+$stageState = [ordered]@{
+    traceId = $TraceId
+    stageId = $StageId
+    agentId = $AgentId
+    backend = 'scripted'
+    dispatchCount = 0
+    validationCount = $results.Count
+    failedChecks = $failedChecks
+}
+Write-JsonFile -Path $resolvedStageStatePath -Value $stageState
 
 Write-VerboseLog ("Stage artifacts written: {0}" -f $resolvedOutputManifestPath)
 

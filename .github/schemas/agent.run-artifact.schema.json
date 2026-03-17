@@ -80,7 +80,8 @@
           "enum": [
             "success",
             "failed",
-            "skipped"
+            "skipped",
+            "partial"
           ]
         },
         "startedAt": {
@@ -118,6 +119,52 @@
             "failures": {
               "type": "integer",
               "minimum": 0
+            }
+          }
+        },
+        "execution": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "backend": {
+              "type": "string"
+            },
+            "attempts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dispatchMode": {
+              "type": "string"
+            },
+            "promptTemplatePath": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "responseSchemaPath": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "dispatchCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workItemCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "changedFileCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stageStatePath": {
+              "type": [
+                "string",
+                "null"
+              ]
             }
           }
         }

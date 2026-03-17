@@ -2,6 +2,13 @@
   "id": "default-dev-flow",
   "version": 1,
   "description": "Deterministic planner -> executor -> tester -> reviewer flow.",
+  "runtime": {
+    "executionBackend": "script-only",
+    "defaultRetryDelaySeconds": 2,
+    "maxPipelineDurationSeconds": 2700,
+    "continueOnStageFailure": false,
+    "writeRunState": true
+  },
   "stages": [
     {
       "id": "plan",
@@ -9,6 +16,9 @@
       "mode": "plan",
       "execution": {
         "scriptPath": "scripts/orchestration/stages/plan-stage.ps1",
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/planner-stage.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json",
         "timeoutSeconds": 120
       },
       "inputArtifacts": [
@@ -16,6 +26,7 @@
       ],
       "outputArtifacts": [
         "task-plan",
+        "task-plan-data",
         "context-pack"
       ],
       "onFailure": "stop"
@@ -26,16 +37,21 @@
       "mode": "execute",
       "execution": {
         "scriptPath": "scripts/orchestration/stages/implement-stage.ps1",
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/executor-task.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-implementation-result.schema.json",
         "timeoutSeconds": 300
       },
       "inputArtifacts": [
         "request",
         "task-plan",
+        "task-plan-data",
         "context-pack"
       ],
       "outputArtifacts": [
         "changeset",
-        "implementation-log"
+        "implementation-log",
+        "implementation-dispatches"
       ],
       "onFailure": "retry-once"
     },
@@ -45,6 +61,7 @@
       "mode": "validate",
       "execution": {
         "scriptPath": "scripts/orchestration/stages/validate-stage.ps1",
+        "dispatchMode": "scripted",
         "timeoutSeconds": 600
       },
       "inputArtifacts": [
@@ -62,6 +79,9 @@
       "mode": "review",
       "execution": {
         "scriptPath": "scripts/orchestration/stages/review-stage.ps1",
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/reviewer-stage.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json",
         "timeoutSeconds": 180
       },
       "inputArtifacts": [
@@ -81,6 +101,7 @@
       "toStage": "implement",
       "requiredArtifacts": [
         "task-plan",
+        "task-plan-data",
         "context-pack"
       ]
     },
