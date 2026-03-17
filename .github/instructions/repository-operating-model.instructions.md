@@ -7,6 +7,7 @@ priority: high
 
 ## Purpose
 - Centralize repository-specific operational rules so `AGENTS.md` and `copilot-instructions.md` stay focused on global behavior, routing, and precedence.
+- Centralize repository-specific operational rules so `AGENTS.md` and `copilot-instructions.md` stay focused on global behavior, routing, precedence, and mandatory planning.
 - Keep repo topology, build/test/run commands, style, release process, and domain instruction references in one canonical location.
 
 ## Scope and References
@@ -17,6 +18,7 @@ priority: high
 - Cross-cutting policies remain centralized:
   - `instructions/authoritative-sources.instructions.md`
   - `.github/governance/authoritative-source-map.json`
+- Planning lifecycle rules are centralized in `instructions/subagent-planning-workflow.instructions.md` and `.temp/planning/README.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
@@ -30,6 +32,12 @@ priority: high
   - `native/`
   - `benchmarks/`
   - `.github/`
+  - `.temp/planning/` versioned planning workspace with `plans-active/` and `plans-completed/`
+
+## Planning Workspace
+- Use `instructions/subagent-planning-workflow.instructions.md` for the mandatory planning and sub-agent workflow on non-trivial work.
+- Active plans live in `.temp/planning/plans-active/`.
+- Completed plans move to `.temp/planning/plans-completed/` only after implementation, validation, review, and release closeout are materially complete.
 
 ## Build, Test, and Run
 - Build solution:
@@ -123,6 +131,8 @@ priority: high
   - create a short plan
   - use a short preamble before tool calls
   - validate namespace, TFMs, XML docs, sealing, `using` directives, and EOF policy when relevant
+  - follow planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+  - keep the planner-owned work in `.temp/planning/plans-active/` until the work is genuinely complete
 - Patterns:
   - multi-target .NET 8/9 with consistent public API
   - use `#if` only when necessary
@@ -167,4 +177,5 @@ priority: high
   - `instructions/readme.instructions.md`
   - `instructions/prompt-templates.instructions.md`
   - `instructions/effort-estimation-ucp.instructions.md`
+  - `instructions/subagent-planning-workflow.instructions.md`
   - `instructions/pr.instructions.md`

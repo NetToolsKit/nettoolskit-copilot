@@ -14,6 +14,7 @@
     - validate-agent-orchestration
     - validate-agent-skill-alignment
     - validate-agent-permissions
+    - validate-planning-structure
     - validate-routing-coverage
     - validate-authoritative-source-policy
     - validate-instruction-architecture
@@ -598,6 +599,11 @@ $baseCheckDefinitions['validate-agent-permissions'] = [pscustomobject]@{
     script = 'scripts/validation/validate-agent-permissions.ps1'
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
+$baseCheckDefinitions['validate-planning-structure'] = [pscustomobject]@{
+    name = 'validate-planning-structure'
+    script = 'scripts/validation/validate-planning-structure.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
 $baseCheckDefinitions['validate-routing-coverage'] = [pscustomobject]@{
     name = 'validate-routing-coverage'
     script = 'scripts/validation/validate-routing-coverage.ps1'
@@ -711,6 +717,7 @@ $defaultCheckOrder = @(
     'validate-agent-orchestration',
     'validate-agent-skill-alignment',
     'validate-agent-permissions',
+    'validate-planning-structure',
     'validate-routing-coverage',
     'validate-authoritative-source-policy',
     'validate-instruction-architecture',

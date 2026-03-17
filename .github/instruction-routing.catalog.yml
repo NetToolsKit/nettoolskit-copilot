@@ -26,6 +26,8 @@ always:
   # Mandatory instruction files (always applied)
   - path: instructions/repository-operating-model.instructions.md
     reason: Repository topology, build/test/run commands, style, and domain instruction map
+  - path: instructions/subagent-planning-workflow.instructions.md
+    reason: Mandatory planning lifecycle and sub-agent chain for non-trivial work
   - path: instructions/workflow-optimization.instructions.md
     reason: Task breakdown and token efficiency
   - path: instructions/authoritative-sources.instructions.md

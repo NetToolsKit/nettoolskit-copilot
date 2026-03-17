@@ -295,14 +295,14 @@ function Test-AgentManifestIntegrity {
         }
     }
 
-    foreach ($requiredRole in @('planner', 'executor', 'reviewer')) {
+    foreach ($requiredRole in @('planner', 'router', 'specialist', 'reviewer', 'release')) {
         if (-not $roles.Contains($requiredRole)) {
             Add-ValidationFailure ("Agent manifest missing required role: {0}" -f $requiredRole)
         }
     }
 
     if (-not $roles.Contains('tester')) {
-        Add-ValidationWarning 'Agent manifest does not define role: tester'
+        Add-ValidationFailure 'Agent manifest missing required role: tester'
     }
 
     return [pscustomobject]@{
@@ -605,15 +605,21 @@ $requiredFiles = @(
     'scripts/runtime/run-agent-pipeline.ps1',
     'scripts/orchestration/engine/invoke-codex-dispatch.ps1',
     'scripts/orchestration/stages/plan-stage.ps1',
+    'scripts/orchestration/stages/route-stage.ps1',
     'scripts/orchestration/stages/implement-stage.ps1',
     'scripts/orchestration/stages/validate-stage.ps1',
     'scripts/orchestration/stages/review-stage.ps1',
+    'scripts/orchestration/stages/closeout-stage.ps1',
     '.github/schemas/agent.stage-plan-result.schema.json',
+    '.github/schemas/agent.stage-route-result.schema.json',
     '.github/schemas/agent.stage-implementation-result.schema.json',
     '.github/schemas/agent.stage-review-result.schema.json',
+    '.github/schemas/agent.stage-closeout-result.schema.json',
     '.codex/orchestration/prompts/planner-stage.prompt.md',
+    '.codex/orchestration/prompts/router-stage.prompt.md',
     '.codex/orchestration/prompts/executor-task.prompt.md',
-    '.codex/orchestration/prompts/reviewer-stage.prompt.md'
+    '.codex/orchestration/prompts/reviewer-stage.prompt.md',
+    '.codex/orchestration/prompts/closeout-stage.prompt.md'
 )
 
 foreach ($relativeFile in $requiredFiles) {

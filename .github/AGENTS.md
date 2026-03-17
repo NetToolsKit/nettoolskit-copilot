@@ -69,6 +69,18 @@ Follow the **Mandatory Context Files** list above.
 3. Implementation: Follow established templates and patterns, maintain standards
 4. Validation: Execute relevant checks, verify compilation, run tests, and confirm architectural compliance
 
+## Sub-Agent Planning Chain
+- For non-trivial work, use the repository planning pattern under `.temp/planning/`.
+- Create or update an active plan in `.temp/planning/plans-active/` before implementation.
+- Preferred chain for non-trivial work:
+  1. planner
+  2. context-token-optimizer
+  3. specialist
+  4. tester when code/runtime changed
+  5. reviewer
+  6. release-closeout
+- Follow `instructions/subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
+
 ### For Multi-Task Requests
 - Apply Task-Based Execution Methodology (see below)
 - Break complex requests into numbered, sequential tasks
@@ -127,6 +139,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Mandatory repo-wide instructions are:
   - `instructions/repository-operating-model.instructions.md`
   - `instructions/authoritative-sources.instructions.md`
+  - `instructions/subagent-planning-workflow.instructions.md`
   - `instructions/workflow-optimization.instructions.md`
   - `instructions/powershell-execution.instructions.md`
   - `instructions/feedback-changelog.instructions.md`

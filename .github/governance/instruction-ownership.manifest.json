@@ -20,12 +20,13 @@
       "copilot-instructions.md": 9000
     },
     "routing": {
-      "maxAlwaysFiles": 7,
+      "maxAlwaysFiles": 8,
       "maxSelectedFiles": 5,
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
         "instructions/repository-operating-model.instructions.md",
+        "instructions/subagent-planning-workflow.instructions.md",
         "instructions/workflow-optimization.instructions.md",
         "instructions/authoritative-sources.instructions.md",
         "instructions/powershell-execution.instructions.md",

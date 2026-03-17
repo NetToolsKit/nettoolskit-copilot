@@ -182,6 +182,24 @@ function Expand-Template {
     return $rendered
 }
 
+# Converts free-form request text into a stable plan filename slug.
+function Convert-ToPlanSlug {
+    param([string] $Text)
+
+    $value = ($Text ?? '').ToLowerInvariant()
+    $value = [regex]::Replace($value, '[^a-z0-9]+', '-')
+    $value = $value.Trim('-')
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return 'planned-work'
+    }
+
+    if ($value.Length -gt 48) {
+        return $value.Substring(0, 48).Trim('-')
+    }
+
+    return $value
+}
+
 # Retrieves a single agent contract from the orchestration manifest.
 function Get-AgentContract {
     param(
@@ -338,6 +356,18 @@ if ($null -eq $planResult) {
 $taskPlanDataPath = Join-Path $stageArtifactsDirectory 'task-plan.json'
 $taskPlanPath = Join-Path $stageArtifactsDirectory 'task-plan.md'
 $contextPackPath = Join-Path $stageArtifactsDirectory 'context-pack.json'
+$planningDirectory = Join-Path $resolvedRepoRoot '.temp/planning/plans-active'
+New-Item -ItemType Directory -Path $planningDirectory -Force | Out-Null
+$planSlug = Convert-ToPlanSlug -Text $requestContent
+$existingActivePlan = Get-ChildItem -LiteralPath $planningDirectory -File -Filter ("plan-*-{0}.md" -f $planSlug) |
+    Sort-Object LastWriteTimeUtc -Descending |
+    Select-Object -First 1
+$activePlanPath = if ($null -ne $existingActivePlan) {
+    $existingActivePlan.FullName
+}
+else {
+    Join-Path $planningDirectory ("plan-{0}-{1}.md" -f $TraceId, $planSlug)
+}
 
 Write-JsonFile -Path $taskPlanDataPath -Value $planResult
 
@@ -375,6 +405,7 @@ $taskPlanMarkdown += @(
 )
 $taskPlanMarkdown += @($planResult.risks | ForEach-Object { '- ' + [string] $_ })
 Set-Content -LiteralPath $taskPlanPath -Value ($taskPlanMarkdown -join "`n") -Encoding UTF8 -NoNewline
+Set-Content -LiteralPath $activePlanPath -Value ($taskPlanMarkdown -join "`n") -Encoding UTF8 -NoNewline
 
 $contextPack = [ordered]@{
     traceId = $TraceId
@@ -407,7 +438,8 @@ $outputManifest = [ordered]@{
     artifacts = @(
         (Get-ArtifactDescriptor -Name 'task-plan' -Path $taskPlanPath -Root $resolvedRepoRoot),
         (Get-ArtifactDescriptor -Name 'task-plan-data' -Path $taskPlanDataPath -Root $resolvedRepoRoot),
-        (Get-ArtifactDescriptor -Name 'context-pack' -Path $contextPackPath -Root $resolvedRepoRoot)
+        (Get-ArtifactDescriptor -Name 'context-pack' -Path $contextPackPath -Root $resolvedRepoRoot),
+        (Get-ArtifactDescriptor -Name 'active-plan' -Path $activePlanPath -Root $resolvedRepoRoot)
     )
 }
 Write-JsonFile -Path $resolvedOutputManifestPath -Value $outputManifest
@@ -422,6 +454,7 @@ $stageState = [ordered]@{
     promptTemplatePath = if ($backendUsed -eq 'codex-exec') { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $resolvedPromptTemplatePath } else { $null }
     responseSchemaPath = if ($backendUsed -eq 'codex-exec') { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $resolvedResponseSchemaPath } else { $null }
     dispatchRecordPath = if ((Test-Path -LiteralPath $dispatchRecordPath -PathType Leaf)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $dispatchRecordPath } else { $null }
+    activePlanPath = Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $activePlanPath
     warning = $dispatchError
 }
 Write-JsonFile -Path $resolvedStageStatePath -Value $stageState

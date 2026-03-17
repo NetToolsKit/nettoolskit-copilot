@@ -313,6 +313,12 @@ function Test-StageRoleAlignment {
         [hashtable] $AgentMap
     )
 
+    $expectedRoleByStageId = @{
+        route = 'router'
+        implement = 'specialist'
+        closeout = 'release'
+    }
+
     $expectedRoleByMode = @{
         plan = 'planner'
         execute = 'executor'
@@ -330,13 +336,18 @@ function Test-StageRoleAlignment {
             continue
         }
 
-        if (-not $expectedRoleByMode.ContainsKey($mode)) {
+        if ($expectedRoleByStageId.ContainsKey($stageId)) {
+            $expectedRole = [string] $expectedRoleByStageId[$stageId]
+        }
+        elseif ($expectedRoleByMode.ContainsKey($mode)) {
+            $expectedRole = [string] $expectedRoleByMode[$mode]
+        }
+        else {
             Add-ValidationWarning ("Pipeline stage '{0}' has non-standard mode '{1}'." -f $stageId, $mode)
             continue
         }
 
         $agentRole = ([string] $AgentMap[$agentId].role).ToLowerInvariant()
-        $expectedRole = $expectedRoleByMode[$mode]
         if ($agentRole -ne $expectedRole) {
             Add-ValidationFailure ("Pipeline stage '{0}' mode '{1}' expects role '{2}' but agent '{3}' has role '{4}'." -f $stageId, $mode, $expectedRole, $agentId, $agentRole)
         }

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/agent.stage-closeout-result.schema.json",
+  "title": "Closeout Stage Result",
+  "type": "object",
+  "required": [
+    "status",
+    "summary",
+    "readmeActions",
+    "commitMessage",
+    "changelogSummary",
+    "followUps"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["ready-for-commit", "blocked", "needs-follow-up"]
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "readmeActions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "commitMessage": { "type": "string", "minLength": 1 },
+    "changelogSummary": { "type": "string", "minLength": 1 },
+    "followUps": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

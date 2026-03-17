@@ -6,15 +6,16 @@
 
 ## Introduction
 
-This folder defines the contract layer for planner, executor, tester, and reviewer collaboration. The objective is to keep multi-agent behavior auditable, reproducible, and validation-driven across local runtime and CI workflows.
+This folder defines the contract layer for planner, context-token-optimizer, specialist, tester, reviewer, and release-closeout collaboration. The objective is to keep multi-agent behavior auditable, reproducible, and validation-driven across local runtime and CI workflows.
 
 ---
 
 ## Features
 
 - ✅ Versioned agent contracts with explicit roles, tool scopes, and budgets
-- ✅ Deterministic pipeline orchestration with stage handoffs and completion criteria
+- ✅ Deterministic pipeline orchestration with planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout handoffs and completion criteria
 - ✅ Real sequential stage dispatch through `codex exec` with schema-validated outputs
+- ✅ Versioned planning artifacts under `.temp/planning/` for active and completed plan history
 - ✅ Standard run artifacts for traceability and post-run analysis
 - ✅ Persisted run state for retry diagnostics and execution auditing under `.temp/runs/<traceId>/`
 - ✅ Golden eval fixtures for regression checks on orchestration behavior
@@ -90,7 +91,7 @@ Get-Content -Raw .\.temp\runs\<traceId>\run-state.json
 
 - `agents.manifest.json`: canonical agent contract (roles, skills, tools, allowed paths, budgets, fallback links).
 - `pipelines/default.pipeline.json`: baseline execution graph with stage order, handoffs, and completion criteria.
-- `prompts/*.prompt.md`: structured planner, executor, and reviewer prompts rendered by the live execution backend.
+- `prompts/*.prompt.md`: structured planner, router, specialist, reviewer, and closeout prompts rendered by the live execution backend.
 - `templates/handoff.template.json`: canonical stage handoff artifact shape.
 - `templates/run-artifact.template.json`: canonical run summary artifact shape.
 - `evals/golden-tests.json`: deterministic orchestration regression fixtures.

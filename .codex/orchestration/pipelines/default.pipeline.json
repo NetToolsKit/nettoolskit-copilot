@@ -1,11 +1,11 @@
 {
   "id": "default-dev-flow",
   "version": 1,
-  "description": "Deterministic planner -> executor -> tester -> reviewer flow.",
+  "description": "Deterministic planner -> router -> specialist -> tester -> reviewer -> closeout flow.",
   "runtime": {
     "executionBackend": "script-only",
     "defaultRetryDelaySeconds": 2,
-    "maxPipelineDurationSeconds": 2700,
+    "maxPipelineDurationSeconds": 3000,
     "continueOnStageFailure": false,
     "writeRunState": true
   },
@@ -21,19 +21,28 @@
         "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json",
         "timeoutSeconds": 120
       },
-      "inputArtifacts": [
-        "request"
-      ],
-      "outputArtifacts": [
-        "task-plan",
-        "task-plan-data",
-        "context-pack"
-      ],
+      "inputArtifacts": ["request"],
+      "outputArtifacts": ["task-plan", "task-plan-data", "context-pack", "active-plan"],
       "onFailure": "stop"
     },
     {
+      "id": "route",
+      "agentId": "router",
+      "mode": "execute",
+      "execution": {
+        "scriptPath": "scripts/orchestration/stages/route-stage.ps1",
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/router-stage.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-route-result.schema.json",
+        "timeoutSeconds": 120
+      },
+      "inputArtifacts": ["request", "task-plan-data", "context-pack", "active-plan"],
+      "outputArtifacts": ["route-selection", "specialist-context-pack"],
+      "onFailure": "retry-once"
+    },
+    {
       "id": "implement",
-      "agentId": "executor",
+      "agentId": "specialist",
       "mode": "execute",
       "execution": {
         "scriptPath": "scripts/orchestration/stages/implement-stage.ps1",
@@ -42,17 +51,8 @@
         "responseSchemaPath": ".github/schemas/agent.stage-implementation-result.schema.json",
         "timeoutSeconds": 300
       },
-      "inputArtifacts": [
-        "request",
-        "task-plan",
-        "task-plan-data",
-        "context-pack"
-      ],
-      "outputArtifacts": [
-        "changeset",
-        "implementation-log",
-        "implementation-dispatches"
-      ],
+      "inputArtifacts": ["request", "task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"],
+      "outputArtifacts": ["changeset", "implementation-log", "implementation-dispatches"],
       "onFailure": "retry-once"
     },
     {
@@ -64,13 +64,8 @@
         "dispatchMode": "scripted",
         "timeoutSeconds": 600
       },
-      "inputArtifacts": [
-        "changeset",
-        "implementation-log"
-      ],
-      "outputArtifacts": [
-        "validation-report"
-      ],
+      "inputArtifacts": ["changeset", "implementation-log", "route-selection"],
+      "outputArtifacts": ["validation-report"],
       "onFailure": "retry-once"
     },
     {
@@ -84,54 +79,55 @@
         "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json",
         "timeoutSeconds": 180
       },
-      "inputArtifacts": [
-        "changeset",
-        "validation-report"
-      ],
-      "outputArtifacts": [
-        "review-report",
-        "decision-log"
-      ],
+      "inputArtifacts": ["changeset", "validation-report"],
+      "outputArtifacts": ["review-report", "decision-log"],
+      "onFailure": "stop"
+    },
+    {
+      "id": "closeout",
+      "agentId": "release-engineer",
+      "mode": "review",
+      "execution": {
+        "scriptPath": "scripts/orchestration/stages/closeout-stage.ps1",
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/closeout-stage.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-closeout-result.schema.json",
+        "timeoutSeconds": 180
+      },
+      "inputArtifacts": ["route-selection", "changeset", "validation-report", "review-report", "decision-log", "active-plan"],
+      "outputArtifacts": ["closeout-report", "release-summary", "completed-plan"],
       "onFailure": "stop"
     }
   ],
   "handoffs": [
     {
       "fromStage": "plan",
+      "toStage": "route",
+      "requiredArtifacts": ["task-plan-data", "context-pack", "active-plan"]
+    },
+    {
+      "fromStage": "route",
       "toStage": "implement",
-      "requiredArtifacts": [
-        "task-plan",
-        "task-plan-data",
-        "context-pack"
-      ]
+      "requiredArtifacts": ["route-selection", "specialist-context-pack"]
     },
     {
       "fromStage": "implement",
       "toStage": "validate",
-      "requiredArtifacts": [
-        "changeset",
-        "implementation-log"
-      ]
+      "requiredArtifacts": ["changeset", "implementation-log"]
     },
     {
       "fromStage": "validate",
       "toStage": "review",
-      "requiredArtifacts": [
-        "validation-report"
-      ]
+      "requiredArtifacts": ["validation-report"]
+    },
+    {
+      "fromStage": "review",
+      "toStage": "closeout",
+      "requiredArtifacts": ["review-report", "decision-log"]
     }
   ],
   "completionCriteria": {
-    "requiredStages": [
-      "plan",
-      "implement",
-      "validate",
-      "review"
-    ],
-    "requiredArtifacts": [
-      "validation-report",
-      "review-report",
-      "decision-log"
-    ]
+    "requiredStages": ["plan", "route", "implement", "validate", "review", "closeout"],
+    "requiredArtifacts": ["validation-report", "review-report", "decision-log", "closeout-report", "release-summary"]
   }
 }

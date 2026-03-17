@@ -5,34 +5,15 @@
       "id": "feature-implementation",
       "request": "Implement a new backend feature with tests and docs updates.",
       "expectedPipelineId": "default-dev-flow",
-      "expectedStageOrder": [
-        "plan",
-        "implement",
-        "validate",
-        "review"
-      ],
-      "requiredAgents": [
-        "planner",
-        "executor",
-        "tester",
-        "reviewer"
-      ]
+      "expectedStageOrder": ["plan", "route", "implement", "validate", "review", "closeout"],
+      "requiredAgents": ["planner", "router", "specialist", "tester", "reviewer", "release-engineer"]
     },
     {
       "id": "policy-and-script-update",
       "request": "Update validation scripts and governance policies without changing source code behavior.",
       "expectedPipelineId": "default-dev-flow",
-      "expectedStageOrder": [
-        "plan",
-        "implement",
-        "validate",
-        "review"
-      ],
-      "requiredAgents": [
-        "planner",
-        "executor",
-        "reviewer"
-      ]
+      "expectedStageOrder": ["plan", "route", "implement", "validate", "review", "closeout"],
+      "requiredAgents": ["planner", "router", "specialist", "reviewer", "release-engineer"]
     }
   ]
 }

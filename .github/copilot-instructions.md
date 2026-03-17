@@ -98,6 +98,7 @@ Follow this order of operations on every task:
 ## Always Applied
 - AGENTS.md (agents and context policy)
 - instructions/repository-operating-model.instructions.md
+- instructions/subagent-planning-workflow.instructions.md
 - instructions/authoritative-sources.instructions.md
 - instructions/workflow-optimization.instructions.md
 - instructions/powershell-execution.instructions.md
@@ -108,6 +109,7 @@ Follow this order of operations on every task:
 
 # Repository and Domain Rules
 - Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
+- Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `.temp/planning/`.
 - Use domain instructions from that map according to the active route and file scope.
 
 # Transparency

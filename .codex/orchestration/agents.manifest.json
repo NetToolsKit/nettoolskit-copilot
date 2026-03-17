@@ -9,70 +9,57 @@
   "agents": [
     {
       "id": "planner",
-      "displayName": "Plan Task Planner",
+      "displayName": "Plan Active Work Planner",
       "role": "planner",
-      "skill": "plan-task-planner",
+      "skill": "plan-active-work-planner",
       "model": "gpt-5",
-      "tools": [
-        "read",
-        "search",
-        "plan"
-      ],
-      "allowedPaths": [
-        ".github/**",
-        ".codex/**",
-        "scripts/**",
-        ".temp/**",
-        "README.md",
-        "CHANGELOG.md"
-      ],
-      "blockedCommands": [
-        "git reset --hard",
-        "git checkout --"
-      ],
+      "tools": ["read", "search", "plan"],
+      "allowedPaths": [".github/**", ".codex/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 20,
         "maxDurationMinutes": 20,
-        "maxFileEdits": 10,
-        "maxTokens": 60000
+        "maxFileEdits": 12,
+        "maxTokens": 70000
       },
-      "fallbackAgentId": "executor",
-      "notes": "Builds plan and context pack; avoids broad code mutation."
+      "fallbackAgentId": "router",
+      "notes": "Creates or updates the active planning artifact and structured work plan."
     },
     {
-      "id": "executor",
-      "displayName": "Dev Software Engineer",
-      "role": "executor",
+      "id": "router",
+      "displayName": "Context Token Optimizer",
+      "role": "router",
+      "skill": "context-token-optimizer",
+      "model": "gpt-5",
+      "tools": ["read", "search", "route"],
+      "allowedPaths": [".github/**", ".codex/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": {
+        "maxSteps": 15,
+        "maxDurationMinutes": 15,
+        "maxFileEdits": 8,
+        "maxTokens": 50000
+      },
+      "fallbackAgentId": "specialist",
+      "notes": "Builds the minimal context pack and recommends the specialist focus."
+    },
+    {
+      "id": "specialist",
+      "displayName": "Implementation Specialist",
+      "role": "specialist",
       "skill": "dev-software-engineer",
       "model": "gpt-5",
-      "tools": [
-        "read",
-        "search",
-        "edit",
-        "shell",
-        "run-tests"
-      ],
-      "allowedPaths": [
-        "src/**",
-        "scripts/**",
-        ".github/**",
-        ".codex/**",
-        ".temp/**",
-        "README.md",
-        "CHANGELOG.md"
-      ],
-      "blockedCommands": [
-        "git reset --hard",
-        "git checkout --"
-      ],
+      "tools": ["read", "search", "edit", "shell", "run-tests"],
+      "allowedPaths": ["src/**", "modules/**", "samples/**", "tests/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
-        "maxSteps": 40,
-        "maxDurationMinutes": 45,
+        "maxSteps": 45,
+        "maxDurationMinutes": 50,
         "maxFileEdits": 40,
         "maxTokens": 180000
       },
       "fallbackAgentId": "tester",
-      "notes": "Implements requested changes and performs targeted verification."
+      "notes": "Executes planned work within scoped paths using the routed specialist focus."
     },
     {
       "id": "tester",
@@ -80,23 +67,9 @@
       "role": "tester",
       "skill": "test-engineer",
       "model": "gpt-5",
-      "tools": [
-        "read",
-        "search",
-        "shell",
-        "run-tests"
-      ],
-      "allowedPaths": [
-        "tests/**",
-        "src/**",
-        "scripts/**",
-        ".github/**",
-        ".temp/**"
-      ],
-      "blockedCommands": [
-        "git reset --hard",
-        "git checkout --"
-      ],
+      "tools": ["read", "search", "shell", "run-tests"],
+      "allowedPaths": ["tests/**", "src/**", "modules/**", "samples/**", "scripts/**", ".github/**", ".temp/**"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 25,
         "maxDurationMinutes": 30,
@@ -104,7 +77,7 @@
         "maxTokens": 120000
       },
       "fallbackAgentId": "reviewer",
-      "notes": "Executes and validates test coverage and risk scenarios."
+      "notes": "Executes deterministic validation before final review."
     },
     {
       "id": "reviewer",
@@ -112,31 +85,34 @@
       "role": "reviewer",
       "skill": "review-code-engineer",
       "model": "gpt-5",
-      "tools": [
-        "read",
-        "search",
-        "review"
-      ],
-      "allowedPaths": [
-        "src/**",
-        "scripts/**",
-        ".github/**",
-        ".codex/**",
-        ".temp/**",
-        "README.md",
-        "CHANGELOG.md"
-      ],
-      "blockedCommands": [
-        "git reset --hard",
-        "git checkout --"
-      ],
+      "tools": ["read", "search", "review"],
+      "allowedPaths": ["src/**", "modules/**", "samples/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 20,
         "maxDurationMinutes": 25,
         "maxFileEdits": 10,
         "maxTokens": 90000
       },
+      "fallbackAgentId": "release-engineer",
       "notes": "Performs final risk-focused review and release recommendation."
+    },
+    {
+      "id": "release-engineer",
+      "displayName": "Release Closeout Engineer",
+      "role": "release",
+      "skill": "release-closeout-engineer",
+      "model": "gpt-5",
+      "tools": ["read", "search", "edit", "summarize"],
+      "allowedPaths": [".github/**", ".codex/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": {
+        "maxSteps": 20,
+        "maxDurationMinutes": 20,
+        "maxFileEdits": 15,
+        "maxTokens": 80000
+      },
+      "notes": "Consolidates README follow-up, commit message, changelog summary, and plan completion."
     }
   ]
 }

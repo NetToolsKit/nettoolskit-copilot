@@ -6,6 +6,11 @@ priority: high
 # Task Breakdown
 Split large tasks into manageable steps; avoid hard token limits; split by functional domain when possible.
 
+# Planning and Routing
+- For non-trivial work, route first and then follow `instructions/subagent-planning-workflow.instructions.md`.
+- Treat `.temp/planning/README.md`, `.temp/planning/plans-active/`, and `.temp/planning/plans-completed/` as the versioned planning workspace.
+- Keep the context pack minimal, but do not omit mandatory instruction files or the planning workflow when the task needs staging.
+
 # Prioritization
 - Critical config changes first
 - Core validation logic second

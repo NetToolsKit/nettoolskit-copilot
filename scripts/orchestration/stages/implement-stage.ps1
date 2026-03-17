@@ -321,10 +321,13 @@ $inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
 $artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
 $taskPlanDataPath = if ($artifactMap.ContainsKey('task-plan-data')) { [string] $artifactMap['task-plan-data'] } else { $null }
 $contextPackPath = if ($artifactMap.ContainsKey('context-pack')) { [string] $artifactMap['context-pack'] } else { $null }
-$taskPlanMarkdownPath = if ($artifactMap.ContainsKey('task-plan')) { [string] $artifactMap['task-plan'] } else { $null }
+$routeSelectionPath = if ($artifactMap.ContainsKey('route-selection')) { [string] $artifactMap['route-selection'] } else { $null }
+$specialistContextPackPath = if ($artifactMap.ContainsKey('specialist-context-pack')) { [string] $artifactMap['specialist-context-pack'] } else { $null }
 
 $taskPlanData = if ($null -ne $taskPlanDataPath -and (Test-Path -LiteralPath $taskPlanDataPath -PathType Leaf)) { Read-JsonFile -Path $taskPlanDataPath } else { $null }
 $contextPackJson = if ($null -ne $contextPackPath -and (Test-Path -LiteralPath $contextPackPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $contextPackPath } else { '{}' }
+$routeSelectionJson = if ($null -ne $routeSelectionPath -and (Test-Path -LiteralPath $routeSelectionPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $routeSelectionPath } else { '{}' }
+$specialistContextPackJson = if ($null -ne $specialistContextPackPath -and (Test-Path -LiteralPath $specialistContextPackPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $specialistContextPackPath } else { $contextPackJson }
 $taskPlanSummary = if ($null -ne $taskPlanData) { [string] $taskPlanData.scopeSummary } else { 'No structured task plan available.' }
 $agentAllowedPaths = @($agent.allowedPaths | ForEach-Object { [string] $_ })
 $shouldUseCodexDispatch = ($ExecutionBackend -eq 'codex-exec') -and ($DispatchMode -eq 'codex-exec') -and ($null -ne $taskPlanData)
@@ -376,6 +379,8 @@ foreach ($workItem in $workItems) {
                 REQUEST_TEXT = $requestContent
                 TASK_PLAN_SUMMARY = $taskPlanSummary
                 CONTEXT_PACK_JSON = $contextPackJson
+                ROUTE_SELECTION_JSON = $routeSelectionJson
+                SPECIALIST_CONTEXT_PACK_JSON = $specialistContextPackJson
                 WORK_ITEM_JSON = $workItemJson
                 COMBINED_ALLOWED_PATHS = (($taskAllowedPaths | ForEach-Object { '- ' + $_ }) -join [Environment]::NewLine)
             }

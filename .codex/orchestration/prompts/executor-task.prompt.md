@@ -28,6 +28,12 @@ Task plan summary:
 Context pack:
 {{CONTEXT_PACK_JSON}}
 
+Route selection:
+{{ROUTE_SELECTION_JSON}}
+
+Specialist context pack:
+{{SPECIALIST_CONTEXT_PACK_JSON}}
+
 Current work item:
 {{WORK_ITEM_JSON}}
 

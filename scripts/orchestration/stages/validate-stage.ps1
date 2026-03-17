@@ -178,6 +178,7 @@ $validationScripts = @(
     [ordered]@{ Name = 'validate-instructions'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-instructions.ps1') },
     [ordered]@{ Name = 'validate-policy'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-policy.ps1') },
     [ordered]@{ Name = 'validate-agent-orchestration'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-agent-orchestration.ps1') },
+    [ordered]@{ Name = 'validate-planning-structure'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-planning-structure.ps1') },
     [ordered]@{ Name = 'validate-release-governance'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-release-governance.ps1') }
 )
 
