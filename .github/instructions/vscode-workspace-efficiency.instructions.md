@@ -33,6 +33,10 @@ priority: high
 - Keep high-cost repository metadata hidden and excluded globally:
   - hide `.git` and `.vs` from Explorer
   - exclude `.git`, `.vs`, `TestResults`, `packages`, `BenchmarkDotNet.Artifacts`, and `.sonarqube` from watcher/search scope
+- Keep slow code-action providers conservative in the global baseline:
+  - prefer `eslint.codeActionsOnSave.mode = problems`
+  - disable ESLint quick-fix documentation and disable-rule comment actions by default
+  - disable `github.copilot.chat.reviewSelection.enabled` when repeated code-action provider stalls are affecting editor responsiveness
 - Keep chat-session continuity settings aligned with the shared template:
   - `workbench.startupEditor = welcomePage`
   - `chat.emptyState.history.enabled = true`

@@ -136,6 +136,7 @@
     // https://code.visualstudio.com/docs/editor/versioncontrol#_viewing-diffs
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
+    "diffEditor.maxComputationTime": 0,
 
     // INTEGRATED TERMINAL - Internal terminal settings
     // https://code.visualstudio.com/docs/terminal/basics
@@ -441,6 +442,13 @@
         "typescriptreact",
         "vue"
     ],
+    "eslint.codeActionsOnSave.mode": "problems",
+    "eslint.codeAction.showDocumentation": {
+        "enable": false
+    },
+    "eslint.codeAction.disableRuleComment": {
+        "enable": false
+    },
 
     // ═══════════════════════════════════════════════════════════════════════════════════════════════
     // COPILOT & AI CHAT CONFIGURATION
@@ -460,6 +468,7 @@
     "github.copilot.advanced": {},
     "github.copilot.chat.localeOverride": "pt-br",
     "github.copilot.nextEditSuggestions.enabled": false,
+    "github.copilot.chat.reviewSelection.enabled": false,
     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
     "chatgpt.localeOverride": "pt-BR",
 
