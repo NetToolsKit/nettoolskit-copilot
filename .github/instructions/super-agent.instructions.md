@@ -29,6 +29,7 @@ priority: high
 2. planning registration
    - create or update the active planning artifact under `planning/active/` for any change-bearing task
    - reuse the existing active plan for the same workstream instead of creating duplicates
+   - define expected generated outputs up front and keep non-versioned artifacts under `.build/` or `.deployment/`
 3. specialist identification
    - route through the repository routing catalog
    - select the smallest correct specialist set

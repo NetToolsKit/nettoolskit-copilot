@@ -9,6 +9,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Architecture Patterns:** Clean Architecture, CQRS, DDD, microservices
 - ✅ **Convention Standardization:** Code style, test patterns, commits, file organization
 - ✅ **Authoritative Source Policy:** Repository context first, then official docs by stack
+- ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart` and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
@@ -20,6 +21,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Safe Parallel Dispatch:** dependency-aware batching blocks overlapping write-sets before parallel worker fan-out
 - ✅ **Worktree Isolation Helpers:** repository-owned worktree creation flow for risky or long-running workstreams
 - ✅ **Workflow Entry Commands:** thin PowerShell entrypoints for brainstorm, plan, execute, and parallel dispatch flows
+- ✅ **Canonical Artifact Layout:** non-versioned generated outputs standardized under `.build/` and `.deployment/`
 - ✅ **TDD and Verification Contracts:** repository-owned workflow rules for test-first implementation and verification-before-completion
 - ✅ **Closeout Documentation Automation:** release closeout can rewrite repository README files and prepend CHANGELOG entries when the workstream is ready for commit
 - ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, allowed-path enforcement, and optional live `codex-exec` dispatch
@@ -111,7 +113,7 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 
 | Integration target | Versioned source of truth | Runtime target |
 | --- | --- | --- |
-| Copilot instructions and prompts | `.github/` | `%USERPROFILE%\\.github` |
+| Copilot instructions, prompts, and VS Code agent hooks | `.github/` | `%USERPROFILE%\\.github` |
 | Codex skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` | `%USERPROFILE%\\.codex` |
 | VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
 | VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
@@ -127,6 +129,7 @@ The repository uses an explicit layered instruction architecture so context stay
 - `Repository operating model`: `.github/instructions/repository-operating-model.instructions.md` owns repository topology, build/test/run, style, release, and domain map details.
 - `Planning workspace`: `.github/instructions/subagent-planning-workflow.instructions.md`, `.github/instructions/brainstorm-spec-workflow.instructions.md`, `planning/README.md`, and `planning/specs/README.md` define active/completed plan and spec handling for non-trivial work.
 - `Cross-cutting policy`: `.github/instructions/authoritative-sources.instructions.md`, `.github/governance/*`, and `.github/policies/*` own rules that apply across domains.
+- `Cross-cutting policy`: `.github/instructions/artifact-layout.instructions.md` owns the canonical non-versioned build and deployment artifact layout.
 - `Domain instructions`: `.github/instructions/*.instructions.md` own stack-specific technical behavior.
 - `Prompts`: `.github/prompts/*` are execution helpers and must not become normative policy owners.
 - `Templates`: `.github/templates/*`, `.vscode/*.tamplate.jsonc`, `.vscode/snippets/*.tamplate.code-snippets`, and `.codex/mcp/*.template.*` define concrete artifact shapes only.
@@ -202,6 +205,8 @@ pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 ```
 
 This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
+
+The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 
 To apply active VS Code workspace files from templates:
 

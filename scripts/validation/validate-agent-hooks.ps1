@@ -1,0 +1,152 @@
+<#
+.SYNOPSIS
+    Validates repository-owned VS Code agent hook configuration under .github/hooks.
+
+.DESCRIPTION
+    Ensures hook configuration files are valid JSON, required lifecycle events
+    are present, and referenced runtime hook scripts exist in the repository.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.PARAMETER WarningOnly
+    When true, failures are emitted as warnings and the script exits with code 0.
+
+.EXAMPLE
+    pwsh -File scripts/validation/validate-agent-hooks.ps1 -RepoRoot . -WarningOnly:$false
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
+#>
+
+param(
+    [string] $RepoRoot,
+    [bool] $WarningOnly = $true
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# Resolves repository root from input and fallback candidates.
+function Resolve-RepositoryRoot {
+    param([string] $RequestedRoot)
+
+    $candidates = @()
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
+    }
+    $candidates += (Get-Location).Path
+
+    foreach ($candidate in ($candidates | Select-Object -Unique)) {
+        $current = $candidate
+        for ($index = 0; $index -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $index++) {
+            if ((Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))) {
+                return $current
+            }
+
+            $current = Split-Path -Path $current -Parent
+        }
+    }
+
+    throw 'Could not detect repository root containing both .github and .codex.'
+}
+
+# Records either a failure or a warning based on validation mode.
+function Add-ValidationMessage {
+    param(
+        [string] $Message,
+        [System.Collections.Generic.List[string]] $Warnings,
+        [System.Collections.Generic.List[string]] $Failures,
+        [bool] $WarningOnlyMode
+    )
+
+    if ($WarningOnlyMode) {
+        $Warnings.Add($Message) | Out-Null
+        Write-Host ("[WARN] {0}" -f $Message)
+    }
+    else {
+        $Failures.Add($Message) | Out-Null
+        Write-Host ("[FAIL] {0}" -f $Message)
+    }
+}
+
+$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$warnings = New-Object System.Collections.Generic.List[string]
+$failures = New-Object System.Collections.Generic.List[string]
+
+$hooksRoot = Join-Path $resolvedRepoRoot '.github/hooks'
+$bootstrapHookPath = Join-Path $hooksRoot 'super-agent.bootstrap.json'
+$scriptDirectory = Join-Path $hooksRoot 'scripts'
+
+if (-not (Test-Path -LiteralPath $hooksRoot -PathType Container)) {
+    Add-ValidationMessage -Message 'Missing .github/hooks directory.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+}
+
+if (-not (Test-Path -LiteralPath $bootstrapHookPath -PathType Leaf)) {
+    Add-ValidationMessage -Message 'Missing required hook file .github/hooks/super-agent.bootstrap.json.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+}
+else {
+    try {
+        $hookDocument = Get-Content -Raw -LiteralPath $bootstrapHookPath | ConvertFrom-Json -Depth 100
+    }
+    catch {
+        $hookDocument = $null
+        Add-ValidationMessage -Message ('.github/hooks/super-agent.bootstrap.json is not valid JSON: {0}' -f $_.Exception.Message) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+    }
+
+    if ($null -ne $hookDocument) {
+        $requiredEvents = @('SessionStart', 'SubagentStart')
+        foreach ($eventName in $requiredEvents) {
+            $entries = @($hookDocument.hooks.$eventName)
+            if ($entries.Count -eq 0) {
+                Add-ValidationMessage -Message ("Hook event '{0}' is missing from .github/hooks/super-agent.bootstrap.json." -f $eventName) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+                continue
+            }
+
+            foreach ($entry in $entries) {
+                if ([string] $entry.type -ne 'command') {
+                    Add-ValidationMessage -Message ("Hook event '{0}' must use type 'command'." -f $eventName) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+                }
+
+                $commandText = [string] $entry.command
+                if ([string]::IsNullOrWhiteSpace($commandText)) {
+                    Add-ValidationMessage -Message ("Hook event '{0}' must define a command." -f $eventName) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+                    continue
+                }
+
+                $expectedScriptName = switch ($eventName) {
+                    'SessionStart' { 'session-start.ps1' }
+                    'SubagentStart' { 'subagent-start.ps1' }
+                    default { $null }
+                }
+
+                if (-not [string]::IsNullOrWhiteSpace($expectedScriptName)) {
+                    $expectedScriptPath = Join-Path $scriptDirectory $expectedScriptName
+                    if (-not (Test-Path -LiteralPath $expectedScriptPath -PathType Leaf)) {
+                        Add-ValidationMessage -Message ("Referenced hook script missing: .github/hooks/scripts/{0}" -f $expectedScriptName) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+                    }
+                }
+            }
+        }
+    }
+}
+
+foreach ($requiredScript in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1')) {
+    $scriptPath = Join-Path $scriptDirectory $requiredScript
+    if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
+        Add-ValidationMessage -Message ("Missing hook helper script: .github/hooks/scripts/{0}" -f $requiredScript) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+    }
+}
+
+Write-Host ''
+Write-Host 'Agent hooks validation summary'
+Write-Host ("  Warnings: {0}" -f $warnings.Count)
+Write-Host ("  Failures: {0}" -f $failures.Count)
+
+if ($failures.Count -gt 0) {
+    exit 1
+}
+
+Write-Host 'Agent hooks validation passed.'
+exit 0

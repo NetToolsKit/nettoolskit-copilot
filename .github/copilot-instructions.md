@@ -18,6 +18,7 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 # Hierarchy and Scope
 - Global rules live here and are always applied.
 - The Super Agent lifecycle lives in `instructions/super-agent.instructions.md` and is always applied for change-bearing work.
+- The canonical non-versioned artifact layout lives in `instructions/artifact-layout.instructions.md`.
 - Non-trivial design-bearing work also uses `instructions/brainstorm-spec-workflow.instructions.md` before execution planning.
 - Risky execution may use `instructions/worktree-isolation.instructions.md`.
 - Code-bearing work also uses `instructions/tdd-verification.instructions.md`.
@@ -119,6 +120,7 @@ Follow this order of operations on every task:
 - instructions/super-agent.instructions.md
 - instructions/brainstorm-spec-workflow.instructions.md
 - instructions/repository-operating-model.instructions.md
+- instructions/artifact-layout.instructions.md
 - instructions/subagent-planning-workflow.instructions.md
 - instructions/worktree-isolation.instructions.md
 - instructions/tdd-verification.instructions.md
@@ -136,6 +138,7 @@ Follow this order of operations on every task:
 - Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `planning/`.
 - When the work is non-trivial and design-bearing, create or update a versioned spec under `planning/specs/` before execution planning.
 - Use domain instructions from that map according to the active route and file scope.
+- For generated build or deployment outputs, use `.build/` and `.deployment/` according to `instructions/artifact-layout.instructions.md`.
 
 # Transparency
 

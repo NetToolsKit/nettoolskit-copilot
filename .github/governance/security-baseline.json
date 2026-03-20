@@ -12,6 +12,10 @@
     ".github/governance/warning-baseline.json",
     ".github/governance/shared-script-checksums.manifest.json",
     ".github/runbooks/README.md",
+    ".github/hooks/super-agent.bootstrap.json",
+    ".github/hooks/scripts/common.ps1",
+    ".github/hooks/scripts/session-start.ps1",
+    ".github/hooks/scripts/subagent-start.ps1",
     ".githooks/pre-commit",
     ".githooks/post-commit",
     ".githooks/post-merge",
@@ -21,6 +25,7 @@
     "scripts/validation/validate-shared-script-checksums.ps1",
     "scripts/validation/validate-template-standards.ps1",
     "scripts/validation/validate-workspace-efficiency.ps1",
+    "scripts/validation/validate-agent-hooks.ps1",
     "scripts/validation/validate-shell-hooks.ps1",
     "scripts/validation/validate-runtime-script-tests.ps1",
     "scripts/validation/validate-warning-baseline.ps1",
@@ -32,6 +37,7 @@
     "scripts/tests/runtime/workspace-efficiency.tests.ps1"
   ],
   "requiredDirectories": [
+    ".github/hooks",
     ".github/policies",
     ".github/governance",
     "scripts/validation"

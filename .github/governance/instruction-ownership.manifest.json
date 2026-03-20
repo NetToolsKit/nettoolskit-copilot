@@ -24,13 +24,14 @@
       "copilot-instructions.md": 9000
     },
     "routing": {
-      "maxAlwaysFiles": 9,
+      "maxAlwaysFiles": 10,
       "maxSelectedFiles": 5,
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
         "instructions/super-agent.instructions.md",
         "instructions/repository-operating-model.instructions.md",
+        "instructions/artifact-layout.instructions.md",
         "instructions/subagent-planning-workflow.instructions.md",
         "instructions/workflow-optimization.instructions.md",
         "instructions/authoritative-sources.instructions.md",
@@ -49,7 +50,8 @@
       ],
       "mustReference": [
         "instructions/repository-operating-model.instructions.md",
-        "instructions/authoritative-sources.instructions.md"
+        "instructions/authoritative-sources.instructions.md",
+        "instructions/artifact-layout.instructions.md"
       ]
     },
     {

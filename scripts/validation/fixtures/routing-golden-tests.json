@@ -242,6 +242,16 @@
       ]
     },
     {
+      "id": "artifact-layout-route",
+      "request": "Standardize build artifact hygiene and move generated outputs into .build and deployment-ready publish outputs into .deployment.",
+      "expected_route_ids": [
+        "artifact-layout"
+      ],
+      "expected_selected_paths": [
+        "instructions/artifact-layout.instructions.md"
+      ]
+    },
+    {
       "id": "no-match-route",
       "request": "Tell me a random joke.",
       "expected_route_ids": [],

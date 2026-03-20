@@ -28,6 +28,8 @@ always:
     reason: Repository-owned Super Agent lifecycle for intake, planning, specialist routing, validation, review, and closeout
   - path: instructions/repository-operating-model.instructions.md
     reason: Repository topology, build/test/run commands, style, and domain instruction map
+  - path: instructions/artifact-layout.instructions.md
+    reason: Canonical non-versioned artifact layout for build, generated, and deployment outputs
   - path: instructions/subagent-planning-workflow.instructions.md
     reason: Mandatory planning lifecycle and sub-agent chain for non-trivial work
   - path: instructions/workflow-optimization.instructions.md
@@ -106,6 +108,21 @@ routing:
         reason: README structure, required sections, formatting
       - path: instructions/nettoolskit-rules.instructions.md
         reason: Repo-specific README rules
+
+  - id: artifact-layout
+    tags: [build, deployment, artifacts, generated, publish]
+    triggers:
+      - ".build"
+      - ".deployment"
+      - "build artifact"
+      - "deployment artifact"
+      - "generated output"
+      - "publish output"
+      - "artifact hygiene"
+      - "artifact layout"
+    include:
+      - path: instructions/artifact-layout.instructions.md
+        reason: Canonical layout for generated, build, publish, and deployment-ready outputs
 
   - id: docs-readme-nuget-library
     tags: [docs, readme, nuget, library]

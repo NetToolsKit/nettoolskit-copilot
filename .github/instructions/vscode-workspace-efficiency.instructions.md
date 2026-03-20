@@ -70,7 +70,9 @@ priority: high
 - Use one dedicated configuration workspace for `.github`, `.codex`, `copilot-instructions`, and global VS Code User assets.
 - Keep product workspaces free of those shared folders unless the task is specifically editing the shared instruction system.
 - Maintain a minimal global `chat.instructionsFilesLocations` set so instruction discovery still works without opening the shared folders in every workspace.
+- Maintain a minimal global `chat.hookFilesLocations` set so VS Code agent hooks load from the workspace `.github/hooks` or the shared runtime `~/.github/hooks` without duplicating hook logic across projects.
 - Prefer `%USERPROFILE%\\.github\\` as the single recursive discovery root.
+- Prefer `~/.github/hooks` as the shared user-level hook root for Copilot and Codex sessions in VS Code.
 - Do not enable duplicated subfolder roots under `.github`.
 - Do not enable `%USERPROFILE%\\.codex\\skills\\` in global instruction discovery unless you have measured and justified the extra cost.
 

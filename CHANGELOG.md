@@ -11,6 +11,16 @@
 - Added a dedicated specification workspace under `planning/specs/` with active and completed spec handling.
 - Added closeout automation planning record:
   - `planning/active/plan-closeout-readme-changelog-automation.md`
+- Added repository-owned VS Code agent hook bootstrap assets:
+  - `.github/hooks/super-agent.bootstrap.json`
+  - `.github/hooks/scripts/common.ps1`
+  - `.github/hooks/scripts/session-start.ps1`
+  - `.github/hooks/scripts/subagent-start.ps1`
+- Added a canonical artifact layout instruction:
+  - `.github/instructions/artifact-layout.instructions.md`
+- Added validation coverage for repository-owned agent hooks:
+  - `scripts/validation/validate-agent-hooks.ps1`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
 
 ### Changed
 - Upgraded the repository-owned orchestration lifecycle from:
@@ -32,11 +42,15 @@
 - Updated repository guidance and planning rules:
   - `.github/AGENTS.md`
   - `.github/copilot-instructions.md`
+  - `.github/instruction-routing.catalog.yml`
   - `.github/instructions/repository-operating-model.instructions.md`
   - `.github/instructions/subagent-planning-workflow.instructions.md`
+  - `.github/instructions/super-agent.instructions.md`
   - `planning/README.md`
   - `planning/specs/README.md`
   - `README.md`
+- Updated the VS Code global settings template to load repository-owned hooks from `~/.github/hooks` in addition to workspace `.github/hooks`:
+  - `.vscode/settings.tamplate.jsonc`
 - Hardened MCP config sync for mixed server manifests so onboarding with `-ApplyMcpConfig` no longer fails when some servers expose `command/args` while others expose `url` only:
   - `.codex/scripts/sync-mcp-to-codex-config.ps1`
   - `scripts/tests/runtime/mcp-config-sync.tests.ps1`

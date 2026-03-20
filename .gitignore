@@ -70,8 +70,8 @@ build/
 .Build/
 .debug/
 .Debug/
-.deployment
-.Deployment
+.deployment/
+.Deployment/
 artifacts/
 
 # MSBuild logs

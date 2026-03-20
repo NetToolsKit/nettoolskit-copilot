@@ -17,6 +17,7 @@ priority: high
   - `copilot-instructions.md`
 - Cross-cutting policies remain centralized:
   - `instructions/authoritative-sources.instructions.md`
+  - `instructions/artifact-layout.instructions.md`
   - `.github/governance/authoritative-source-map.json`
 - Planning lifecycle rules are centralized in `instructions/subagent-planning-workflow.instructions.md` and `planning/README.md`.
 - Brainstorm/spec rules are centralized in `instructions/brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
@@ -70,6 +71,10 @@ priority: high
   - `pwsh -File scripts/runtime/bootstrap.ps1`
   - mirrors `.github` and `scripts` into `~/.github`
   - syncs `.codex` runtime assets into `~/.codex`
+- Non-versioned artifact layout:
+  - `.build/` for transient build and generated outputs
+  - `.deployment/` for publish, package, release, and deployment-ready outputs
+  - do not invent new top-level artifact folders when these two cover the need
 
 ## Style and Artifact Hygiene
 - Namespaces mirror folders such as `src/NetToolsKit.DynamicQuery/*` -> `NetToolsKit.DynamicQuery`.
@@ -87,6 +92,10 @@ priority: high
   - follow `.editorconfig`
   - repository policy currently uses `insert_final_newline = false`
   - do not add trailing whitespace
+- Generated output hygiene:
+  - keep non-versioned build or generated output in `.build/`
+  - keep publish, release, and deployable output in `.deployment/`
+  - do not scatter generated artifacts under source folders when the artifacts are not source of truth
 
 ## UI, API, and Database Conventions
 - Chat remains pt-BR, but technical assets stay in English unless the repository explicitly requires localized user-facing text.

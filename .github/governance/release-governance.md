@@ -49,6 +49,7 @@ These files are validated through the governance and provenance baselines so onb
    - `pwsh -File .\scripts\validation\validate-supply-chain.ps1`
    - `pwsh -File .\scripts\validation\validate-warning-baseline.ps1`
    - `pwsh -File .\scripts\validation\validate-agent-orchestration.ps1`
+   - `pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -WarningOnly:$false`
    - `pwsh -File .\scripts\validation\validate-release-governance.ps1`
    - `pwsh -File .\scripts\validation\validate-release-provenance.ps1`
    - `pwsh -File .\scripts\validation\validate-audit-ledger.ps1`

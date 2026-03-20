@@ -141,6 +141,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `instructions/super-agent.instructions.md`
   - `instructions/brainstorm-spec-workflow.instructions.md`
   - `instructions/repository-operating-model.instructions.md`
+  - `instructions/artifact-layout.instructions.md`
   - `instructions/authoritative-sources.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`
   - `instructions/worktree-isolation.instructions.md`
@@ -148,5 +149,6 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `instructions/workflow-optimization.instructions.md`
   - `instructions/powershell-execution.instructions.md`
   - `instructions/feedback-changelog.instructions.md`
+- Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
 - Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
 - For `.github` authoring, include `instructions/copilot-instruction-creation.instructions.md`.

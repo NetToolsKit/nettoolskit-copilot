@@ -23,6 +23,7 @@
     - validate-workspace-efficiency
     - validate-compatibility-lifecycle-policy
     - validate-powershell-standards
+    - validate-agent-hooks
     - validate-shell-hooks
     - validate-runtime-script-tests
     - validate-warning-baseline
@@ -656,6 +657,12 @@ $baseCheckDefinitions['validate-powershell-standards'] = [pscustomobject]@{
     args = $powershellArgs
 }
 
+$baseCheckDefinitions['validate-agent-hooks'] = [pscustomobject]@{
+    name = 'validate-agent-hooks'
+    script = 'scripts/validation/validate-agent-hooks.ps1'
+    args = @{ RepoRoot = $resolvedRepoRoot }
+}
+
 $baseCheckDefinitions['validate-shell-hooks'] = [pscustomobject]@{
     name = 'validate-shell-hooks'
     script = 'scripts/validation/validate-shell-hooks.ps1'
@@ -726,6 +733,7 @@ $defaultCheckOrder = @(
     'validate-workspace-efficiency',
     'validate-compatibility-lifecycle-policy',
     'validate-powershell-standards',
+    'validate-agent-hooks',
     'validate-shell-hooks',
     'validate-runtime-script-tests',
     'validate-warning-baseline',
