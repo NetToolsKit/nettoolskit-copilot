@@ -37,6 +37,9 @@
   - `planning/README.md`
   - `planning/specs/README.md`
   - `README.md`
+- Hardened MCP config sync for mixed server manifests so onboarding with `-ApplyMcpConfig` no longer fails when some servers expose `command/args` while others expose `url` only:
+  - `.codex/scripts/sync-mcp-to-codex-config.ps1`
+  - `scripts/tests/runtime/mcp-config-sync.tests.ps1`
 
 ### Removed
 - Removed placeholder `.gitkeep` files from the planning workspace:

@@ -80,8 +80,10 @@ cd copilot-instructions
 ### One-Step Local Onboarding
 
 ```powershell
-pwsh -File .\scripts\runtime\install.ps1 -CreateSettingsBackup
+pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
+
+You do not need to be inside the repository directory when running the installer. Point `pwsh -File` at the versioned script path and it will detect the repository root from the script location. Use `-RepoRoot` only when you need to override that default.
 
 ### Cross-Platform Prerequisites
 
@@ -180,16 +182,16 @@ copilot-instructions/
 pwsh -File ./scripts/runtime/bootstrap.ps1
 
 # one-step local onboarding wrapper
-pwsh -File ./scripts/runtime/install.ps1 -CreateSettingsBackup
+pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
-# optional: also apply shared MCP servers to ~/.codex/config.toml
+# optional: apply shared MCP servers separately when you do not want the full install wrapper
 pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 
 # enterprise healthcheck (instructions + policy + agent orchestration + release governance + runtime doctor)
 pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 ```
 
-This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`).
+This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
 
 To apply active VS Code workspace files from templates:
 

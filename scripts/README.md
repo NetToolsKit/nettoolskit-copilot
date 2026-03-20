@@ -56,7 +56,7 @@ No package installation is required. Scripts run with PowerShell 7+.
 
 ```powershell
 # run the full recommended local onboarding flow
-pwsh -File .\scripts\runtime\install.ps1 -CreateSettingsBackup
+pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
 # Sync shared assets
 pwsh -File .\scripts\runtime\bootstrap.ps1
@@ -76,6 +76,8 @@ pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Validate enter
 # Enable local Git hooks (pre-commit + post-commit sync)
 pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
 ```
+
+The installer does not require the current shell to be in the repository root. If `pwsh -File` points to the versioned `install.ps1` path, the script resolves the repository root from its own location. Use `-RepoRoot` only when you need to override that auto-detection.
 
 ---
 
@@ -203,7 +205,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
 | `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
-| `runtime/install.ps1` | Runs the recommended onboarding flow by orchestrating bootstrap, VS Code sync, Git hook setup, and healthcheck. Supports preview mode and parameterized runtime paths. | `pwsh -File scripts/runtime/install.ps1 -CreateSettingsBackup` |
+| `runtime/install.ps1` | Runs the recommended onboarding flow by orchestrating bootstrap, optional MCP apply, VS Code sync, Git hook setup, and healthcheck. Supports preview mode and parameterized runtime paths. Can be invoked from any directory when `pwsh -File` points to the versioned script path. | `pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |

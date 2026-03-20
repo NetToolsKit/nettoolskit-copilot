@@ -19,6 +19,24 @@ function Format-TomlArray {
     return "[" + ($escaped -join ", ") + "]"
 }
 
+function Get-OptionalPropertyValue {
+    param(
+        [Parameter(Mandatory = $true)] $Object,
+        [Parameter(Mandatory = $true)][string]$PropertyName
+    )
+
+    if ($null -eq $Object) {
+        return $null
+    }
+
+    $property = $Object.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return $property.Value
+}
+
 function Remove-McpSections {
     param([string[]]$Lines)
 
@@ -60,30 +78,35 @@ function Render-McpToml {
 
     $lines = New-Object System.Collections.Generic.List[string]
     foreach ($server in $Servers) {
-        if ([string]::IsNullOrWhiteSpace($server.name)) {
+        $nameValue = Get-OptionalPropertyValue -Object $server -PropertyName 'name'
+        if ([string]::IsNullOrWhiteSpace([string]$nameValue)) {
             throw "Each server must include a non-empty 'name'."
         }
 
-        $name = [string]$server.name
+        $name = [string]$nameValue
         $lines.Add("[mcp_servers.$name]")
 
-        if ($null -ne $server.command -and -not [string]::IsNullOrWhiteSpace([string]$server.command)) {
-            $lines.Add("command = ""$(Escape-TomlString ([string]$server.command))""")
+        $commandValue = Get-OptionalPropertyValue -Object $server -PropertyName 'command'
+        if ($null -ne $commandValue -and -not [string]::IsNullOrWhiteSpace([string]$commandValue)) {
+            $lines.Add("command = ""$(Escape-TomlString ([string]$commandValue))""")
         }
 
-        if ($null -ne $server.args) {
-            $args = @($server.args | ForEach-Object { [string]$_ })
+        $argsValue = Get-OptionalPropertyValue -Object $server -PropertyName 'args'
+        if ($null -ne $argsValue) {
+            $args = @($argsValue | ForEach-Object { [string]$_ })
             if ($args.Count -gt 0) {
                 $lines.Add("args = $(Format-TomlArray -Values $args)")
             }
         }
 
-        if ($null -ne $server.url -and -not [string]::IsNullOrWhiteSpace([string]$server.url)) {
-            $lines.Add("url = ""$(Escape-TomlString ([string]$server.url))""")
+        $urlValue = Get-OptionalPropertyValue -Object $server -PropertyName 'url'
+        if ($null -ne $urlValue -and -not [string]::IsNullOrWhiteSpace([string]$urlValue)) {
+            $lines.Add("url = ""$(Escape-TomlString ([string]$urlValue))""")
         }
 
-        if ($null -ne $server.headers) {
-            $headerProps = $server.headers.PSObject.Properties
+        $headersValue = Get-OptionalPropertyValue -Object $server -PropertyName 'headers'
+        if ($null -ne $headersValue) {
+            $headerProps = $headersValue.PSObject.Properties
             if ($headerProps.Count -gt 0) {
                 $lines.Add("[mcp_servers.$name.headers]")
                 foreach ($prop in $headerProps) {
@@ -94,8 +117,9 @@ function Render-McpToml {
             }
         }
 
-        if ($null -ne $server.env) {
-            $envProps = $server.env.PSObject.Properties
+        $envValue = Get-OptionalPropertyValue -Object $server -PropertyName 'env'
+        if ($null -ne $envValue) {
+            $envProps = $envValue.PSObject.Properties
             if ($envProps.Count -gt 0) {
                 $lines.Add("[mcp_servers.$name.env]")
                 foreach ($prop in $envProps) {

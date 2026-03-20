@@ -66,6 +66,12 @@
     pwsh -File scripts/runtime/install.ps1 -Mirror -ApplyMcpConfig -BackupMcpConfig -CreateSettingsBackup
 
 .EXAMPLE
+    pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
+.EXAMPLE
+    pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -RepoRoot C:\Users\tguis\copilot-instructions -PreviewOnly
+
+.EXAMPLE
     pwsh -File scripts/runtime/install.ps1 -PreviewOnly
 
 .NOTES
