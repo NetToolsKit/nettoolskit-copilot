@@ -24,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param(
         [string] $RequestedRoot
@@ -57,6 +58,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param(
         [bool] $Condition,
@@ -68,6 +70,7 @@ function Assert-True {
     }
 }
 
+# Fails the current test when the actual and expected values differ.
 function Assert-Equal {
     param(
         [object] $Actual,
@@ -80,6 +83,19 @@ function Assert-Equal {
     }
 }
 
+# Fails the current test when the supplied value is not null.
+function Assert-Null {
+    param(
+        [object] $Actual,
+        [string] $Message
+    )
+
+    if ($null -ne $Actual) {
+        throw ("{0} Actual='{1}'" -f $Message, $Actual)
+    }
+}
+
+# Writes deterministic UTF-8 test content to disk.
 function Write-TextFile {
     param(
         [string] $Path,
@@ -137,6 +153,17 @@ try {
         $afterSecondRun = Get-Content -Raw -LiteralPath $targetPath
 
         Assert-Equal -Actual $afterSecondRun -Expected $beforeSecondRun -Message 'Global settings sync must be idempotent when target is already aligned.'
+
+        $repoTemplatePath = Join-Path $resolvedRepoRoot '.vscode/settings.tamplate.jsonc'
+        $repoTemplate = Get-Content -Raw -LiteralPath $repoTemplatePath | ConvertFrom-Json -Depth 200
+        Assert-Equal -Actual $repoTemplate.PSObject.Properties['files.insertFinalNewline'].Value -Expected $false -Message 'Shared VS Code template must preserve the repository EOF policy.'
+        Assert-Null -Actual $repoTemplate.PSObject.Properties['editor.defaultFormatter'] -Message 'Shared VS Code template must not define a global default formatter.'
+
+        foreach ($languageScope in @('[javascript]', '[typescript]', '[html]', '[css]', '[scss]', '[vue]', '[json]', '[markdown]')) {
+            $scopeValue = $repoTemplate.PSObject.Properties[$languageScope].Value
+            Assert-True -Condition ($null -ne $scopeValue) -Message ("Shared VS Code template must keep the language scope {0}." -f $languageScope)
+            Assert-Null -Actual $scopeValue.PSObject.Properties['editor.defaultFormatter'] -Message ("Shared VS Code template must not assign a shared default formatter for {0}." -f $languageScope)
+        }
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

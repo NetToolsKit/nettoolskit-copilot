@@ -6,7 +6,8 @@
     Compares source and runtime file sets for:
     - .github -> ~/.github
     - scripts -> ~/.github/scripts
-    - .codex/skills -> ~/.codex/skills
+    - .codex/skills -> ~/.agents/skills
+    - duplicate repo-managed skill folders that should not remain in ~/.codex/skills
     - .codex/mcp -> ~/.codex/shared-mcp
     - .codex/scripts (root tools) -> ~/.codex/shared-scripts
     - scripts/common -> ~/.codex/shared-scripts/common
@@ -30,6 +31,9 @@
 
 .PARAMETER TargetCodexPath
     Runtime target path for .codex assets. Defaults to <user-home>/.codex.
+
+.PARAMETER TargetAgentsSkillsPath
+    Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
 
 .PARAMETER Detailed
     Prints file-level entries for missing, extra, and drifted files.
@@ -58,12 +62,14 @@ param(
     [string] $RepoRoot,
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
+    [string] $TargetAgentsSkillsPath,
     [switch] $Detailed,
     [switch] $SyncOnDrift,
     [switch] $StrictExtras
 )
 
 $ErrorActionPreference = 'Stop'
+
 
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
 if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
@@ -141,18 +147,86 @@ function Get-FileInventory {
     return $inventory
 }
 
+# Returns repository-managed skill directory names from the versioned skill source root.
+function Get-ManagedSkillNameList {
+    param(
+        [string] $SkillRoot
+    )
+
+    if (-not (Test-Path -LiteralPath $SkillRoot -PathType Container)) {
+        return @()
+    }
+
+    return @(Get-ChildItem -LiteralPath $SkillRoot -Directory -Force | Select-Object -ExpandProperty Name | Sort-Object -Unique)
+}
+
+# Checks whether a relative path starts with or equals one of the provided prefixes.
+function Test-PathPrefixMatch {
+    param(
+        [string] $RelativePath,
+        [string[]] $Prefixes
+    )
+
+    $prefixList = @($Prefixes | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) })
+    if ($prefixList.Count -eq 0) {
+        return $true
+    }
+
+    $normalizedPath = $RelativePath.Replace('\', '/')
+    foreach ($prefix in $prefixList) {
+        $normalizedPrefix = $prefix.Replace('\', '/').TrimEnd('/')
+        if ($normalizedPath -eq $normalizedPrefix -or $normalizedPath.StartsWith(("{0}/" -f $normalizedPrefix), [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+# Filters a file inventory by optional include and ignore prefix sets.
+function Select-InventoryEntries {
+    param(
+        [hashtable] $Inventory,
+        [string[]] $IncludePrefixes = @(),
+        [string[]] $IgnorePrefixes = @()
+    )
+
+    $result = @{}
+    $includeList = @($IncludePrefixes | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) })
+    $ignoreList = @($IgnorePrefixes | Where-Object { -not [string]::IsNullOrWhiteSpace([string] $_) })
+
+    foreach ($entry in $Inventory.GetEnumerator()) {
+        if ($includeList.Count -gt 0 -and -not (Test-PathPrefixMatch -RelativePath $entry.Key -Prefixes $includeList)) {
+            continue
+        }
+
+        if ($ignoreList.Count -gt 0 -and (Test-PathPrefixMatch -RelativePath $entry.Key -Prefixes $ignoreList)) {
+            continue
+        }
+
+        $result[$entry.Key] = $entry.Value
+    }
+
+    return $result
+}
+
 # Compares source and runtime inventories to detect missing, extra, and drifted files.
 function Compare-Mapping {
     param(
         [string] $Name,
         [string] $SourcePath,
         [string] $TargetPath,
+        [string[]] $IncludePrefixes = @(),
+        [string[]] $IgnoreSourcePrefixes = @(),
         [string[]] $IgnoreExtraPrefixes = @(),
         [switch] $IncludeExtraRuntimeDrift
     )
 
     $sourceInventory = Get-FileInventory -RootPath $SourcePath
     $targetInventory = Get-FileInventory -RootPath $TargetPath
+
+    $sourceInventory = Select-InventoryEntries -Inventory $sourceInventory -IncludePrefixes $IncludePrefixes -IgnorePrefixes $IgnoreSourcePrefixes
+    $targetInventory = Select-InventoryEntries -Inventory $targetInventory -IncludePrefixes $IncludePrefixes
 
     $sourceKeys = @($sourceInventory.Keys | Sort-Object)
     $targetKeys = @($targetInventory.Keys | Sort-Object)
@@ -212,6 +286,39 @@ function Compare-Mapping {
     }
 }
 
+# Reports repository-managed skill folders that should not remain duplicated in ~/.codex/skills.
+function Test-CodexSkillDuplicateState {
+    param(
+        [string] $ManagedSkillRoot,
+        [string] $CodexSkillsRoot
+    )
+
+    $managedSkillNames = @(Get-ManagedSkillNameList -SkillRoot $ManagedSkillRoot)
+    $duplicates = New-Object System.Collections.Generic.List[string]
+
+    if (Test-Path -LiteralPath $CodexSkillsRoot -PathType Container) {
+        foreach ($skillName in $managedSkillNames) {
+            $candidate = Join-Path $CodexSkillsRoot $skillName
+            if (Test-Path -LiteralPath $candidate) {
+                $duplicates.Add($skillName) | Out-Null
+            }
+        }
+
+    }
+
+    return [pscustomobject]@{
+        Name = 'repo-managed skill duplicates in runtime .codex/skills'
+        SourcePath = $ManagedSkillRoot
+        TargetPath = $CodexSkillsRoot
+        SourceCount = $managedSkillNames.Count
+        TargetCount = if (Test-Path -LiteralPath $CodexSkillsRoot -PathType Container) { @(Get-ChildItem -LiteralPath $CodexSkillsRoot -Force).Count } else { 0 }
+        MissingInRuntime = @()
+        ExtraInRuntime = @($duplicates)
+        DriftedFiles = @()
+        IsHealthy = ($duplicates.Count -eq 0)
+    }
+}
+
 # Prints a standardized summary for a single runtime mapping comparison.
 function Write-MappingReport {
     param(
@@ -248,6 +355,9 @@ function Invoke-Doctor {
         [string] $ResolvedRepoRoot
     )
 
+    $managedSkillRoot = Join-Path $ResolvedRepoRoot '.codex\skills'
+    $managedSkillPrefixes = @((Get-ManagedSkillNameList -SkillRoot $managedSkillRoot))
+
     $mappings = @(
         [pscustomobject]@{
             Name = '.github -> runtime'
@@ -262,10 +372,12 @@ function Invoke-Doctor {
             IgnoreExtraPrefixes = @()
         },
         [pscustomobject]@{
-            Name = '.codex/skills -> runtime'
-            Source = Join-Path $ResolvedRepoRoot '.codex\skills'
-            Target = Join-Path $TargetCodexPath 'skills'
-            IgnoreExtraPrefixes = @('.system\', '.system/')
+            Name = '.codex/skills -> runtime .agents/skills'
+            Source = $managedSkillRoot
+            Target = $TargetAgentsSkillsPath
+            IncludePrefixes = $managedSkillPrefixes
+            IgnoreSourcePrefixes = @('README.md')
+            IgnoreExtraPrefixes = @((Get-ChildItem -LiteralPath $TargetAgentsSkillsPath -Directory -ErrorAction SilentlyContinue | Where-Object { $managedSkillPrefixes -notcontains $_.Name } | ForEach-Object { $_.Name }))
         },
         [pscustomobject]@{
             Name = '.codex/mcp -> runtime'
@@ -301,8 +413,12 @@ function Invoke-Doctor {
 
     $reports = @()
     foreach ($mapping in $mappings) {
-        $reports += Compare-Mapping -Name $mapping.Name -SourcePath $mapping.Source -TargetPath $mapping.Target -IgnoreExtraPrefixes $mapping.IgnoreExtraPrefixes -IncludeExtraRuntimeDrift:$StrictExtras
+        $includePrefixes = if ($null -ne $mapping.PSObject.Properties['IncludePrefixes']) { @($mapping.IncludePrefixes) } else { @() }
+        $ignoreSourcePrefixes = if ($null -ne $mapping.PSObject.Properties['IgnoreSourcePrefixes']) { @($mapping.IgnoreSourcePrefixes) } else { @() }
+        $reports += Compare-Mapping -Name $mapping.Name -SourcePath $mapping.Source -TargetPath $mapping.Target -IncludePrefixes $includePrefixes -IgnoreSourcePrefixes $ignoreSourcePrefixes -IgnoreExtraPrefixes $mapping.IgnoreExtraPrefixes -IncludeExtraRuntimeDrift:$StrictExtras
     }
+
+    $reports += (Test-CodexSkillDuplicateState -ManagedSkillRoot $managedSkillRoot -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills'))
 
     return $reports
 }
@@ -326,6 +442,9 @@ if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Join-Path $userHome '.codex'
 }
+if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
+}
 
 Write-StyledOutput 'Runtime doctor report'
 Write-StyledOutput ("  repo root: {0}" -f $resolvedRepoRoot)
@@ -345,7 +464,7 @@ if ($hasDrift -and $SyncOnDrift) {
         throw "Bootstrap script not found: $bootstrapScript"
     }
 
-    & $bootstrapScript -RepoRoot $resolvedRepoRoot -TargetGithubPath $TargetGithubPath -TargetCodexPath $TargetCodexPath
+        & $bootstrapScript -RepoRoot $resolvedRepoRoot -TargetGithubPath $TargetGithubPath -TargetCodexPath $TargetCodexPath -TargetAgentsSkillsPath $TargetAgentsSkillsPath
     $reports = Invoke-Doctor -ResolvedRepoRoot $resolvedRepoRoot
     foreach ($report in $reports) {
         Write-MappingReport -Report $report -DetailedReport:$Detailed

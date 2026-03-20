@@ -1,6 +1,20 @@
 <#
 .SYNOPSIS
     Runtime tests for repository-owned VS Code agent hook scripts.
+
+.DESCRIPTION
+    Validates the SessionStart and SubagentStart hook payload contracts used to
+    bootstrap Copilot and Codex sessions inside VS Code.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.EXAMPLE
+    pwsh -File scripts/tests/runtime/vscode-agent-hooks.tests.ps1
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 param(
@@ -10,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param([string] $RequestedRoot)
 
@@ -33,6 +48,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param(
         [bool] $Condition,

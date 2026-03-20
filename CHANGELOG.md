@@ -1,6 +1,20 @@
 ## [1.2.0] - 2026-03-20
 
 ### Fixed
+- Fixed fresh clones leaving the repository dirty before any user change because a set of tracked PowerShell scripts were committed with mixed line endings under the repository `*.ps1 eol=crlf` policy:
+  - `scripts/deploy/deploy-backend-to-vps.ps1`
+  - `scripts/git-hooks/setup-git-hooks.ps1`
+  - `scripts/governance/set-branch-protection.ps1`
+  - `scripts/maintenance/generate-http-from-openapi.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/tests/run-coverage.ps1`
+  - `scripts/validation/export-audit-report.ps1`
+  - `scripts/validation/validate-policy.ps1`
+  - `scripts/validation/validate-release-governance.ps1`
+- Added a PowerShell standards guardrail to fail when tracked `.ps1` files are stored in Git with mixed or non-normalized index line endings:
+  - `scripts/validation/validate-powershell-standards.ps1`
 - Fixed shell hook PowerShell boolean invocation so validation no longer fails after `post-merge`, `pre-commit`, or `post-checkout`, including shell-safe quoting for PowerShell boolean literals in POSIX hooks:
   - `.githooks/pre-commit`
   - `.githooks/post-merge`
@@ -10,6 +24,21 @@
   - `scripts/tests/runtime/runtime-scripts.tests.ps1`
 - Extended shell-hook validation to catch unsupported PowerShell boolean argument forms that pass shell syntax checks but fail at runtime:
   - `scripts/validation/validate-shell-hooks.ps1`
+- Fixed the shared VS Code formatter baseline so repository-managed settings no longer route JS/TS/HTML/CSS/SCSS/Vue/JSON/Markdown through Prettier by default, avoiding automatic final newline reintroduction against the repository EOF policy:
+  - `.vscode/settings.tamplate.jsonc`
+  - `scripts/tests/runtime/vscode-global-settings-sync.tests.ps1`
+  - `.github/instructions/vscode-workspace-efficiency.instructions.md`
+- Hardened `validate-all.ps1` to accept external boolean-like string values for `WarningOnly`, so older shell hooks and stale local clones no longer fail argument binding before the suite starts:
+  - `scripts/validation/validate-all.ps1`
+- Reconfirmed the shell-safe quoted PowerShell boolean literal convention for Git hooks:
+  - `.githooks/pre-commit`
+  - `.githooks/post-checkout`
+  - `.githooks/post-merge`
+  - `scripts/validation/validate-shell-hooks.ps1`
+- Removed duplicate repo-managed skill entries from the VS Code/Codex picker by making `%USERPROFILE%\\.agents\\skills` the canonical visible/runtime target and cleaning stale repo-managed duplicates from `%USERPROFILE%\\.codex\\skills`:
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:
@@ -37,6 +66,9 @@
 - Added CI wrapper for the warning-only pre-build security snapshot:
   - `scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1`
   - `scripts/tests/runtime/ci-security-snapshot.tests.ps1`
+- Added a picker-visible repository starter alias for the repo-owned lifecycle controller:
+  - `.codex/skills/using-super-agent/SKILL.md`
+  - `.codex/skills/using-super-agent/agents/openai.yaml`
 
 ### Changed
 - Upgraded the repository-owned orchestration lifecycle from:
@@ -90,6 +122,17 @@
   - `scripts/runtime/self-heal.ps1`
   - `scripts/runtime/run-agent-pipeline.ps1`
   - `scripts/validation/export-audit-report.ps1`
+- Updated runtime bootstrap documentation and smoke coverage so repository-owned local skills are documented and verified in both `~/.codex/skills` and picker-visible `~/.agents/skills` projections:
+  - `.codex/skills/README.md`
+  - `README.md`
+  - `scripts/README.md`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+- Tightened the PowerShell authoring contract so function description comments must explain purpose and clarify parameter expectations, side effects, or returned values when behavior is not obvious:
+  - `.github/instructions/powershell-script-creation.instructions.md`
+- Updated runtime and skill documentation so repo-managed skills are documented as canonical under `%USERPROFILE%\\.agents\\skills` rather than mirrored visibly in `%USERPROFILE%\\.codex\\skills`:
+  - `README.md`
+  - `scripts/README.md`
+  - `.codex/skills/README.md`
 
 ### Removed
 - Removed placeholder `.gitkeep` files from the planning workspace:

@@ -21,6 +21,7 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Task-loop implementation with per-task spec review and code-quality review
 - ✅ Safe parallel batching for dependency-independent work items with write-set conflict blocking
 - ✅ Super Agent worktree isolation helper and thin lifecycle entry commands
+- ✅ Picker-visible `Using Super Agent` starter alias projected into `%USERPROFILE%\\.agents\\skills`
 - ✅ Repository-owned TDD and verification workflow contracts for execution stages
 - ✅ Persisted orchestration run state for replay diagnostics and auditability
 - ✅ Release governance checks (CODEOWNERS, changelog contracts, branch-protection baseline)
@@ -183,7 +184,8 @@ scripts/
 
 `runtime/bootstrap.ps1` syncs:
 - `.github/` -> `~/.github`
-- `.codex/skills/` -> `~/.codex/skills`
+- `.codex/skills/` -> `~/.agents/skills` as the canonical picker-visible/runtime skill target
+- stale repo-managed duplicates are removed from `~/.codex/skills` while unmanaged/system skill folders are preserved
 - `.codex/mcp/` -> `~/.codex/shared-mcp`
 - `.codex/scripts/` (root MCP tools) + `scripts/common/` + `scripts/security/` -> `~/.codex/shared-scripts`
 - `.codex/orchestration/` -> `~/.codex/shared-orchestration`
@@ -209,7 +211,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/validate-template-standards.ps1` | Validates shared templates against `.github/governance/template-standards.baseline.json`, including required/forbidden patterns and referenced script/doc paths. | `pwsh -File scripts/validation/validate-template-standards.ps1` |
 | `validation/validate-workspace-efficiency.ps1` | Validates `.code-workspace` files against `.github/governance/workspace-efficiency.baseline.json` using the effective combination of global template plus local workspace overrides. Covers redundant settings, Git throttling, watcher/search inheritance, and multi-folder heuristics for Codex/Copilot usage. | `pwsh -File scripts/validation/validate-workspace-efficiency.ps1 -WorkspaceSearchRoot .\workspaces` |
 | `validation/validate-compatibility-lifecycle-policy.ps1` | Validates `COMPATIBILITY.md` Support Lifecycle/EOL table semantics (reference date, ordering, EOL + 1 day, status). | `pwsh -File scripts/validation/validate-compatibility-lifecycle-policy.ps1` |
-| `validation/validate-powershell-standards.ps1` | Validates script standards for PowerShell files (help, param block, function docs, approved verbs). | `pwsh -File scripts/validation/validate-powershell-standards.ps1` |
+| `validation/validate-powershell-standards.ps1` | Validates `scripts/**/*.ps1` for script help coverage, per-parameter `.PARAMETER` entries, function description comments, approved verbs, and tracked line-ending normalization. | `pwsh -File scripts/validation/validate-powershell-standards.ps1` |
 | `validation/validate-shell-hooks.ps1` | Validates `.githooks/*` shell syntax with `sh -n` and optional `shellcheck`. | `pwsh -File scripts/validation/validate-shell-hooks.ps1` |
 | `validation/validate-agent-hooks.ps1` | Validates repository-owned VS Code hook JSON and required bootstrap scripts under `.github/hooks/`. | `pwsh -File scripts/validation/validate-agent-hooks.ps1 -WarningOnly:$false` |
 | `validation/validate-runtime-script-tests.ps1` | Runs runtime test scripts under `scripts/tests/runtime` without external test frameworks. | `pwsh -File scripts/validation/validate-runtime-script-tests.ps1` |

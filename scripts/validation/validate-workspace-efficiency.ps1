@@ -25,6 +25,9 @@
 .PARAMETER BaselinePath
     Baseline JSON path. Defaults to `.github/governance/workspace-efficiency.baseline.json`.
 
+.PARAMETER SettingsTemplatePath
+    Settings template path used to validate effective global-plus-workspace settings.
+
 .PARAMETER WorkspaceSearchRoot
     Root path used to discover `.code-workspace` files. Defaults to repository root.
 

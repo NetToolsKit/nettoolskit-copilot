@@ -33,7 +33,6 @@
     "editor.fontSize": 13,
     "editor.formatOnSave": false,
     "editor.stickyScroll.enabled": false,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.renderWhitespace": "none",
     "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": true,
@@ -330,6 +329,8 @@
 
     // FORMATTERS - Specific formatter settings
     // https://prettier.io/docs/en/configuration.html
+    // Prettier remains available for explicit use, but it is not the shared
+    // default formatter because the repository EOF policy forbids final newlines.
     "prettier.endOfLine": "lf",
     "prettier.trailingComma": "es5",
 
@@ -355,36 +356,29 @@
 
     // JavaScript / TypeScript
     "[javascript]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
     "[typescript]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
 
     // Web Technologies
     "[html]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
     "[css]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
     "[scss]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
     "[vue]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
 
     // Configuration Files
     "[json]": {
-        "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "files.encoding": "utf8"
     },
     "json.schemas": [
         {
@@ -426,7 +420,6 @@
     // Documentation
     "[markdown]": {
         "files.encoding": "utf8",
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.wordWrap": "wordWrapColumn",
         "editor.wordWrapColumn": 160,
         "files.insertFinalNewline": false,

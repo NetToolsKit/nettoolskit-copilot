@@ -1,9 +1,29 @@
+<#
+.SYNOPSIS
+    Runtime tests for repository-owned Super Agent worktree isolation helpers.
+
+.DESCRIPTION
+    Validates the worktree creation helper and confirms isolated worktrees are
+    discoverable through Git after creation.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.EXAMPLE
+    pwsh -File scripts/tests/runtime/super-agent-worktree.tests.ps1
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
+#>
+
 param(
     [string] $RepoRoot
 )
 
 $ErrorActionPreference = 'Stop'
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param([bool] $Condition, [string] $Message)
     if (-not $Condition) {

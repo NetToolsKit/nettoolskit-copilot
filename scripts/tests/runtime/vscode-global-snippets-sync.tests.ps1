@@ -24,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param(
         [string] $RequestedRoot
@@ -57,6 +58,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param(
         [bool] $Condition,
@@ -68,6 +70,7 @@ function Assert-True {
     }
 }
 
+# Fails the current test when the actual and expected values differ.
 function Assert-Equal {
     param(
         [object] $Actual,
@@ -80,6 +83,7 @@ function Assert-Equal {
     }
 }
 
+# Writes deterministic UTF-8 test content to disk.
 function Write-TextFile {
     param(
         [string] $Path,

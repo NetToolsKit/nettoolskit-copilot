@@ -48,8 +48,17 @@
 .PARAMETER ContinueOnStageFailure
     When true (default), continue executing subsequent stages after non-successful stage.
 
+.PARAMETER ExecutionBackend
+    Pipeline execution backend. Choose between `script-only` and `codex-exec`.
+
+.PARAMETER DispatchCommand
+    Command used to invoke delegated Codex execution when the backend requires it.
+
 .PARAMETER StopAfterStageId
     Optional stage id that truncates the pipeline after the selected stage.
+
+.PARAMETER WriteRunState
+    When true (default), writes per-stage and consolidated run-state artifacts.
 
 .PARAMETER DetailedOutput
     Shows detailed diagnostics.

@@ -23,6 +23,9 @@
 .PARAMETER TargetCodexPath
     Optional runtime target path for .codex assets.
 
+.PARAMETER TargetAgentsSkillsPath
+    Optional runtime target path for picker-visible local skills.
+
 .PARAMETER GlobalVscodeUserPath
     Optional VS Code global user settings folder.
 
@@ -83,6 +86,7 @@ param(
     [string] $RepoRoot,
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
+    [string] $TargetAgentsSkillsPath,
     [string] $GlobalVscodeUserPath,
     [string] $ValidationProfile = 'dev',
     [switch] $Mirror,
@@ -211,6 +215,9 @@ if (-not [string]::IsNullOrWhiteSpace($TargetGithubPath)) {
 if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $bootstrapArguments.TargetCodexPath = $TargetCodexPath
 }
+if (-not [string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $bootstrapArguments.TargetAgentsSkillsPath = $TargetAgentsSkillsPath
+}
 if ($Mirror) {
     $bootstrapArguments.Mirror = $true
 }
@@ -261,9 +268,12 @@ if (-not $SkipHealthcheck) {
     if (-not [string]::IsNullOrWhiteSpace($TargetGithubPath)) {
         $healthcheckArguments.TargetGithubPath = $TargetGithubPath
     }
-    if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-        $healthcheckArguments.TargetCodexPath = $TargetCodexPath
-    }
+if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
+    $healthcheckArguments.TargetCodexPath = $TargetCodexPath
+}
+if (-not [string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $healthcheckArguments.TargetAgentsSkillsPath = $TargetAgentsSkillsPath
+}
 
     $steps.Add((New-InstallStep -Name 'Run repository healthcheck' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/healthcheck.ps1') -Arguments $healthcheckArguments)) | Out-Null
 }

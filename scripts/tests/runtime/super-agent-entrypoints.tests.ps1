@@ -1,9 +1,29 @@
+<#
+.SYNOPSIS
+    Runtime tests for the repository-owned Super Agent entrypoint scripts.
+
+.DESCRIPTION
+    Validates the thin Super Agent entry commands that wrap brainstorming,
+    planning, execution, and parallel dispatch flows.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.EXAMPLE
+    pwsh -File scripts/tests/runtime/super-agent-entrypoints.tests.ps1
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
+#>
+
 param(
     [string] $RepoRoot
 )
 
 $ErrorActionPreference = 'Stop'
 
+# Fails the current test when the actual and expected values differ.
 function Assert-Equal {
     param([object] $Actual, [object] $Expected, [string] $Message)
     if ($Actual -ne $Expected) {
@@ -11,6 +31,7 @@ function Assert-Equal {
     }
 }
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param([bool] $Condition, [string] $Message)
     if (-not $Condition) {

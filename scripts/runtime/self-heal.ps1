@@ -22,6 +22,9 @@
 .PARAMETER TargetCodexPath
     Runtime target path for .codex assets. Defaults to <user-home>/.codex.
 
+.PARAMETER TargetAgentsSkillsPath
+    Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
+
 .PARAMETER Mirror
     Uses mirror mode for bootstrap sync.
 
@@ -67,6 +70,7 @@ param(
     [string] $RepoRoot,
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
+    [string] $TargetAgentsSkillsPath,
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
     [switch] $BackupConfig,
@@ -78,6 +82,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
 
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
 if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
@@ -185,6 +190,9 @@ if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Join-Path $userHome '.codex'
 }
+if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
+}
 
 $resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
 
@@ -222,6 +230,7 @@ $bootstrapArgs = @{
     RepoRoot = $resolvedRepoRoot
     TargetGithubPath = $TargetGithubPath
     TargetCodexPath = $TargetCodexPath
+    TargetAgentsSkillsPath = $TargetAgentsSkillsPath
 }
 if ($Mirror) {
     $bootstrapArgs.Mirror = $true
@@ -254,6 +263,7 @@ $healthcheckArgs = @{
     RepoRoot = $resolvedRepoRoot
     TargetGithubPath = $TargetGithubPath
     TargetCodexPath = $TargetCodexPath
+    TargetAgentsSkillsPath = $TargetAgentsSkillsPath
     OutputPath = $healthcheckReportPath
     LogPath = $healthcheckLogPath
 }
@@ -287,6 +297,7 @@ $report = [ordered]@{
     targets = [ordered]@{
         github = $TargetGithubPath
         codex = $TargetCodexPath
+        agentsSkills = $TargetAgentsSkillsPath
     }
     options = [ordered]@{
         mirror = [bool] $Mirror

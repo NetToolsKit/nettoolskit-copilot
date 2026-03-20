@@ -15,7 +15,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
 - ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
-- ✅ **Mandatory Non-Trivial Flow:** super-agent intake -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Mandatory Non-Trivial Flow:** using-super-agent -> super-agent intake -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
 - ✅ **Worker-Ready Planning:** planner work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
 - ✅ **Task-Level Review Loop:** each implementation slice can pass through task spec review and task quality review before completion
 - ✅ **Safe Parallel Dispatch:** dependency-aware batching blocks overlapping write-sets before parallel worker fan-out
@@ -114,7 +114,8 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 | Integration target | Versioned source of truth | Runtime target |
 | --- | --- | --- |
 | Copilot instructions, prompts, and VS Code agent hooks | `.github/` | `%USERPROFILE%\\.github` |
-| Codex skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` | `%USERPROFILE%\\.codex` |
+| Codex runtime skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` | `%USERPROFILE%\\.codex` |
+| Picker-visible local skills for VS Code/Codex | `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
 | VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
 | VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
 | VS Code workspaces | `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
@@ -204,7 +205,7 @@ pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 ```
 
-This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
+This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects repository-owned skills once into `~/.agents/skills` as the canonical visible/runtime skill target, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
 
 The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 

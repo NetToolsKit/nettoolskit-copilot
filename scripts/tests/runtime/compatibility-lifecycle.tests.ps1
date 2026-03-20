@@ -23,6 +23,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param(
         [string] $RequestedRoot
@@ -56,6 +57,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Fails the current test when the process exit code does not match the expected value.
 function Assert-ExitCode {
     param(
         [int] $ExitCode,
@@ -68,6 +70,7 @@ function Assert-ExitCode {
     }
 }
 
+# Builds compatibility matrix test content for lifecycle validation scenarios.
 function New-CompatibilityContent {
     param(
         [string] $ReferenceDate,
@@ -87,6 +90,7 @@ function New-CompatibilityContent {
     return ($header + $Rows) -join "`r`n"
 }
 
+# Persists generated compatibility test content to a temporary file.
 function Write-CompatibilityFile {
     param(
         [string] $ReferenceDate,

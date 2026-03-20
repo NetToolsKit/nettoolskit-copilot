@@ -37,6 +37,10 @@ priority: high
   - prefer `eslint.codeActionsOnSave.mode = problems`
   - disable ESLint quick-fix documentation and disable-rule comment actions by default
   - disable `github.copilot.chat.reviewSelection.enabled` when repeated code-action provider stalls are affecting editor responsiveness
+- Keep the shared formatter baseline compatible with the repository EOF policy:
+  - do not set `esbenp.prettier-vscode` as the shared global default formatter
+  - do not set Prettier as the shared default formatter for `javascript`, `typescript`, `html`, `css`, `scss`, `vue`, `json`, or `markdown`
+  - the repository default EOF policy uses `insert_final_newline = false`, while Prettier writes a terminal newline
 - Keep chat-session continuity settings aligned with the shared template:
   - `workbench.startupEditor = welcomePage`
   - `chat.emptyState.history.enabled = true`

@@ -16,6 +16,7 @@ This folder stores versioned Codex skills aligned with `.github/instructions`. S
 - ✅ Runtime sync through root bootstrap
 - ✅ Reusable workflows mapped to repository instruction packs
 - ✅ Repository-owned Super Agent lifecycle for intake, specs, planning, specialist routing, review, and closeout
+- ✅ Picker-visible `Using Super Agent` starter alias for deterministic session bootstrap
 - ✅ Worktree isolation and closeout automation skills for high-safety execution
 - ✅ Build-time dependency vulnerability auditing for .NET, frontend, and Rust stacks
 
@@ -48,7 +49,7 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 
 ```powershell
 pwsh -File .\scripts\runtime\bootstrap.ps1
-Get-ChildItem "$env:USERPROFILE\.codex\skills"
+Get-ChildItem "$env:USERPROFILE\.agents\skills"
 ```
 
 ---
@@ -57,7 +58,7 @@ Get-ChildItem "$env:USERPROFILE\.codex\skills"
 
 ### Example 1: Software Implementation
 
-Use skills: `super-agent`, `brainstorm-spec-architect`, `plan-active-work-planner`, `context-token-optimizer`, then the routed specialist
+Use skills: `using-super-agent`, `super-agent`, `brainstorm-spec-architect`, `plan-active-work-planner`, `context-token-optimizer`, then the routed specialist
 
 ### Example 2: Testing and Coverage
 
@@ -103,6 +104,7 @@ Use skills: `super-agent`, `worktree-isolation-engineer`, `release-closeout-engi
 
 - `core-context-router`
 - `core-runtime-sync`
+- `using-super-agent`
 - `super-agent`
 - `brainstorm-spec-architect`
 - `plan-active-work-planner`

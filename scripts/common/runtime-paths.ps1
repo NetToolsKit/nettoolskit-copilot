@@ -39,3 +39,9 @@ function Resolve-UserHomePath {
 
     throw 'Could not resolve user home path. Set USERPROFILE or HOME.'
 }
+
+# Resolves the local `.agents/skills` picker path used by VS Code and Codex skill discovery.
+function Resolve-AgentsSkillsPath {
+    $homePath = Resolve-UserHomePath
+    return Join-Path $homePath '.agents\skills'
+}

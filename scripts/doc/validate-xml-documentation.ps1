@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Audits C# projects to detect types missing XML <summary> documentation.
 

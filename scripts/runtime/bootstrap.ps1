@@ -6,7 +6,7 @@
     Detects the repository root and copies shared assets to:
     - <user-home>/.github
     - <user-home>/.github/scripts
-    - <user-home>/.codex/skills
+    - <user-home>/.agents/skills
     - <user-home>/.codex/shared-mcp
     - <user-home>/.codex/shared-scripts
     - <user-home>/.codex/shared-orchestration
@@ -29,7 +29,10 @@
     Target path for .github runtime assets. Defaults to <user-home>/.github.
 
 .PARAMETER TargetCodexPath
-    Target path for .codex runtime assets. Defaults to <user-home>/.codex.
+    Target path for .codex runtime assets other than picker-visible skills. Defaults to <user-home>/.codex.
+
+.PARAMETER TargetAgentsSkillsPath
+    Target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
 
 .PARAMETER Mirror
     Mirrors target folders (removes files not present in source) when supported by the sync mode.
@@ -61,6 +64,7 @@ param(
     [string] $RepoRoot,
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
+    [string] $TargetAgentsSkillsPath,
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
     [switch] $BackupConfig,
@@ -68,6 +72,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
 
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
 if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
@@ -180,6 +185,70 @@ function Invoke-DirectorySync {
     Write-VerboseColor ("Synced with fallback copy: {0} -> {1}" -f $Source, $Destination) 'Gray'
 }
 
+# Returns repository-managed skill directory names from the versioned source root.
+function Get-ManagedSkillNameList {
+    param(
+        [string] $SourceRoot
+    )
+
+    if (-not (Test-Path -LiteralPath $SourceRoot -PathType Container)) {
+        return @()
+    }
+
+    return @(Get-ChildItem -LiteralPath $SourceRoot -Directory -Force | Select-Object -ExpandProperty Name | Sort-Object -Unique)
+}
+
+# Synchronizes repository-owned skill directories into the local `.agents/skills` picker path.
+function Invoke-AgentsSkillSync {
+    param(
+        [string] $SourceRoot,
+        [string] $DestinationRoot,
+        [switch] $MirrorMode
+    )
+
+    if (-not (Test-Path -LiteralPath $SourceRoot -PathType Container)) {
+        Write-VerboseColor ("Skipping missing agents skill source root: {0}" -f $SourceRoot) 'Yellow'
+        return
+    }
+
+    New-Item -ItemType Directory -Path $DestinationRoot -Force | Out-Null
+
+    $sourceSkillDirectories = @(Get-ChildItem -LiteralPath $SourceRoot -Directory -Force)
+    foreach ($skillDirectory in $sourceSkillDirectories) {
+        $targetSkillPath = Join-Path $DestinationRoot $skillDirectory.Name
+        Invoke-DirectorySync -Source $skillDirectory.FullName -Destination $targetSkillPath -MirrorMode:$MirrorMode
+    }
+}
+
+# Removes repository-managed skill duplicates from the local `.codex/skills` runtime root.
+function Remove-ManagedCodexSkillDuplicates {
+    param(
+        [string] $ManagedSourceRoot,
+        [string] $CodexSkillsRoot
+    )
+
+    if (-not (Test-Path -LiteralPath $CodexSkillsRoot -PathType Container)) {
+        return
+    }
+
+    foreach ($skillName in (Get-ManagedSkillNameList -SourceRoot $ManagedSourceRoot)) {
+        $duplicateSkillPath = Join-Path $CodexSkillsRoot $skillName
+        if (Test-Path -LiteralPath $duplicateSkillPath) {
+            Remove-Item -LiteralPath $duplicateSkillPath -Recurse -Force -ErrorAction Stop
+        }
+    }
+
+    $managedReadme = Join-Path $ManagedSourceRoot 'README.md'
+    $duplicateReadme = Join-Path $CodexSkillsRoot 'README.md'
+    if ((Test-Path -LiteralPath $managedReadme -PathType Leaf) -and (Test-Path -LiteralPath $duplicateReadme -PathType Leaf)) {
+        $managedHash = (Get-FileHash -LiteralPath $managedReadme -Algorithm SHA256).Hash
+        $duplicateHash = (Get-FileHash -LiteralPath $duplicateReadme -Algorithm SHA256).Hash
+        if ($managedHash -eq $duplicateHash) {
+            Remove-Item -LiteralPath $duplicateReadme -Force -ErrorAction Stop
+        }
+    }
+}
+
 # Applies MCP manifest settings to target Codex config.toml.
 function Invoke-McpConfigApply {
     param(
@@ -221,6 +290,9 @@ if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Join-Path $userHome '.codex'
 }
+if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
+}
 
 $sourceGithub = Join-Path $resolvedRepoRoot '.github'
 $sourceCodex = Join-Path $resolvedRepoRoot '.codex'
@@ -235,7 +307,8 @@ Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
 
 Invoke-DirectorySync -Source $sourceGithub -Destination $TargetGithubPath -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceScripts -Destination (Join-Path $TargetGithubPath 'scripts') -MirrorMode:$Mirror
-Invoke-DirectorySync -Source (Join-Path $sourceCodex 'skills') -Destination (Join-Path $TargetCodexPath 'skills') -MirrorMode:$Mirror
+Invoke-AgentsSkillSync -SourceRoot (Join-Path $sourceCodex 'skills') -DestinationRoot $TargetAgentsSkillsPath -MirrorMode:$Mirror
+Remove-ManagedCodexSkillDuplicates -ManagedSourceRoot (Join-Path $sourceCodex 'skills') -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills')
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceCommonScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\common') -MirrorMode:$Mirror
@@ -251,7 +324,8 @@ if (Test-Path -LiteralPath $sharedReadme) {
 Write-StyledOutput 'Sync complete.'
 Write-StyledOutput ("  .github -> {0}" -f $TargetGithubPath)
 Write-StyledOutput ("  scripts -> {0}" -f (Join-Path $TargetGithubPath 'scripts'))
-Write-StyledOutput ("  .codex/skills -> {0}" -f (Join-Path $TargetCodexPath 'skills'))
+Write-StyledOutput ("  .codex/skills (source only; runtime duplicates removed from {0})" -f (Join-Path $TargetCodexPath 'skills'))
+Write-StyledOutput ("  .agents/skills (canonical picker/runtime skills) -> {0}" -f $TargetAgentsSkillsPath)
 Write-StyledOutput ("  .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
 Write-StyledOutput ("  .codex/scripts + scripts/common + scripts/security -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
 Write-StyledOutput ("  .codex/orchestration -> {0}" -f (Join-Path $TargetCodexPath 'shared-orchestration'))

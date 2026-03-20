@@ -9,39 +9,39 @@
   "entries": [
     {
       "path": "scripts/common/console-style.ps1",
-      "sha256": "066081e6268580a10669d6f293ce55c11cadd11844d07d9c03d519be38d8a8ac"
+      "sha256": "fcfc3e587abbcc1a3a4ee5c00846dc8a29899bdb1d5b3aca0b40ac2d7c6e5ea6"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
-      "sha256": "6f769e5103b008fa82cc66359c25ef8567a612de7836241f84a3ac6caeeca8d0"
+      "sha256": "9229e6852be99cce4d17e523f8a2e62f0c5acf3649b132753eec87a124bc051c"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "1b9a9ac89394cd5b21916941c6b59063bc576086632897c5190a6756c141d1e9"
+      "sha256": "c76c53d4664a2aeb8f3fce416682a571040c1b18e1f3c28d4b02731a28562469"
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
-      "sha256": "078279ec04209ea283eee756e505c829eb373e094c250f5a930fc41285be09e9"
+      "sha256": "c303c0f8364fe28ae1b7d888934d98ffcc4fe3c3a12811cdab21cb0552191798"
     },
     {
       "path": "scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1",
-      "sha256": "a85cb91035315b9045a7a25c71ebd46fe7b96d66b64c5ba454f6e5da828627ec"
+      "sha256": "e6a5372d951954801c95075e6fd882e90a85853584e4235022373c6dbf1a2559"
     },
     {
       "path": "scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1",
-      "sha256": "564a681cafaecf14ad7395f33192f00416d03aba7abde3dd6f2b45c27a8a8ead"
+      "sha256": "0e3f9b943bd09c63f304679525ab5429395fe88c4e1c7fdc80cf9cd7f5165af5"
     },
     {
       "path": "scripts/security/Invoke-PreBuildSecurityGate.ps1",
-      "sha256": "b99a08d21ea9a7da616fe4e200ba37abaaf7d8f36c8ee77fb4cd7abc211ba881"
+      "sha256": "a0ee604d753cd27a3192e466a1b75b33d1d4fb8a52c4b3d6c69e0d51b6c4c427"
     },
     {
       "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",
-      "sha256": "ea75e72ecfa8e09f57b221162122e0d5adb901ef3937c01ecbbb61c66eedcf72"
+      "sha256": "b0469a3fa7f8cc7b4ee7b09163398e0f2be36fac67e3c2dfa16cf0ab06dd3d46"
     },
     {
       "path": "scripts/security/Invoke-VulnerabilityAudit.ps1",
-      "sha256": "0dbf6bcf732be2b12a18d1fea8ccd405518d9e247b9cf86b64ceb37cf130aa09"
+      "sha256": "e5103d092207dfd9604b426b84d56b1a1b9a0fe0ee7d08182096575fad8e144f"
     }
   ]
 }

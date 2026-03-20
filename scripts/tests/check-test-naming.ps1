@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Validates whether test method names follow the triple-underscore convention (e.g., Feature_Context_Result).
 

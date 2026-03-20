@@ -26,6 +26,9 @@
 .PARAMETER TargetCodexPath
     Runtime target path for .codex assets. Defaults to <user-home>/.codex.
 
+.PARAMETER TargetAgentsSkillsPath
+    Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
+
 .PARAMETER SyncRuntime
     Runs bootstrap sync before health checks.
 
@@ -71,6 +74,7 @@ param(
     [string] $RepoRoot,
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
+    [string] $TargetAgentsSkillsPath,
     [switch] $SyncRuntime,
     [switch] $Mirror,
     [switch] $StrictExtras,
@@ -220,10 +224,14 @@ if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Join-Path $userHome '.codex'
 }
+if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
+}
 
 $resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
 $resolvedTargetGithubPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetGithubPath
 $resolvedTargetCodexPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetCodexPath
+$resolvedTargetAgentsSkillsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetAgentsSkillsPath
 
 $resolvedLogPath = if ([string]::IsNullOrWhiteSpace($LogPath)) {
     $timestampToken = Get-Date -Format 'yyyyMMdd-HHmmss'
@@ -263,6 +271,7 @@ if ($SyncRuntime) {
         RepoRoot = $resolvedRepoRoot
         TargetGithubPath = $resolvedTargetGithubPath
         TargetCodexPath = $resolvedTargetCodexPath
+        TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
     }
     if ($Mirror) {
         $bootstrapArgs.Mirror = $true
@@ -288,6 +297,7 @@ $doctorArgs = @{
     RepoRoot = $resolvedRepoRoot
     TargetGithubPath = $resolvedTargetGithubPath
     TargetCodexPath = $resolvedTargetCodexPath
+    TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
 }
 if ($StrictExtras) {
     $doctorArgs.StrictExtras = $true
@@ -320,6 +330,7 @@ $report = [ordered]@{
     targets = [ordered]@{
         github = $resolvedTargetGithubPath
         codex = $resolvedTargetCodexPath
+        agentsSkills = $resolvedTargetAgentsSkillsPath
     }
     options = [ordered]@{
         syncRuntime = [bool] $SyncRuntime

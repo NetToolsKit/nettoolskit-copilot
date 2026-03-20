@@ -21,6 +21,9 @@
 .PARAMETER TargetCodexPath
     Runtime target path for .codex assets. Defaults to <user-home>/.codex.
 
+.PARAMETER TargetAgentsSkillsPath
+    Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
+
 .PARAMETER SyncRuntime
     Runs bootstrap sync before health checks.
 
@@ -66,6 +69,7 @@ param(
     [string] $RepoRoot,
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
+    [string] $TargetAgentsSkillsPath,
     [switch] $SyncRuntime,
     [switch] $Mirror,
     [switch] $StrictExtras,
@@ -79,6 +83,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
 
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
 if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
@@ -156,6 +161,9 @@ if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Join-Path $userHome '.codex'
 }
+if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
+}
 
 $resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
 $resolvedHealthcheckOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $HealthcheckOutputPath
@@ -195,6 +203,7 @@ $healthcheckArgs = @{
     RepoRoot = $resolvedRepoRoot
     TargetGithubPath = $TargetGithubPath
     TargetCodexPath = $TargetCodexPath
+    TargetAgentsSkillsPath = $TargetAgentsSkillsPath
     OutputPath = $resolvedHealthcheckOutputPath
     LogPath = $healthcheckLogPath
     ValidationProfile = $ValidationProfile
@@ -262,6 +271,7 @@ $auditReport = [ordered]@{
     targets = [ordered]@{
         github = $TargetGithubPath
         codex = $TargetCodexPath
+        agentsSkills = $TargetAgentsSkillsPath
     }
     options = [ordered]@{
         syncRuntime = [bool] $SyncRuntime

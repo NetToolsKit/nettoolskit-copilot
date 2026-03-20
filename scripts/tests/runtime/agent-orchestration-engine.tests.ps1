@@ -1,6 +1,20 @@
 <#
 .SYNOPSIS
     Runtime tests for the multi-agent orchestration engine without external frameworks.
+
+.DESCRIPTION
+    Validates end-to-end scripted orchestration behavior, artifact generation,
+    and closeout side effects for the repository-owned agent pipeline.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.EXAMPLE
+    pwsh -File scripts/tests/runtime/agent-orchestration-engine.tests.ps1
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 param(
@@ -10,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param([string] $RequestedRoot)
 
@@ -33,6 +48,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param(
         [bool] $Condition,
@@ -44,6 +60,7 @@ function Assert-True {
     }
 }
 
+# Fails the current test when the actual and expected values differ.
 function Assert-Equal {
     param(
         $Actual,
@@ -56,6 +73,7 @@ function Assert-Equal {
     }
 }
 
+# Writes deterministic JSON test content to disk.
 function Write-JsonFile {
     param(
         [string] $Path,

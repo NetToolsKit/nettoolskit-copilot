@@ -32,6 +32,24 @@
 .PARAMETER OutputArtifactManifestPath
     Path where this stage writes its output artifact manifest.
 
+.PARAMETER AgentsManifestPath
+    Optional path to the orchestration agent manifest used by scripted validation backends.
+
+.PARAMETER DispatchMode
+    Validation dispatch mode. Defaults to `scripted`.
+
+.PARAMETER PromptTemplatePath
+    Optional prompt template path for delegated validation backends.
+
+.PARAMETER ResponseSchemaPath
+    Optional response schema path for delegated validation backends.
+
+.PARAMETER DispatchCommand
+    Command used when delegated validation dispatch is enabled.
+
+.PARAMETER ExecutionBackend
+    Validation backend selector. Defaults to `script-only`.
+
 .PARAMETER StageStatePath
     Optional path where stage execution metadata is written.
 

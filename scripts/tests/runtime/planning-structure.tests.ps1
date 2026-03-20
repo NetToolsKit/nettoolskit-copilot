@@ -1,3 +1,22 @@
+<#
+.SYNOPSIS
+    Runtime tests for the versioned planning workspace structure.
+
+.DESCRIPTION
+    Validates the planning workspace contract by executing the repository
+    planning structure validator in enforced mode.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, uses the current location.
+
+.EXAMPLE
+    pwsh -File scripts/tests/runtime/planning-structure.tests.ps1
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
+#>
+
 param(
     [string] $RepoRoot
 )
@@ -5,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param([string] $RequestedRoot)
 

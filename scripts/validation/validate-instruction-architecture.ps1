@@ -32,6 +32,9 @@
 .PARAMETER RoutingCatalogPath
     Relative path to instruction-routing.catalog.yml.
 
+.PARAMETER RoutePromptPath
+    Relative path to the route-only prompt that enforces deterministic context selection.
+
 .PARAMETER PromptRoot
     Relative or absolute prompt root to scan.
 
@@ -43,6 +46,9 @@
 
 .PARAMETER WarningOnly
     When true (default), failures are emitted as warnings and execution exits with code 0.
+
+.PARAMETER Verbose
+    Shows detailed diagnostics.
 
 .PARAMETER DetailedOutput
     Prints file-level warning details.

@@ -50,6 +50,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
 if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
     $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'

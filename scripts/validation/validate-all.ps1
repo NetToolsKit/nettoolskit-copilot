@@ -94,7 +94,7 @@ param(
     [switch] $IncludeAllPowershellScripts,
     [switch] $StrictPowershellStandards,
     [switch] $SkipPSScriptAnalyzer,
-    [bool] $WarningOnly = $true,
+    [object] $WarningOnly = $true,
     [bool] $WriteLedger = $true,
     [string] $LedgerPath = '.temp/audit/validation-ledger.jsonl',
     [string] $OutputPath = '.temp/audit/validate-all.latest.json',
@@ -165,6 +165,61 @@ function Add-SuiteWarning {
     Initialize-SuiteWarningList
     $script:Warnings.Add($Message) | Out-Null
     Write-StyledOutput ("[WARN] {0}" -f $Message)
+}
+
+# Normalizes external boolean-like inputs so shell hooks and older wrappers can
+# pass string values such as "true" without tripping PowerShell parameter binding.
+function Convert-ToBooleanValue {
+    param(
+        [object] $Value,
+        [string] $ParameterName,
+        [bool] $DefaultValue
+    )
+
+    if ($null -eq $Value) {
+        return $DefaultValue
+    }
+
+    if ($Value -is [bool]) {
+        return [bool] $Value
+    }
+
+    if ($Value -is [string]) {
+        $normalized = $Value.Trim().ToLowerInvariant()
+        switch ($normalized) {
+            '' { return $DefaultValue }
+            '1' { return $true }
+            'true' { return $true }
+            'yes' { return $true }
+            'on' { return $true }
+            '0' { return $false }
+            'false' { return $false }
+            'no' { return $false }
+            'off' { return $false }
+            default {
+                throw ("Invalid boolean value for parameter '{0}': {1}" -f $ParameterName, $Value)
+            }
+        }
+    }
+
+    if (($Value -is [byte]) -or ($Value -is [int16]) -or ($Value -is [int]) -or ($Value -is [long])) {
+        if ([long] $Value -eq 1) {
+            return $true
+        }
+
+        if ([long] $Value -eq 0) {
+            return $false
+        }
+
+        throw ("Invalid numeric boolean value for parameter '{0}': {1}" -f $ParameterName, $Value)
+    }
+
+    try {
+        return [System.Convert]::ToBoolean($Value)
+    }
+    catch {
+        throw ("Invalid boolean value for parameter '{0}': {1}" -f $ParameterName, $Value)
+    }
 }
 
 # Resolves a path from repo root.
@@ -555,7 +610,8 @@ $selectedProfile = Get-ValidationProfile -ProfilesFilePath $profileFilePath -Pro
 $profileId = if ($null -eq $selectedProfile) { 'custom' } else { [string] $selectedProfile.id }
 
 $profileWarningOnly = if ($null -eq $selectedProfile) { $false } else { [bool] $selectedProfile.warningOnly }
-$effectiveWarningOnly = [bool] ($WarningOnly -or $profileWarningOnly)
+$resolvedWarningOnly = Convert-ToBooleanValue -Value $WarningOnly -ParameterName 'WarningOnly' -DefaultValue $true
+$effectiveWarningOnly = [bool] ($resolvedWarningOnly -or $profileWarningOnly)
 
 if ($effectiveWarningOnly) {
     Write-StyledOutput '[INFO] validate-all running in warning-only mode.'

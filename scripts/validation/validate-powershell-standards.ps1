@@ -25,7 +25,7 @@
     Scripts directory root. Defaults to `scripts`.
 
 .PARAMETER IncludeAllScripts
-    Validates all scripts under ScriptsRoot. If omitted, validates governance-critical script folders only.
+    Legacy compatibility switch. All scripts under ScriptsRoot are validated by default.
 
 .PARAMETER Strict
     Treats warning-level style findings as failures.
@@ -187,33 +187,51 @@ function Get-TargetScriptFileList {
         return @()
     }
 
-    if ($AllScripts) {
-        return @(Get-ChildItem -LiteralPath $resolvedScriptsRoot -Recurse -File -Filter '*.ps1' | Select-Object -ExpandProperty FullName | Sort-Object -Unique)
-    }
+    return @(Get-ChildItem -LiteralPath $resolvedScriptsRoot -Recurse -File -Filter '*.ps1' | Select-Object -ExpandProperty FullName | Sort-Object -Unique)
+}
 
-    $criticalFolders = @(
-        'scripts/validation',
-        'scripts/runtime',
-        'scripts/orchestration',
-        'scripts/governance',
-        'scripts/git-hooks'
+# Fails when tracked PowerShell scripts are stored with non-normalized line endings in Git.
+function Test-TrackedScriptLineEndingNormalization {
+    param(
+        [string] $Root,
+        [string[]] $ScriptPaths
     )
 
-    $fileSet = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+    $gitCommand = Get-Command -Name 'git' -ErrorAction SilentlyContinue
+    if ($null -eq $gitCommand) {
+        Add-ValidationWarning 'Git not found; tracked PowerShell line-ending normalization check skipped.'
+        return
+    }
 
-    foreach ($criticalFolder in $criticalFolders) {
-        $folderPath = Resolve-RepoPath -Root $Root -Path $criticalFolder
-        if (-not (Test-Path -LiteralPath $folderPath -PathType Container)) {
-            Add-ValidationWarning ("Critical script folder not found: {0}" -f $criticalFolder)
+    $relativeTrackedPaths = @()
+    foreach ($scriptPath in $ScriptPaths) {
+        $relativePath = Convert-ToRelativePath -Root $Root -Path $scriptPath
+        $trackedPath = (& git -C $Root ls-files --error-unmatch -- $relativePath 2>$null)
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($trackedPath -join ''))) {
+            $relativeTrackedPaths += $relativePath
+        }
+    }
+
+    if ($relativeTrackedPaths.Count -eq 0) {
+        return
+    }
+
+    $eolLines = @(& git -C $Root ls-files --eol -- $relativeTrackedPaths 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        Add-ValidationWarning 'Could not inspect tracked PowerShell line endings with git ls-files --eol.'
+        return
+    }
+
+    foreach ($line in $eolLines) {
+        $text = [string] $line
+        if ([string]::IsNullOrWhiteSpace($text)) {
             continue
         }
 
-        Get-ChildItem -LiteralPath $folderPath -Recurse -File -Filter '*.ps1' | ForEach-Object {
-            $fileSet.Add($_.FullName) | Out-Null
+        if ($text -match '^i/(mixed|crlf)\b') {
+            Add-ValidationFailure ("Tracked PowerShell script is not normalized in Git index: {0}" -f $text.Trim())
         }
     }
-
-    return @($fileSet | Sort-Object)
 }
 
 # Checks if script contains comment-based help block near top.
@@ -223,9 +241,10 @@ function Test-CommentBasedHelpBlock {
         [string] $RelativePath
     )
 
-    $hasHelpBlock = $RawContent -match '(?s)^\s*<#\s*.*?#>'
+    $normalizedContent = $RawContent.TrimStart([char] 0xFEFF)
+    $hasHelpBlock = $normalizedContent -match '(?s)^\s*<#\s*.*?#>'
     if (-not $hasHelpBlock) {
-        Add-ValidationWarning ("Missing comment-based help block: {0}" -f $RelativePath)
+        Add-ValidationFailure ("Missing comment-based help block: {0}" -f $RelativePath)
     }
 
     return $hasHelpBlock
@@ -235,14 +254,19 @@ function Test-CommentBasedHelpBlock {
 function Test-HelpSectionSet {
     param(
         [string] $RawContent,
-        [string] $RelativePath
+        [string] $RelativePath,
+        [string[]] $ScriptParameters
     )
 
-    $requiredTokens = @('.SYNOPSIS', '.DESCRIPTION', '.PARAMETER', '.EXAMPLE', '.NOTES')
+    $requiredTokens = @('.SYNOPSIS', '.DESCRIPTION', '.EXAMPLE', '.NOTES')
     foreach ($token in $requiredTokens) {
         if ($RawContent -notmatch [regex]::Escape($token)) {
-            Add-ValidationWarning ("Help section missing {0}: {1}" -f $token, $RelativePath)
+            Add-ValidationFailure ("Help section missing {0}: {1}" -f $token, $RelativePath)
         }
+    }
+
+    if (@($ScriptParameters).Count -gt 0 -and $RawContent -notmatch [regex]::Escape('.PARAMETER')) {
+        Add-ValidationFailure ("Help section missing .PARAMETER entries: {0}" -f $RelativePath)
     }
 }
 
@@ -255,6 +279,35 @@ function Test-ParamBlockPresence {
 
     if ($RawContent -notmatch '(?im)^\s*param\s*\(') {
         Add-ValidationFailure ("Missing param() block: {0}" -f $RelativePath)
+    }
+}
+
+# Returns script-level parameter names from the top-level param block.
+function Get-ScriptParameterNameList {
+    param(
+        [System.Management.Automation.Language.ScriptBlockAst] $Ast
+    )
+
+    if ($null -eq $Ast -or $null -eq $Ast.ParamBlock) {
+        return @()
+    }
+
+    return @($Ast.ParamBlock.Parameters | ForEach-Object { $_.Name.VariablePath.UserPath })
+}
+
+# Ensures each script-level parameter has a matching .PARAMETER entry in the help block.
+function Test-ScriptParameterHelpCoverage {
+    param(
+        [string] $RawContent,
+        [string[]] $ScriptParameters,
+        [string] $RelativePath
+    )
+
+    foreach ($parameterName in $ScriptParameters) {
+        $parameterPattern = "(?im)^\s*\.PARAMETER\s+{0}\b" -f [regex]::Escape($parameterName)
+        if ($RawContent -notmatch $parameterPattern) {
+            Add-ValidationFailure ("Script help is missing .PARAMETER {0}: {1}" -f $parameterName, $RelativePath)
+        }
     }
 }
 
@@ -417,16 +470,23 @@ if ($scriptPaths.Count -eq 0) {
     }
 }
 
+Test-TrackedScriptLineEndingNormalization -Root $resolvedRepoRoot -ScriptPaths $scriptPaths
+
 $filesChecked = 0
 foreach ($scriptPath in $scriptPaths) {
     $relativePath = Convert-ToRelativePath -Root $resolvedRepoRoot -Path $scriptPath
     $rawContent = Get-Content -Raw -LiteralPath $scriptPath
     $lines = @(Get-Content -LiteralPath $scriptPath)
+    $tokens = $null
+    $errors = $null
+    $scriptAst = [System.Management.Automation.Language.Parser]::ParseFile($scriptPath, [ref] $tokens, [ref] $errors)
+    $scriptParameters = @(Get-ScriptParameterNameList -Ast $scriptAst)
 
     $filesChecked++
     $hasHelpBlock = Test-CommentBasedHelpBlock -RawContent $rawContent -RelativePath $relativePath
     if ($hasHelpBlock) {
-        Test-HelpSectionSet -RawContent $rawContent -RelativePath $relativePath
+        Test-HelpSectionSet -RawContent $rawContent -RelativePath $relativePath -ScriptParameters $scriptParameters
+        Test-ScriptParameterHelpCoverage -RawContent $rawContent -ScriptParameters $scriptParameters -RelativePath $relativePath
     }
 
     Test-ParamBlockPresence -RawContent $rawContent -RelativePath $relativePath

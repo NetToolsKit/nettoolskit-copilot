@@ -24,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the repository root for the current script or test fixture.
 function Resolve-RepositoryRoot {
     param(
         [string] $RequestedRoot
@@ -57,6 +58,7 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Fails the current test when the supplied condition is false.
 function Assert-True {
     param(
         [bool] $Condition,
@@ -68,6 +70,7 @@ function Assert-True {
     }
 }
 
+# Fails the current test when the collection does not contain the expected value.
 function Assert-Contains {
     param(
         [string[]] $Collection,
@@ -92,6 +95,7 @@ try {
     Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'bootstrap missing RepoRoot parameter.'
     Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'bootstrap missing TargetGithubPath parameter.'
     Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'bootstrap missing TargetCodexPath parameter.'
+    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'bootstrap missing TargetAgentsSkillsPath parameter.'
     Assert-Contains -Collection $keys -Value 'Mirror' -Message 'bootstrap missing Mirror parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'healthcheck.ps1'
@@ -101,6 +105,7 @@ try {
     Assert-Contains -Collection $keys -Value 'WarningOnly' -Message 'healthcheck missing WarningOnly parameter.'
     Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'healthcheck missing TargetGithubPath parameter.'
     Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'healthcheck missing TargetCodexPath parameter.'
+    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'healthcheck missing TargetAgentsSkillsPath parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'self-heal.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -109,6 +114,7 @@ try {
     Assert-Contains -Collection $keys -Value 'ApplyMcpConfig' -Message 'self-heal missing ApplyMcpConfig parameter.'
     Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'self-heal missing TargetGithubPath parameter.'
     Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'self-heal missing TargetCodexPath parameter.'
+    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'self-heal missing TargetAgentsSkillsPath parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'clean-codex-runtime.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -129,13 +135,26 @@ try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $targetGithub = Join-Path $tempRoot '.github'
     $targetCodex = Join-Path $tempRoot '.codex'
+    $targetAgentsSkills = Join-Path $tempRoot '.agents\skills'
+    $targetCodexSkills = Join-Path $targetCodex 'skills'
     $scriptPath = Join-Path $runtimeScriptRoot 'bootstrap.ps1'
     try {
-        & $scriptPath -RepoRoot $resolvedRepoRoot -TargetGithubPath $targetGithub -TargetCodexPath $targetCodex -Mirror | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $targetCodexSkills 'super-agent') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $targetCodexSkills 'using-super-agent') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $targetCodexSkills '.system') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $targetCodexSkills 'super-agent\SKILL.md') -Value 'duplicate'
+        Set-Content -LiteralPath (Join-Path $targetCodexSkills 'using-super-agent\SKILL.md') -Value 'duplicate'
+        Set-Content -LiteralPath (Join-Path $targetCodexSkills '.system\SKILL.md') -Value 'system'
+
+        & $scriptPath -RepoRoot $resolvedRepoRoot -TargetGithubPath $targetGithub -TargetCodexPath $targetCodex -TargetAgentsSkillsPath $targetAgentsSkills -Mirror | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'bootstrap smoke test failed.'
         Assert-True (Test-Path -LiteralPath $targetGithub -PathType Container) 'bootstrap did not create target github folder.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'skills') -PathType Container) 'bootstrap did not sync skills folder.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $targetAgentsSkills 'super-agent\SKILL.md') -PathType Leaf) 'bootstrap did not project picker-visible skills.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $targetAgentsSkills 'using-super-agent\SKILL.md') -PathType Leaf) 'bootstrap did not project the using-super-agent picker alias.'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodexSkills 'super-agent'))) 'bootstrap did not remove duplicate repo-managed super-agent from .codex/skills.'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodexSkills 'using-super-agent'))) 'bootstrap did not remove duplicate repo-managed using-super-agent from .codex/skills.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodexSkills '.system\SKILL.md') -PathType Leaf) 'bootstrap should preserve unmanaged/system skills in .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts') -PathType Container) 'bootstrap did not sync shared-scripts folder.'
     }
     finally {

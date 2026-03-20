@@ -11,10 +11,13 @@ Standardize PowerShell scripts in scripts/ with the same structure and safety mo
 - Do not assemble a final script directly from the example skeleton in this instruction; use the template as the executable starting point and treat examples here as partial guidance only.
 - For AI-assisted generation prefer .github/prompts/create-powershell-script.prompt.md first, then adapt as needed.
 - Start with comment-based help using SYNOPSIS, DESCRIPTION, PARAMETER, EXAMPLE, and NOTES.
+- Document every script parameter with its own `.PARAMETER <Name>` entry in the script help block.
 - Keep param block at the top of the executable body.
 - Set ErrorActionPreference to Stop.
 - Organize code in three sections: Helpers, Main execution, Summary/exit.
 - Use descriptive function names with approved verbs.
+- Add a description comment immediately above every function declaration so readers can identify purpose without reverse-engineering the implementation.
+- Function description comments must explain what the function does and call out relevant parameter expectations, side effects, or returned value when the behavior is not obvious from the signature alone.
 
 # Template Placeholder Mapping
 - Replace [SHORT_SCRIPT_SUMMARY] with one-line script intent.
@@ -54,6 +57,7 @@ Standardize PowerShell scripts in scripts/ with the same structure and safety mo
 - Keep script idempotent whenever feasible.
 - Use UTF-8 encoding for file writes unless target format requires otherwise.
 - Respect repository EOF policy from `.editorconfig`: PowerShell files use `crlf`, do not end with a trailing blank line, and do not add a final newline unless a file-specific rule explicitly requires it.
+- Keep PowerShell files UTF-8 without BOM unless a file-specific format explicitly requires BOM.
 
 # Example Skeleton
 ```powershell

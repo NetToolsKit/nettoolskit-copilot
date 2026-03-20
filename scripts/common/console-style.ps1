@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Shared ANSI console styling helpers for repository scripts.
 
