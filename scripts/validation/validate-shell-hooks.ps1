@@ -208,6 +208,24 @@ function Invoke-HookShellcheck {
     }
 }
 
+# Validates repository shell hook parameter conventions that shell syntax checks cannot catch.
+function Test-HookSemanticGuards {
+    param(
+        [string] $HookPath
+    )
+
+    $content = Get-Content -Raw -LiteralPath $HookPath
+    $invalidWarningOnlyPattern = '(?im)-WarningOnly\s+(true|false)\b'
+    if ($content -match $invalidWarningOnlyPattern) {
+        Add-ValidationFailure ("Hook uses unsupported boolean argument form for PowerShell bool parameters: {0}. Use the single-quoted literal form '-WarningOnly:`$true' or '-WarningOnly:`$false' in shell hooks." -f $HookPath)
+    }
+
+    $invalidShellExpansionPattern = "(?im)(^|[ \t])-WarningOnly:\\\$(true|false)\b"
+    if ($content -match $invalidShellExpansionPattern) {
+        Add-ValidationFailure ("Hook passes a PowerShell boolean literal without shell-safe quoting: {0}. Use the single-quoted literal form '-WarningOnly:`$true' or '-WarningOnly:`$false' so POSIX shell does not expand `$true/`$false." -f $HookPath)
+    }
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 
@@ -236,6 +254,8 @@ foreach ($relativeHook in $requiredHooks) {
     if (-not [string]::IsNullOrWhiteSpace($shellPath)) {
         Invoke-HookSyntaxCheck -ShellPath $shellPath -HookPath $hookPath
     }
+
+    Test-HookSemanticGuards -HookPath $hookPath
 
     if ($EnableShellcheck) {
         Invoke-HookShellcheck -HookPath $hookPath

@@ -176,6 +176,26 @@ try {
         }
     }
 
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $codexHome = Join-Path $tempRoot '.codex'
+    $tmpDir = Join-Path $codexHome 'tmp'
+    $logDir = Join-Path $codexHome 'log'
+    $sessionsDir = Join-Path $codexHome 'sessions'
+    $scriptPath = Join-Path $runtimeScriptRoot 'clean-codex-runtime.ps1'
+    try {
+        New-Item -ItemType Directory -Path $tmpDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $sessionsDir -Force | Out-Null
+        & $scriptPath -CodexHome $codexHome -IncludeSessions -SessionRetentionDays 1 -LogRetentionDays 1 -Apply | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'clean-codex-runtime must tolerate empty log/session collections.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
     Write-Host '[OK] runtime script tests passed.'
     exit 0
 }

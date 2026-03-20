@@ -99,6 +99,31 @@ function Convert-BytesToMB {
     return [math]::Round(($Bytes / 1MB), 2)
 }
 
+# Safely sums file lengths for a collection that may be empty.
+function Get-FileCollectionByteSum {
+    param(
+        [AllowNull()]
+        [object[]] $Files
+    )
+
+    $items = @($Files | Where-Object { $null -ne $_ })
+    if ($items.Count -eq 0) {
+        return [long] 0
+    }
+
+    $measure = $items | Measure-Object -Property Length -Sum
+    if ($null -eq $measure) {
+        return [long] 0
+    }
+
+    $sumProperty = $measure.PSObject.Properties['Sum']
+    if ($null -eq $sumProperty -or $null -eq $sumProperty.Value) {
+        return [long] 0
+    }
+
+    return [long] $sumProperty.Value
+}
+
 # Resolves the local Codex home path.
 function Resolve-CodexHomePath {
     param(
@@ -131,10 +156,7 @@ function Get-PathStat {
     }
 
     $files = @(Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction SilentlyContinue)
-    $sum = ($files | Measure-Object -Property Length -Sum).Sum
-    if ($null -eq $sum) {
-        $sum = 0
-    }
+    $sum = Get-FileCollectionByteSum -Files $files
 
     return [pscustomobject]@{
         exists = $true
@@ -155,12 +177,8 @@ function Get-PathByteCount {
 
     $item = Get-Item -LiteralPath $Path -Force
     if ($item.PSIsContainer) {
-        $sum = (Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
-        if ($null -eq $sum) {
-            return [long] 0
-        }
-
-        return [long] $sum
+        $files = @(Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction SilentlyContinue)
+        return (Get-FileCollectionByteSum -Files $files)
     }
 
     return [long] $item.Length
@@ -311,10 +329,7 @@ foreach ($target in $directoryTargets) {
 }
 
 $logStats = Get-PathStat -Path $logPath
-$expiredLogBytes = ($expiredLogFiles | Measure-Object -Property Length -Sum).Sum
-if ($null -eq $expiredLogBytes) {
-    $expiredLogBytes = 0
-}
+$expiredLogBytes = Get-FileCollectionByteSum -Files $expiredLogFiles
 Write-StyledOutput ("  Target log: files={0} sizeMB={1}" -f $logStats.files, (Convert-BytesToMB -Bytes $logStats.bytes))
 Write-StyledOutput ("  Expired log files: {0} (sizeMB={1})" -f $expiredLogFiles.Count, (Convert-BytesToMB -Bytes $expiredLogBytes))
 
@@ -327,10 +342,7 @@ else {
 }
 
 if ($IncludeSessions) {
-    $sessionBytes = ($sessionFiles | Measure-Object -Property Length -Sum).Sum
-    if ($null -eq $sessionBytes) {
-        $sessionBytes = 0
-    }
+    $sessionBytes = Get-FileCollectionByteSum -Files $sessionFiles
 
     Write-StyledOutput ("  Expired session files: {0} (sizeMB={1})" -f $sessionFiles.Count, (Convert-BytesToMB -Bytes $sessionBytes))
 }

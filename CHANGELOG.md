@@ -1,5 +1,16 @@
 ## [1.2.0] - 2026-03-20
 
+### Fixed
+- Fixed shell hook PowerShell boolean invocation so validation no longer fails after `post-merge`, `pre-commit`, or `post-checkout`, including shell-safe quoting for PowerShell boolean literals in POSIX hooks:
+  - `.githooks/pre-commit`
+  - `.githooks/post-merge`
+  - `.githooks/post-checkout`
+- Fixed Codex runtime cleanup byte aggregation when expired log/session collections are empty:
+  - `scripts/runtime/clean-codex-runtime.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+- Extended shell-hook validation to catch unsupported PowerShell boolean argument forms that pass shell syntax checks but fail at runtime:
+  - `scripts/validation/validate-shell-hooks.ps1`
+
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:
   - `.github/instructions/brainstorm-spec-workflow.instructions.md`
