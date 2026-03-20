@@ -12,12 +12,20 @@
       "sha256": "066081e6268580a10669d6f293ce55c11cadd11844d07d9c03d519be38d8a8ac"
     },
     {
+      "path": "scripts/common/repository-paths.ps1",
+      "sha256": "6f769e5103b008fa82cc66359c25ef8567a612de7836241f84a3ac6caeeca8d0"
+    },
+    {
       "path": "scripts/common/runtime-paths.ps1",
       "sha256": "1b9a9ac89394cd5b21916941c6b59063bc576086632897c5190a6756c141d1e9"
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
       "sha256": "078279ec04209ea283eee756e505c829eb373e094c250f5a930fc41285be09e9"
+    },
+    {
+      "path": "scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1",
+      "sha256": "a85cb91035315b9045a7a25c71ebd46fe7b96d66b64c5ba454f6e5da828627ec"
     },
     {
       "path": "scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1",

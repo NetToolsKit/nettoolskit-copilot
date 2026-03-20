@@ -86,63 +86,22 @@ if (Test-Path -LiteralPath $script:RuntimePathsPath -PathType Leaf) {
 else {
     throw "Missing shared runtime path helper: $script:RuntimePathsPath"
 }
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
+    . $script:RepositoryHelpersPath
+}
+else {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 
 # -------------------------------
 # Helpers
 # -------------------------------
-# Writes verbose diagnostics with a logical color label.
-function Write-VerboseColor {
-    param(
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message)
-    }
-}
-
-# Resolves the repository root using explicit and fallback location candidates.
-function Resolve-RepositoryRoot {
-    param(
-        [string] $RequestedRoot
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
-        }
-        catch {
-            throw "Invalid RepoRoot path: $RequestedRoot"
-        }
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($script:ScriptRoot)) {
-        $candidates += (Resolve-Path -LiteralPath (Join-Path $script:ScriptRoot '..\..')).Path
-    }
-
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($i = 0; $i -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $i++) {
-            $hasLayout = (Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))
-            if ($hasLayout) {
-                Write-VerboseColor ("Repository root detected: {0}" -f $current) 'Green'
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw 'Could not detect repository root containing both .github and .codex.'
-}
-
 # Validates that a required file path exists before execution continues.
 function Assert-PathPresent {
     param(

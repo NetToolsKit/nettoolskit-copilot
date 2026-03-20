@@ -1,10 +1,6 @@
 name: Enterprise Trends Dashboard
 
 on:
-  push:
-    branches:
-      - main
-      - master
   schedule:
     - cron: "30 10 * * *"
   workflow_dispatch:
@@ -39,38 +35,10 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
-          $hasDotnet = @(
-            Get-ChildItem -Path $PWD -Recurse -File -Include *.sln,*.slnf -ErrorAction SilentlyContinue
-          ).Count -gt 0
-          $hasFrontend = @(
-            Get-ChildItem -Path $PWD -Recurse -File -Filter package.json -ErrorAction SilentlyContinue
-          ).Count -gt 0
-          $hasRust = @(
-            Get-ChildItem -Path $PWD -Recurse -File -Filter Cargo.toml -ErrorAction SilentlyContinue
-          ).Count -gt 0
-
-          $gateArgs = @(
-            '-NoLogo',
-            '-NoProfile',
-            '-File', './scripts/security/Invoke-PreBuildSecurityGate.ps1',
-            '-RepoRoot', $PWD,
-            '-WarningOnly:$true',
-            '-AllowMissingCargoAudit'
-          )
-
-          if (-not $hasDotnet) {
-            $gateArgs += '-SkipDotnet'
-          }
-
-          if (-not $hasFrontend) {
-            $gateArgs += '-SkipFrontend'
-          }
-
-          if (-not $hasRust) {
-            $gateArgs += '-SkipRust'
-          }
-
-          pwsh @gateArgs
+          pwsh -NoLogo -NoProfile -File ./scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1 `
+            -RepoRoot $PWD `
+            -WarningOnly:$true `
+            -AllowMissingCargoAudit
 
       - name: Export trends artifacts
         shell: pwsh

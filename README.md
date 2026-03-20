@@ -440,6 +440,8 @@ Security and governance observability workflows:
 - `.github/workflows/sbom-attestation-observability.yml`
 - `.github/workflows/security-static-observability.yml`
 
+`validate-agent-system.yml` owns push-time audit/healthcheck coverage; `enterprise-trends-dashboard.yml` is reserved for scheduled or manually-triggered trend exports to avoid duplicate `validate-all` runs on every push.
+
 ---
 
 ## Quick Start

@@ -21,6 +21,11 @@
 - Added validation coverage for repository-owned agent hooks:
   - `scripts/validation/validate-agent-hooks.ps1`
   - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+- Added shared repository runtime helper:
+  - `scripts/common/repository-paths.ps1`
+- Added CI wrapper for the warning-only pre-build security snapshot:
+  - `scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1`
+  - `scripts/tests/runtime/ci-security-snapshot.tests.ps1`
 
 ### Changed
 - Upgraded the repository-owned orchestration lifecycle from:
@@ -51,6 +56,10 @@
   - `README.md`
 - Updated the VS Code global settings template to load repository-owned hooks from `~/.github/hooks` in addition to workspace `.github/hooks`:
   - `.vscode/settings.tamplate.jsonc`
+- Deduplicated push-time CI validation coverage:
+  - `validate-agent-system.yml` remains the push-time owner for healthcheck and `validate-all`
+  - `enterprise-trends-dashboard.yml` is now schedule/manual only
+  - `dependency-risk-observability.yml` and `enterprise-trends-dashboard.yml` now share the same warning-only CI security snapshot wrapper
 - Hardened MCP config sync for mixed server manifests so onboarding with `-ApplyMcpConfig` no longer fails when some servers expose `command/args` while others expose `url` only:
   - `.codex/scripts/sync-mcp-to-codex-config.ps1`
   - `scripts/tests/runtime/mcp-config-sync.tests.ps1`
@@ -62,6 +71,14 @@
   - `scripts/orchestration/stages/plan-stage.ps1`
   - `scripts/orchestration/stages/implement-stage.ps1`
   - `scripts/tests/runtime/agent-orchestration-engine.tests.ps1`
+- Consolidated shared helper usage in critical scripts:
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/apply-vscode-templates.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/runtime/run-agent-pipeline.ps1`
+  - `scripts/validation/export-audit-report.ps1`
 
 ### Removed
 - Removed placeholder `.gitkeep` files from the planning workspace:
