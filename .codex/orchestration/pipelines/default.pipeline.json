@@ -1,7 +1,7 @@
 {
   "id": "default-dev-flow",
   "version": 1,
-  "description": "Deterministic planner -> router -> specialist -> tester -> reviewer -> closeout flow.",
+  "description": "Deterministic master -> planner -> router -> specialist -> tester -> reviewer -> closeout flow.",
   "runtime": {
     "executionBackend": "script-only",
     "defaultRetryDelaySeconds": 2,
@@ -10,6 +10,21 @@
     "writeRunState": true
   },
   "stages": [
+    {
+      "id": "intake",
+      "agentId": "master",
+      "mode": "plan",
+      "execution": {
+        "scriptPath": "scripts/orchestration/stages/intake-stage.ps1",
+        "dispatchMode": "codex-exec",
+        "promptTemplatePath": ".codex/orchestration/prompts/master-intake-stage.prompt.md",
+        "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json",
+        "timeoutSeconds": 120
+      },
+      "inputArtifacts": ["request"],
+      "outputArtifacts": ["normalized-request", "intake-report"],
+      "onFailure": "retry-once"
+    },
     {
       "id": "plan",
       "agentId": "planner",
@@ -21,7 +36,7 @@
         "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json",
         "timeoutSeconds": 120
       },
-      "inputArtifacts": ["request"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report"],
       "outputArtifacts": ["task-plan", "task-plan-data", "context-pack", "active-plan"],
       "onFailure": "stop"
     },
@@ -36,7 +51,7 @@
         "responseSchemaPath": ".github/schemas/agent.stage-route-result.schema.json",
         "timeoutSeconds": 120
       },
-      "inputArtifacts": ["request", "task-plan-data", "context-pack", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "task-plan-data", "context-pack", "active-plan"],
       "outputArtifacts": ["route-selection", "specialist-context-pack"],
       "onFailure": "retry-once"
     },
@@ -51,7 +66,7 @@
         "responseSchemaPath": ".github/schemas/agent.stage-implementation-result.schema.json",
         "timeoutSeconds": 300
       },
-      "inputArtifacts": ["request", "task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"],
       "outputArtifacts": ["changeset", "implementation-log", "implementation-dispatches"],
       "onFailure": "retry-once"
     },
@@ -79,7 +94,7 @@
         "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json",
         "timeoutSeconds": 180
       },
-      "inputArtifacts": ["changeset", "validation-report"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "changeset", "validation-report", "route-selection", "active-plan"],
       "outputArtifacts": ["review-report", "decision-log"],
       "onFailure": "stop"
     },
@@ -94,12 +109,17 @@
         "responseSchemaPath": ".github/schemas/agent.stage-closeout-result.schema.json",
         "timeoutSeconds": 180
       },
-      "inputArtifacts": ["route-selection", "changeset", "validation-report", "review-report", "decision-log", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "route-selection", "changeset", "validation-report", "review-report", "decision-log", "active-plan"],
       "outputArtifacts": ["closeout-report", "release-summary", "completed-plan"],
       "onFailure": "stop"
     }
   ],
   "handoffs": [
+    {
+      "fromStage": "intake",
+      "toStage": "plan",
+      "requiredArtifacts": ["normalized-request", "intake-report"]
+    },
     {
       "fromStage": "plan",
       "toStage": "route",
@@ -127,7 +147,7 @@
     }
   ],
   "completionCriteria": {
-    "requiredStages": ["plan", "route", "implement", "validate", "review", "closeout"],
-    "requiredArtifacts": ["validation-report", "review-report", "decision-log", "closeout-report", "release-summary"]
+    "requiredStages": ["intake", "plan", "route", "implement", "validate", "review", "closeout"],
+    "requiredArtifacts": ["intake-report", "validation-report", "review-report", "decision-log", "closeout-report", "release-summary"]
   }
 }

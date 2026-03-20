@@ -267,6 +267,7 @@ function New-FallbackRouteResult {
         }
     }
     foreach ($extraPath in @(
+        '.github/instructions/master-orchestrator.instructions.md',
         '.github/instructions/subagent-planning-workflow.instructions.md',
         '.github/instruction-routing.catalog.yml'
     )) {
@@ -329,8 +330,16 @@ if ($null -eq $agent) {
 
 $inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
 $artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
+$normalizedRequestPath = if ($artifactMap.ContainsKey('normalized-request')) { [string] $artifactMap['normalized-request'] } else { $null }
 $taskPlanDataPath = if ($artifactMap.ContainsKey('task-plan-data')) { [string] $artifactMap['task-plan-data'] } else { $null }
 $contextPackPath = if ($artifactMap.ContainsKey('context-pack')) { [string] $artifactMap['context-pack'] } else { $null }
+
+if ($null -ne $normalizedRequestPath -and (Test-Path -LiteralPath $normalizedRequestPath -PathType Leaf)) {
+    $normalizedRequestContent = (Get-Content -Raw -LiteralPath $normalizedRequestPath).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($normalizedRequestContent)) {
+        $requestContent = $normalizedRequestContent
+    }
+}
 
 $taskPlanData = if ($null -ne $taskPlanDataPath -and (Test-Path -LiteralPath $taskPlanDataPath -PathType Leaf)) { Read-JsonFile -Path $taskPlanDataPath } else { $null }
 if ($null -eq $taskPlanData) {

@@ -11,9 +11,10 @@ description: Close out a completed workstream by aligning README artifacts when 
 2. Load `.github/copilot-instructions.md`.
 3. Load `.github/instruction-routing.catalog.yml`.
 4. Load `.github/instructions/repository-operating-model.instructions.md`.
-5. Load `.github/instructions/feedback-changelog.instructions.md`.
-6. Load `.github/instructions/readme.instructions.md` when README files are in scope.
-7. Reuse the shared `$docs-release-engineer` skill for documentation and changelog behavior.
+5. Load `.github/instructions/master-orchestrator.instructions.md`.
+6. Load `.github/instructions/feedback-changelog.instructions.md`.
+7. Load `.github/instructions/readme.instructions.md` when README files are in scope.
+8. Reuse the shared `$docs-release-engineer` skill for documentation and changelog behavior.
 
 ## Responsibilities
 

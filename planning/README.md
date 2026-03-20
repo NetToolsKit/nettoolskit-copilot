@@ -28,5 +28,6 @@ planning/
 
 ## References
 
+- `.github/instructions/master-orchestrator.instructions.md`
 - `.github/instructions/subagent-planning-workflow.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`

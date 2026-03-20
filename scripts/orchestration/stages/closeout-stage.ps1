@@ -275,12 +275,20 @@ if ($null -eq $agent) {
 
 $inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
 $artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
+$normalizedRequestPath = if ($artifactMap.ContainsKey('normalized-request')) { [string] $artifactMap['normalized-request'] } else { $null }
 $routeSelectionPath = if ($artifactMap.ContainsKey('route-selection')) { [string] $artifactMap['route-selection'] } else { $null }
 $changesetPath = if ($artifactMap.ContainsKey('changeset')) { [string] $artifactMap['changeset'] } else { $null }
 $validationReportPath = if ($artifactMap.ContainsKey('validation-report')) { [string] $artifactMap['validation-report'] } else { $null }
 $reviewReportPath = if ($artifactMap.ContainsKey('review-report')) { [string] $artifactMap['review-report'] } else { $null }
 $decisionLogPath = if ($artifactMap.ContainsKey('decision-log')) { [string] $artifactMap['decision-log'] } else { $null }
 $activePlanPath = if ($artifactMap.ContainsKey('active-plan')) { [string] $artifactMap['active-plan'] } else { $null }
+
+if ($null -ne $normalizedRequestPath -and (Test-Path -LiteralPath $normalizedRequestPath -PathType Leaf)) {
+    $normalizedRequestContent = (Get-Content -Raw -LiteralPath $normalizedRequestPath).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($normalizedRequestContent)) {
+        $requestContent = $normalizedRequestContent
+    }
+}
 
 $routeSelectionJson = if ($null -ne $routeSelectionPath -and (Test-Path -LiteralPath $routeSelectionPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $routeSelectionPath } else { '{}' }
 $changesetJson = if ($null -ne $changesetPath -and (Test-Path -LiteralPath $changesetPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $changesetPath } else { '{}' }

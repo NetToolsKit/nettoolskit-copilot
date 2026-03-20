@@ -64,22 +64,29 @@ Follow the **Mandatory Context Files** list above.
 - Respect previous technical choices unless explicitly changing approach
 
 ## Execution Flow for Development Tasks
-1. Task Analysis: Load mandatory context files, identify domain, analyze scope
-2. Planning: Create execution plan for non-trivial tasks
-3. Implementation: Follow established templates and patterns, maintain standards
-4. Validation: Execute relevant checks, verify compilation, run tests, and confirm architectural compliance
+1. MASTER Intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing
+2. Planning Registration: create or update the active plan for any change-bearing task
+3. Specialist Routing: identify the smallest correct specialist set and whether safe delegation is possible
+4. Implementation: follow established templates and patterns, maintain standards
+5. Validation: execute relevant checks, verify compilation, run tests, and confirm architectural compliance
+6. Review: perform mandatory final risk-focused review for repository changes
+7. Closeout: prepare commit message guidance and changelog/README follow-up as required
+8. Planning Update: update plan status and move to completed only when materially finished
 
 ## Sub-Agent Planning Chain
 - For non-trivial work, use the repository planning pattern under `planning/`.
 - Create or update an active plan in `planning/active/` before implementation.
-- Preferred chain for non-trivial work:
-  1. planner
-  2. context-token-optimizer
-  3. specialist
-  4. tester when code/runtime changed
-  5. reviewer
-  6. release-closeout
+- Preferred fixed lifecycle for non-trivial change-bearing work:
+  1. `MASTER` intake and request normalization
+  2. planning registration
+  3. specialist identification
+  4. execution, with multiple subagents only when write-scope conflicts are controlled
+  5. tester when code/runtime changed
+  6. reviewer
+  7. release-closeout
+  8. planning update
 - Follow `instructions/subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
+- Follow `instructions/master-orchestrator.instructions.md` for the mandatory lifecycle contract.
 
 ### For Multi-Task Requests
 - Apply Task-Based Execution Methodology (see below)
@@ -137,6 +144,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `copilot-instructions.md`
   - `instructions/repository-operating-model.instructions.md`
 - Mandatory repo-wide instructions are:
+  - `instructions/master-orchestrator.instructions.md`
   - `instructions/repository-operating-model.instructions.md`
   - `instructions/authoritative-sources.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`

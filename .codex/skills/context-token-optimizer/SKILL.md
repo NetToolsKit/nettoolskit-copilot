@@ -11,8 +11,9 @@ description: Build a minimal context pack and recommend the correct specialist p
 2. Load `.github/copilot-instructions.md`.
 3. Load `.github/instruction-routing.catalog.yml`.
 4. Load `.github/instructions/repository-operating-model.instructions.md`.
-5. Load `.github/instructions/subagent-planning-workflow.instructions.md`.
-6. Reuse the shared `$core-context-router` skill for deterministic minimal routing.
+5. Load `.github/instructions/master-orchestrator.instructions.md`.
+6. Load `.github/instructions/subagent-planning-workflow.instructions.md`.
+7. Reuse the shared `$core-context-router` skill for deterministic minimal routing.
 
 ## Responsibilities
 

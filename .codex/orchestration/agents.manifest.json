@@ -8,13 +8,31 @@
   },
   "agents": [
     {
+      "id": "master",
+      "displayName": "Master Orchestrator",
+      "role": "planner",
+      "skill": "master-orchestrator",
+      "model": "gpt-5",
+      "tools": ["read", "search", "plan", "route"],
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": {
+        "maxSteps": 16,
+        "maxDurationMinutes": 15,
+        "maxFileEdits": 8,
+        "maxTokens": 45000
+      },
+      "fallbackAgentId": "planner",
+      "notes": "Normalizes the request and enforces the repository-owned lifecycle before planning starts."
+    },
+    {
       "id": "planner",
       "displayName": "Plan Active Work Planner",
       "role": "planner",
       "skill": "plan-active-work-planner",
       "model": "gpt-5",
       "tools": ["read", "search", "plan"],
-      "allowedPaths": [".github/**", ".codex/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
       "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 20,
@@ -32,7 +50,7 @@
       "skill": "context-token-optimizer",
       "model": "gpt-5",
       "tools": ["read", "search", "route"],
-      "allowedPaths": [".github/**", ".codex/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
       "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 15,
@@ -86,7 +104,7 @@
       "skill": "review-code-engineer",
       "model": "gpt-5",
       "tools": ["read", "search", "review"],
-      "allowedPaths": ["src/**", "modules/**", "samples/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "allowedPaths": ["src/**", "modules/**", "samples/**", "planning/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
       "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 20,
@@ -104,7 +122,7 @@
       "skill": "release-closeout-engineer",
       "model": "gpt-5",
       "tools": ["read", "search", "edit", "summarize"],
-      "allowedPaths": [".github/**", ".codex/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
       "blockedCommands": ["git reset --hard", "git checkout --"],
       "budget": {
         "maxSteps": 20,

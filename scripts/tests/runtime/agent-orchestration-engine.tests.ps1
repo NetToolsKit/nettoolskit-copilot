@@ -168,6 +168,19 @@ end {
             changelogImpact = $true
         }
     }
+    elseif ($allInput -match '# Master Intake Stage Contract') {
+        $payload = [ordered]@{
+            stage = 'master-intake'
+            normalizedRequest = 'Implement enterprise orchestration support.'
+            changeBearing = $true
+            planningRequired = $true
+            workstreamSlug = 'implement-enterprise-orchestration-support'
+            explicitWorkItems = @('Normalize request', 'Plan execution')
+            constraints = @('Preserve repository policy and validation gates.')
+            risks = @('Skipping planning would violate the lifecycle.')
+            notes = @('Use sequential execution unless the planner proves tasks are parallel-safe.')
+        }
+    }
     elseif ($allInput -match '# Executor Task Contract') {
         $taskId = 'task-generic'
         if ($allInput -match '"id"\s*:\s*"(?<taskId>[a-z0-9-]+)"') {
@@ -222,6 +235,30 @@ end {
     $requestPath = Join-Path $runDirectory 'artifacts/request.md'
     Set-Content -LiteralPath $requestPath -Value 'Implement enterprise orchestration support.' -Encoding UTF8 -NoNewline
 
+    $intakeOutputManifestPath = Join-Path $runDirectory 'stages/intake-output.json'
+    & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/intake-stage.ps1') `
+        -RepoRoot $resolvedRepoRoot `
+        -RunDirectory $runDirectory `
+        -TraceId 'run-test' `
+        -StageId 'intake' `
+        -AgentId 'master' `
+        -RequestPath $requestPath `
+        -OutputArtifactManifestPath $intakeOutputManifestPath `
+        -DispatchMode 'codex-exec' `
+        -PromptTemplatePath '.codex/orchestration/prompts/master-intake-stage.prompt.md' `
+        -ResponseSchemaPath '.github/schemas/agent.stage-intake-result.schema.json' `
+        -DispatchCommand $fakeCodexPath `
+        -ExecutionBackend 'codex-exec' | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Intake stage should succeed with fake Codex.'
+
+    $intakeManifest = Get-Content -Raw -LiteralPath $intakeOutputManifestPath | ConvertFrom-Json -Depth 100
+    $intakeArtifacts = @{}
+    foreach ($artifact in @($intakeManifest.artifacts)) {
+        $intakeArtifacts[[string] $artifact.name] = Join-Path $resolvedRepoRoot ([string] $artifact.path)
+    }
+    $intakeReport = Get-Content -Raw -LiteralPath $intakeArtifacts['intake-report'] | ConvertFrom-Json -Depth 100
+    Assert-True ([bool] $intakeReport.planningRequired) 'Intake stage should require planning in the fake flow.'
+
     $planOutputManifestPath = Join-Path $runDirectory 'stages/plan-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/plan-stage.ps1') `
         -RepoRoot $resolvedRepoRoot `
@@ -230,6 +267,7 @@ end {
         -StageId 'plan' `
         -AgentId 'planner' `
         -RequestPath $requestPath `
+        -InputArtifactManifestPath $intakeOutputManifestPath `
         -OutputArtifactManifestPath $planOutputManifestPath `
         -DispatchMode 'codex-exec' `
         -PromptTemplatePath '.codex/orchestration/prompts/planner-stage.prompt.md' `
@@ -253,7 +291,7 @@ end {
             stageId = 'route'
             agentId = 'router'
             producedAt = (Get-Date).ToString('o')
-            artifacts = @($planManifest.artifacts)
+            artifacts = @($intakeManifest.artifacts + $planManifest.artifacts)
         })
     $routeOutputManifestPath = Join-Path $runDirectory 'stages/route-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/route-stage.ps1') `
@@ -286,7 +324,7 @@ end {
             stageId = 'implement'
             agentId = 'specialist'
             producedAt = (Get-Date).ToString('o')
-            artifacts = @($planManifest.artifacts + $routeManifest.artifacts)
+            artifacts = @($intakeManifest.artifacts + $planManifest.artifacts + $routeManifest.artifacts)
         })
     $implementOutputManifestPath = Join-Path $runDirectory 'stages/implement-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/implement-stage.ps1') `

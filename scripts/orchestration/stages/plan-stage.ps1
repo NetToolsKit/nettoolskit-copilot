@@ -211,6 +211,27 @@ function Get-AgentContract {
     return @($manifest.agents | Where-Object { $_.id -eq $TargetAgentId } | Select-Object -First 1)
 }
 
+# Converts an artifact manifest into a name-to-path lookup table.
+function Convert-ArtifactManifestToMap {
+    param(
+        [object] $Manifest,
+        [string] $Root
+    )
+
+    $map = @{}
+    foreach ($artifact in @($Manifest.artifacts)) {
+        $name = [string] $artifact.name
+        $path = [string] $artifact.path
+        if ([string]::IsNullOrWhiteSpace($name) -or [string]::IsNullOrWhiteSpace($path)) {
+            continue
+        }
+
+        $map[$name] = Resolve-FullPath -BasePath $Root -Candidate $path
+    }
+
+    return $map
+}
+
 # Creates a deterministic fallback plan when live planner dispatch is unavailable.
 function New-FallbackPlanResult {
     param(
@@ -290,6 +311,23 @@ $requestContent = if (Test-Path -LiteralPath $resolvedRequestPath -PathType Leaf
 }
 else {
     'No request content provided.'
+}
+
+if (-not [string]::IsNullOrWhiteSpace($InputArtifactManifestPath)) {
+    $resolvedInputManifestPath = Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $InputArtifactManifestPath
+    if (Test-Path -LiteralPath $resolvedInputManifestPath -PathType Leaf) {
+        $inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
+        $artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
+        if ($artifactMap.ContainsKey('normalized-request')) {
+            $normalizedRequestPath = [string] $artifactMap['normalized-request']
+            if (Test-Path -LiteralPath $normalizedRequestPath -PathType Leaf) {
+                $normalizedRequestContent = (Get-Content -Raw -LiteralPath $normalizedRequestPath).Trim()
+                if (-not [string]::IsNullOrWhiteSpace($normalizedRequestContent)) {
+                    $requestContent = $normalizedRequestContent
+                }
+            }
+        }
+    }
 }
 
 $agent = Get-AgentContract -ManifestPath $resolvedAgentsManifestPath -TargetAgentId $AgentId

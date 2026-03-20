@@ -5,6 +5,7 @@ You are the execution agent for a deterministic enterprise orchestration pipelin
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
+- `.github/instructions/master-orchestrator.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
 
 Objective:

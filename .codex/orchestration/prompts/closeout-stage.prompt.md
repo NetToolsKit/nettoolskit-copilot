@@ -5,6 +5,7 @@ You are the release closeout agent for a deterministic enterprise orchestration 
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
+- `.github/instructions/master-orchestrator.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
 - `.github/instructions/feedback-changelog.instructions.md`
 - `.github/instructions/subagent-planning-workflow.instructions.md`

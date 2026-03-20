@@ -6,7 +6,7 @@ priority: high
 # Sub-Agent Planning Workflow
 
 ## Purpose
-- Standardize how non-trivial work is planned, routed, executed, reviewed, and closed out with a deterministic sub-agent chain.
+- Standardize how the repository-owned MASTER lifecycle plans, routes, executes, reviews, and closes out non-trivial work with a deterministic sub-agent chain.
 - Keep planning artifacts versioned under `planning/` as first-class operational assets without mixing them into stable product documentation.
 
 ## Planning Workspace Contract
@@ -26,22 +26,28 @@ Create or update an active planning document when any of these are true:
 
 ## Mandatory Sub-Agent Chain
 For non-trivial work, prefer this execution chain unless the user explicitly asks for a lighter flow:
-1. `planner` agent
+1. `master-orchestrator` contract
+   - normalize the request and decide whether the task is change-bearing
+   - ensure planning registration happens before execution
+2. `planner` agent
    - create or update the active plan in `planning/active/`
    - define scope, ordered tasks, validations, risks, and closeout requirements
-2. `context-token-optimizer` agent
+3. `context-token-optimizer` agent
    - reduce token load by selecting the minimal context pack
    - recommend the correct specialist path
-3. `specialist` agent
+4. `specialist` agent
    - perform the domain implementation using the routed context only
-4. `tester` agent
+5. `tester` agent
    - mandatory when code, runtime behavior, or validation scripts changed
-5. `reviewer` agent
+6. `reviewer` agent
    - mandatory final risk-focused code review
-6. `release-closeout` agent
+7. `release-closeout` agent
    - adjust README files when needed
    - produce suggested commit message
    - produce changelog summary or entry-ready content when the change belongs in version history
+8. planning update
+   - update execution state, validation status, blockers, and closeout notes
+   - move the plan to `planning/completed/` only when materially complete
 
 ## Specialist Selection Rule
 - Use the smallest specialist capable of executing the task correctly.
@@ -51,11 +57,12 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
 ## Output Contract
 Every active plan should define:
 1. objective and scope summary
-2. ordered tasks with dependencies when needed
-3. validation checklist
-4. risks and fallback path
-5. selected specialist or specialist candidates
-6. closeout expectations for README, commit message, and changelog
+2. normalized request or intake summary
+3. ordered tasks with dependencies when needed
+4. validation checklist
+5. risks and fallback path
+6. selected specialist or specialist candidates
+7. closeout expectations for README, commit message, and changelog
 
 ## Closeout Rules
 - If the change affects stable documentation, update the relevant README in the same workstream.

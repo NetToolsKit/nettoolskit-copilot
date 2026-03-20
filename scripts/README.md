@@ -122,10 +122,13 @@ scripts/
 │   ├── engine/
 │   │   └── invoke-codex-dispatch.ps1
 │   └── stages/
+│       ├── intake-stage.ps1
 │       ├── plan-stage.ps1
+│       ├── route-stage.ps1
 │       ├── implement-stage.ps1
 │       ├── validate-stage.ps1
-│       └── review-stage.ps1
+│       ├── review-stage.ps1
+│       └── closeout-stage.ps1
 ├── governance/
 │   ├── set-branch-protection.ps1
 │   └── update-shared-script-checksums-manifest.ps1

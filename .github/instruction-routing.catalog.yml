@@ -24,6 +24,8 @@ always:
     reason: Global rules and domain mapping
 
   # Mandatory instruction files (always applied)
+  - path: instructions/master-orchestrator.instructions.md
+    reason: Repository-owned MASTER lifecycle for intake, planning, specialist routing, validation, review, and closeout
   - path: instructions/repository-operating-model.instructions.md
     reason: Repository topology, build/test/run commands, style, and domain instruction map
   - path: instructions/subagent-planning-workflow.instructions.md

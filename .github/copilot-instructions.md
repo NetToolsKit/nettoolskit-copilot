@@ -17,6 +17,7 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 # Hierarchy and Scope
 - Global rules live here and are always applied.
+- The MASTER lifecycle lives in `instructions/master-orchestrator.instructions.md` and is always applied for change-bearing work.
 - Repository-specific operating rules live in `instructions/repository-operating-model.instructions.md`.
 - Domain instruction files extend these rules; do not duplicate globals.
 - Prefer the most specific domain rule when conflicts occur.
@@ -63,6 +64,19 @@ Follow this order of operations on every task:
 
 # Workflow
 
+## Master Orchestrator Lifecycle
+- Treat `instructions/master-orchestrator.instructions.md` as the mandatory controller contract for change-bearing work.
+- Default lifecycle:
+  1. MASTER intake
+  2. planning registration
+  3. specialist identification
+  4. execution
+  5. testing
+  6. code review
+  7. closeout
+  8. planning update
+- Do not skip directly from request to implementation when files, runtime assets, or repository state are expected to change.
+
 ## How to use
 - Start with AGENTS.md for solution-specific details (stack, folders, commands).
 - Use this file for global rules, precedence, and always-applied policies.
@@ -97,6 +111,7 @@ Follow this order of operations on every task:
 
 ## Always Applied
 - AGENTS.md (agents and context policy)
+- instructions/master-orchestrator.instructions.md
 - instructions/repository-operating-model.instructions.md
 - instructions/subagent-planning-workflow.instructions.md
 - instructions/authoritative-sources.instructions.md
@@ -109,6 +124,7 @@ Follow this order of operations on every task:
 
 # Repository and Domain Rules
 - Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
+- Change-bearing work must start with `instructions/master-orchestrator.instructions.md` before planning and implementation.
 - Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `planning/`.
 - Use domain instructions from that map according to the active route and file scope.
 

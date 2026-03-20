@@ -11,12 +11,14 @@ description: Create or update active planning documents under `planning/active`,
 2. Load `.github/copilot-instructions.md`.
 3. Load `.github/instruction-routing.catalog.yml`.
 4. Load `.github/instructions/repository-operating-model.instructions.md`.
-5. Load `.github/instructions/subagent-planning-workflow.instructions.md`.
-6. Reuse the shared `$plan-task-planner` skill for plan quality and validation discipline.
+5. Load `.github/instructions/master-orchestrator.instructions.md`.
+6. Load `.github/instructions/subagent-planning-workflow.instructions.md`.
+7. Reuse the shared `$plan-task-planner` skill for plan quality and validation discipline.
 
 ## Responsibilities
 
 - create or update the active planning document under `planning/active/`
+- preserve the normalized intake summary from the MASTER stage when one exists
 - keep scope, ordered tasks, validations, risks, and closeout rules explicit
 - name the plan with a stable slug and reuse the same file when continuing the same workstream
 - declare the recommended specialist and whether tester, reviewer, and release closeout are mandatory

@@ -319,10 +319,18 @@ if ($null -eq $agent) {
 
 $inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
 $artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
+$normalizedRequestPath = if ($artifactMap.ContainsKey('normalized-request')) { [string] $artifactMap['normalized-request'] } else { $null }
 $taskPlanDataPath = if ($artifactMap.ContainsKey('task-plan-data')) { [string] $artifactMap['task-plan-data'] } else { $null }
 $contextPackPath = if ($artifactMap.ContainsKey('context-pack')) { [string] $artifactMap['context-pack'] } else { $null }
 $routeSelectionPath = if ($artifactMap.ContainsKey('route-selection')) { [string] $artifactMap['route-selection'] } else { $null }
 $specialistContextPackPath = if ($artifactMap.ContainsKey('specialist-context-pack')) { [string] $artifactMap['specialist-context-pack'] } else { $null }
+
+if ($null -ne $normalizedRequestPath -and (Test-Path -LiteralPath $normalizedRequestPath -PathType Leaf)) {
+    $normalizedRequestContent = (Get-Content -Raw -LiteralPath $normalizedRequestPath).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($normalizedRequestContent)) {
+        $requestContent = $normalizedRequestContent
+    }
+}
 
 $taskPlanData = if ($null -ne $taskPlanDataPath -and (Test-Path -LiteralPath $taskPlanDataPath -PathType Leaf)) { Read-JsonFile -Path $taskPlanDataPath } else { $null }
 $contextPackJson = if ($null -ne $contextPackPath -and (Test-Path -LiteralPath $contextPackPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $contextPackPath } else { '{}' }

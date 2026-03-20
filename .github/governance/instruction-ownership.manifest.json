@@ -12,6 +12,10 @@
     {
       "concern": "Repository-level routing entry point and minimal-context contract must remain globally visible.",
       "ownedBy": "global-core"
+    },
+    {
+      "concern": "MASTER lifecycle orchestration must remain globally visible so change-bearing work cannot bypass planning, testing, review, or closeout.",
+      "ownedBy": "global-core"
     }
   ],
   "architectureConstraints": {
@@ -20,11 +24,12 @@
       "copilot-instructions.md": 9000
     },
     "routing": {
-      "maxAlwaysFiles": 8,
+      "maxAlwaysFiles": 9,
       "maxSelectedFiles": 5,
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
+        "instructions/master-orchestrator.instructions.md",
         "instructions/repository-operating-model.instructions.md",
         "instructions/subagent-planning-workflow.instructions.md",
         "instructions/workflow-optimization.instructions.md",
@@ -58,6 +63,7 @@
       "id": "cross-cutting-policies",
       "description": "Policies, maps, and baselines that apply across domains.",
       "pathPatterns": [
+        ".github/instructions/master-orchestrator.instructions.md",
         ".github/instructions/authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
@@ -71,6 +77,7 @@
       ],
       "excludePatterns": [
         ".github/instructions/authoritative-sources.instructions.md",
+        ".github/instructions/master-orchestrator.instructions.md",
         ".github/instructions/repository-operating-model.instructions.md"
       ]
     },

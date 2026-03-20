@@ -1,64 +1,66 @@
 <#
 .SYNOPSIS
-    Produces review and decision artifacts for the orchestration pipeline.
+    Produces normalized request artifacts for the MASTER intake stage.
 
 .DESCRIPTION
-    Produces review outputs and, when enabled, dispatches the reviewer through
-    the local Codex CLI using changeset and validation artifacts as context.
+    Runs the repository-owned MASTER intake lifecycle before planning begins.
+    When live dispatch is enabled, invokes the master agent through the local
+    Codex CLI and persists a normalized request plus intake metadata.
 
 .PARAMETER RepoRoot
-    Repository root path.
+    Repository root used to resolve manifests, prompts, schemas, and artifacts.
 
 .PARAMETER RunDirectory
-    Absolute run directory for generated artifacts.
+    Pipeline run directory where stage artifacts and metadata are persisted.
 
 .PARAMETER TraceId
-    Unique trace identifier for the pipeline run.
+    Stable execution trace identifier for the current pipeline run.
 
 .PARAMETER StageId
-    Current stage identifier.
+    Stage identifier from the pipeline manifest.
 
 .PARAMETER AgentId
-    Current agent identifier.
+    Agent contract identifier used for this stage.
 
 .PARAMETER RequestPath
-    Path to the request text artifact.
+    Path to the request artifact used as the initial intake payload.
 
 .PARAMETER InputArtifactManifestPath
-    Path to input artifact manifest.
+    Optional path to an upstream artifact manifest. The intake stage can start without it.
 
 .PARAMETER OutputArtifactManifestPath
-    Path where this stage writes its output artifact manifest.
+    Artifact manifest written by this stage.
 
 .PARAMETER AgentsManifestPath
-    Agent contract manifest path.
+    Relative or absolute path to the orchestration agent manifest.
 
 .PARAMETER DispatchMode
-    Stage dispatch mode from pipeline execution settings.
+    Dispatch mode declared by the pipeline stage contract.
 
 .PARAMETER PromptTemplatePath
-    Prompt template path for live dispatch.
+    Intake prompt template used when live dispatch is enabled.
 
 .PARAMETER ResponseSchemaPath
-    JSON schema path for live dispatch.
+    JSON schema used to validate live intake output.
 
 .PARAMETER DispatchCommand
-    Codex CLI command name or absolute path.
+    Local command used to invoke Codex dispatch.
 
 .PARAMETER ExecutionBackend
-    Runtime backend selection. `codex-exec` enables live dispatch.
+    Selected backend for the run, such as `script-only` or `codex-exec`.
 
 .PARAMETER StageStatePath
-    Optional path where stage execution metadata is written.
+    Optional override path for the persisted stage-state artifact.
 
 .PARAMETER DetailedOutput
-    Shows detailed diagnostics.
+    Enables verbose diagnostics for stage execution.
 
 .EXAMPLE
-    pwsh -File .\scripts\orchestration\stages\review-stage.ps1 -RepoRoot . -RunDirectory .temp\runs\trace-001 -TraceId trace-001 -StageId review -AgentId reviewer -RequestPath .temp\runs\trace-001\request.txt -InputArtifactManifestPath .temp\runs\trace-001\stages\validate\output-artifacts.json -OutputArtifactManifestPath .temp\runs\trace-001\stages\review\output-artifacts.json -ExecutionBackend codex-exec -DispatchMode codex-exec
+    pwsh -File scripts/orchestration/stages/intake-stage.ps1 -RepoRoot . -RunDirectory .temp/runs/example -TraceId trace-1 -StageId intake -AgentId master -RequestPath .temp/runs/example/request.md -OutputArtifactManifestPath .temp/runs/example/intake-output.json -ExecutionBackend codex-exec -DispatchMode codex-exec
 
 .NOTES
-    Falls back to a deterministic review decision derived from validation status when live reviewer dispatch is unavailable.
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 param(
@@ -68,7 +70,7 @@ param(
     [Parameter(Mandatory = $true)] [string] $StageId,
     [Parameter(Mandatory = $true)] [string] $AgentId,
     [Parameter(Mandatory = $true)] [string] $RequestPath,
-    [Parameter(Mandatory = $true)] [string] $InputArtifactManifestPath,
+    [string] $InputArtifactManifestPath,
     [Parameter(Mandatory = $true)] [string] $OutputArtifactManifestPath,
     [string] $AgentsManifestPath = '.codex/orchestration/agents.manifest.json',
     [string] $DispatchMode = 'scripted',
@@ -182,6 +184,24 @@ function Expand-Template {
     return $rendered
 }
 
+# Converts free-text work intent into a stable planning slug.
+function Convert-ToPlanSlug {
+    param([string] $Text)
+
+    $value = ($Text ?? '').ToLowerInvariant()
+    $value = [regex]::Replace($value, '[^a-z0-9]+', '-')
+    $value = $value.Trim('-')
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return 'planned-work'
+    }
+
+    if ($value.Length -gt 48) {
+        return $value.Substring(0, 48).Trim('-')
+    }
+
+    return $value
+}
+
 # Retrieves a single agent contract from the orchestration manifest.
 function Get-AgentContract {
     param(
@@ -193,45 +213,38 @@ function Get-AgentContract {
     return @($manifest.agents | Where-Object { $_.id -eq $TargetAgentId } | Select-Object -First 1)
 }
 
-# Converts an artifact manifest into a name-to-absolute-path lookup table.
-function Convert-ArtifactManifestToMap {
-    param(
-        [object] $Manifest,
-        [string] $Root
-    )
+# Creates a deterministic fallback intake result when live dispatch is unavailable.
+function New-FallbackIntakeResult {
+    param([string] $RequestText)
 
-    $map = @{}
-    foreach ($artifact in @($Manifest.artifacts)) {
-        $name = [string] $artifact.name
-        $path = [string] $artifact.path
-        if ([string]::IsNullOrWhiteSpace($name) -or [string]::IsNullOrWhiteSpace($path)) {
-            continue
-        }
+    $trimmed = ($RequestText ?? '').Trim()
+    $normalized = if ([string]::IsNullOrWhiteSpace($trimmed)) { 'No request content provided.' } else { $trimmed }
+    $isInformational = $normalized -match '^(what|why|how|list|show|explain)\b' -and $normalized -notmatch '\b(add|adjust|change|create|delete|edit|fix|implement|move|refactor|remove|rename|sync|update|write)\b'
+    $slug = Convert-ToPlanSlug -Text $normalized
 
-        $map[$name] = Resolve-FullPath -BasePath $Root -Candidate $path
-    }
-
-    return $map
-}
-
-# Creates a deterministic fallback review result when live reviewer dispatch is unavailable.
-function New-FallbackReviewResult {
-    param([int] $FailedChecks)
-
-    $decision = if ($FailedChecks -eq 0) { 'approved' } else { 'blocked' }
     return [ordered]@{
-        decision = $decision
-        summary = 'Fallback review mode produced a deterministic decision from validation status only.'
-        findings = if ($FailedChecks -eq 0) { @() } else { @('Validation stage reported one or more failed checks.') }
-        requiredFollowUps = if ($FailedChecks -eq 0) { @() } else { @('Resolve validation failures before release.') }
-        recommendation = if ($FailedChecks -eq 0) { 'Proceed with delivery.' } else { 'Block release until validation failures are resolved.' }
+        stage = 'master-intake'
+        normalizedRequest = $normalized
+        changeBearing = (-not $isInformational)
+        planningRequired = (-not $isInformational)
+        workstreamSlug = $slug
+        explicitWorkItems = @($normalized)
+        constraints = @(
+            'Preserve repository instructions, policies, and validation coverage.',
+            'Use repository context first and official sources second.'
+        )
+        risks = @(
+            'Skipping planning or review would violate the repository lifecycle.'
+        )
+        notes = @(
+            'Execution remains sequential unless later planning proves tasks are parallel-safe.'
+        )
     }
 }
 
 $resolvedRepoRoot = [System.IO.Path]::GetFullPath($RepoRoot)
 $resolvedRunDirectory = [System.IO.Path]::GetFullPath($RunDirectory)
 $resolvedRequestPath = [System.IO.Path]::GetFullPath($RequestPath)
-$resolvedInputManifestPath = [System.IO.Path]::GetFullPath($InputArtifactManifestPath)
 $resolvedOutputManifestPath = [System.IO.Path]::GetFullPath($OutputArtifactManifestPath)
 $resolvedAgentsManifestPath = Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $AgentsManifestPath
 $resolvedPromptTemplatePath = Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $PromptTemplatePath
@@ -243,57 +256,46 @@ $stageMetadataDirectory = Join-Path $resolvedRunDirectory ('stages/{0}' -f $Stag
 New-Item -ItemType Directory -Path $stageArtifactsDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $stageMetadataDirectory -Force | Out-Null
 
-$agent = Get-AgentContract -ManifestPath $resolvedAgentsManifestPath -TargetAgentId $AgentId
-if ($null -eq $agent) {
-    throw ("Agent contract not found for stage {0}: {1}" -f $StageId, $AgentId)
-}
-
-$inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
-$artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
-$normalizedRequestPath = if ($artifactMap.ContainsKey('normalized-request')) { [string] $artifactMap['normalized-request'] } else { $null }
-$changesetPath = if ($artifactMap.ContainsKey('changeset')) { [string] $artifactMap['changeset'] } else { $null }
-$validationReportPath = if ($artifactMap.ContainsKey('validation-report')) { [string] $artifactMap['validation-report'] } else { $null }
-
-if ($null -ne $normalizedRequestPath -and (Test-Path -LiteralPath $normalizedRequestPath -PathType Leaf)) {
-    $normalizedRequestContent = (Get-Content -Raw -LiteralPath $normalizedRequestPath).Trim()
-    if (-not [string]::IsNullOrWhiteSpace($normalizedRequestContent)) {
-        $requestContent = $normalizedRequestContent
-    }
-}
-
-$changesetJson = if ($null -ne $changesetPath -and (Test-Path -LiteralPath $changesetPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $changesetPath } else { '{}' }
-$validationReport = if ($null -ne $validationReportPath -and (Test-Path -LiteralPath $validationReportPath -PathType Leaf)) { Read-JsonFile -Path $validationReportPath } else { $null }
-$validationReportJson = if ($null -ne $validationReportPath -and (Test-Path -LiteralPath $validationReportPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $validationReportPath } else { '{}' }
-$requestContent = if ($null -ne $normalizedRequestPath -and (Test-Path -LiteralPath $normalizedRequestPath -PathType Leaf)) {
-    (Get-Content -Raw -LiteralPath $normalizedRequestPath).Trim()
-}
-elseif (Test-Path -LiteralPath $resolvedRequestPath -PathType Leaf) {
+$requestContent = if (Test-Path -LiteralPath $resolvedRequestPath -PathType Leaf) {
     (Get-Content -Raw -LiteralPath $resolvedRequestPath).Trim()
 }
 else {
     'No request content provided.'
 }
-$failedChecks = if ($null -ne $validationReport) { [int] $validationReport.summary.failedChecks } else { 1 }
+
+$agent = Get-AgentContract -ManifestPath $resolvedAgentsManifestPath -TargetAgentId $AgentId
+if ($null -eq $agent) {
+    throw ("Agent contract not found for stage {0}: {1}" -f $StageId, $AgentId)
+}
+
+$allowedPaths = @($agent.allowedPaths | ForEach-Object { [string] $_ })
 $shouldUseCodexDispatch = ($ExecutionBackend -eq 'codex-exec') -and ($DispatchMode -eq 'codex-exec')
-$backendUsed = if ($shouldUseCodexDispatch) { 'codex-exec' } else { 'scripted' }
+$dispatchRecordPath = Join-Path $stageMetadataDirectory 'master-dispatch.json'
+$dispatchResultPath = Join-Path $stageMetadataDirectory 'master-result.json'
+$dispatchPromptPath = Join-Path $stageMetadataDirectory 'master-prompt.md'
 $dispatchError = $null
-$reviewResult = $null
-$dispatchRecordPath = Join-Path $stageMetadataDirectory 'reviewer-dispatch.json'
-$dispatchResultPath = Join-Path $stageMetadataDirectory 'reviewer-result.json'
-$dispatchPromptPath = Join-Path $stageMetadataDirectory 'reviewer-prompt.md'
+$intakeResult = $null
+$backendUsed = if ($shouldUseCodexDispatch) { 'codex-exec' } else { 'scripted' }
 
 if ($shouldUseCodexDispatch) {
     try {
+        if (-not (Test-Path -LiteralPath $resolvedPromptTemplatePath -PathType Leaf)) {
+            throw "Master prompt template not found: $resolvedPromptTemplatePath"
+        }
+
+        if (-not (Test-Path -LiteralPath $resolvedResponseSchemaPath -PathType Leaf)) {
+            throw "Master response schema not found: $resolvedResponseSchemaPath"
+        }
+
         $templateText = Get-Content -Raw -LiteralPath $resolvedPromptTemplatePath
         $renderedPrompt = Expand-Template -TemplateText $templateText -Tokens @{
             REQUEST_TEXT = $requestContent
-            CHANGESET_JSON = $changesetJson
-            VALIDATION_REPORT_JSON = $validationReportJson
+            AGENT_ALLOWED_PATHS = (($allowedPaths | ForEach-Object { '- ' + $_ }) -join [Environment]::NewLine)
         }
         Set-Content -LiteralPath $dispatchPromptPath -Value $renderedPrompt -Encoding UTF8 -NoNewline
 
         $dispatchScriptPath = Join-Path $resolvedRepoRoot 'scripts/orchestration/engine/invoke-codex-dispatch.ps1'
-        $dispatchParams = @{
+        $dispatchParameters = @{
             RepoRoot = $resolvedRepoRoot
             WorkingDirectory = $resolvedRepoRoot
             TraceId = $TraceId
@@ -307,61 +309,24 @@ if ($shouldUseCodexDispatch) {
             Model = [string] $agent.model
             DetailedOutput = [bool] $DetailedOutput
         }
-        & $dispatchScriptPath @dispatchParams
-        $reviewResult = Read-JsonFile -Path $dispatchResultPath
+        & $dispatchScriptPath @dispatchParameters
+        $intakeResult = Read-JsonFile -Path $dispatchResultPath
     }
     catch {
         $dispatchError = $_.Exception.Message
-        Write-StyledOutput ("[WARN] Reviewer live dispatch failed. Falling back to scripted mode. {0}" -f $dispatchError)
+        Write-StyledOutput ("[WARN] Master live dispatch failed. Falling back to scripted mode. {0}" -f $dispatchError)
         $backendUsed = 'scripted'
     }
 }
 
-if ($null -eq $reviewResult) {
-    $reviewResult = New-FallbackReviewResult -FailedChecks $failedChecks
+if ($null -eq $intakeResult) {
+    $intakeResult = New-FallbackIntakeResult -RequestText $requestContent
 }
 
-$reviewReportPath = Join-Path $stageArtifactsDirectory 'review-report.md'
-$decisionLogPath = Join-Path $stageArtifactsDirectory 'decision-log.md'
-
-$reviewReport = @(
-    ('# Review Report ({0})' -f $TraceId),
-    '',
-    ('- Stage: {0}' -f $StageId),
-    ('- Agent: {0}' -f $AgentId),
-    ('- Backend: {0}' -f $backendUsed),
-    ('- GeneratedAt: {0}' -f (Get-Date).ToString('o')),
-    ('- Decision: {0}' -f [string] $reviewResult.decision),
-    '',
-    '## Summary',
-    ('- {0}' -f [string] $reviewResult.summary),
-    '',
-    '## Findings'
-)
-$reviewReport += @($reviewResult.findings | ForEach-Object { '- ' + [string] $_ })
-$reviewReport += @(
-    '',
-    '## Required Follow-Ups'
-)
-$reviewReport += @($reviewResult.requiredFollowUps | ForEach-Object { '- ' + [string] $_ })
-$reviewReport += @(
-    '',
-    '## Recommendation',
-    ('- {0}' -f [string] $reviewResult.recommendation)
-)
-Set-Content -LiteralPath $reviewReportPath -Value ($reviewReport -join "`n") -Encoding UTF8 -NoNewline
-
-$decisionLog = @(
-    ('# Decision Log ({0})' -f $TraceId),
-    '',
-    ('- Decision: {0}' -f [string] $reviewResult.decision),
-    ('- RecordedAt: {0}' -f (Get-Date).ToString('o')),
-    ('- Backend: {0}' -f $backendUsed),
-    '',
-    '## Recommendation',
-    ('- {0}' -f [string] $reviewResult.recommendation)
-)
-Set-Content -LiteralPath $decisionLogPath -Value ($decisionLog -join "`n") -Encoding UTF8 -NoNewline
+$normalizedRequestPath = Join-Path $stageArtifactsDirectory 'normalized-request.md'
+$intakeReportPath = Join-Path $stageArtifactsDirectory 'intake-report.json'
+Set-Content -LiteralPath $normalizedRequestPath -Value ([string] $intakeResult.normalizedRequest) -Encoding UTF8 -NoNewline
+Write-JsonFile -Path $intakeReportPath -Value $intakeResult
 
 $outputManifestDirectory = Split-Path -Parent $resolvedOutputManifestPath
 if (-not [string]::IsNullOrWhiteSpace($outputManifestDirectory)) {
@@ -374,8 +339,8 @@ $outputManifest = [ordered]@{
     agentId = $AgentId
     producedAt = (Get-Date).ToString('o')
     artifacts = @(
-        (Get-ArtifactDescriptor -Name 'review-report' -Path $reviewReportPath -Root $resolvedRepoRoot),
-        (Get-ArtifactDescriptor -Name 'decision-log' -Path $decisionLogPath -Root $resolvedRepoRoot)
+        (Get-ArtifactDescriptor -Name 'normalized-request' -Path $normalizedRequestPath -Root $resolvedRepoRoot),
+        (Get-ArtifactDescriptor -Name 'intake-report' -Path $intakeReportPath -Root $resolvedRepoRoot)
     )
 }
 Write-JsonFile -Path $resolvedOutputManifestPath -Value $outputManifest
@@ -386,6 +351,8 @@ $stageState = [ordered]@{
     agentId = $AgentId
     backend = $backendUsed
     dispatchCount = if ($backendUsed -eq 'codex-exec') { 1 } else { 0 }
+    planningRequired = [bool] $intakeResult.planningRequired
+    changeBearing = [bool] $intakeResult.changeBearing
     promptTemplatePath = if ($backendUsed -eq 'codex-exec') { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $resolvedPromptTemplatePath } else { $null }
     responseSchemaPath = if ($backendUsed -eq 'codex-exec') { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $resolvedResponseSchemaPath } else { $null }
     dispatchRecordPath = if ((Test-Path -LiteralPath $dispatchRecordPath -PathType Leaf)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $dispatchRecordPath } else { $null }

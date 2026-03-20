@@ -5,6 +5,7 @@ You are the planning agent for a deterministic enterprise orchestration pipeline
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
+- `.github/instructions/master-orchestrator.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
 - `.github/instructions/workflow-optimization.instructions.md`
 

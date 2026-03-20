@@ -14,7 +14,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
 - ✅ **Versioned Planning Workspace:** Active and completed plan history under `planning/`
-- ✅ **Mandatory Non-Trivial Flow:** planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Mandatory Non-Trivial Flow:** master intake -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
 - ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, allowed-path enforcement, and optional live `codex-exec` dispatch
 - ✅ **Run-State Diagnostics:** Persisted `.temp/runs/<traceId>/run-state.json` snapshots for orchestration auditing and recovery analysis
 - ✅ **Unified Validation Suite:** Single `validate-all` command for hooks/CI governance checks
@@ -138,7 +138,8 @@ The repository uses versioned planning artifacts to keep non-trivial work audita
 - `planning/README.md` explains the planning contract.
 - `planning/active/` stores the current active plan files.
 - `planning/completed/` stores closed plans after implementation, validation, review, and closeout.
-- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
+- `instructions/master-orchestrator.instructions.md` defines the mandatory intake-to-closeout lifecycle for change-bearing work.
+- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory master -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
 
 ## Dev Container
 
