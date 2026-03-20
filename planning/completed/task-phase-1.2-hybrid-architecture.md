@@ -422,4 +422,3 @@ A faster, more efficient CLI that looks and works exactly the same, with Codex's
 
 **Phase 1.2: Complete ✅**
 **Ready for user testing and feedback!**
-

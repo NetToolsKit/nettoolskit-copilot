@@ -240,4 +240,3 @@ crates/shared/* (utilities)
 2. `apply-rs-refactoring-analysis.md` - Detailed refactoring plan
 
 **Next Action:** Commit Phase 0 results and begin Phase 1 (Workspace Skeleton)
-

@@ -2375,4 +2375,3 @@ All 10 files in commands/src/ are imported in lib.rs and actively used:
 24. ✅ **Linting:** `cargo clippy -D warnings` must pass
 
 ---
-

@@ -187,5 +187,3 @@ All structs derive `serde::Deserialize` where applicable and live under `command
 **Document Version**: 0.1
 **Last Updated**: 2025-11-03
 **Next Review**: Start of implementation (Phase 2.4 kickoff)
-
-

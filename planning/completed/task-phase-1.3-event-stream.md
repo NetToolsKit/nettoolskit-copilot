@@ -413,5 +413,3 @@ If Phase 1.3 introduces issues:
 ---
 
 **Let's begin Phase 1.3! 🚀**
-
-

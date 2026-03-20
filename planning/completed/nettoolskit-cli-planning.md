@@ -781,5 +781,3 @@ None
 > **Note**: For complete details of the layered code architecture, see **Section 1. Code Architecture** at the beginning of this document.
 
 ---
-
-

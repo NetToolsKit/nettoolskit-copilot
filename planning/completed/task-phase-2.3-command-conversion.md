@@ -323,5 +323,3 @@ Processing... 3/6
 - Phase 2.4: Convert `/new` command
 - Phase 2.5: Add Ctrl+C handling
 - Phase 2.6: Performance optimization
-
-
