@@ -24,7 +24,7 @@ Default workflow for all tasks: Static RAGs Routing (Route → Execute)
   - `prompts/route-instructions.prompt.md` (route-only prompt that outputs a JSON context pack)
 - Execute next: use ONLY the files returned by the Context Pack.
 
-If context budget is tight, prefer dropping any other files before these. These two documents coordinate global rules and agent usage and must be loaded to avoid inconsistent answers.
+If context budget is tight, drop other files before these two.
 
 # How to Use in Chat
 - Prefer the Workspace agent for code changes in this repo.
@@ -56,13 +56,11 @@ Use the **Mandatory Context Files** list above.
 # Context Preservation & Execution Patterns
 
 ## Session Continuity
-- Load previous context at session start: review recent changes and current state
-- Maintain architectural patterns and decisions from earlier work
-- Preserve Clean Architecture boundaries and established abstractions
-- Respect previous technical choices unless explicitly changing approach
+- Review recent changes and current state at session start
+- Preserve established patterns, boundaries, and previous technical choices unless explicitly changing direction
 
 ## Execution Flow for Development Tasks
-1. MASTER Intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing
+1. Super Agent intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing
 2. Planning Registration: create or update the active plan for any change-bearing task
 3. Spec Registration: create or update a versioned spec under `planning/specs/active/` when non-trivial work needs design direction before planning
 4. Specialist Routing: identify the smallest correct specialist set and whether safe delegation is possible
@@ -77,7 +75,7 @@ Use the **Mandatory Context Files** list above.
 - Create or update an active plan in `planning/active/` before implementation.
 - Create or update an active spec in `planning/specs/active/` before planning when the work is non-trivial and design direction must be locked first.
 - Preferred fixed lifecycle for non-trivial change-bearing work:
-  1. `MASTER` intake and request normalization
+  1. `Super Agent` intake and request normalization
   2. planning registration
   3. brainstorming/spec registration when required
   4. specialist identification
@@ -87,7 +85,9 @@ Use the **Mandatory Context Files** list above.
   8. release-closeout
   9. planning update
 - Follow `instructions/subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
-- Follow `instructions/master-orchestrator.instructions.md` for the mandatory lifecycle contract.
+- Follow `instructions/worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Follow `instructions/tdd-verification.instructions.md` for code-bearing work that needs explicit verification evidence.
+- Follow `instructions/super-agent.instructions.md` for the mandatory lifecycle contract.
 - Follow `instructions/brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
 
 ### For Multi-Task Requests
@@ -133,23 +133,18 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Note any deviations from original task specification
 - Provide rollback information if tasks need to be undone
 
-## Benefits of Task-Based Approach
-- Improved clarity and reduced ambiguity in complex requests
-- Better progress tracking and session continuity
-- Easier debugging when tasks fail or need modification
-- Enhanced collaboration between human and AI agents
-- Systematic approach aligned with Clean Architecture principles
-
 # Repository Operating Model
 - Repo-specific topology, commands, style, release process, and domain instruction map live in:
   - `copilot-instructions.md`
   - `instructions/repository-operating-model.instructions.md`
 - Mandatory repo-wide instructions are:
-  - `instructions/master-orchestrator.instructions.md`
+  - `instructions/super-agent.instructions.md`
   - `instructions/brainstorm-spec-workflow.instructions.md`
   - `instructions/repository-operating-model.instructions.md`
   - `instructions/authoritative-sources.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`
+  - `instructions/worktree-isolation.instructions.md`
+  - `instructions/tdd-verification.instructions.md`
   - `instructions/workflow-optimization.instructions.md`
   - `instructions/powershell-execution.instructions.md`
   - `instructions/feedback-changelog.instructions.md`

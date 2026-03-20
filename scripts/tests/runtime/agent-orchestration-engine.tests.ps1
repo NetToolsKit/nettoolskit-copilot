@@ -153,6 +153,32 @@ end {
                     description = 'First planned task.'
                     dependsOn = @()
                     allowedPaths = @('scripts/**', '.github/**')
+                    targetPaths = @('scripts/orchestration/stages/plan-stage.ps1')
+                    commands = @(
+                        [ordered]@{
+                            purpose = 'targeted validation'
+                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            expectedOutcome = 'Runtime tests pass after the first task.'
+                        }
+                    )
+                    checkpoints = @(
+                        [ordered]@{
+                            name = 'first-task-baseline'
+                            expectedOutcome = 'expected-verified'
+                            evidence = 'Planner confirmed the first task scope and target file before implementation.'
+                        },
+                        [ordered]@{
+                            name = 'first-task-green'
+                            expectedOutcome = 'expected-pass'
+                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            evidence = 'Runtime tests pass after the first task.'
+                        }
+                    )
+                    commitCheckpoint = [ordered]@{
+                        scope = 'task'
+                        when = 'After the first task is validated.'
+                        suggestedMessage = 'feat: complete first orchestration task checkpoint'
+                    }
                     deliverables = @('First deliverable')
                     validationSteps = @('Run focused checks.')
                     successCriteria = @('First task completes cleanly.')
@@ -163,6 +189,32 @@ end {
                     description = 'Second planned task.'
                     dependsOn = @('task-one')
                     allowedPaths = @('scripts/**', '.github/**')
+                    targetPaths = @('scripts/orchestration/stages/implement-stage.ps1')
+                    commands = @(
+                        [ordered]@{
+                            purpose = 'targeted validation'
+                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            expectedOutcome = 'Runtime tests pass after the second task.'
+                        }
+                    )
+                    checkpoints = @(
+                        [ordered]@{
+                            name = 'second-task-baseline'
+                            expectedOutcome = 'expected-verified'
+                            evidence = 'Planner confirmed the second task scope and target file before implementation.'
+                        },
+                        [ordered]@{
+                            name = 'second-task-green'
+                            expectedOutcome = 'expected-pass'
+                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            evidence = 'Runtime tests pass after the second task.'
+                        }
+                    )
+                    commitCheckpoint = [ordered]@{
+                        scope = 'slice'
+                        when = 'After the second task is validated and the slice is stable.'
+                        suggestedMessage = 'feat: complete second orchestration task checkpoint'
+                    }
                     deliverables = @('Second deliverable')
                     validationSteps = @('Run focused checks.')
                     successCriteria = @('Second task completes cleanly.')
@@ -195,9 +247,9 @@ end {
             changelogImpact = $true
         }
     }
-    elseif ($allInput -match '# Master Intake Stage Contract') {
+    elseif ($allInput -match '# Super Agent Intake Stage Contract') {
         $payload = [ordered]@{
-            stage = 'master-intake'
+            stage = 'super-agent-intake'
             normalizedRequest = 'Implement enterprise orchestration support.'
             changeBearing = $true
             planningRequired = $true
@@ -223,6 +275,24 @@ end {
             residualRisks = @()
             notes = @('Mock executor produced no file changes.')
             commitReady = $true
+        }
+    }
+    elseif ($allInput -match '# Task Spec Review Contract') {
+        $payload = [ordered]@{
+            reviewType = 'spec-compliance'
+            decision = 'approved'
+            summary = 'Mock spec review approved the task.'
+            findings = @()
+            followUps = @()
+        }
+    }
+    elseif ($allInput -match '# Task Code Quality Review Contract') {
+        $payload = [ordered]@{
+            reviewType = 'code-quality'
+            decision = 'approved'
+            summary = 'Mock code-quality review approved the task.'
+            findings = @()
+            followUps = @()
         }
     }
     elseif ($allInput -match '# Reviewer Stage Contract') {
@@ -281,11 +351,11 @@ end {
         -RunDirectory $runDirectory `
         -TraceId 'run-test' `
         -StageId 'intake' `
-        -AgentId 'master' `
+        -AgentId 'super-agent' `
         -RequestPath $requestPath `
         -OutputArtifactManifestPath $intakeOutputManifestPath `
         -DispatchMode 'codex-exec' `
-        -PromptTemplatePath '.codex/orchestration/prompts/master-intake-stage.prompt.md' `
+        -PromptTemplatePath '.codex/orchestration/prompts/super-agent-intake-stage.prompt.md' `
         -ResponseSchemaPath '.github/schemas/agent.stage-intake-result.schema.json' `
         -DispatchCommand $fakeCodexPath `
         -ExecutionBackend 'codex-exec' | Out-Null
@@ -349,6 +419,10 @@ end {
     }
     $taskPlanData = Get-Content -Raw -LiteralPath $planArtifacts['task-plan-data'] | ConvertFrom-Json -Depth 100
     Assert-Equal -Actual @($taskPlanData.workItems).Count -Expected 2 -Message 'Plan stage should produce two work items in fake flow.'
+    Assert-Equal -Actual @($taskPlanData.workItems[0].targetPaths).Count -Expected 1 -Message 'Plan stage should emit target paths per work item.'
+    Assert-Equal -Actual @($taskPlanData.workItems[0].commands).Count -Expected 1 -Message 'Plan stage should emit explicit commands per work item.'
+    Assert-Equal -Actual @($taskPlanData.workItems[0].checkpoints).Count -Expected 2 -Message 'Plan stage should emit checkpoints per work item.'
+    Assert-Equal -Actual ([string] $taskPlanData.workItems[0].commitCheckpoint.scope) -Expected 'task' -Message 'Plan stage should emit commit checkpoints per work item.'
     Assert-True (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf) 'Plan stage should produce an active plan file.'
 
     $routeInputManifestPath = Join-Path $runDirectory 'stages/route-input.json'
@@ -416,6 +490,7 @@ end {
     }
     $dispatches = Get-Content -Raw -LiteralPath $implementArtifacts['implementation-dispatches'] | ConvertFrom-Json -Depth 100
     Assert-Equal -Actual @($dispatches.tasks).Count -Expected 2 -Message 'Implement stage should dispatch each planned work item.'
+    Assert-True ($implementArtifacts.ContainsKey('task-review-report')) 'Implement stage should emit the task-review-report artifact.'
 
     $validateInputManifestPath = Join-Path $runDirectory 'stages/validate-input.json'
     Write-JsonFile -Path $validateInputManifestPath -Value ([ordered]@{
@@ -423,7 +498,7 @@ end {
             stageId = 'validate'
             agentId = 'tester'
             producedAt = (Get-Date).ToString('o')
-            artifacts = @($implementManifest.artifacts + $routeManifest.artifacts)
+            artifacts = @($implementManifest.artifacts + $routeManifest.artifacts + $planManifest.artifacts)
         })
     $validateOutputManifestPath = Join-Path $runDirectory 'stages/validate-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/validate-stage.ps1') `
@@ -455,6 +530,7 @@ end {
                 [ordered]@{ name = 'changeset'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $implementArtifacts['changeset']) -replace '\\', '/' },
                 [ordered]@{ name = 'validation-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $validateArtifacts['validation-report']) -replace '\\', '/' },
                 [ordered]@{ name = 'route-selection'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $routeArtifacts['route-selection']) -replace '\\', '/' },
+                [ordered]@{ name = 'task-review-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $implementArtifacts['task-review-report']) -replace '\\', '/' },
                 [ordered]@{ name = 'active-plan'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $planArtifacts['active-plan']) -replace '\\', '/' }
             )
         })
@@ -493,6 +569,7 @@ end {
                 [ordered]@{ name = 'route-selection'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $routeArtifacts['route-selection']) -replace '\\', '/' },
                 [ordered]@{ name = 'changeset'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $implementArtifacts['changeset']) -replace '\\', '/' },
                 [ordered]@{ name = 'validation-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $validateArtifacts['validation-report']) -replace '\\', '/' },
+                [ordered]@{ name = 'task-review-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $implementArtifacts['task-review-report']) -replace '\\', '/' },
                 [ordered]@{ name = 'review-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $reviewArtifacts['review-report']) -replace '\\', '/' },
                 [ordered]@{ name = 'decision-log'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $reviewArtifacts['decision-log']) -replace '\\', '/' },
                 [ordered]@{ name = 'active-plan'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $planArtifacts['active-plan']) -replace '\\', '/' }

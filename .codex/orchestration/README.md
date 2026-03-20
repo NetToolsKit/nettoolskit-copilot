@@ -6,16 +6,20 @@
 
 ## Introduction
 
-This folder defines the contract layer for MASTER intake, brainstorming/spec, planner, context-token-optimizer, specialist, tester, reviewer, and release-closeout collaboration. The objective is to keep multi-agent behavior auditable, reproducible, and validation-driven across local runtime and CI workflows.
+This folder defines the contract layer for Super Agent intake, brainstorming/spec, planner, context-token-optimizer, specialist, tester, reviewer, and release-closeout collaboration. The objective is to keep multi-agent behavior auditable, reproducible, and validation-driven across local runtime and CI workflows.
 
 ---
 
 ## Features
 
 - ✅ Versioned agent contracts with explicit roles, tool scopes, and budgets
-- ✅ Deterministic pipeline orchestration with master -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout handoffs and completion criteria
+- ✅ Deterministic pipeline orchestration with super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout handoffs and completion criteria
+- ✅ Planner handoffs are worker-ready with target paths, explicit commands, expected checkpoints, and commit checkpoint guidance per work item
+- ✅ Task-loop execution with implementer -> task spec review -> task quality review before each task is accepted
+- ✅ Safe parallel dispatch for dependency-independent task batches with write-set conflict blocking
+- ✅ Repository-owned worktree helper and thin Super Agent entry commands for brainstorm, plan, execute, and parallel dispatch
 - ✅ Closeout stage can apply repository-relative README updates and prepend CHANGELOG entries when the workstream is ready for commit
-- ✅ Real sequential stage dispatch through `codex exec` with schema-validated outputs
+- ✅ Real stage dispatch through `codex exec` with schema-validated outputs and task-level worker loops
 - ✅ Versioned planning artifacts under `planning/` plus versioned spec artifacts under `planning/specs/`
 - ✅ Standard run artifacts for traceability and post-run analysis
 - ✅ Persisted run state for retry diagnostics and execution auditing under `.temp/runs/<traceId>/`
@@ -51,6 +55,8 @@ No additional package installation is required. Use PowerShell 7+ and run comman
 ```powershell
 pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run orchestration smoke test" -ExecutionBackend codex-exec
+pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice"
+pwsh -File .\scripts\runtime\invoke-super-agent-plan.ps1 -RequestText "Write the execution plan"
 ```
 
 ---
@@ -69,7 +75,7 @@ pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
 pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras
 ```
 
-### Example 3: Execute Default Pipeline With Live Sequential Dispatch
+### Example 3: Execute Default Pipeline With Live Dispatch
 
 ```powershell
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 `
@@ -77,7 +83,13 @@ pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 `
   -ExecutionBackend codex-exec
 ```
 
-### Example 4: Inspect Persisted Run Artifacts
+### Example 4: Create an Isolated Worktree First
+
+```powershell
+pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice"
+```
+
+### Example 5: Inspect Persisted Run Artifacts
 
 ```powershell
 Get-Content -Raw .\.temp\runs\<traceId>\run-artifact.json
@@ -112,6 +124,9 @@ Get-Content -Raw .\.temp\runs\<traceId>\run-state.json
   - `script-only`: deterministic synthetic execution for offline contract smoke tests
   - `codex-exec`: real sequential dispatch through the local Codex CLI
 - `scripts/orchestration/engine/invoke-codex-dispatch.ps1` is the adapter that renders prompts, invokes Codex, captures JSON output, and persists dispatch logs.
+- `scripts/orchestration/engine/invoke-task-worker.ps1` is the task-loop adapter that executes a worker-ready item through implementer -> spec review -> quality review, applies retries, and emits task review artifacts.
+- `scripts/runtime/new-super-agent-worktree.ps1` creates isolated git worktrees for risky or parallelized execution flows.
+- `scripts/runtime/invoke-super-agent-brainstorm.ps1`, `invoke-super-agent-plan.ps1`, `invoke-super-agent-execute.ps1`, and `invoke-super-agent-parallel-dispatch.ps1` are thin entrypoints over the repository-owned lifecycle.
 - Each pipeline run writes:
   - `run-artifact.json`: summarized execution result
   - `run-state.json`: mutable state snapshot for stage-by-stage diagnostics
@@ -125,8 +140,14 @@ Get-Content -Raw .\.temp\runs\<traceId>\run-state.json
 # validate orchestration contracts only
 pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
 
-# execute live sequential stages through codex exec
+# execute live stages through codex exec
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Smoke run" -ExecutionBackend codex-exec
+
+# validate Super Agent worktree helper
+pwsh -File .\scripts\tests\runtime\super-agent-worktree.tests.ps1 -RepoRoot .
+
+# validate Super Agent thin entrypoints
+pwsh -File .\scripts\tests\runtime\super-agent-entrypoints.tests.ps1 -RepoRoot .
 
 # run end-to-end checks including orchestration, policy, and release governance
 pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras

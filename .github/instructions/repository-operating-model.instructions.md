@@ -20,7 +20,9 @@ priority: high
   - `.github/governance/authoritative-source-map.json`
 - Planning lifecycle rules are centralized in `instructions/subagent-planning-workflow.instructions.md` and `planning/README.md`.
 - Brainstorm/spec rules are centralized in `instructions/brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
-- MASTER lifecycle rules are centralized in `instructions/master-orchestrator.instructions.md`.
+- Super Agent lifecycle rules are centralized in `instructions/super-agent.instructions.md`.
+- Worktree isolation rules are centralized in `instructions/worktree-isolation.instructions.md`.
+- TDD and verification rules are centralized in `instructions/tdd-verification.instructions.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
@@ -38,9 +40,11 @@ priority: high
   - `planning/specs/` versioned brainstorming/spec workspace with `active/` and `completed/`
 
 ## Planning Workspace
-- Use `instructions/master-orchestrator.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
+- Use `instructions/super-agent.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
 - Use `instructions/brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
 - Use `instructions/subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
+- Use `instructions/worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Use `instructions/tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
 - Active plans live in `planning/active/`.
 - Completed plans move to `planning/completed/` only after implementation, validation, review, and release closeout are materially complete.
 - Active specs live in `planning/specs/active/`.
@@ -138,7 +142,9 @@ priority: high
   - create a short plan
   - use a short preamble before tool calls
   - validate namespace, TFMs, XML docs, sealing, `using` directives, and EOF policy when relevant
-  - follow master -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+  - follow super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+  - prefer isolated worktrees for risky or long-running workstreams
+  - treat verification evidence as mandatory before completion claims
   - keep plan artifacts in `planning/active/` and spec artifacts in `planning/specs/active/` until the work is genuinely complete
 - Patterns:
   - multi-target .NET 8/9 with consistent public API
@@ -186,5 +192,7 @@ priority: high
   - `instructions/effort-estimation-ucp.instructions.md`
   - `instructions/brainstorm-spec-workflow.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`
-  - `instructions/master-orchestrator.instructions.md`
+  - `instructions/super-agent.instructions.md`
+  - `instructions/worktree-isolation.instructions.md`
+  - `instructions/tdd-verification.instructions.md`
   - `instructions/pr.instructions.md`

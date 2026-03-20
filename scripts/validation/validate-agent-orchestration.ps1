@@ -619,13 +619,17 @@ $requiredFiles = @(
     '.github/schemas/agent.stage-implementation-result.schema.json',
     '.github/schemas/agent.stage-review-result.schema.json',
     '.github/schemas/agent.stage-closeout-result.schema.json',
-    '.codex/orchestration/prompts/master-intake-stage.prompt.md',
+    '.github/schemas/agent.task-review-result.schema.json',
+    '.codex/orchestration/prompts/super-agent-intake-stage.prompt.md',
     '.codex/orchestration/prompts/spec-stage.prompt.md',
     '.codex/orchestration/prompts/planner-stage.prompt.md',
     '.codex/orchestration/prompts/router-stage.prompt.md',
     '.codex/orchestration/prompts/executor-task.prompt.md',
+    '.codex/orchestration/prompts/task-spec-review.prompt.md',
+    '.codex/orchestration/prompts/task-quality-review.prompt.md',
     '.codex/orchestration/prompts/reviewer-stage.prompt.md',
-    '.codex/orchestration/prompts/closeout-stage.prompt.md'
+    '.codex/orchestration/prompts/closeout-stage.prompt.md',
+    'scripts/orchestration/engine/invoke-task-worker.ps1'
 )
 
 foreach ($relativeFile in $requiredFiles) {

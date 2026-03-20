@@ -18,6 +18,10 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Policy-as-code validation for instruction/runtime governance
 - ✅ Multi-agent contract and orchestration validation
 - ✅ Multi-agent pipeline runner with guardrails, deterministic stage handoffs, and optional live `codex-exec` dispatch
+- ✅ Task-loop implementation with per-task spec review and code-quality review
+- ✅ Safe parallel batching for dependency-independent work items with write-set conflict blocking
+- ✅ Super Agent worktree isolation helper and thin lifecycle entry commands
+- ✅ Repository-owned TDD and verification workflow contracts for execution stages
 - ✅ Persisted orchestration run state for replay diagnostics and auditability
 - ✅ Release governance checks (CODEOWNERS, changelog contracts, branch-protection baseline)
 - ✅ Security baseline checks (sensitive file patterns and secret-like content scanning)
@@ -56,7 +60,8 @@ No package installation is required. Scripts run with PowerShell 7+.
 
 ```powershell
 # run the full recommended local onboarding flow
-pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+$RepoRoot = '<REPO_ROOT>'
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
 # Sync shared assets
 pwsh -File .\scripts\runtime\bootstrap.ps1
@@ -72,6 +77,21 @@ pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Validate enter
 
 # Execute the same pipeline through the live Codex backend
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Validate enterprise multi-agent flow" -ExecutionBackend codex-exec
+
+# Create an isolated worktree before risky or multi-slice execution
+pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice"
+
+# Stop after brainstorm/spec
+pwsh -File .\scripts\runtime\invoke-super-agent-brainstorm.ps1 -RequestText "Design the workstream"
+
+# Stop after planning
+pwsh -File .\scripts\runtime\invoke-super-agent-plan.ps1 -RequestText "Write the execution plan"
+
+# Execute the full lifecycle
+pwsh -File .\scripts\runtime\invoke-super-agent-execute.ps1 -RequestText "Implement the approved plan"
+
+# Execute the full lifecycle and allow safe parallel worker fan-out
+pwsh -File .\scripts\runtime\invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items"
 
 # Enable local Git hooks (pre-commit + post-commit sync)
 pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
@@ -114,17 +134,24 @@ scripts/
 │   ├── doctor.ps1
 │   ├── install.ps1
 │   ├── apply-vscode-templates.ps1
+│   ├── new-super-agent-worktree.ps1
 │   ├── sync-vscode-global-snippets.ps1
 │   ├── sync-workspace-settings.ps1
+│   ├── invoke-super-agent-brainstorm.ps1
+│   ├── invoke-super-agent-plan.ps1
+│   ├── invoke-super-agent-execute.ps1
+│   ├── invoke-super-agent-parallel-dispatch.ps1
 │   ├── healthcheck.ps1
 │   ├── self-heal.ps1
 │   ├── run-agent-pipeline.ps1
 │   └── clean-codex-runtime.ps1
 ├── orchestration/
 │   ├── engine/
-│   │   └── invoke-codex-dispatch.ps1
+│   │   ├── invoke-codex-dispatch.ps1
+│   │   └── invoke-task-worker.ps1
 │   └── stages/
 │       ├── intake-stage.ps1
+│       ├── spec-stage.ps1
 │       ├── plan-stage.ps1
 │       ├── route-stage.ps1
 │       ├── implement-stage.ps1
@@ -205,7 +232,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
 | `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
-| `runtime/install.ps1` | Runs the recommended onboarding flow by orchestrating bootstrap, optional MCP apply, VS Code sync, Git hook setup, and healthcheck. Supports preview mode and parameterized runtime paths. Can be invoked from any directory when `pwsh -File` points to the versioned script path. | `pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
+| `runtime/install.ps1` | Runs the recommended onboarding flow by orchestrating bootstrap, optional MCP apply, VS Code sync, Git hook setup, and healthcheck. Supports preview mode and parameterized runtime paths. Can be invoked from any directory when `pwsh -File` points to the versioned script path. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
@@ -214,7 +241,13 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `runtime/healthcheck.ps1` | Runs `validate-all` (profile-aware) plus `runtime-doctor`, emits report/log, and defaults to warning-only mode. | `pwsh -File scripts/runtime/healthcheck.ps1 -ValidationProfile release` |
 | `runtime/self-heal.ps1` | Runs controlled repair flow (bootstrap + optional templates) and validates final state via healthcheck. | `pwsh -File scripts/runtime/self-heal.ps1 -Mirror -StrictExtras` |
 | `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, and budget guardrails; supports `script-only` and live `codex-exec` backends; writes `run-artifact.json`, `run-state.json`, and stage artifacts under `.temp/runs/<traceId>/`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change" -ExecutionBackend codex-exec` |
+| `runtime/new-super-agent-worktree.ps1` | Creates deterministic git worktrees for isolated Super Agent work, with Windows-safe branch/worktree naming and preview support. | `pwsh -File scripts/runtime/new-super-agent-worktree.ps1 -WorktreeName "feature-slice"` |
+| `runtime/invoke-super-agent-brainstorm.ps1` | Runs the Super Agent lifecycle through intake and spec only, producing normalized request and active spec artifacts. | `pwsh -File scripts/runtime/invoke-super-agent-brainstorm.ps1 -RequestText "Design the workstream"` |
+| `runtime/invoke-super-agent-plan.ps1` | Runs the Super Agent lifecycle through planning and stops after a worker-ready plan is written. | `pwsh -File scripts/runtime/invoke-super-agent-plan.ps1 -RequestText "Write the execution plan"` |
+| `runtime/invoke-super-agent-execute.ps1` | Runs the full Super Agent lifecycle end-to-end with the configured execution backend. | `pwsh -File scripts/runtime/invoke-super-agent-execute.ps1 -RequestText "Implement the approved plan"` |
+| `runtime/invoke-super-agent-parallel-dispatch.ps1` | Runs the full Super Agent lifecycle and is intended for safe parallel worker dispatch once dependency-independent batches are present. | `pwsh -File scripts/runtime/invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items"` |
 | `orchestration/engine/invoke-codex-dispatch.ps1` | Renders a stage prompt, invokes the local Codex CLI, captures JSON output, and persists dispatch logs/records for live planner, executor, and reviewer stages. | `pwsh -File scripts/orchestration/engine/invoke-codex-dispatch.ps1 -RepoRoot . -TraceId trace-001 -StageId plan -AgentId planner -PromptPath .temp\\planner.md -ResponseSchemaPath .github\\schemas\\agent.stage-plan-result.schema.json -ResultPath .temp\\planner-result.json -DispatchRecordPath .temp\\planner-dispatch.json` |
+| `orchestration/engine/invoke-task-worker.ps1` | Executes a single worker-ready task through implementer -> task spec review -> task quality review, with retry and allowed-path enforcement. | `pwsh -File scripts/orchestration/engine/invoke-task-worker.ps1 -RepoRoot . -TraceId trace-001 -TaskRecordPath .temp\\runs\\trace-001\\artifacts\\task-001.json -RunDirectory .temp\\runs\\trace-001 -ExecutionBackend codex-exec` |
 | `runtime/clean-codex-runtime.ps1` | Cleans local Codex runtime garbage (`tmp`, `vendor_imports`) and prunes `log`/`sessions` files older than retention using `LastWriteTime` (default 30 days). | `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30 -Apply` |
 | `orchestration/stages/*.ps1` | Stage executors (`plan`, `implement`, `validate`, `review`) consumed by `run-agent-pipeline.ps1`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Smoke run"` |
 | `maintenance/clean-build-artifacts.ps1` | Deletes `.build`, `.deployment`, `bin`, and `obj` directories. Supports dry-run and prompts for confirmation. | `pwsh -File scripts/maintenance/clean-build-artifacts.ps1 -DryRun` |
@@ -272,6 +305,21 @@ pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run pipeline s
 # execute default multi-agent pipeline with live planner/executor/reviewer dispatch
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run pipeline smoke test" -ExecutionBackend codex-exec
 
+# create an isolated worktree for Super Agent execution
+pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice" -PreviewOnly
+
+# run Super Agent through brainstorm/spec only
+pwsh -File .\scripts\runtime\invoke-super-agent-brainstorm.ps1 -RequestText "Design the workstream" -PreviewOnly
+
+# run Super Agent through planning only
+pwsh -File .\scripts\runtime\invoke-super-agent-plan.ps1 -RequestText "Write the execution plan" -PreviewOnly
+
+# run the full Super Agent lifecycle
+pwsh -File .\scripts\runtime\invoke-super-agent-execute.ps1 -RequestText "Implement the approved plan" -PreviewOnly
+
+# run the full lifecycle with the safe parallel-dispatch entrypoint
+pwsh -File .\scripts\runtime\invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items" -PreviewOnly
+
 # preview/runtime cleanup (no deletion)
 pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30
 
@@ -289,6 +337,12 @@ pwsh -File .\scripts\validation\validate-policy.ps1
 
 # validate multi-agent contracts and pipeline integrity
 pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
+
+# run the native Super Agent worktree tests
+pwsh -File .\scripts\tests\runtime\super-agent-worktree.tests.ps1 -RepoRoot .
+
+# run the native Super Agent entrypoint tests
+pwsh -File .\scripts\tests\runtime\super-agent-entrypoints.tests.ps1 -RepoRoot .
 
 # validate routing catalog coverage against golden fixtures
 pwsh -File .\scripts\validation\validate-routing-coverage.ps1

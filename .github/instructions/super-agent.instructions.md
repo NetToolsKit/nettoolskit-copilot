@@ -3,7 +3,7 @@ applyTo: "**/*.{cs,csproj,sln,ps1,rs,toml,ts,tsx,js,jsx,vue,yml,yaml,json,jsonc,
 priority: high
 ---
 
-# Master Orchestrator Lifecycle
+# Super Agent Lifecycle
 
 ## Purpose
 - Normalize all change-bearing work through one repository-owned lifecycle before implementation starts.
@@ -17,12 +17,12 @@ priority: high
 
 ## Hard Rule
 - Do not jump directly from user request to implementation.
-- The MASTER flow owns intake, normalization, planning registration, specialist selection, execution strategy, validation, closeout, and planning-state updates.
-- In Codex, prefer the repo-owned `master-orchestrator` skill as the bootstrap controller whenever skill discovery can activate it.
+- The Super Agent flow owns intake, normalization, planning registration, specialist selection, execution strategy, validation, closeout, and planning-state updates.
+- In Codex, prefer the repo-owned `super-agent` skill as the bootstrap controller whenever skill discovery can activate it.
 - In Copilot, enforce the same lifecycle through this instruction and the mandatory routing flow because Copilot does not execute local skills directly.
 
 ## Required Lifecycle
-1. `MASTER` intake
+1. `Super Agent` intake
    - normalize the request
    - identify goals, constraints, risks, and whether the task is trivial or change-bearing
    - break the request into explicit work items when needed

@@ -17,8 +17,10 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 # Hierarchy and Scope
 - Global rules live here and are always applied.
-- The MASTER lifecycle lives in `instructions/master-orchestrator.instructions.md` and is always applied for change-bearing work.
+- The Super Agent lifecycle lives in `instructions/super-agent.instructions.md` and is always applied for change-bearing work.
 - Non-trivial design-bearing work also uses `instructions/brainstorm-spec-workflow.instructions.md` before execution planning.
+- Risky execution may use `instructions/worktree-isolation.instructions.md`.
+- Code-bearing work also uses `instructions/tdd-verification.instructions.md`.
 - Repository-specific operating rules live in `instructions/repository-operating-model.instructions.md`.
 - Domain instruction files extend these rules; do not duplicate globals.
 - Prefer the most specific domain rule when conflicts occur.
@@ -65,18 +67,19 @@ Follow this order of operations on every task:
 
 # Workflow
 
-## Master Orchestrator Lifecycle
-- Treat `instructions/master-orchestrator.instructions.md` as the mandatory controller contract for change-bearing work.
+## Super Agent Lifecycle
+- Treat `instructions/super-agent.instructions.md` as the mandatory controller contract for change-bearing work.
 - Default lifecycle:
-  1. MASTER intake
+  1. Super Agent intake
   2. planning registration
   3. spec registration when required
   4. specialist identification
-  5. execution
-  6. testing
-  7. code review
-  8. closeout
-  9. planning update
+  5. worktree isolation when warranted
+  6. execution
+  7. testing
+  8. code review
+  9. closeout
+  10. planning update
 - Do not skip directly from request to implementation when files, runtime assets, or repository state are expected to change.
 
 ## How to use
@@ -89,7 +92,7 @@ Follow this order of operations on every task:
 - Use repository context first for project-specific behavior, architecture, scripts, templates, and conventions.
 - For external platform, framework, SDK, API, CLI, or tool behavior, follow `instructions/authoritative-sources.instructions.md`.
 - Use `.github/governance/authoritative-source-map.json` as the single source of truth for stack-specific official documentation domains.
-- Do not duplicate official documentation domain lists across domain instruction files.
+- Do not duplicate official domain lists across domain instruction files.
 
 # Validation Checklist Policy
 - Every non-trivial task must define a concrete validation checklist before or during implementation.
@@ -113,10 +116,12 @@ Follow this order of operations on every task:
 
 ## Always Applied
 - AGENTS.md (agents and context policy)
-- instructions/master-orchestrator.instructions.md
+- instructions/super-agent.instructions.md
 - instructions/brainstorm-spec-workflow.instructions.md
 - instructions/repository-operating-model.instructions.md
 - instructions/subagent-planning-workflow.instructions.md
+- instructions/worktree-isolation.instructions.md
+- instructions/tdd-verification.instructions.md
 - instructions/authoritative-sources.instructions.md
 - instructions/workflow-optimization.instructions.md
 - instructions/powershell-execution.instructions.md
@@ -127,7 +132,7 @@ Follow this order of operations on every task:
 
 # Repository and Domain Rules
 - Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
-- Change-bearing work must start with `instructions/master-orchestrator.instructions.md` before planning and implementation.
+- Change-bearing work must start with `instructions/super-agent.instructions.md` before planning and implementation.
 - Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `planning/`.
 - When the work is non-trivial and design-bearing, create or update a versioned spec under `planning/specs/` before execution planning.
 - Use domain instructions from that map according to the active route and file scope.

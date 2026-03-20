@@ -1,0 +1,53 @@
+param(
+    [string] $RepoRoot
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Assert-True {
+    param([bool] $Condition, [string] $Message)
+    if (-not $Condition) {
+        throw $Message
+    }
+}
+
+$resolvedRepoRoot = if ([string]::IsNullOrWhiteSpace($RepoRoot)) { (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path } else { (Resolve-Path $RepoRoot).Path }
+$scriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/new-super-agent-worktree.ps1'
+$tempRoot = Join-Path $env:TEMP ('worktree-test-' + [guid]::NewGuid().ToString('N'))
+$repoPath = Join-Path $tempRoot 'repo'
+
+try {
+    New-Item -ItemType Directory -Path $repoPath -Force | Out-Null
+    & git -C $repoPath init | Out-Null
+    & git -C $repoPath config user.email 'super-agent-test@example.invalid' | Out-Null
+    & git -C $repoPath config user.name 'Super Agent Test' | Out-Null
+    Set-Content -LiteralPath (Join-Path $repoPath 'README.md') -Value '# temp repo' -Encoding UTF8 -NoNewline
+    & git -C $repoPath add README.md | Out-Null
+    & git -C $repoPath commit -m 'init' | Out-Null
+
+    $previewJson = & $scriptPath -RepoRoot $repoPath -WorktreeName 'Feature Planning' -PreviewOnly
+    $preview = $previewJson | ConvertFrom-Json -Depth 50
+    Assert-True ($preview.branchName -eq 'super/feature-planning') 'Preview should derive a deterministic branch name.'
+    Assert-True ($preview.worktreePath -match 'feature-planning') 'Preview should derive a slugged worktree path.'
+
+    $resultJson = & $scriptPath -RepoRoot $repoPath -WorktreeName 'Feature Planning'
+    $result = $resultJson | ConvertFrom-Json -Depth 50
+    Assert-True ([bool] $result.created) 'Worktree creation should report success.'
+    Assert-True (Test-Path -LiteralPath ([string] $result.worktreePath) -PathType Container) 'Worktree path should exist after creation.'
+
+    $worktreeList = @(git -C $repoPath worktree list --porcelain) -join "`n"
+    $normalizedReportedPath = ([string] $result.worktreePath) -replace '\\', '/'
+    Assert-True ($worktreeList -match [regex]::Escape($normalizedReportedPath)) 'git worktree list should include the created worktree.'
+
+    Write-Host '[OK] super-agent worktree tests passed.'
+    exit 0
+}
+catch {
+    Write-Host ("[FAIL] super-agent worktree tests failed: {0}" -f $_.Exception.Message)
+    exit 1
+}
+finally {
+    if (Test-Path -LiteralPath $tempRoot) {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}

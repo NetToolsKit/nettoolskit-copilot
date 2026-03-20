@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Produces normalized request artifacts for the MASTER intake stage.
+    Produces normalized request artifacts for the Super Agent intake stage.
 
 .DESCRIPTION
-    Runs the repository-owned MASTER intake lifecycle before planning begins.
-    When live dispatch is enabled, invokes the master agent through the local
+    Runs the repository-owned Super Agent intake lifecycle before planning begins.
+    When live dispatch is enabled, invokes the Super Agent through the local
     Codex CLI and persists a normalized request plus intake metadata.
 
 .PARAMETER RepoRoot
@@ -56,7 +56,7 @@
     Enables verbose diagnostics for stage execution.
 
 .EXAMPLE
-    pwsh -File scripts/orchestration/stages/intake-stage.ps1 -RepoRoot . -RunDirectory .temp/runs/example -TraceId trace-1 -StageId intake -AgentId master -RequestPath .temp/runs/example/request.md -OutputArtifactManifestPath .temp/runs/example/intake-output.json -ExecutionBackend codex-exec -DispatchMode codex-exec
+    pwsh -File scripts/orchestration/stages/intake-stage.ps1 -RepoRoot . -RunDirectory .temp/runs/example -TraceId trace-1 -StageId intake -AgentId super-agent -RequestPath .temp/runs/example/request.md -OutputArtifactManifestPath .temp/runs/example/intake-output.json -ExecutionBackend codex-exec -DispatchMode codex-exec
 
 .NOTES
     Version: 1.0
@@ -223,7 +223,7 @@ function New-FallbackIntakeResult {
     $slug = Convert-ToPlanSlug -Text $normalized
 
     return [ordered]@{
-        stage = 'master-intake'
+        stage = 'super-agent-intake'
         normalizedRequest = $normalized
         changeBearing = (-not $isInformational)
         planningRequired = (-not $isInformational)
@@ -270,9 +270,9 @@ if ($null -eq $agent) {
 
 $allowedPaths = @($agent.allowedPaths | ForEach-Object { [string] $_ })
 $shouldUseCodexDispatch = ($ExecutionBackend -eq 'codex-exec') -and ($DispatchMode -eq 'codex-exec')
-$dispatchRecordPath = Join-Path $stageMetadataDirectory 'master-dispatch.json'
-$dispatchResultPath = Join-Path $stageMetadataDirectory 'master-result.json'
-$dispatchPromptPath = Join-Path $stageMetadataDirectory 'master-prompt.md'
+$dispatchRecordPath = Join-Path $stageMetadataDirectory 'super-agent-dispatch.json'
+$dispatchResultPath = Join-Path $stageMetadataDirectory 'super-agent-result.json'
+$dispatchPromptPath = Join-Path $stageMetadataDirectory 'super-agent-prompt.md'
 $dispatchError = $null
 $intakeResult = $null
 $backendUsed = if ($shouldUseCodexDispatch) { 'codex-exec' } else { 'scripted' }
@@ -280,11 +280,11 @@ $backendUsed = if ($shouldUseCodexDispatch) { 'codex-exec' } else { 'scripted' }
 if ($shouldUseCodexDispatch) {
     try {
         if (-not (Test-Path -LiteralPath $resolvedPromptTemplatePath -PathType Leaf)) {
-            throw "Master prompt template not found: $resolvedPromptTemplatePath"
+            throw "Super Agent prompt template not found: $resolvedPromptTemplatePath"
         }
 
         if (-not (Test-Path -LiteralPath $resolvedResponseSchemaPath -PathType Leaf)) {
-            throw "Master response schema not found: $resolvedResponseSchemaPath"
+            throw "Super Agent response schema not found: $resolvedResponseSchemaPath"
         }
 
         $templateText = Get-Content -Raw -LiteralPath $resolvedPromptTemplatePath
@@ -314,7 +314,7 @@ if ($shouldUseCodexDispatch) {
     }
     catch {
         $dispatchError = $_.Exception.Message
-        Write-StyledOutput ("[WARN] Master live dispatch failed. Falling back to scripted mode. {0}" -f $dispatchError)
+        Write-StyledOutput ("[WARN] Super Agent live dispatch failed. Falling back to scripted mode. {0}" -f $dispatchError)
         $backendUsed = 'scripted'
     }
 }

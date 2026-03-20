@@ -35,7 +35,7 @@ planning/
 
 ## References
 
-- `.github/instructions/master-orchestrator.instructions.md`
+- `.github/instructions/super-agent.instructions.md`
 - `.github/instructions/brainstorm-spec-workflow.instructions.md`
 - `.github/instructions/subagent-planning-workflow.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`

@@ -8,7 +8,7 @@ description: Use for non-trivial feature, behavior, workflow, or architecture wo
 2. Load .github/copilot-instructions.md.
 3. Load .github/instruction-routing.catalog.yml.
 4. Load .github/instructions/repository-operating-model.instructions.md.
-5. Load .github/instructions/master-orchestrator.instructions.md.
+5. Load .github/instructions/super-agent.instructions.md.
 6. Load .github/instructions/brainstorm-spec-workflow.instructions.md.
 7. Load .github/instructions/subagent-planning-workflow.instructions.md.
 8. Load planning/specs/README.md.
@@ -16,7 +16,7 @@ description: Use for non-trivial feature, behavior, workflow, or architecture wo
 ## Responsibilities
 - decide whether a separate spec is required for the current workstream
 - create or update the versioned active spec under planning/specs/active/
-- preserve the normalized intake summary from the MASTER stage when available
+- preserve the normalized intake summary from the Super Agent intake stage when available
 - record design intent, decisions, alternatives, constraints, risks, and acceptance criteria
 - state whether the workstream is ready to move into execution planning
 - recommend the likely specialist path when that can already be determined

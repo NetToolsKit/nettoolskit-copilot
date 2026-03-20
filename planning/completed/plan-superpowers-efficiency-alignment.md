@@ -121,25 +121,25 @@ Generated: 2026-03-20
 
 ## Progress
 - [x] 1. Create comparison and tracked plan.
-- [x] 2. Define repository-native master orchestration contract, intake stage, and repo-owned bootstrap behavior for request normalization before planning.
+- [x] 2. Define repository-native Super Agent orchestration contract, intake stage, and repo-owned bootstrap behavior for request normalization before planning.
 - [ ] 3. Add a true Codex session-start hook only if the runtime later exposes a supported repository-owned startup hook surface.
 - [x] 4. Add brainstorming/spec workflow and versioned spec artifact location.
-- [ ] 5. Harden plan schema and planner skill so tasks become worker-ready with exact files, tests, and checkpoints.
-- [ ] 6. Add first-class worktree isolation workflow with Windows-safe implementation and validation.
-- [ ] 7. Upgrade orchestration from stage-only execution to task-loop execution with spec review then code-quality review.
-- [ ] 8. Implement safe parallel dispatch with dependency graph and write-set conflict detection.
-- [ ] 9. Add stricter TDD and verification workflow contracts integrated with existing specialists and validations.
-- [ ] 10. Add workflow entry prompts/commands for brainstorm, write-plan, execute-plan, and parallel dispatch.
-- [ ] 11. Run full validation, sync runtime, update docs, and produce closeout guidance.
+- [x] 5. Harden plan schema and planner skill so tasks become worker-ready with exact files, tests, and checkpoints.
+- [x] 6. Add first-class worktree isolation workflow with Windows-safe implementation and validation.
+- [x] 7. Upgrade orchestration from stage-only execution to task-loop execution with spec review then code-quality review.
+- [x] 8. Implement safe parallel dispatch with dependency graph and write-set conflict detection.
+- [x] 9. Add stricter TDD and verification workflow contracts integrated with existing specialists and validations.
+- [x] 10. Add workflow entry prompts/commands for brainstorm, write-plan, execute-plan, and parallel dispatch.
+- [x] 11. Run full validation, sync runtime, update docs, and produce closeout guidance.
 
 ## Validation Checklist
-- [ ] No current instruction, skill, or policy is removed without a stronger repository-owned replacement.
-- [ ] `validate-all` remains green after each phase.
-- [ ] Runtime sync continues to project cleanly into `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, and VS Code global assets.
-- [ ] New workflow layers are versioned, documented, and tested.
-- [ ] Parallel execution refuses overlapping write-sets.
-- [ ] Worktree automation remains Windows-safe and does not introduce destructive defaults.
-- [ ] Brainstorm/spec workflow is optional only for trivial tasks and mandatory for non-trivial feature work.
+- [x] No current instruction, skill, or policy is removed without a stronger repository-owned replacement.
+- [x] `validate-all` remains green after each phase.
+- [x] Runtime sync continues to project cleanly into `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, and VS Code global assets.
+- [x] New workflow layers are versioned, documented, and tested.
+- [x] Parallel execution refuses overlapping write-sets.
+- [x] Worktree automation remains Windows-safe and does not introduce destructive defaults.
+- [x] Brainstorm/spec workflow is optional only for trivial tasks and mandatory for non-trivial feature work.
 
 ## Recommended Specialists
 - Primary: `ops-devops-platform-engineer`
@@ -156,3 +156,10 @@ Generated: 2026-03-20
 - `copilot-instructions` is already stronger in enterprise governance, validation, runtime sync, and source-of-truth control.
 - The correct path is selective absorption of the high-leverage workflow mechanics, not wholesale adoption.
 - Phase 4 delivered a repository-owned `brainstorm/spec` stage, versioned `planning/specs/` workspace, new brainstorm specialist skill, orchestration contracts, routing coverage, runtime sync, and green validation for the added workflow.
+- Phase 5 hardened planner output so each work item now carries target paths, explicit commands, expected checkpoints, and commit checkpoint guidance for deterministic worker handoff.
+- Phase 6 delivered repository-owned worktree isolation with instruction coverage, a dedicated skill, runtime helper script, and native tests.
+- Phase 7 upgraded implementation from coarse stage execution to task-loop execution with implementer work, task-level spec review, task-level quality review, and retry handling.
+- Phase 8 delivered safe parallel dispatch through dependency-aware task batching and overlapping write-set conflict blocking before fan-out.
+- Phase 9 added repository-owned TDD and verification workflow contracts that integrate with the existing enterprise specialist chain.
+- Phase 10 delivered thin workflow entry commands for brainstorming, planning, full execution, and parallel dispatch.
+- Phase 11 closed the workstream with updated public docs, changelog coverage, routing fixtures, runtime validation, and closeout guidance.

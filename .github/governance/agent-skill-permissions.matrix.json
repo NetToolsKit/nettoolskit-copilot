@@ -7,9 +7,9 @@
   },
   "agents": [
     {
-      "agentId": "master",
+      "agentId": "super-agent",
       "role": "planner",
-      "skill": "master-orchestrator",
+      "skill": "super-agent",
       "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
       "allowedStageScriptGlobs": ["scripts/orchestration/stages/intake-stage.ps1"],
       "requiredBudget": { "maxSteps": 16, "maxDurationMinutes": 15, "maxFileEdits": 8, "maxTokens": 45000 }

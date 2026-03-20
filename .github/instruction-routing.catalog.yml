@@ -24,8 +24,8 @@ always:
     reason: Global rules and domain mapping
 
   # Mandatory instruction files (always applied)
-  - path: instructions/master-orchestrator.instructions.md
-    reason: Repository-owned MASTER lifecycle for intake, planning, specialist routing, validation, review, and closeout
+  - path: instructions/super-agent.instructions.md
+    reason: Repository-owned Super Agent lifecycle for intake, planning, specialist routing, validation, review, and closeout
   - path: instructions/repository-operating-model.instructions.md
     reason: Repository topology, build/test/run commands, style, and domain instruction map
   - path: instructions/subagent-planning-workflow.instructions.md
@@ -74,6 +74,23 @@ routing:
         reason: Brainstorming and versioned specification workflow before execution planning
       - path: instructions/subagent-planning-workflow.instructions.md
         reason: Planning chain and active/completed workstream lifecycle
+
+  - id: super-agent-workflow
+    tags: [workflow, worktree, tdd, verification, parallel-dispatch]
+    triggers:
+      - "super agent"
+      - "super-agent"
+      - "worktree"
+      - "parallel dispatch"
+      - "parallel tasks"
+      - "tdd"
+      - "verification"
+      - "verify before completion"
+    include:
+      - path: instructions/worktree-isolation.instructions.md
+        reason: Isolated worktree guidance for risky or broad-scope execution
+      - path: instructions/tdd-verification.instructions.md
+        reason: Stronger verification and evidence requirements for code-bearing work
 
   - id: docs-readme
     tags: [docs, readme]

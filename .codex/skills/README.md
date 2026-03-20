@@ -15,6 +15,8 @@ This folder stores versioned Codex skills aligned with `.github/instructions`. S
 - ✅ Skills versioned in source control
 - ✅ Runtime sync through root bootstrap
 - ✅ Reusable workflows mapped to repository instruction packs
+- ✅ Repository-owned Super Agent lifecycle for intake, specs, planning, specialist routing, review, and closeout
+- ✅ Worktree isolation and closeout automation skills for high-safety execution
 - ✅ Build-time dependency vulnerability auditing for .NET, frontend, and Rust stacks
 
 ---
@@ -55,7 +57,7 @@ Get-ChildItem "$env:USERPROFILE\.codex\skills"
 
 ### Example 1: Software Implementation
 
-Use skills: `master-orchestrator`, `brainstorm-spec-architect`, `plan-active-work-planner`, `context-token-optimizer`, then the routed specialist
+Use skills: `super-agent`, `brainstorm-spec-architect`, `plan-active-work-planner`, `context-token-optimizer`, then the routed specialist
 
 ### Example 2: Testing and Coverage
 
@@ -89,6 +91,10 @@ Use skills: `ops-resilience-chaos-engineer`, `obs-sre-observability-engineer`
 
 Use skill: `privacy-compliance-engineer`
 
+### Example 9: Isolated Delivery and Closeout
+
+Use skills: `super-agent`, `worktree-isolation-engineer`, `release-closeout-engineer`
+
 ---
 
 ## API Reference
@@ -97,8 +103,12 @@ Use skill: `privacy-compliance-engineer`
 
 - `core-context-router`
 - `core-runtime-sync`
-- `master-orchestrator`
+- `super-agent`
 - `brainstorm-spec-architect`
+- `plan-active-work-planner`
+- `context-token-optimizer`
+- `worktree-isolation-engineer`
+- `release-closeout-engineer`
 - `dev-software-engineer` (base)
 - `test-engineer`
 - `review-code-engineer`

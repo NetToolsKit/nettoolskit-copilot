@@ -1,7 +1,7 @@
 {
   "id": "default-dev-flow",
   "version": 1,
-  "description": "Deterministic master -> brainstorm-spec -> planner -> router -> specialist -> tester -> reviewer -> closeout flow.",
+  "description": "Deterministic super-agent -> brainstorm-spec -> planner -> router -> specialist -> tester -> reviewer -> closeout flow.",
   "runtime": {
     "executionBackend": "script-only",
     "defaultRetryDelaySeconds": 2,
@@ -12,12 +12,12 @@
   "stages": [
     {
       "id": "intake",
-      "agentId": "master",
+      "agentId": "super-agent",
       "mode": "plan",
       "execution": {
         "scriptPath": "scripts/orchestration/stages/intake-stage.ps1",
         "dispatchMode": "codex-exec",
-        "promptTemplatePath": ".codex/orchestration/prompts/master-intake-stage.prompt.md",
+        "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md",
         "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json",
         "timeoutSeconds": 120
       },
@@ -82,7 +82,7 @@
         "timeoutSeconds": 300
       },
       "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"],
-      "outputArtifacts": ["changeset", "implementation-log", "implementation-dispatches"],
+      "outputArtifacts": ["changeset", "implementation-log", "implementation-dispatches", "task-review-report"],
       "onFailure": "retry-once"
     },
     {
@@ -94,7 +94,7 @@
         "dispatchMode": "scripted",
         "timeoutSeconds": 600
       },
-      "inputArtifacts": ["changeset", "implementation-log", "route-selection"],
+      "inputArtifacts": ["changeset", "implementation-log", "route-selection", "task-plan-data", "task-review-report"],
       "outputArtifacts": ["validation-report"],
       "onFailure": "retry-once"
     },
@@ -109,7 +109,7 @@
         "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json",
         "timeoutSeconds": 180
       },
-      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "changeset", "validation-report", "route-selection", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "changeset", "validation-report", "route-selection", "task-review-report", "active-plan"],
       "outputArtifacts": ["review-report", "decision-log"],
       "onFailure": "stop"
     },
@@ -124,7 +124,7 @@
         "responseSchemaPath": ".github/schemas/agent.stage-closeout-result.schema.json",
         "timeoutSeconds": 180
       },
-      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "route-selection", "changeset", "validation-report", "review-report", "decision-log", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "route-selection", "changeset", "validation-report", "task-review-report", "review-report", "decision-log", "active-plan"],
       "outputArtifacts": ["closeout-report", "release-summary", "completed-plan", "readme-updates", "changelog-update"],
       "onFailure": "stop"
     }

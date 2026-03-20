@@ -267,7 +267,7 @@ function New-FallbackRouteResult {
         }
     }
     foreach ($extraPath in @(
-        '.github/instructions/master-orchestrator.instructions.md',
+        '.github/instructions/super-agent.instructions.md',
         '.github/instructions/subagent-planning-workflow.instructions.md',
         '.github/instruction-routing.catalog.yml'
     )) {

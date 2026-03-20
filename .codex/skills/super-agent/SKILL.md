@@ -1,16 +1,16 @@
 ---
-name: master-orchestrator
-description: Use when starting any repository work that may change files, runtime assets, planning state, docs, settings, or governance. Normalize the request into the repository-owned lifecycle: master intake, planning registration, specialist routing, execution, testing, review, closeout, and planning-state updates before implementation begins.
+name: super-agent
+description: Use when starting any repository work that may change files, runtime assets, planning state, docs, settings, or governance. Normalize the request into the repository-owned lifecycle: super-agent intake, planning registration, specialist routing, execution, testing, review, closeout, and planning-state updates before implementation begins.
 ---
 
-# Master Orchestrator
+# Super Agent
 
 ## Load minimal context first
 
 1. Load `.github/AGENTS.md`.
 2. Load `.github/copilot-instructions.md`.
 3. Load `.github/instruction-routing.catalog.yml`.
-4. Load `.github/instructions/master-orchestrator.instructions.md`.
+4. Load `.github/instructions/super-agent.instructions.md`.
 5. Load `.github/instructions/repository-operating-model.instructions.md`.
 6. Load `.github/instructions/subagent-planning-workflow.instructions.md`.
 7. Reuse the shared `$plan-active-work-planner`, `$context-token-optimizer`, and `$release-closeout-engineer` skills as downstream stages.
@@ -28,7 +28,7 @@ description: Use when starting any repository work that may change files, runtim
 
 ## Required lifecycle
 
-1. MASTER intake
+1. Super Agent intake
 2. planning registration
 3. specialist identification
 4. execution
@@ -40,7 +40,7 @@ description: Use when starting any repository work that may change files, runtim
 ## Invocation rule
 
 - In Codex, this skill should be the first repository-owned controller for change-bearing work whenever skill discovery can match it.
-- In Copilot, the same lifecycle is enforced through `instructions/master-orchestrator.instructions.md` even though Copilot does not execute skills directly.
+- In Copilot, the same lifecycle is enforced through `instructions/super-agent.instructions.md` even though Copilot does not execute skills directly.
 
 ## Output contract
 

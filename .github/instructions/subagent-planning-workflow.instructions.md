@@ -6,7 +6,7 @@ priority: high
 # Sub-Agent Planning Workflow
 
 ## Purpose
-- Standardize how the repository-owned MASTER lifecycle plans, routes, executes, reviews, and closes out non-trivial work with a deterministic sub-agent chain.
+- Standardize how the repository-owned Super Agent lifecycle plans, routes, executes, reviews, and closes out non-trivial work with a deterministic sub-agent chain.
 - Keep planning artifacts versioned under `planning/` as first-class operational assets without mixing them into stable product documentation.
 
 ## Planning Workspace Contract
@@ -29,7 +29,7 @@ Create or update an active planning document when any of these are true:
 
 ## Mandatory Sub-Agent Chain
 For non-trivial work, prefer this execution chain unless the user explicitly asks for a lighter flow:
-1. `master-orchestrator` contract
+1. `super-agent` contract
    - normalize the request and decide whether the task is change-bearing
    - ensure planning registration happens before execution
 2. `brainstorm-spec-architect` agent
@@ -42,17 +42,21 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
 4. `context-token-optimizer` agent
    - reduce token load by selecting the minimal context pack
    - recommend the correct specialist path
-5. `specialist` agent
+5. worktree isolation decision
+   - for risky, long-running, or broad-scope work, prefer `instructions/worktree-isolation.instructions.md`
+   - use the repository-owned helper `scripts/runtime/new-super-agent-worktree.ps1` when isolation is warranted
+6. `specialist` agent
    - perform the domain implementation using the routed context only
-6. `tester` agent
+   - keep execution aligned with `instructions/tdd-verification.instructions.md`
+7. `tester` agent
    - mandatory when code, runtime behavior, or validation scripts changed
-7. `reviewer` agent
+8. `reviewer` agent
    - mandatory final risk-focused code review
-8. `release-closeout` agent
+9. `release-closeout` agent
    - update relevant README files when needed
    - produce suggested commit message
    - update CHANGELOG with entry-ready content when the change belongs in version history
-9. planning update
+10. planning update
    - update execution state, validation status, blockers, and closeout notes
    - move the plan to `planning/completed/` and the spec to `planning/specs/completed/` only when materially complete
 
@@ -67,10 +71,12 @@ Every active plan should define:
 2. normalized request or intake summary
 3. spec path or explicit statement that a separate spec was not required
 4. ordered tasks with dependencies when needed
-5. validation checklist
-6. risks and fallback path
-7. selected specialist or specialist candidates
-8. closeout expectations for README, commit message, and changelog
+5. per-task target paths, explicit commands, expected checkpoints, and commit checkpoint suggestion
+6. validation checklist with explicit verification evidence expectations
+7. risks and fallback path
+8. selected specialist or specialist candidates
+9. closeout expectations for README, commit message, and changelog
+10. whether isolated worktree execution is recommended
 
 ## Closeout Rules
 - If the change affects stable documentation, update the relevant README in the same workstream.

@@ -40,6 +40,14 @@
 - Hardened MCP config sync for mixed server manifests so onboarding with `-ApplyMcpConfig` no longer fails when some servers expose `command/args` while others expose `url` only:
   - `.codex/scripts/sync-mcp-to-codex-config.ps1`
   - `scripts/tests/runtime/mcp-config-sync.tests.ps1`
+- Hardened planner handoff contracts so work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint guidance:
+  - `.github/schemas/agent.stage-plan-result.schema.json`
+  - `.codex/orchestration/prompts/planner-stage.prompt.md`
+  - `.codex/skills/plan-active-work-planner/SKILL.md`
+  - `.codex/skills/plan-task-planner/SKILL.md`
+  - `scripts/orchestration/stages/plan-stage.ps1`
+  - `scripts/orchestration/stages/implement-stage.ps1`
+  - `scripts/tests/runtime/agent-orchestration-engine.tests.ps1`
 
 ### Removed
 - Removed placeholder `.gitkeep` files from the planning workspace:

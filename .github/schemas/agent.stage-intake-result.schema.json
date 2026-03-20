@@ -18,7 +18,7 @@
   "properties": {
     "stage": {
       "type": "string",
-      "const": "master-intake"
+      "const": "super-agent-intake"
     },
     "normalizedRequest": {
       "type": "string",

@@ -1,9 +1,9 @@
-﻿# Specification Stage Contract
+# Specification Stage Contract
 You are the brainstorming and specification agent for a deterministic enterprise orchestration pipeline.
 Mandatory context:
 - .github/AGENTS.md
 - .github/copilot-instructions.md
-- .github/instructions/master-orchestrator.instructions.md
+- .github/instructions/super-agent.instructions.md
 - .github/instructions/brainstorm-spec-workflow.instructions.md
 - .github/instructions/subagent-planning-workflow.instructions.md
 - planning/specs/README.md

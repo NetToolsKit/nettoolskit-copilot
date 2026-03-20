@@ -7,7 +7,7 @@
   "stages": [
     {
       "stageId": "intake",
-      "agentId": "master",
+      "agentId": "super-agent",
       "status": "success",
       "startedAt": "2026-02-26T00:00:00Z",
       "finishedAt": "2026-02-26T00:01:00Z",
@@ -19,7 +19,7 @@
         "backend": "scripted",
         "attempts": 1,
         "dispatchMode": "codex-exec",
-        "promptTemplatePath": ".codex/orchestration/prompts/master-intake-stage.prompt.md",
+        "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md",
         "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json",
         "dispatchCount": 1,
         "workItemCount": 1,
@@ -90,7 +90,7 @@
       "finishedAt": "2026-02-26T00:09:00Z",
       "durationMs": 240000,
       "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"],
-      "outputArtifacts": ["changeset", "implementation-log", "implementation-dispatches"],
+      "outputArtifacts": ["changeset", "implementation-log", "implementation-dispatches", "task-review-report"],
       "validation": { "warnings": 1, "failures": 0 }
     },
     {
@@ -100,7 +100,7 @@
       "startedAt": "2026-02-26T00:09:00Z",
       "finishedAt": "2026-02-26T00:11:00Z",
       "durationMs": 120000,
-      "inputArtifacts": ["changeset", "implementation-log", "route-selection"],
+      "inputArtifacts": ["changeset", "implementation-log", "route-selection", "task-plan-data", "task-review-report"],
       "outputArtifacts": ["validation-report"],
       "validation": { "warnings": 0, "failures": 0 }
     },
@@ -111,7 +111,7 @@
       "startedAt": "2026-02-26T00:11:00Z",
       "finishedAt": "2026-02-26T00:12:00Z",
       "durationMs": 60000,
-      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "changeset", "validation-report", "route-selection", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "changeset", "validation-report", "route-selection", "task-review-report", "active-plan"],
       "outputArtifacts": ["review-report", "decision-log"],
       "validation": { "warnings": 0, "failures": 0 }
     },
@@ -122,7 +122,7 @@
       "startedAt": "2026-02-26T00:12:00Z",
       "finishedAt": "2026-02-26T00:14:00Z",
       "durationMs": 120000,
-      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "route-selection", "changeset", "validation-report", "review-report", "decision-log", "active-plan"],
+      "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec", "route-selection", "changeset", "validation-report", "task-review-report", "review-report", "decision-log", "active-plan"],
       "outputArtifacts": ["closeout-report", "release-summary", "completed-plan", "readme-updates", "changelog-update"],
       "validation": { "warnings": 0, "failures": 0 }
     }

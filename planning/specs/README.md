@@ -28,6 +28,6 @@ planning/
 - Keep the spec focused on intent, decisions, alternatives, risks, and acceptance criteria. Do not turn it into the task execution plan.
 
 ## References
-- `.github/instructions/master-orchestrator.instructions.md`
+- `.github/instructions/super-agent.instructions.md`
 - `.github/instructions/brainstorm-spec-workflow.instructions.md`
 - `.github/instructions/subagent-planning-workflow.instructions.md`

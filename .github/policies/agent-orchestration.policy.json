@@ -5,7 +5,7 @@
     ".codex/orchestration/README.md",
     ".codex/orchestration/agents.manifest.json",
     ".codex/orchestration/pipelines/default.pipeline.json",
-    ".codex/orchestration/prompts/master-intake-stage.prompt.md",
+    ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md",
     ".codex/orchestration/prompts/spec-stage.prompt.md",
     ".codex/orchestration/prompts/planner-stage.prompt.md",
     ".codex/orchestration/prompts/router-stage.prompt.md",

@@ -37,6 +37,10 @@
           "title",
           "description",
           "allowedPaths",
+          "targetPaths",
+          "commands",
+          "checkpoints",
+          "commitCheckpoint",
           "deliverables",
           "validationSteps",
           "successCriteria"
@@ -56,6 +60,57 @@
             "minItems": 1,
             "uniqueItems": true,
             "items": { "type": "string", "minLength": 1 }
+          },
+          "targetPaths": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["purpose", "command"],
+              "additionalProperties": false,
+              "properties": {
+                "purpose": { "type": "string", "minLength": 1 },
+                "command": { "type": "string", "minLength": 1 },
+                "expectedOutcome": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "checkpoints": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["name", "expectedOutcome", "evidence"],
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "expectedOutcome": {
+                  "type": "string",
+                  "enum": ["expected-fail", "expected-pass", "expected-verified"]
+                },
+                "evidence": { "type": "string", "minLength": 1 },
+                "command": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "commitCheckpoint": {
+            "type": "object",
+            "required": ["scope", "when", "suggestedMessage"],
+            "additionalProperties": false,
+            "properties": {
+              "scope": {
+                "type": "string",
+                "enum": ["task", "slice", "final"]
+              },
+              "when": { "type": "string", "minLength": 1 },
+              "suggestedMessage": { "type": "string", "minLength": 1 }
+            }
           },
           "deliverables": {
             "type": "array",

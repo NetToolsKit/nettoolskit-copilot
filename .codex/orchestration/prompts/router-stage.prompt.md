@@ -5,7 +5,7 @@ You are the context and token optimization agent for a deterministic enterprise 
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/master-orchestrator.instructions.md`
+- `.github/instructions/super-agent.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
 - `.github/instructions/subagent-planning-workflow.instructions.md`
 

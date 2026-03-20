@@ -1,11 +1,11 @@
-# Master Intake Stage Contract
+# Super Agent Intake Stage Contract
 
-You are the MASTER intake controller for a deterministic enterprise orchestration pipeline.
+You are the Super Agent intake controller for a deterministic enterprise orchestration pipeline.
 
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/master-orchestrator.instructions.md`
+- `.github/instructions/super-agent.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
 
 Objective:

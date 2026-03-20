@@ -48,6 +48,9 @@
 .PARAMETER ContinueOnStageFailure
     When true (default), continue executing subsequent stages after non-successful stage.
 
+.PARAMETER StopAfterStageId
+    Optional stage id that truncates the pipeline after the selected stage.
+
 .PARAMETER DetailedOutput
     Shows detailed diagnostics.
 
@@ -79,6 +82,7 @@ param(
     [bool] $ContinueOnStageFailure = $true,
     [ValidateSet('script-only', 'codex-exec')] [string] $ExecutionBackend,
     [string] $DispatchCommand = 'codex',
+    [string] $StopAfterStageId,
     [bool] $WriteRunState = $true,
     [switch] $DetailedOutput
 )
@@ -472,6 +476,7 @@ $resolvedRunRoot = Resolve-RepoPath -Root $resolvedRepoRoot -Path $RunRoot
 
 $agentsManifest = Read-JsonFile -Path $resolvedAgentsManifestPath
 $pipeline = Read-JsonFile -Path $resolvedPipelinePath
+$pipelineStages = @($pipeline.stages)
 
 $defaultsConfig = Get-OptionalPropertyValue -Object $agentsManifest -PropertyName 'defaults'
 $defaultTimeoutValue = Get-OptionalPropertyValue -Object $defaultsConfig -PropertyName 'timeoutMinutes' -DefaultValue 30
@@ -528,6 +533,42 @@ else {
     [bool] $WriteRunState
 }
 
+$selectedStages = $pipelineStages
+if (-not [string]::IsNullOrWhiteSpace($StopAfterStageId)) {
+    $stopStageIndex = -1
+    for ($index = 0; $index -lt $pipelineStages.Count; $index++) {
+        if ([string] $pipelineStages[$index].id -eq $StopAfterStageId) {
+            $stopStageIndex = $index
+            break
+        }
+    }
+
+    if ($stopStageIndex -lt 0) {
+        throw ("Unknown StopAfterStageId: {0}" -f $StopAfterStageId)
+    }
+
+    $selectedStages = @($pipelineStages[0..$stopStageIndex])
+}
+
+$selectedStageIds = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($selectedStage in $selectedStages) {
+    $selectedStageIds.Add([string] $selectedStage.id) | Out-Null
+}
+
+$completionRequiredStages = if ([string]::IsNullOrWhiteSpace($StopAfterStageId)) {
+    @($pipeline.completionCriteria.requiredStages)
+}
+else {
+    @($selectedStages | ForEach-Object { [string] $_.id })
+}
+
+$completionRequiredArtifacts = if ([string]::IsNullOrWhiteSpace($StopAfterStageId)) {
+    @($pipeline.completionCriteria.requiredArtifacts)
+}
+else {
+    @($selectedStages[-1].outputArtifacts | ForEach-Object { [string] $_ })
+}
+
 $trace = if ([string]::IsNullOrWhiteSpace($TraceId)) {
     "run-{0}" -f (Get-Date -Format 'yyyyMMdd-HHmmss')
 }
@@ -576,6 +617,9 @@ Write-StyledOutput ("[INFO] Continue on stage failure: {0}" -f $effectiveContinu
 Write-StyledOutput ("[INFO] Retry delay seconds: {0}" -f $effectiveRetryDelaySeconds)
 Write-StyledOutput ("[INFO] Max pipeline duration seconds: {0}" -f $effectiveMaxPipelineDurationSeconds)
 Write-StyledOutput ("[INFO] Execution backend: {0}" -f $effectiveExecutionBackend)
+if (-not [string]::IsNullOrWhiteSpace($StopAfterStageId)) {
+    Write-StyledOutput ("[INFO] Stop after stage: {0}" -f $StopAfterStageId)
+}
 
 if ($effectiveWriteRunState) {
     Write-RunStateArtifact `
@@ -593,7 +637,7 @@ if ($effectiveWriteRunState) {
         -Root $resolvedRepoRoot
 }
 
-foreach ($stage in @($pipeline.stages)) {
+foreach ($stage in @($selectedStages)) {
     $stageId = [string] $stage.id
     $agentId = [string] $stage.agentId
     $stageMode = [string] $stage.mode
@@ -962,7 +1006,7 @@ foreach ($stage in @($pipeline.stages)) {
     $stageResults.Add($stageResult) | Out-Null
 
     if ($stageSucceeded) {
-        foreach ($handoff in @($pipeline.handoffs | Where-Object { $_.fromStage -eq $stageId })) {
+        foreach ($handoff in @($pipeline.handoffs | Where-Object { $_.fromStage -eq $stageId -and $selectedStageIds.Contains([string] $_.toStage) })) {
             Write-HandoffArtifact `
                 -Root $resolvedRepoRoot `
                 -TraceIdValue $trace `
@@ -1004,7 +1048,7 @@ $pipelineFinishedAt = Get-Date
 $failedStages = @($stageResults | Where-Object { $_.status -ne 'success' }).Count
 
 $missingCompletionStages = @()
-foreach ($requiredStage in @($pipeline.completionCriteria.requiredStages)) {
+foreach ($requiredStage in @($completionRequiredStages)) {
     $requiredStageId = [string] $requiredStage
     $stageOk = @($stageResults | Where-Object { $_.stageId -eq $requiredStageId -and $_.status -eq 'success' }).Count -gt 0
     if (-not $stageOk) {
@@ -1013,7 +1057,7 @@ foreach ($requiredStage in @($pipeline.completionCriteria.requiredStages)) {
 }
 
 $missingCompletionArtifacts = @()
-foreach ($requiredArtifact in @($pipeline.completionCriteria.requiredArtifacts)) {
+foreach ($requiredArtifact in @($completionRequiredArtifacts)) {
     $requiredName = [string] $requiredArtifact
     if (-not $artifactMap.ContainsKey($requiredName)) {
         $missingCompletionArtifacts += $requiredName

@@ -231,6 +231,17 @@
       ]
     },
     {
+      "id": "super-agent-workflow-route",
+      "request": "Create an isolated worktree, use TDD, and verify before completion while preparing safe parallel dispatch.",
+      "expected_route_ids": [
+        "super-agent-workflow"
+      ],
+      "expected_selected_paths": [
+        "instructions/worktree-isolation.instructions.md",
+        "instructions/tdd-verification.instructions.md"
+      ]
+    },
+    {
       "id": "no-match-route",
       "request": "Tell me a random joke.",
       "expected_route_ids": [],

@@ -22,14 +22,18 @@ description: Plan and sequence complex implementation work into deterministic, t
 
 1. Define objective, constraints, assumptions, and acceptance criteria.
 2. Break work into small ordered tasks with dependencies.
-3. Add validation per task (build, tests, smoke checks).
-4. Identify risks and fallback path for each critical task.
-5. Produce an execution order that can be run incrementally.
+3. Add exact target files or the narrowest safe path scope for each task.
+4. Add explicit runnable commands and expected fail/pass checkpoints per task.
+5. Add validation per task (build, tests, smoke checks).
+6. Identify risks and fallback path for each critical task.
+7. Add stable commit checkpoint suggestions for meaningful delivery slices.
+8. Produce an execution order that can be run incrementally.
 
 ## Output contract
 
 1. Scope summary.
 2. Ordered tasks.
-3. Validation checklist.
-4. Risk list and mitigation.
-5. Delivery slices (POC, incremental, final).
+3. Per-task target paths, commands, checkpoints, and commit checkpoints.
+4. Validation checklist.
+5. Risk list and mitigation.
+6. Delivery slices (POC, incremental, final).

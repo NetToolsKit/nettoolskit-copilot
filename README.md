@@ -14,7 +14,13 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
 - ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
-- ✅ **Mandatory Non-Trivial Flow:** master intake -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Mandatory Non-Trivial Flow:** super-agent intake -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Worker-Ready Planning:** planner work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
+- ✅ **Task-Level Review Loop:** each implementation slice can pass through task spec review and task quality review before completion
+- ✅ **Safe Parallel Dispatch:** dependency-aware batching blocks overlapping write-sets before parallel worker fan-out
+- ✅ **Worktree Isolation Helpers:** repository-owned worktree creation flow for risky or long-running workstreams
+- ✅ **Workflow Entry Commands:** thin PowerShell entrypoints for brainstorm, plan, execute, and parallel dispatch flows
+- ✅ **TDD and Verification Contracts:** repository-owned workflow rules for test-first implementation and verification-before-completion
 - ✅ **Closeout Documentation Automation:** release closeout can rewrite repository README files and prepend CHANGELOG entries when the workstream is ready for commit
 - ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, allowed-path enforcement, and optional live `codex-exec` dispatch
 - ✅ **Run-State Diagnostics:** Persisted `.temp/runs/<traceId>/run-state.json` snapshots for orchestration auditing and recovery analysis
@@ -80,7 +86,8 @@ cd copilot-instructions
 ### One-Step Local Onboarding
 
 ```powershell
-pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+$RepoRoot = '<REPO_ROOT>'
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
 
 You do not need to be inside the repository directory when running the installer. Point `pwsh -File` at the versioned script path and it will detect the repository root from the script location. Use `-RepoRoot` only when you need to override that default.
@@ -143,9 +150,11 @@ The repository uses versioned planning artifacts to keep non-trivial work audita
 - `planning/specs/README.md` explains the brainstorming/spec contract.
 - `planning/specs/active/` stores the current active spec files when design direction must be versioned before planning.
 - `planning/completed/` stores closed plans after implementation, validation, review, and closeout.
-- `instructions/master-orchestrator.instructions.md` defines the mandatory intake-to-closeout lifecycle for change-bearing work.
+- `instructions/super-agent.instructions.md` defines the mandatory intake-to-closeout lifecycle for change-bearing work.
 - `instructions/brainstorm-spec-workflow.instructions.md` defines when a separate spec is required before planning.
-- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory master -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
+- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
+- `instructions/worktree-isolation.instructions.md` defines when isolated worktrees should be created for risky or multi-slice execution.
+- `instructions/tdd-verification.instructions.md` defines the default test-first and verification-before-completion workflow contract.
 
 ## Dev Container
 
@@ -182,7 +191,8 @@ copilot-instructions/
 pwsh -File ./scripts/runtime/bootstrap.ps1
 
 # one-step local onboarding wrapper
-pwsh -File C:\Users\tguis\copilot-instructions\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+$RepoRoot = '<REPO_ROOT>'
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
 # optional: apply shared MCP servers separately when you do not want the full install wrapper
 pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
@@ -377,6 +387,21 @@ pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and 
 
 # execute the same pipeline with live sequential planner/executor/reviewer dispatch
 pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate request" -ExecutionBackend codex-exec
+
+# create an isolated Super Agent worktree before risky or parallel work
+pwsh -File ./scripts/runtime/new-super-agent-worktree.ps1 -WorktreeName "feature-slice"
+
+# stop after the brainstorm/spec stage
+pwsh -File ./scripts/runtime/invoke-super-agent-brainstorm.ps1 -RequestText "Design the workstream"
+
+# stop after planning
+pwsh -File ./scripts/runtime/invoke-super-agent-plan.ps1 -RequestText "Write the execution plan"
+
+# run the full lifecycle
+pwsh -File ./scripts/runtime/invoke-super-agent-execute.ps1 -RequestText "Implement the approved plan"
+
+# run the full lifecycle with safe parallel batching
+pwsh -File ./scripts/runtime/invoke-super-agent-parallel-dispatch.ps1 -RequestText "Execute independent work items"
 
 # validate branch protection drift against baseline (no mutation)
 pwsh -File ./scripts/governance/set-branch-protection.ps1
@@ -584,6 +609,7 @@ Located in `.github/prompts/poml/templates/`:
 | **Quality** | `static-analysis-sonarqube.instructions.md` | Code quality, static analysis |
 | **Documentation** | `readme.instructions.md`, `pr.instructions.md` | READMEs, PR guidelines |
 | **Workflow** | `workflow-optimization.instructions.md` | Development efficiency |
+| **Super Agent Workflow** | `super-agent.instructions.md`, `brainstorm-spec-workflow.instructions.md`, `subagent-planning-workflow.instructions.md`, `worktree-isolation.instructions.md`, `tdd-verification.instructions.md` | Intake, specs, planning, worktree isolation, TDD, verification, and closeout |
 
 ### Context Selection Rule (Hard Requirement)
 

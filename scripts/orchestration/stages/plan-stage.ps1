@@ -257,6 +257,32 @@ function New-FallbackPlanResult {
                 description = $RequestText
                 dependsOn = @()
                 allowedPaths = $AllowedPaths
+                targetPaths = $AllowedPaths
+                commands = @(
+                    [ordered]@{
+                        purpose = 'repository validation'
+                        command = 'pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile dev'
+                        expectedOutcome = 'Validation finishes without new failures for the changed scope.'
+                    }
+                )
+                checkpoints = @(
+                    [ordered]@{
+                        name = 'scope-confirmed'
+                        expectedOutcome = 'expected-verified'
+                        evidence = 'Allowed paths and request scope stay aligned before implementation starts.'
+                    },
+                    [ordered]@{
+                        name = 'validation-green'
+                        expectedOutcome = 'expected-pass'
+                        command = 'pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile dev'
+                        evidence = 'Repository validation succeeds after the requested change is applied.'
+                    }
+                )
+                commitCheckpoint = [ordered]@{
+                    scope = 'task'
+                    when = 'After the requested change is implemented and validation passes.'
+                    suggestedMessage = 'feat: implement requested change with validated scope'
+                }
                 deliverables = @(
                     'Requested code or documentation change',
                     'Validation-ready implementation log'
@@ -459,7 +485,27 @@ foreach ($workItem in @($planResult.workItems)) {
     $taskPlanMarkdown += ('### {0}: {1}' -f [string] $workItem.id, [string] $workItem.title)
     $taskPlanMarkdown += ('- Description: {0}' -f [string] $workItem.description)
     $taskPlanMarkdown += ('- Allowed paths: {0}' -f ((@($workItem.allowedPaths) | ForEach-Object { [string] $_ }) -join ', '))
+    $taskPlanMarkdown += ('- Target paths: {0}' -f ((@($workItem.targetPaths) | ForEach-Object { [string] $_ }) -join ', '))
     $taskPlanMarkdown += ('- Deliverables: {0}' -f ((@($workItem.deliverables) | ForEach-Object { [string] $_ }) -join '; '))
+    $taskPlanMarkdown += ('- Commands: {0}' -f ((@($workItem.commands) | ForEach-Object {
+                $purpose = [string] $_.purpose
+                $command = [string] $_.command
+                if ([string]::IsNullOrWhiteSpace($purpose)) {
+                    $command
+                }
+                else {
+                    '{0} => {1}' -f $purpose, $command
+                }
+            }) -join '; '))
+    $taskPlanMarkdown += ('- Checkpoints: {0}' -f ((@($workItem.checkpoints) | ForEach-Object {
+                $name = [string] $_.name
+                $expectedOutcome = [string] $_.expectedOutcome
+                $evidence = [string] $_.evidence
+                '{0} [{1}] => {2}' -f $name, $expectedOutcome, $evidence
+            }) -join '; '))
+    if ($null -ne $workItem.commitCheckpoint) {
+        $taskPlanMarkdown += ('- Commit checkpoint: [{0}] {1} => {2}' -f [string] $workItem.commitCheckpoint.scope, [string] $workItem.commitCheckpoint.when, [string] $workItem.commitCheckpoint.suggestedMessage)
+    }
     $taskPlanMarkdown += ('- Validation: {0}' -f ((@($workItem.validationSteps) | ForEach-Object { [string] $_ }) -join '; '))
     $taskPlanMarkdown += ''
 }
