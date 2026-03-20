@@ -73,9 +73,16 @@ function Write-JsonFile {
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
 $createdCompletedPlanPath = $null
+$createdCompletedSpecPath = $null
+$originalPlanningReadmeContent = $null
+$originalChangelogContent = $null
 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
+    $planningReadmePath = Join-Path $resolvedRepoRoot 'planning/README.md'
+    $changelogPath = Join-Path $resolvedRepoRoot 'CHANGELOG.md'
+    $originalPlanningReadmeContent = Get-Content -Raw -LiteralPath $planningReadmePath
+    $originalChangelogContent = Get-Content -Raw -LiteralPath $changelogPath
     $fakeCodexRunnerPath = Join-Path $tempRoot 'fake-codex-runner.ps1'
     $fakeCodexPath = Join-Path $tempRoot 'fake-codex.cmd'
     $fakeCodex = @'
@@ -113,7 +120,27 @@ end {
         throw 'Fake codex did not receive -o output path.'
     }
 
-    if ($allInput -match '# Planner Stage Contract') {
+    if ($allInput -match '# Specification Stage Contract') {
+        $payload = [ordered]@{
+            stage = 'brainstorm-spec'
+            status = 'required'
+            specRequired = $true
+            workstreamSlug = 'implement-enterprise-orchestration-support'
+            specSummary = 'A versioned design checkpoint is required before planning.'
+            designDecisions = @(
+                'Keep a versioned spec separate from the execution plan.',
+                'Lock the normalized request before creating work items.'
+            )
+            alternativesConsidered = @('Skipping the spec and planning directly from intake.')
+            assumptions = @('Repository policy remains authoritative.')
+            risks = @('Skipping the spec would blur design and execution intent.')
+            acceptanceCriteria = @('A spec file exists.', 'Planning receives the spec summary.')
+            planningReadiness = 'ready-for-plan'
+            recommendedSpecialists = @('dev-dotnet-backend-engineer')
+            notes = @('Mock spec agent prepared the workstream for planning.')
+        }
+    }
+    elseif ($allInput -match '# Planner Stage Contract') {
         $payload = [ordered]@{
             objective = 'Deliver the requested change with deterministic validation.'
             scopeSummary = 'Planner produced two sequential work items for the request.'
@@ -212,8 +239,21 @@ end {
             status = 'ready-for-commit'
             summary = 'Mock closeout produced commit-ready artifacts.'
             readmeActions = @('README already aligned for mock flow.')
+            readmeUpdates = @(
+                [ordered]@{
+                    path = 'planning/README.md'
+                    summary = 'Refresh planning README from the closeout stage.'
+                    content = "# Planning Workspace`n`nCloseout automation updated this README during the orchestration smoke test."
+                }
+            )
             commitMessage = 'feat: close orchestration smoke test'
             changelogSummary = 'Close the orchestration smoke test plan.'
+            changelogUpdate = [ordered]@{
+                apply = $true
+                path = 'CHANGELOG.md'
+                summary = 'Record closeout documentation automation coverage.'
+                entry = "## [9.9.9] - 2026-03-20`n`n### Changed`n- Added smoke-test coverage for closeout-driven README and CHANGELOG updates."
+            }
             followUps = @()
         }
     }
@@ -259,6 +299,32 @@ end {
     $intakeReport = Get-Content -Raw -LiteralPath $intakeArtifacts['intake-report'] | ConvertFrom-Json -Depth 100
     Assert-True ([bool] $intakeReport.planningRequired) 'Intake stage should require planning in the fake flow.'
 
+    $specOutputManifestPath = Join-Path $runDirectory 'stages/spec-output.json'
+    & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/spec-stage.ps1') `
+        -RepoRoot $resolvedRepoRoot `
+        -RunDirectory $runDirectory `
+        -TraceId 'run-test' `
+        -StageId 'spec' `
+        -AgentId 'brainstormer' `
+        -RequestPath $requestPath `
+        -InputArtifactManifestPath $intakeOutputManifestPath `
+        -OutputArtifactManifestPath $specOutputManifestPath `
+        -DispatchMode 'codex-exec' `
+        -PromptTemplatePath '.codex/orchestration/prompts/spec-stage.prompt.md' `
+        -ResponseSchemaPath '.github/schemas/agent.stage-spec-result.schema.json' `
+        -DispatchCommand $fakeCodexPath `
+        -ExecutionBackend 'codex-exec' | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Spec stage should succeed with fake Codex.'
+
+    $specManifest = Get-Content -Raw -LiteralPath $specOutputManifestPath | ConvertFrom-Json -Depth 100
+    $specArtifacts = @{}
+    foreach ($artifact in @($specManifest.artifacts)) {
+        $specArtifacts[[string] $artifact.name] = Join-Path $resolvedRepoRoot ([string] $artifact.path)
+    }
+    $specSummary = Get-Content -Raw -LiteralPath $specArtifacts['spec-summary'] | ConvertFrom-Json -Depth 100
+    Assert-True ([bool] $specSummary.specRequired) 'Spec stage should require a versioned spec in the fake flow.'
+    Assert-True (Test-Path -LiteralPath $specArtifacts['active-spec'] -PathType Leaf) 'Spec stage should produce an active spec file.'
+
     $planOutputManifestPath = Join-Path $runDirectory 'stages/plan-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/plan-stage.ps1') `
         -RepoRoot $resolvedRepoRoot `
@@ -267,7 +333,7 @@ end {
         -StageId 'plan' `
         -AgentId 'planner' `
         -RequestPath $requestPath `
-        -InputArtifactManifestPath $intakeOutputManifestPath `
+        -InputArtifactManifestPath $specOutputManifestPath `
         -OutputArtifactManifestPath $planOutputManifestPath `
         -DispatchMode 'codex-exec' `
         -PromptTemplatePath '.codex/orchestration/prompts/planner-stage.prompt.md' `
@@ -291,7 +357,7 @@ end {
             stageId = 'route'
             agentId = 'router'
             producedAt = (Get-Date).ToString('o')
-            artifacts = @($intakeManifest.artifacts + $planManifest.artifacts)
+            artifacts = @($intakeManifest.artifacts + $specManifest.artifacts + $planManifest.artifacts)
         })
     $routeOutputManifestPath = Join-Path $runDirectory 'stages/route-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/route-stage.ps1') `
@@ -324,7 +390,7 @@ end {
             stageId = 'implement'
             agentId = 'specialist'
             producedAt = (Get-Date).ToString('o')
-            artifacts = @($intakeManifest.artifacts + $planManifest.artifacts + $routeManifest.artifacts)
+            artifacts = @($intakeManifest.artifacts + $specManifest.artifacts + $planManifest.artifacts + $routeManifest.artifacts)
         })
     $implementOutputManifestPath = Join-Path $runDirectory 'stages/implement-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/implement-stage.ps1') `
@@ -384,8 +450,12 @@ end {
             agentId = 'reviewer'
             producedAt = (Get-Date).ToString('o')
             artifacts = @(
+                [ordered]@{ name = 'spec-summary'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $specArtifacts['spec-summary']) -replace '\\', '/' },
+                [ordered]@{ name = 'active-spec'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $specArtifacts['active-spec']) -replace '\\', '/' },
                 [ordered]@{ name = 'changeset'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $implementArtifacts['changeset']) -replace '\\', '/' },
-                [ordered]@{ name = 'validation-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $validateArtifacts['validation-report']) -replace '\\', '/' }
+                [ordered]@{ name = 'validation-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $validateArtifacts['validation-report']) -replace '\\', '/' },
+                [ordered]@{ name = 'route-selection'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $routeArtifacts['route-selection']) -replace '\\', '/' },
+                [ordered]@{ name = 'active-plan'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $planArtifacts['active-plan']) -replace '\\', '/' }
             )
         })
     $reviewOutputManifestPath = Join-Path $runDirectory 'stages/review-output.json'
@@ -418,6 +488,8 @@ end {
             agentId = 'release-engineer'
             producedAt = (Get-Date).ToString('o')
             artifacts = @(
+                [ordered]@{ name = 'spec-summary'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $specArtifacts['spec-summary']) -replace '\\', '/' },
+                [ordered]@{ name = 'active-spec'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $specArtifacts['active-spec']) -replace '\\', '/' },
                 [ordered]@{ name = 'route-selection'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $routeArtifacts['route-selection']) -replace '\\', '/' },
                 [ordered]@{ name = 'changeset'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $implementArtifacts['changeset']) -replace '\\', '/' },
                 [ordered]@{ name = 'validation-report'; path = [System.IO.Path]::GetRelativePath($resolvedRepoRoot, $validateArtifacts['validation-report']) -replace '\\', '/' },
@@ -449,12 +521,22 @@ end {
         $closeoutArtifacts[[string] $artifact.name] = Join-Path $resolvedRepoRoot ([string] $artifact.path)
     }
     $closeoutReport = Get-Content -Raw -LiteralPath $closeoutArtifacts['closeout-report'] | ConvertFrom-Json -Depth 100
+    $readmeUpdatesReport = Get-Content -Raw -LiteralPath $closeoutArtifacts['readme-updates'] | ConvertFrom-Json -Depth 100
+    $changelogUpdateReport = Get-Content -Raw -LiteralPath $closeoutArtifacts['changelog-update'] | ConvertFrom-Json -Depth 100
     $completedPlanMetadata = Get-Content -Raw -LiteralPath $closeoutArtifacts['completed-plan'] | ConvertFrom-Json -Depth 100
     if (-not [string]::IsNullOrWhiteSpace([string] $completedPlanMetadata.completedPlanPath)) {
         $createdCompletedPlanPath = Join-Path $resolvedRepoRoot ([string] $completedPlanMetadata.completedPlanPath)
     }
+    if (-not [string]::IsNullOrWhiteSpace([string] $completedPlanMetadata.completedSpecPath)) {
+        $createdCompletedSpecPath = Join-Path $resolvedRepoRoot ([string] $completedPlanMetadata.completedSpecPath)
+    }
     Assert-Equal -Actual $closeoutReport.status -Expected 'ready-for-commit' -Message 'Closeout stage should be commit-ready in fake flow.'
+    Assert-True ([bool] $readmeUpdatesReport.updated) 'Closeout stage should report applied README updates in fake flow.'
+    Assert-True ([bool] $changelogUpdateReport.applied) 'Closeout stage should report an applied changelog update in fake flow.'
+    Assert-True ((Get-Content -Raw -LiteralPath $planningReadmePath) -match 'Closeout automation updated this README') 'Closeout stage should rewrite the planning README in fake flow.'
+    Assert-True ((Get-Content -Raw -LiteralPath $changelogPath).StartsWith("## [9.9.9] - 2026-03-20", [System.StringComparison]::Ordinal)) 'Closeout stage should prepend the changelog entry in fake flow.'
     Assert-True (-not (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf)) 'Closeout stage should move the active plan out of planning/active.'
+    Assert-True (-not (Test-Path -LiteralPath $specArtifacts['active-spec'] -PathType Leaf)) 'Closeout stage should move the active spec out of planning/specs/active.'
 
     Write-Host '[OK] agent orchestration engine tests passed.'
     exit 0
@@ -471,13 +553,17 @@ catch {
     exit 1
 }
 finally {
+    if ($null -ne $originalPlanningReadmeContent) {
+        Set-Content -LiteralPath (Join-Path $resolvedRepoRoot 'planning/README.md') -Value $originalPlanningReadmeContent -Encoding UTF8 -NoNewline
+    }
+    if ($null -ne $originalChangelogContent) {
+        Set-Content -LiteralPath (Join-Path $resolvedRepoRoot 'CHANGELOG.md') -Value $originalChangelogContent -Encoding UTF8 -NoNewline
+    }
     if (-not [string]::IsNullOrWhiteSpace($createdCompletedPlanPath) -and (Test-Path -LiteralPath $createdCompletedPlanPath -PathType Leaf)) {
         Remove-Item -LiteralPath $createdCompletedPlanPath -Force -ErrorAction SilentlyContinue
     }
-
-    $completedPlansGitKeepPath = Join-Path $resolvedRepoRoot 'planning/completed/.gitkeep'
-    if (-not (Test-Path -LiteralPath $completedPlansGitKeepPath -PathType Leaf)) {
-        New-Item -ItemType File -Path $completedPlansGitKeepPath -Force | Out-Null
+    if (-not [string]::IsNullOrWhiteSpace($createdCompletedSpecPath) -and (Test-Path -LiteralPath $createdCompletedSpecPath -PathType Leaf)) {
+        Remove-Item -LiteralPath $createdCompletedSpecPath -Force -ErrorAction SilentlyContinue
     }
 
     if (Test-Path -LiteralPath $tempRoot) {

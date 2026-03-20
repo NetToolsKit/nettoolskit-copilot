@@ -57,6 +57,24 @@ routing:
       - path: instructions/pr.instructions.md
         when: creating/updating PR-related content
 
+  - id: planning-spec
+    tags: [planning, brainstorm, spec, architecture, workflow]
+    triggers:
+      - "planning"
+      - "plan"
+      - "brainstorm"
+      - "spec"
+      - "specification"
+      - "design"
+      - "design decision"
+      - "architecture decision"
+      - "workstream"
+    include:
+      - path: instructions/brainstorm-spec-workflow.instructions.md
+        reason: Brainstorming and versioned specification workflow before execution planning
+      - path: instructions/subagent-planning-workflow.instructions.md
+        reason: Planning chain and active/completed workstream lifecycle
+
   - id: docs-readme
     tags: [docs, readme]
     triggers:

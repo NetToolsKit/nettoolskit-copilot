@@ -123,7 +123,7 @@ Generated: 2026-03-20
 - [x] 1. Create comparison and tracked plan.
 - [x] 2. Define repository-native master orchestration contract, intake stage, and repo-owned bootstrap behavior for request normalization before planning.
 - [ ] 3. Add a true Codex session-start hook only if the runtime later exposes a supported repository-owned startup hook surface.
-- [ ] 4. Add brainstorming/spec workflow and versioned spec artifact location.
+- [x] 4. Add brainstorming/spec workflow and versioned spec artifact location.
 - [ ] 5. Harden plan schema and planner skill so tasks become worker-ready with exact files, tests, and checkpoints.
 - [ ] 6. Add first-class worktree isolation workflow with Windows-safe implementation and validation.
 - [ ] 7. Upgrade orchestration from stage-only execution to task-loop execution with spec review then code-quality review.
@@ -155,3 +155,4 @@ Generated: 2026-03-20
 - `superpowers` is strongest in session bootstrap, rigid workflow discipline, and ergonomic workflow entry.
 - `copilot-instructions` is already stronger in enterprise governance, validation, runtime sync, and source-of-truth control.
 - The correct path is selective absorption of the high-leverage workflow mechanics, not wholesale adoption.
+- Phase 4 delivered a repository-owned `brainstorm/spec` stage, versioned `planning/specs/` workspace, new brainstorm specialist skill, orchestration contracts, routing coverage, runtime sync, and green validation for the added workflow.

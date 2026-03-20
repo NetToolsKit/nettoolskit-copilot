@@ -55,7 +55,7 @@ Get-ChildItem "$env:USERPROFILE\.codex\skills"
 
 ### Example 1: Software Implementation
 
-Use skills: `master-orchestrator`, `plan-active-work-planner`, `context-token-optimizer`, then the routed specialist
+Use skills: `master-orchestrator`, `brainstorm-spec-architect`, `plan-active-work-planner`, `context-token-optimizer`, then the routed specialist
 
 ### Example 2: Testing and Coverage
 
@@ -98,6 +98,7 @@ Use skill: `privacy-compliance-engineer`
 - `core-context-router`
 - `core-runtime-sync`
 - `master-orchestrator`
+- `brainstorm-spec-architect`
 - `dev-software-engineer` (base)
 - `test-engineer`
 - `review-code-engineer`

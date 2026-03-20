@@ -7,8 +7,10 @@
     "status",
     "summary",
     "readmeActions",
+    "readmeUpdates",
     "commitMessage",
     "changelogSummary",
+    "changelogUpdate",
     "followUps"
   ],
   "additionalProperties": false,
@@ -22,8 +24,32 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
+    "readmeUpdates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "summary", "content"],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 1 },
+          "content": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "commitMessage": { "type": "string", "minLength": 1 },
     "changelogSummary": { "type": "string", "minLength": 1 },
+    "changelogUpdate": {
+      "type": "object",
+      "required": ["apply", "path", "summary", "entry"],
+      "additionalProperties": false,
+      "properties": {
+        "apply": { "type": "boolean" },
+        "path": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "entry": { "type": "string" }
+      }
+    },
     "followUps": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }

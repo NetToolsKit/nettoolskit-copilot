@@ -1,6 +1,6 @@
 ---
 name: release-closeout-engineer
-description: Close out a completed workstream by aligning README artifacts when needed, producing a commit message, and generating changelog-ready summary content. Use after review when a stable checkpoint is ready.
+description: Close out a completed workstream by updating README artifacts when needed, producing a commit message, and applying changelog-ready content when the work is ready for commit. Use after review when a stable checkpoint is ready.
 ---
 
 # Release Closeout Engineer
@@ -18,15 +18,16 @@ description: Close out a completed workstream by aligning README artifacts when 
 
 ## Responsibilities
 
-- determine whether README updates are required for the completed workstream
+- determine whether README updates are required for the completed workstream and produce the final file content when they are
 - prepare a commit message suggestion in English using repository commit conventions
-- prepare changelog-ready summary content when the change belongs in version history
+- prepare and apply changelog-ready content when the change belongs in version history
 - keep closeout artifacts concise, accurate, and aligned with the implemented scope
 
 ## Output contract
 
 1. closeout summary
 2. README actions or confirmation that no README update is needed
-3. suggested commit message
-4. changelog summary or explicit statement that no changelog entry is required
-5. ready-to-commit flag
+3. structured README updates when files must be rewritten
+4. suggested commit message
+5. changelog summary plus structured changelog update payload
+6. ready-to-commit flag

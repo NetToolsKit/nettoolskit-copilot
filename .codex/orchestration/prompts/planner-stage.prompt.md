@@ -6,6 +6,7 @@ Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
 - `.github/instructions/master-orchestrator.instructions.md`
+- `.github/instructions/brainstorm-spec-workflow.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
 - `.github/instructions/workflow-optimization.instructions.md`
 
@@ -25,6 +26,12 @@ Rules:
 
 Request:
 {{REQUEST_TEXT}}
+
+Specification summary:
+{{SPEC_SUMMARY_JSON}}
+
+Active specification:
+{{ACTIVE_SPEC_TEXT}}
 
 Agent allowed paths:
 {{AGENT_ALLOWED_PATHS}}

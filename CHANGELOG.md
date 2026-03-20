@@ -1,3 +1,54 @@
+## [1.2.0] - 2026-03-20
+
+### Added
+- Added a versioned brainstorm/spec layer before execution planning:
+  - `.github/instructions/brainstorm-spec-workflow.instructions.md`
+  - `.github/schemas/agent.stage-spec-result.schema.json`
+  - `.codex/orchestration/prompts/spec-stage.prompt.md`
+  - `scripts/orchestration/stages/spec-stage.ps1`
+  - `.codex/skills/brainstorm-spec-architect/SKILL.md`
+  - `.codex/skills/brainstorm-spec-architect/agents/openai.yaml`
+- Added a dedicated specification workspace under `planning/specs/` with active and completed spec handling.
+- Added closeout automation planning record:
+  - `planning/active/plan-closeout-readme-changelog-automation.md`
+
+### Changed
+- Upgraded the repository-owned orchestration lifecycle from:
+  - `intake -> plan -> route -> implement -> validate -> review -> closeout`
+  to:
+  - `intake -> spec -> plan -> route -> implement -> validate -> review -> closeout`
+- Updated closeout contracts so release closeout can apply documentation updates directly when the workstream is ready for commit:
+  - `.github/schemas/agent.stage-closeout-result.schema.json`
+  - `.codex/orchestration/prompts/closeout-stage.prompt.md`
+  - `scripts/orchestration/stages/closeout-stage.ps1`
+- Extended closeout outputs with structured release artifacts:
+  - `readme-updates`
+  - `changelog-update`
+- Updated orchestration contracts and docs:
+  - `.codex/orchestration/agents.manifest.json`
+  - `.codex/orchestration/pipelines/default.pipeline.json`
+  - `.codex/orchestration/templates/run-artifact.template.json`
+  - `.codex/orchestration/README.md`
+- Updated repository guidance and planning rules:
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/instructions/repository-operating-model.instructions.md`
+  - `.github/instructions/subagent-planning-workflow.instructions.md`
+  - `planning/README.md`
+  - `planning/specs/README.md`
+  - `README.md`
+
+### Removed
+- Removed placeholder `.gitkeep` files from the planning workspace:
+  - `planning/active/.gitkeep`
+  - `planning/completed/.gitkeep`
+  - `planning/specs/active/.gitkeep`
+  - `planning/specs/completed/.gitkeep`
+
+### Feedback Integration
+- File: `scripts/orchestration/stages/closeout-stage.ps1` | context: release closeout automation | problem: closeout only suggested README and changelog actions and did not update repository docs | solution: added structured README rewrite payloads, structured changelog update payloads, safe repository-relative write enforcement, and output evidence artifacts | workspace-impact: closeout can now finish documentation updates together with commit guidance when the workstream is ready.
+- File: `scripts/validation/validate-planning-structure.ps1` | context: planning workspace hygiene | problem: planning structure depended on placeholder `.gitkeep` files to keep empty folders tracked | solution: changed the planning contract to create subdirectories on demand and removed placeholder-file requirements from validation and runtime tests | workspace-impact: cleaner planning workspace with fewer artificial artifacts and less git noise.
+
 ## [1.1.8] - 2026-03-10
 
 ### Changed

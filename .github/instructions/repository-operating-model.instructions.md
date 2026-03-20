@@ -19,6 +19,7 @@ priority: high
   - `instructions/authoritative-sources.instructions.md`
   - `.github/governance/authoritative-source-map.json`
 - Planning lifecycle rules are centralized in `instructions/subagent-planning-workflow.instructions.md` and `planning/README.md`.
+- Brainstorm/spec rules are centralized in `instructions/brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
 - MASTER lifecycle rules are centralized in `instructions/master-orchestrator.instructions.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
@@ -34,12 +35,16 @@ priority: high
   - `benchmarks/`
   - `.github/`
   - `planning/` versioned planning workspace with `active/` and `completed/`
+  - `planning/specs/` versioned brainstorming/spec workspace with `active/` and `completed/`
 
 ## Planning Workspace
 - Use `instructions/master-orchestrator.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
+- Use `instructions/brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
 - Use `instructions/subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
 - Active plans live in `planning/active/`.
 - Completed plans move to `planning/completed/` only after implementation, validation, review, and release closeout are materially complete.
+- Active specs live in `planning/specs/active/`.
+- Completed specs move to `planning/specs/completed/` with the related workstream when applicable.
 
 ## Build, Test, and Run
 - Build solution:
@@ -133,8 +138,8 @@ priority: high
   - create a short plan
   - use a short preamble before tool calls
   - validate namespace, TFMs, XML docs, sealing, `using` directives, and EOF policy when relevant
-  - follow master -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
-  - keep the planner-owned work in `planning/active/` until the work is genuinely complete
+  - follow master -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+  - keep plan artifacts in `planning/active/` and spec artifacts in `planning/specs/active/` until the work is genuinely complete
 - Patterns:
   - multi-target .NET 8/9 with consistent public API
   - use `#if` only when necessary
@@ -179,6 +184,7 @@ priority: high
   - `instructions/readme.instructions.md`
   - `instructions/prompt-templates.instructions.md`
   - `instructions/effort-estimation-ucp.instructions.md`
+  - `instructions/brainstorm-spec-workflow.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`
   - `instructions/master-orchestrator.instructions.md`
   - `instructions/pr.instructions.md`

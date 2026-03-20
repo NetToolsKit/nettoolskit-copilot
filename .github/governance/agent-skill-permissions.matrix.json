@@ -15,6 +15,14 @@
       "requiredBudget": { "maxSteps": 16, "maxDurationMinutes": 15, "maxFileEdits": 8, "maxTokens": 45000 }
     },
     {
+      "agentId": "brainstormer",
+      "role": "planner",
+      "skill": "brainstorm-spec-architect",
+      "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "allowedStageScriptGlobs": ["scripts/orchestration/stages/spec-stage.ps1"],
+      "requiredBudget": { "maxSteps": 18, "maxDurationMinutes": 20, "maxFileEdits": 10, "maxTokens": 55000 }
+    },
+    {
       "agentId": "planner",
       "role": "planner",
       "skill": "plan-active-work-planner",

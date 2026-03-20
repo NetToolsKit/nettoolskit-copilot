@@ -13,8 +13,9 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
-- ✅ **Versioned Planning Workspace:** Active and completed plan history under `planning/`
-- ✅ **Mandatory Non-Trivial Flow:** master intake -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
+- ✅ **Mandatory Non-Trivial Flow:** master intake -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Closeout Documentation Automation:** release closeout can rewrite repository README files and prepend CHANGELOG entries when the workstream is ready for commit
 - ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, allowed-path enforcement, and optional live `codex-exec` dispatch
 - ✅ **Run-State Diagnostics:** Persisted `.temp/runs/<traceId>/run-state.json` snapshots for orchestration auditing and recovery analysis
 - ✅ **Unified Validation Suite:** Single `validate-all` command for hooks/CI governance checks
@@ -115,7 +116,7 @@ The repository uses an explicit layered instruction architecture so context stay
 
 - `Global core`: `.github/AGENTS.md` and `.github/copilot-instructions.md` stay short and define universal behavior only.
 - `Repository operating model`: `.github/instructions/repository-operating-model.instructions.md` owns repository topology, build/test/run, style, release, and domain map details.
-- `Planning workspace`: `.github/instructions/subagent-planning-workflow.instructions.md` and `planning/README.md` define active/completed plan handling for non-trivial work.
+- `Planning workspace`: `.github/instructions/subagent-planning-workflow.instructions.md`, `.github/instructions/brainstorm-spec-workflow.instructions.md`, `planning/README.md`, and `planning/specs/README.md` define active/completed plan and spec handling for non-trivial work.
 - `Cross-cutting policy`: `.github/instructions/authoritative-sources.instructions.md`, `.github/governance/*`, and `.github/policies/*` own rules that apply across domains.
 - `Domain instructions`: `.github/instructions/*.instructions.md` own stack-specific technical behavior.
 - `Prompts`: `.github/prompts/*` are execution helpers and must not become normative policy owners.
@@ -129,7 +130,7 @@ The repository uses an explicit layered instruction architecture so context stay
 - Keep global context stable: avoid regrowing `AGENTS.md` and `copilot-instructions.md` with domain detail that belongs elsewhere.
 - Keep policy centralized: if a rule can be defined once in governance or a shared instruction, do not duplicate it in domain files, prompts, templates, or skills.
 - Keep runtime non-authoritative: local runtime folders are projections of the repository, never the source of truth.
-- Keep non-trivial work on the mandatory planning chain and keep active plans in `planning/active/` until the work is materially complete.
+- Keep non-trivial work on the mandatory planning chain and keep active plans in `planning/active/` plus active specs in `planning/specs/active/` until the work is materially complete.
 
 ### Planning Workspace
 
@@ -137,9 +138,12 @@ The repository uses versioned planning artifacts to keep non-trivial work audita
 
 - `planning/README.md` explains the planning contract.
 - `planning/active/` stores the current active plan files.
+- `planning/specs/README.md` explains the brainstorming/spec contract.
+- `planning/specs/active/` stores the current active spec files when design direction must be versioned before planning.
 - `planning/completed/` stores closed plans after implementation, validation, review, and closeout.
 - `instructions/master-orchestrator.instructions.md` defines the mandatory intake-to-closeout lifecycle for change-bearing work.
-- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory master -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
+- `instructions/brainstorm-spec-workflow.instructions.md` defines when a separate spec is required before planning.
+- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory master -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
 
 ## Dev Container
 

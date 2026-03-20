@@ -4,8 +4,9 @@
 
 .DESCRIPTION
     Enforces the repository contract for versioned planning artifacts under
-    `planning/`, including required directories, tracked placeholder files,
-    and absence of legacy `.temp/planning` drift.
+    `planning/`, including required documentation entry points, required
+    top-level directories, on-demand planning subdirectories, and absence of
+    legacy `.temp/planning` drift.
 
 .PARAMETER RepoRoot
     Repository root used to resolve the planning workspace structure.
@@ -65,8 +66,7 @@ $failures = New-Object System.Collections.Generic.List[string]
 
 $requiredFiles = @(
     'planning/README.md',
-    'planning/active/.gitkeep',
-    'planning/completed/.gitkeep'
+    'planning/specs/README.md'
 )
 
 foreach ($relativePath in $requiredFiles) {
@@ -78,14 +78,27 @@ foreach ($relativePath in $requiredFiles) {
 
 $requiredDirectories = @(
     'planning',
-    'planning/active',
-    'planning/completed'
+    'planning/specs'
 )
 
 foreach ($relativePath in $requiredDirectories) {
     $absolutePath = Join-Path $resolvedRepoRoot $relativePath
     if (-not (Test-Path -LiteralPath $absolutePath -PathType Container)) {
         Add-ValidationMessage -Message ("Missing required planning directory: {0}" -f $relativePath) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+    }
+}
+
+$onDemandDirectories = @(
+    'planning/active',
+    'planning/completed',
+    'planning/specs/active',
+    'planning/specs/completed'
+)
+
+foreach ($relativePath in $onDemandDirectories) {
+    $absolutePath = Join-Path $resolvedRepoRoot $relativePath
+    if (-not (Test-Path -LiteralPath $absolutePath -PathType Container)) {
+        Write-Host ("[INFO] Optional planning directory will be created on demand: {0}" -f $relativePath)
     }
 }
 

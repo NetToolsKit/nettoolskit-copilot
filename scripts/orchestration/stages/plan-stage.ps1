@@ -313,6 +313,9 @@ else {
     'No request content provided.'
 }
 
+$specSummaryJson = '{}'
+$activeSpecText = ''
+
 if (-not [string]::IsNullOrWhiteSpace($InputArtifactManifestPath)) {
     $resolvedInputManifestPath = Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $InputArtifactManifestPath
     if (Test-Path -LiteralPath $resolvedInputManifestPath -PathType Leaf) {
@@ -327,7 +330,27 @@ if (-not [string]::IsNullOrWhiteSpace($InputArtifactManifestPath)) {
                 }
             }
         }
+        $specSummaryJson = '{}'
+        $activeSpecText = ''
+        if ($artifactMap.ContainsKey('spec-summary')) {
+            $specSummaryPath = [string] $artifactMap['spec-summary']
+            if (Test-Path -LiteralPath $specSummaryPath -PathType Leaf) {
+                $specSummaryJson = Get-Content -Raw -LiteralPath $specSummaryPath
+            }
+        }
+        if ($artifactMap.ContainsKey('active-spec')) {
+            $activeSpecPath = [string] $artifactMap['active-spec']
+            if (Test-Path -LiteralPath $activeSpecPath -PathType Leaf) {
+                $activeSpecText = Get-Content -Raw -LiteralPath $activeSpecPath
+            }
+        }
     }
+}
+if ($null -eq $specSummaryJson) {
+    $specSummaryJson = '{}'
+}
+if ($null -eq $activeSpecText) {
+    $activeSpecText = ''
 }
 
 $agent = Get-AgentContract -ManifestPath $resolvedAgentsManifestPath -TargetAgentId $AgentId
@@ -357,6 +380,8 @@ if ($shouldUseCodexDispatch) {
         $templateText = Get-Content -Raw -LiteralPath $resolvedPromptTemplatePath
         $renderedPrompt = Expand-Template -TemplateText $templateText -Tokens @{
             REQUEST_TEXT = $requestContent
+            SPEC_SUMMARY_JSON = $specSummaryJson
+            ACTIVE_SPEC_TEXT = $activeSpecText
             AGENT_ALLOWED_PATHS = (($allowedPaths | ForEach-Object { '- ' + $_ }) -join [Environment]::NewLine)
         }
         Set-Content -LiteralPath $dispatchPromptPath -Value $renderedPrompt -Encoding UTF8 -NoNewline

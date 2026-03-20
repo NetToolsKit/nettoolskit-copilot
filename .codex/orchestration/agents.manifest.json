@@ -26,6 +26,24 @@
       "notes": "Normalizes the request and enforces the repository-owned lifecycle before planning starts."
     },
     {
+      "id": "brainstormer",
+      "displayName": "Brainstorm Spec Architect",
+      "role": "planner",
+      "skill": "brainstorm-spec-architect",
+      "model": "gpt-5",
+      "tools": ["read", "search", "plan", "route"],
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": {
+        "maxSteps": 18,
+        "maxDurationMinutes": 20,
+        "maxFileEdits": 10,
+        "maxTokens": 55000
+      },
+      "fallbackAgentId": "planner",
+      "notes": "Creates or updates versioned design specs before execution planning when the workstream is non-trivial."
+    },
+    {
       "id": "planner",
       "displayName": "Plan Active Work Planner",
       "role": "planner",
@@ -130,7 +148,7 @@
         "maxFileEdits": 15,
         "maxTokens": 80000
       },
-      "notes": "Consolidates README follow-up, commit message, changelog summary, and plan completion."
+      "notes": "Consolidates README updates, changelog update payloads, commit guidance, and plan completion."
     }
   ]
 }

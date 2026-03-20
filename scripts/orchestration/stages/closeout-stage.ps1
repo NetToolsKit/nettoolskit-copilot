@@ -215,6 +215,208 @@ function Convert-ArtifactManifestToMap {
     return $map
 }
 
+# Resolves a repository-relative target path and blocks writes outside the repo root.
+function Resolve-SafeRepoTargetPath {
+    param(
+        [string] $Root,
+        [string] $RelativePath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($RelativePath)) {
+        throw 'Closeout update path cannot be empty.'
+    }
+
+    if ([System.IO.Path]::IsPathRooted($RelativePath)) {
+        throw ("Closeout update path must be repository-relative: {0}" -f $RelativePath)
+    }
+
+    $resolvedRoot = [System.IO.Path]::GetFullPath($Root)
+    $resolvedPath = [System.IO.Path]::GetFullPath((Join-Path $resolvedRoot $RelativePath))
+    $rootPrefix = $resolvedRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    if (($resolvedPath -ne $resolvedRoot) -and (-not $resolvedPath.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase))) {
+        throw ("Closeout update path escapes repository root: {0}" -f $RelativePath)
+    }
+
+    return $resolvedPath
+}
+
+# Returns a short JSON preview of a file for closeout prompting.
+function Get-FilePreviewText {
+    param(
+        [string] $Path,
+        [int] $MaxLines = 160
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return ''
+    }
+
+    return ((Get-Content -LiteralPath $Path | Select-Object -First $MaxLines) -join "`n")
+}
+
+# Builds a unique list of README candidates from changed files and route guidance.
+function Get-ReadmeCandidatePaths {
+    param(
+        [string] $Root,
+        [string[]] $ChangedFiles,
+        [bool] $ReadmeImpact
+    )
+
+    $paths = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+
+    foreach ($changedFile in @($ChangedFiles)) {
+        if ([string]::IsNullOrWhiteSpace($changedFile)) {
+            continue
+        }
+
+        $resolvedCandidate = Resolve-FullPath -BasePath $Root -Candidate $changedFile
+        $currentDirectory = if (Test-Path -LiteralPath $resolvedCandidate -PathType Container) {
+            $resolvedCandidate
+        }
+        else {
+            Split-Path -Path $resolvedCandidate -Parent
+        }
+
+        while (-not [string]::IsNullOrWhiteSpace($currentDirectory)) {
+            $candidateReadmePath = Join-Path $currentDirectory 'README.md'
+            if (Test-Path -LiteralPath $candidateReadmePath -PathType Leaf) {
+                $paths.Add($candidateReadmePath) | Out-Null
+                break
+            }
+
+            if ([System.StringComparer]::OrdinalIgnoreCase.Equals($currentDirectory, $Root)) {
+                break
+            }
+
+            $parentDirectory = Split-Path -Path $currentDirectory -Parent
+            if ([string]::IsNullOrWhiteSpace($parentDirectory) -or [System.StringComparer]::OrdinalIgnoreCase.Equals($parentDirectory, $currentDirectory)) {
+                break
+            }
+
+            $currentDirectory = $parentDirectory
+        }
+    }
+
+    if ($ReadmeImpact) {
+        $rootReadmePath = Join-Path $Root 'README.md'
+        if (Test-Path -LiteralPath $rootReadmePath -PathType Leaf) {
+            $paths.Add($rootReadmePath) | Out-Null
+        }
+    }
+
+    return @($paths)
+}
+
+# Builds a prompt-safe payload describing README candidates and current content.
+function Get-ReadmeCandidatePayload {
+    param(
+        [string] $Root,
+        [string[]] $Paths
+    )
+
+    return @(
+        $Paths |
+            Sort-Object |
+            ForEach-Object {
+                [ordered]@{
+                    path = Convert-ToRelativeRepoPath -Root $Root -Path $_
+                    currentContent = Get-Content -Raw -LiteralPath $_
+                }
+            }
+    )
+}
+
+# Builds a prompt-safe payload describing the changelog candidate and current head content.
+function Get-ChangelogCandidatePayload {
+    param(
+        [string] $Root,
+        [bool] $ChangelogImpact
+    )
+
+    $defaultPath = Join-Path $Root 'CHANGELOG.md'
+    return [ordered]@{
+        path = Convert-ToRelativeRepoPath -Root $Root -Path $defaultPath
+        shouldUpdate = $ChangelogImpact
+        currentHead = Get-FilePreviewText -Path $defaultPath -MaxLines 160
+    }
+}
+
+# Applies README updates returned by the closeout result.
+function Set-ReadmeUpdates {
+    param(
+        [string] $Root,
+        [object[]] $Updates
+    )
+
+    $applied = New-Object System.Collections.Generic.List[object]
+
+    foreach ($update in @($Updates)) {
+        $relativePath = [string] $update.path
+        $targetPath = Resolve-SafeRepoTargetPath -Root $Root -RelativePath $relativePath
+        if ([System.IO.Path]::GetFileName($targetPath) -ne 'README.md') {
+            throw ("Closeout README update must target a README.md file: {0}" -f $relativePath)
+        }
+
+        if (-not (Test-Path -LiteralPath $targetPath -PathType Leaf)) {
+            throw ("Closeout README target does not exist: {0}" -f $relativePath)
+        }
+
+        Set-Content -LiteralPath $targetPath -Value ([string] $update.content) -Encoding UTF8 -NoNewline
+        $applied.Add([ordered]@{
+                path = Convert-ToRelativeRepoPath -Root $Root -Path $targetPath
+                summary = [string] $update.summary
+                checksum = ("sha256:{0}" -f (Get-FileHash -LiteralPath $targetPath -Algorithm SHA256).Hash.ToLowerInvariant())
+            }) | Out-Null
+    }
+
+    return @($applied.ToArray())
+}
+
+# Applies a changelog update returned by the closeout result.
+function Update-ChangelogFile {
+    param(
+        [string] $Root,
+        [object] $Update
+    )
+
+    $relativePath = [string] $Update.path
+    $targetPath = Resolve-SafeRepoTargetPath -Root $Root -RelativePath $relativePath
+    $fileName = [System.IO.Path]::GetFileName($targetPath)
+    if ($fileName -notmatch '^(?i:CHANGELOG)(\..+)?$') {
+        throw ("Closeout changelog update must target a CHANGELOG file: {0}" -f $relativePath)
+    }
+
+    $entry = (([string] $Update.entry) ?? '').Trim()
+    $existingContent = if (Test-Path -LiteralPath $targetPath -PathType Leaf) {
+        Get-Content -Raw -LiteralPath $targetPath
+    }
+    else {
+        ''
+    }
+
+    $applied = $false
+    if (-not [string]::IsNullOrWhiteSpace($entry)) {
+        $normalizedExisting = $existingContent.TrimStart()
+        if (-not $normalizedExisting.StartsWith($entry, [System.StringComparison]::Ordinal)) {
+            $combinedContent = if ([string]::IsNullOrWhiteSpace($existingContent)) {
+                $entry
+            }
+            else {
+                $entry + "`n`n" + $existingContent.TrimStart()
+            }
+            Set-Content -LiteralPath $targetPath -Value $combinedContent -Encoding UTF8 -NoNewline
+            $applied = $true
+        }
+    }
+
+    return [ordered]@{
+        path = Convert-ToRelativeRepoPath -Root $Root -Path $targetPath
+        summary = [string] $Update.summary
+        applied = $applied
+        checksum = if (Test-Path -LiteralPath $targetPath -PathType Leaf) { ("sha256:{0}" -f (Get-FileHash -LiteralPath $targetPath -Algorithm SHA256).Hash.ToLowerInvariant()) } else { $null }
+    }
+}
+
 # Produces the deterministic fallback closeout result when live dispatch is unavailable.
 function New-FallbackCloseoutResult {
     param(
@@ -227,8 +429,15 @@ function New-FallbackCloseoutResult {
             status = 'blocked'
             summary = 'Closeout is blocked because review or validation did not pass cleanly.'
             readmeActions = @('Do not update release-facing documentation until the blocking issues are resolved.')
+            readmeUpdates = @()
             commitMessage = 'fix: resolve blocking review findings before closeout'
             changelogSummary = 'Blocked closeout due to pending validation or review findings.'
+            changelogUpdate = [ordered]@{
+                apply = $false
+                path = 'CHANGELOG.md'
+                summary = 'Do not update the changelog while closeout is blocked.'
+                entry = ''
+            }
             followUps = @(
                 'Resolve failed validation checks.',
                 'Address reviewer follow-up items before closing the plan.'
@@ -240,8 +449,15 @@ function New-FallbackCloseoutResult {
         status = 'ready-for-commit'
         summary = 'Closeout is ready for commit and plan completion.'
         readmeActions = @('Review whether README changes are required for the delivered scope and keep them aligned when applicable.')
+        readmeUpdates = @()
         commitMessage = 'feat: finalize planned delivery with validated review closeout'
         changelogSummary = 'Finalize the validated delivery and close the active implementation plan.'
+        changelogUpdate = [ordered]@{
+            apply = $false
+            path = 'CHANGELOG.md'
+            summary = 'No deterministic changelog update was generated in fallback mode.'
+            entry = ''
+        }
         followUps = @()
     }
 }
@@ -276,6 +492,8 @@ if ($null -eq $agent) {
 $inputManifest = Read-JsonFile -Path $resolvedInputManifestPath
 $artifactMap = Convert-ArtifactManifestToMap -Manifest $inputManifest -Root $resolvedRepoRoot
 $normalizedRequestPath = if ($artifactMap.ContainsKey('normalized-request')) { [string] $artifactMap['normalized-request'] } else { $null }
+$specSummaryPath = if ($artifactMap.ContainsKey('spec-summary')) { [string] $artifactMap['spec-summary'] } else { $null }
+$activeSpecPath = if ($artifactMap.ContainsKey('active-spec')) { [string] $artifactMap['active-spec'] } else { $null }
 $routeSelectionPath = if ($artifactMap.ContainsKey('route-selection')) { [string] $artifactMap['route-selection'] } else { $null }
 $changesetPath = if ($artifactMap.ContainsKey('changeset')) { [string] $artifactMap['changeset'] } else { $null }
 $validationReportPath = if ($artifactMap.ContainsKey('validation-report')) { [string] $artifactMap['validation-report'] } else { $null }
@@ -290,12 +508,22 @@ if ($null -ne $normalizedRequestPath -and (Test-Path -LiteralPath $normalizedReq
     }
 }
 
+$routeSelection = if ($null -ne $routeSelectionPath -and (Test-Path -LiteralPath $routeSelectionPath -PathType Leaf)) { Read-JsonFile -Path $routeSelectionPath } else { $null }
 $routeSelectionJson = if ($null -ne $routeSelectionPath -and (Test-Path -LiteralPath $routeSelectionPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $routeSelectionPath } else { '{}' }
+$specSummaryJson = if ($null -ne $specSummaryPath -and (Test-Path -LiteralPath $specSummaryPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $specSummaryPath } else { '{}' }
 $changesetJson = if ($null -ne $changesetPath -and (Test-Path -LiteralPath $changesetPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $changesetPath } else { '{}' }
+$changeset = if ($null -ne $changesetPath -and (Test-Path -LiteralPath $changesetPath -PathType Leaf)) { Read-JsonFile -Path $changesetPath } else { $null }
 $validationReport = if ($null -ne $validationReportPath -and (Test-Path -LiteralPath $validationReportPath -PathType Leaf)) { Read-JsonFile -Path $validationReportPath } else { $null }
 $validationReportJson = if ($null -ne $validationReportPath -and (Test-Path -LiteralPath $validationReportPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $validationReportPath } else { '{}' }
 $reviewReportText = if ($null -ne $reviewReportPath -and (Test-Path -LiteralPath $reviewReportPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $reviewReportPath } else { '' }
 $decisionLogText = if ($null -ne $decisionLogPath -and (Test-Path -LiteralPath $decisionLogPath -PathType Leaf)) { Get-Content -Raw -LiteralPath $decisionLogPath } else { '' }
+
+$changedFiles = if ($null -ne $changeset) { @($changeset.changedFiles | ForEach-Object { [string] $_ }) } else { @() }
+$shouldUpdateReadmes = if ($null -ne $routeSelection) { [bool] $routeSelection.readmeImpact } else { $false }
+$shouldUpdateChangelog = if ($null -ne $routeSelection) { [bool] $routeSelection.changelogImpact } else { $false }
+$readmeCandidatePaths = Get-ReadmeCandidatePaths -Root $resolvedRepoRoot -ChangedFiles $changedFiles -ReadmeImpact $shouldUpdateReadmes
+$readmeCandidatesJson = ((Get-ReadmeCandidatePayload -Root $resolvedRepoRoot -Paths $readmeCandidatePaths) | ConvertTo-Json -Depth 20)
+$changelogCandidateJson = ((Get-ChangelogCandidatePayload -Root $resolvedRepoRoot -ChangelogImpact $shouldUpdateChangelog) | ConvertTo-Json -Depth 20)
 
 $failedChecks = if ($null -ne $validationReport) { [int] $validationReport.summary.failedChecks } else { 1 }
 $reviewDecision = if ($decisionLogText -match 'Decision:\s*(?<decision>[a-z-]+)') { $Matches['decision'] } else { 'blocked' }
@@ -313,11 +541,14 @@ if ($shouldUseCodexDispatch) {
         $templateText = Get-Content -Raw -LiteralPath $resolvedPromptTemplatePath
         $renderedPrompt = Expand-Template -TemplateText $templateText -Tokens @{
             REQUEST_TEXT = $requestContent
+            SPEC_SUMMARY_JSON = $specSummaryJson
             ROUTE_SELECTION_JSON = $routeSelectionJson
             CHANGESET_JSON = $changesetJson
             VALIDATION_REPORT_JSON = $validationReportJson
             REVIEW_REPORT_TEXT = $reviewReportText
             DECISION_LOG_TEXT = $decisionLogText
+            README_CANDIDATES_JSON = $readmeCandidatesJson
+            CHANGELOG_CANDIDATE_JSON = $changelogCandidateJson
         }
         Set-Content -LiteralPath $dispatchPromptPath -Value $renderedPrompt -Encoding UTF8 -NoNewline
 
@@ -353,9 +584,26 @@ if ($null -eq $closeoutResult) {
 $closeoutReportPath = Join-Path $stageArtifactsDirectory 'closeout-report.json'
 $releaseSummaryPath = Join-Path $stageArtifactsDirectory 'release-summary.md'
 $completedPlanMetadataPath = Join-Path $stageArtifactsDirectory 'completed-plan.json'
+$readmeUpdatesReportPath = Join-Path $stageArtifactsDirectory 'readme-updates.json'
+$changelogUpdateReportPath = Join-Path $stageArtifactsDirectory 'changelog-update.json'
 
 $completedPlanPath = $null
 $planMoved = $false
+$completedSpecPath = $null
+$specMoved = $false
+$appliedReadmeUpdates = @()
+$appliedChangelogUpdate = [ordered]@{
+    path = 'CHANGELOG.md'
+    summary = 'No changelog update was applied.'
+    applied = $false
+    checksum = $null
+}
+if ($closeoutResult.status -eq 'ready-for-commit') {
+    $appliedReadmeUpdates = Set-ReadmeUpdates -Root $resolvedRepoRoot -Updates @($closeoutResult.readmeUpdates)
+    if ($null -ne $closeoutResult.changelogUpdate -and [bool] $closeoutResult.changelogUpdate.apply) {
+        $appliedChangelogUpdate = Update-ChangelogFile -Root $resolvedRepoRoot -Update $closeoutResult.changelogUpdate
+    }
+}
 if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWhiteSpace($activePlanPath) -and (Test-Path -LiteralPath $activePlanPath -PathType Leaf)) {
     $completedPlansDirectory = Join-Path $resolvedRepoRoot 'planning/completed'
     New-Item -ItemType Directory -Path $completedPlansDirectory -Force | Out-Null
@@ -363,8 +611,23 @@ if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWh
     Move-Item -LiteralPath $activePlanPath -Destination $completedPlanPath -Force
     $planMoved = $true
 }
+if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWhiteSpace($activeSpecPath) -and (Test-Path -LiteralPath $activeSpecPath -PathType Leaf)) {
+    $activeSpecRelativePath = Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $activeSpecPath
+    if ($activeSpecRelativePath -like 'planning/specs/active/*') {
+        $completedSpecsDirectory = Join-Path $resolvedRepoRoot 'planning/specs/completed'
+        New-Item -ItemType Directory -Path $completedSpecsDirectory -Force | Out-Null
+        $completedSpecPath = Join-Path $completedSpecsDirectory ([System.IO.Path]::GetFileName($activeSpecPath))
+        Move-Item -LiteralPath $activeSpecPath -Destination $completedSpecPath -Force
+        $specMoved = $true
+    }
+}
 
 Write-JsonFile -Path $closeoutReportPath -Value $closeoutResult
+Write-JsonFile -Path $readmeUpdatesReportPath -Value ([ordered]@{
+        updated = (@($appliedReadmeUpdates).Count -gt 0)
+        updates = @($appliedReadmeUpdates)
+    })
+Write-JsonFile -Path $changelogUpdateReportPath -Value $appliedChangelogUpdate
 
 $releaseSummary = @(
     ('# Release Summary ({0})' -f $TraceId),
@@ -374,6 +637,7 @@ $releaseSummary = @(
     ('- Backend: {0}' -f $backendUsed),
     ('- Status: {0}' -f [string] $closeoutResult.status),
     ('- GeneratedAt: {0}' -f (Get-Date).ToString('o')),
+    ('- README candidates: {0}' -f @($readmeCandidatePaths).Count),
     '',
     '## Summary',
     ('- {0}' -f [string] $closeoutResult.summary),
@@ -389,12 +653,33 @@ $releaseSummary = @(
 $releaseSummary += @($closeoutResult.readmeActions | ForEach-Object { '- ' + [string] $_ })
 $releaseSummary += @(
     '',
+    '## README Updates Applied'
+)
+if (@($appliedReadmeUpdates).Count -gt 0) {
+    $releaseSummary += @($appliedReadmeUpdates | ForEach-Object { '- ' + [string] $_.path + ': ' + [string] $_.summary })
+}
+else {
+    $releaseSummary += '- none'
+}
+$releaseSummary += @(
+    '',
+    '## CHANGELOG Update Applied'
+)
+if ([bool] $appliedChangelogUpdate.applied) {
+    $releaseSummary += ('- {0}: {1}' -f [string] $appliedChangelogUpdate.path, [string] $appliedChangelogUpdate.summary)
+}
+else {
+    $releaseSummary += ('- {0}' -f [string] $appliedChangelogUpdate.summary)
+}
+$releaseSummary += @(
+    '',
     '## Follow-Ups'
 )
 $releaseSummary += @($closeoutResult.followUps | ForEach-Object { '- ' + [string] $_ })
 $releaseSummary += @(
     '',
-    ('- Active plan moved: {0}' -f $planMoved)
+    ('- Active plan moved: {0}' -f $planMoved),
+    ('- Active spec moved: {0}' -f $specMoved)
 )
 Set-Content -LiteralPath $releaseSummaryPath -Value ($releaseSummary -join "`n") -Encoding UTF8 -NoNewline
 
@@ -405,6 +690,9 @@ $completedPlanMetadata = [ordered]@{
     moved = $planMoved
     sourcePlanPath = if (-not [string]::IsNullOrWhiteSpace($activePlanPath)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $activePlanPath } else { $null }
     completedPlanPath = if (-not [string]::IsNullOrWhiteSpace($completedPlanPath)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $completedPlanPath } else { $null }
+    specMoved = $specMoved
+    sourceSpecPath = if (-not [string]::IsNullOrWhiteSpace($activeSpecPath)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $activeSpecPath } else { $null }
+    completedSpecPath = if (-not [string]::IsNullOrWhiteSpace($completedSpecPath)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $completedSpecPath } else { $null }
 }
 Write-JsonFile -Path $completedPlanMetadataPath -Value $completedPlanMetadata
 
@@ -416,7 +704,9 @@ $outputManifest = [ordered]@{
     artifacts = @(
         (Get-ArtifactDescriptor -Name 'closeout-report' -Path $closeoutReportPath -Root $resolvedRepoRoot),
         (Get-ArtifactDescriptor -Name 'release-summary' -Path $releaseSummaryPath -Root $resolvedRepoRoot),
-        (Get-ArtifactDescriptor -Name 'completed-plan' -Path $completedPlanMetadataPath -Root $resolvedRepoRoot)
+        (Get-ArtifactDescriptor -Name 'completed-plan' -Path $completedPlanMetadataPath -Root $resolvedRepoRoot),
+        (Get-ArtifactDescriptor -Name 'readme-updates' -Path $readmeUpdatesReportPath -Root $resolvedRepoRoot),
+        (Get-ArtifactDescriptor -Name 'changelog-update' -Path $changelogUpdateReportPath -Root $resolvedRepoRoot)
     )
 }
 Write-JsonFile -Path $resolvedOutputManifestPath -Value $outputManifest
@@ -428,6 +718,9 @@ $stageState = [ordered]@{
     backend = $backendUsed
     dispatchCount = if ($backendUsed -eq 'codex-exec') { 1 } else { 0 }
     completedPlanMoved = $planMoved
+    completedSpecMoved = $specMoved
+    readmeUpdateCount = @($appliedReadmeUpdates).Count
+    changelogUpdated = [bool] $appliedChangelogUpdate.applied
     promptTemplatePath = if ($backendUsed -eq 'codex-exec') { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $resolvedPromptTemplatePath } else { $null }
     responseSchemaPath = if ($backendUsed -eq 'codex-exec') { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $resolvedResponseSchemaPath } else { $null }
     dispatchRecordPath = if ((Test-Path -LiteralPath $dispatchRecordPath -PathType Leaf)) { Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $dispatchRecordPath } else { $null }

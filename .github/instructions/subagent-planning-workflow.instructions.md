@@ -13,6 +13,9 @@ priority: high
 - Use `planning/README.md` as the planning workspace guide.
 - Active plans live in `planning/active/`.
 - Finished plans move to `planning/completed/` only when the work is genuinely complete.
+- Use `planning/specs/README.md` as the versioned specification guide for brainstorming/spec artifacts.
+- Active specs live in `planning/specs/active/`.
+- Finished specs move to `planning/specs/completed/` with the related workstream when applicable.
 - Plan files should use stable slugged names such as `plan-<scope>.md`.
 - Reuse and update an existing active plan when the request continues the same workstream instead of creating a duplicate file.
 
@@ -29,25 +32,29 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
 1. `master-orchestrator` contract
    - normalize the request and decide whether the task is change-bearing
    - ensure planning registration happens before execution
-2. `planner` agent
+2. `brainstorm-spec-architect` agent
+   - create or update a versioned spec in `planning/specs/active/` when non-trivial work needs design direction locked before planning
+   - capture decisions, alternatives, risks, acceptance criteria, and planning readiness
+3. `planner` agent
    - create or update the active plan in `planning/active/`
+   - consume the current active spec when one exists
    - define scope, ordered tasks, validations, risks, and closeout requirements
-3. `context-token-optimizer` agent
+4. `context-token-optimizer` agent
    - reduce token load by selecting the minimal context pack
    - recommend the correct specialist path
-4. `specialist` agent
+5. `specialist` agent
    - perform the domain implementation using the routed context only
-5. `tester` agent
+6. `tester` agent
    - mandatory when code, runtime behavior, or validation scripts changed
-6. `reviewer` agent
+7. `reviewer` agent
    - mandatory final risk-focused code review
-7. `release-closeout` agent
-   - adjust README files when needed
+8. `release-closeout` agent
+   - update relevant README files when needed
    - produce suggested commit message
-   - produce changelog summary or entry-ready content when the change belongs in version history
-8. planning update
+   - update CHANGELOG with entry-ready content when the change belongs in version history
+9. planning update
    - update execution state, validation status, blockers, and closeout notes
-   - move the plan to `planning/completed/` only when materially complete
+   - move the plan to `planning/completed/` and the spec to `planning/specs/completed/` only when materially complete
 
 ## Specialist Selection Rule
 - Use the smallest specialist capable of executing the task correctly.
@@ -58,14 +65,15 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
 Every active plan should define:
 1. objective and scope summary
 2. normalized request or intake summary
-3. ordered tasks with dependencies when needed
-4. validation checklist
-5. risks and fallback path
-6. selected specialist or specialist candidates
-7. closeout expectations for README, commit message, and changelog
+3. spec path or explicit statement that a separate spec was not required
+4. ordered tasks with dependencies when needed
+5. validation checklist
+6. risks and fallback path
+7. selected specialist or specialist candidates
+8. closeout expectations for README, commit message, and changelog
 
 ## Closeout Rules
 - If the change affects stable documentation, update the relevant README in the same workstream.
 - Always return a suggested commit message when the work reaches a stable checkpoint.
-- If the change should be retained in release history, produce changelog-ready summary content following `instructions/feedback-changelog.instructions.md`.
+- If the change should be retained in release history, update the changelog with entry-ready content following `instructions/feedback-changelog.instructions.md`.
 - Do not move a plan to `planning/completed/` until implementation, validation, review, and closeout are all materially complete.

@@ -220,6 +220,17 @@
       ]
     },
     {
+      "id": "planning-spec-route",
+      "request": "Brainstorm the design decisions and create a versioned planning spec for this workstream before implementation.",
+      "expected_route_ids": [
+        "planning-spec"
+      ],
+      "expected_selected_paths": [
+        "instructions/brainstorm-spec-workflow.instructions.md",
+        "instructions/subagent-planning-workflow.instructions.md"
+      ]
+    },
+    {
       "id": "no-match-route",
       "request": "Tell me a random joke.",
       "expected_route_ids": [],

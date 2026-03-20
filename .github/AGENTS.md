@@ -33,13 +33,11 @@ If context budget is tight, prefer dropping any other files before these. These 
 - Switch to VS for IDE or build tooling questions.
 
 # Instruction Entry Point (Decision Flow)
-Use this section as the quick “what do I load / follow first?” guide.
-
 ## Static RAGs Routing
 Baseline workflow for anything in this repo.
 
 1) Always load these first (in order)
-Follow the **Mandatory Context Files** list above.
+Use the **Mandatory Context Files** list above.
 
 2) Then select additional instruction files based on what you are changing
 - If editing `.github/**`: include `instructions/pr.instructions.md` and `instructions/prompt-templates.instructions.md` when relevant.
@@ -66,33 +64,36 @@ Follow the **Mandatory Context Files** list above.
 ## Execution Flow for Development Tasks
 1. MASTER Intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing
 2. Planning Registration: create or update the active plan for any change-bearing task
-3. Specialist Routing: identify the smallest correct specialist set and whether safe delegation is possible
-4. Implementation: follow established templates and patterns, maintain standards
-5. Validation: execute relevant checks, verify compilation, run tests, and confirm architectural compliance
-6. Review: perform mandatory final risk-focused review for repository changes
-7. Closeout: prepare commit message guidance and changelog/README follow-up as required
-8. Planning Update: update plan status and move to completed only when materially finished
+3. Spec Registration: create or update a versioned spec under `planning/specs/active/` when non-trivial work needs design direction before planning
+4. Specialist Routing: identify the smallest correct specialist set and whether safe delegation is possible
+5. Implementation: follow established templates and patterns, maintain standards
+6. Validation: execute relevant checks, verify compilation, run tests, and confirm architectural compliance
+7. Review: perform mandatory final risk-focused review for repository changes
+8. Closeout: prepare commit message guidance and changelog/README follow-up as required
+9. Planning Update: update plan/spec status and move to completed only when materially finished
 
 ## Sub-Agent Planning Chain
 - For non-trivial work, use the repository planning pattern under `planning/`.
 - Create or update an active plan in `planning/active/` before implementation.
+- Create or update an active spec in `planning/specs/active/` before planning when the work is non-trivial and design direction must be locked first.
 - Preferred fixed lifecycle for non-trivial change-bearing work:
   1. `MASTER` intake and request normalization
   2. planning registration
-  3. specialist identification
-  4. execution, with multiple subagents only when write-scope conflicts are controlled
-  5. tester when code/runtime changed
-  6. reviewer
-  7. release-closeout
-  8. planning update
+  3. brainstorming/spec registration when required
+  4. specialist identification
+  5. execution, with multiple subagents only when write-scope conflicts are controlled
+  6. tester when code/runtime changed
+  7. reviewer
+  8. release-closeout
+  9. planning update
 - Follow `instructions/subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
 - Follow `instructions/master-orchestrator.instructions.md` for the mandatory lifecycle contract.
+- Follow `instructions/brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
 
 ### For Multi-Task Requests
 - Apply Task-Based Execution Methodology (see below)
 - Break complex requests into numbered, sequential tasks
 - Validate each task completion before proceeding
-- Maintain session continuity across task boundaries
 
 ## Quality Gates
 Before generating code: Context loaded, patterns identified, approach validated
@@ -109,7 +110,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Context loss: Forgetting architectural decisions from earlier in session
 - Pattern deviation: Creating new patterns instead of following established ones
 - Layer violations: Breaking Clean Architecture dependency rules
-- Standard drift: Not maintaining consistent coding standards
+- Standard drift: Not maintaining consistent standards
 
 # Task-Based Execution Methodology
 
@@ -145,6 +146,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `instructions/repository-operating-model.instructions.md`
 - Mandatory repo-wide instructions are:
   - `instructions/master-orchestrator.instructions.md`
+  - `instructions/brainstorm-spec-workflow.instructions.md`
   - `instructions/repository-operating-model.instructions.md`
   - `instructions/authoritative-sources.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`

@@ -18,6 +18,7 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 # Hierarchy and Scope
 - Global rules live here and are always applied.
 - The MASTER lifecycle lives in `instructions/master-orchestrator.instructions.md` and is always applied for change-bearing work.
+- Non-trivial design-bearing work also uses `instructions/brainstorm-spec-workflow.instructions.md` before execution planning.
 - Repository-specific operating rules live in `instructions/repository-operating-model.instructions.md`.
 - Domain instruction files extend these rules; do not duplicate globals.
 - Prefer the most specific domain rule when conflicts occur.
@@ -69,12 +70,13 @@ Follow this order of operations on every task:
 - Default lifecycle:
   1. MASTER intake
   2. planning registration
-  3. specialist identification
-  4. execution
-  5. testing
-  6. code review
-  7. closeout
-  8. planning update
+  3. spec registration when required
+  4. specialist identification
+  5. execution
+  6. testing
+  7. code review
+  8. closeout
+  9. planning update
 - Do not skip directly from request to implementation when files, runtime assets, or repository state are expected to change.
 
 ## How to use
@@ -112,6 +114,7 @@ Follow this order of operations on every task:
 ## Always Applied
 - AGENTS.md (agents and context policy)
 - instructions/master-orchestrator.instructions.md
+- instructions/brainstorm-spec-workflow.instructions.md
 - instructions/repository-operating-model.instructions.md
 - instructions/subagent-planning-workflow.instructions.md
 - instructions/authoritative-sources.instructions.md
@@ -126,6 +129,7 @@ Follow this order of operations on every task:
 - Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
 - Change-bearing work must start with `instructions/master-orchestrator.instructions.md` before planning and implementation.
 - Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `planning/`.
+- When the work is non-trivial and design-bearing, create or update a versioned spec under `planning/specs/` before execution planning.
 - Use domain instructions from that map according to the active route and file scope.
 
 # Transparency
