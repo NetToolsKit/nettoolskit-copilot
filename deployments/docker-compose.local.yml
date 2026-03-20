@@ -20,7 +20,7 @@ services:
       XDG_DATA_HOME: /var/lib/ntk
       XDG_CONFIG_HOME: /var/lib/ntk/config
     volumes:
-      - ../.temp/service-data:/var/lib/ntk
+      - ../.deployment/local/service-data:/var/lib/ntk
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
       interval: 15s

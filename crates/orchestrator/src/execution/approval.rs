@@ -213,7 +213,8 @@ fn resolve_approval_audit_path() -> Option<PathBuf> {
     if let Ok(current_dir) = std::env::current_dir() {
         return Some(
             current_dir
-                .join(".temp")
+                .join(".deployment")
+                .join("local")
                 .join("ai")
                 .join("approval-audit.jsonl"),
         );

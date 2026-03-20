@@ -195,21 +195,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p coverage
-          cargo llvm-cov --workspace --all-targets --lcov --output-path coverage/lcov.info --fail-under-lines 65 --fail-under-functions 70
-          cargo llvm-cov report --html --output-dir coverage/html
-          cargo llvm-cov report --json --output-path coverage/report.json
-          cargo llvm-cov report --json --summary-only --output-path coverage/summary.json
+          mkdir -p .build/coverage
+          cargo llvm-cov --workspace --all-targets --lcov --output-path .build/coverage/lcov.info --fail-under-lines 65 --fail-under-functions 70
+          cargo llvm-cov report --html --output-dir .build/coverage/html
+          cargo llvm-cov report --json --output-path .build/coverage/report.json
+          cargo llvm-cov report --json --summary-only --output-path .build/coverage/summary.json
       - name: Run critical file coverage gate
         shell: pwsh
-        run: ./.github/scripts/Invoke-RustCriticalFileCoverageGate.ps1 -ReportPath coverage/report.json
+        run: ./.github/scripts/Invoke-RustCriticalFileCoverageGate.ps1 -ReportPath .build/coverage/report.json
       - name: Publish coverage summary
         shell: bash
         run: |
           set -euo pipefail
-          lines="$(jq -r '.data[0].totals.lines.percent' coverage/summary.json)"
-          functions="$(jq -r '.data[0].totals.functions.percent' coverage/summary.json)"
-          regions="$(jq -r '.data[0].totals.regions.percent' coverage/summary.json)"
+          lines="$(jq -r '.data[0].totals.lines.percent' .build/coverage/summary.json)"
+          functions="$(jq -r '.data[0].totals.functions.percent' .build/coverage/summary.json)"
+          regions="$(jq -r '.data[0].totals.regions.percent' .build/coverage/summary.json)"
           {
             echo "### Coverage Summary"
             echo ""
@@ -226,15 +226,15 @@ jobs:
         with:
           name: coverage-report
           path: |
-            coverage/lcov.info
-            coverage/report.json
-            coverage/summary.json
-            coverage/html
+            .build/coverage/lcov.info
+            .build/coverage/report.json
+            .build/coverage/summary.json
+            .build/coverage/html
           retention-days: 30
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: coverage/lcov.info
+          files: .build/coverage/lcov.info
           fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

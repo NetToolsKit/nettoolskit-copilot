@@ -13,7 +13,7 @@ fn test_policy() -> RepoWorkflowPolicy {
         allowed_command_prefixes: vec!["cargo test".to_string(), "git status".to_string()],
         allow_push: false,
         allow_pull_request: false,
-        workspace_root: PathBuf::from(".temp/repo-workflow-tests"),
+        workspace_root: PathBuf::from(".build/test-scratch/repo-workflow-tests"),
     }
 }
 

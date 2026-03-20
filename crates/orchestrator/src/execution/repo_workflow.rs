@@ -759,7 +759,8 @@ fn default_workspace_root() -> PathBuf {
     }
     std::env::current_dir()
         .unwrap_or_else(|_| PathBuf::from("."))
-        .join(".temp")
+        .join(".deployment")
+        .join("local")
         .join("repo-workflow")
 }
 
@@ -785,7 +786,7 @@ mod tests {
             allowed_command_prefixes: vec!["cargo ".to_string(), "git status".to_string()],
             allow_push: false,
             allow_pull_request: false,
-            workspace_root: PathBuf::from(".temp/repo-workflow-tests"),
+            workspace_root: PathBuf::from(".build/test-scratch/repo-workflow-tests"),
         }
     }
 
@@ -926,7 +927,7 @@ mod tests {
                 (NTK_REPO_WORKFLOW_ALLOW_PR_ENV, Some("on")),
                 (
                     NTK_REPO_WORKFLOW_BASE_DIR_ENV,
-                    Some(".temp/custom-repo-workflow-root"),
+                    Some(".deployment/local/custom-repo-workflow-root"),
                 ),
             ],
             || {
@@ -941,7 +942,7 @@ mod tests {
                 assert!(policy.allow_pull_request);
                 assert!(policy
                     .workspace_root
-                    .ends_with(PathBuf::from(".temp/custom-repo-workflow-root")));
+                    .ends_with(PathBuf::from(".deployment/local/custom-repo-workflow-root")));
             },
         );
     }
@@ -1304,7 +1305,7 @@ mod tests {
 
     #[test]
     fn allocate_workspace_path_uses_slug_suffix() {
-        let root = PathBuf::from(".temp/repo-workflow-tests");
+        let root = PathBuf::from(".build/test-scratch/repo-workflow-tests");
         let path = allocate_workspace_path(root.as_path(), "https://github.com/acme/demo.git");
         let path_string = path.display().to_string();
         assert!(path_string.contains("demo"));

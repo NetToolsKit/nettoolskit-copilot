@@ -50,6 +50,7 @@ Objectives:
   - [Crates](#crates)
   - [Compatibility and Support](#compatibility-and-support)
   - [Operations](#operations)
+  - [Planning](#planning)
 - [Build and Tests](#build-and-tests)
 - [Contributing](#contributing)
 - [Dependencies](#dependencies)
@@ -139,6 +140,15 @@ Operational runbook and incident procedures:
 
 ---
 
+### Planning
+
+Canonical planning documents now live in:
+
+- [Planning Index](planning/README.md)
+- [Current Active Work Plan](planning/active/plan-repository-operations-hygiene.md)
+
+---
+
 ### Compatibility and Support
 
 Official platform compatibility tiers and support commitments are defined in:
@@ -163,6 +173,12 @@ Security reports should use the private disclosure path documented in `SECURITY.
 ## Build and Tests
 
 This repository uses standard Cargo workflows for building, testing, formatting, linting, and documentation generation.
+
+Workspace build and validation artifacts are centralized through `.cargo/config.toml` and CI/runtime path conventions under:
+
+- `./.build/cargo-target`
+- `./.build/coverage`
+- `./.deployment/local/service-data`
 
 ```bash
 # Build all crates

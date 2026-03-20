@@ -141,7 +141,7 @@ Note: when `NTK_CHATOPS_DISCORD_INTERACTIONS_PUBLIC_KEY` is set, requests must i
 
 Local data is persisted to:
 
-- Host path: `./.temp/service-data`
+- Host path: `./.deployment/local/service-data`
 - Container path: `/var/lib/ntk`
 
 This keeps runtime data local-first and portable for VPS backups.

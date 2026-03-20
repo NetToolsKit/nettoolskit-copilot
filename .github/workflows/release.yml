@@ -94,7 +94,7 @@ jobs:
             throw "COMPATIBILITY.md not found."
           }
 
-          $sharedRepoPath = ".temp/copilot-instructions"
+          $sharedRepoPath = ".build/copilot-instructions"
           if (-not (Test-Path -LiteralPath $sharedRepoPath)) {
             git clone --depth 1 https://github.com/ThiagoGuislotti/copilot-instructions.git $sharedRepoPath
           }
