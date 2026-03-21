@@ -136,6 +136,9 @@ else {
 }
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
+$script:LogFilePath = $null
+
+Initialize-ExecutionIssueTracking
 
 # Writes verbose diagnostics.
 function Write-VerboseLog {
@@ -179,6 +182,7 @@ function Invoke-InstallStep {
     }
     else {
         Write-StyledOutput ("[STEP] {0}" -f $Step.name) | Out-Host
+        Write-ExecutionLog -Level 'INFO' -Message ("Starting install step: {0}" -f $Step.name)
         try {
             $stepArguments = @{}
             foreach ($property in $Step.arguments.GetEnumerator()) {
@@ -186,14 +190,24 @@ function Invoke-InstallStep {
             }
 
             & $Step.scriptPath @stepArguments | Out-Null
-            $status = 'passed'
-            Write-StyledOutput ("[OK] {0}" -f $Step.name) | Out-Host
+            $stepExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+            if ($stepExitCode -eq 0) {
+                $status = 'passed'
+                Write-StyledOutput ("[OK] {0}" -f $Step.name) | Out-Host
+                Write-ExecutionLog -Level 'OK' -Message ("Install step passed: {0}" -f $Step.name)
+            }
+            else {
+                $status = 'failed'
+                $errorMessage = "non-zero exit code: $stepExitCode"
+                Write-StyledOutput ("[FAIL] {0}: {1}" -f $Step.name, $errorMessage) | Out-Host
+                Write-ExecutionLog -Level 'ERROR' -Code 'INSTALL_STEP_FAILED' -Message ("{0}: {1}" -f $Step.name, $errorMessage)
+            }
         }
         catch {
             $status = 'failed'
             $errorMessage = $_.Exception.Message
             Write-StyledOutput ("[FAIL] {0}: {1}" -f $Step.name, $errorMessage) | Out-Host
-            throw
+            Write-ExecutionLog -Level 'ERROR' -Code 'INSTALL_STEP_EXCEPTION' -Message ("{0}: {1}" -f $Step.name, $errorMessage)
         }
     }
 
@@ -290,21 +304,47 @@ if (-not $SkipHealthcheck) {
 
 $results = New-Object System.Collections.Generic.List[object]
 foreach ($step in $steps) {
-    $results.Add((Invoke-InstallStep -Step $step -Preview ([bool] $PreviewOnly))) | Out-Null
+    $stepResult = Invoke-InstallStep -Step $step -Preview ([bool] $PreviewOnly)
+    $results.Add($stepResult) | Out-Null
+
+    if ((-not $PreviewOnly) -and $stepResult.status -eq 'failed') {
+        break
+    }
 }
 
 $resultItems = @($results.ToArray())
 $stepItems = @($steps.ToArray())
+$passedSteps = @($resultItems | Where-Object { $_.status -eq 'passed' }).Count
+$failedSteps = @($resultItems | Where-Object { $_.status -eq 'failed' }).Count
+$issueSummary = Write-ExecutionIssueSummary -Title 'Runtime install issue summary'
+$overallStatus = if ($failedSteps -gt 0) { 'failed' } elseif ($PreviewOnly) { 'preview' } else { 'passed' }
 
 Write-StyledOutput '' | Out-Host
 Write-StyledOutput 'Runtime install summary' | Out-Host
 Write-StyledOutput ("  Preview-only: {0}" -f ([bool] $PreviewOnly)) | Out-Host
 Write-StyledOutput ("  Planned steps: {0}" -f $steps.Count) | Out-Host
-Write-StyledOutput ("  Executed steps: {0}" -f @($resultItems | Where-Object { $_.status -eq 'passed' }).Count) | Out-Host
+Write-StyledOutput ("  Executed steps: {0}" -f $resultItems.Count) | Out-Host
+Write-StyledOutput ("  Passed steps: {0}" -f $passedSteps) | Out-Host
+Write-StyledOutput ("  Failed steps: {0}" -f $failedSteps) | Out-Host
+Write-StyledOutput ("  Overall status: {0}" -f $overallStatus) | Out-Host
 
-[pscustomobject]@{
+$output = [pscustomobject]@{
     previewOnly = [bool] $PreviewOnly
     repoRoot = $resolvedRepoRoot
     steps = $stepItems
     results = $resultItems
+    summary = [pscustomobject]@{
+        overallStatus = $overallStatus
+        plannedSteps = $steps.Count
+        executedSteps = $resultItems.Count
+        passedSteps = $passedSteps
+        failedSteps = $failedSteps
+    }
+    issues = $issueSummary
+}
+
+$output
+
+if ($failedSteps -gt 0 -and -not $PreviewOnly) {
+    exit 1
 }

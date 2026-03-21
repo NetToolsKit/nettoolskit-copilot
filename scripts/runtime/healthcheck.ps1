@@ -122,6 +122,7 @@ else {
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
+Initialize-ExecutionIssueTracking
 
 # Writes verbose diagnostics.
 function Write-VerboseLog {
@@ -153,10 +154,10 @@ function Invoke-ScriptCheck {
         if ($TreatFailureAsWarning) {
             $status = 'warning'
             $exitCode = 0
-            Write-ExecutionLog -Level 'WARN' -Message ("{0}: {1}" -f $Name, $errorMessage)
+            Write-ExecutionLog -Level 'WARN' -Code 'HEALTHCHECK_SCRIPT_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
         }
         else {
-            Write-ExecutionLog -Level 'ERROR' -Message ("{0}: {1}" -f $Name, $errorMessage)
+            Write-ExecutionLog -Level 'ERROR' -Code 'HEALTHCHECK_SCRIPT_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
         }
     }
     else {
@@ -172,11 +173,11 @@ function Invoke-ScriptCheck {
             elseif ($TreatFailureAsWarning) {
                 $status = 'warning'
                 $exitCode = 0
-                Write-ExecutionLog -Level 'WARN' -Message ("Check warning: {0} (non-zero exit converted to warning)" -f $Name)
+                Write-ExecutionLog -Level 'WARN' -Code 'HEALTHCHECK_CHECK_WARNING' -Message ("Check warning: {0} (non-zero exit converted to warning)" -f $Name)
             }
             else {
                 $status = 'failed'
-                Write-ExecutionLog -Level 'ERROR' -Message ("Check failed: {0} (exit code {1})" -f $Name, $exitCode)
+                Write-ExecutionLog -Level 'ERROR' -Code 'HEALTHCHECK_CHECK_FAILED' -Message ("Check failed: {0} (exit code {1})" -f $Name, $exitCode)
             }
         }
         catch {
@@ -184,12 +185,12 @@ function Invoke-ScriptCheck {
             if ($TreatFailureAsWarning) {
                 $status = 'warning'
                 $exitCode = 0
-                Write-ExecutionLog -Level 'WARN' -Message ("Check warning: {0} (exception converted to warning: {1})" -f $Name, $errorMessage)
+                Write-ExecutionLog -Level 'WARN' -Code 'HEALTHCHECK_CHECK_EXCEPTION_WARNING' -Message ("Check warning: {0} (exception converted to warning: {1})" -f $Name, $errorMessage)
             }
             else {
                 $status = 'failed'
                 $exitCode = 1
-                Write-ExecutionLog -Level 'ERROR' -Message ("Check exception: {0} :: {1}" -f $Name, $errorMessage)
+                Write-ExecutionLog -Level 'ERROR' -Code 'HEALTHCHECK_CHECK_EXCEPTION' -Message ("Check exception: {0} :: {1}" -f $Name, $errorMessage)
             }
         }
     }
@@ -358,12 +359,16 @@ $report = [ordered]@{
         failedChecks = $failedChecks
         overallStatus = $overallStatus
     }
+    issues = $null
     checks = $checks.ToArray()
     logPath = $resolvedLogPath
 }
 
-Set-Content -LiteralPath $resolvedOutputPath -Value ($report | ConvertTo-Json -Depth 100)
 Write-ExecutionLog -Level 'INFO' -Message ("Healthcheck summary: total={0} passed={1} warning={2} failed={3}" -f $checks.Count, $passedChecks, $warningChecks, $failedChecks)
+$issueSummary = Write-ExecutionIssueSummary -Title 'Healthcheck issue summary'
+$report.issues = $issueSummary
+
+Set-Content -LiteralPath $resolvedOutputPath -Value ($report | ConvertTo-Json -Depth 100)
 Write-ExecutionLog -Level 'INFO' -Message ("Healthcheck report generated: {0}" -f $resolvedOutputPath)
 
 if ($failedChecks -gt 0 -and -not $WarningOnly) {

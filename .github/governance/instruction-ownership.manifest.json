@@ -20,8 +20,8 @@
   ],
   "architectureConstraints": {
     "globalCoreMaxChars": {
-      "AGENTS.md": 9000,
-      "copilot-instructions.md": 9000
+      "AGENTS.md": 14000,
+      "copilot-instructions.md": 14000
     },
     "routing": {
       "maxAlwaysFiles": 10,

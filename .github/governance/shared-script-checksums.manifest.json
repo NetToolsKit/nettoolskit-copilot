@@ -13,11 +13,11 @@
     },
     {
       "path": "scripts/common/repository-paths.ps1",
-      "sha256": "9229e6852be99cce4d17e523f8a2e62f0c5acf3649b132753eec87a124bc051c"
+      "sha256": "7ec1c7bfc17e79d6436315c2fc602a88a6c50907c46e80003d2158d998e171b3"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "f028b4bacb836a6bd46b9555aef37b60d989d4af9ce400881746c740e7464d8d"
+      "sha256": "60e59cbb8e428a2caf1aa26c180da8fd804cb28810074c5926c163945ffbad88"
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",

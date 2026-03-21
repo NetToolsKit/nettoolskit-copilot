@@ -112,6 +112,17 @@
 - Extended the manual EOF cleanup helper with a Git-status-scoped mode so trimming can be limited to files currently reported as changed instead of scanning the whole repository:
   - `scripts/maintenance/trim-trailing-blank-lines.ps1`
   - `scripts/tests/runtime/trim-trailing-blank-lines.tests.ps1`
+- Added a shared runtime issue registry so `install.ps1`, `healthcheck.ps1`, and `self-heal.ps1` now assign stable `WRN###` / `ERR###` IDs to logged warnings and errors and always finish with a deduplicated issue summary plus severity counts:
+  - `scripts/common/repository-paths.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/tests/runtime/install-runtime.tests.ps1`
+  - `scripts/README.md`
+- Updated governance thresholds and validation-ledger handling so the current runtime/instruction size and analyzer baseline no longer produce avoidable warning-only noise, and broken local ledgers are archived before a new chain starts:
+  - `.github/governance/instruction-ownership.manifest.json`
+  - `.github/governance/warning-baseline.json`
+  - `scripts/validation/validate-all.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:

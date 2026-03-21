@@ -94,11 +94,15 @@ try {
     Assert-Equal -Actual $previewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Install preview must start with bootstrap.'
     Assert-Equal -Actual $previewResult.steps[4].name -Expected 'Run repository healthcheck' -Message 'Install preview must end with healthcheck.'
     Assert-True -Condition ($previewResult.steps[0].scriptPath -like '*scripts\runtime\bootstrap.ps1') -Message 'Install preview must reference bootstrap.ps1.'
+    Assert-Equal -Actual $previewResult.summary.overallStatus -Expected 'preview' -Message 'Install preview must report preview summary status.'
+    Assert-Equal -Actual $previewResult.issues.totalIssues -Expected 0 -Message 'Install preview must not report issues when only planning.'
 
     $reducedPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -SkipGlobalSettings -SkipGlobalSnippets -SkipGitHooks -SkipHealthcheck
 
     Assert-Equal -Actual @($reducedPreviewResult.steps).Count -Expected 1 -Message 'Install preview must honor skip switches.'
     Assert-Equal -Actual $reducedPreviewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Reduced install preview must keep bootstrap.'
+    Assert-Equal -Actual $reducedPreviewResult.summary.overallStatus -Expected 'preview' -Message 'Reduced install preview must report preview summary status.'
+    Assert-Equal -Actual $reducedPreviewResult.issues.totalIssues -Expected 0 -Message 'Reduced install preview must not report issues when only planning.'
 
     Write-Host '[OK] runtime install tests passed.'
     exit 0

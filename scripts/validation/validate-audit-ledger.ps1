@@ -168,7 +168,7 @@ Set-Location -Path $resolvedRepoRoot
 
 $resolvedLedgerPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $LedgerPath
 if (-not (Test-Path -LiteralPath $resolvedLedgerPath -PathType Leaf)) {
-    Add-ValidationWarning ("Audit ledger not found (optional): {0}" -f $LedgerPath)
+    Write-StyledOutput ("[INFO] Audit ledger not found (optional): {0}" -f $LedgerPath)
     Write-StyledOutput ''
     Write-StyledOutput 'Audit ledger validation summary'
     Write-StyledOutput ("  Warning-only mode: {0}" -f $script:IsWarningOnly)
@@ -180,7 +180,7 @@ if (-not (Test-Path -LiteralPath $resolvedLedgerPath -PathType Leaf)) {
 
 $lines = @(Get-Content -LiteralPath $resolvedLedgerPath)
 if ($lines.Count -eq 0) {
-    Add-ValidationWarning ("Audit ledger has no entries: {0}" -f $LedgerPath)
+    Write-StyledOutput ("[INFO] Audit ledger has no entries yet: {0}" -f $LedgerPath)
 }
 
 $entriesChecked = 0

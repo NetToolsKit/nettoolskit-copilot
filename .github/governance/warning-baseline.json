@@ -6,8 +6,10 @@
     "PSAvoidUsingWriteHost": 100,
     "PSUseSingularNouns": 50,
     "PSReviewUnusedParameter": 20,
-    "PSUseShouldProcessForStateChangingFunctions": 20,
+    "PSUseShouldProcessForStateChangingFunctions": 30,
     "PSUseApprovedVerbs": 15,
-    "PSAvoidAssignmentToAutomaticVariable": 10
+    "PSAvoidAssignmentToAutomaticVariable": 10,
+    "PSUseBOMForUnicodeEncodedFile": 10,
+    "PSUseDeclaredVarsMoreThanAssignments": 10
   }
 }

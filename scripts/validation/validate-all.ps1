@@ -404,6 +404,120 @@ function Get-StringSha256Hash {
     return ([System.BitConverter]::ToString($hashBytes)).Replace('-', '').ToLowerInvariant()
 }
 
+# Validates the local ledger chain so stale local corruption can be archived before checks run.
+function Test-ValidationLedgerChain {
+    param(
+        [string] $ResolvedLedgerPath
+    )
+
+    if (-not (Test-Path -LiteralPath $ResolvedLedgerPath -PathType Leaf)) {
+        return [pscustomobject]@{
+            isValid = $true
+            reason = $null
+        }
+    }
+
+    $lines = @(Get-Content -LiteralPath $ResolvedLedgerPath)
+    $previousEntryHash = ('0' * 64)
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $line = [string] $lines[$index]
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+
+        try {
+            $entryObject = $line | ConvertFrom-Json -Depth 200
+        }
+        catch {
+            return [pscustomobject]@{
+                isValid = $false
+                reason = ("line {0} is not valid JSON" -f ($index + 1))
+            }
+        }
+
+        $payloadJson = [string] $entryObject.payloadJson
+        $payloadHash = [string] $entryObject.payloadHash
+        $prevHash = [string] $entryObject.prevHash
+        $entryHash = [string] $entryObject.entryHash
+
+        if ([string]::IsNullOrWhiteSpace($payloadJson) -or [string]::IsNullOrWhiteSpace($payloadHash) -or [string]::IsNullOrWhiteSpace($prevHash) -or [string]::IsNullOrWhiteSpace($entryHash)) {
+            return [pscustomobject]@{
+                isValid = $false
+                reason = ("line {0} is missing required hash fields" -f ($index + 1))
+            }
+        }
+
+        if ($prevHash -ne $previousEntryHash) {
+            return [pscustomobject]@{
+                isValid = $false
+                reason = ("chain break at line {0}" -f ($index + 1))
+            }
+        }
+
+        $computedPayloadHash = Get-StringSha256Hash -Text $payloadJson
+        if ($computedPayloadHash -ne $payloadHash) {
+            return [pscustomobject]@{
+                isValid = $false
+                reason = ("payload hash mismatch at line {0}" -f ($index + 1))
+            }
+        }
+
+        $computedEntryHash = Get-StringSha256Hash -Text ("{0}|{1}" -f $prevHash, $payloadHash)
+        if ($computedEntryHash -ne $entryHash) {
+            return [pscustomobject]@{
+                isValid = $false
+                reason = ("entry hash mismatch at line {0}" -f ($index + 1))
+            }
+        }
+
+        $previousEntryHash = $entryHash
+    }
+
+    return [pscustomobject]@{
+        isValid = $true
+        reason = $null
+    }
+}
+
+# Archives a broken local validation ledger so future runs start a fresh chain.
+function Repair-ValidationLedgerIfNeeded {
+    param(
+        [string] $Root,
+        [string] $TargetLedgerPath
+    )
+
+    $resolvedLedgerPath = Resolve-RepoPath -Root $Root -Path $TargetLedgerPath
+    if (-not (Test-Path -LiteralPath $resolvedLedgerPath -PathType Leaf)) {
+        return $null
+    }
+
+    $ledgerHealth = Test-ValidationLedgerChain -ResolvedLedgerPath $resolvedLedgerPath
+    if ($ledgerHealth.isValid) {
+        return $null
+    }
+
+    $ledgerDirectory = Split-Path -Path $resolvedLedgerPath -Parent
+    $ledgerBaseName = [System.IO.Path]::GetFileNameWithoutExtension($resolvedLedgerPath)
+    $ledgerExtension = [System.IO.Path]::GetExtension($resolvedLedgerPath)
+    $timestampToken = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $archivePath = Join-Path $ledgerDirectory ("{0}.broken-{1}{2}" -f $ledgerBaseName, $timestampToken, $ledgerExtension)
+
+    Move-Item -LiteralPath $resolvedLedgerPath -Destination $archivePath -Force
+
+    $latestLedgerPath = Resolve-RepoPath -Root $Root -Path '.temp/audit/validation-ledger.latest.json'
+    if (Test-Path -LiteralPath $latestLedgerPath -PathType Leaf) {
+        $latestArchivePath = Join-Path (Split-Path -Path $latestLedgerPath -Parent) ("validation-ledger.latest.broken-{0}.json" -f $timestampToken)
+        Move-Item -LiteralPath $latestLedgerPath -Destination $latestArchivePath -Force
+    }
+
+    Write-StyledOutput ("[INFO] Archived broken validation ledger and starting a new chain: {0} ({1})" -f [System.IO.Path]::GetRelativePath($Root, $archivePath), $ledgerHealth.reason)
+
+    return [pscustomobject]@{
+        archivedLedgerPath = $archivePath
+        reason = $ledgerHealth.reason
+    }
+}
+
 # Gets selected validation profile object.
 function Get-ValidationProfile {
     param(
@@ -604,6 +718,7 @@ function Invoke-ValidationScript {
 # -------------------------------
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
+Repair-ValidationLedgerIfNeeded -Root $resolvedRepoRoot -TargetLedgerPath $LedgerPath | Out-Null
 
 $profileFilePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $ValidationProfilesPath
 $selectedProfile = Get-ValidationProfile -ProfilesFilePath $profileFilePath -ProfileId $ValidationProfile

@@ -118,6 +118,7 @@ else {
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
+Initialize-ExecutionIssueTracking
 
 # -------------------------------
 # Helpers
@@ -137,7 +138,7 @@ function Invoke-ScriptStep {
 
     if (-not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
         $errorMessage = "Script not found: $ScriptPath"
-        Write-ExecutionLog -Level 'ERROR' -Message ("{0}: {1}" -f $Name, $errorMessage)
+        Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_SCRIPT_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
     }
     else {
         Write-ExecutionLog -Level 'INFO' -Message ("Starting step: {0}" -f $Name)
@@ -150,13 +151,13 @@ function Invoke-ScriptStep {
                 Write-ExecutionLog -Level 'OK' -Message ("Step passed: {0}" -f $Name)
             }
             else {
-                Write-ExecutionLog -Level 'ERROR' -Message ("Step failed: {0} (exit code {1})" -f $Name, $exitCode)
+                Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_STEP_FAILED' -Message ("Step failed: {0} (exit code {1})" -f $Name, $exitCode)
             }
         }
         catch {
             $exitCode = 1
             $errorMessage = $_.Exception.Message
-            Write-ExecutionLog -Level 'ERROR' -Message ("Step exception: {0} :: {1}" -f $Name, $errorMessage)
+            Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_STEP_EXCEPTION' -Message ("Step exception: {0} :: {1}" -f $Name, $errorMessage)
         }
     }
 
@@ -262,7 +263,7 @@ if ($ApplyVscodeTemplates) {
     }
 }
 else {
-    Write-ExecutionLog -Level 'WARN' -Message 'Skipping VS Code templates apply (enable with -ApplyVscodeTemplates).'
+    Write-ExecutionLog -Level 'INFO' -Message 'Skipping VS Code templates apply (enable with -ApplyVscodeTemplates).'
 }
 
 $healthcheckReportPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path '.temp/healthcheck-report.json'
@@ -295,7 +296,7 @@ if (Test-Path -LiteralPath $healthcheckReportPath -PathType Leaf) {
         $healthcheckSummary = Get-Content -Raw -LiteralPath $healthcheckReportPath | ConvertFrom-Json -Depth 100
     }
     catch {
-        Write-ExecutionLog -Level 'WARN' -Message ("Could not parse healthcheck report: {0}" -f $healthcheckReportPath)
+        Write-ExecutionLog -Level 'WARN' -Code 'SELF_HEAL_HEALTHCHECK_REPORT_PARSE_WARNING' -Message ("Could not parse healthcheck report: {0}" -f $healthcheckReportPath)
     }
 }
 
@@ -322,10 +323,14 @@ $report = [ordered]@{
         failedSteps = $failedSteps
         overallStatus = $overallStatus
     }
+    issues = $null
     steps = $steps.ToArray()
     healthcheck = $healthcheckSummary
     logPath = $resolvedLogPath
 }
+
+$issueSummary = Write-ExecutionIssueSummary -Title 'Self-heal issue summary'
+$report.issues = $issueSummary
 
 $reportJson = $report | ConvertTo-Json -Depth 100
 Set-Content -LiteralPath $resolvedOutputPath -Value $reportJson
