@@ -9,7 +9,7 @@
   "entries": [
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "6366285055ce6d5e4db69c0f2e65311147cfc133ad29fb5001beec65da519d33"
+      "sha256": "d7011471d349918260f8303cd0737caf1430430ff05bceebe8d6b906a3f120ea"
     },
     {
       "path": "scripts/common/console-style.ps1",
@@ -29,27 +29,27 @@
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
-      "sha256": "acbe057fe58d169286fa89f764bdb7a890a72fc2542b2a77840c0d8cc8f11f0e"
+      "sha256": "72297f17960c841386a29c35749af55ce2e396d74b8dbdfe5ed8c3a4a8f8069c"
     },
     {
       "path": "scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1",
-      "sha256": "e7102d803463506b30287888278adbbe8b2144e33f916128bf1774597591b0b7"
+      "sha256": "67975228023861560c59bf37852d0339f83f11cba99911e38faf2ee7d2eb3991"
     },
     {
       "path": "scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1",
-      "sha256": "7cd464d5f6b81c87240b50247e4d3f095fca3243f20743067d20140961441e7c"
+      "sha256": "723c6ed1e9aae204a2d889b21f2fff1fc7a8291a8c2f24e6d6045815cf1300f9"
     },
     {
       "path": "scripts/security/Invoke-PreBuildSecurityGate.ps1",
-      "sha256": "42048acc2a69eaa179a6b41427a692428d7ba50fab46ec73053968d36715da74"
+      "sha256": "22735954b413d1609c828fa21863bb6fc71f82038bfce194ebf9c142171a79cc"
     },
     {
       "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",
-      "sha256": "d1a18c49b536d94f5286ab53e303fb450d985360178db52896717c5f1309a464"
+      "sha256": "ac00a6dc1860b58bd99b4459e86f3557e5de83a84bd2a10ff8e324d6f61e4932"
     },
     {
       "path": "scripts/security/Invoke-VulnerabilityAudit.ps1",
-      "sha256": "019734b409ffd7ba73a87432e6c1a6a39df6284743deb08920ecbae1567cd83f"
+      "sha256": "c02ae7eba56e84ec8136435de60b730958e0686e8a7344193ddd62728d9abfc5"
     }
   ]
 }
