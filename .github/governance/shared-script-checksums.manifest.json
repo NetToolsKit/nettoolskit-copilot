@@ -17,7 +17,7 @@
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "c76c53d4664a2aeb8f3fce416682a571040c1b18e1f3c28d4b02731a28562469"
+      "sha256": "f028b4bacb836a6bd46b9555aef37b60d989d4af9ce400881746c740e7464d8d"
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",

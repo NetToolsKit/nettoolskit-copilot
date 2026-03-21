@@ -85,8 +85,8 @@ Use the **Mandatory Context Files** list above.
 
 ## Execution Flow for Development Tasks
 1. Super Agent intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing
-2. Planning Registration: create or update the active plan for any change-bearing task under `planning/active/` when the workspace owns a planning surface, otherwise under `.build/super-agent/planning/active/`
-3. Spec Registration: create or update a versioned spec under `planning/specs/active/` when the workspace owns a spec surface; otherwise use `.build/super-agent/specs/active/` when non-trivial work needs design direction before planning
+2. Spec Registration: create or update a versioned spec under `planning/specs/active/` when the workspace owns a spec surface; otherwise use `.build/super-agent/specs/active/` when non-trivial change-bearing work needs design direction before planning
+3. Planning Registration: create or update the active plan for any change-bearing task under `planning/active/` when the workspace owns a planning surface, otherwise under `.build/super-agent/planning/active/`; consume the active spec before planning whenever one exists
 4. Specialist Routing: identify the smallest correct specialist set and whether safe delegation is possible
 5. Implementation: follow established templates and patterns, maintain standards
 6. Validation: execute relevant checks, verify compilation, run tests, and confirm architectural compliance
@@ -100,8 +100,8 @@ Use the **Mandatory Context Files** list above.
 - Create or update an active spec in `planning/specs/active/` before planning when the workspace exposes a spec surface and the work is non-trivial; otherwise use `.build/super-agent/specs/active/`.
 - Preferred fixed lifecycle for non-trivial change-bearing work:
   1. `Super Agent` intake and request normalization
-  2. planning registration
-  3. brainstorming/spec registration when required
+  2. brainstorming/spec registration
+  3. planning registration
   4. specialist identification
   5. execution, with multiple subagents only when write-scope conflicts are controlled
   6. tester when code/runtime changed

@@ -45,3 +45,9 @@ function Resolve-AgentsSkillsPath {
     $homePath = Resolve-UserHomePath
     return Join-Path $homePath '.agents\skills'
 }
+
+# Resolves the personal Copilot skill path used by GitHub Copilot native skill discovery.
+function Resolve-CopilotSkillsPath {
+    $homePath = Resolve-UserHomePath
+    return Join-Path $homePath '.copilot\skills'
+}

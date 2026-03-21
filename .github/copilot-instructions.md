@@ -92,8 +92,8 @@ Follow this order of operations on every task:
 - Treat `instructions/super-agent.instructions.md` as the mandatory controller contract for change-bearing work.
 - Default lifecycle:
   1. Super Agent intake
-  2. planning registration
-  3. spec registration when required
+  2. spec registration for non-trivial change-bearing work
+  3. planning registration
   4. specialist identification
   5. worktree isolation when warranted
   6. execution
@@ -160,7 +160,7 @@ Follow this order of operations on every task:
 - In `global-runtime` mode, infer repo topology and local commands from the target workspace itself; do not import the `copilot-instructions` repo topology into an unrelated client repository.
 - Change-bearing work must start with `instructions/super-agent.instructions.md` before planning and implementation.
 - Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the workspace planning surface under `planning/` when it exists, otherwise the fallback under `.build/super-agent/`.
-- When the work is non-trivial and design-bearing, create or update a spec under `planning/specs/` when available, otherwise under `.build/super-agent/specs/` before execution planning.
+- When the work is non-trivial and design-bearing, create or update a spec under `planning/specs/` when available, otherwise under `.build/super-agent/specs/`, and do not continue to planning until that spec is planning-ready.
 - Use domain instructions from that map according to the active route and file scope.
 - For generated build or deployment outputs, use `.build/` and `.deployment/` according to `instructions/artifact-layout.instructions.md`.
 

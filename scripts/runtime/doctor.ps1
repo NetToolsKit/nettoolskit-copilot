@@ -7,6 +7,7 @@
     - .github -> ~/.github
     - scripts -> ~/.github/scripts
     - .codex/skills -> ~/.agents/skills
+    - .github/skills -> ~/.copilot/skills
     - duplicate repo-managed skill folders that should not remain in ~/.codex/skills
     - .codex/mcp -> ~/.codex/shared-mcp
     - .codex/scripts (root tools) -> ~/.codex/shared-scripts
@@ -34,6 +35,9 @@
 
 .PARAMETER TargetAgentsSkillsPath
     Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
+
+.PARAMETER TargetCopilotSkillsPath
+    Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
 
 .PARAMETER Detailed
     Prints file-level entries for missing, extra, and drifted files.
@@ -63,6 +67,7 @@ param(
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
+    [string] $TargetCopilotSkillsPath,
     [switch] $Detailed,
     [switch] $SyncOnDrift,
     [switch] $StrictExtras
@@ -380,6 +385,12 @@ function Invoke-Doctor {
             IgnoreExtraPrefixes = @((Get-ChildItem -LiteralPath $TargetAgentsSkillsPath -Directory -ErrorAction SilentlyContinue | Where-Object { $managedSkillPrefixes -notcontains $_.Name } | ForEach-Object { $_.Name }))
         },
         [pscustomobject]@{
+            Name = '.github/skills -> runtime .copilot/skills'
+            Source = Join-Path $ResolvedRepoRoot '.github\skills'
+            Target = $TargetCopilotSkillsPath
+            IgnoreExtraPrefixes = @()
+        },
+        [pscustomobject]@{
             Name = '.codex/mcp -> runtime'
             Source = Join-Path $ResolvedRepoRoot '.codex\mcp'
             Target = Join-Path $TargetCodexPath 'shared-mcp'
@@ -445,6 +456,9 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
 }
+if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
+    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
+}
 
 Write-StyledOutput 'Runtime doctor report'
 Write-StyledOutput ("  repo root: {0}" -f $resolvedRepoRoot)
@@ -464,7 +478,7 @@ if ($hasDrift -and $SyncOnDrift) {
         throw "Bootstrap script not found: $bootstrapScript"
     }
 
-        & $bootstrapScript -RepoRoot $resolvedRepoRoot -TargetGithubPath $TargetGithubPath -TargetCodexPath $TargetCodexPath -TargetAgentsSkillsPath $TargetAgentsSkillsPath
+    & $bootstrapScript -RepoRoot $resolvedRepoRoot -TargetGithubPath $TargetGithubPath -TargetCodexPath $TargetCodexPath -TargetAgentsSkillsPath $TargetAgentsSkillsPath -TargetCopilotSkillsPath $TargetCopilotSkillsPath
     $reports = Invoke-Doctor -ResolvedRepoRoot $resolvedRepoRoot
     foreach ($report in $reports) {
         Write-MappingReport -Report $report -DetailedReport:$Detailed

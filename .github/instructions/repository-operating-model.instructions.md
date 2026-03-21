@@ -70,7 +70,9 @@ priority: high
 - Runtime sync:
   - `pwsh -File scripts/runtime/bootstrap.ps1`
   - mirrors `.github` and `scripts` into `~/.github`
-  - syncs `.codex` runtime assets into `~/.codex`
+  - syncs `.codex/skills` into `~/.agents/skills` as the single visible Codex/VS Code starter/controller surface
+  - syncs `.github/skills` into `~/.copilot/skills` for native GitHub Copilot skill discovery
+  - syncs remaining `.codex` runtime assets into `~/.codex`
 - Non-versioned artifact layout:
   - `.build/` for transient build and generated outputs
   - `.deployment/` for publish, package, release, and deployment-ready outputs

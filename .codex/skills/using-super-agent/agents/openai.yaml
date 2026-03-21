@@ -1,6 +1,0 @@
-interface:
-  display_name: "Using Super Agent"
-  short_description: "Start repository work through the repository-owned Super Agent lifecycle instead of external starter skills."
-  default_prompt: "Use $using-super-agent first, then invoke $super-agent to normalize the request, register planning, choose the specialist chain, and enforce validation-review-closeout."
-policy:
-  allow_implicit_invocation: true

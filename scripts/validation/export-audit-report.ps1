@@ -24,6 +24,9 @@
 .PARAMETER TargetAgentsSkillsPath
     Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
 
+.PARAMETER TargetCopilotSkillsPath
+    Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
+
 .PARAMETER SyncRuntime
     Runs bootstrap sync before health checks.
 
@@ -70,6 +73,7 @@ param(
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
+    [string] $TargetCopilotSkillsPath,
     [switch] $SyncRuntime,
     [switch] $Mirror,
     [switch] $StrictExtras,
@@ -164,6 +168,9 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
 }
+if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
+    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
+}
 
 $resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
 $resolvedHealthcheckOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $HealthcheckOutputPath
@@ -204,6 +211,7 @@ $healthcheckArgs = @{
     TargetGithubPath = $TargetGithubPath
     TargetCodexPath = $TargetCodexPath
     TargetAgentsSkillsPath = $TargetAgentsSkillsPath
+    TargetCopilotSkillsPath = $TargetCopilotSkillsPath
     OutputPath = $resolvedHealthcheckOutputPath
     LogPath = $healthcheckLogPath
     ValidationProfile = $ValidationProfile
@@ -272,6 +280,7 @@ $auditReport = [ordered]@{
         github = $TargetGithubPath
         codex = $TargetCodexPath
         agentsSkills = $TargetAgentsSkillsPath
+        copilotSkills = $TargetCopilotSkillsPath
     }
     options = [ordered]@{
         syncRuntime = [bool] $SyncRuntime

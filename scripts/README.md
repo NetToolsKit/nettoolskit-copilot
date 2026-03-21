@@ -21,7 +21,9 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Task-loop implementation with per-task spec review and code-quality review
 - ✅ Safe parallel batching for dependency-independent work items with write-set conflict blocking
 - ✅ Super Agent worktree isolation helper and thin lifecycle entry commands
-- ✅ Picker-visible `Using Super Agent` starter alias projected into `%USERPROFILE%\\.agents\\skills`
+- ✅ Single picker-visible `super-agent` controller projected into `%USERPROFILE%\\.agents\\skills`
+- ✅ Native Copilot skill projection from `.github/skills` into `%USERPROFILE%\\.copilot\\skills`
+- ✅ Repository-owned Copilot agent profile under `.github/agents/super-agent.agent.md`
 - ✅ Configurable VS Code startup-controller selector with repository default plus local and environment overrides
 - ✅ Repository-owned PreToolUse EOF normalization for supported VS Code AI edit tools
 - ✅ Repository-owned TDD and verification workflow contracts for execution stages
@@ -189,6 +191,7 @@ scripts/
 `runtime/bootstrap.ps1` syncs:
 - `.github/` -> `~/.github`
 - `.codex/skills/` -> `~/.agents/skills` as the canonical picker-visible/runtime skill target
+- `.github/skills/` -> `~/.copilot/skills` for native GitHub Copilot skill discovery
 - stale repo-managed duplicates are removed from `~/.codex/skills` while unmanaged/system skill folders are preserved
 - `.codex/mcp/` -> `~/.codex/shared-mcp`
 - `.codex/scripts/` (root MCP tools) + `scripts/common/` + `scripts/security/` -> `~/.codex/shared-scripts`

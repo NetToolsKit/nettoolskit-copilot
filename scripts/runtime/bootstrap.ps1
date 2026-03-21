@@ -7,6 +7,7 @@
     - <user-home>/.github
     - <user-home>/.github/scripts
     - <user-home>/.agents/skills
+    - <user-home>/.copilot/skills
     - <user-home>/.codex/shared-mcp
     - <user-home>/.codex/shared-scripts
     - <user-home>/.codex/shared-orchestration
@@ -33,6 +34,9 @@
 
 .PARAMETER TargetAgentsSkillsPath
     Target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
+
+.PARAMETER TargetCopilotSkillsPath
+    Target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
 
 .PARAMETER Mirror
     Mirrors target folders (removes files not present in source) when supported by the sync mode.
@@ -65,6 +69,7 @@ param(
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
+    [string] $TargetCopilotSkillsPath,
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
     [switch] $BackupConfig,
@@ -250,6 +255,22 @@ function Invoke-AgentsSkillSync {
     }
 }
 
+# Synchronizes repository-owned GitHub Copilot native skills into the local `~/.copilot/skills` path.
+function Invoke-CopilotSkillSync {
+    param(
+        [string] $SourceRoot,
+        [string] $DestinationRoot,
+        [switch] $MirrorMode
+    )
+
+    if (-not (Test-Path -LiteralPath $SourceRoot -PathType Container)) {
+        Write-VerboseColor ("Skipping missing Copilot skill source root: {0}" -f $SourceRoot) 'Yellow'
+        return
+    }
+
+    Invoke-DirectorySync -Source $SourceRoot -Destination $DestinationRoot -MirrorMode:$MirrorMode
+}
+
 # Removes repository-managed skill duplicates from the local `.codex/skills` runtime root.
 function Remove-ManagedCodexSkillDuplicates {
     param(
@@ -323,6 +344,9 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
 }
+if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
+    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
+}
 
 $sourceGithub = Join-Path $resolvedRepoRoot '.github'
 $sourceCodex = Join-Path $resolvedRepoRoot '.codex'
@@ -338,6 +362,7 @@ Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
 Invoke-DirectorySync -Source $sourceGithub -Destination $TargetGithubPath -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceScripts -Destination (Join-Path $TargetGithubPath 'scripts') -MirrorMode:$Mirror
 Invoke-AgentsSkillSync -SourceRoot (Join-Path $sourceCodex 'skills') -DestinationRoot $TargetAgentsSkillsPath -MirrorMode:$Mirror
+Invoke-CopilotSkillSync -SourceRoot (Join-Path $sourceGithub 'skills') -DestinationRoot $TargetCopilotSkillsPath -MirrorMode:$Mirror
 Remove-ManagedCodexSkillDuplicates -ManagedSourceRoot (Join-Path $sourceCodex 'skills') -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills')
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
@@ -356,6 +381,7 @@ Write-StyledOutput ("  .github -> {0}" -f $TargetGithubPath)
 Write-StyledOutput ("  scripts -> {0}" -f (Join-Path $TargetGithubPath 'scripts'))
 Write-StyledOutput ("  .codex/skills (source only; runtime duplicates removed from {0})" -f (Join-Path $TargetCodexPath 'skills'))
 Write-StyledOutput ("  .agents/skills (canonical picker/runtime skills) -> {0}" -f $TargetAgentsSkillsPath)
+Write-StyledOutput ("  .github/skills -> {0}" -f $TargetCopilotSkillsPath)
 Write-StyledOutput ("  .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
 Write-StyledOutput ("  .codex/scripts + scripts/common + scripts/security -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
 Write-StyledOutput ("  .codex/orchestration -> {0}" -f (Join-Path $TargetCodexPath 'shared-orchestration'))

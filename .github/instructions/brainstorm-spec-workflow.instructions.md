@@ -46,7 +46,8 @@ Each active spec should capture:
 - A spec does not replace the active plan.
 - The spec locks down intent and design direction.
 - The active plan under `planning/active/` or `.build/super-agent/planning/active/` translates the approved spec into ordered execution tasks, validation steps, routing, and closeout expectations.
-- For non-trivial work, planning should consume the current active spec before generating or updating the active plan.
+- For non-trivial change-bearing work, planning must consume the current active spec before generating or updating the active plan.
+- Do not generate or update the active plan for non-trivial change-bearing work until the active spec exists and its planning readiness statement is explicit.
 
 ## Closeout Rule
 - When a workstream is materially complete, move both the active plan and the active spec to their completed locations together when applicable.

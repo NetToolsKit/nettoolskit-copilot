@@ -31,14 +31,15 @@ Create or update an active planning document when any of these are true:
 For non-trivial work, prefer this execution chain unless the user explicitly asks for a lighter flow:
 1. `super-agent` contract
    - normalize the request and decide whether the task is change-bearing
+   - ensure spec registration happens before planning for non-trivial change-bearing work
    - ensure planning registration happens before execution
 2. `brainstorm-spec-architect` agent
    - create or update a spec in `planning/specs/active/` when the workspace owns that surface, otherwise in `.build/super-agent/specs/active/`
-   - do this when non-trivial work needs design direction locked before planning
+   - do this for non-trivial change-bearing work so design direction is locked before planning
    - capture decisions, alternatives, risks, acceptance criteria, and planning readiness
 3. `planner` agent
    - create or update the active plan in `planning/active/` when available, otherwise in `.build/super-agent/planning/active/`
-   - consume the current active spec when one exists
+   - consume the current active spec and require explicit planning readiness before planning starts
    - define scope, ordered tasks, validations, risks, and closeout requirements
 4. `context-token-optimizer` agent
    - reduce token load by selecting the minimal context pack

@@ -25,6 +25,9 @@
 .PARAMETER TargetAgentsSkillsPath
     Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
 
+.PARAMETER TargetCopilotSkillsPath
+    Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
+
 .PARAMETER Mirror
     Uses mirror mode for bootstrap sync.
 
@@ -71,6 +74,7 @@ param(
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
+    [string] $TargetCopilotSkillsPath,
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
     [switch] $BackupConfig,
@@ -193,6 +197,9 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
 }
+if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
+    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
+}
 
 $resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
 
@@ -231,6 +238,7 @@ $bootstrapArgs = @{
     TargetGithubPath = $TargetGithubPath
     TargetCodexPath = $TargetCodexPath
     TargetAgentsSkillsPath = $TargetAgentsSkillsPath
+    TargetCopilotSkillsPath = $TargetCopilotSkillsPath
 }
 if ($Mirror) {
     $bootstrapArgs.Mirror = $true
@@ -264,6 +272,7 @@ $healthcheckArgs = @{
     TargetGithubPath = $TargetGithubPath
     TargetCodexPath = $TargetCodexPath
     TargetAgentsSkillsPath = $TargetAgentsSkillsPath
+    TargetCopilotSkillsPath = $TargetCopilotSkillsPath
     OutputPath = $healthcheckReportPath
     LogPath = $healthcheckLogPath
 }
@@ -298,6 +307,7 @@ $report = [ordered]@{
         github = $TargetGithubPath
         codex = $TargetCodexPath
         agentsSkills = $TargetAgentsSkillsPath
+        copilotSkills = $TargetCopilotSkillsPath
     }
     options = [ordered]@{
         mirror = [bool] $Mirror

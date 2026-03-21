@@ -19,7 +19,7 @@ priority: high
 
 ## Hard Rule
 - Do not jump directly from user request to implementation.
-- The Super Agent flow owns intake, normalization, planning registration, specialist selection, execution strategy, validation, closeout, and planning-state updates.
+- The Super Agent flow owns intake, normalization, spec registration for non-trivial change-bearing work, planning registration, specialist selection, execution strategy, validation, closeout, and planning-state updates.
 - In Codex, prefer the repo-owned `super-agent` skill as the bootstrap controller whenever skill discovery can activate it.
 - In Copilot, enforce the same lifecycle through this instruction and the mandatory routing flow because Copilot does not execute local skills directly.
 - Do not assume `instruction-routing.catalog.yml`, `planning/`, or `instructions/repository-operating-model.instructions.md` belong to an arbitrary client repo unless that repo actually provides them.
@@ -29,15 +29,17 @@ priority: high
    - normalize the request
    - identify goals, constraints, risks, and whether the task is trivial or change-bearing
    - break the request into explicit work items when needed
-2. planning registration
+2. spec registration for non-trivial change-bearing work
+   - create or update the active spec under `planning/specs/active/` when the workspace provides `planning/specs/README.md`
+   - otherwise create or update the transient spec under `.build/super-agent/specs/active/`
+   - do not continue to planning until the active spec is planning-ready when the work is non-trivial, behavior-changing, architecture-affecting, workflow-affecting, or otherwise design-bearing
+   - skip a separate spec only when the work is trivial and no design direction needs to be locked before planning
+3. planning registration
    - create or update the active planning artifact under `planning/active/` when the workspace provides `planning/README.md`
    - otherwise create or update the transient planning artifact under `.build/super-agent/planning/active/`
    - reuse the existing active plan for the same workstream instead of creating duplicates
+   - consume the current active spec whenever one exists
    - define expected generated outputs up front and keep non-versioned artifacts under `.build/` or `.deployment/`
-3. spec registration when required
-   - create or update the active spec under `planning/specs/active/` when the workspace provides `planning/specs/README.md`
-   - otherwise create or update the transient spec under `.build/super-agent/specs/active/`
-   - skip a separate spec only when the work is trivial and no design direction needs to be locked before planning
 4. specialist identification
    - when the workspace provides `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`, route through that local catalog
    - otherwise build the minimal local context pack manually from the target repo structure and select the smallest correct specialist set

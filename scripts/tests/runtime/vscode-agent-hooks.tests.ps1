@@ -196,11 +196,11 @@ finally {
 }
 
 try {
-    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', 'using-super-agent', 'Process')
-    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_NAME', 'Using Super Agent', 'Process')
+    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', 'super-agent', 'Process')
+    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_NAME', 'Custom Super Agent', 'Process')
 
     $overrideResult = Invoke-HookScript -ScriptPath $sessionStartScript -Payload $sessionPayload
-    Assert-True ([string] $overrideResult.hookSpecificOutput.additionalContext -match 'Selected startup controller: Using Super Agent \(\$using-super-agent\) via environment-override') 'SessionStart hook should honor environment overrides for the startup controller.'
+    Assert-True ([string] $overrideResult.hookSpecificOutput.additionalContext -match 'Selected startup controller: Custom Super Agent \(\$super-agent\) via environment-override') 'SessionStart hook should honor environment overrides for the startup controller.'
 }
 finally {
     [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', $null, 'Process')

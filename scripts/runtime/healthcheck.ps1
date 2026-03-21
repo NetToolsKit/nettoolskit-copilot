@@ -29,6 +29,9 @@
 .PARAMETER TargetAgentsSkillsPath
     Runtime target path for picker-visible local skills. Defaults to <user-home>/.agents/skills.
 
+.PARAMETER TargetCopilotSkillsPath
+    Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
+
 .PARAMETER SyncRuntime
     Runs bootstrap sync before health checks.
 
@@ -75,6 +78,7 @@ param(
     [string] $TargetGithubPath,
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
+    [string] $TargetCopilotSkillsPath,
     [switch] $SyncRuntime,
     [switch] $Mirror,
     [switch] $StrictExtras,
@@ -227,11 +231,15 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
 }
+if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
+    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
+}
 
 $resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
 $resolvedTargetGithubPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetGithubPath
 $resolvedTargetCodexPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetCodexPath
 $resolvedTargetAgentsSkillsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetAgentsSkillsPath
+$resolvedTargetCopilotSkillsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetCopilotSkillsPath
 
 $resolvedLogPath = if ([string]::IsNullOrWhiteSpace($LogPath)) {
     $timestampToken = Get-Date -Format 'yyyyMMdd-HHmmss'
@@ -272,6 +280,7 @@ if ($SyncRuntime) {
         TargetGithubPath = $resolvedTargetGithubPath
         TargetCodexPath = $resolvedTargetCodexPath
         TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
+        TargetCopilotSkillsPath = $resolvedTargetCopilotSkillsPath
     }
     if ($Mirror) {
         $bootstrapArgs.Mirror = $true
@@ -298,6 +307,7 @@ $doctorArgs = @{
     TargetGithubPath = $resolvedTargetGithubPath
     TargetCodexPath = $resolvedTargetCodexPath
     TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
+    TargetCopilotSkillsPath = $resolvedTargetCopilotSkillsPath
 }
 if ($StrictExtras) {
     $doctorArgs.StrictExtras = $true
@@ -331,6 +341,7 @@ $report = [ordered]@{
         github = $resolvedTargetGithubPath
         codex = $resolvedTargetCodexPath
         agentsSkills = $resolvedTargetAgentsSkillsPath
+        copilotSkills = $resolvedTargetCopilotSkillsPath
     }
     options = [ordered]@{
         syncRuntime = [bool] $SyncRuntime

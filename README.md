@@ -11,13 +11,14 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Authoritative Source Policy:** Repository context first, then official docs by stack
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
+- ✅ **Native Copilot Super Agent Surface:** repository-owned `.github/skills/super-agent` and `.github/agents/super-agent.agent.md` for GitHub Copilot-native discovery
 - ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files
 - ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
 - ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
-- ✅ **Mandatory Non-Trivial Flow:** using-super-agent -> super-agent intake -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Mandatory Non-Trivial Flow:** super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
 - ✅ **Worker-Ready Planning:** planner work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
 - ✅ **Task-Level Review Loop:** each implementation slice can pass through task spec review and task quality review before completion
 - ✅ **Safe Parallel Dispatch:** dependency-aware batching blocks overlapping write-sets before parallel worker fan-out
@@ -207,7 +208,7 @@ pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 ```
 
-This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects repository-owned skills once into `~/.agents/skills` as the canonical visible/runtime skill target, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
+This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects the single visible repository-owned starter/controller into `~/.agents/skills`, projects native Copilot skills into `~/.copilot/skills`, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
 
 The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 

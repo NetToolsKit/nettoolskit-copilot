@@ -1,6 +1,6 @@
 ---
 name: super-agent
-description: Use when starting any workspace work that may change files, runtime assets, planning state, docs, settings, or governance. Normalize the request into the Super Agent lifecycle: intake, planning registration, specialist routing, execution, testing, review, closeout, and planning-state updates before implementation begins.
+description: Use as the single visible starter and controller for workspace work that may change files, runtime assets, planning state, docs, settings, or governance. Normalize the request into the Super Agent lifecycle: intake, spec registration for non-trivial work, planning registration, specialist routing, execution, testing, review, closeout, and planning-state updates before implementation begins.
 ---
 
 # Super Agent
@@ -20,6 +20,7 @@ description: Use when starting any workspace work that may change files, runtime
 - normalize the request before planning or implementation
 - act as the first controller for any change-bearing workspace request, even when not explicitly named
 - decide whether the task is change-bearing, non-trivial, or safe to keep lightweight
+- create or update the active spec first for non-trivial change-bearing work under `planning/` when available, otherwise under `.build/super-agent/`
 - create or update the active plan for any change-bearing workstream under `planning/` when available, otherwise under `.build/super-agent/`
 - identify the smallest correct specialist chain
 - keep execution sequential by default and allow multiple subagents only when write-scope conflicts are controlled
@@ -30,13 +31,14 @@ description: Use when starting any workspace work that may change files, runtime
 ## Required lifecycle
 
 1. Super Agent intake
-2. planning registration
-3. specialist identification
-4. execution
-5. testing
-6. code review
-7. closeout
-8. planning update
+2. spec registration for non-trivial change-bearing work
+3. planning registration
+4. specialist identification
+5. execution
+6. testing
+7. code review
+8. closeout
+9. planning update
 
 ## Invocation rule
 

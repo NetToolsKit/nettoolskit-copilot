@@ -84,6 +84,31 @@
   - `.github/hooks/scripts/subagent-start.ps1`
   - `scripts/validation/validate-agent-hooks.ps1`
   - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+- Simplified the repository-owned Super Agent startup surface to a single visible `super-agent` controller, removing the extra `using-super-agent` picker alias while preserving selector-based override support:
+  - `.codex/skills/super-agent/SKILL.md`
+  - `.codex/skills/README.md`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+  - `README.md`
+  - `scripts/README.md`
+- Hardened the Super Agent lifecycle so non-trivial change-bearing work now requires a planning-ready spec before planning can start:
+  - `.github/instructions/super-agent.instructions.md`
+  - `.github/instructions/brainstorm-spec-workflow.instructions.md`
+  - `.github/instructions/subagent-planning-workflow.instructions.md`
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.codex/skills/super-agent/SKILL.md`
+- Added native GitHub Copilot Super Agent surfaces and runtime projection so the shared bootstrap now syncs repository-owned Copilot skills into `%USERPROFILE%\\.copilot\\skills` and exposes a repo-owned agent profile under `.github/agents/`:
+  - `.github/skills/super-agent/SKILL.md`
+  - `.github/agents/super-agent.agent.md`
+  - `scripts/common/runtime-paths.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/validation/export-audit-report.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
 - Extended the manual EOF cleanup helper with a Git-status-scoped mode so trimming can be limited to files currently reported as changed instead of scanning the whole repository:
   - `scripts/maintenance/trim-trailing-blank-lines.ps1`
   - `scripts/tests/runtime/trim-trailing-blank-lines.tests.ps1`
