@@ -5,7 +5,9 @@
 .DESCRIPTION
     Provides helper functions for:
     - repository root discovery
+    - git-aware and solution/layout-aware root discovery
     - repository-relative path resolution
+    - generic absolute/relative path conversion
     - parent directory resolution
     - verbose diagnostics
     - structured execution logging
@@ -39,9 +41,19 @@ function Write-VerboseColor {
         [ConsoleColor] $Color = [ConsoleColor]::Gray
     )
 
-    if ($script:IsVerboseEnabled) {
+    $verboseVariable = Get-Variable -Name IsVerboseEnabled -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $verboseVariable -and [bool] $verboseVariable.Value) {
         Write-StyledOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message)
     }
+}
+
+# Writes plain verbose diagnostics when verbose mode is enabled.
+function Write-VerboseLog {
+    param(
+        [string] $Message
+    )
+
+    Write-VerboseColor -Message $Message -Color ([ConsoleColor]::Gray)
 }
 
 # Resolves the repository root using explicit and fallback location candidates.
@@ -51,6 +63,7 @@ function Resolve-RepositoryRoot {
     )
 
     $candidates = @()
+    $scriptRootVariable = Get-Variable -Name ScriptRoot -Scope Script -ErrorAction SilentlyContinue
 
     if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
         try {
@@ -61,8 +74,8 @@ function Resolve-RepositoryRoot {
         }
     }
 
-    if (-not [string]::IsNullOrWhiteSpace($script:ScriptRoot)) {
-        $candidates += (Resolve-Path -LiteralPath (Join-Path $script:ScriptRoot '..\..')).Path
+    if ($null -ne $scriptRootVariable -and -not [string]::IsNullOrWhiteSpace([string] $scriptRootVariable.Value)) {
+        $candidates += (Resolve-Path -LiteralPath (Join-Path ([string] $scriptRootVariable.Value) '..\..')).Path
     }
 
     $candidates += (Get-Location).Path
@@ -83,6 +96,86 @@ function Resolve-RepositoryRoot {
     throw 'Could not detect repository root containing both .github and .codex.'
 }
 
+# Resolves the current working repository root from an explicit path, git root,
+# or the current location when no git metadata is available.
+function Resolve-GitRootOrCurrentPath {
+    param(
+        [string] $RequestedRoot,
+        [string] $FallbackPath = (Get-Location).Path
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        if (-not (Test-Path -LiteralPath $RequestedRoot -PathType Container)) {
+            throw "Requested RepoRoot does not exist: $RequestedRoot"
+        }
+
+        return (Resolve-Path -LiteralPath $RequestedRoot).Path
+    }
+
+    $gitRoot = (& git -C $FallbackPath rev-parse --show-toplevel 2>$null)
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace([string] $gitRoot)) {
+        return ([string] $gitRoot).Trim()
+    }
+
+    return [System.IO.Path]::GetFullPath($FallbackPath)
+}
+
+# Resolves the current git checkout root from an explicit path or throws when
+# the current location is not inside a repository.
+function Resolve-ExplicitOrGitRoot {
+    param(
+        [string] $RequestedRoot,
+        [string] $StartPath = (Get-Location).Path
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        if (-not (Test-Path -LiteralPath $RequestedRoot -PathType Container)) {
+            throw "Requested RepoRoot does not exist: $RequestedRoot"
+        }
+
+        return (Resolve-Path -LiteralPath $RequestedRoot).Path
+    }
+
+    $gitRoot = (& git -C $StartPath rev-parse --show-toplevel 2>$null)
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace([string] $gitRoot)) {
+        return ([string] $gitRoot).Trim()
+    }
+
+    throw 'Could not detect a git repository root. Use -RepoRoot explicitly.'
+}
+
+# Resolves a root path by searching for solution or source/module layout markers.
+function Resolve-SolutionOrLayoutRoot {
+    param(
+        [string] $RequestedRoot,
+        [string] $StartPath = (Get-Location).Path
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        if (-not (Test-Path -LiteralPath $RequestedRoot -PathType Container)) {
+            throw "Requested RepoRoot '$RequestedRoot' does not exist."
+        }
+
+        return (Resolve-Path -LiteralPath $RequestedRoot).Path
+    }
+
+    $candidate = [System.IO.DirectoryInfo]::new($StartPath)
+    for ($step = 0; $step -lt 6 -and $null -ne $candidate; $step++) {
+        $candidatePath = $candidate.FullName
+        $hasSolution = @(Get-ChildItem -LiteralPath $candidatePath -Filter *.sln -File -ErrorAction SilentlyContinue).Count -gt 0
+        $hasSrc = Test-Path -LiteralPath (Join-Path $candidatePath 'src') -PathType Container
+        $hasModules = Test-Path -LiteralPath (Join-Path $candidatePath 'modules') -PathType Container
+
+        if ($hasSolution -or ($hasSrc -and $hasModules)) {
+            return $candidatePath
+        }
+
+        $candidate = $candidate.Parent
+    }
+
+    throw "Could not auto-detect repository root from '$StartPath'."
+}
+
 # Builds an absolute path from repository root and relative input path.
 function Resolve-RepoPath {
     param(
@@ -95,6 +188,44 @@ function Resolve-RepoPath {
     }
 
     return [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
+}
+
+# Builds an absolute path from repository root and relative input path.
+function Resolve-PathFromRoot {
+    param(
+        [string] $RootPath,
+        [string] $PathValue
+    )
+
+    return Resolve-FullPath -BasePath $RootPath -Candidate $PathValue
+}
+
+# Builds an absolute path from an arbitrary base path and relative input path.
+function Resolve-FullPath {
+    param(
+        [string] $BasePath,
+        [string] $Candidate
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Candidate)) {
+        return $null
+    }
+
+    if ([System.IO.Path]::IsPathRooted($Candidate)) {
+        return [System.IO.Path]::GetFullPath($Candidate)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Candidate))
+}
+
+# Converts an absolute path into a stable repository-relative path.
+function Convert-ToRelativeRepoPath {
+    param(
+        [string] $Root,
+        [string] $Path
+    )
+
+    return [System.IO.Path]::GetRelativePath($Root, $Path) -replace '\\', '/'
 }
 
 # Returns the parent directory for a given file path when available.
@@ -268,9 +399,10 @@ function Write-ExecutionIssueSummary {
         Write-StyledOutput $line | Out-Host
     }
 
-    if ($null -ne $script:LogFilePath) {
+    $logFilePathVariable = Get-Variable -Name LogFilePath -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $logFilePathVariable -and $null -ne $logFilePathVariable.Value) {
         foreach ($line in $summaryLines) {
-            Add-Content -LiteralPath $script:LogFilePath -Value $line
+            Add-Content -LiteralPath $logFilePathVariable.Value -Value $line
         }
     }
 
@@ -294,8 +426,9 @@ function Write-ExecutionLog {
         "[{0}] [{1}] [{2}] [{3}] {4}" -f $timestamp, $Level, $issue.id, $issue.code, $Message
     }
 
-    if ($null -ne $script:LogFilePath) {
-        Add-Content -LiteralPath $script:LogFilePath -Value $line
+    $logFilePathVariable = Get-Variable -Name LogFilePath -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $logFilePathVariable -and $null -ne $logFilePathVariable.Value) {
+        Add-Content -LiteralPath $logFilePathVariable.Value -Value $line
     }
 
     Write-StyledOutput $line | Out-Host

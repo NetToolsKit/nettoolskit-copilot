@@ -92,26 +92,12 @@ if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
 if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
     . $script:ConsoleStylePath
 }
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
+. $script:RepositoryHelpersPath
 $script:IsVerboseEnabled = [bool] $DetailedOutput
-
-# Emits verbose diagnostics only when detailed output is enabled.
-function Write-VerboseLog {
-    param([string] $Message)
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
-# Converts an absolute repository path into a stable relative artifact path.
-function Convert-ToRelativeRepoPath {
-    param(
-        [string] $Root,
-        [string] $Path
-    )
-
-    return [System.IO.Path]::GetRelativePath($Root, $Path) -replace '\\', '/'
-}
 
 # Builds a checksum-bearing artifact descriptor for the stage manifest.
 function Get-ArtifactDescriptor {
@@ -127,24 +113,6 @@ function Get-ArtifactDescriptor {
         path = (Convert-ToRelativeRepoPath -Root $Root -Path $Path)
         checksum = ("sha256:{0}" -f $hash.Hash.ToLowerInvariant())
     }
-}
-
-# Resolves repository-relative paths into normalized absolute paths.
-function Resolve-FullPath {
-    param(
-        [string] $BasePath,
-        [string] $Candidate
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Candidate)) {
-        return $null
-    }
-
-    if ([System.IO.Path]::IsPathRooted($Candidate)) {
-        return [System.IO.Path]::GetFullPath($Candidate)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Candidate))
 }
 
 # Reads a JSON file using a repository-wide deep parse depth.

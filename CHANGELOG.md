@@ -1,5 +1,20 @@
 ## [1.2.0] - 2026-03-20
 
+### Changed
+- Reduced duplicated validator logging scaffolding by introducing a shared `scripts/common/validation-logging.ps1` helper and moving the validation script family plus `runtime/validate-vscode-global-alignment.ps1` onto the shared warning/failure/verbose contract:
+  - `scripts/common/validation-logging.ps1`
+  - `scripts/common/repository-paths.ps1`
+  - `scripts/validation/*.ps1`
+  - `scripts/runtime/validate-vscode-global-alignment.ps1`
+  - `scripts/README.md`
+- Expanded `scripts/common/repository-paths.ps1` into the shared infrastructure boundary for runtime, security, orchestration, and runtime test scripts by centralizing repository/git/solution root discovery, generic path conversion helpers, verbose logging, and execution issue reporting while removing duplicated helper blocks from the affected script families:
+  - `scripts/common/repository-paths.ps1`
+  - `scripts/runtime/*.ps1`
+  - `scripts/security/*.ps1`
+  - `scripts/orchestration/**/*.ps1`
+  - `scripts/tests/runtime/*.ps1`
+  - `scripts/README.md`
+
 ### Fixed
 - Fixed fresh clones leaving the repository dirty before any user change because a set of tracked PowerShell scripts were committed with mixed line endings under the repository `*.ps1 eol=crlf` policy:
   - `scripts/deploy/deploy-backend-to-vps.ps1`

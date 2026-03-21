@@ -117,18 +117,6 @@ else {
 }
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $DetailedOutput
-
-# Writes verbose diagnostics with a stable prefix.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
 # Reads and parses JSON from path.
 function Read-JsonFile {
     param(

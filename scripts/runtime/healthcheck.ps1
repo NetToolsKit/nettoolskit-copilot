@@ -123,18 +123,6 @@ $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ExecutionIssueTracking
-
-# Writes verbose diagnostics.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
 # Runs a script check and captures status and execution metrics.
 function Invoke-ScriptCheck {
     param(

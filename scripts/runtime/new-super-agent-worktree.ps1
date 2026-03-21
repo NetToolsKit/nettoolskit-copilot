@@ -47,33 +47,26 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
+if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
+    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+}
+if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
+    . $script:ConsoleStylePath
+}
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
+    . $script:RepositoryHelpersPath
+}
+else {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
+$script:IsVerboseEnabled = [bool] $DetailedOutput
+
 $script:IsDetailedOutputEnabled = [bool] $DetailedOutput
-
-# Writes optional verbose diagnostics when detailed output is enabled.
-function Write-VerboseLog {
-    param([string] $Message)
-
-    if ($script:IsDetailedOutputEnabled) {
-        Write-Verbose ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
-# Resolves the repository root from the explicit path or current Git checkout.
-function Resolve-RepositoryRoot {
-    param([string] $RequestedRoot)
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        return (Resolve-Path -LiteralPath $RequestedRoot).Path
-    }
-
-    $gitRoot = @(git rev-parse --show-toplevel 2>$null)
-    if ($LASTEXITCODE -ne 0 -or $gitRoot.Count -eq 0) {
-        throw 'Could not detect a git repository root. Use -RepoRoot explicitly.'
-    }
-
-    return [System.IO.Path]::GetFullPath($gitRoot[0].Trim())
-}
-
 # Converts a human-readable worktree name into a deterministic slug.
 function Convert-ToSlug {
     param([string] $Value)
@@ -88,7 +81,7 @@ function Convert-ToSlug {
     return $slug
 }
 
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$resolvedRepoRoot = Resolve-ExplicitOrGitRoot -RequestedRoot $RepoRoot
 $repoName = Split-Path -Path $resolvedRepoRoot -Leaf
 $slug = Convert-ToSlug -Value $WorktreeName
 $effectiveBranchName = if ([string]::IsNullOrWhiteSpace($BranchName)) { "super/$slug" } else { $BranchName.Trim() }

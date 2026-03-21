@@ -30,16 +30,37 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# Resolves the repository root used for planning workspace checks.
-function Resolve-RepositoryRoot {
-    param([string] $RequestedRoot)
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        return (Resolve-Path -LiteralPath $RequestedRoot).Path
-    }
-
-    return (Get-Location).Path
+$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
+if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
+    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
 }
+if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
+    . $script:ConsoleStylePath
+}
+
+$script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf)) {
+    $script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf) {
+    . $script:RepositoryPathsPath
+}
+else {
+    throw "Missing shared repository path helper: $script:RepositoryPathsPath"
+}
+
+$script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\common\validation-logging.ps1'
+if (-not (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf)) {
+    $script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\..\common\validation-logging.ps1'
+}
+if (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf) {
+    . $script:ValidationLoggingPath
+}
+else {
+    throw "Missing shared validation logging helper: $script:ValidationLoggingPath"
+}
+
+$script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 
 # Records either a failure or a warning based on the selected validation mode.
 function Add-ValidationMessage {
@@ -52,11 +73,11 @@ function Add-ValidationMessage {
 
     if ($WarningOnlyMode) {
         $Warnings.Add($Message) | Out-Null
-        Write-Host ("[WARN] {0}" -f $Message)
+        Write-ValidationOutput ("[WARN] {0}" -f $Message)
     }
     else {
         $Failures.Add($Message) | Out-Null
-        Write-Host ("[FAIL] {0}" -f $Message)
+        Write-ValidationOutput ("[FAIL] {0}" -f $Message)
     }
 }
 
@@ -98,7 +119,7 @@ $onDemandDirectories = @(
 foreach ($relativePath in $onDemandDirectories) {
     $absolutePath = Join-Path $resolvedRepoRoot $relativePath
     if (-not (Test-Path -LiteralPath $absolutePath -PathType Container)) {
-        Write-Host ("[INFO] Optional planning directory will be created on demand: {0}" -f $relativePath)
+        Write-ValidationOutput ("[INFO] Optional planning directory will be created on demand: {0}" -f $relativePath)
     }
 }
 
@@ -107,14 +128,14 @@ if (Test-Path -LiteralPath $legacyPlanningPath) {
     Add-ValidationMessage -Message 'Legacy planning workspace found under .temp/planning. Move versioned planning artifacts to planning/.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
 }
 
-Write-Host ''
-Write-Host 'Planning structure validation summary'
-Write-Host ("  Warnings: {0}" -f $warnings.Count)
-Write-Host ("  Failures: {0}" -f $failures.Count)
+Write-ValidationOutput ''
+Write-ValidationOutput 'Planning structure validation summary'
+Write-ValidationOutput ("  Warnings: {0}" -f $warnings.Count)
+Write-ValidationOutput ("  Failures: {0}" -f $failures.Count)
 
 if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host 'Planning workspace validation passed.'
+Write-ValidationOutput 'Planning workspace validation passed.'
 exit 0

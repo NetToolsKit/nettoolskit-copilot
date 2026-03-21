@@ -58,18 +58,6 @@ else {
 
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
-
-# Writes stable verbose diagnostics.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 

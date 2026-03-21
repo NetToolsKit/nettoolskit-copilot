@@ -24,17 +24,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# Resolves the repository root for the current script or test fixture.
-function Resolve-RepositoryRoot {
-    param([string] $RequestedRoot)
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        return (Resolve-Path -LiteralPath $RequestedRoot).Path
-    }
-
-    return (Get-Location).Path
+$script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
+$script:RepositoryHelpersPath = Join-Path $script:ScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
 }
-
+. $script:RepositoryHelpersPath
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $validationScriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-planning-structure.ps1'
 

@@ -74,32 +74,24 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-# Resolves repository-relative paths into normalized absolute paths.
-function Resolve-FullPath {
-    param(
-        [string] $BasePath,
-        [string] $Candidate
-    )
-
-    if ([System.IO.Path]::IsPathRooted($Candidate)) {
-        return [System.IO.Path]::GetFullPath($Candidate)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Candidate))
+$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
+    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\console-style.ps1'
 }
-
-# Emits verbose diagnostics only when detailed output is enabled.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($DetailedOutput) {
-        Write-Host ("[VERBOSE] {0}" -f $Message)
-    }
+if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
+    . $script:ConsoleStylePath
 }
-
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
+    . $script:RepositoryHelpersPath
+}
+else {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
+$script:IsVerboseEnabled = [bool] $DetailedOutput
 $resolvedRepoRoot = [System.IO.Path]::GetFullPath($RepoRoot)
 $resolvedWorkingDirectory = if ([string]::IsNullOrWhiteSpace($WorkingDirectory)) { $resolvedRepoRoot } else { Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $WorkingDirectory }
 $resolvedPromptPath = Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $PromptPath

@@ -92,45 +92,12 @@ if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
 if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
     . $script:ConsoleStylePath
 }
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
+. $script:RepositoryHelpersPath
 $script:IsVerboseEnabled = [bool] $DetailedOutput
-
-# Writes verbose diagnostics for route-stage execution.
-function Write-VerboseLog {
-    param([string] $Message)
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
-# Resolves relative stage paths against a base directory.
-function Resolve-FullPath {
-    param(
-        [string] $BasePath,
-        [string] $Candidate
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Candidate)) {
-        return $null
-    }
-
-    if ([System.IO.Path]::IsPathRooted($Candidate)) {
-        return [System.IO.Path]::GetFullPath($Candidate)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Candidate))
-}
-
-# Converts an absolute path into a repository-relative artifact path.
-function Convert-ToRelativeRepoPath {
-    param(
-        [string] $Root,
-        [string] $Path
-    )
-
-    return [System.IO.Path]::GetRelativePath($Root, $Path) -replace '\\', '/'
-}
-
 # Builds one artifact descriptor with checksum metadata.
 function Get-ArtifactDescriptor {
     param(

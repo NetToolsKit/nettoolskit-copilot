@@ -23,6 +23,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
+$script:RepositoryHelpersPath = Join-Path $script:ScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
+. $script:RepositoryHelpersPath
 # Fails the current test when the actual and expected values differ.
 function Assert-Equal {
     param([object] $Actual, [object] $Expected, [string] $Message)

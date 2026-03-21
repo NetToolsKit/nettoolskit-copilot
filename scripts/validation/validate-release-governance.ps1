@@ -50,7 +50,6 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-
 $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
 if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
     $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
@@ -58,98 +57,35 @@ if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
 if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
     . $script:ConsoleStylePath
 }
+
+$script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf)) {
+    $script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf) {
+    . $script:RepositoryPathsPath
+}
+else {
+    throw "Missing shared repository path helper: $script:RepositoryPathsPath"
+}
+$script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\common\validation-logging.ps1'
+if (-not (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf)) {
+    $script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\..\common\validation-logging.ps1'
+}
+if (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf) {
+    . $script:ValidationLoggingPath
+}
+else {
+    throw "Missing shared validation logging helper: $script:ValidationLoggingPath"
+}
+
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
-$script:Failures = New-Object System.Collections.Generic.List[string]
-$script:Warnings = New-Object System.Collections.Generic.List[string]
 $script:IsVerboseEnabled = [bool] $Verbose
+Initialize-ValidationState -VerboseEnabled $script:IsVerboseEnabled
 
 # -------------------------------
 # Helpers
 # -------------------------------
-# Writes verbose diagnostics with a logical color label.
-function Write-VerboseColor {
-    param(
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message)
-    }
-}
-
-# Registers a validation failure and prints a standardized failure message.
-function Add-ValidationFailure {
-    param(
-        [string] $Message
-    )
-
-    $script:Failures.Add($Message) | Out-Null
-    Write-StyledOutput ("[FAIL] {0}" -f $Message)
-}
-
-# Registers a validation warning and prints a standardized warning message.
-function Add-ValidationWarning {
-    param(
-        [string] $Message
-    )
-
-    $script:Warnings.Add($Message) | Out-Null
-    Write-StyledOutput ("[WARN] {0}" -f $Message)
-}
-
-# Builds an absolute path from repository root and relative input path.
-function Resolve-RepoPath {
-    param(
-        [string] $Root,
-        [string] $Path
-    )
-
-    if ([System.IO.Path]::IsPathRooted($Path)) {
-        return [System.IO.Path]::GetFullPath($Path)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
-}
-
-# Resolves the repository root using explicit and fallback location candidates.
-function Resolve-RepositoryRoot {
-    param(
-        [string] $RequestedRoot
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
-        }
-        catch {
-            throw "Invalid RepoRoot path: $RequestedRoot"
-        }
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($script:ScriptRoot)) {
-        $candidates += (Resolve-Path -LiteralPath (Join-Path $script:ScriptRoot '..\..')).Path
-    }
-
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($i = 0; $i -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $i++) {
-            $hasLayout = (Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))
-            if ($hasLayout) {
-                Write-VerboseColor ("Repository root detected: {0}" -f $current) 'Green'
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw 'Could not detect repository root containing both .github and .codex.'
-}
 
 # Extracts semantic version entries and dates from changelog content.
 function Get-ChangelogEntryList {

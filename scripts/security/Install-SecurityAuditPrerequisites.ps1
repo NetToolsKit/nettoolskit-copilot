@@ -83,6 +83,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $script:IsDetailedLogsEnabled = [bool] $DetailedLogs
+$script:IsVerboseEnabled = [bool] $DetailedLogs
 $script:Failures = New-Object System.Collections.Generic.List[string]
 $script:Warnings = New-Object System.Collections.Generic.List[string]
 
@@ -95,14 +96,16 @@ if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
 }
 
 # Writes verbose diagnostics.
-function Write-VerboseLog {
-    param([string] $Message)
-
-    if ($script:IsDetailedLogsEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
 }
-
+if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
+    . $script:RepositoryHelpersPath
+}
+else {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
 # Registers non-blocking warning.
 function Add-SetupWarning {
     param([string] $Message)
@@ -118,28 +121,6 @@ function Add-SetupFailure {
     $script:Failures.Add($Message) | Out-Null
     Write-StyledOutput ("[FAIL] {0}" -f $Message)
 }
-
-# Resolves repository root from parameter, git root, or current directory.
-function Resolve-RepositoryRoot {
-    param([string] $RequestedRoot)
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        if (-not (Test-Path -LiteralPath $RequestedRoot -PathType Container)) {
-            throw "Requested RepoRoot does not exist: $RequestedRoot"
-        }
-
-        return (Resolve-Path -LiteralPath $RequestedRoot).Path
-    }
-
-    $currentPath = (Get-Location).Path
-    $gitRoot = (& git -C $currentPath rev-parse --show-toplevel 2>$null)
-    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace([string] $gitRoot)) {
-        return ([string] $gitRoot).Trim()
-    }
-
-    return $currentPath
-}
-
 # Checks whether command is available in current PATH.
 function Test-CommandAvailability {
     param([string] $CommandName)
@@ -485,7 +466,7 @@ function Invoke-PrerequisiteSetup {
 }
 
 try {
-    $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+    $resolvedRepoRoot = Resolve-GitRootOrCurrentPath -RequestedRoot $RepoRoot
     Set-Location -LiteralPath $resolvedRepoRoot
 
     $platformName = Get-PlatformName

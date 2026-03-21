@@ -71,73 +71,19 @@ if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
 if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
     . $script:ConsoleStylePath
 }
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
+    . $script:RepositoryHelpersPath
+}
+else {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
+
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
-
-# Writes verbose diagnostics.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
-# Resolves repository root from input and fallback candidates.
-function Resolve-RepositoryRoot {
-    param(
-        [string] $RequestedRoot
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
-        }
-        catch {
-            throw "Invalid RepoRoot path: $RequestedRoot"
-        }
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($script:ScriptRoot)) {
-        $candidates += (Resolve-Path -LiteralPath (Join-Path $script:ScriptRoot '..\..')).Path
-    }
-
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($index = 0; $index -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $index++) {
-            $hasLayout = (Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))
-            if ($hasLayout) {
-                Write-VerboseLog ("Repository root detected: {0}" -f $current)
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw 'Could not detect repository root containing both .github and .codex.'
-}
-
-# Resolves one path from repository root.
-function Resolve-RepoPath {
-    param(
-        [string] $Root,
-        [string] $Path
-    )
-
-    if ([System.IO.Path]::IsPathRooted($Path)) {
-        return [System.IO.Path]::GetFullPath($Path)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
-}
-
 # Reads one JSON or JSONC file.
 function Read-JsonFile {
     param(

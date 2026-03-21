@@ -28,29 +28,37 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# Resolves repository root from input and fallback candidates.
-function Resolve-RepositoryRoot {
-    param([string] $RequestedRoot)
-
-    $candidates = @()
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
-    }
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($index = 0; $index -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $index++) {
-            if ((Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))) {
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw 'Could not detect repository root containing both .github and .codex.'
+$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
+if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
+    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
 }
+if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
+    . $script:ConsoleStylePath
+}
+
+$script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf)) {
+    $script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+}
+if (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf) {
+    . $script:RepositoryPathsPath
+}
+else {
+    throw "Missing shared repository path helper: $script:RepositoryPathsPath"
+}
+
+$script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\common\validation-logging.ps1'
+if (-not (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf)) {
+    $script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\..\common\validation-logging.ps1'
+}
+if (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf) {
+    . $script:ValidationLoggingPath
+}
+else {
+    throw "Missing shared validation logging helper: $script:ValidationLoggingPath"
+}
+
+$script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 
 # Records either a failure or a warning based on validation mode.
 function Add-ValidationMessage {
@@ -63,11 +71,11 @@ function Add-ValidationMessage {
 
     if ($WarningOnlyMode) {
         $Warnings.Add($Message) | Out-Null
-        Write-Host ("[WARN] {0}" -f $Message)
+        Write-ValidationOutput ("[WARN] {0}" -f $Message)
     }
     else {
         $Failures.Add($Message) | Out-Null
-        Write-Host ("[FAIL] {0}" -f $Message)
+        Write-ValidationOutput ("[FAIL] {0}" -f $Message)
     }
 }
 
@@ -192,14 +200,14 @@ if (Test-Path -LiteralPath $commonScriptPath -PathType Leaf) {
     }
 }
 
-Write-Host ''
-Write-Host 'Agent hooks validation summary'
-Write-Host ("  Warnings: {0}" -f $warnings.Count)
-Write-Host ("  Failures: {0}" -f $failures.Count)
+Write-ValidationOutput ''
+Write-ValidationOutput 'Agent hooks validation summary'
+Write-ValidationOutput ("  Warnings: {0}" -f $warnings.Count)
+Write-ValidationOutput ("  Failures: {0}" -f $failures.Count)
 
 if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host 'Agent hooks validation passed.'
+Write-ValidationOutput 'Agent hooks validation passed.'
 exit 0

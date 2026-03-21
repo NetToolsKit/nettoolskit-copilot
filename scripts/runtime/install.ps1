@@ -139,18 +139,6 @@ $script:IsVerboseEnabled = [bool] $Verbose
 $script:LogFilePath = $null
 
 Initialize-ExecutionIssueTracking
-
-# Writes verbose diagnostics.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message) | Out-Host
-    }
-}
-
 # Builds a deterministic install step contract.
 function New-InstallStep {
     param(

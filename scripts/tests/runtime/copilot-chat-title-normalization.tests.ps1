@@ -25,40 +25,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# Resolves the repository root for the current script or test fixture.
-function Resolve-RepositoryRoot {
-    param(
-        [string] $RequestedRoot
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
-        }
-        catch {
-            throw "Invalid RepoRoot path: $RequestedRoot"
-        }
-    }
-
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($index = 0; $index -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $index++) {
-            $hasLayout = (Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))
-            if ($hasLayout) {
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw 'Could not detect repository root containing both .github and .codex.'
+$script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
+$script:RepositoryHelpersPath = Join-Path $script:ScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
 }
-
+. $script:RepositoryHelpersPath
 # Fails the current test when the supplied condition is false.
 function Assert-True {
     param(

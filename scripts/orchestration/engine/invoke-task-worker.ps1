@@ -109,21 +109,16 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-# Resolves absolute paths from repository-relative candidates.
-function Resolve-FullPath {
-    param([string] $BasePath, [string] $Candidate)
-    if ([string]::IsNullOrWhiteSpace($Candidate)) { return $null }
-    if ([System.IO.Path]::IsPathRooted($Candidate)) { return [System.IO.Path]::GetFullPath($Candidate) }
-    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Candidate))
+$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
+    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\repository-paths.ps1'
 }
-
-# Converts an absolute path into a stable repository-relative path.
-function Convert-ToRelativeRepoPath {
-    param([string] $Root, [string] $Path)
-    return [System.IO.Path]::GetRelativePath($Root, $Path) -replace '\\', '/'
+if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
+    . $script:RepositoryHelpersPath
 }
-
+else {
+    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+}
 # Reads JSON with repository-standard parse depth.
 function Read-JsonFile {
     param([string] $Path)
