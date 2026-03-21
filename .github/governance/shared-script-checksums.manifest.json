@@ -9,7 +9,7 @@
   "entries": [
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "d7011471d349918260f8303cd0737caf1430430ff05bceebe8d6b906a3f120ea"
+      "sha256": "65ec9cc10847485dc4efe0b03ab29a939e7b0b9a8cb4f94ee44ff57b9cb69d88"
     },
     {
       "path": "scripts/common/console-style.ps1",
@@ -20,8 +20,12 @@
       "sha256": "4869124784ba480b3fe3cec189b1d5b0867b8952bc52770de20ee60f7b8a2bc1"
     },
     {
+      "path": "scripts/common/runtime-install-profiles.ps1",
+      "sha256": "b579b35359819de500b94ef43f99c3143b4e8a83b88af61cda6632e8d8f27a8d"
+    },
+    {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "733b33c84af9bd59627ec4d71938de9c0b4d5e5248ea17af450810804885cb8f"
+      "sha256": "b6562fb277b090f8a56fb06046c4257dbb90856734ced68192a5a18a67b5264f"
     },
     {
       "path": "scripts/common/validation-logging.ps1",

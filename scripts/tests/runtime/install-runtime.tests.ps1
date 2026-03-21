@@ -60,6 +60,28 @@ function Assert-Equal {
     }
 }
 
+# Fails the current test when the supplied script block does not throw.
+function Assert-ThrowsLike {
+    param(
+        [scriptblock] $Action,
+        [string] $ExpectedPattern,
+        [string] $Message
+    )
+
+    try {
+        & $Action
+    }
+    catch {
+        if ($_.Exception.Message -match $ExpectedPattern) {
+            return
+        }
+
+        throw ("{0} Expected pattern='{1}' Actual='{2}'" -f $Message, $ExpectedPattern, $_.Exception.Message)
+    }
+
+    throw $Message
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $scriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/install.ps1'
 
@@ -68,17 +90,39 @@ try {
 
     Assert-True -Condition ($null -ne $previewResult) -Message 'Install preview must return a result object.'
     Assert-Equal -Actual $previewResult.previewOnly -Expected $true -Message 'Install preview must flag previewOnly.'
-    Assert-Equal -Actual @($previewResult.steps).Count -Expected 6 -Message 'Install preview must plan the default onboarding steps.'
-    Assert-Equal -Actual $previewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Install preview must start with bootstrap.'
-    Assert-Equal -Actual $previewResult.steps[4].name -Expected 'Configure global Git aliases' -Message 'Install preview must include global Git alias setup after local hooks.'
-    Assert-Equal -Actual $previewResult.steps[5].name -Expected 'Run repository healthcheck' -Message 'Install preview must end with healthcheck.'
-    Assert-True -Condition ($previewResult.steps[0].scriptPath -like '*scripts\runtime\bootstrap.ps1') -Message 'Install preview must reference bootstrap.ps1.'
+    Assert-Equal -Actual $previewResult.runtimeProfile.name -Expected 'none' -Message 'Install preview must default to the non-intrusive none profile.'
+    Assert-Equal -Actual @($previewResult.steps).Count -Expected 0 -Message 'Install preview must not plan any steps for the default none profile.'
     Assert-Equal -Actual $previewResult.summary.overallStatus -Expected 'preview' -Message 'Install preview must report preview summary status.'
     Assert-Equal -Actual $previewResult.issues.totalIssues -Expected 0 -Message 'Install preview must not report issues when only planning.'
 
-    $reducedPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -SkipGlobalSettings -SkipGlobalSnippets -SkipGitHooks -SkipHealthcheck
+    $allPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile all
 
-    Assert-Equal -Actual @($reducedPreviewResult.steps).Count -Expected 1 -Message 'Install preview must honor skip switches.'
+    Assert-Equal -Actual $allPreviewResult.runtimeProfile.name -Expected 'all' -Message 'Install preview must honor explicit all profile selection.'
+    Assert-Equal -Actual @($allPreviewResult.steps).Count -Expected 6 -Message 'Install preview must plan the full onboarding steps for profile all.'
+    Assert-Equal -Actual $allPreviewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'All-profile install preview must start with bootstrap.'
+    Assert-Equal -Actual $allPreviewResult.steps[4].name -Expected 'Configure global Git aliases' -Message 'All-profile install preview must include global Git alias setup after local hooks.'
+    Assert-Equal -Actual $allPreviewResult.steps[5].name -Expected 'Run repository healthcheck' -Message 'All-profile install preview must end with healthcheck.'
+    Assert-True -Condition ($allPreviewResult.steps[0].scriptPath -like '*scripts\runtime\bootstrap.ps1') -Message 'All-profile install preview must reference bootstrap.ps1.'
+    Assert-Equal -Actual $allPreviewResult.summary.overallStatus -Expected 'preview' -Message 'All-profile install preview must report preview summary status.'
+    Assert-Equal -Actual $allPreviewResult.issues.totalIssues -Expected 0 -Message 'All-profile install preview must not report issues when only planning.'
+
+    $githubPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile github
+
+    Assert-Equal -Actual @($githubPreviewResult.steps).Count -Expected 2 -Message 'GitHub-profile install preview must plan bootstrap plus healthcheck only.'
+    Assert-Equal -Actual $githubPreviewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'GitHub-profile install preview must keep bootstrap.'
+    Assert-Equal -Actual $githubPreviewResult.steps[1].name -Expected 'Run repository healthcheck' -Message 'GitHub-profile install preview must keep healthcheck.'
+
+    $codexPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile codex
+
+    Assert-Equal -Actual @($codexPreviewResult.steps).Count -Expected 2 -Message 'Codex-profile install preview must plan bootstrap plus healthcheck only.'
+    Assert-Equal -Actual $codexPreviewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Codex-profile install preview must keep bootstrap.'
+    Assert-Equal -Actual $codexPreviewResult.steps[1].name -Expected 'Run repository healthcheck' -Message 'Codex-profile install preview must keep healthcheck.'
+
+    Assert-ThrowsLike -Action { & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile github -ApplyMcpConfig } -ExpectedPattern 'does not enable the Codex runtime surface' -Message 'Install preview must reject MCP apply when the selected profile does not enable Codex.'
+
+    $reducedPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile all -SkipGlobalSettings -SkipGlobalSnippets -SkipGitHooks -SkipHealthcheck
+
+    Assert-Equal -Actual @($reducedPreviewResult.steps).Count -Expected 1 -Message 'Install preview must honor skip switches on top of profile all.'
     Assert-Equal -Actual $reducedPreviewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Reduced install preview must keep bootstrap.'
     Assert-Equal -Actual $reducedPreviewResult.summary.overallStatus -Expected 'preview' -Message 'Reduced install preview must report preview summary status.'
     Assert-Equal -Actual $reducedPreviewResult.issues.totalIssues -Expected 0 -Message 'Reduced install preview must not report issues when only planning.'

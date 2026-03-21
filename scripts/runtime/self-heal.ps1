@@ -28,6 +28,11 @@
 .PARAMETER TargetCopilotSkillsPath
     Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
 
+.PARAMETER RuntimeProfile
+    Runtime activation profile passed to bootstrap and healthcheck. Supported
+    values are defined in `.github/governance/runtime-install-profiles.json`.
+    Defaults to `all` when self-heal is invoked directly.
+
 .PARAMETER Mirror
     Uses mirror mode for bootstrap sync.
 
@@ -75,6 +80,7 @@ param(
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
     [string] $TargetCopilotSkillsPath,
+    [string] $RuntimeProfile,
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
     [switch] $BackupConfig,
@@ -98,7 +104,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
@@ -171,6 +177,7 @@ function Invoke-ScriptStep {
 # -------------------------------
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
+$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
 
 $userHome = Resolve-UserHomePath
 if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
@@ -209,6 +216,7 @@ Set-Content -LiteralPath $resolvedLogPath -Value ("# self-heal log`n# generatedA
 $script:LogFilePath = $resolvedLogPath
 
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
+Write-ExecutionLog -Level 'INFO' -Message ("Runtime profile: {0}" -f $resolvedRuntimeProfile.Name)
 Write-ExecutionLog -Level 'INFO' -Message ("Output report: {0}" -f $resolvedOutputPath)
 Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
 
@@ -224,6 +232,7 @@ $bootstrapArgs = @{
     TargetCodexPath = $TargetCodexPath
     TargetAgentsSkillsPath = $TargetAgentsSkillsPath
     TargetCopilotSkillsPath = $TargetCopilotSkillsPath
+    RuntimeProfile = $resolvedRuntimeProfile.Name
 }
 if ($Mirror) {
     $bootstrapArgs.Mirror = $true
@@ -258,6 +267,7 @@ $healthcheckArgs = @{
     TargetCodexPath = $TargetCodexPath
     TargetAgentsSkillsPath = $TargetAgentsSkillsPath
     TargetCopilotSkillsPath = $TargetCopilotSkillsPath
+    RuntimeProfile = $resolvedRuntimeProfile.Name
     OutputPath = $healthcheckReportPath
     LogPath = $healthcheckLogPath
 }
@@ -300,6 +310,7 @@ $report = [ordered]@{
         backupConfig = [bool] $BackupConfig
         applyVscodeTemplates = [bool] $ApplyVscodeTemplates
         strictExtras = [bool] $StrictExtras
+        runtimeProfile = $resolvedRuntimeProfile.Name
     }
     summary = [ordered]@{
         totalSteps = $steps.Count

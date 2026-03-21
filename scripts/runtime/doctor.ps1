@@ -40,6 +40,11 @@
 .PARAMETER TargetCopilotSkillsPath
     Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
 
+.PARAMETER RuntimeProfile
+    Runtime activation profile. Supported values are defined in
+    `.github/governance/runtime-install-profiles.json`. Defaults to `all`
+    when doctor is invoked directly.
+
 .PARAMETER Detailed
     Prints file-level entries for missing, extra, and drifted files.
 
@@ -69,6 +74,7 @@ param(
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
     [string] $TargetCopilotSkillsPath,
+    [string] $RuntimeProfile,
     [switch] $Detailed,
     [switch] $SyncOnDrift,
     [switch] $StrictExtras
@@ -87,7 +93,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 # Builds a file hash inventory for drift comparison operations.
 function Get-FileInventory {
@@ -314,76 +320,85 @@ function Write-MappingReport {
 # Executes all runtime mapping drift checks and returns detailed reports.
 function Invoke-Doctor {
     param(
-        [string] $ResolvedRepoRoot
+        [string] $ResolvedRepoRoot,
+        [object] $ResolvedRuntimeProfile
     )
 
     $managedSkillRoot = Join-Path $ResolvedRepoRoot '.codex\skills'
     $managedSkillPrefixes = @((Get-ManagedSkillNameList -SkillRoot $managedSkillRoot))
 
-    $mappings = @(
-        [pscustomobject]@{
-            Name = '.github -> runtime'
-            Source = Join-Path $ResolvedRepoRoot '.github'
-            Target = $TargetGithubPath
-            IgnoreExtraPrefixes = @('scripts\', 'scripts/')
-        },
-        [pscustomobject]@{
-            Name = 'scripts -> runtime .github/scripts'
-            Source = Join-Path $ResolvedRepoRoot 'scripts'
-            Target = Join-Path $TargetGithubPath 'scripts'
-            IgnoreExtraPrefixes = @()
-        },
-        [pscustomobject]@{
-            Name = '.codex/skills -> runtime .agents/skills'
-            Source = $managedSkillRoot
-            Target = $TargetAgentsSkillsPath
-            IncludePrefixes = $managedSkillPrefixes
-            IgnoreSourcePrefixes = @('README.md')
-            IgnoreExtraPrefixes = @((Get-ChildItem -LiteralPath $TargetAgentsSkillsPath -Directory -ErrorAction SilentlyContinue | Where-Object { $managedSkillPrefixes -notcontains $_.Name } | ForEach-Object { $_.Name }))
-        },
-        [pscustomobject]@{
-            Name = '.github/skills -> runtime .copilot/skills'
-            Source = Join-Path $ResolvedRepoRoot '.github\skills'
-            Target = $TargetCopilotSkillsPath
-            IgnoreExtraPrefixes = @()
-        },
-        [pscustomobject]@{
-            Name = '.codex/mcp -> runtime'
-            Source = Join-Path $ResolvedRepoRoot '.codex\mcp'
-            Target = Join-Path $TargetCodexPath 'shared-mcp'
-            IgnoreExtraPrefixes = @()
-        },
-        [pscustomobject]@{
-            Name = '.codex/scripts (root tools) -> runtime'
-            Source = Join-Path $ResolvedRepoRoot '.codex\scripts'
-            Target = Join-Path $TargetCodexPath 'shared-scripts'
-            IgnoreExtraPrefixes = @('common\', 'common/', 'security\', 'security/', 'maintenance\', 'maintenance/')
-        },
-        [pscustomobject]@{
-            Name = 'scripts/common -> runtime'
-            Source = Join-Path $ResolvedRepoRoot 'scripts\common'
-            Target = Join-Path $TargetCodexPath 'shared-scripts\common'
-            IgnoreExtraPrefixes = @()
-        },
-        [pscustomobject]@{
-            Name = 'scripts/security -> runtime'
-            Source = Join-Path $ResolvedRepoRoot 'scripts\security'
-            Target = Join-Path $TargetCodexPath 'shared-scripts\security'
-            IgnoreExtraPrefixes = @()
-        },
-        [pscustomobject]@{
-            Name = 'scripts/maintenance -> runtime'
-            Source = Join-Path $ResolvedRepoRoot 'scripts\maintenance'
-            Target = Join-Path $TargetCodexPath 'shared-scripts\maintenance'
-            IgnoreExtraPrefixes = @()
-        },
-        [pscustomobject]@{
-            Name = '.codex/orchestration -> runtime'
-            Source = Join-Path $ResolvedRepoRoot '.codex\orchestration'
-            Target = Join-Path $TargetCodexPath 'shared-orchestration'
-            IgnoreExtraPrefixes = @()
-        }
-    )
+    $mappings = @()
+    if ($ResolvedRuntimeProfile.EnableGithubRuntime) {
+        $mappings += @(
+            [pscustomobject]@{
+                Name = '.github -> runtime'
+                Source = Join-Path $ResolvedRepoRoot '.github'
+                Target = $TargetGithubPath
+                IgnoreExtraPrefixes = @('scripts\', 'scripts/')
+            },
+            [pscustomobject]@{
+                Name = 'scripts -> runtime .github/scripts'
+                Source = Join-Path $ResolvedRepoRoot 'scripts'
+                Target = Join-Path $TargetGithubPath 'scripts'
+                IgnoreExtraPrefixes = @()
+            },
+            [pscustomobject]@{
+                Name = '.github/skills -> runtime .copilot/skills'
+                Source = Join-Path $ResolvedRepoRoot '.github\skills'
+                Target = $TargetCopilotSkillsPath
+                IgnoreExtraPrefixes = @()
+            }
+        )
+    }
+
+    if ($ResolvedRuntimeProfile.EnableCodexRuntime) {
+        $mappings += @(
+            [pscustomobject]@{
+                Name = '.codex/skills -> runtime .agents/skills'
+                Source = $managedSkillRoot
+                Target = $TargetAgentsSkillsPath
+                IncludePrefixes = $managedSkillPrefixes
+                IgnoreSourcePrefixes = @('README.md')
+                IgnoreExtraPrefixes = @((Get-ChildItem -LiteralPath $TargetAgentsSkillsPath -Directory -ErrorAction SilentlyContinue | Where-Object { $managedSkillPrefixes -notcontains $_.Name } | ForEach-Object { $_.Name }))
+            },
+            [pscustomobject]@{
+                Name = '.codex/mcp -> runtime'
+                Source = Join-Path $ResolvedRepoRoot '.codex\mcp'
+                Target = Join-Path $TargetCodexPath 'shared-mcp'
+                IgnoreExtraPrefixes = @()
+            },
+            [pscustomobject]@{
+                Name = '.codex/scripts (root tools) -> runtime'
+                Source = Join-Path $ResolvedRepoRoot '.codex\scripts'
+                Target = Join-Path $TargetCodexPath 'shared-scripts'
+                IgnoreExtraPrefixes = @('common\', 'common/', 'security\', 'security/', 'maintenance\', 'maintenance/')
+            },
+            [pscustomobject]@{
+                Name = 'scripts/common -> runtime'
+                Source = Join-Path $ResolvedRepoRoot 'scripts\common'
+                Target = Join-Path $TargetCodexPath 'shared-scripts\common'
+                IgnoreExtraPrefixes = @()
+            },
+            [pscustomobject]@{
+                Name = 'scripts/security -> runtime'
+                Source = Join-Path $ResolvedRepoRoot 'scripts\security'
+                Target = Join-Path $TargetCodexPath 'shared-scripts\security'
+                IgnoreExtraPrefixes = @()
+            },
+            [pscustomobject]@{
+                Name = 'scripts/maintenance -> runtime'
+                Source = Join-Path $ResolvedRepoRoot 'scripts\maintenance'
+                Target = Join-Path $TargetCodexPath 'shared-scripts\maintenance'
+                IgnoreExtraPrefixes = @()
+            },
+            [pscustomobject]@{
+                Name = '.codex/orchestration -> runtime'
+                Source = Join-Path $ResolvedRepoRoot '.codex\orchestration'
+                Target = Join-Path $TargetCodexPath 'shared-orchestration'
+                IgnoreExtraPrefixes = @()
+            }
+        )
+    }
 
     $reports = @()
     foreach ($mapping in $mappings) {
@@ -392,7 +407,9 @@ function Invoke-Doctor {
         $reports += Compare-Mapping -Name $mapping.Name -SourcePath $mapping.Source -TargetPath $mapping.Target -IncludePrefixes $includePrefixes -IgnoreSourcePrefixes $ignoreSourcePrefixes -IgnoreExtraPrefixes $mapping.IgnoreExtraPrefixes -IncludeExtraRuntimeDrift:$StrictExtras
     }
 
-    $reports += (Test-CodexSkillDuplicateState -ManagedSkillRoot $managedSkillRoot -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills'))
+    if ($ResolvedRuntimeProfile.EnableCodexRuntime) {
+        $reports += (Test-CodexSkillDuplicateState -ManagedSkillRoot $managedSkillRoot -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills'))
+    }
 
     return $reports
 }
@@ -408,6 +425,7 @@ function Test-HasExtraRuntimeFile {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
+$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
 
 $userHome = Resolve-UserHomePath
 if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
@@ -425,8 +443,10 @@ if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
 
 Write-StyledOutput 'Runtime doctor report'
 Write-StyledOutput ("  repo root: {0}" -f $resolvedRepoRoot)
+Write-StyledOutput ("  runtime profile: {0}" -f $resolvedRuntimeProfile.Name)
+Write-StyledOutput ("  profile catalog: {0}" -f $resolvedRuntimeProfile.CatalogPath)
 
-$reports = Invoke-Doctor -ResolvedRepoRoot $resolvedRepoRoot
+$reports = Invoke-Doctor -ResolvedRepoRoot $resolvedRepoRoot -ResolvedRuntimeProfile $resolvedRuntimeProfile
 foreach ($report in $reports) {
     Write-MappingReport -Report $report -DetailedReport:$Detailed
 }
@@ -441,8 +461,8 @@ if ($hasDrift -and $SyncOnDrift) {
         throw "Bootstrap script not found: $bootstrapScript"
     }
 
-    & $bootstrapScript -RepoRoot $resolvedRepoRoot -TargetGithubPath $TargetGithubPath -TargetCodexPath $TargetCodexPath -TargetAgentsSkillsPath $TargetAgentsSkillsPath -TargetCopilotSkillsPath $TargetCopilotSkillsPath
-    $reports = Invoke-Doctor -ResolvedRepoRoot $resolvedRepoRoot
+    & $bootstrapScript -RepoRoot $resolvedRepoRoot -TargetGithubPath $TargetGithubPath -TargetCodexPath $TargetCodexPath -TargetAgentsSkillsPath $TargetAgentsSkillsPath -TargetCopilotSkillsPath $TargetCopilotSkillsPath -RuntimeProfile $resolvedRuntimeProfile.Name
+    $reports = Invoke-Doctor -ResolvedRepoRoot $resolvedRepoRoot -ResolvedRuntimeProfile $resolvedRuntimeProfile
     foreach ($report in $reports) {
         Write-MappingReport -Report $report -DetailedReport:$Detailed
     }
@@ -462,6 +482,10 @@ else {
 }
 
 Write-StyledOutput ("Drift status: {0}" -f $statusText)
+
+if ($reports.Count -eq 0) {
+    Write-StyledOutput 'Runtime profile disables all runtime surfaces; nothing to audit.'
+}
 
 if ($hasExtras -and (-not $StrictExtras)) {
     Write-StyledOutput 'Runtime has extra files not tracked by source mappings.'

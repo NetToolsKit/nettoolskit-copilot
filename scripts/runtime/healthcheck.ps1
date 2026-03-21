@@ -32,6 +32,11 @@
 .PARAMETER TargetCopilotSkillsPath
     Runtime target path for GitHub Copilot native personal skills. Defaults to <user-home>/.copilot/skills.
 
+.PARAMETER RuntimeProfile
+    Runtime activation profile passed to bootstrap and doctor. Supported
+    values are defined in `.github/governance/runtime-install-profiles.json`.
+    Defaults to `all` when healthcheck is invoked directly.
+
 .PARAMETER SyncRuntime
     Runs bootstrap sync before health checks.
 
@@ -79,6 +84,7 @@ param(
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
     [string] $TargetCopilotSkillsPath,
+    [string] $RuntimeProfile,
     [switch] $SyncRuntime,
     [switch] $Mirror,
     [switch] $StrictExtras,
@@ -102,7 +108,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
@@ -193,6 +199,7 @@ function Invoke-ScriptCheck {
 # -------------------------------
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
+$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
 
 $userHome = Resolve-UserHomePath
 if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
@@ -237,6 +244,7 @@ $script:LogFilePath = $resolvedLogPath
 
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
 Write-ExecutionLog -Level 'INFO' -Message ("Validation profile: {0}" -f $ValidationProfile)
+Write-ExecutionLog -Level 'INFO' -Message ("Runtime profile: {0}" -f $resolvedRuntimeProfile.Name)
 Write-ExecutionLog -Level 'INFO' -Message ("Warning-only mode: {0}" -f $WarningOnly)
 Write-ExecutionLog -Level 'INFO' -Message ("Output report: {0}" -f $resolvedOutputPath)
 Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
@@ -254,6 +262,7 @@ if ($SyncRuntime) {
         TargetCodexPath = $resolvedTargetCodexPath
         TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
         TargetCopilotSkillsPath = $resolvedTargetCopilotSkillsPath
+        RuntimeProfile = $resolvedRuntimeProfile.Name
     }
     if ($Mirror) {
         $bootstrapArgs.Mirror = $true
@@ -281,6 +290,7 @@ $doctorArgs = @{
     TargetCodexPath = $resolvedTargetCodexPath
     TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
     TargetCopilotSkillsPath = $resolvedTargetCopilotSkillsPath
+    RuntimeProfile = $resolvedRuntimeProfile.Name
 }
 if ($StrictExtras) {
     $doctorArgs.StrictExtras = $true
@@ -320,6 +330,7 @@ $report = [ordered]@{
         syncRuntime = [bool] $SyncRuntime
         mirror = [bool] $Mirror
         strictExtras = [bool] $StrictExtras
+        runtimeProfile = $resolvedRuntimeProfile.Name
         validationProfile = $ValidationProfile
         warningOnly = [bool] $WarningOnly
         treatRuntimeDriftAsWarning = [bool] $TreatRuntimeDriftAsWarning

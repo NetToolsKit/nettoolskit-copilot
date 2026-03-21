@@ -33,6 +33,11 @@
 .PARAMETER GlobalVscodeUserPath
     Optional VS Code global user settings folder.
 
+.PARAMETER RuntimeProfile
+    Runtime activation profile. Supported values are defined in
+    `.github/governance/runtime-install-profiles.json`. Defaults to the
+    catalog default, which is currently `none`.
+
 .PARAMETER ValidationProfile
     Validation profile used by the final healthcheck. Defaults to `dev`.
 
@@ -93,6 +98,7 @@ param(
     [string] $TargetAgentsSkillsPath,
     [string] $TargetCopilotSkillsPath,
     [string] $GlobalVscodeUserPath,
+    [string] $RuntimeProfile,
     [string] $ValidationProfile = 'dev',
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
@@ -118,7 +124,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 $script:LogFilePath = $null
@@ -195,36 +201,44 @@ function Invoke-InstallStep {
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile
 $steps = New-Object System.Collections.Generic.List[object]
 
-$bootstrapArguments = @{
-    RepoRoot = $resolvedRepoRoot
-}
-if (-not [string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $bootstrapArguments.TargetGithubPath = $TargetGithubPath
-}
-if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $bootstrapArguments.TargetCodexPath = $TargetCodexPath
-}
-if (-not [string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-    $bootstrapArguments.TargetAgentsSkillsPath = $TargetAgentsSkillsPath
-}
-if (-not [string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-    $bootstrapArguments.TargetCopilotSkillsPath = $TargetCopilotSkillsPath
-}
-if ($Mirror) {
-    $bootstrapArguments.Mirror = $true
-}
-if ($ApplyMcpConfig) {
-    $bootstrapArguments.ApplyMcpConfig = $true
-}
-if ($BackupMcpConfig) {
-    $bootstrapArguments.BackupConfig = $true
+if ($ApplyMcpConfig -and -not $resolvedRuntimeProfile.EnableCodexRuntime) {
+    throw ("Runtime profile '{0}' does not enable the Codex runtime surface required by -ApplyMcpConfig." -f $resolvedRuntimeProfile.Name)
 }
 
-$steps.Add((New-InstallStep -Name 'Bootstrap shared runtime assets' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/bootstrap.ps1') -Arguments $bootstrapArguments)) | Out-Null
+if ($resolvedRuntimeProfile.InstallBootstrap) {
+    $bootstrapArguments = @{
+        RepoRoot = $resolvedRepoRoot
+        RuntimeProfile = $resolvedRuntimeProfile.Name
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TargetGithubPath)) {
+        $bootstrapArguments.TargetGithubPath = $TargetGithubPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
+        $bootstrapArguments.TargetCodexPath = $TargetCodexPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
+        $bootstrapArguments.TargetAgentsSkillsPath = $TargetAgentsSkillsPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
+        $bootstrapArguments.TargetCopilotSkillsPath = $TargetCopilotSkillsPath
+    }
+    if ($Mirror) {
+        $bootstrapArguments.Mirror = $true
+    }
+    if ($ApplyMcpConfig) {
+        $bootstrapArguments.ApplyMcpConfig = $true
+    }
+    if ($BackupMcpConfig) {
+        $bootstrapArguments.BackupConfig = $true
+    }
 
-if (-not $SkipGlobalSettings) {
+    $steps.Add((New-InstallStep -Name 'Bootstrap shared runtime assets' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/bootstrap.ps1') -Arguments $bootstrapArguments)) | Out-Null
+}
+
+if ($resolvedRuntimeProfile.InstallGlobalVscodeSettings -and -not $SkipGlobalSettings) {
     $settingsArguments = @{
         RepoRoot = $resolvedRepoRoot
     }
@@ -238,7 +252,7 @@ if (-not $SkipGlobalSettings) {
     $steps.Add((New-InstallStep -Name 'Render global VS Code settings' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/sync-vscode-global-settings.ps1') -Arguments $settingsArguments)) | Out-Null
 }
 
-if (-not $SkipGlobalSnippets) {
+if ($resolvedRuntimeProfile.InstallGlobalVscodeSnippets -and -not $SkipGlobalSnippets) {
     $snippetArguments = @{
         RepoRoot = $resolvedRepoRoot
     }
@@ -249,8 +263,11 @@ if (-not $SkipGlobalSnippets) {
     $steps.Add((New-InstallStep -Name 'Synchronize global VS Code snippets' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/sync-vscode-global-snippets.ps1') -Arguments $snippetArguments)) | Out-Null
 }
 
-if (-not $SkipGitHooks) {
+if ($resolvedRuntimeProfile.InstallLocalGitHooks -and -not $SkipGitHooks) {
     $steps.Add((New-InstallStep -Name 'Configure local Git hooks' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-git-hooks.ps1') -Arguments @{})) | Out-Null
+}
+
+if ($resolvedRuntimeProfile.InstallGlobalGitAliases -and -not $SkipGitHooks) {
     $globalAliasArguments = @{
         RepoRoot = $resolvedRepoRoot
         TargetCodexPath = if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) { $TargetCodexPath } else { Join-Path (Resolve-UserHomePath) '.codex' }
@@ -258,9 +275,10 @@ if (-not $SkipGitHooks) {
     $steps.Add((New-InstallStep -Name 'Configure global Git aliases' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-global-git-aliases.ps1') -Arguments $globalAliasArguments)) | Out-Null
 }
 
-if (-not $SkipHealthcheck) {
+if ($resolvedRuntimeProfile.InstallHealthcheck -and -not $SkipHealthcheck) {
     $healthcheckArguments = @{
         RepoRoot = $resolvedRepoRoot
+        RuntimeProfile = $resolvedRuntimeProfile.Name
         ValidationProfile = $ValidationProfile
         WarningOnly = $true
     }
@@ -299,6 +317,8 @@ $overallStatus = if ($failedSteps -gt 0) { 'failed' } elseif ($PreviewOnly) { 'p
 
 Write-StyledOutput '' | Out-Host
 Write-StyledOutput 'Runtime install summary' | Out-Host
+Write-StyledOutput ("  Runtime profile: {0}" -f $resolvedRuntimeProfile.Name) | Out-Host
+Write-StyledOutput ("  Profile catalog: {0}" -f $resolvedRuntimeProfile.CatalogPath) | Out-Host
 Write-StyledOutput ("  Preview-only: {0}" -f ([bool] $PreviewOnly)) | Out-Host
 Write-StyledOutput ("  Planned steps: {0}" -f $steps.Count) | Out-Host
 Write-StyledOutput ("  Executed steps: {0}" -f $resultItems.Count) | Out-Host
@@ -309,10 +329,17 @@ Write-StyledOutput ("  Overall status: {0}" -f $overallStatus) | Out-Host
 $output = [pscustomobject]@{
     previewOnly = [bool] $PreviewOnly
     repoRoot = $resolvedRepoRoot
+    runtimeProfile = [pscustomobject]@{
+        name = $resolvedRuntimeProfile.Name
+        description = $resolvedRuntimeProfile.Description
+        defaultProfile = $resolvedRuntimeProfile.DefaultProfile
+        catalogPath = $resolvedRuntimeProfile.CatalogPath
+    }
     steps = $stepItems
     results = $resultItems
     summary = [pscustomobject]@{
         overallStatus = $overallStatus
+        runtimeProfile = $resolvedRuntimeProfile.Name
         plannedSteps = $steps.Count
         executedSteps = $resultItems.Count
         passedSteps = $passedSteps

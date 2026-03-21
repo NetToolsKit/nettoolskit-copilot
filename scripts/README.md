@@ -66,7 +66,7 @@ No package installation is required. Scripts run with PowerShell 7+.
 ```powershell
 # run the full recommended local onboarding flow
 $RepoRoot = '<REPO_ROOT>'
-pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
 # Sync shared assets
 pwsh -File .\scripts\runtime\bootstrap.ps1
@@ -109,6 +109,37 @@ pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
 ```
 
 The installer does not require the current shell to be in the repository root. If `pwsh -File` points to the versioned `install.ps1` path, the script resolves the repository root from its own location. Use `-RepoRoot` only when you need to override that auto-detection.
+
+The installer now uses a versioned runtime profile catalog at `.github/governance/runtime-install-profiles.json`.
+
+- `none` is the default profile for `install.ps1`
+- `none` means the installer does not mutate runtime folders, VS Code globals, or Git configuration
+- `bootstrap.ps1`, `doctor.ps1`, `healthcheck.ps1`, and `self-heal.ps1` still default to `all` when called directly
+
+Supported install profiles:
+
+| Profile | Behavior |
+| --- | --- |
+| `none` | Default. No runtime projection or editor/Git integration changes. |
+| `github` | Only sync `%USERPROFILE%\\.github`, `%USERPROFILE%\\.github\\scripts`, and `%USERPROFILE%\\.copilot\\skills`. |
+| `codex` | Only sync `%USERPROFILE%\\.agents\\skills` plus `%USERPROFILE%\\.codex\\shared-*`. |
+| `all` | Sync both runtime surfaces and also apply global VS Code settings/snippets, local Git hooks, global Git aliases, and installer healthcheck. |
+
+Examples:
+
+```powershell
+# default non-intrusive preview
+pwsh -File .\scripts\runtime\install.ps1 -PreviewOnly
+
+# only GitHub/Copilot runtime assets
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile github
+
+# only Codex runtime assets
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile codex -ApplyMcpConfig -BackupMcpConfig
+
+# full onboarding
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+```
 
 The VS Code hook bootstrap selects its startup controller from `.github/hooks/super-agent.selector.json`. Keep the repository default in version control and override locally only through `~/.github/hooks/super-agent.selector.local.json` or the environment variables `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`.
 
@@ -194,15 +225,19 @@ scripts/
 
 ### Bootstrap Contract
 
-`runtime/bootstrap.ps1` syncs:
-- `.github/` -> `~/.github`
-- `.codex/skills/` -> `~/.agents/skills` as the canonical picker-visible/runtime skill target
-- `.github/skills/` -> `~/.copilot/skills` for native GitHub Copilot skill discovery
-- stale repo-managed duplicates are removed from `~/.codex/skills` while unmanaged/system skill folders are preserved
-- `.codex/mcp/` -> `~/.codex/shared-mcp`
-- `.codex/scripts/` (root MCP tools) + `scripts/common/` + `scripts/security/` -> `~/.codex/shared-scripts`
-- `scripts/maintenance/` -> `~/.codex/shared-scripts/maintenance`
-- `.codex/orchestration/` -> `~/.codex/shared-orchestration`
+`runtime/bootstrap.ps1` is profile-aware:
+- default direct behavior: `-RuntimeProfile all`
+- `-RuntimeProfile github` syncs only:
+  - `.github/` -> `~/.github`
+  - `scripts/` -> `~/.github/scripts`
+  - `.github/skills/` -> `~/.copilot/skills`
+- `-RuntimeProfile codex` syncs only:
+  - `.codex/skills/` -> `~/.agents/skills`
+  - stale repo-managed duplicates are removed from `~/.codex/skills` while unmanaged/system skill folders are preserved
+  - `.codex/mcp/` -> `~/.codex/shared-mcp`
+  - `.codex/scripts/` (root MCP tools) + `scripts/common/` + `scripts/security/` + `scripts/maintenance/` -> `~/.codex/shared-scripts`
+  - `.codex/orchestration/` -> `~/.codex/shared-orchestration`
+- `-RuntimeProfile none` performs no runtime projection and is mainly useful for install preview/testing
 
 MCP apply mode updates only `[mcp_servers.*]` sections in `~/.codex/config.toml`, preserving the rest.
 
@@ -249,11 +284,12 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
 | `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
 | `git-hooks/setup-global-git-aliases.ps1` | Configures manual global Git aliases for runtime-synced helper scripts. Currently installs `git trim-eof`, which runs the shared trim script in `-GitChangedOnly` mode before `git add` when you want manual EOF cleanup in any repository. | `pwsh -File scripts/git-hooks/setup-global-git-aliases.ps1` |
-| `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `runtime-paths`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
+| `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `runtime-paths`, `runtime-install-profiles`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
+| `common/runtime-install-profiles.ps1` | Shared runtime profile loader used by install/bootstrap/doctor/healthcheck/self-heal to resolve the versioned profile contract from `.github/governance/runtime-install-profiles.json`. | `. ./scripts/common/runtime-install-profiles.ps1; Resolve-RuntimeInstallProfile -ResolvedRepoRoot . -ProfileName all` |
 | `common/repository-paths.ps1` | Shared repository helper for repository/git/solution root discovery, repo-relative and full-path conversion, parent directory handling, verbose diagnostics, and structured execution logging reused across runtime, security, orchestration, and runtime test scripts. | `. ./scripts/common/repository-paths.ps1` |
 | `common/validation-logging.ps1` | Shared validation log helper for warning/failure registration, verbose output, and compact validation summaries reused across the validation script family. | `. ./scripts/common/validation-logging.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
-| `runtime/install.ps1` | Runs the recommended onboarding flow by orchestrating bootstrap, optional MCP apply, VS Code sync, Git hook setup, and healthcheck. Supports preview mode and parameterized runtime paths. Can be invoked from any directory when `pwsh -File` points to the versioned script path. Warning/error lines now carry runtime issue IDs and the script always closes with a deduplicated issue summary plus severity counts. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
+| `runtime/install.ps1` | Runs the profile-driven onboarding flow. Default profile is `none`, so the installer is non-intrusive unless `-RuntimeProfile github`, `codex`, or `all` is passed explicitly. Supports preview mode and parameterized runtime paths. Warning/error lines carry runtime issue IDs and the script always closes with a deduplicated issue summary plus severity counts. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
@@ -317,9 +353,12 @@ pwsh -File .\scripts\runtime\bootstrap.ps1 -TargetGithubPath .\.temp\github -Tar
 # preview the recommended onboarding flow without mutating runtime files
 pwsh -File .\scripts\runtime\install.ps1 -PreviewOnly
 
+# preview the full onboarding flow explicitly
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -PreviewOnly
+
 # all runtime warning/error logs now include IDs such as WRN001 / ERR001
 # and finish with a deduplicated issue summary plus severity counts
-pwsh -File .\scripts\runtime\install.ps1 -CreateSettingsBackup -ApplyMcpConfig
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig
 
 # diagnose runtime drift
 pwsh -File .\scripts\runtime\doctor.ps1

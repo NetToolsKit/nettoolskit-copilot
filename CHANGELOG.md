@@ -706,3 +706,7 @@
 - Updated paths to match repo structure (`instructions/`, `templates/`); removed obsolete `.github/` references.
 - Enforced mandatory context for Copilot (AGENTS.md, `copilot-instructions.md`, core instructions).
 - Fixed minor validation issues (backticks, descriptions).
+- add a versioned runtime-install profile catalog with explicit `none`, `github`, `codex`, and `all` modes so onboarding can stay non-intrusive by default
+- make `install.ps1` default to profile `none` and require explicit opt-in for GitHub/Copilot runtime sync, Codex runtime sync, or the full onboarding flow
+- make `bootstrap.ps1`, `doctor.ps1`, `healthcheck.ps1`, and `self-heal.ps1` runtime-profile aware while keeping their standalone default at `all`
+- document the new profile model clearly in the repository README and scripts README, including explicit examples for `none`, `github`, `codex`, and `all`

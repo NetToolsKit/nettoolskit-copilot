@@ -93,10 +93,41 @@ cd copilot-instructions
 
 ```powershell
 $RepoRoot = '<REPO_ROOT>'
-pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
 
 You do not need to be inside the repository directory when running the installer. Point `pwsh -File` at the versioned script path and it will detect the repository root from the script location. Use `-RepoRoot` only when you need to override that default.
+
+The installer is intentionally non-intrusive by default:
+
+- `install.ps1` now defaults to runtime profile `none`
+- `none` plans/applies nothing until you opt in with `-RuntimeProfile`
+- the supported profiles are defined in `.github/governance/runtime-install-profiles.json`
+
+Use one of these explicit profiles:
+
+| Profile | What it enables |
+| --- | --- |
+| `none` | Default. No runtime projection, no VS Code global changes, no Git integration changes. |
+| `github` | Only the GitHub/Copilot runtime surface: `%USERPROFILE%\\.github`, `%USERPROFILE%\\.github\\scripts`, and `%USERPROFILE%\\.copilot\\skills`. |
+| `codex` | Only the Codex runtime surface: `%USERPROFILE%\\.agents\\skills` plus `%USERPROFILE%\\.codex\\shared-*`. |
+| `all` | Everything above plus global VS Code settings/snippets, local Git hooks, global Git aliases, and installer healthcheck. |
+
+Examples:
+
+```powershell
+# explicit no-op preview (default behavior)
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -PreviewOnly
+
+# enable only the GitHub/Copilot runtime surface
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile github
+
+# enable only the Codex runtime surface
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile codex -ApplyMcpConfig -BackupMcpConfig
+
+# enable everything
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+```
 
 ### Cross-Platform Prerequisites
 
@@ -200,7 +231,7 @@ pwsh -File ./scripts/runtime/bootstrap.ps1
 
 # one-step local onboarding wrapper
 $RepoRoot = '<REPO_ROOT>'
-pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
 # optional: apply shared MCP servers separately when you do not want the full install wrapper
 pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
@@ -209,7 +240,9 @@ pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 ```
 
-This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects the single visible repository-owned starter/controller into `~/.agents/skills`, projects native Copilot skills into `~/.copilot/skills`, mirrors shared helper scripts from `scripts/common`, `scripts/security`, and `scripts/maintenance` into `~/.codex/shared-scripts`, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
+`bootstrap.ps1` remains the direct runtime sync entrypoint and defaults to runtime profile `all` when called on its own. Use `-RuntimeProfile github` or `-RuntimeProfile codex` when you want the projection to stay scoped to one runtime surface.
+
+With profile `all`, bootstrap syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects the single visible repository-owned starter/controller into `~/.agents/skills`, projects native Copilot skills into `~/.copilot/skills`, mirrors shared helper scripts from `scripts/common`, `scripts/security`, and `scripts/maintenance` into `~/.codex/shared-scripts`, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
 
 The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 

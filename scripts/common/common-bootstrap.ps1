@@ -42,6 +42,7 @@ function Resolve-CommonHelperFileName {
         'console-style' { return 'console-style.ps1' }
         'repository-paths' { return 'repository-paths.ps1' }
         'runtime-paths' { return 'runtime-paths.ps1' }
+        'runtime-install-profiles' { return 'runtime-install-profiles.ps1' }
         'validation-logging' { return 'validation-logging.ps1' }
         default {
             if ($Helper.EndsWith('.ps1', [System.StringComparison]::OrdinalIgnoreCase)) {
