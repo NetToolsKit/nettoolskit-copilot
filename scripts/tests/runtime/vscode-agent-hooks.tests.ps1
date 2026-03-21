@@ -125,6 +125,8 @@ $subagentResult = $subagentOutput | ConvertFrom-Json -Depth 50
 Assert-True ($sessionResult.hookSpecificOutput.hookEventName -eq 'SessionStart') 'SessionStart hook should return SessionStart payload.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Super Agent lifecycle is mandatory') 'SessionStart hook should inject Super Agent bootstrap context.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Selected startup controller: Super Agent \(\$super-agent\) via default') 'SessionStart hook should advertise the default startup controller.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=workspace-adapter') 'SessionStart hook should expose a visible activation banner in workspace-adapter mode.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'first substantive assistant reply') 'SessionStart hook should require a visible activation confirmation in the first substantive reply.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match '\.build/') 'SessionStart hook should mention the artifact layout policy.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SessionStart hook should mention the repository EOF policy.'
 Assert-True ($preToolReplaceResult.hookSpecificOutput.hookEventName -eq 'PreToolUse') 'PreToolUse hook should return PreToolUse payload.'
@@ -134,6 +136,7 @@ Assert-True ([string] $preToolCreateResult.hookSpecificOutput.updatedInput.conte
 Assert-True ($subagentResult.hookSpecificOutput.hookEventName -eq 'SubagentStart') 'SubagentStart hook should return SubagentStart payload.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'reviewer') 'SubagentStart hook should mention the spawned worker type.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SubagentStart hook should mention the repository EOF policy.'
+Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=workspace-adapter') 'SubagentStart hook should propagate the visibility banner in workspace-adapter mode.'
 
 $globalWorkspacePath = New-TemporaryWorkspacePath
 
@@ -163,6 +166,7 @@ try {
     $globalSubagentResult = $globalSubagentOutput | ConvertFrom-Json -Depth 50
 
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'Workspace mode: global-runtime') 'SessionStart hook should advertise global-runtime mode for workspaces without a local adapter.'
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=global-runtime') 'SessionStart hook should expose a visible activation banner in global-runtime mode.'
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'load runtime AGENTS\.md and copilot-instructions\.md from ~/.github first') 'SessionStart hook should fall back to runtime instructions in global-runtime mode.'
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/planning/active') 'SessionStart hook should use the .build planning fallback in global-runtime mode.'
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/specs/active') 'SessionStart hook should use the .build spec fallback in global-runtime mode.'
@@ -171,6 +175,7 @@ try {
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'Workspace mode: global-runtime') 'SubagentStart hook should propagate global-runtime mode.'
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'implementer') 'SubagentStart hook should mention the worker type in global-runtime mode.'
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/planning/active') 'SubagentStart hook should preserve the global planning fallback.'
+    Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=global-runtime') 'SubagentStart hook should propagate the visibility banner in global-runtime mode.'
 }
 finally {
     if (Test-Path -LiteralPath $globalWorkspacePath) {

@@ -471,6 +471,17 @@ function Format-SkillToken {
     return ('$' + $SkillName)
 }
 
+# Builds a short, user-visible activation banner for the current startup controller.
+function New-SuperAgentVisibilityBanner {
+    param(
+        [string] $WorkspaceName,
+        [object] $Selection,
+        [object] $WorkspaceSurface
+    )
+
+    return ('[Super Agent: ACTIVE | controller={0} | skill={1} | mode={2} | workspace={3}]' -f $Selection.DisplayName, $Selection.SkillName, $WorkspaceSurface.WorkspaceMode, $WorkspaceName)
+}
+
 # Builds the SessionStart bootstrap context injected into VS Code agent sessions.
 function New-SessionContextString {
     param(
@@ -483,6 +494,7 @@ function New-SessionContextString {
     $branchName = Get-GitBranchName -WorkspacePath $workspacePath
     $workspaceSurface = Get-SuperAgentWorkspaceSurface -WorkspacePath $workspacePath
     $eofMessage = Get-WorkspaceEofPolicyMessage -WorkspacePath $workspacePath
+    $visibilityBanner = New-SuperAgentVisibilityBanner -WorkspaceName $workspaceName -Selection $selection -WorkspaceSurface $workspaceSurface
 
     $segments = New-Object System.Collections.Generic.List[string]
     $segments.Add(('Workspace: {0}' -f $workspaceName)) | Out-Null
@@ -492,6 +504,8 @@ function New-SessionContextString {
     }
 
     $segments.Add(('Selected startup controller: {0} ({1}) via {2}.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source)) | Out-Null
+    $segments.Add(('Visibility banner: {0}.' -f $visibilityBanner)) | Out-Null
+    $segments.Add('Visibility contract: in the first substantive assistant reply of this session, echo the visibility banner exactly once near the start so the user can see that Super Agent is active.') | Out-Null
     $segments.Add(('Workspace mode: {0}.' -f $workspaceSurface.WorkspaceMode)) | Out-Null
     $segments.Add([string] $workspaceSurface.InstructionLoadMessage) | Out-Null
     $segments.Add([string] $workspaceSurface.RoutingMessage) | Out-Null
@@ -520,8 +534,10 @@ function New-SubagentContextString {
     if ([string]::IsNullOrWhiteSpace($agentType)) {
         $agentType = 'subagent'
     }
+    $workspaceName = Get-WorkspaceName -WorkspacePath $workspacePath
+    $visibilityBanner = New-SuperAgentVisibilityBanner -WorkspaceName $workspaceName -Selection $selection -WorkspaceSurface $workspaceSurface
 
-    return ('Startup controller: {0} ({1}) via {2}. Workspace mode: {3}. {4} {5} Planning root: {6}. Spec root: {7}. {8} Super Agent bootstrap is active. Current worker type: {9}. {10} Keep scope minimal, follow the active routing decision for this workspace, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $workspaceSurface.WorkspaceMode, $workspaceSurface.InstructionLoadMessage, $workspaceSurface.RoutingMessage, $workspaceSurface.PlanningActivePath, $workspaceSurface.SpecActivePath, $workspaceSurface.CloseoutMessage, $agentType, $eofMessage)
+    return ('Startup controller: {0} ({1}) via {2}. Visibility banner: {3}. Workspace mode: {4}. {5} {6} Planning root: {7}. Spec root: {8}. {9} Super Agent bootstrap is active. Current worker type: {10}. {11} Keep scope minimal, follow the active routing decision for this workspace, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $visibilityBanner, $workspaceSurface.WorkspaceMode, $workspaceSurface.InstructionLoadMessage, $workspaceSurface.RoutingMessage, $workspaceSurface.PlanningActivePath, $workspaceSurface.SpecActivePath, $workspaceSurface.CloseoutMessage, $agentType, $eofMessage)
 }
 
 # Builds the PreToolUse payload used to normalize repository edit tool inputs before disk writes occur.

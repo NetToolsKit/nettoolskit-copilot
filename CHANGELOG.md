@@ -69,6 +69,11 @@
   - `.codex/skills/using-super-agent/SKILL.md`
   - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
   - `scripts/validation/validate-agent-hooks.ps1`
+- Added a visible Super Agent activation banner to the VS Code hook bootstrap contract so the first substantive reply in a session can make the controller state explicit to the user:
+  - `.github/hooks/scripts/common.ps1`
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:

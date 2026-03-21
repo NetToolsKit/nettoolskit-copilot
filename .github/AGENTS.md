@@ -72,6 +72,7 @@ Use the **Mandatory Context Files** list above.
 
 # Auditing & Transparency
 - When listing applied instructions in a response or PR body, reference both copilot-instructions.md and AGENTS.md when they influence the change.
+- When the Super Agent bootstrap is active, the first substantive assistant reply in the session should surface a short activation banner near the start so the user can see the controller is active.
 
 # Context Preservation & Execution Patterns
 

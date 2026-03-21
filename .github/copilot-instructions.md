@@ -169,6 +169,7 @@ Follow this order of operations on every task:
 ## Pragmatic use
 - List applied instructions only when there are relevant actions (plans, command executions, patches/file changes).
 - Use a short preamble to indicate key instructions before tool/command calls; omit in purely informational answers.
+- When the Super Agent bootstrap is active, the first substantive reply in the session should expose the activation banner injected by the hook exactly once near the start.
 - For auditing, consolidate the full list of instructions in PR/commit body or CHANGELOG.md.
 - When requested, include an Applied instructions section with the actually used set.
 - After finishing a logically complete item, return a suggested commit message in English using semantic commit prefixes such as `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`, `build:`, or `ci:`.
