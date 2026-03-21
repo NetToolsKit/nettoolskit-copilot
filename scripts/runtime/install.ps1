@@ -38,6 +38,16 @@
     `.github/governance/runtime-install-profiles.json`. Defaults to the
     catalog default, which is currently `none`.
 
+.PARAMETER GitHookEofMode
+    Local pre-commit EOF hygiene mode for this clone/worktree. Supported
+    values are defined in `.github/governance/git-hook-eof-modes.json`.
+
+.PARAMETER GitHookEofScope
+    Scope for persisting the EOF hygiene mode selection. Supported values are
+    defined in `.github/governance/git-hook-eof-modes.json`. When omitted and
+    `-GitHookEofMode` is supplied during a non-preview run, the installer asks
+    whether the selection should be global. The default remains local-repo.
+
 .PARAMETER ValidationProfile
     Validation profile used by the final healthcheck. Defaults to `dev`.
 
@@ -99,6 +109,8 @@ param(
     [string] $TargetCopilotSkillsPath,
     [string] $GlobalVscodeUserPath,
     [string] $RuntimeProfile,
+    [string] $GitHookEofMode,
+    [string] $GitHookEofScope,
     [string] $ValidationProfile = 'dev',
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
@@ -124,7 +136,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'git-hook-eof-settings')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 $script:LogFilePath = $null
@@ -200,12 +212,73 @@ function Invoke-InstallStep {
     }
 }
 
+# Prompts the operator for the desired EOF hook scope when needed.
+function Resolve-InstallGitHookEofScope {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot,
+        [bool] $PreviewOnly,
+        [string] $RequestedScopeName,
+        [bool] $PromptRequested
+    )
+
+    if (-not $PromptRequested) {
+        if ([string]::IsNullOrWhiteSpace($RequestedScopeName)) {
+            return $null
+        }
+
+        return (Resolve-GitHookEofScope -ResolvedRepoRoot $ResolvedRepoRoot -ScopeName $RequestedScopeName)
+    }
+
+    if ($PreviewOnly) {
+        return (Resolve-GitHookEofScope -ResolvedRepoRoot $ResolvedRepoRoot -ScopeName 'local-repo')
+    }
+
+    try {
+        $response = Read-Host 'Apply Git hook EOF mode globally for all repositories using this hook runtime? [y/N]'
+    }
+    catch {
+        return (Resolve-GitHookEofScope -ResolvedRepoRoot $ResolvedRepoRoot -ScopeName 'local-repo')
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($response)) {
+        $normalizedResponse = $response.Trim().ToLowerInvariant()
+        if ($normalizedResponse -in @('y', 'yes', 's', 'sim')) {
+            return (Resolve-GitHookEofScope -ResolvedRepoRoot $ResolvedRepoRoot -ScopeName 'global')
+        }
+    }
+
+    return (Resolve-GitHookEofScope -ResolvedRepoRoot $ResolvedRepoRoot -ScopeName 'local-repo')
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile
+$requestedGitHookEofSelection = (-not [string]::IsNullOrWhiteSpace($GitHookEofMode)) -or (-not [string]::IsNullOrWhiteSpace($GitHookEofScope))
+$currentEffectiveGitHookEofMode = if ($requestedGitHookEofSelection) {
+    Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
+}
+else {
+    $null
+}
+$shouldPromptForGitHookEofScope = (-not [string]::IsNullOrWhiteSpace($GitHookEofMode)) -and [string]::IsNullOrWhiteSpace($GitHookEofScope)
+$resolvedGitHookEofMode = if (-not [string]::IsNullOrWhiteSpace($GitHookEofMode)) {
+    Resolve-GitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot -ModeName $GitHookEofMode
+}
+elseif ($requestedGitHookEofSelection) {
+    Resolve-GitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot -ModeName $currentEffectiveGitHookEofMode.Name
+}
+else {
+    $null
+}
+$resolvedGitHookEofScope = Resolve-InstallGitHookEofScope -ResolvedRepoRoot $resolvedRepoRoot -PreviewOnly ([bool] $PreviewOnly) -RequestedScopeName $GitHookEofScope -PromptRequested $shouldPromptForGitHookEofScope
 $steps = New-Object System.Collections.Generic.List[object]
 
 if ($ApplyMcpConfig -and -not $resolvedRuntimeProfile.EnableCodexRuntime) {
     throw ("Runtime profile '{0}' does not enable the Codex runtime surface required by -ApplyMcpConfig." -f $resolvedRuntimeProfile.Name)
+}
+
+if ($SkipGitHooks -and ($null -ne $resolvedGitHookEofMode -or $null -ne $resolvedGitHookEofScope)) {
+    throw 'GitHookEofMode or GitHookEofScope cannot be used when SkipGitHooks is set.'
 }
 
 if ($resolvedRuntimeProfile.InstallBootstrap) {
@@ -263,8 +336,16 @@ if ($resolvedRuntimeProfile.InstallGlobalVscodeSnippets -and -not $SkipGlobalSni
     $steps.Add((New-InstallStep -Name 'Synchronize global VS Code snippets' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/sync-vscode-global-snippets.ps1') -Arguments $snippetArguments)) | Out-Null
 }
 
-if ($resolvedRuntimeProfile.InstallLocalGitHooks -and -not $SkipGitHooks) {
-    $steps.Add((New-InstallStep -Name 'Configure local Git hooks' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-git-hooks.ps1') -Arguments @{})) | Out-Null
+$shouldConfigureLocalGitHooks = (-not $SkipGitHooks) -and ($resolvedRuntimeProfile.InstallLocalGitHooks -or $null -ne $resolvedGitHookEofMode -or $null -ne $resolvedGitHookEofScope)
+if ($shouldConfigureLocalGitHooks) {
+    $gitHookArguments = @{}
+    if ($null -ne $resolvedGitHookEofMode) {
+        $gitHookArguments.EofHygieneMode = $resolvedGitHookEofMode.Name
+    }
+    if ($null -ne $resolvedGitHookEofScope) {
+        $gitHookArguments.EofHygieneScope = $resolvedGitHookEofScope.Name
+    }
+    $steps.Add((New-InstallStep -Name 'Configure local Git hooks' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-git-hooks.ps1') -Arguments $gitHookArguments)) | Out-Null
 }
 
 if ($resolvedRuntimeProfile.InstallGlobalGitAliases -and -not $SkipGitHooks) {
@@ -335,6 +416,23 @@ $output = [pscustomobject]@{
         defaultProfile = $resolvedRuntimeProfile.DefaultProfile
         catalogPath = $resolvedRuntimeProfile.CatalogPath
     }
+    gitHookEofMode = if ($null -ne $resolvedGitHookEofMode) {
+        [pscustomobject]@{
+            name = $resolvedGitHookEofMode.Name
+            description = $resolvedGitHookEofMode.Description
+            defaultMode = $resolvedGitHookEofMode.DefaultMode
+            catalogPath = $resolvedGitHookEofMode.CatalogPath
+        }
+    } else { $null }
+    gitHookEofScope = if ($null -ne $resolvedGitHookEofScope) {
+        [pscustomobject]@{
+            name = $resolvedGitHookEofScope.Name
+            description = $resolvedGitHookEofScope.Description
+            defaultScope = $resolvedGitHookEofScope.DefaultScope
+            catalogPath = $resolvedGitHookEofScope.CatalogPath
+            prompted = [bool] $shouldPromptForGitHookEofScope
+        }
+    } else { $null }
     steps = $stepItems
     results = $resultItems
     summary = [pscustomobject]@{

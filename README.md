@@ -127,6 +127,13 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile c
 
 # enable everything
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
+# enable full onboarding plus intrusive EOF autofix on pre-commit
+# if scope is omitted, install asks whether it should be global and defaults to local-repo when you answer no
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
+# enable full onboarding plus explicit global EOF autofix across repositories using this hook runtime
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
 
 ### Cross-Platform Prerequisites
@@ -353,6 +360,49 @@ Local hooks are managed by `core.hooksPath=.githooks`.
 pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1
 ```
 
+The EOF hygiene mode is configurable either per clone/worktree or globally for the current machine.
+
+Supported modes and scopes are defined in `.github/governance/git-hook-eof-modes.json`:
+
+| Mode | Behavior |
+| --- | --- |
+| `manual` | Default. `pre-commit` does not trim files automatically. Use the manual `git trim-eof` alias yourself before staging/committing when needed. |
+| `autofix` | Intrusive mode. On every commit, `pre-commit` trims staged files and re-stages them before validation. |
+
+| Scope | Behavior |
+| --- | --- |
+| `local-repo` | Less intrusive default scope. Persists the selection only for the current clone/worktree under `.git/`. |
+| `global` | Persists the selection once under `%USERPROFILE%\\.codex\\git-hook-eof-settings.json` so repositories using this hook runtime inherit it unless they define a local override. |
+
+Examples:
+
+```powershell
+# keep the safer default behavior for this clone
+pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode manual -EofHygieneScope local-repo
+
+# opt this clone/PC into automatic staged EOF cleanup during pre-commit
+pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope local-repo
+
+# apply the same EOF mode globally for repositories using this hook runtime
+pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global
+
+# same opt-in through the installer; when scope is omitted it asks whether you want global
+pwsh -File ./scripts/runtime/install.ps1 -RuntimeProfile all -GitHookEofMode autofix
+```
+
+Settings files:
+
+- `.git/codex-hook-eof-settings.json`
+- `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`
+
+Resolution order on every commit:
+
+1. `.git/codex-hook-eof-settings.json`
+2. `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`
+3. catalog default (`manual` + `local-repo`)
+
+`pre-commit` reads that configuration on every commit, so changing local or global scope takes effect immediately on the next commit without editing tracked files.
+
 ### Global Manual Alias
 
 ```powershell
@@ -369,9 +419,17 @@ Use it in any Git repository before `git add` when you want to trim only the fil
 
 ### pre-commit
 
-- Runs `scripts/validation/validate-all.ps1`
+- Resolves EOF hygiene from `.git/codex-hook-eof-settings.json`, then `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`, then the catalog default
+- In `manual` mode:
+  - does not trim files automatically
+  - continues directly to validation
+- In `autofix` mode:
+  - trims only currently staged files
+  - re-stages them before validation
+  - blocks the commit if a file has both staged and unstaged changes, because auto-restaging would be unsafe
+- Then runs `scripts/validation/validate-all.ps1`
 - Uses `-ValidationProfile dev -WarningOnly true` (best effort)
-- Never blocks commit; failures are reported as warnings
+- Validation itself remains warning-only, but the EOF hygiene step can block the commit in `autofix` mode when automatic cleanup is unsafe or fails
 
 ### post-commit
 

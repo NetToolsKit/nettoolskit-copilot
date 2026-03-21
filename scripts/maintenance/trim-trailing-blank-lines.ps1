@@ -20,6 +20,10 @@
 .PARAMETER Path
     Root folder to scan or a single file path. Defaults to the current directory when omitted.
 
+.PARAMETER LiteralPaths
+    Explicit file paths to trim. When provided, discovery/scanning is skipped
+    and only these files are processed.
+
 .PARAMETER CheckOnly
     Only checks and lists files that would be fixed. Returns exit code 1 when changes are required.
 
@@ -57,6 +61,7 @@
 
 param (
     [string] $Path,
+    [string[]] $LiteralPaths,
     [switch] $Verbose,
     [switch] $CheckOnly,
     [switch] $GitChangedOnly
@@ -250,13 +255,31 @@ $ExcludeDirs = @(
     'bin', 'obj', '.git', 'node_modules', '.vs', '.idea',
     '.build', '.deployment', 'artifacts', 'target'
 )
+$explicitLiteralPaths = @($LiteralPaths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+$hasLiteralPaths = $explicitLiteralPaths.Count -gt 0
 
 # -------------------------------
 # Discover files (single-file mode or repo scanning)
 # -------------------------------
 $files = @()
 
-if ($Path -and (Test-Path -LiteralPath $Path -PathType Leaf)) {
+if ($hasLiteralPaths) {
+    $files = @(
+        $explicitLiteralPaths |
+            ForEach-Object { Resolve-Path -LiteralPath $_ -ErrorAction Stop } |
+            ForEach-Object { $_.Path }
+    )
+
+    $root = if ($files.Count -gt 0) {
+        Get-RepoRoot -startPath (Split-Path -Path $files[0] -Parent)
+    }
+    else {
+        Get-RepoRoot -startPath ((Get-Location).Path)
+    }
+    Write-ColorLine -Message ("Root: {0}" -f $root) -Color Blue
+    Write-ColorLine -Message 'Explicit file list mode: enabled' -Color Cyan
+}
+elseif ($Path -and (Test-Path -LiteralPath $Path -PathType Leaf)) {
     # Single file mode
     $fullFile = (Resolve-Path -LiteralPath $Path).Path
     $root     = [System.IO.Path]::GetDirectoryName($fullFile)
@@ -321,8 +344,15 @@ $files = @($files)
 
 Write-ColorLine -Message ("Files found: {0}" -f $files.Count) -Color Yellow
 
-if ($GitChangedOnly -and $files.Count -gt 0) {
-    Write-ColorLine -Message 'Git changed files selected for trim:' -Color Cyan
+if (($GitChangedOnly -or $hasLiteralPaths) -and $files.Count -gt 0) {
+    $selectionHeading = if ($hasLiteralPaths) {
+        'Explicit files selected for trim:'
+    }
+    else {
+        'Git changed files selected for trim:'
+    }
+
+    Write-ColorLine -Message $selectionHeading -Color Cyan
     foreach ($selectedFile in $files) {
         Write-ColorLine -Message ("  - {0}" -f [IO.Path]::GetRelativePath($root, $selectedFile)) -Color DarkGray
     }
@@ -384,3 +414,5 @@ if ($CheckOnly) {
         exit 0
     }
 }
+
+exit 0

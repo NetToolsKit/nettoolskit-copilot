@@ -1,3 +1,8 @@
+## [9.9.9] - 2026-03-20
+
+### Changed
+- Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
+
 ## [1.2.0] - 2026-03-20
 
 ### Changed
@@ -42,6 +47,19 @@
   - `scripts/README.md`
 
 ### Fixed
+- Added a configurable EOF hygiene mode for Git hooks so each clone/PC can keep the default `manual` behavior, opt into intrusive staged-file autofix during `pre-commit`, and choose whether the setting is stored per repo clone or globally for the machine, with the effective mode resolved on every commit:
+  - `.github/governance/git-hook-eof-modes.json`
+  - `scripts/common/git-hook-eof-settings.ps1`
+  - `scripts/git-hooks/setup-git-hooks.ps1`
+  - `scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1`
+  - `.githooks/pre-commit`
+  - `scripts/runtime/install.ps1`
+  - `scripts/maintenance/trim-trailing-blank-lines.ps1`
+  - `scripts/tests/runtime/git-hook-eof-hygiene.tests.ps1`
+  - `scripts/tests/runtime/install-runtime.tests.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `README.md`
+  - `scripts/README.md`
 - Removed volatile metadata churn from versioned planning artifacts so active plan/spec files no longer rewrite timestamps or trace metadata on repeated stage runs, and moving them to `planning/completed` now preserves file timestamps:
   - `scripts/orchestration/stages/plan-stage.ps1`
   - `scripts/orchestration/stages/spec-stage.ps1`

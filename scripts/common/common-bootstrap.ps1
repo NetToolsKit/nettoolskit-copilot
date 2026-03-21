@@ -41,6 +41,7 @@ function Resolve-CommonHelperFileName {
     switch ($Helper) {
         'console-style' { return 'console-style.ps1' }
         'repository-paths' { return 'repository-paths.ps1' }
+        'git-hook-eof-settings' { return 'git-hook-eof-settings.ps1' }
         'runtime-paths' { return 'runtime-paths.ps1' }
         'runtime-install-profiles' { return 'runtime-install-profiles.ps1' }
         'validation-logging' { return 'validation-logging.ps1' }

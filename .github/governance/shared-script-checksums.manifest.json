@@ -9,11 +9,15 @@
   "entries": [
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "65ec9cc10847485dc4efe0b03ab29a939e7b0b9a8cb4f94ee44ff57b9cb69d88"
+      "sha256": "883d65c3e4b11b49bed9386ca21f94ba9c5d1e4ac5da10a9cf0f2d2359daf615"
     },
     {
       "path": "scripts/common/console-style.ps1",
       "sha256": "fcfc3e587abbcc1a3a4ee5c00846dc8a29899bdb1d5b3aca0b40ac2d7c6e5ea6"
+    },
+    {
+      "path": "scripts/common/git-hook-eof-settings.ps1",
+      "sha256": "c1d2d33ad5deb54534d7f17bbbd53b773b552742affa74a539550205ae0aad67"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
@@ -21,7 +25,7 @@
     },
     {
       "path": "scripts/common/runtime-install-profiles.ps1",
-      "sha256": "b579b35359819de500b94ef43f99c3143b4e8a83b88af61cda6632e8d8f27a8d"
+      "sha256": "fedea077fa5641a7d6f98a4f432643eaabdcacc71ef9702fced138f3f2a07e40"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",

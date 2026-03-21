@@ -127,6 +127,21 @@ try {
     Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'setup-global-git-aliases missing TargetCodexPath parameter.'
     Assert-Contains -Collection $keys -Value 'Uninstall' -Message 'setup-global-git-aliases missing Uninstall parameter.'
 
+    $scriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/setup-git-hooks.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'setup-git-hooks missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'EofHygieneMode' -Message 'setup-git-hooks missing EofHygieneMode parameter.'
+    Assert-Contains -Collection $keys -Value 'EofHygieneScope' -Message 'setup-git-hooks missing EofHygieneScope parameter.'
+    Assert-Contains -Collection $keys -Value 'Uninstall' -Message 'setup-git-hooks missing Uninstall parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'install.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'install missing RuntimeProfile parameter.'
+    Assert-Contains -Collection $keys -Value 'GitHookEofMode' -Message 'install missing GitHookEofMode parameter.'
+    Assert-Contains -Collection $keys -Value 'GitHookEofScope' -Message 'install missing GitHookEofScope parameter.'
+
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $targetGithub = Join-Path $tempRoot '.github'
     $targetCodex = Join-Path $tempRoot '.codex'

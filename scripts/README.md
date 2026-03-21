@@ -106,6 +106,9 @@ pwsh -File .\scripts\runtime\invoke-super-agent-execute.ps1 -RequestText "Implem
 
 # Enable local Git hooks (pre-commit + post-commit sync)
 pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
+
+# Enable local Git hooks and opt this clone into automatic staged EOF cleanup
+pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope local-repo
 ```
 
 The installer does not require the current shell to be in the repository root. If `pwsh -File` points to the versioned `install.ps1` path, the script resolves the repository root from its own location. Use `-RepoRoot` only when you need to override that auto-detection.
@@ -139,6 +142,13 @@ pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile codex -ApplyMcpConfig -
 
 # full onboarding
 pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
+# full onboarding plus intrusive EOF autofix on pre-commit
+# if scope is omitted, install asks whether this should be global and defaults to local-repo when you answer no
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -GitHookEofMode autofix -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
+# full onboarding plus explicit global EOF autofix
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
 
 The VS Code hook bootstrap selects its startup controller from `.github/hooks/super-agent.selector.json`. Keep the repository default in version control and override locally only through `~/.github/hooks/super-agent.selector.local.json` or the environment variables `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`.
@@ -282,14 +292,15 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/test-routing-selection.ps1` | Runs deterministic golden tests for static routing behavior based on catalog + fixtures. | `pwsh -File scripts/validation/test-routing-selection.ps1` |
 | `governance/set-branch-protection.ps1` | Validates or applies branch protection from `.github/governance/branch-protection.baseline.json` using GitHub CLI. | `pwsh -File scripts/governance/set-branch-protection.ps1 -Apply` |
 | `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
-| `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
+| `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`), persists EOF hygiene mode either under `.git/codex-hook-eof-settings.json` or `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`, and enables `pre-commit` validation + `post-commit` sync. Use `-EofHygieneMode autofix -EofHygieneScope local-repo` for a repo-only override or `-EofHygieneScope global` for machine-wide inheritance. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global` |
 | `git-hooks/setup-global-git-aliases.ps1` | Configures manual global Git aliases for runtime-synced helper scripts. Currently installs `git trim-eof`, which runs the shared trim script in `-GitChangedOnly` mode before `git add` when you want manual EOF cleanup in any repository. | `pwsh -File scripts/git-hooks/setup-global-git-aliases.ps1` |
-| `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `runtime-paths`, `runtime-install-profiles`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
+| `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `git-hook-eof-settings`, `runtime-paths`, `runtime-install-profiles`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
+| `common/git-hook-eof-settings.ps1` | Shared EOF hygiene mode helper that resolves `.github/governance/git-hook-eof-modes.json`, persists local-repo or global selections, and returns the effective mode on every commit with precedence `local-repo -> global -> default`. | `. ./scripts/common/git-hook-eof-settings.ps1; Get-EffectiveGitHookEofMode -ResolvedRepoRoot .` |
 | `common/runtime-install-profiles.ps1` | Shared runtime profile loader used by install/bootstrap/doctor/healthcheck/self-heal to resolve the versioned profile contract from `.github/governance/runtime-install-profiles.json`. | `. ./scripts/common/runtime-install-profiles.ps1; Resolve-RuntimeInstallProfile -ResolvedRepoRoot . -ProfileName all` |
 | `common/repository-paths.ps1` | Shared repository helper for repository/git/solution root discovery, repo-relative and full-path conversion, parent directory handling, verbose diagnostics, and structured execution logging reused across runtime, security, orchestration, and runtime test scripts. | `. ./scripts/common/repository-paths.ps1` |
 | `common/validation-logging.ps1` | Shared validation log helper for warning/failure registration, verbose output, and compact validation summaries reused across the validation script family. | `. ./scripts/common/validation-logging.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
-| `runtime/install.ps1` | Runs the profile-driven onboarding flow. Default profile is `none`, so the installer is non-intrusive unless `-RuntimeProfile github`, `codex`, or `all` is passed explicitly. Supports preview mode and parameterized runtime paths. Warning/error lines carry runtime issue IDs and the script always closes with a deduplicated issue summary plus severity counts. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
+| `runtime/install.ps1` | Runs the profile-driven onboarding flow. Default profile is `none`, so the installer is non-intrusive unless `-RuntimeProfile github`, `codex`, or `all` is passed explicitly. Supports preview mode, parameterized runtime paths, and `-GitHookEofMode manual|autofix` plus `-GitHookEofScope local-repo|global` for hook behavior. When mode is provided without scope during a real run, the installer asks whether the selection should be global and defaults to the less-intrusive local-repo scope. Warning/error lines carry runtime issue IDs and the script always closes with a deduplicated issue summary plus severity counts. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
@@ -521,6 +532,12 @@ pwsh -File (Join-Path $SecurityScriptsRoot 'Invoke-PreBuildSecurityGate.ps1') -R
 # install local Git hooks (validation + sync)
 pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
 
+# install local Git hooks and opt this clone into automatic staged EOF cleanup
+pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope local-repo
+
+# install local Git hooks but persist the EOF mode globally for repositories using this hook runtime
+pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global
+
 # configure the manual global git trim alias
 pwsh -File .\scripts\git-hooks\setup-global-git-aliases.ps1
 
@@ -532,7 +549,10 @@ Get-Help .\scripts\runtime\bootstrap.ps1 -Full
 ```
 
 After setup, hooks behavior is:
-- `pre-commit`: runs `validate-all -ValidationProfile dev -WarningOnly true` (best effort, warning-only)
+- `pre-commit`: resolves EOF hygiene from `.git/codex-hook-eof-settings.json`, then `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`, then the catalog default
+- `pre-commit` in `manual` mode: does not trim files automatically and continues to validation
+- `pre-commit` in `autofix` mode: trims only staged files, re-stages them, and blocks the commit when a file has both staged and unstaged changes because auto-restaging would be unsafe
+- `pre-commit`: then runs `validate-all -ValidationProfile dev -WarningOnly true` (best effort, warning-only)
 - `post-commit`: runs `scripts/runtime/bootstrap.ps1 -Mirror` to sync and clean drift in `~/.github` and managed `~/.codex` folders (best effort)
 - `post-commit`: runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort)
 - `post-merge`: runs `validate-all -ValidationProfile release -WarningOnly true` (best effort, warning-only)

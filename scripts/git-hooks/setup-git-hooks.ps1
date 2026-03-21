@@ -16,6 +16,14 @@
 .PARAMETER RepoRoot
     Optional repository root. If omitted, the script detects root from script location.
 
+.PARAMETER EofHygieneMode
+    Local pre-commit EOF hygiene mode for this clone/worktree. Supported
+    values are defined in `.github/governance/git-hook-eof-modes.json`.
+
+.PARAMETER EofHygieneScope
+    Scope for persisting the EOF hygiene mode selection. Supported values are
+    defined in `.github/governance/git-hook-eof-modes.json`.
+
 .PARAMETER Uninstall
     Removes local `core.hooksPath` configuration instead of setting it.
 
@@ -38,6 +46,8 @@
 
 param(
     [string] $RepoRoot,
+    [string] $EofHygieneMode,
+    [string] $EofHygieneScope,
     [switch] $Uninstall,
     [switch] $Verbose
 )
@@ -54,7 +64,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'git-hook-eof-settings')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 
@@ -115,13 +125,26 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitRoot)) {
 }
 
 if ($Uninstall) {
+    $resolvedRemovalScope = if (-not [string]::IsNullOrWhiteSpace($EofHygieneScope)) {
+        Resolve-GitHookEofScope -ResolvedRepoRoot $resolvedRepoRoot -ScopeName $EofHygieneScope
+    }
+    else {
+        Resolve-GitHookEofScope -ResolvedRepoRoot $resolvedRepoRoot -ScopeName 'local-repo'
+    }
+
     & git -C $resolvedRepoRoot config --local --unset core.hooksPath 2>$null
     if ($LASTEXITCODE -ne 0) {
         Write-StyledOutput 'No local core.hooksPath configured.'
+        $removedSettingsPath = Remove-GitHookEofModeSelection -ResolvedRepoRoot $resolvedRepoRoot -ScopeName $resolvedRemovalScope.Name
+        if (Test-Path -LiteralPath $removedSettingsPath -PathType Leaf) {
+            Write-StyledOutput ("Warning: could not remove local EOF hook settings: {0}" -f $removedSettingsPath)
+        }
         exit 0
     }
 
+    $removedSettingsPath = Remove-GitHookEofModeSelection -ResolvedRepoRoot $resolvedRepoRoot -ScopeName $resolvedRemovalScope.Name
     Write-StyledOutput 'Removed local Git hook path (core.hooksPath).'
+    Write-StyledOutput ("Removed EOF hook settings ({0}): {1}" -f $resolvedRemovalScope.Name, $removedSettingsPath)
     exit 0
 }
 
@@ -149,6 +172,32 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Failed to configure local Git hook path.'
 }
 
+$effectiveEofSelection = Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
+$eofScopeSelection = if (-not [string]::IsNullOrWhiteSpace($EofHygieneScope)) {
+    Resolve-GitHookEofScope -ResolvedRepoRoot $resolvedRepoRoot -ScopeName $EofHygieneScope
+}
+else {
+    $null
+}
+$shouldPersistEofSelection = (-not [string]::IsNullOrWhiteSpace($EofHygieneMode)) -or ($null -ne $eofScopeSelection)
+$eofModeSelection = if ($shouldPersistEofSelection) {
+    $targetModeName = if (-not [string]::IsNullOrWhiteSpace($EofHygieneMode)) { $EofHygieneMode } else { $effectiveEofSelection.Name }
+    $targetScopeName = if ($null -ne $eofScopeSelection) { $eofScopeSelection.Name } else { 'local-repo' }
+    $selection = Set-GitHookEofModeSelection -ResolvedRepoRoot $resolvedRepoRoot -ModeName $targetModeName -ScopeName $targetScopeName
+    if ($selection.Scope.Name -eq 'global') {
+        Remove-GitHookEofModeSelection -ResolvedRepoRoot $resolvedRepoRoot -ScopeName 'local-repo' | Out-Null
+    }
+
+    $selection
+}
+else {
+    [pscustomobject]@{
+        Mode = (Resolve-GitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot -ModeName $effectiveEofSelection.Name)
+        Scope = (Resolve-GitHookEofScope -ResolvedRepoRoot $resolvedRepoRoot -ScopeName $effectiveEofSelection.Scope)
+        SettingsPath = $effectiveEofSelection.SettingsPath
+        Source = $effectiveEofSelection.Source
+    }
+}
 Invoke-HookExecutabilityUpdate -HookPaths $hookPaths.ToArray()
 
 $configuredPath = (& git -C $resolvedRepoRoot config --local --get core.hooksPath 2>$null)
@@ -159,7 +208,13 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($configuredPath)) {
 Write-StyledOutput 'Git hooks configured successfully.'
 Write-StyledOutput ("  repo: {0}" -f $gitRoot)
 Write-StyledOutput ("  core.hooksPath: {0}" -f $configuredPath)
-Write-StyledOutput '  pre-commit: .githooks/pre-commit (runs validate-all with profile=dev, warning-only, best effort)'
+Write-StyledOutput ("  pre-commit: .githooks/pre-commit (EOF mode={0}; scope={1}; runs validate-all with profile=dev, warning-only, best effort)" -f $eofModeSelection.Mode.Name, $eofModeSelection.Scope.Name)
+if ($null -ne $eofModeSelection.SettingsPath) {
+    Write-StyledOutput ("  EOF hook settings ({0}): {1}" -f $eofModeSelection.Scope.Name, $eofModeSelection.SettingsPath)
+}
+else {
+    Write-StyledOutput ("  EOF hook settings source: {0}" -f $eofModeSelection.Source)
+}
 Write-StyledOutput '  post-commit: .githooks/post-commit (syncs ~/.github and ~/.codex via scripts/runtime/bootstrap.ps1)'
 Write-StyledOutput '  post-merge: .githooks/post-merge (runs validate-all with profile=release, warning-only, best effort)'
 Write-StyledOutput '  post-checkout: .githooks/post-checkout (runs validate-all with profile=dev, warning-only, best effort)'

@@ -119,6 +119,8 @@ try {
     Assert-Equal -Actual $codexPreviewResult.steps[1].name -Expected 'Run repository healthcheck' -Message 'Codex-profile install preview must keep healthcheck.'
 
     Assert-ThrowsLike -Action { & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile github -ApplyMcpConfig } -ExpectedPattern 'does not enable the Codex runtime surface' -Message 'Install preview must reject MCP apply when the selected profile does not enable Codex.'
+    Assert-ThrowsLike -Action { & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -GitHookEofMode autofix -SkipGitHooks } -ExpectedPattern 'GitHookEofMode or GitHookEofScope cannot be used when SkipGitHooks is set' -Message 'Install preview must reject an explicit GitHookEofMode when hook setup is skipped.'
+    Assert-ThrowsLike -Action { & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -GitHookEofScope global -SkipGitHooks } -ExpectedPattern 'GitHookEofMode or GitHookEofScope cannot be used when SkipGitHooks is set' -Message 'Install preview must reject an explicit GitHookEofScope when hook setup is skipped.'
 
     $reducedPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -RuntimeProfile all -SkipGlobalSettings -SkipGlobalSnippets -SkipGitHooks -SkipHealthcheck
 
@@ -126,6 +128,24 @@ try {
     Assert-Equal -Actual $reducedPreviewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Reduced install preview must keep bootstrap.'
     Assert-Equal -Actual $reducedPreviewResult.summary.overallStatus -Expected 'preview' -Message 'Reduced install preview must report preview summary status.'
     Assert-Equal -Actual $reducedPreviewResult.issues.totalIssues -Expected 0 -Message 'Reduced install preview must not report issues when only planning.'
+
+    $gitHookModePreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -GitHookEofMode autofix
+
+    Assert-Equal -Actual @($gitHookModePreviewResult.steps).Count -Expected 1 -Message 'Install preview must allow GitHookEofMode to force local hook setup on top of the default none profile.'
+    Assert-Equal -Actual $gitHookModePreviewResult.steps[0].name -Expected 'Configure local Git hooks' -Message 'GitHookEofMode preview must plan local Git hook setup.'
+    Assert-Equal -Actual $gitHookModePreviewResult.steps[0].arguments.EofHygieneMode -Expected 'autofix' -Message 'GitHookEofMode preview must forward the selected EOF hygiene mode to setup-git-hooks.'
+    Assert-Equal -Actual $gitHookModePreviewResult.steps[0].arguments.EofHygieneScope -Expected 'local-repo' -Message 'Install preview must assume the less-intrusive local-repo scope when prompting is skipped.'
+    Assert-Equal -Actual $gitHookModePreviewResult.gitHookEofMode.name -Expected 'autofix' -Message 'Install preview must expose the explicit EOF hook mode in the output contract.'
+    Assert-Equal -Actual $gitHookModePreviewResult.gitHookEofScope.name -Expected 'local-repo' -Message 'Install preview must expose the assumed local-repo hook scope in the output contract.'
+    Assert-Equal -Actual $gitHookModePreviewResult.gitHookEofScope.prompted -Expected $true -Message 'Install preview must record that the hook scope would be prompted during an execution run.'
+    Assert-Equal -Actual $gitHookModePreviewResult.summary.overallStatus -Expected 'preview' -Message 'GitHookEofMode preview must report preview summary status.'
+
+    $gitHookGlobalPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -GitHookEofMode autofix -GitHookEofScope global
+
+    Assert-Equal -Actual @($gitHookGlobalPreviewResult.steps).Count -Expected 1 -Message 'Install preview must still plan a single local hook setup step for explicit global scope.'
+    Assert-Equal -Actual $gitHookGlobalPreviewResult.steps[0].arguments.EofHygieneScope -Expected 'global' -Message 'Install preview must forward the explicit global hook scope to setup-git-hooks.'
+    Assert-Equal -Actual $gitHookGlobalPreviewResult.gitHookEofScope.name -Expected 'global' -Message 'Install preview must expose the explicit global hook scope in the output contract.'
+    Assert-Equal -Actual $gitHookGlobalPreviewResult.gitHookEofScope.prompted -Expected $false -Message 'Install preview must not mark explicit hook scope selection as prompted.'
 
     Write-Host '[OK] runtime install tests passed.'
     exit 0
