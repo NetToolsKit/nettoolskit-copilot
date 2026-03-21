@@ -25,12 +25,18 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
-$script:RepositoryHelpersPath = Join-Path $script:ScriptRoot '..\..\common\repository-paths.ps1'
-if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
-    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-. $script:RepositoryHelpersPath
-# Fails the current test when the process exit code does not match the expected value.
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+}
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
+}
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+# Fails the current runtime test when the exit code differs from the expected value.
 function Assert-ExitCode {
     param(
         [int] $ExitCode,

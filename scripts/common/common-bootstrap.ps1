@@ -25,8 +25,7 @@
 #>
 
 param(
-    [Parameter(Mandatory = $true)]
-    [string[]] $Helpers,
+    [string[]] $Helpers = @(),
     [string] $CallerScriptRoot = $PSScriptRoot
 )
 
@@ -110,8 +109,26 @@ function Resolve-CommonHelperPath {
     throw ("Missing shared helper '{0}'. Searched: {1}" -f $helperFileName, $searchedText)
 }
 
-$uniqueHelpers = @($Helpers | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
-foreach ($helper in $uniqueHelpers) {
-    $resolvedHelperPath = Resolve-CommonHelperPath -ScriptRoot $CallerScriptRoot -Helper $helper
-    . $resolvedHelperPath
+# Imports one or more shared helpers for the caller script root.
+function Import-SharedHelpers {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]] $Helpers,
+        [Alias('CallerScriptRoot')]
+        [string] $ScriptRoot = $PSScriptRoot
+    )
+
+    $uniqueHelpers = @($Helpers | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    foreach ($helper in $uniqueHelpers) {
+        $resolvedHelperPath = Resolve-CommonHelperPath -ScriptRoot $ScriptRoot -Helper $helper
+        . $resolvedHelperPath
+    }
+}
+
+if (@($Helpers).Count -gt 0) {
+    $uniqueHelpers = @($Helpers | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    foreach ($helper in $uniqueHelpers) {
+        $resolvedHelperPath = Resolve-CommonHelperPath -ScriptRoot $CallerScriptRoot -Helper $helper
+        . $resolvedHelperPath
+    }
 }

@@ -42,89 +42,28 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
-if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
-    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
-    . $script:ConsoleStylePath
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
 }
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
+}
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 
-# Writes verbose diagnostics.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
-# Resolves repository root from input and fallback candidates.
-function Resolve-RepositoryRoot {
-    param(
-        [string] $RequestedRoot
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $RequestedRoot).Path
-        }
-        catch {
-            throw "Invalid RepoRoot path: $RequestedRoot"
-        }
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($script:ScriptRoot)) {
-        $candidates += (Resolve-Path -LiteralPath (Join-Path $script:ScriptRoot '..\..')).Path
-    }
-
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($index = 0; $index -lt 6 -and -not [string]::IsNullOrWhiteSpace($current); $index++) {
-            $hasLayout = (Test-Path -LiteralPath (Join-Path $current '.github')) -and (Test-Path -LiteralPath (Join-Path $current '.codex'))
-            if ($hasLayout) {
-                Write-VerboseLog ("Repository root detected: {0}" -f $current)
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw 'Could not detect repository root containing both .github and .codex.'
-}
-
-# Resolves a repository-relative path into an absolute path.
-function Resolve-RepoPath {
-    param(
-        [string] $Root,
-        [string] $Path
-    )
-
-    if ([System.IO.Path]::IsPathRooted($Path)) {
-        return [System.IO.Path]::GetFullPath($Path)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
-}
-
 # Converts absolute path to normalized repository-relative path.
-function Convert-ToRelativePath {
+function Convert-ToManifestRelativePath {
     param(
         [string] $Root,
         [string] $Path
     )
 
-    $relative = [System.IO.Path]::GetRelativePath($Root, $Path)
-    return $relative.Replace('\', '/')
+    return Convert-ToRelativeRepoPath -Root $Root -Path $Path
 }
 
 # Collects script files from included roots.
@@ -166,7 +105,7 @@ if ($scriptFiles.Count -eq 0) {
 
 $entryList = New-Object System.Collections.Generic.List[object]
 foreach ($scriptFile in $scriptFiles) {
-    $relativePath = Convert-ToRelativePath -Root $resolvedRepoRoot -Path $scriptFile
+    $relativePath = Convert-ToManifestRelativePath -Root $resolvedRepoRoot -Path $scriptFile
     $hash = (Get-FileHash -LiteralPath $scriptFile -Algorithm SHA256).Hash.ToLowerInvariant()
     $entryList.Add([ordered]@{
             path = $relativePath

@@ -13,7 +13,7 @@
 - targeted docs, changelog, and checksum manifest
 
 ## Spec
-- `planning/specs/active/spec-shared-helper-loader-bootstrap.md`
+- `planning/specs/completed/spec-shared-helper-loader-bootstrap.md`
 
 ## Tasks
 1. Add a shared helper loader.
@@ -31,6 +31,13 @@
      - `pwsh -NoLogo -NoProfile -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false`
      - `pwsh -NoLogo -NoProfile -File scripts/validation/validate-shared-script-checksums.ps1 -RepoRoot . -WarningOnly:$false`
      - `pwsh -NoLogo -NoProfile -File scripts/validation/validate-all.ps1 -RepoRoot . -ValidationProfile dev`
+
+## Outcome
+- Added `scripts/common/common-bootstrap.ps1` as the shared loader bootstrap for common helper imports.
+- Migrated runtime, validation, orchestration, security, test, governance, git-hook, maintenance, deploy, and documentation scripts to the shared bootstrap pattern.
+- Removed the remaining local repository/helper resolution duplicates from governance and git-hook entrypoints.
+- Updated docs and checksum governance.
+- Validation closed with zero warnings and zero failures in `validate-all -ValidationProfile dev`.
 
 ## Risks
 - Loader search order regressions in mirrored runtime directories.

@@ -8,12 +8,16 @@
   ],
   "entries": [
     {
+      "path": "scripts/common/common-bootstrap.ps1",
+      "sha256": "6366285055ce6d5e4db69c0f2e65311147cfc133ad29fb5001beec65da519d33"
+    },
+    {
       "path": "scripts/common/console-style.ps1",
       "sha256": "fcfc3e587abbcc1a3a4ee5c00846dc8a29899bdb1d5b3aca0b40ac2d7c6e5ea6"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
-      "sha256": "1be56a15d0bbc46bfb6bfdd85803f3b0eace54676d4456ac19b3536b56a759a0"
+      "sha256": "4869124784ba480b3fe3cec189b1d5b0867b8952bc52770de20ee60f7b8a2bc1"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
@@ -25,27 +29,27 @@
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
-      "sha256": "7ecd3f086e5a92eccf99edb5ebff12ef99465a652b72634a31bb89c85a92a77b"
+      "sha256": "acbe057fe58d169286fa89f764bdb7a890a72fc2542b2a77840c0d8cc8f11f0e"
     },
     {
       "path": "scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1",
-      "sha256": "a060789669d837175d5fdd1c2359525200412050b5e6fc17ba7af68c9a4b2ac7"
+      "sha256": "e7102d803463506b30287888278adbbe8b2144e33f916128bf1774597591b0b7"
     },
     {
       "path": "scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1",
-      "sha256": "61423e9e32a1d0fda2518821ada78465d668b525490251827ca66ea673109235"
+      "sha256": "7cd464d5f6b81c87240b50247e4d3f095fca3243f20743067d20140961441e7c"
     },
     {
       "path": "scripts/security/Invoke-PreBuildSecurityGate.ps1",
-      "sha256": "dac5090319cba0d63e4314a33083145c7091c09c97ce0b066841f207f0dabef4"
+      "sha256": "42048acc2a69eaa179a6b41427a692428d7ba50fab46ec73053968d36715da74"
     },
     {
       "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",
-      "sha256": "3474171277fe38a71ed73de11d579017c049ae3ee887514c7c9327120cc673d7"
+      "sha256": "d1a18c49b536d94f5286ab53e303fb450d985360178db52896717c5f1309a464"
     },
     {
       "path": "scripts/security/Invoke-VulnerabilityAudit.ps1",
-      "sha256": "e8fa5f52b1880e7f049a02e98a25671229f4a8c9b63d65facc9da4f031d20685"
+      "sha256": "019734b409ffd7ba73a87432e6c1a6a39df6284743deb08920ecbae1567cd83f"
     }
   ]
 }

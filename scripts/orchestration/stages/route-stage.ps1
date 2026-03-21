@@ -85,18 +85,17 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
-if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
-    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
-    . $script:ConsoleStylePath
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
 }
-$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
-if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
-    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:RepositoryHelpersPath
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
 $script:IsVerboseEnabled = [bool] $DetailedOutput
 # Builds one artifact descriptor with checksum metadata.
 function Get-ArtifactDescriptor {

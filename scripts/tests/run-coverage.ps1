@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Executes .NET test projects with code coverage collection and merges HTML/Cobertura reports.
 .DESCRIPTION
@@ -78,16 +78,18 @@ param(
 $ErrorActionPreference = 'Stop'
 
 
-$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
-if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
-    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
-    . $script:ConsoleStylePath
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
 }
-
-# Logging functions
-# Writes informational messages to the console.
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
+}
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style')
+# Writes an informational line for the coverage execution flow.
 function Write-Info($msg) {
     Write-StyledOutput "INFO: $msg"
 }

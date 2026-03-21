@@ -87,26 +87,18 @@ $script:IsVerboseEnabled = [bool] $DetailedLogs
 $script:Failures = New-Object System.Collections.Generic.List[string]
 $script:Warnings = New-Object System.Collections.Generic.List[string]
 
-$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
-if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
-    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
-    . $script:ConsoleStylePath
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
 }
-
-# Writes verbose diagnostics.
-$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
-if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
-    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
-    . $script:RepositoryHelpersPath
-}
-else {
-    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
-}
-# Registers non-blocking warning.
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
+# Registers a prerequisite setup warning in the in-memory result summary.
 function Add-SetupWarning {
     param([string] $Message)
 

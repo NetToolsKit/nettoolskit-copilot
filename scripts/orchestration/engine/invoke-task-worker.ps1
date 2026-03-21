@@ -109,17 +109,18 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
-if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) {
-    $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\repository-paths.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
-    . $script:RepositoryHelpersPath
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
 }
-else {
-    throw "Missing shared repository helper: $script:RepositoryHelpersPath"
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-# Reads JSON with repository-standard parse depth.
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+# Reads a JSON file and deserializes it with the orchestration depth required by worker artifacts.
 function Read-JsonFile {
     param([string] $Path)
     return (Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json -Depth 200)

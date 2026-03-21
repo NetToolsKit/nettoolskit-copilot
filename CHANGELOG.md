@@ -14,6 +14,19 @@
   - `scripts/orchestration/**/*.ps1`
   - `scripts/tests/runtime/*.ps1`
   - `scripts/README.md`
+- Added `scripts/common/common-bootstrap.ps1` as the shared helper-loader bootstrap and migrated runtime, validation, orchestration, security, test, governance, git-hook, maintenance, deploy, and documentation scripts onto the same import contract for `console-style`, `repository-paths`, `runtime-paths`, and `validation-logging`:
+  - `scripts/common/common-bootstrap.ps1`
+  - `scripts/runtime/*.ps1`
+  - `scripts/validation/*.ps1`
+  - `scripts/orchestration/**/*.ps1`
+  - `scripts/security/*.ps1`
+  - `scripts/tests/**/*.ps1`
+  - `scripts/governance/*.ps1`
+  - `scripts/git-hooks/*.ps1`
+  - `scripts/maintenance/*.ps1`
+  - `scripts/deploy/*.ps1`
+  - `scripts/doc/*.ps1`
+  - `scripts/README.md`
 
 ### Fixed
 - Fixed fresh clones leaving the repository dirty before any user change because a set of tracked PowerShell scripts were committed with mixed line endings under the repository `*.ps1 eol=crlf` policy:

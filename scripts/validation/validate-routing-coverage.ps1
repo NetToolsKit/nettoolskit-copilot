@@ -45,35 +45,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:ConsoleStylePath = Join-Path $PSScriptRoot '..\common\console-style.ps1'
-if (-not (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf)) {
-    $script:ConsoleStylePath = Join-Path $PSScriptRoot '..\..\common\console-style.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
 }
-if (Test-Path -LiteralPath $script:ConsoleStylePath -PathType Leaf) {
-    . $script:ConsoleStylePath
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
 }
-
-$script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\common\repository-paths.ps1'
-if (-not (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf)) {
-    $script:RepositoryPathsPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-if (Test-Path -LiteralPath $script:RepositoryPathsPath -PathType Leaf) {
-    . $script:RepositoryPathsPath
-}
-else {
-    throw "Missing shared repository path helper: $script:RepositoryPathsPath"
-}
-$script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\common\validation-logging.ps1'
-if (-not (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf)) {
-    $script:ValidationLoggingPath = Join-Path $PSScriptRoot '..\..\common\validation-logging.ps1'
-}
-if (Test-Path -LiteralPath $script:ValidationLoggingPath -PathType Leaf) {
-    . $script:ValidationLoggingPath
-}
-else {
-    throw "Missing shared validation logging helper: $script:ValidationLoggingPath"
-}
-
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'validation-logging')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ValidationState -VerboseEnabled $script:IsVerboseEnabled

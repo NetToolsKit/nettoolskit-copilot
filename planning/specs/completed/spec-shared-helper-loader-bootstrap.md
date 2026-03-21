@@ -21,11 +21,16 @@
    - import one or more named helpers deterministically
 3. Call pattern in consumer scripts:
    - locate the shared loader with the minimal fallback list
-   - dot-source the loader once
-   - call `Import-SharedHelpers` with the required helper names
+   - dot-source the loader once with `-CallerScriptRoot` and `-Helpers`
+   - keep the helper resolution contract declarative at the call site
 4. Keep existing helper behavior untouched after import.
 
 ## Acceptance Criteria
 - Consumer scripts no longer inline helper path detection for the common helper set.
 - Mirrored runtime paths still work for orchestration and runtime scripts.
 - Validation suite passes without warnings or failures.
+
+## Final Notes
+- The canonical consumer pattern is:
+  - `. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')`
+- The direct dot-sourced invocation is used so imported helper functions materialize in the consumer script scope without extra wrapper duplication.
