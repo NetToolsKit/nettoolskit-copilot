@@ -87,8 +87,23 @@ $subagentResult = $subagentOutput | ConvertFrom-Json -Depth 50
 
 Assert-True ($sessionResult.hookSpecificOutput.hookEventName -eq 'SessionStart') 'SessionStart hook should return SessionStart payload.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Super Agent lifecycle is mandatory') 'SessionStart hook should inject Super Agent bootstrap context.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Selected startup controller: Super Agent \(\$super-agent\) via default') 'SessionStart hook should advertise the default startup controller.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match '\.build/') 'SessionStart hook should mention the artifact layout policy.'
 Assert-True ($subagentResult.hookSpecificOutput.hookEventName -eq 'SubagentStart') 'SubagentStart hook should return SubagentStart payload.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'reviewer') 'SubagentStart hook should mention the spawned worker type.'
+
+try {
+    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', 'using-super-agent', 'Process')
+    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_NAME', 'Using Super Agent', 'Process')
+
+    $overrideOutput = ($sessionPayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $sessionStartScript)
+    $overrideResult = $overrideOutput | ConvertFrom-Json -Depth 50
+
+    Assert-True ([string] $overrideResult.hookSpecificOutput.additionalContext -match 'Selected startup controller: Using Super Agent \(\$using-super-agent\) via environment-override') 'SessionStart hook should honor environment overrides for the startup controller.'
+}
+finally {
+    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', $null, 'Process')
+    [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_NAME', $null, 'Process')
+}
 
 Write-Host 'VS Code agent hook runtime tests passed.'

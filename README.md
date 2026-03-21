@@ -10,6 +10,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Convention Standardization:** Code style, test patterns, commits, file organization
 - ✅ **Authoritative Source Policy:** Repository context first, then official docs by stack
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart` and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
+- ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
 - ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
@@ -208,6 +209,11 @@ pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects repository-owned skills once into `~/.agents/skills` as the canonical visible/runtime skill target, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
 
 The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
+
+The startup controller injected by those hooks is selected from `.github/hooks/super-agent.selector.json`. The repository default remains `Super Agent`, and you can override it without changing tracked files by either:
+
+- creating `~/.github/hooks/super-agent.selector.local.json`
+- setting `COPILOT_SUPER_AGENT_SKILL` and optionally `COPILOT_SUPER_AGENT_NAME`
 
 To apply active VS Code workspace files from templates:
 

@@ -69,6 +69,10 @@
 - Added a picker-visible repository starter alias for the repo-owned lifecycle controller:
   - `.codex/skills/using-super-agent/SKILL.md`
   - `.codex/skills/using-super-agent/agents/openai.yaml`
+- Added a versioned startup-controller selector for repository-owned VS Code hooks so the bootstrap can keep `Super Agent` as the default while allowing untracked local or environment overrides:
+  - `.github/hooks/super-agent.selector.json`
+  - `scripts/validation/validate-agent-hooks.ps1`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
 
 ### Changed
 - Upgraded the repository-owned orchestration lifecycle from:
@@ -133,6 +137,14 @@
   - `README.md`
   - `scripts/README.md`
   - `.codex/skills/README.md`
+- Updated repository-owned VS Code hook bootstrap context so SessionStart and SubagentStart now announce the selected startup controller and respect this override order:
+  - repository default from `.github/hooks/super-agent.selector.json`
+  - local untracked override from `~/.github/hooks/super-agent.selector.local.json`
+  - environment override from `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`
+  - files updated:
+    - `.github/hooks/scripts/common.ps1`
+    - `README.md`
+    - `scripts/README.md`
 
 ### Removed
 - Removed placeholder `.gitkeep` files from the planning workspace:

@@ -77,6 +77,7 @@ $failures = New-Object System.Collections.Generic.List[string]
 
 $hooksRoot = Join-Path $resolvedRepoRoot '.github/hooks'
 $bootstrapHookPath = Join-Path $hooksRoot 'super-agent.bootstrap.json'
+$selectorPath = Join-Path $hooksRoot 'super-agent.selector.json'
 $scriptDirectory = Join-Path $hooksRoot 'scripts'
 
 if (-not (Test-Path -LiteralPath $hooksRoot -PathType Container)) {
@@ -128,6 +129,41 @@ else {
                     }
                 }
             }
+        }
+    }
+}
+
+if (-not (Test-Path -LiteralPath $selectorPath -PathType Leaf)) {
+    Add-ValidationMessage -Message 'Missing required hook file .github/hooks/super-agent.selector.json.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+}
+else {
+    try {
+        $selectorDocument = Get-Content -Raw -LiteralPath $selectorPath | ConvertFrom-Json -Depth 100
+    }
+    catch {
+        $selectorDocument = $null
+        Add-ValidationMessage -Message ('.github/hooks/super-agent.selector.json is not valid JSON: {0}' -f $_.Exception.Message) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+    }
+
+    if ($null -ne $selectorDocument) {
+        if ([string]::IsNullOrWhiteSpace([string] $selectorDocument.defaultAgent.skillName)) {
+            Add-ValidationMessage -Message '.github/hooks/super-agent.selector.json must define defaultAgent.skillName.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+        }
+
+        if ([string]::IsNullOrWhiteSpace([string] $selectorDocument.defaultAgent.displayName)) {
+            Add-ValidationMessage -Message '.github/hooks/super-agent.selector.json must define defaultAgent.displayName.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+        }
+
+        if ([string]::IsNullOrWhiteSpace([string] $selectorDocument.overrideSources.environment.skillVariable)) {
+            Add-ValidationMessage -Message '.github/hooks/super-agent.selector.json must define overrideSources.environment.skillVariable.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+        }
+
+        if ([string]::IsNullOrWhiteSpace([string] $selectorDocument.overrideSources.environment.displayVariable)) {
+            Add-ValidationMessage -Message '.github/hooks/super-agent.selector.json must define overrideSources.environment.displayVariable.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+        }
+
+        if ([string]::IsNullOrWhiteSpace([string] $selectorDocument.overrideSources.localOverrideFile)) {
+            Add-ValidationMessage -Message '.github/hooks/super-agent.selector.json must define overrideSources.localOverrideFile.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
         }
     }
 }

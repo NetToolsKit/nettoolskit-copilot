@@ -22,6 +22,7 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Safe parallel batching for dependency-independent work items with write-set conflict blocking
 - ✅ Super Agent worktree isolation helper and thin lifecycle entry commands
 - ✅ Picker-visible `Using Super Agent` starter alias projected into `%USERPROFILE%\\.agents\\skills`
+- ✅ Configurable VS Code startup-controller selector with repository default plus local and environment overrides
 - ✅ Repository-owned TDD and verification workflow contracts for execution stages
 - ✅ Persisted orchestration run state for replay diagnostics and auditability
 - ✅ Release governance checks (CODEOWNERS, changelog contracts, branch-protection baseline)
@@ -99,6 +100,8 @@ pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
 ```
 
 The installer does not require the current shell to be in the repository root. If `pwsh -File` points to the versioned `install.ps1` path, the script resolves the repository root from its own location. Use `-RepoRoot` only when you need to override that auto-detection.
+
+The VS Code hook bootstrap selects its startup controller from `.github/hooks/super-agent.selector.json`. Keep the repository default in version control and override locally only through `~/.github/hooks/super-agent.selector.local.json` or the environment variables `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`.
 
 ---
 
@@ -266,6 +269,10 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 - Current bootstrap events:
   - `SessionStart`
   - `SubagentStart`
+- Startup controller selection:
+  - versioned default: `.github/hooks/super-agent.selector.json`
+  - optional local override: `~/.github/hooks/super-agent.selector.local.json`
+  - optional environment override: `COPILOT_SUPER_AGENT_SKILL`, `COPILOT_SUPER_AGENT_NAME`
 | `maintenance/generate-http-from-openapi.ps1` | Generates a REST Client .http file from OpenAPI (default) or Swagger JSON. | `pwsh -File scripts/maintenance/generate-http-from-openapi.ps1 -Source http://localhost:5000` |
 | `maintenance/fix-version-ranges.ps1` | Normalises PackageReference versions into `[current, limit)` ranges. | `pwsh -File scripts/maintenance/fix-version-ranges.ps1 -Verbose` |
 | `maintenance/trim-trailing-blank-lines.ps1` | Removes trailing spaces and blank lines at EOF while respecting the repository EOF policy: files end without final newline unless a future explicit rule says otherwise. | `pwsh -File scripts/maintenance/trim-trailing-blank-lines.ps1 -Path "C:\repo" -CheckOnly` |
