@@ -9,6 +9,12 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 - Only downgrade to lightweight/prototype mode when the user explicitly labels the request as `POC`, `spike`, or `informal test`.
 - Even in POC/informal mode, keep baseline safety controls (no secrets exposure, no unsafe destructive actions).
 
+# EOF Policy
+- Preserve the exact EOF state of every edited file.
+- The repository default in `.editorconfig` is `insert_final_newline = false`.
+- Do not append a terminal newline when editing or creating files unless a narrower file-specific rule explicitly requires it.
+- Do not leave trailing blank lines at EOF.
+
 # Language Policy
 - Chat/Conversation: pt-BR (Portuguese) - all responses to user in chat
 - Code/Commits/Docs: EN (English) - all technical content

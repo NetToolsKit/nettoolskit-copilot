@@ -157,13 +157,21 @@ try {
         $repoTemplatePath = Join-Path $resolvedRepoRoot '.vscode/settings.tamplate.jsonc'
         $repoTemplate = Get-Content -Raw -LiteralPath $repoTemplatePath | ConvertFrom-Json -Depth 200
         Assert-Equal -Actual $repoTemplate.PSObject.Properties['files.insertFinalNewline'].Value -Expected $false -Message 'Shared VS Code template must preserve the repository EOF policy.'
+        Assert-Equal -Actual $repoTemplate.PSObject.Properties['files.trimFinalNewlines'].Value -Expected $true -Message 'Shared VS Code template must trim extra final newlines on save.'
         Assert-Null -Actual $repoTemplate.PSObject.Properties['editor.defaultFormatter'] -Message 'Shared VS Code template must not define a global default formatter.'
+        Assert-Equal -Actual $repoTemplate.PSObject.Properties['editor.formatOnSave'].Value -Expected $false -Message 'Shared VS Code template must keep formatOnSave disabled by default.'
+        Assert-Equal -Actual $repoTemplate.PSObject.Properties['editor.formatOnPaste'].Value -Expected $false -Message 'Shared VS Code template must keep formatOnPaste disabled by default.'
+        Assert-Equal -Actual $repoTemplate.PSObject.Properties['editor.formatOnType'].Value -Expected $false -Message 'Shared VS Code template must keep formatOnType disabled by default.'
 
         foreach ($languageScope in @('[javascript]', '[typescript]', '[html]', '[css]', '[scss]', '[vue]', '[json]', '[markdown]')) {
             $scopeValue = $repoTemplate.PSObject.Properties[$languageScope].Value
             Assert-True -Condition ($null -ne $scopeValue) -Message ("Shared VS Code template must keep the language scope {0}." -f $languageScope)
             Assert-Null -Actual $scopeValue.PSObject.Properties['editor.defaultFormatter'] -Message ("Shared VS Code template must not assign a shared default formatter for {0}." -f $languageScope)
         }
+
+        $goScope = $repoTemplate.PSObject.Properties['[go]'].Value
+        Assert-True -Condition ($null -ne $goScope) -Message 'Shared VS Code template must keep the [go] scope.'
+        Assert-Equal -Actual $goScope.PSObject.Properties['editor.formatOnSave'].Value -Expected $false -Message 'Shared VS Code template must not force Go formatOnSave because it conflicts with the repository EOF policy.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

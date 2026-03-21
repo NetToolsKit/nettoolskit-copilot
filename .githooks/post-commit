@@ -186,6 +186,31 @@ run_vscode_global_check() {
   return 0
 }
 
+# Runs runtime cleanup in the background while the slower VS Code alignment
+# validation stays on the foreground path. Cleanup output is replayed after
+# validation completes so the hook log remains readable.
+run_runtime_cleanup_concurrent() {
+  cmd="$1"
+  temp_root="${TMPDIR:-${TMP:-${TEMP:-/tmp}}}"
+  cleanup_log="${temp_root}/post-commit-cleanup-$$.log"
+  cleanup_pid=""
+
+  (
+    run_runtime_cleanup "$cmd"
+  ) >"$cleanup_log" 2>&1 &
+  cleanup_pid=$!
+
+  run_vscode_global_check "$cmd"
+  wait "$cleanup_pid" || true
+
+  if [ -f "$cleanup_log" ]; then
+    cat "$cleanup_log"
+    rm -f "$cleanup_log"
+  fi
+
+  return 0
+}
+
 # Hook is best-effort: no hard failure if PowerShell is unavailable.
 PS_CMD="$(resolve_ps_cmd)"
 if [ -z "$PS_CMD" ]; then
@@ -195,6 +220,5 @@ fi
 
 run_sync "$PS_CMD"
 run_optional_mcp_apply "$PS_CMD"
-run_vscode_global_check "$PS_CMD"
-run_runtime_cleanup "$PS_CMD"
+run_runtime_cleanup_concurrent "$PS_CMD"
 exit 0

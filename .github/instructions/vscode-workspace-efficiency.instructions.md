@@ -41,6 +41,9 @@ priority: high
   - do not set `esbenp.prettier-vscode` as the shared global default formatter
   - do not set Prettier as the shared default formatter for `javascript`, `typescript`, `html`, `css`, `scss`, `vue`, `json`, or `markdown`
   - the repository default EOF policy uses `insert_final_newline = false`, while Prettier writes a terminal newline
+  - keep shared `editor.formatOnSave`, `editor.formatOnPaste`, and `editor.formatOnType` disabled unless a narrower repository policy explicitly accepts formatter-managed EOF behavior
+  - avoid language-scoped `formatOnSave` overrides in the shared global template when the formatter is known to normalize files with a terminal newline
+  - repository-owned VS Code hooks should normalize edit-tool payloads before disk writes so AI edits do not reintroduce a terminal newline when the workspace policy forbids it
 - Keep chat-session continuity settings aligned with the shared template:
   - `workbench.startupEditor = welcomePage`
   - `chat.emptyState.history.enabled = true`

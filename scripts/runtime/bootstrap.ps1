@@ -96,13 +96,23 @@ if (-not (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf)) 
     $script:RepositoryHelpersPath = Join-Path $PSScriptRoot '..\..\common\repository-paths.ps1'
 }
 if (Test-Path -LiteralPath $script:RepositoryHelpersPath -PathType Leaf) {
-    . $script:RepositoryHelpersPath
+. $script:RepositoryHelpersPath
 }
 else {
     throw "Missing shared repository helper: $script:RepositoryHelpersPath"
 }
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
+$script:RobocopyCommand = Get-Command -Name 'robocopy' -ErrorAction SilentlyContinue
+$script:RobocopyBaseArgs = @(
+    '/R:2',
+    '/W:1',
+    '/NFL',
+    '/NDL',
+    '/NJH',
+    '/NJS',
+    '/MT:8'
+)
 
 # -------------------------------
 # Helpers
@@ -141,6 +151,36 @@ function Invoke-FallbackSync {
     }
 }
 
+# Invokes robocopy with the shared repository sync defaults.
+function Invoke-RobocopySync {
+    param(
+        [string] $Source,
+        [string] $Destination,
+        [switch] $MirrorMode,
+        [string[]] $AdditionalArgs
+    )
+
+    New-Item -ItemType Directory -Path $Destination -Force | Out-Null
+
+    $mode = if ($MirrorMode) { '/MIR' } else { '/E' }
+    $robocopyArgs = @(
+        $Source,
+        $Destination,
+        $mode
+    ) + $script:RobocopyBaseArgs
+
+    if (@($AdditionalArgs).Count -gt 0) {
+        $robocopyArgs += $AdditionalArgs
+    }
+
+    & $script:RobocopyCommand.Source @robocopyArgs | Out-Null
+    if ($LASTEXITCODE -ge 8) {
+        throw "robocopy failed for '$Source' -> '$Destination' (exit code: $LASTEXITCODE)"
+    }
+
+    Write-VerboseColor ("Synced with robocopy: {0} -> {1}" -f $Source, $Destination) 'Gray'
+}
+
 # Synchronizes source and destination directories with robocopy or fallback mode.
 function Invoke-DirectorySync {
     param(
@@ -154,29 +194,8 @@ function Invoke-DirectorySync {
         return
     }
 
-    $robocopyCmd = Get-Command robocopy -ErrorAction SilentlyContinue
-    if ($null -ne $robocopyCmd) {
-        New-Item -ItemType Directory -Path $Destination -Force | Out-Null
-
-        $mode = if ($MirrorMode) { '/MIR' } else { '/E' }
-        $robocopyArgs = @(
-            $Source,
-            $Destination,
-            $mode,
-            '/R:2',
-            '/W:1',
-            '/NFL',
-            '/NDL',
-            '/NJH',
-            '/NJS'
-        )
-
-        & robocopy @robocopyArgs | Out-Null
-        if ($LASTEXITCODE -ge 8) {
-            throw "robocopy failed for '$Source' -> '$Destination' (exit code: $LASTEXITCODE)"
-        }
-
-        Write-VerboseColor ("Synced with robocopy: {0} -> {1}" -f $Source, $Destination) 'Gray'
+    if ($null -ne $script:RobocopyCommand) {
+        Invoke-RobocopySync -Source $Source -Destination $Destination -MirrorMode:$MirrorMode
         return
     }
 
@@ -212,6 +231,17 @@ function Invoke-AgentsSkillSync {
     }
 
     New-Item -ItemType Directory -Path $DestinationRoot -Force | Out-Null
+
+    if ($null -ne $script:RobocopyCommand) {
+        Invoke-RobocopySync -Source $SourceRoot -Destination $DestinationRoot -MirrorMode:$MirrorMode -AdditionalArgs @('/XF', 'README.md')
+
+        $destinationReadme = Join-Path $DestinationRoot 'README.md'
+        if (Test-Path -LiteralPath $destinationReadme -PathType Leaf) {
+            Remove-Item -LiteralPath $destinationReadme -Force -ErrorAction Stop
+        }
+
+        return
+    }
 
     $sourceSkillDirectories = @(Get-ChildItem -LiteralPath $SourceRoot -Directory -Force)
     foreach ($skillDirectory in $sourceSkillDirectories) {

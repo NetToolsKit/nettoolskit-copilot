@@ -32,6 +32,8 @@
     "editor.fontFamily": "'Cascadia Code PL', Consolas, 'Courier New', monospace",
     "editor.fontSize": 13,
     "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
     "editor.stickyScroll.enabled": false,
     "editor.renderWhitespace": "none",
     "editor.bracketPairColorization.enabled": true,
@@ -182,6 +184,7 @@
     "files.autoGuessEncoding": false,
     "files.eol": "\n",
     "files.insertFinalNewline": false,
+    "files.trimFinalNewlines": true,
     "files.associations": {
         // Makefiles
         "Makefile.*": "makefile",
@@ -340,7 +343,7 @@
     // Go
     "[go]": {
         "editor.insertSpaces": false,
-        "editor.formatOnSave": true,
+        "editor.formatOnSave": false,
         "editor.tabSize": 4,
         "editor.codeActionsOnSave": {
             "source.organizeImports": "always"

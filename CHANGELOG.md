@@ -35,10 +35,29 @@
   - `.githooks/post-checkout`
   - `.githooks/post-merge`
   - `scripts/validation/validate-shell-hooks.ps1`
+- Reduced false-positive install and healthcheck noise by making the runtime test runner suppress child test fixture output on success and replay it only for verbose runs or real failures:
+  - `scripts/validation/validate-runtime-script-tests.ps1`
+  - `scripts/README.md`
+- Moved repository EOF enforcement closer to the VS Code AI edit origin by adding a repository-owned `PreToolUse` hook that strips terminal newlines from supported edit/create tool payloads before files are written:
+  - `.github/hooks/super-agent.bootstrap.json`
+  - `.github/hooks/scripts/common.ps1`
+  - `.github/hooks/scripts/pre-tool-use.ps1`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+  - `scripts/validation/validate-agent-hooks.ps1`
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/instructions/repository-operating-model.instructions.md`
 - Removed duplicate repo-managed skill entries from the VS Code/Codex picker by making `%USERPROFILE%\\.agents\\skills` the canonical visible/runtime target and cleaning stale repo-managed duplicates from `%USERPROFILE%\\.codex\\skills`:
   - `scripts/runtime/bootstrap.ps1`
   - `scripts/runtime/doctor.ps1`
   - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+- Reduced local post-commit latency without changing the default hook contract by collapsing repository skill projection in `bootstrap.ps1` into a single root sync when `robocopy` is available and by overlapping runtime cleanup with VS Code global alignment validation in `.githooks/post-commit`:
+  - `.githooks/post-commit`
+  - `scripts/runtime/bootstrap.ps1`
+- Hardened the shared VS Code settings baseline against terminal newline reintroduction by keeping format-on-paste and format-on-type disabled, trimming extra final blank lines on save, and removing the shared Go `formatOnSave` override that conflicted with the repository EOF policy:
+  - `.vscode/settings.tamplate.jsonc`
+  - `.github/instructions/vscode-workspace-efficiency.instructions.md`
+  - `scripts/tests/runtime/vscode-global-settings-sync.tests.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:

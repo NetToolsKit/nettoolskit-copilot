@@ -91,6 +91,178 @@ function Resolve-HooksRootPath {
     return (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 }
 
+# Resolves the repository default insert_final_newline policy from the workspace .editorconfig.
+function Get-WorkspaceInsertFinalNewlinePolicy {
+    param(
+        [string] $WorkspacePath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath)) {
+        return $null
+    }
+
+    $editorConfigPath = Join-Path $WorkspacePath '.editorconfig'
+    if (-not (Test-Path -LiteralPath $editorConfigPath -PathType Leaf)) {
+        return $null
+    }
+
+    foreach ($line in (Get-Content -LiteralPath $editorConfigPath)) {
+        $trimmed = [string] $line
+        $trimmed = $trimmed.Trim()
+
+        if ([string]::IsNullOrWhiteSpace($trimmed)) {
+            continue
+        }
+
+        if ($trimmed.StartsWith('#') -or $trimmed.StartsWith(';')) {
+            continue
+        }
+
+        if ($trimmed -match '^insert_final_newline\s*=\s*(true|false)$') {
+            return [System.Convert]::ToBoolean($Matches[1])
+        }
+    }
+
+    return $null
+}
+
+# Returns true when the supplied path resolves inside the current workspace.
+function Test-WorkspaceManagedFilePath {
+    param(
+        [string] $WorkspacePath,
+        [string] $FilePath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath) -or [string]::IsNullOrWhiteSpace($FilePath)) {
+        return $false
+    }
+
+    try {
+        $resolvedWorkspace = [System.IO.Path]::GetFullPath($WorkspacePath)
+        $resolvedFile = if ([System.IO.Path]::IsPathRooted($FilePath)) {
+            [System.IO.Path]::GetFullPath($FilePath)
+        }
+        else {
+            [System.IO.Path]::GetFullPath((Join-Path $resolvedWorkspace $FilePath))
+        }
+    }
+    catch {
+        return $false
+    }
+
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+    $workspacePrefix = $resolvedWorkspace.TrimEnd('\', '/') + $separator
+    $comparison = if ($IsWindows) { [System.StringComparison]::OrdinalIgnoreCase } else { [System.StringComparison]::Ordinal }
+
+    return $resolvedFile.StartsWith($workspacePrefix, $comparison)
+}
+
+# Removes terminal newline sequences from a tool text payload while preserving internal line breaks.
+function Remove-TerminalNewline {
+    param(
+        [AllowNull()]
+        [string] $Text
+    )
+
+    if ($null -eq $Text) {
+        return $null
+    }
+
+    return ($Text -replace '(\r\n|\n)+$','')
+}
+
+# Clones a hook tool input payload into a mutable object for normalization.
+function Copy-ToolInputObject {
+    param(
+        [object] $ToolInput
+    )
+
+    if ($null -eq $ToolInput) {
+        return $null
+    }
+
+    return ($ToolInput | ConvertTo-Json -Depth 100 | ConvertFrom-Json -Depth 100)
+}
+
+# Normalizes supported edit-tool payloads to remove terminal newlines when the workspace policy forbids them.
+function Get-EofNormalizedToolInput {
+    param(
+        [string] $WorkspacePath,
+        [string] $ToolName,
+        [object] $ToolInput
+    )
+
+    $insertFinalNewline = Get-WorkspaceInsertFinalNewlinePolicy -WorkspacePath $WorkspacePath
+    if ($insertFinalNewline -ne $false) {
+        return $null
+    }
+
+    $updatedInput = Copy-ToolInputObject -ToolInput $ToolInput
+    if ($null -eq $updatedInput) {
+        return $null
+    }
+
+    $changed = $false
+
+    switch ($ToolName) {
+        'createFile' {
+            if (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $updatedInput.filePath)) {
+                $normalizedContent = Remove-TerminalNewline -Text ([string] $updatedInput.content)
+                if ($normalizedContent -cne [string] $updatedInput.content) {
+                    $updatedInput.content = $normalizedContent
+                    $changed = $true
+                }
+            }
+        }
+        'insertEdit' {
+            if (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $updatedInput.filePath)) {
+                $normalizedCode = Remove-TerminalNewline -Text ([string] $updatedInput.code)
+                if ($normalizedCode -cne [string] $updatedInput.code) {
+                    $updatedInput.code = $normalizedCode
+                    $changed = $true
+                }
+            }
+        }
+        'replaceString' {
+            if (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $updatedInput.filePath)) {
+                $normalizedNewString = Remove-TerminalNewline -Text ([string] $updatedInput.newString)
+                if ($normalizedNewString -cne [string] $updatedInput.newString) {
+                    $updatedInput.newString = $normalizedNewString
+                    $changed = $true
+                }
+            }
+        }
+        'multiReplaceString' {
+            foreach ($replacement in @($updatedInput.replacements)) {
+                if (-not (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $replacement.filePath))) {
+                    continue
+                }
+
+                $normalizedNewString = Remove-TerminalNewline -Text ([string] $replacement.newString)
+                if ($normalizedNewString -cne [string] $replacement.newString) {
+                    $replacement.newString = $normalizedNewString
+                    $changed = $true
+                }
+            }
+        }
+    }
+
+    if (-not $changed) {
+        return $null
+    }
+
+    return $updatedInput
+}
+
+# Returns true when the tool participates in repository file creation or editing.
+function Test-EofSensitiveToolName {
+    param(
+        [string] $ToolName
+    )
+
+    return @('applyPatch', 'createFile', 'insertEdit', 'replaceString', 'multiReplaceString') -contains $ToolName
+}
+
 # Reads a JSON file when it exists and returns $null when absent.
 function Read-OptionalJsonFile {
     param(
@@ -246,6 +418,7 @@ function New-SessionContextString {
 
     $segments.Add(('Selected startup controller: {0} ({1}) via {2}.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source)) | Out-Null
     $segments.Add('Super Agent lifecycle is mandatory for change-bearing work: intake -> planning -> spec when needed -> specialist -> test -> review -> closeout -> planning update.') | Out-Null
+    $segments.Add('Repository EOF policy is strict: preserve exact file EOF, and do not append a terminal newline because .editorconfig uses insert_final_newline = false by default.') | Out-Null
     $segments.Add('Use repository context first and official docs second.') | Out-Null
     $segments.Add('Keep non-versioned build outputs under .build/ and deployment/runtime publish outputs under .deployment/.') | Out-Null
 
@@ -272,5 +445,33 @@ function New-SubagentContextString {
         $agentType = 'subagent'
     }
 
-    return ('Startup controller: {0} ({1}) via {2}. Super Agent bootstrap is active. Current worker type: {3}. Keep scope minimal, follow the repository routing result, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $agentType)
+    return ('Startup controller: {0} ({1}) via {2}. Super Agent bootstrap is active. Current worker type: {3}. Preserve repository EOF policy exactly: do not append a terminal newline unless a file-specific rule explicitly requires it. Keep scope minimal, follow the repository routing result, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $agentType)
+}
+
+# Builds the PreToolUse payload used to normalize repository edit tool inputs before disk writes occur.
+function New-PreToolUseResult {
+    param(
+        [object] $Payload
+    )
+
+    $toolName = [string] (Get-OptionalPayloadProperty -Payload $Payload -Name 'tool_name')
+    $toolInput = Get-OptionalPayloadProperty -Payload $Payload -Name 'tool_input'
+    $workspacePath = [string] (Get-OptionalPayloadProperty -Payload $Payload -Name 'cwd')
+
+    $hookSpecificOutput = [ordered]@{
+        hookEventName = 'PreToolUse'
+    }
+
+    if (Test-EofSensitiveToolName -ToolName $toolName) {
+        $hookSpecificOutput.additionalContext = 'Repository EOF policy is strict for this workspace: preserve exact EOF state and do not append a terminal newline because .editorconfig uses insert_final_newline = false by default.'
+
+        $updatedInput = Get-EofNormalizedToolInput -WorkspacePath $workspacePath -ToolName $toolName -ToolInput $toolInput
+        if ($null -ne $updatedInput) {
+            $hookSpecificOutput.updatedInput = $updatedInput
+        }
+    }
+
+    return [ordered]@{
+        hookSpecificOutput = $hookSpecificOutput
+    }
 }

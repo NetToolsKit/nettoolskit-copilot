@@ -62,6 +62,26 @@ function Write-VerboseLog {
     }
 }
 
+# Replays captured test output only when detailed diagnostics are required.
+function Write-TestOutput {
+    param(
+        [object[]] $Items
+    )
+
+    if ($null -eq $Items) {
+        return
+    }
+
+    foreach ($item in $Items) {
+        $text = [string] $item
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            continue
+        }
+
+        Write-StyledOutput $text
+    }
+}
+
 # Registers a validation failure.
 function Add-ValidationFailure {
     param(
@@ -140,20 +160,28 @@ if (Test-Path -LiteralPath $testPath -PathType Container) {
         Write-VerboseLog ("Running runtime tests in: {0}" -f $testPath)
         foreach ($testScript in $testScripts) {
             Write-StyledOutput ("[RUN] runtime test: {0}" -f $testScript.Name)
+            $capturedOutput = @()
             try {
-                & $testScript.FullName -RepoRoot $resolvedRepoRoot | Out-Null
+                $capturedOutput = @(& $testScript.FullName -RepoRoot $resolvedRepoRoot *>&1)
                 $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
                 if ($exitCode -eq 0) {
                     $passCount++
+                    if ($script:IsVerboseEnabled) {
+                        Write-TestOutput -Items $capturedOutput
+                    }
                     Write-StyledOutput ("[OK] runtime test: {0}" -f $testScript.Name)
                 }
                 else {
                     $failCount++
+                    Write-TestOutput -Items $capturedOutput
                     Add-ValidationFailure ("Runtime test failed: {0} (exit code {1})" -f $testScript.Name, $exitCode)
                 }
             }
             catch {
                 $failCount++
+                if ($null -ne $capturedOutput) {
+                    Write-TestOutput -Items $capturedOutput
+                }
                 Add-ValidationFailure ("Runtime test failed: {0} ({1})" -f $testScript.Name, $_.Exception.Message)
             }
         }

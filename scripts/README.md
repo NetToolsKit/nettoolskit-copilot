@@ -23,6 +23,7 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Super Agent worktree isolation helper and thin lifecycle entry commands
 - ✅ Picker-visible `Using Super Agent` starter alias projected into `%USERPROFILE%\\.agents\\skills`
 - ✅ Configurable VS Code startup-controller selector with repository default plus local and environment overrides
+- ✅ Repository-owned PreToolUse EOF normalization for supported VS Code AI edit tools
 - ✅ Repository-owned TDD and verification workflow contracts for execution stages
 - ✅ Persisted orchestration run state for replay diagnostics and auditability
 - ✅ Release governance checks (CODEOWNERS, changelog contracts, branch-protection baseline)
@@ -217,7 +218,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `validation/validate-powershell-standards.ps1` | Validates `scripts/**/*.ps1` for script help coverage, per-parameter `.PARAMETER` entries, function description comments, approved verbs, and tracked line-ending normalization. | `pwsh -File scripts/validation/validate-powershell-standards.ps1` |
 | `validation/validate-shell-hooks.ps1` | Validates `.githooks/*` shell syntax with `sh -n` and optional `shellcheck`. | `pwsh -File scripts/validation/validate-shell-hooks.ps1` |
 | `validation/validate-agent-hooks.ps1` | Validates repository-owned VS Code hook JSON and required bootstrap scripts under `.github/hooks/`. | `pwsh -File scripts/validation/validate-agent-hooks.ps1 -WarningOnly:$false` |
-| `validation/validate-runtime-script-tests.ps1` | Runs runtime test scripts under `scripts/tests/runtime` without external test frameworks. | `pwsh -File scripts/validation/validate-runtime-script-tests.ps1` |
+| `validation/validate-runtime-script-tests.ps1` | Runs runtime test scripts under `scripts/tests/runtime` without external test frameworks and replays child test diagnostics only when verbose mode is enabled or a test fails. | `pwsh -File scripts/validation/validate-runtime-script-tests.ps1` |
 | `validation/validate-dotnet-standards.ps1` | Validates .NET template standards under `.github/templates/*.cs`. | `pwsh -File scripts/validation/validate-dotnet-standards.ps1` |
 | `validation/validate-architecture-boundaries.ps1` | Validates architecture boundaries from `.github/governance/architecture-boundaries.baseline.json`. | `pwsh -File scripts/validation/validate-architecture-boundaries.ps1` |
 | `validation/validate-instruction-metadata.ps1` | Validates frontmatter metadata for `.github/instructions`, `.github/prompts`, and `.github/chatmodes`. | `pwsh -File scripts/validation/validate-instruction-metadata.ps1` |
@@ -268,11 +269,16 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
   - `~/.github/hooks`
 - Current bootstrap events:
   - `SessionStart`
+  - `PreToolUse`
   - `SubagentStart`
 - Startup controller selection:
   - versioned default: `.github/hooks/super-agent.selector.json`
   - optional local override: `~/.github/hooks/super-agent.selector.local.json`
   - optional environment override: `COPILOT_SUPER_AGENT_SKILL`, `COPILOT_SUPER_AGENT_NAME`
+- EOF normalization:
+  - `PreToolUse` normalizes supported edit/create tool payloads before disk writes
+  - current supported tools: `createFile`, `insertEdit`, `replaceString`, `multiReplaceString`
+  - `applyPatch` still relies on model compliance with the EOF policy because its patch grammar is not safely rewritten by the hook
 | `maintenance/generate-http-from-openapi.ps1` | Generates a REST Client .http file from OpenAPI (default) or Swagger JSON. | `pwsh -File scripts/maintenance/generate-http-from-openapi.ps1 -Source http://localhost:5000` |
 | `maintenance/fix-version-ranges.ps1` | Normalises PackageReference versions into `[current, limit)` ranges. | `pwsh -File scripts/maintenance/fix-version-ranges.ps1 -Verbose` |
 | `maintenance/trim-trailing-blank-lines.ps1` | Removes trailing spaces and blank lines at EOF while respecting the repository EOF policy: files end without final newline unless a future explicit rule says otherwise. | `pwsh -File scripts/maintenance/trim-trailing-blank-lines.ps1 -Path "C:\repo" -CheckOnly` |

@@ -3,8 +3,8 @@
     Runtime tests for repository-owned VS Code agent hook scripts.
 
 .DESCRIPTION
-    Validates the SessionStart and SubagentStart hook payload contracts used to
-    bootstrap Copilot and Codex sessions inside VS Code.
+    Validates the SessionStart, PreToolUse, and SubagentStart hook payload
+    contracts used to bootstrap Copilot and Codex sessions inside VS Code.
 
 .PARAMETER RepoRoot
     Optional repository root. If omitted, auto-detects a root containing .github and .codex.
@@ -62,6 +62,7 @@ function Assert-True {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $sessionStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/session-start.ps1'
+$preToolUseScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/pre-tool-use.ps1'
 $subagentStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/subagent-start.ps1'
 
 $sessionPayload = [ordered]@{
@@ -79,18 +80,53 @@ $subagentPayload = [ordered]@{
     agent_type = 'reviewer'
 }
 
+$preToolReplacePayload = [ordered]@{
+    cwd = $resolvedRepoRoot
+    sessionId = 'session-123'
+    hookEventName = 'PreToolUse'
+    tool_name = 'replaceString'
+    tool_use_id = 'tool-123'
+    tool_input = [ordered]@{
+        filePath = (Join-Path $resolvedRepoRoot 'README.md')
+        oldString = 'before'
+        newString = "after`r`n"
+    }
+}
+
+$preToolCreatePayload = [ordered]@{
+    cwd = $resolvedRepoRoot
+    sessionId = 'session-123'
+    hookEventName = 'PreToolUse'
+    tool_name = 'createFile'
+    tool_use_id = 'tool-456'
+    tool_input = [ordered]@{
+        filePath = (Join-Path $resolvedRepoRoot '.temp/hook-test.txt')
+        content = "line one`nline two`n"
+    }
+}
+
 $sessionOutput = ($sessionPayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $sessionStartScript)
+$preToolReplaceOutput = ($preToolReplacePayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $preToolUseScript)
+$preToolCreateOutput = ($preToolCreatePayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $preToolUseScript)
 $subagentOutput = ($subagentPayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $subagentStartScript)
 
 $sessionResult = $sessionOutput | ConvertFrom-Json -Depth 50
+$preToolReplaceResult = $preToolReplaceOutput | ConvertFrom-Json -Depth 50
+$preToolCreateResult = $preToolCreateOutput | ConvertFrom-Json -Depth 50
 $subagentResult = $subagentOutput | ConvertFrom-Json -Depth 50
 
 Assert-True ($sessionResult.hookSpecificOutput.hookEventName -eq 'SessionStart') 'SessionStart hook should return SessionStart payload.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Super Agent lifecycle is mandatory') 'SessionStart hook should inject Super Agent bootstrap context.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Selected startup controller: Super Agent \(\$super-agent\) via default') 'SessionStart hook should advertise the default startup controller.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match '\.build/') 'SessionStart hook should mention the artifact layout policy.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SessionStart hook should mention the repository EOF policy.'
+Assert-True ($preToolReplaceResult.hookSpecificOutput.hookEventName -eq 'PreToolUse') 'PreToolUse hook should return PreToolUse payload.'
+Assert-True ([string] $preToolReplaceResult.hookSpecificOutput.additionalContext -match 'do not append a terminal newline') 'PreToolUse hook should remind the model about the EOF policy.'
+Assert-True ([string] $preToolReplaceResult.hookSpecificOutput.updatedInput.newString -eq 'after') 'PreToolUse hook should strip a terminal newline from replaceString.newString.'
+Assert-True ([string] $preToolCreateResult.hookSpecificOutput.updatedInput.content -eq "line one`nline two") 'PreToolUse hook should strip a terminal newline from createFile.content.'
 Assert-True ($subagentResult.hookSpecificOutput.hookEventName -eq 'SubagentStart') 'SubagentStart hook should return SubagentStart payload.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'reviewer') 'SubagentStart hook should mention the spawned worker type.'
+Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'do not append a terminal newline') 'SubagentStart hook should mention the repository EOF policy.'
 
 try {
     [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', 'using-super-agent', 'Process')

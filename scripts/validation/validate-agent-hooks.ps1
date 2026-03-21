@@ -97,7 +97,7 @@ else {
     }
 
     if ($null -ne $hookDocument) {
-        $requiredEvents = @('SessionStart', 'SubagentStart')
+        $requiredEvents = @('SessionStart', 'PreToolUse', 'SubagentStart')
         foreach ($eventName in $requiredEvents) {
             $entries = @($hookDocument.hooks.$eventName)
             if ($entries.Count -eq 0) {
@@ -118,6 +118,7 @@ else {
 
                 $expectedScriptName = switch ($eventName) {
                     'SessionStart' { 'session-start.ps1' }
+                    'PreToolUse' { 'pre-tool-use.ps1' }
                     'SubagentStart' { 'subagent-start.ps1' }
                     default { $null }
                 }
@@ -168,7 +169,7 @@ else {
     }
 }
 
-foreach ($requiredScript in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1')) {
+foreach ($requiredScript in @('common.ps1', 'session-start.ps1', 'pre-tool-use.ps1', 'subagent-start.ps1')) {
     $scriptPath = Join-Path $scriptDirectory $requiredScript
     if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
         Add-ValidationMessage -Message ("Missing hook helper script: .github/hooks/scripts/{0}" -f $requiredScript) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly

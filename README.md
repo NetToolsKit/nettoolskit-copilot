@@ -9,8 +9,9 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Architecture Patterns:** Clean Architecture, CQRS, DDD, microservices
 - ✅ **Convention Standardization:** Code style, test patterns, commits, file organization
 - ✅ **Authoritative Source Policy:** Repository context first, then official docs by stack
-- ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart` and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
+- ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
+- ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files
 - ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
@@ -214,6 +215,8 @@ The startup controller injected by those hooks is selected from `.github/hooks/s
 
 - creating `~/.github/hooks/super-agent.selector.local.json`
 - setting `COPILOT_SUPER_AGENT_SKILL` and optionally `COPILOT_SUPER_AGENT_NAME`
+
+The repository-owned `PreToolUse` hook also normalizes supported AI edit payloads (`createFile`, `insertEdit`, `replaceString`, and `multiReplaceString`) so files created or edited through VS Code agents preserve the repository EOF policy instead of gaining a terminal newline.
 
 To apply active VS Code workspace files from templates:
 

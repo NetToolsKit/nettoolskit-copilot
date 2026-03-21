@@ -91,6 +91,8 @@ priority: high
   - never leave trailing blank lines at EOF
   - follow `.editorconfig`
   - repository policy currently uses `insert_final_newline = false`
+  - preserve the exact terminal EOF state during edits; when a file currently has no terminal newline, keep it that way after AI-generated changes
+  - do not append a terminal newline unless a narrower file-specific rule explicitly requires it
   - do not add trailing whitespace
 - Generated output hygiene:
   - keep non-versioned build or generated output in `.build/`

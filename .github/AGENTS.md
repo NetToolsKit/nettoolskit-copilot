@@ -18,6 +18,12 @@
 - Exception: only relax this standard when the user explicitly states the task is a `POC`, `spike`, or `informal test`.
 - In non-enterprise exceptions, keep minimum safety (no secrets exposure, no destructive commands without explicit approval).
 
+# EOF Policy
+- Preserve the exact EOF state of edited files.
+- The repository default from `.editorconfig` is `insert_final_newline = false`.
+- Do not append a terminal newline during AI-generated edits or file creation unless a narrower file-specific rule explicitly requires it.
+- Do not leave trailing blank lines at EOF.
+
 Default workflow for all tasks: Static RAGs Routing (Route → Execute)
 - Route first (pick minimal context):
   - `instruction-routing.catalog.yml` (single source of truth for routes)
