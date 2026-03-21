@@ -74,6 +74,9 @@
   - `.github/AGENTS.md`
   - `.github/copilot-instructions.md`
   - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+- Aligned the picker-visible Super Agent skills with the runtime activation contract so `Using Super Agent` and `Super Agent` both declare the visible startup banner expectation:
+  - `.codex/skills/using-super-agent/SKILL.md`
+  - `.codex/skills/super-agent/SKILL.md`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:

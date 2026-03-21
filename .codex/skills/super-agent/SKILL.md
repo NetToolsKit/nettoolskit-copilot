@@ -25,6 +25,7 @@ description: Use when starting any workspace work that may change files, runtime
 - keep execution sequential by default and allow multiple subagents only when write-scope conflicts are controlled
 - require tester, reviewer, and closeout before claiming workspace work is complete
 - always prepare a commit message suggestion and update planning state after execution
+- make controller activation visible by surfacing the injected Super Agent banner exactly once in the first substantive reply of the session
 
 ## Required lifecycle
 
@@ -52,3 +53,4 @@ description: Use when starting any workspace work that may change files, runtime
 5. validation obligations
 6. closeout obligations
 7. planning update instructions
+8. visible activation banner surfaced once near the start of the first substantive reply

@@ -8,6 +8,7 @@ description: Use when starting any workspace conversation that may lead to chang
 ## Purpose
 
 Use this starter skill when you want the workflow controller to be obvious in the picker and at session start.
+The first substantive reply after handoff should surface the active Super Agent visibility banner so the user can confirm the controller is active.
 
 ## Invocation rule
 
@@ -23,9 +24,11 @@ Use this starter skill when you want the workflow controller to be obvious in th
 3. Invoke `$super-agent`.
 4. Let `Super Agent` decide whether the workspace is in `workspace-adapter` mode or `global-runtime` mode.
 5. Let `Super Agent` decide planning roots, specialist routing, execution mode, validation, review, closeout, and planning update.
+6. In the first substantive reply after activation, expose the visibility banner exactly once near the start.
 
 ## Output contract
 
 1. repository context loaded
 2. super-agent invoked
 3. lifecycle controller active
+4. visibility banner surfaced once in the first substantive reply
