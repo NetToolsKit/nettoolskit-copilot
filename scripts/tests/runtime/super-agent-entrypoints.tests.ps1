@@ -65,10 +65,18 @@ try {
     $execute = (& (Join-Path $resolvedRepoRoot 'scripts/runtime/invoke-super-agent-execute.ps1') -RepoRoot $resolvedRepoRoot -RequestText 'execute request' -PreviewOnly) | ConvertFrom-Json -Depth 50
     Assert-Equal $execute.mode 'execute' 'Execute wrapper should expose the execute mode.'
     Assert-True (-not $execute.parameters.PSObject.Properties['StopAfterStageId']) 'Execute wrapper should run the full lifecycle.'
+    Assert-True ($null -ne $execute.parameters.PSObject.Properties['ApprovedStageIds']) 'Execute wrapper should expose approval stage ids.'
+    Assert-True ($null -ne $execute.parameters.PSObject.Properties['ApprovedAgentIds']) 'Execute wrapper should expose approval agent ids.'
+    Assert-True ($null -ne $execute.parameters.PSObject.Properties['ApprovedBy']) 'Execute wrapper should expose ApprovedBy.'
+    Assert-True ($null -ne $execute.parameters.PSObject.Properties['ApprovalJustification']) 'Execute wrapper should expose ApprovalJustification.'
 
     $parallel = (& (Join-Path $resolvedRepoRoot 'scripts/runtime/invoke-super-agent-parallel-dispatch.ps1') -RepoRoot $resolvedRepoRoot -RequestText 'parallel request' -PreviewOnly) | ConvertFrom-Json -Depth 50
     Assert-Equal $parallel.mode 'parallel-dispatch' 'Parallel wrapper should expose the parallel-dispatch mode.'
     Assert-Equal $parallel.parameters.ExecutionBackend 'codex-exec' 'Parallel wrapper should force codex-exec.'
+    Assert-True ($null -ne $parallel.parameters.PSObject.Properties['ApprovedStageIds']) 'Parallel wrapper should expose approval stage ids.'
+    Assert-True ($null -ne $parallel.parameters.PSObject.Properties['ApprovedAgentIds']) 'Parallel wrapper should expose approval agent ids.'
+    Assert-True ($null -ne $parallel.parameters.PSObject.Properties['ApprovedBy']) 'Parallel wrapper should expose ApprovedBy.'
+    Assert-True ($null -ne $parallel.parameters.PSObject.Properties['ApprovalJustification']) 'Parallel wrapper should expose ApprovalJustification.'
 
     Write-Host '[OK] super-agent entrypoint tests passed.'
     exit 0

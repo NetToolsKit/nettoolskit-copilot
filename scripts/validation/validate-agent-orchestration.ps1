@@ -188,6 +188,14 @@ function Test-AgentManifestIntegrity {
             Add-ValidationFailure ("Agent {0} references missing skill config: .codex/skills/{1}/agents/openai.yaml" -f $agentId, $skillName)
         }
 
+        $approvalRequired = [bool] (Get-OptionalPropertyValue -Object $agent -PropertyName 'approvalRequired' -DefaultValue $false)
+        if ($approvalRequired) {
+            $approvalInstructions = [string] (Get-OptionalPropertyValue -Object $agent -PropertyName 'approvalInstructions' -DefaultValue '')
+            if ([string]::IsNullOrWhiteSpace($approvalInstructions)) {
+                Add-ValidationFailure ("Agent {0} requires approval but does not declare approvalInstructions." -f $agentId)
+            }
+        }
+
         foreach ($path in @($agent.allowedPaths)) {
             $pathText = [string] $path
             if ([string]::IsNullOrWhiteSpace($pathText)) {

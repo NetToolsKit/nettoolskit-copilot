@@ -621,6 +621,47 @@ end {
     Assert-True (-not (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf)) 'Closeout stage should move the active plan out of planning/active.'
     Assert-True (-not (Test-Path -LiteralPath $specArtifacts['active-spec'] -PathType Leaf)) 'Closeout stage should move the active spec out of planning/specs/active.'
 
+    $pipelineRunRoot = Join-Path $tempRoot 'pipeline-runs'
+    $pipelineScriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/run-agent-pipeline.ps1'
+
+    & $pipelineScriptPath `
+        -RepoRoot $resolvedRepoRoot `
+        -RunRoot $pipelineRunRoot `
+        -TraceId 'approval-denied-test' `
+        -RequestText 'Implement enterprise orchestration support.' `
+        -ExecutionBackend 'codex-exec' `
+        -DispatchCommand $fakeCodexPath `
+        -WarningOnly:$false | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 1 -Message 'Pipeline should fail when sensitive stages do not have explicit approval.'
+
+    $deniedRunArtifactPath = Join-Path $pipelineRunRoot 'approval-denied-test\run-artifact.json'
+    $deniedRunArtifact = Get-Content -Raw -LiteralPath $deniedRunArtifactPath | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual ([string] $deniedRunArtifact.status) -Expected 'failed' -Message 'Denied pipeline should report failed status.'
+    $deniedImplementStage = @($deniedRunArtifact.stages | Where-Object { [string] $_.stageId -eq 'implement' } | Select-Object -First 1)
+    Assert-True ($null -ne $deniedImplementStage) 'Denied pipeline should record the implement stage result.'
+    Assert-True ([bool] $deniedImplementStage.execution.approvalRequired) 'Implement stage should be marked as approval-required.'
+    Assert-True (-not [bool] $deniedImplementStage.execution.approvalSatisfied) 'Implement stage should record unsatisfied approval when denied.'
+
+    & $pipelineScriptPath `
+        -RepoRoot $resolvedRepoRoot `
+        -RunRoot $pipelineRunRoot `
+        -TraceId 'approval-approved-test' `
+        -RequestText 'Implement enterprise orchestration support.' `
+        -ExecutionBackend 'codex-exec' `
+        -DispatchCommand $fakeCodexPath `
+        -ApprovedAgentIds specialist,release-engineer `
+        -ApprovedBy 'runtime-test' `
+        -ApprovalJustification 'orchestration smoke test' `
+        -WarningOnly:$false | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Pipeline should succeed when explicit approval is supplied for sensitive agents.'
+
+    $approvedRunDirectory = Join-Path $pipelineRunRoot 'approval-approved-test'
+    $approvedRunArtifact = Get-Content -Raw -LiteralPath (Join-Path $approvedRunDirectory 'run-artifact.json') | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual ([string] $approvedRunArtifact.status) -Expected 'success' -Message 'Approved pipeline should report success.'
+    Assert-Equal -Actual @($approvedRunArtifact.approvals).Count -Expected 2 -Message 'Approved pipeline should persist both approval entries.'
+    $approvalRecord = Get-Content -Raw -LiteralPath (Join-Path $approvedRunDirectory 'artifacts\approval-record.json') | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual @($approvalRecord.approvals).Count -Expected 2 -Message 'Approval record should be persisted as an artifact.'
+
     Write-Host '[OK] agent orchestration engine tests passed.'
     exit 0
 }

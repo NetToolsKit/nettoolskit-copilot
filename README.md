@@ -19,6 +19,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
 - ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
 - ✅ **Mandatory Non-Trivial Flow:** super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Approval Gate For Sensitive Execution:** sensitive implementation and closeout agents require explicit approval metadata before the runner dispatches file-mutating or release-mutating work
 - ✅ **Worker-Ready Planning:** planner work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
 - ✅ **Task-Level Review Loop:** each implementation slice can pass through task spec review and task quality review before completion
 - ✅ **Safe Parallel Dispatch:** dependency-aware batching blocks overlapping write-sets before parallel worker fan-out
@@ -404,6 +405,9 @@ pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and 
 # execute the same pipeline with live sequential planner/executor/reviewer dispatch
 pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate request" -ExecutionBackend codex-exec
 
+# execute the same pipeline with explicit approval for sensitive agents
+pwsh -File ./scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate request" -ExecutionBackend codex-exec -ApprovedAgentIds specialist,release-engineer -ApprovedBy "thiago.guislotti" -ApprovalJustification "Approved implementation and closeout for this run"
+
 # create an isolated Super Agent worktree before risky or parallel work
 pwsh -File ./scripts/runtime/new-super-agent-worktree.ps1 -WorktreeName "feature-slice"
 
@@ -418,6 +422,9 @@ pwsh -File ./scripts/runtime/invoke-super-agent-execute.ps1 -RequestText "Implem
 
 # run the full lifecycle with safe parallel batching
 pwsh -File ./scripts/runtime/invoke-super-agent-parallel-dispatch.ps1 -RequestText "Execute independent work items"
+
+# run the full lifecycle with explicit approval for sensitive stages
+pwsh -File ./scripts/runtime/invoke-super-agent-execute.ps1 -RequestText "Implement the approved plan" -ApprovedAgentIds specialist,release-engineer -ApprovedBy "thiago.guislotti" -ApprovalJustification "Approved full lifecycle execution"
 
 # validate branch protection drift against baseline (no mutation)
 pwsh -File ./scripts/governance/set-branch-protection.ps1

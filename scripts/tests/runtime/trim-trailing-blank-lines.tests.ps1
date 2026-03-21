@@ -138,6 +138,24 @@ try {
         Assert-True -Condition (($gitModeOutput -join "`n") -match 'changed\.cs') -Message 'GitChangedOnly mode should list modified tracked files selected for trim.'
         Assert-True -Condition (($gitModeOutput -join "`n") -match 'new\.md') -Message 'GitChangedOnly mode should list untracked files selected for trim.'
         Assert-True -Condition (-not (($gitModeOutput -join "`n") -match 'clean\.cs')) -Message 'GitChangedOnly mode should not list clean tracked files.'
+
+        $singleChangeRepoRoot = Join-Path $tempRoot 'single-change-git-repo'
+        [void] (New-Item -ItemType Directory -Path $singleChangeRepoRoot -Force)
+        Initialize-GitRepository -Path $singleChangeRepoRoot
+
+        $singleChangedFile = Join-Path $singleChangeRepoRoot 'single.cs'
+        Write-TextFile -Path $singleChangedFile -Content 'public sealed class Single { }'
+        & git -C $singleChangeRepoRoot add single.cs | Out-Null
+        & git -C $singleChangeRepoRoot commit -m 'initial' | Out-Null
+
+        Write-TextFile -Path $singleChangedFile -Content "public sealed class Single { }`n`n"
+
+        $singleGitModeOutput = & $scriptPath -Path $singleChangeRepoRoot -GitChangedOnly
+        $singleChangedText = [System.IO.File]::ReadAllText($singleChangedFile)
+
+        Assert-Equal -Actual $singleChangedText -Expected 'public sealed class Single { }' -Message 'GitChangedOnly mode must trim a single modified tracked file without failing scalar Count access.'
+        Assert-True -Condition (($singleGitModeOutput -join "`n") -match 'Files found: 1') -Message 'GitChangedOnly mode should report a single changed file cleanly.'
+        Assert-True -Condition (($singleGitModeOutput -join "`n") -match 'single\.cs') -Message 'GitChangedOnly mode should list the single changed tracked file.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

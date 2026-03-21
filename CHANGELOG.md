@@ -1,6 +1,19 @@
 ## [1.2.0] - 2026-03-20
 
 ### Changed
+- Added Phase 1 Super Agent hardening through explicit approval gating for sensitive orchestration stages and agents, persisted approval records in run artifacts, and approval parameter forwarding on the execute/parallel entrypoints:
+  - `.github/schemas/agent.contract.schema.json`
+  - `.github/schemas/agent.run-artifact.schema.json`
+  - `.codex/orchestration/agents.manifest.json`
+  - `scripts/runtime/run-agent-pipeline.ps1`
+  - `scripts/runtime/invoke-super-agent-execute.ps1`
+  - `scripts/runtime/invoke-super-agent-parallel-dispatch.ps1`
+  - `scripts/validation/validate-agent-orchestration.ps1`
+  - `scripts/tests/runtime/agent-orchestration-engine.tests.ps1`
+  - `scripts/tests/runtime/super-agent-entrypoints.tests.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `README.md`
+  - `scripts/README.md`
 - Reduced duplicated validator logging scaffolding by introducing a shared `scripts/common/validation-logging.ps1` helper and moving the validation script family plus `runtime/validate-vscode-global-alignment.ps1` onto the shared warning/failure/verbose contract:
   - `scripts/common/validation-logging.ps1`
   - `scripts/common/repository-paths.ps1`

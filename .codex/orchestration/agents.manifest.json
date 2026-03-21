@@ -88,6 +88,8 @@
       "tools": ["read", "search", "edit", "shell", "run-tests"],
       "allowedPaths": ["src/**", "modules/**", "samples/**", "tests/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
       "blockedCommands": ["git reset --hard", "git checkout --"],
+      "approvalRequired": true,
+      "approvalInstructions": "Explicit approval is required before running the implement stage because this agent can edit repository files and execute shell commands.",
       "budget": {
         "maxSteps": 45,
         "maxDurationMinutes": 50,
@@ -142,6 +144,8 @@
       "tools": ["read", "search", "edit", "summarize"],
       "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
       "blockedCommands": ["git reset --hard", "git checkout --"],
+      "approvalRequired": true,
+      "approvalInstructions": "Explicit approval is required before running the closeout stage because this agent can rewrite README, CHANGELOG, and planning artifacts.",
       "budget": {
         "maxSteps": 20,
         "maxDurationMinutes": 20,

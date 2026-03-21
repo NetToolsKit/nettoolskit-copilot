@@ -57,6 +57,18 @@
 .PARAMETER StopAfterStageId
     Optional stage id that truncates the pipeline after the selected stage.
 
+.PARAMETER ApprovedStageIds
+    Optional list of stage ids explicitly approved for sensitive execution.
+
+.PARAMETER ApprovedAgentIds
+    Optional list of agent ids explicitly approved for sensitive execution.
+
+.PARAMETER ApprovedBy
+    Required when approval ids are supplied. Identifies who approved the run.
+
+.PARAMETER ApprovalJustification
+    Required when approval ids are supplied. Explains why the sensitive execution was approved.
+
 .PARAMETER WriteRunState
     When true (default), writes per-stage and consolidated run-state artifacts.
 
@@ -92,6 +104,10 @@ param(
     [ValidateSet('script-only', 'codex-exec')] [string] $ExecutionBackend,
     [string] $DispatchCommand = 'codex',
     [string] $StopAfterStageId,
+    [string[]] $ApprovedStageIds = @(),
+    [string[]] $ApprovedAgentIds = @(),
+    [string] $ApprovedBy,
+    [string] $ApprovalJustification,
     [bool] $WriteRunState = $true,
     [switch] $DetailedOutput
 )
@@ -277,6 +293,57 @@ function Get-ArtifactDescriptor {
     }
 }
 
+# Converts string input into a case-insensitive set.
+function Convert-ToStringSet {
+    param(
+        [string[]] $Values
+    )
+
+    $set = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($value in @($Values)) {
+        $text = [string] $value
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            continue
+        }
+
+        $set.Add($text.Trim()) | Out-Null
+    }
+
+    return ,$set
+}
+
+# Evaluates whether the current stage satisfies its approval requirement.
+function Get-StageApprovalEvaluation {
+    param(
+        [string] $StageId,
+        [string] $AgentId,
+        [object] $Agent,
+        [bool] $DefaultApprovalRequired,
+        [System.Collections.Generic.HashSet[string]] $ApprovedStageSet,
+        [System.Collections.Generic.HashSet[string]] $ApprovedAgentSet
+    )
+
+    $approvalRequired = [bool] (Get-OptionalPropertyValue -Object $Agent -PropertyName 'approvalRequired' -DefaultValue $DefaultApprovalRequired)
+    $approvalInstructions = [string] (Get-OptionalPropertyValue -Object $Agent -PropertyName 'approvalInstructions' -DefaultValue '')
+    $stageApproved = $ApprovedStageSet.Contains($StageId)
+    $agentApproved = $ApprovedAgentSet.Contains($AgentId)
+    $approvalSatisfied = (-not $approvalRequired) -or $stageApproved -or $agentApproved
+    $approvalSource = $null
+    if ($stageApproved) {
+        $approvalSource = 'stage'
+    }
+    elseif ($agentApproved) {
+        $approvalSource = 'agent'
+    }
+
+    return [pscustomobject]@{
+        required = $approvalRequired
+        satisfied = $approvalSatisfied
+        source = $approvalSource
+        instructions = $approvalInstructions
+    }
+}
+
 # Converts artifact manifest object to dictionary (name -> absolute path).
 function Convert-ManifestToArtifactMap {
     param(
@@ -430,6 +497,7 @@ $pipelineStages = @($pipeline.stages)
 $defaultsConfig = Get-OptionalPropertyValue -Object $agentsManifest -PropertyName 'defaults'
 $defaultTimeoutValue = Get-OptionalPropertyValue -Object $defaultsConfig -PropertyName 'timeoutMinutes' -DefaultValue 30
 $defaultTimeoutMinutes = [int] $defaultTimeoutValue
+$defaultApprovalRequired = [bool] (Get-OptionalPropertyValue -Object $defaultsConfig -PropertyName 'approvalRequired' -DefaultValue $false)
 
 $runtimeConfig = Get-OptionalPropertyValue -Object $pipeline -PropertyName 'runtime'
 $runtimeExecutionBackendValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'executionBackend'
@@ -530,6 +598,7 @@ $artifactsDirectory = Join-Path $runDirectory 'artifacts'
 $stagesDirectory = Join-Path $runDirectory 'stages'
 $handoffsDirectory = Join-Path $runDirectory 'handoffs'
 $runStatePath = Join-Path $runDirectory 'run-state.json'
+$approvalRecordPath = Join-Path $artifactsDirectory 'approval-record.json'
 
 New-Item -ItemType Directory -Path $artifactsDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $stagesDirectory -Force | Out-Null
@@ -545,6 +614,45 @@ foreach ($agent in @($agentsManifest.agents)) {
 
 $artifactMap = @{}
 $artifactMap['request'] = $requestPath
+$approvedStageSet = Convert-ToStringSet -Values $ApprovedStageIds
+$approvedAgentSet = Convert-ToStringSet -Values $ApprovedAgentIds
+$approvalEntries = New-Object System.Collections.Generic.List[object]
+
+if (($approvedStageSet.Count -gt 0 -or $approvedAgentSet.Count -gt 0) -and [string]::IsNullOrWhiteSpace($ApprovedBy)) {
+    throw 'ApprovedBy is required when ApprovedStageIds or ApprovedAgentIds are supplied.'
+}
+
+if (($approvedStageSet.Count -gt 0 -or $approvedAgentSet.Count -gt 0) -and [string]::IsNullOrWhiteSpace($ApprovalJustification)) {
+    throw 'ApprovalJustification is required when ApprovedStageIds or ApprovedAgentIds are supplied.'
+}
+
+$approvalRecordedAt = (Get-Date).ToString('o')
+foreach ($approvedStageId in $approvedStageSet) {
+    $approvalEntries.Add([pscustomobject]([ordered]@{
+                scope = 'stage'
+                targetId = $approvedStageId
+                approvedBy = $ApprovedBy
+                justification = $ApprovalJustification
+                recordedAt = $approvalRecordedAt
+            })) | Out-Null
+}
+foreach ($approvedAgentId in $approvedAgentSet) {
+    $approvalEntries.Add([pscustomobject]([ordered]@{
+                scope = 'agent'
+                targetId = $approvedAgentId
+                approvedBy = $ApprovedBy
+                justification = $ApprovalJustification
+                recordedAt = $approvalRecordedAt
+            })) | Out-Null
+}
+
+if ($approvalEntries.Count -gt 0) {
+    Write-JsonFile -Path $approvalRecordPath -Value ([ordered]@{
+            traceId = $trace
+            approvals = $approvalEntries.ToArray()
+        })
+    $artifactMap['approval-record'] = $approvalRecordPath
+}
 
 $stageResults = New-Object System.Collections.Generic.List[object]
 $runWarnings = New-Object System.Collections.Generic.List[string]
@@ -646,9 +754,37 @@ foreach ($stage in @($selectedStages)) {
         workItemCount = 0
         changedFileCount = 0
         stageStatePath = $null
+        approvalRequired = $false
+        approvalSatisfied = $false
+        approvalRecordPath = $null
     }
 
-    while ($attempt -lt $maxAttempts -and -not $stageSucceeded) {
+    $approvalEvaluation = Get-StageApprovalEvaluation `
+        -StageId $stageId `
+        -AgentId $agentId `
+        -Agent $agent `
+        -DefaultApprovalRequired $defaultApprovalRequired `
+        -ApprovedStageSet $approvedStageSet `
+        -ApprovedAgentSet $approvedAgentSet
+    $stageBlockedByApproval = $approvalEvaluation.required -and -not $approvalEvaluation.satisfied
+    $stageExecutionDetails.approvalRequired = [bool] $approvalEvaluation.required
+    $stageExecutionDetails.approvalSatisfied = [bool] $approvalEvaluation.satisfied
+    if ($approvalEntries.Count -gt 0) {
+        $stageExecutionDetails.approvalRecordPath = Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $approvalRecordPath
+    }
+
+    if ($stageBlockedByApproval) {
+        $instructionsText = if ([string]::IsNullOrWhiteSpace([string] $approvalEvaluation.instructions)) {
+            'Provide explicit approval before running this sensitive stage.'
+        }
+        else {
+            [string] $approvalEvaluation.instructions
+        }
+        $lastFailureMessage = ("Stage {0} (agent={1}) requires explicit approval. {2} Use -ApprovedStageIds {0} or -ApprovedAgentIds {1} together with -ApprovedBy and -ApprovalJustification." -f $stageId, $agentId, $instructionsText)
+        Write-StyledOutput ("[ERROR] {0}" -f $lastFailureMessage)
+    }
+
+    while (-not $stageBlockedByApproval -and $attempt -lt $maxAttempts -and -not $stageSucceeded) {
         $attempt++
         Write-StyledOutput ("[INFO] Stage {0} (agent={1}, mode={2}) attempt {3}/{4}" -f $stageId, $agentId, $stageMode, $attempt, $maxAttempts)
 
@@ -972,6 +1108,10 @@ foreach ($stage in @($selectedStages)) {
         break
     }
 
+    if ($stageBlockedByApproval) {
+        break
+    }
+
     if (-not $stageSucceeded -and $onFailure -eq 'stop' -and $effectiveContinueOnStageFailure) {
         $runWarnings.Add(("Stage {0} configured with stop-on-failure, but execution continued due ContinueOnStageFailure=true." -f $stageId)) | Out-Null
     }
@@ -1059,6 +1199,7 @@ $runArtifact = [pscustomobject]@{
     finishedAt = $pipelineFinishedAt.ToString('o')
     stages = $stagesForArtifact
     summary = $runSummary
+    approvals = $approvalEntries.ToArray()
 }
 
 Set-Content -LiteralPath $runArtifactPath -Value ($runArtifact | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline

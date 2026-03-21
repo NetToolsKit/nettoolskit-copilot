@@ -273,10 +273,12 @@ else {
 
     if ($GitChangedOnly) {
         try {
-            $files = Get-GitChangedFiles -Root $root |
-                Where-Object {
-                    Test-IsProcessableFile -fullPath $_ -excludedExtensions $BinaryExtensions -excludeDirs $ExcludeDirs -root $root
-                }
+            $files = @(
+                Get-GitChangedFiles -Root $root |
+                    Where-Object {
+                        Test-IsProcessableFile -fullPath $_ -excludedExtensions $BinaryExtensions -excludeDirs $ExcludeDirs -root $root
+                    }
+            )
 
             Write-ColorLine -Message 'Git changed files mode: enabled' -Color Cyan
         }
@@ -314,6 +316,8 @@ else {
         }
     }
 }
+
+$files = @($files)
 
 Write-ColorLine -Message ("Files found: {0}" -f $files.Count) -Color Yellow
 

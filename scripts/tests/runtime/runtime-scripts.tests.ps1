@@ -111,6 +111,10 @@ try {
     Assert-Contains -Collection $keys -Value 'RequestText' -Message 'run-agent-pipeline missing RequestText parameter.'
     Assert-Contains -Collection $keys -Value 'ExecutionBackend' -Message 'run-agent-pipeline missing ExecutionBackend parameter.'
     Assert-Contains -Collection $keys -Value 'DispatchCommand' -Message 'run-agent-pipeline missing DispatchCommand parameter.'
+    Assert-Contains -Collection $keys -Value 'ApprovedStageIds' -Message 'run-agent-pipeline missing ApprovedStageIds parameter.'
+    Assert-Contains -Collection $keys -Value 'ApprovedAgentIds' -Message 'run-agent-pipeline missing ApprovedAgentIds parameter.'
+    Assert-Contains -Collection $keys -Value 'ApprovedBy' -Message 'run-agent-pipeline missing ApprovedBy parameter.'
+    Assert-Contains -Collection $keys -Value 'ApprovalJustification' -Message 'run-agent-pipeline missing ApprovalJustification parameter.'
     Assert-Contains -Collection $keys -Value 'WriteRunState' -Message 'run-agent-pipeline missing WriteRunState parameter.'
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))

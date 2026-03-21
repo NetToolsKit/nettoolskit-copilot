@@ -18,6 +18,18 @@
 .PARAMETER PreviewOnly
     Emits the pipeline invocation payload as JSON without executing it.
 
+.PARAMETER ApprovedStageIds
+    Optional sensitive stage ids approved for this run.
+
+.PARAMETER ApprovedAgentIds
+    Optional sensitive agent ids approved for this run.
+
+.PARAMETER ApprovedBy
+    Identifies who approved the sensitive execution.
+
+.PARAMETER ApprovalJustification
+    Explains why the sensitive execution was approved.
+
 .PARAMETER DetailedOutput
     Enables verbose diagnostics.
 
@@ -33,6 +45,10 @@ param(
     [Parameter(Mandatory = $true)] [string] $RequestText,
     [string] $DispatchCommand = 'codex',
     [switch] $PreviewOnly,
+    [string[]] $ApprovedStageIds = @(),
+    [string[]] $ApprovedAgentIds = @(),
+    [string] $ApprovedBy,
+    [string] $ApprovalJustification,
     [switch] $DetailedOutput
 )
 
@@ -45,6 +61,10 @@ $params = [ordered]@{
     RequestText = $RequestText
     ExecutionBackend = 'codex-exec'
     DispatchCommand = $DispatchCommand
+    ApprovedStageIds = @($ApprovedStageIds)
+    ApprovedAgentIds = @($ApprovedAgentIds)
+    ApprovedBy = $ApprovedBy
+    ApprovalJustification = $ApprovalJustification
     DetailedOutput = [bool] $DetailedOutput
 }
 
