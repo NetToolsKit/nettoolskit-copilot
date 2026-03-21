@@ -9,6 +9,7 @@
     - render versioned global VS Code settings
     - synchronize versioned VS Code snippets
     - configure local Git hooks
+    - configure global Git aliases
     - run repository healthcheck
 
     The script is intentionally an orchestrator only. It reuses the versioned
@@ -250,6 +251,11 @@ if (-not $SkipGlobalSnippets) {
 
 if (-not $SkipGitHooks) {
     $steps.Add((New-InstallStep -Name 'Configure local Git hooks' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-git-hooks.ps1') -Arguments @{})) | Out-Null
+    $globalAliasArguments = @{
+        RepoRoot = $resolvedRepoRoot
+        TargetCodexPath = if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) { $TargetCodexPath } else { Join-Path (Resolve-UserHomePath) '.codex' }
+    }
+    $steps.Add((New-InstallStep -Name 'Configure global Git aliases' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-global-git-aliases.ps1') -Arguments $globalAliasArguments)) | Out-Null
 }
 
 if (-not $SkipHealthcheck) {

@@ -201,6 +201,7 @@ scripts/
 - stale repo-managed duplicates are removed from `~/.codex/skills` while unmanaged/system skill folders are preserved
 - `.codex/mcp/` -> `~/.codex/shared-mcp`
 - `.codex/scripts/` (root MCP tools) + `scripts/common/` + `scripts/security/` -> `~/.codex/shared-scripts`
+- `scripts/maintenance/` -> `~/.codex/shared-scripts/maintenance`
 - `.codex/orchestration/` -> `~/.codex/shared-orchestration`
 
 MCP apply mode updates only `[mcp_servers.*]` sections in `~/.codex/config.toml`, preserving the rest.
@@ -247,6 +248,7 @@ Runtime-sensitive files such as `~/.codex/auth.json`, `~/.codex/sessions/`, and 
 | `governance/set-branch-protection.ps1` | Validates or applies branch protection from `.github/governance/branch-protection.baseline.json` using GitHub CLI. | `pwsh -File scripts/governance/set-branch-protection.ps1 -Apply` |
 | `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
 | `git-hooks/setup-git-hooks.ps1` | Configures local Git hooks path (`core.hooksPath=.githooks`) and enables `pre-commit` validation + `post-commit` sync. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1` |
+| `git-hooks/setup-global-git-aliases.ps1` | Configures manual global Git aliases for runtime-synced helper scripts. Currently installs `git trim-eof`, which runs the shared trim script in `-GitChangedOnly` mode before `git add` when you want manual EOF cleanup in any repository. | `pwsh -File scripts/git-hooks/setup-global-git-aliases.ps1` |
 | `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `runtime-paths`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
 | `common/repository-paths.ps1` | Shared repository helper for repository/git/solution root discovery, repo-relative and full-path conversion, parent directory handling, verbose diagnostics, and structured execution logging reused across runtime, security, orchestration, and runtime test scripts. | `. ./scripts/common/repository-paths.ps1` |
 | `common/validation-logging.ps1` | Shared validation log helper for warning/failure registration, verbose output, and compact validation summaries reused across the validation script family. | `. ./scripts/common/validation-logging.ps1` |
@@ -479,6 +481,12 @@ pwsh -File (Join-Path $SecurityScriptsRoot 'Invoke-PreBuildSecurityGate.ps1') -R
 
 # install local Git hooks (validation + sync)
 pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
+
+# configure the manual global git trim alias
+pwsh -File .\scripts\git-hooks\setup-global-git-aliases.ps1
+
+# use the global alias in any git repository before staging
+git trim-eof
 
 # inspect help for script contracts
 Get-Help .\scripts\runtime\bootstrap.ps1 -Full

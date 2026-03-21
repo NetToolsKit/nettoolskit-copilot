@@ -1,9 +1,4 @@
-# Task Plan (approval-approved-test)
-
-- Stage: plan
-- Agent: planner
-- Backend: codex-exec
-- GeneratedAt: 2026-03-21T16:23:09.3064814-03:00
+# Task Plan
 
 ## Objective
 - Deliver the requested change with deterministic validation.

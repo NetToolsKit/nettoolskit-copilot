@@ -13,6 +13,7 @@
     - .codex/scripts (root tools) -> ~/.codex/shared-scripts
     - scripts/common -> ~/.codex/shared-scripts/common
     - scripts/security -> ~/.codex/shared-scripts/security
+    - scripts/maintenance -> ~/.codex/shared-scripts/maintenance
     - .codex/orchestration -> ~/.codex/shared-orchestration
 
     For each mapping, reports:
@@ -356,7 +357,7 @@ function Invoke-Doctor {
             Name = '.codex/scripts (root tools) -> runtime'
             Source = Join-Path $ResolvedRepoRoot '.codex\scripts'
             Target = Join-Path $TargetCodexPath 'shared-scripts'
-            IgnoreExtraPrefixes = @('common\', 'common/', 'security\', 'security/')
+            IgnoreExtraPrefixes = @('common\', 'common/', 'security\', 'security/', 'maintenance\', 'maintenance/')
         },
         [pscustomobject]@{
             Name = 'scripts/common -> runtime'
@@ -368,6 +369,12 @@ function Invoke-Doctor {
             Name = 'scripts/security -> runtime'
             Source = Join-Path $ResolvedRepoRoot 'scripts\security'
             Target = Join-Path $TargetCodexPath 'shared-scripts\security'
+            IgnoreExtraPrefixes = @()
+        },
+        [pscustomobject]@{
+            Name = 'scripts/maintenance -> runtime'
+            Source = Join-Path $ResolvedRepoRoot 'scripts\maintenance'
+            Target = Join-Path $TargetCodexPath 'shared-scripts\maintenance'
             IgnoreExtraPrefixes = @()
         },
         [pscustomobject]@{

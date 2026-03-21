@@ -21,7 +21,7 @@
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "60e59cbb8e428a2caf1aa26c180da8fd804cb28810074c5926c163945ffbad88"
+      "sha256": "733b33c84af9bd59627ec4d71938de9c0b4d5e5248ea17af450810804885cb8f"
     },
     {
       "path": "scripts/common/validation-logging.ps1",

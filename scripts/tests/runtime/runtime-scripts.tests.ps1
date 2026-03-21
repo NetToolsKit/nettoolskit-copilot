@@ -117,6 +117,13 @@ try {
     Assert-Contains -Collection $keys -Value 'ApprovalJustification' -Message 'run-agent-pipeline missing ApprovalJustification parameter.'
     Assert-Contains -Collection $keys -Value 'WriteRunState' -Message 'run-agent-pipeline missing WriteRunState parameter.'
 
+    $scriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/setup-global-git-aliases.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'setup-global-git-aliases missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'setup-global-git-aliases missing TargetCodexPath parameter.'
+    Assert-Contains -Collection $keys -Value 'Uninstall' -Message 'setup-global-git-aliases missing Uninstall parameter.'
+
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $targetGithub = Join-Path $tempRoot '.github'
     $targetCodex = Join-Path $tempRoot '.codex'
@@ -140,6 +147,7 @@ try {
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodexSkills 'super-agent'))) 'bootstrap did not remove duplicate repo-managed super-agent from .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodexSkills '.system\SKILL.md') -PathType Leaf) 'bootstrap should preserve unmanaged/system skills in .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts') -PathType Container) 'bootstrap did not sync shared-scripts folder.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts\maintenance\trim-trailing-blank-lines.ps1') -PathType Leaf) 'bootstrap did not project maintenance trim script into shared-scripts.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

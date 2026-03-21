@@ -134,6 +134,29 @@ function Write-JsonFile {
     Set-Content -LiteralPath $Path -Value ($Value | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
 }
 
+# Writes text only when the target content changes, preserving file timestamps when unchanged.
+function Set-TextContentIfChanged {
+    param(
+        [string] $Path,
+        [string] $Content
+    )
+
+    $directory = Split-Path -Parent $Path
+    if (-not [string]::IsNullOrWhiteSpace($directory)) {
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    }
+
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        $existingContent = Get-Content -Raw -LiteralPath $Path
+        if ([string]::Equals($existingContent, $Content, [System.StringComparison]::Ordinal)) {
+            return $false
+        }
+    }
+
+    Set-Content -LiteralPath $Path -Value $Content -Encoding UTF8 -NoNewline
+    return $true
+}
+
 # Expands a prompt template by replacing token placeholders with supplied values.
 function Expand-Template {
     param(
@@ -443,18 +466,50 @@ $taskPlanMarkdown = @(
     '',
     '## Acceptance Criteria'
 )
+
+$versionedTaskPlanMarkdown = @(
+    '# Task Plan',
+    '',
+    '## Objective',
+    ('- {0}' -f [string] $planResult.objective),
+    '',
+    '## Scope Summary',
+    ('- {0}' -f [string] $planResult.scopeSummary),
+    '',
+    '## Acceptance Criteria'
+)
 $taskPlanMarkdown += @($planResult.acceptanceCriteria | ForEach-Object { '- ' + [string] $_ })
+$versionedTaskPlanMarkdown += @($planResult.acceptanceCriteria | ForEach-Object { '- ' + [string] $_ })
 $taskPlanMarkdown += @(
+    '',
+    '## Work Items'
+)
+$versionedTaskPlanMarkdown += @(
     '',
     '## Work Items'
 )
 foreach ($workItem in @($planResult.workItems)) {
     $taskPlanMarkdown += ('### {0}: {1}' -f [string] $workItem.id, [string] $workItem.title)
+    $versionedTaskPlanMarkdown += ('### {0}: {1}' -f [string] $workItem.id, [string] $workItem.title)
     $taskPlanMarkdown += ('- Description: {0}' -f [string] $workItem.description)
+    $versionedTaskPlanMarkdown += ('- Description: {0}' -f [string] $workItem.description)
     $taskPlanMarkdown += ('- Allowed paths: {0}' -f ((@($workItem.allowedPaths) | ForEach-Object { [string] $_ }) -join ', '))
+    $versionedTaskPlanMarkdown += ('- Allowed paths: {0}' -f ((@($workItem.allowedPaths) | ForEach-Object { [string] $_ }) -join ', '))
     $taskPlanMarkdown += ('- Target paths: {0}' -f ((@($workItem.targetPaths) | ForEach-Object { [string] $_ }) -join ', '))
+    $versionedTaskPlanMarkdown += ('- Target paths: {0}' -f ((@($workItem.targetPaths) | ForEach-Object { [string] $_ }) -join ', '))
     $taskPlanMarkdown += ('- Deliverables: {0}' -f ((@($workItem.deliverables) | ForEach-Object { [string] $_ }) -join '; '))
+    $versionedTaskPlanMarkdown += ('- Deliverables: {0}' -f ((@($workItem.deliverables) | ForEach-Object { [string] $_ }) -join '; '))
     $taskPlanMarkdown += ('- Commands: {0}' -f ((@($workItem.commands) | ForEach-Object {
+                $purpose = [string] $_.purpose
+                $command = [string] $_.command
+                if ([string]::IsNullOrWhiteSpace($purpose)) {
+                    $command
+                }
+                else {
+                    '{0} => {1}' -f $purpose, $command
+                }
+            }) -join '; '))
+    $versionedTaskPlanMarkdown += ('- Commands: {0}' -f ((@($workItem.commands) | ForEach-Object {
                 $purpose = [string] $_.purpose
                 $command = [string] $_.command
                 if ([string]::IsNullOrWhiteSpace($purpose)) {
@@ -470,18 +525,33 @@ foreach ($workItem in @($planResult.workItems)) {
                 $evidence = [string] $_.evidence
                 '{0} [{1}] => {2}' -f $name, $expectedOutcome, $evidence
             }) -join '; '))
+    $versionedTaskPlanMarkdown += ('- Checkpoints: {0}' -f ((@($workItem.checkpoints) | ForEach-Object {
+                $name = [string] $_.name
+                $expectedOutcome = [string] $_.expectedOutcome
+                $evidence = [string] $_.evidence
+                '{0} [{1}] => {2}' -f $name, $expectedOutcome, $evidence
+            }) -join '; '))
     if ($null -ne $workItem.commitCheckpoint) {
         $taskPlanMarkdown += ('- Commit checkpoint: [{0}] {1} => {2}' -f [string] $workItem.commitCheckpoint.scope, [string] $workItem.commitCheckpoint.when, [string] $workItem.commitCheckpoint.suggestedMessage)
+        $versionedTaskPlanMarkdown += ('- Commit checkpoint: [{0}] {1} => {2}' -f [string] $workItem.commitCheckpoint.scope, [string] $workItem.commitCheckpoint.when, [string] $workItem.commitCheckpoint.suggestedMessage)
     }
     $taskPlanMarkdown += ('- Validation: {0}' -f ((@($workItem.validationSteps) | ForEach-Object { [string] $_ }) -join '; '))
+    $versionedTaskPlanMarkdown += ('- Validation: {0}' -f ((@($workItem.validationSteps) | ForEach-Object { [string] $_ }) -join '; '))
     $taskPlanMarkdown += ''
+    $versionedTaskPlanMarkdown += ''
 }
 $taskPlanMarkdown += @(
     '## Risks'
 )
+$versionedTaskPlanMarkdown += @(
+    '## Risks'
+)
 $taskPlanMarkdown += @($planResult.risks | ForEach-Object { '- ' + [string] $_ })
-Set-Content -LiteralPath $taskPlanPath -Value ($taskPlanMarkdown -join "`n") -Encoding UTF8 -NoNewline
-Set-Content -LiteralPath $activePlanPath -Value ($taskPlanMarkdown -join "`n") -Encoding UTF8 -NoNewline
+$versionedTaskPlanMarkdown += @($planResult.risks | ForEach-Object { '- ' + [string] $_ })
+$taskPlanContent = $taskPlanMarkdown -join "`n"
+$versionedTaskPlanContent = $versionedTaskPlanMarkdown -join "`n"
+Set-Content -LiteralPath $taskPlanPath -Value $taskPlanContent -Encoding UTF8 -NoNewline
+$null = Set-TextContentIfChanged -Path $activePlanPath -Content $versionedTaskPlanContent
 
 $contextPack = [ordered]@{
     traceId = $TraceId

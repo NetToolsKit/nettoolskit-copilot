@@ -42,6 +42,22 @@
   - `scripts/README.md`
 
 ### Fixed
+- Removed volatile metadata churn from versioned planning artifacts so active plan/spec files no longer rewrite timestamps or trace metadata on repeated stage runs, and moving them to `planning/completed` now preserves file timestamps:
+  - `scripts/orchestration/stages/plan-stage.ps1`
+  - `scripts/orchestration/stages/spec-stage.ps1`
+  - `scripts/orchestration/stages/closeout-stage.ps1`
+  - `scripts/tests/runtime/agent-orchestration-engine.tests.ps1`
+- Added a repository-owned global Git alias setup flow for manual EOF cleanup across arbitrary repositories and fixed the Windows shell invocation so `git trim-eof` correctly executes the runtime-synced trim script in `-GitChangedOnly` mode:
+  - `scripts/git-hooks/setup-global-git-aliases.ps1`
+  - `scripts/common/runtime-paths.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/tests/runtime/git-global-aliases.tests.ps1`
+  - `scripts/tests/runtime/install-runtime.tests.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `README.md`
+  - `scripts/README.md`
 - Fixed fresh clones leaving the repository dirty before any user change because a set of tracked PowerShell scripts were committed with mixed line endings under the repository `*.ps1 eol=crlf` policy:
   - `scripts/deploy/deploy-backend-to-vps.ps1`
   - `scripts/git-hooks/setup-git-hooks.ps1`

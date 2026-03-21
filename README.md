@@ -118,7 +118,7 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 | Integration target | Versioned source of truth | Runtime target |
 | --- | --- | --- |
 | Copilot instructions, prompts, and VS Code agent hooks | `.github/` | `%USERPROFILE%\\.github` |
-| Codex runtime skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` | `%USERPROFILE%\\.codex` |
+| Codex runtime skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
 | Picker-visible local skills for VS Code/Codex | `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
 | VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
 | VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
@@ -209,7 +209,7 @@ pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 ```
 
-This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects the single visible repository-owned starter/controller into `~/.agents/skills`, projects native Copilot skills into `~/.copilot/skills`, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
+This syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects the single visible repository-owned starter/controller into `~/.agents/skills`, projects native Copilot skills into `~/.copilot/skills`, mirrors shared helper scripts from `scripts/common`, `scripts/security`, and `scripts/maintenance` into `~/.codex/shared-scripts`, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, renders the global VS Code settings/snippets, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
 
 The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 
@@ -319,6 +319,20 @@ Local hooks are managed by `core.hooksPath=.githooks`.
 ```powershell
 pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1
 ```
+
+### Global Manual Alias
+
+```powershell
+pwsh -File ./scripts/git-hooks/setup-global-git-aliases.ps1
+```
+
+This installs a manual global alias:
+
+```powershell
+git trim-eof
+```
+
+Use it in any Git repository before `git add` when you want to trim only the files currently reported by `git status`.
 
 ### pre-commit
 

@@ -51,3 +51,9 @@ function Resolve-CopilotSkillsPath {
     $homePath = Resolve-UserHomePath
     return Join-Path $homePath '.copilot\skills'
 }
+
+# Resolves the shared Codex scripts path used by mirrored repository-owned helper tools.
+function Resolve-CodexSharedScriptsPath {
+    $homePath = Resolve-UserHomePath
+    return Join-Path $homePath '.codex\shared-scripts'
+}

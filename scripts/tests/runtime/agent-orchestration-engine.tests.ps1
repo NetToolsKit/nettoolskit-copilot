@@ -82,6 +82,8 @@ $createdCompletedPlanPath = $null
 $createdCompletedSpecPath = $null
 $originalPlanningReadmeContent = $null
 $originalChangelogContent = $null
+$activePlanLastWriteTimeUtc = $null
+$activeSpecLastWriteTimeUtc = $null
 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
@@ -400,6 +402,9 @@ end {
     $specSummary = Get-Content -Raw -LiteralPath $specArtifacts['spec-summary'] | ConvertFrom-Json -Depth 100
     Assert-True ([bool] $specSummary.specRequired) 'Spec stage should require a versioned spec in the fake flow.'
     Assert-True (Test-Path -LiteralPath $specArtifacts['active-spec'] -PathType Leaf) 'Spec stage should produce an active spec file.'
+    $activeSpecContent = Get-Content -Raw -LiteralPath $specArtifacts['active-spec']
+    Assert-True ($activeSpecContent -notmatch 'GeneratedAt:') 'Versioned active spec should not include volatile GeneratedAt metadata.'
+    $activeSpecLastWriteTimeUtc = (Get-Item -LiteralPath $specArtifacts['active-spec']).LastWriteTimeUtc
 
     $planOutputManifestPath = Join-Path $runDirectory 'stages/plan-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/plan-stage.ps1') `
@@ -430,6 +435,45 @@ end {
     Assert-Equal -Actual @($taskPlanData.workItems[0].checkpoints).Count -Expected 2 -Message 'Plan stage should emit checkpoints per work item.'
     Assert-Equal -Actual ([string] $taskPlanData.workItems[0].commitCheckpoint.scope) -Expected 'task' -Message 'Plan stage should emit commit checkpoints per work item.'
     Assert-True (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf) 'Plan stage should produce an active plan file.'
+    $activePlanContent = Get-Content -Raw -LiteralPath $planArtifacts['active-plan']
+    Assert-True ($activePlanContent -notmatch 'GeneratedAt:') 'Versioned active plan should not include volatile GeneratedAt metadata.'
+    $activePlanLastWriteTimeUtc = (Get-Item -LiteralPath $planArtifacts['active-plan']).LastWriteTimeUtc
+
+    Start-Sleep -Milliseconds 1200
+
+    & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/spec-stage.ps1') `
+        -RepoRoot $resolvedRepoRoot `
+        -RunDirectory $runDirectory `
+        -TraceId 'run-test' `
+        -StageId 'spec' `
+        -AgentId 'brainstormer' `
+        -RequestPath $requestPath `
+        -InputArtifactManifestPath $intakeOutputManifestPath `
+        -OutputArtifactManifestPath $specOutputManifestPath `
+        -DispatchMode 'codex-exec' `
+        -PromptTemplatePath '.codex/orchestration/prompts/spec-stage.prompt.md' `
+        -ResponseSchemaPath '.github/schemas/agent.stage-spec-result.schema.json' `
+        -DispatchCommand $fakeCodexPath `
+        -ExecutionBackend 'codex-exec' | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Repeated spec stage should succeed with fake Codex.'
+    Assert-Equal -Actual ((Get-Item -LiteralPath $specArtifacts['active-spec']).LastWriteTimeUtc) -Expected $activeSpecLastWriteTimeUtc -Message 'Repeated spec stage should not rewrite the versioned spec when content is unchanged.'
+
+    & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/plan-stage.ps1') `
+        -RepoRoot $resolvedRepoRoot `
+        -RunDirectory $runDirectory `
+        -TraceId 'run-test' `
+        -StageId 'plan' `
+        -AgentId 'planner' `
+        -RequestPath $requestPath `
+        -InputArtifactManifestPath $specOutputManifestPath `
+        -OutputArtifactManifestPath $planOutputManifestPath `
+        -DispatchMode 'codex-exec' `
+        -PromptTemplatePath '.codex/orchestration/prompts/planner-stage.prompt.md' `
+        -ResponseSchemaPath '.github/schemas/agent.stage-plan-result.schema.json' `
+        -DispatchCommand $fakeCodexPath `
+        -ExecutionBackend 'codex-exec' | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Repeated plan stage should succeed with fake Codex.'
+    Assert-Equal -Actual ((Get-Item -LiteralPath $planArtifacts['active-plan']).LastWriteTimeUtc) -Expected $activePlanLastWriteTimeUtc -Message 'Repeated plan stage should not rewrite the versioned plan when content is unchanged.'
 
     $routeInputManifestPath = Join-Path $runDirectory 'stages/route-input.json'
     Write-JsonFile -Path $routeInputManifestPath -Value ([ordered]@{
@@ -620,6 +664,8 @@ end {
     Assert-True ((Get-Content -Raw -LiteralPath $changelogPath).StartsWith("## [9.9.9] - 2026-03-20", [System.StringComparison]::Ordinal)) 'Closeout stage should prepend the changelog entry in fake flow.'
     Assert-True (-not (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf)) 'Closeout stage should move the active plan out of planning/active.'
     Assert-True (-not (Test-Path -LiteralPath $specArtifacts['active-spec'] -PathType Leaf)) 'Closeout stage should move the active spec out of planning/specs/active.'
+    Assert-Equal -Actual ((Get-Item -LiteralPath $createdCompletedPlanPath).LastWriteTimeUtc) -Expected $activePlanLastWriteTimeUtc -Message 'Closeout stage should preserve the plan LastWriteTime when moving to completed.'
+    Assert-Equal -Actual ((Get-Item -LiteralPath $createdCompletedSpecPath).LastWriteTimeUtc) -Expected $activeSpecLastWriteTimeUtc -Message 'Closeout stage should preserve the spec LastWriteTime when moving to completed.'
 
     $pipelineRunRoot = Join-Path $tempRoot 'pipeline-runs'
     $pipelineScriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/run-agent-pipeline.ps1'

@@ -68,9 +68,10 @@ try {
 
     Assert-True -Condition ($null -ne $previewResult) -Message 'Install preview must return a result object.'
     Assert-Equal -Actual $previewResult.previewOnly -Expected $true -Message 'Install preview must flag previewOnly.'
-    Assert-Equal -Actual @($previewResult.steps).Count -Expected 5 -Message 'Install preview must plan the default onboarding steps.'
+    Assert-Equal -Actual @($previewResult.steps).Count -Expected 6 -Message 'Install preview must plan the default onboarding steps.'
     Assert-Equal -Actual $previewResult.steps[0].name -Expected 'Bootstrap shared runtime assets' -Message 'Install preview must start with bootstrap.'
-    Assert-Equal -Actual $previewResult.steps[4].name -Expected 'Run repository healthcheck' -Message 'Install preview must end with healthcheck.'
+    Assert-Equal -Actual $previewResult.steps[4].name -Expected 'Configure global Git aliases' -Message 'Install preview must include global Git alias setup after local hooks.'
+    Assert-Equal -Actual $previewResult.steps[5].name -Expected 'Run repository healthcheck' -Message 'Install preview must end with healthcheck.'
     Assert-True -Condition ($previewResult.steps[0].scriptPath -like '*scripts\runtime\bootstrap.ps1') -Message 'Install preview must reference bootstrap.ps1.'
     Assert-Equal -Actual $previewResult.summary.overallStatus -Expected 'preview' -Message 'Install preview must report preview summary status.'
     Assert-Equal -Actual $previewResult.issues.totalIssues -Expected 0 -Message 'Install preview must not report issues when only planning.'

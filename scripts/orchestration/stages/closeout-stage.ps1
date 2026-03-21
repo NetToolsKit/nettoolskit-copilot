@@ -134,6 +134,26 @@ function Write-JsonFile {
     Set-Content -LiteralPath $Path -Value ($Value | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
 }
 
+# Moves a file while preserving its original timestamp metadata.
+function Move-ItemPreserveTimestamps {
+    param(
+        [string] $SourcePath,
+        [string] $DestinationPath
+    )
+
+    $sourceItem = Get-Item -LiteralPath $SourcePath
+    $creationTimeUtc = $sourceItem.CreationTimeUtc
+    $lastWriteTimeUtc = $sourceItem.LastWriteTimeUtc
+    $lastAccessTimeUtc = $sourceItem.LastAccessTimeUtc
+
+    Move-Item -LiteralPath $SourcePath -Destination $DestinationPath -Force
+
+    $destinationItem = Get-Item -LiteralPath $DestinationPath
+    $destinationItem.CreationTimeUtc = $creationTimeUtc
+    $destinationItem.LastWriteTimeUtc = $lastWriteTimeUtc
+    $destinationItem.LastAccessTimeUtc = $lastAccessTimeUtc
+}
+
 # Replaces token placeholders in a prompt template.
 function Expand-Template {
     param(
@@ -574,7 +594,7 @@ if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWh
     $completedPlansDirectory = Join-Path $resolvedRepoRoot 'planning/completed'
     New-Item -ItemType Directory -Path $completedPlansDirectory -Force | Out-Null
     $completedPlanPath = Join-Path $completedPlansDirectory ([System.IO.Path]::GetFileName($activePlanPath))
-    Move-Item -LiteralPath $activePlanPath -Destination $completedPlanPath -Force
+    Move-ItemPreserveTimestamps -SourcePath $activePlanPath -Destination $completedPlanPath
     $planMoved = $true
 }
 if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWhiteSpace($activeSpecPath) -and (Test-Path -LiteralPath $activeSpecPath -PathType Leaf)) {
@@ -583,7 +603,7 @@ if ($closeoutResult.status -eq 'ready-for-commit' -and -not [string]::IsNullOrWh
         $completedSpecsDirectory = Join-Path $resolvedRepoRoot 'planning/specs/completed'
         New-Item -ItemType Directory -Path $completedSpecsDirectory -Force | Out-Null
         $completedSpecPath = Join-Path $completedSpecsDirectory ([System.IO.Path]::GetFileName($activeSpecPath))
-        Move-Item -LiteralPath $activeSpecPath -Destination $completedSpecPath -Force
+        Move-ItemPreserveTimestamps -SourcePath $activeSpecPath -Destination $completedSpecPath
         $specMoved = $true
     }
 }

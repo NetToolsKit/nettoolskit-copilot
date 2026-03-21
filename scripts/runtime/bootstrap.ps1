@@ -19,6 +19,7 @@
     - .codex/scripts (MCP utility scripts and docs)
     - scripts/common (shared PowerShell helpers)
     - scripts/security (shared security audit gates)
+    - scripts/maintenance (repository-owned maintenance helpers)
 
     When -ApplyMcpConfig is specified, applies MCP servers from the shared manifest
     into the local Codex config.toml file.
@@ -338,6 +339,7 @@ $sourceScripts = Join-Path $resolvedRepoRoot 'scripts'
 $sourceCodexScripts = Join-Path $sourceCodex 'scripts'
 $sourceCommonScripts = Join-Path $sourceScripts 'common'
 $sourceSecurityScripts = Join-Path $sourceScripts 'security'
+$sourceMaintenanceScripts = Join-Path $sourceScripts 'maintenance'
 
 Assert-PathPresent -Path $sourceGithub -Label 'source .github folder'
 Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
@@ -352,6 +354,7 @@ Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-P
 Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceCommonScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\common') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source $sourceSecurityScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\security') -MirrorMode:$Mirror
+Invoke-DirectorySync -Source $sourceMaintenanceScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\maintenance') -MirrorMode:$Mirror
 Invoke-DirectorySync -Source (Join-Path $sourceCodex 'orchestration') -Destination (Join-Path $TargetCodexPath 'shared-orchestration') -MirrorMode:$Mirror
 
 $sharedReadme = Join-Path $sourceCodex 'README.md'

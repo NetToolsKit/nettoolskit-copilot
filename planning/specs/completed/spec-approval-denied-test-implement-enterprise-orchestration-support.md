@@ -1,10 +1,6 @@
-# Specification (approval-approved-test)
+# Specification
 
-- Stage: spec
-- Agent: brainstormer
-- Backend: codex-exec
 - Workstream: implement-enterprise-orchestration-support
-- GeneratedAt: 2026-03-21T16:23:08.6593749-03:00
 
 ## Objective
 - Implement enterprise orchestration support.

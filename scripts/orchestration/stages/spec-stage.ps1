@@ -136,6 +136,29 @@ function Write-JsonFile {
     Set-Content -LiteralPath $Path -Value ($Value | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
 }
 
+# Writes text only when the target content changes, preserving file timestamps when unchanged.
+function Set-TextContentIfChanged {
+    param(
+        [string] $Path,
+        [string] $Content
+    )
+
+    $directory = Split-Path -Parent $Path
+    if (-not [string]::IsNullOrWhiteSpace($directory)) {
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    }
+
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        $existingContent = Get-Content -Raw -LiteralPath $Path
+        if ([string]::Equals($existingContent, $Content, [System.StringComparison]::Ordinal)) {
+            return $false
+        }
+    }
+
+    Set-Content -LiteralPath $Path -Value $Content -Encoding UTF8 -NoNewline
+    return $true
+}
+
 # Expands a prompt template by replacing token placeholders with supplied values.
 function Expand-Template {
     param(
@@ -400,13 +423,9 @@ if ([bool] $specResult.specRequired) {
     }
 
     $specMarkdown = @(
-        ('# Specification ({0})' -f $TraceId),
+        '# Specification',
         '',
-        ('- Stage: {0}' -f $StageId),
-        ('- Agent: {0}' -f $AgentId),
-        ('- Backend: {0}' -f $backendUsed),
         ('- Workstream: {0}' -f [string] $specResult.workstreamSlug),
-        ('- GeneratedAt: {0}' -f (Get-Date).ToString('o')),
         '',
         '## Objective',
         ('- {0}' -f $requestContent),
@@ -450,7 +469,7 @@ if ([bool] $specResult.specRequired) {
         '## Notes'
     )
     $specMarkdown += @($specResult.notes | ForEach-Object { '- ' + [string] $_ })
-    Set-Content -LiteralPath $activeSpecArtifactPath -Value ($specMarkdown -join "`n") -Encoding UTF8 -NoNewline
+    $null = Set-TextContentIfChanged -Path $activeSpecArtifactPath -Content ($specMarkdown -join "`n")
     $specVersioned = $true
 }
 else {
