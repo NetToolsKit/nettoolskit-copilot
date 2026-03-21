@@ -126,6 +126,9 @@
 - Updated the global transparency contract so every substantive terminal-facing completion message must explicitly report the controller and any specialists or subagents used, or state that no specialist/delegated agent was used:
   - `.github/AGENTS.md`
   - `.github/copilot-instructions.md`
+- Tightened the same transparency contract so the final `Agents used:` line must render each reported agent name in backticks, such as `Super Agent`:
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
 - Upgraded the repository-owned orchestration lifecycle from:
   - `intake -> plan -> route -> implement -> validate -> review -> closeout`
   to:
