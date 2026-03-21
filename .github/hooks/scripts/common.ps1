@@ -126,6 +126,90 @@ function Get-WorkspaceInsertFinalNewlinePolicy {
     return $null
 }
 
+# Detects whether the current workspace provides a local Super Agent adapter surface.
+function Get-SuperAgentWorkspaceSurface {
+    param(
+        [string] $WorkspacePath
+    )
+
+    $hasWorkspaceAgents = Test-WorkspacePath -WorkspacePath $WorkspacePath -RelativePath '.github/AGENTS.md'
+    $hasWorkspaceInstructions = Test-WorkspacePath -WorkspacePath $WorkspacePath -RelativePath '.github/copilot-instructions.md'
+    $hasWorkspaceRouteCatalog = Test-WorkspacePath -WorkspacePath $WorkspacePath -RelativePath '.github/instruction-routing.catalog.yml'
+    $hasWorkspaceRoutePrompt = Test-WorkspacePath -WorkspacePath $WorkspacePath -RelativePath '.github/prompts/route-instructions.prompt.md'
+    $hasPlanningWorkspace = Test-WorkspacePath -WorkspacePath $WorkspacePath -RelativePath 'planning/README.md'
+    $hasSpecWorkspace = Test-WorkspacePath -WorkspacePath $WorkspacePath -RelativePath 'planning/specs/README.md'
+
+    $workspaceMode = if ($hasWorkspaceAgents -and $hasWorkspaceInstructions) {
+        'workspace-adapter'
+    }
+    else {
+        'global-runtime'
+    }
+
+    $planningActivePath = if ($hasPlanningWorkspace) { 'planning/active' } else { '.build/super-agent/planning/active' }
+    $planningCompletedPath = if ($hasPlanningWorkspace) { 'planning/completed' } else { '.build/super-agent/planning/completed' }
+    $specActivePath = if ($hasSpecWorkspace) { 'planning/specs/active' } else { '.build/super-agent/specs/active' }
+    $specCompletedPath = if ($hasSpecWorkspace) { 'planning/specs/completed' } else { '.build/super-agent/specs/completed' }
+
+    $instructionLoadMessage = if ($workspaceMode -eq 'workspace-adapter') {
+        'Load workspace .github/AGENTS.md and .github/copilot-instructions.md first.'
+    }
+    else {
+        'No local workspace adapter detected: load runtime AGENTS.md and copilot-instructions.md from ~/.github first.'
+    }
+
+    $routingMessage = if (($workspaceMode -eq 'workspace-adapter') -and $hasWorkspaceRouteCatalog -and $hasWorkspaceRoutePrompt) {
+        'Routing mode: use workspace static routing with .github/instruction-routing.catalog.yml and .github/prompts/route-instructions.prompt.md.'
+    }
+    elseif ($workspaceMode -eq 'workspace-adapter') {
+        'Routing mode: no local static routing surface detected; build a minimal context pack from the workspace files you are touching.'
+    }
+    else {
+        'Routing mode: global-runtime. Do not assume the runtime repository routing catalog or repository-operating-model.instructions.md applies to this workspace; build a minimal local context pack from the target repo.'
+    }
+
+    $closeoutMessage = if ($workspaceMode -eq 'workspace-adapter') {
+        'Closeout uses workspace conventions, including README and CHANGELOG updates when the local repo requires them.'
+    }
+    else {
+        'Closeout stays generic in global-runtime mode: always prepare a commit message and only update README or CHANGELOG when the target repo already uses them.'
+    }
+
+    return [pscustomobject]@{
+        WorkspaceMode          = $workspaceMode
+        HasWorkspaceAdapter    = ($workspaceMode -eq 'workspace-adapter')
+        HasWorkspaceRouteCatalog = $hasWorkspaceRouteCatalog
+        HasWorkspaceRoutePrompt = $hasWorkspaceRoutePrompt
+        HasPlanningWorkspace   = $hasPlanningWorkspace
+        HasSpecWorkspace       = $hasSpecWorkspace
+        PlanningActivePath     = $planningActivePath
+        PlanningCompletedPath  = $planningCompletedPath
+        SpecActivePath         = $specActivePath
+        SpecCompletedPath      = $specCompletedPath
+        InstructionLoadMessage = $instructionLoadMessage
+        RoutingMessage         = $routingMessage
+        CloseoutMessage        = $closeoutMessage
+    }
+}
+
+# Builds a workspace-aware EOF policy guidance string for startup and edit hooks.
+function Get-WorkspaceEofPolicyMessage {
+    param(
+        [string] $WorkspacePath
+    )
+
+    $insertFinalNewline = Get-WorkspaceInsertFinalNewlinePolicy -WorkspacePath $WorkspacePath
+    if ($insertFinalNewline -eq $false) {
+        return 'Workspace EOF policy: preserve exact file EOF, and do not append a terminal newline because .editorconfig uses insert_final_newline = false.'
+    }
+
+    if ($insertFinalNewline -eq $true) {
+        return 'Workspace EOF policy: preserve exact file EOF and keep a terminal newline where .editorconfig uses insert_final_newline = true.'
+    }
+
+    return 'Workspace EOF policy: preserve the current EOF state of touched files and do not change terminal newline behavior unless the workspace defines a narrower rule.'
+}
+
 # Returns true when the supplied path resolves inside the current workspace.
 function Test-WorkspaceManagedFilePath {
     param(
@@ -397,10 +481,8 @@ function New-SessionContextString {
     $workspacePath = [string] (Get-OptionalPayloadProperty -Payload $Payload -Name 'cwd')
     $workspaceName = Get-WorkspaceName -WorkspacePath $workspacePath
     $branchName = Get-GitBranchName -WorkspacePath $workspacePath
-    $hasWorkspaceAgents = Test-WorkspacePath -WorkspacePath $workspacePath -RelativePath '.github/AGENTS.md'
-    $hasWorkspaceInstructions = Test-WorkspacePath -WorkspacePath $workspacePath -RelativePath '.github/copilot-instructions.md'
-    $hasPlanningWorkspace = Test-WorkspacePath -WorkspacePath $workspacePath -RelativePath 'planning/README.md'
-    $hasSpecWorkspace = Test-WorkspacePath -WorkspacePath $workspacePath -RelativePath 'planning/specs/README.md'
+    $workspaceSurface = Get-SuperAgentWorkspaceSurface -WorkspacePath $workspacePath
+    $eofMessage = Get-WorkspaceEofPolicyMessage -WorkspacePath $workspacePath
 
     $segments = New-Object System.Collections.Generic.List[string]
     $segments.Add(('Workspace: {0}' -f $workspaceName)) | Out-Null
@@ -409,26 +491,17 @@ function New-SessionContextString {
         $segments.Add(('Branch: {0}' -f $branchName)) | Out-Null
     }
 
-    if ($hasWorkspaceAgents -and $hasWorkspaceInstructions) {
-        $segments.Add('Load workspace .github/AGENTS.md and .github/copilot-instructions.md first.') | Out-Null
-    }
-    else {
-        $segments.Add('Load runtime AGENTS.md and copilot-instructions.md from ~/.github first.') | Out-Null
-    }
-
     $segments.Add(('Selected startup controller: {0} ({1}) via {2}.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source)) | Out-Null
+    $segments.Add(('Workspace mode: {0}.' -f $workspaceSurface.WorkspaceMode)) | Out-Null
+    $segments.Add([string] $workspaceSurface.InstructionLoadMessage) | Out-Null
+    $segments.Add([string] $workspaceSurface.RoutingMessage) | Out-Null
+    $segments.Add(('Planning root: {0} -> {1}.' -f $workspaceSurface.PlanningActivePath, $workspaceSurface.PlanningCompletedPath)) | Out-Null
+    $segments.Add(('Spec root: {0} -> {1}.' -f $workspaceSurface.SpecActivePath, $workspaceSurface.SpecCompletedPath)) | Out-Null
+    $segments.Add([string] $workspaceSurface.CloseoutMessage) | Out-Null
     $segments.Add('Super Agent lifecycle is mandatory for change-bearing work: intake -> planning -> spec when needed -> specialist -> test -> review -> closeout -> planning update.') | Out-Null
-    $segments.Add('Repository EOF policy is strict: preserve exact file EOF, and do not append a terminal newline because .editorconfig uses insert_final_newline = false by default.') | Out-Null
-    $segments.Add('Use repository context first and official docs second.') | Out-Null
+    $segments.Add($eofMessage) | Out-Null
+    $segments.Add('Use workspace context first and official docs second.') | Out-Null
     $segments.Add('Keep non-versioned build outputs under .build/ and deployment/runtime publish outputs under .deployment/.') | Out-Null
-
-    if ($hasPlanningWorkspace) {
-        $segments.Add('Planning workspace detected: use planning/active and planning/completed for versioned plans.') | Out-Null
-    }
-
-    if ($hasSpecWorkspace) {
-        $segments.Add('Specification workspace detected: use planning/specs/active before planning for non-trivial design-bearing work.') | Out-Null
-    }
 
     return ($segments -join ' ')
 }
@@ -440,12 +513,15 @@ function New-SubagentContextString {
     )
 
     $selection = Resolve-SuperAgentSelection
+    $workspacePath = [string] (Get-OptionalPayloadProperty -Payload $Payload -Name 'cwd')
+    $workspaceSurface = Get-SuperAgentWorkspaceSurface -WorkspacePath $workspacePath
+    $eofMessage = Get-WorkspaceEofPolicyMessage -WorkspacePath $workspacePath
     $agentType = [string] (Get-OptionalPayloadProperty -Payload $Payload -Name 'agent_type')
     if ([string]::IsNullOrWhiteSpace($agentType)) {
         $agentType = 'subagent'
     }
 
-    return ('Startup controller: {0} ({1}) via {2}. Super Agent bootstrap is active. Current worker type: {3}. Preserve repository EOF policy exactly: do not append a terminal newline unless a file-specific rule explicitly requires it. Keep scope minimal, follow the repository routing result, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $agentType)
+    return ('Startup controller: {0} ({1}) via {2}. Workspace mode: {3}. {4} {5} Planning root: {6}. Spec root: {7}. {8} Super Agent bootstrap is active. Current worker type: {9}. {10} Keep scope minimal, follow the active routing decision for this workspace, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $workspaceSurface.WorkspaceMode, $workspaceSurface.InstructionLoadMessage, $workspaceSurface.RoutingMessage, $workspaceSurface.PlanningActivePath, $workspaceSurface.SpecActivePath, $workspaceSurface.CloseoutMessage, $agentType, $eofMessage)
 }
 
 # Builds the PreToolUse payload used to normalize repository edit tool inputs before disk writes occur.
@@ -463,7 +539,7 @@ function New-PreToolUseResult {
     }
 
     if (Test-EofSensitiveToolName -ToolName $toolName) {
-        $hookSpecificOutput.additionalContext = 'Repository EOF policy is strict for this workspace: preserve exact EOF state and do not append a terminal newline because .editorconfig uses insert_final_newline = false by default.'
+        $hookSpecificOutput.additionalContext = Get-WorkspaceEofPolicyMessage -WorkspacePath $workspacePath
 
         $updatedInput = Get-EofNormalizedToolInput -WorkspacePath $workspacePath -ToolName $toolName -ToolInput $toolInput
         if ($null -ne $updatedInput) {

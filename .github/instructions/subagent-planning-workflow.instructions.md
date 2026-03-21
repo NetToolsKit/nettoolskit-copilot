@@ -6,16 +6,16 @@ priority: high
 # Sub-Agent Planning Workflow
 
 ## Purpose
-- Standardize how the repository-owned Super Agent lifecycle plans, routes, executes, reviews, and closes out non-trivial work with a deterministic sub-agent chain.
-- Keep planning artifacts versioned under `planning/` as first-class operational assets without mixing them into stable product documentation.
+- Standardize how the Super Agent lifecycle plans, routes, executes, reviews, and closes out non-trivial work with a deterministic sub-agent chain.
+- Keep planning artifacts versioned under `planning/` when the workspace owns that surface, and fall back to `.build/super-agent/` when it does not.
 
 ## Planning Workspace Contract
-- Use `planning/README.md` as the planning workspace guide.
-- Active plans live in `planning/active/`.
-- Finished plans move to `planning/completed/` only when the work is genuinely complete.
-- Use `planning/specs/README.md` as the versioned specification guide for brainstorming/spec artifacts.
-- Active specs live in `planning/specs/active/`.
-- Finished specs move to `planning/specs/completed/` with the related workstream when applicable.
+- When the workspace provides `planning/README.md`, use it as the planning workspace guide.
+- Active plans live in `planning/active/` when the workspace provides a versioned planning surface; otherwise they live in `.build/super-agent/planning/active/`.
+- Finished plans move to `planning/completed/` or `.build/super-agent/planning/completed/` only when the work is genuinely complete.
+- When the workspace provides `planning/specs/README.md`, use it as the versioned specification guide for brainstorming/spec artifacts.
+- Active specs live in `planning/specs/active/` when the workspace provides a versioned spec surface; otherwise they live in `.build/super-agent/specs/active/`.
+- Finished specs move to `planning/specs/completed/` or `.build/super-agent/specs/completed/` with the related workstream when applicable.
 - Plan files should use stable slugged names such as `plan-<scope>.md`.
 - Reuse and update an existing active plan when the request continues the same workstream instead of creating a duplicate file.
 
@@ -33,10 +33,11 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
    - normalize the request and decide whether the task is change-bearing
    - ensure planning registration happens before execution
 2. `brainstorm-spec-architect` agent
-   - create or update a versioned spec in `planning/specs/active/` when non-trivial work needs design direction locked before planning
+   - create or update a spec in `planning/specs/active/` when the workspace owns that surface, otherwise in `.build/super-agent/specs/active/`
+   - do this when non-trivial work needs design direction locked before planning
    - capture decisions, alternatives, risks, acceptance criteria, and planning readiness
 3. `planner` agent
-   - create or update the active plan in `planning/active/`
+   - create or update the active plan in `planning/active/` when available, otherwise in `.build/super-agent/planning/active/`
    - consume the current active spec when one exists
    - define scope, ordered tasks, validations, risks, and closeout requirements
 4. `context-token-optimizer` agent
@@ -58,7 +59,8 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
    - update CHANGELOG with entry-ready content when the change belongs in version history
 10. planning update
    - update execution state, validation status, blockers, and closeout notes
-   - move the plan to `planning/completed/` and the spec to `planning/specs/completed/` only when materially complete
+   - move the plan to `planning/completed/` and the spec to `planning/specs/completed/` when the workspace owns those versioned folders
+   - otherwise move them to `.build/super-agent/planning/completed/` and `.build/super-agent/specs/completed/` only when materially complete
 
 ## Specialist Selection Rule
 - Use the smallest specialist capable of executing the task correctly.

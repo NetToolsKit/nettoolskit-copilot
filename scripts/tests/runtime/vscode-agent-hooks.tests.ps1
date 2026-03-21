@@ -60,6 +60,13 @@ function Assert-True {
     }
 }
 
+# Creates and returns a disposable temporary workspace path.
+function New-TemporaryWorkspacePath {
+    $path = Join-Path ([System.IO.Path]::GetTempPath()) ('super-agent-workspace-' + [guid]::NewGuid().ToString('N'))
+    [void] (New-Item -ItemType Directory -Path $path -Force)
+    return $path
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $sessionStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/session-start.ps1'
 $preToolUseScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/pre-tool-use.ps1'
@@ -126,7 +133,50 @@ Assert-True ([string] $preToolReplaceResult.hookSpecificOutput.updatedInput.newS
 Assert-True ([string] $preToolCreateResult.hookSpecificOutput.updatedInput.content -eq "line one`nline two") 'PreToolUse hook should strip a terminal newline from createFile.content.'
 Assert-True ($subagentResult.hookSpecificOutput.hookEventName -eq 'SubagentStart') 'SubagentStart hook should return SubagentStart payload.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'reviewer') 'SubagentStart hook should mention the spawned worker type.'
-Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'do not append a terminal newline') 'SubagentStart hook should mention the repository EOF policy.'
+Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SubagentStart hook should mention the repository EOF policy.'
+
+$globalWorkspacePath = New-TemporaryWorkspacePath
+
+try {
+    [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath 'src') -Force)
+    Set-Content -LiteralPath (Join-Path $globalWorkspacePath 'README.md') -Value '# temp workspace' -NoNewline
+
+    $globalSessionPayload = [ordered]@{
+        cwd = $globalWorkspacePath
+        source = 'new'
+        sessionId = 'session-global'
+        hookEventName = 'SessionStart'
+    }
+
+    $globalSubagentPayload = [ordered]@{
+        cwd = $globalWorkspacePath
+        sessionId = 'session-global'
+        hookEventName = 'SubagentStart'
+        agent_id = 'subagent-global'
+        agent_type = 'implementer'
+    }
+
+    $globalSessionOutput = ($globalSessionPayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $sessionStartScript)
+    $globalSubagentOutput = ($globalSubagentPayload | ConvertTo-Json -Depth 20 -Compress | & pwsh -NoLogo -NoProfile -File $subagentStartScript)
+
+    $globalSessionResult = $globalSessionOutput | ConvertFrom-Json -Depth 50
+    $globalSubagentResult = $globalSubagentOutput | ConvertFrom-Json -Depth 50
+
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'Workspace mode: global-runtime') 'SessionStart hook should advertise global-runtime mode for workspaces without a local adapter.'
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'load runtime AGENTS\.md and copilot-instructions\.md from ~/.github first') 'SessionStart hook should fall back to runtime instructions in global-runtime mode.'
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/planning/active') 'SessionStart hook should use the .build planning fallback in global-runtime mode.'
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/specs/active') 'SessionStart hook should use the .build spec fallback in global-runtime mode.'
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'Do not assume the runtime repository routing catalog') 'SessionStart hook should block runtime repo routing assumptions in global-runtime mode.'
+    Assert-True (-not ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false')) 'SessionStart hook should not claim insert_final_newline = false when the workspace has no .editorconfig rule.'
+    Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'Workspace mode: global-runtime') 'SubagentStart hook should propagate global-runtime mode.'
+    Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'implementer') 'SubagentStart hook should mention the worker type in global-runtime mode.'
+    Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/planning/active') 'SubagentStart hook should preserve the global planning fallback.'
+}
+finally {
+    if (Test-Path -LiteralPath $globalWorkspacePath) {
+        Remove-Item -LiteralPath $globalWorkspacePath -Recurse -Force
+    }
+}
 
 try {
     [Environment]::SetEnvironmentVariable('COPILOT_SUPER_AGENT_SKILL', 'using-super-agent', 'Process')

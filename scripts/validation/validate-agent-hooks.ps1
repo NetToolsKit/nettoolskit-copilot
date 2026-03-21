@@ -176,6 +176,22 @@ foreach ($requiredScript in @('common.ps1', 'session-start.ps1', 'pre-tool-use.p
     }
 }
 
+$commonScriptPath = Join-Path $scriptDirectory 'common.ps1'
+if (Test-Path -LiteralPath $commonScriptPath -PathType Leaf) {
+    $commonScriptContent = Get-Content -Raw -LiteralPath $commonScriptPath
+
+    foreach ($requiredMarker in @(
+        'workspace-adapter',
+        'global-runtime',
+        '.build/super-agent/planning/active',
+        '.build/super-agent/specs/active'
+    )) {
+        if ($commonScriptContent -notmatch [regex]::Escape($requiredMarker)) {
+            Add-ValidationMessage -Message ("Hook helper contract missing required marker '{0}' in .github/hooks/scripts/common.ps1." -f $requiredMarker) -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+        }
+    }
+}
+
 Write-Host ''
 Write-Host 'Agent hooks validation summary'
 Write-Host ("  Warnings: {0}" -f $warnings.Count)

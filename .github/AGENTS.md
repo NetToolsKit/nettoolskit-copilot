@@ -11,6 +11,19 @@
   1. AGENTS.md (this file)
   2. copilot-instructions.md
 
+# Super Agent Workspace Modes
+- `workspace-adapter` mode:
+  - active when the target workspace provides local `.github/AGENTS.md` and `.github/copilot-instructions.md`
+  - use workspace-owned instructions first
+  - use local static routing only when `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md` also exist
+  - use versioned planning under `planning/` when the workspace provides `planning/README.md` and `planning/specs/README.md`
+- `global-runtime` mode:
+  - active when the target workspace does not provide the local adapter files above
+  - use the mirrored runtime baseline under `%USERPROFILE%\\.github`
+  - do not assume the runtime repository routing catalog or `instructions/repository-operating-model.instructions.md` applies to the target workspace
+  - build a minimal local context pack manually from the target repo structure
+  - keep transient orchestration artifacts under `.build/super-agent/planning/` and `.build/super-agent/specs/`
+
 # Enterprise-First Default
 - All tasks must be designed and implemented with real-world enterprise standards by default.
 - Target the highest feasible quality level by default across planning, implementation, validation, and documentation.
@@ -24,11 +37,12 @@
 - Do not append a terminal newline during AI-generated edits or file creation unless a narrower file-specific rule explicitly requires it.
 - Do not leave trailing blank lines at EOF.
 
-Default workflow for all tasks: Static RAGs Routing (Route → Execute)
-- Route first (pick minimal context):
-  - `instruction-routing.catalog.yml` (single source of truth for routes)
-  - `prompts/route-instructions.prompt.md` (route-only prompt that outputs a JSON context pack)
+Default workflow for adapter-enabled repos: Static RAGs Routing (Route → Execute)
+- In `workspace-adapter` mode, route first (pick minimal context):
+  - `.github/instruction-routing.catalog.yml` (single source of truth for routes)
+  - `.github/prompts/route-instructions.prompt.md` (route-only prompt that outputs a JSON context pack)
 - Execute next: use ONLY the files returned by the Context Pack.
+- In `global-runtime` mode, skip the runtime repo routing catalog and assemble a minimal local context pack from the target workspace files you are actually touching.
 
 If context budget is tight, drop other files before these two.
 
@@ -40,7 +54,7 @@ If context budget is tight, drop other files before these two.
 
 # Instruction Entry Point (Decision Flow)
 ## Static RAGs Routing
-Baseline workflow for anything in this repo.
+Baseline workflow when the target workspace provides a local adapter and routing surface.
 
 1) Always load these first (in order)
 Use the **Mandatory Context Files** list above.
@@ -67,8 +81,8 @@ Use the **Mandatory Context Files** list above.
 
 ## Execution Flow for Development Tasks
 1. Super Agent intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing
-2. Planning Registration: create or update the active plan for any change-bearing task
-3. Spec Registration: create or update a versioned spec under `planning/specs/active/` when non-trivial work needs design direction before planning
+2. Planning Registration: create or update the active plan for any change-bearing task under `planning/active/` when the workspace owns a planning surface, otherwise under `.build/super-agent/planning/active/`
+3. Spec Registration: create or update a versioned spec under `planning/specs/active/` when the workspace owns a spec surface; otherwise use `.build/super-agent/specs/active/` when non-trivial work needs design direction before planning
 4. Specialist Routing: identify the smallest correct specialist set and whether safe delegation is possible
 5. Implementation: follow established templates and patterns, maintain standards
 6. Validation: execute relevant checks, verify compilation, run tests, and confirm architectural compliance
@@ -77,9 +91,9 @@ Use the **Mandatory Context Files** list above.
 9. Planning Update: update plan/spec status and move to completed only when materially finished
 
 ## Sub-Agent Planning Chain
-- For non-trivial work, use the repository planning pattern under `planning/`.
-- Create or update an active plan in `planning/active/` before implementation.
-- Create or update an active spec in `planning/specs/active/` before planning when the work is non-trivial and design direction must be locked first.
+- For non-trivial work, use the workspace-owned planning pattern under `planning/` when it exists.
+- Create or update an active plan in `planning/active/` before implementation when the workspace exposes a planning surface; otherwise use `.build/super-agent/planning/active/`.
+- Create or update an active spec in `planning/specs/active/` before planning when the workspace exposes a spec surface and the work is non-trivial; otherwise use `.build/super-agent/specs/active/`.
 - Preferred fixed lifecycle for non-trivial change-bearing work:
   1. `Super Agent` intake and request normalization
   2. planning registration
@@ -140,13 +154,12 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Provide rollback information if tasks need to be undone
 
 # Repository Operating Model
-- Repo-specific topology, commands, style, release process, and domain instruction map live in:
+- In `workspace-adapter` mode, repo-specific topology, commands, style, release process, and domain instruction map live in:
   - `copilot-instructions.md`
   - `instructions/repository-operating-model.instructions.md`
-- Mandatory repo-wide instructions are:
+- Universal Super Agent instructions that still apply in `global-runtime` mode are:
   - `instructions/super-agent.instructions.md`
   - `instructions/brainstorm-spec-workflow.instructions.md`
-  - `instructions/repository-operating-model.instructions.md`
   - `instructions/artifact-layout.instructions.md`
   - `instructions/authoritative-sources.instructions.md`
   - `instructions/subagent-planning-workflow.instructions.md`
@@ -155,6 +168,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `instructions/workflow-optimization.instructions.md`
   - `instructions/powershell-execution.instructions.md`
   - `instructions/feedback-changelog.instructions.md`
+- `instructions/repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
 - Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
 - Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
 - For `.github` authoring, include `instructions/copilot-instruction-creation.instructions.md`.

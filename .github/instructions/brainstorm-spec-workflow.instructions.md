@@ -4,12 +4,12 @@ priority: high
 ---
 # Brainstorming And Specification Workflow
 ## Purpose
-- Introduce a repository-owned brainstorming and specification step before implementation planning for non-trivial change-bearing work.
+- Introduce a brainstorming and specification step before implementation planning for non-trivial change-bearing work.
 - Keep design intent, alternatives, risks, and acceptance criteria versioned separately from execution plans.
 - Prevent implementation planning from becoming the first place where architectural decisions are made.
 
 ## When A Spec Is Mandatory
-Create or update a spec under `planning/specs/active/` when any of these are true:
+Create or update a spec under `planning/specs/active/` when the workspace provides that surface, otherwise under `.build/super-agent/specs/active/`, when any of these are true:
 - the task introduces or changes behavior, architecture, workflow, or feature scope
 - the task is non-trivial and planning is already required
 - the task spans multiple work items and design tradeoffs must be documented first
@@ -23,9 +23,9 @@ A separate spec is usually not required when all of these are true:
 - there is no meaningful design tradeoff to lock down before planning
 
 ## Spec Workspace Contract
-- Use `planning/specs/README.md` as the guide for versioned specs.
-- Active specs live in `planning/specs/active/`.
-- Completed specs move to `planning/specs/completed/` only when the associated workstream is materially finished.
+- Use `planning/specs/README.md` as the guide for versioned specs when the workspace provides it.
+- Active specs live in `planning/specs/active/` when the workspace provides a versioned spec surface; otherwise they live in `.build/super-agent/specs/active/`.
+- Completed specs move to `planning/specs/completed/` or `.build/super-agent/specs/completed/` only when the associated workstream is materially finished.
 - Reuse the same spec file for the same workstream instead of creating duplicates.
 - Use stable names such as `spec-<scope>.md`.
 
@@ -45,9 +45,9 @@ Each active spec should capture:
 ## Relationship To Planning
 - A spec does not replace the active plan.
 - The spec locks down intent and design direction.
-- The active plan under `planning/active/` translates the approved spec into ordered execution tasks, validation steps, routing, and closeout expectations.
+- The active plan under `planning/active/` or `.build/super-agent/planning/active/` translates the approved spec into ordered execution tasks, validation steps, routing, and closeout expectations.
 - For non-trivial work, planning should consume the current active spec before generating or updating the active plan.
 
 ## Closeout Rule
 - When a workstream is materially complete, move both the active plan and the active spec to their completed locations together when applicable.
-- Do not leave completed design artifacts stranded in `planning/specs/active/`.
+- Do not leave completed design artifacts stranded in `planning/specs/active/` or `.build/super-agent/specs/active/`.

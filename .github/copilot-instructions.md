@@ -15,6 +15,18 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 - Do not append a terminal newline when editing or creating files unless a narrower file-specific rule explicitly requires it.
 - Do not leave trailing blank lines at EOF.
 
+# Workspace Mode Detection
+- `workspace-adapter` mode:
+  - active when the target workspace provides local `.github/AGENTS.md` and `.github/copilot-instructions.md`
+  - use workspace-owned instructions first
+  - use local static routing only when `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md` also exist
+  - use `planning/` when the workspace provides `planning/README.md` and `planning/specs/README.md`
+- `global-runtime` mode:
+  - active when the target workspace lacks that local adapter
+  - use the mirrored runtime baseline under `%USERPROFILE%\\.github`
+  - do not assume the runtime repository routing catalog or `instructions/repository-operating-model.instructions.md` applies to the target workspace
+  - use `.build/super-agent/planning/` and `.build/super-agent/specs/` for transient orchestration artifacts when the workspace does not provide versioned planning folders
+
 # Language Policy
 - Chat/Conversation: pt-BR (Portuguese) - all responses to user in chat
 - Code/Commits/Docs: EN (English) - all technical content
@@ -37,21 +49,23 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 ## Hard rule
 - Always load `AGENTS.md` first, then this file.
-- If the workspace is available, do not proceed unless both files are loaded.
+- In `workspace-adapter` mode, load the workspace-owned copies first.
+- In `global-runtime` mode, load the runtime copies from `%USERPROFILE%\\.github`.
 
 # Static RAGs Routing
-Preferred default workflow: **Route → Execute** (always route first to generate a minimal Context Pack).
+Preferred default workflow in `workspace-adapter` mode: **Route → Execute** (always route first to generate a minimal Context Pack).
 
-Use static routing when you want consistent instruction selection without running any external service.
+Use static routing when you want consistent instruction selection without running any external service and the workspace actually provides a local routing surface.
 
 Flow (two-stage):
-1) Route: Use instruction-routing.catalog.yml + prompts/route-instructions.prompt.md to produce a Context Pack (mandatory + minimal domain files).
+1) Route: Use `.github/instruction-routing.catalog.yml` + `.github/prompts/route-instructions.prompt.md` to produce a Context Pack (mandatory + minimal domain files).
 2) Execute: Perform the actual task using ONLY the Context Pack files as context.
 
 Rules:
 - Always include mandatory context (AGENTS.md + this file) and mandatory instruction files.
 - Prefer 2–5 domain instruction files per task.
 - If ambiguous, ask up to 3 clarifying questions before executing.
+- In `global-runtime` mode, do not use the runtime repo routing catalog as if it belonged to the target workspace; assemble the minimal local context pack manually from the target repo files you are actually changing.
 
 ## Decision Quickstart (Instruction Hierarchy)
 
@@ -88,11 +102,12 @@ Follow this order of operations on every task:
   9. closeout
   10. planning update
 - Do not skip directly from request to implementation when files, runtime assets, or repository state are expected to change.
+- When the workspace does not provide `planning/`, use `.build/super-agent/planning/` and `.build/super-agent/specs/` as the fallback orchestration roots.
 
 ## How to use
 - Start with AGENTS.md for solution-specific details (stack, folders, commands).
 - Use this file for global rules, precedence, and always-applied policies.
-- Use `instructions/repository-operating-model.instructions.md` for repo topology, build/test/run commands, style, release, and domain instruction mapping.
+- Use `instructions/repository-operating-model.instructions.md` only when the target workspace provides a local repo adapter and repo-specific operating model.
 - Follow domain-specific files in instructions/*.md for technical details.
 
 # Authoritative Sources Policy
@@ -125,7 +140,6 @@ Follow this order of operations on every task:
 - AGENTS.md (agents and context policy)
 - instructions/super-agent.instructions.md
 - instructions/brainstorm-spec-workflow.instructions.md
-- instructions/repository-operating-model.instructions.md
 - instructions/artifact-layout.instructions.md
 - instructions/subagent-planning-workflow.instructions.md
 - instructions/worktree-isolation.instructions.md
@@ -135,14 +149,18 @@ Follow this order of operations on every task:
 - instructions/powershell-execution.instructions.md
 - instructions/feedback-changelog.instructions.md
 
+## Only for Workspace-Adapter Mode
+- instructions/repository-operating-model.instructions.md
+
 ## Only for .github Changes
 - instructions/copilot-instruction-creation.instructions.md
 
 # Repository and Domain Rules
-- Repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
+- In `workspace-adapter` mode, repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
+- In `global-runtime` mode, infer repo topology and local commands from the target workspace itself; do not import the `copilot-instructions` repo topology into an unrelated client repository.
 - Change-bearing work must start with `instructions/super-agent.instructions.md` before planning and implementation.
-- Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the versioned planning workspace under `planning/`.
-- When the work is non-trivial and design-bearing, create or update a versioned spec under `planning/specs/` before execution planning.
+- Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the workspace planning surface under `planning/` when it exists, otherwise the fallback under `.build/super-agent/`.
+- When the work is non-trivial and design-bearing, create or update a spec under `planning/specs/` when available, otherwise under `.build/super-agent/specs/` before execution planning.
 - Use domain instructions from that map according to the active route and file scope.
 - For generated build or deployment outputs, use `.build/` and `.deployment/` according to `instructions/artifact-layout.instructions.md`.
 

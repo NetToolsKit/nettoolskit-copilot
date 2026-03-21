@@ -58,6 +58,17 @@
   - `.vscode/settings.tamplate.jsonc`
   - `.github/instructions/vscode-workspace-efficiency.instructions.md`
   - `scripts/tests/runtime/vscode-global-settings-sync.tests.ps1`
+- Made the repository-owned `Super Agent` bootstrap universal across arbitrary workspaces by splitting startup behavior into `workspace-adapter` and `global-runtime` modes, falling back to `.build/super-agent/` when a target repo does not provide local `.github` and `planning/` surfaces:
+  - `.github/hooks/scripts/common.ps1`
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/instructions/super-agent.instructions.md`
+  - `.github/instructions/subagent-planning-workflow.instructions.md`
+  - `.github/instructions/brainstorm-spec-workflow.instructions.md`
+  - `.codex/skills/super-agent/SKILL.md`
+  - `.codex/skills/using-super-agent/SKILL.md`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+  - `scripts/validation/validate-agent-hooks.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:
