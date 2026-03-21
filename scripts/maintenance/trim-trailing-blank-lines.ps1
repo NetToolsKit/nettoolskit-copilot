@@ -13,11 +13,19 @@
     Otherwise it falls back to a filesystem scan starting from -Path (or the current directory)
     while skipping common build/tooling folders.
 
+    In `-GitChangedOnly` mode, discovery is limited to the current Git status set
+    so the script only trims files that Git currently reports as modified,
+    added, copied, renamed, or untracked.
+
 .PARAMETER Path
     Root folder to scan or a single file path. Defaults to the current directory when omitted.
 
 .PARAMETER CheckOnly
     Only checks and lists files that would be fixed. Returns exit code 1 when changes are required.
+
+.PARAMETER GitChangedOnly
+    Limits discovery to files currently reported by `git status`.
+    Deleted paths are ignored because they no longer exist on disk.
 
 .PARAMETER Verbose
     Prints detailed logs of processed files, decisions and errors.
@@ -38,15 +46,20 @@
     Targets a single file and trims trailing whitespace/blank lines in-place.
     pwsh -File scripts/maintenance/trim-trailing-blank-lines.ps1 -Path "scripts/README.md"
 
+.EXAMPLE
+    Lists and trims only the files that Git currently marks as changed.
+    pwsh -File scripts/maintenance/trim-trailing-blank-lines.ps1 -GitChangedOnly
+
 .NOTES
-    Version: 1.3
+    Version: 1.4
     Requirements: PowerShell 7+, Git CLI (optional, for faster discovery).
 #>
 
 param (
     [string] $Path,
     [switch] $Verbose,
-    [switch] $CheckOnly
+    [switch] $CheckOnly,
+    [switch] $GitChangedOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -121,6 +134,12 @@ function Get-RepoRoot ([string] $startPath) {
     }
 }
 
+# Returns true when the Git CLI is available for repository-aware discovery.
+function Test-GitAvailable {
+    $gitCommand = Get-Command git -ErrorAction SilentlyContinue
+    return ($null -ne $gitCommand)
+}
+
 # Checks whether a path is located under any configured excluded directory.
 function Test-IsUnderExcludedDir ([string] $fullPath, [string[]] $excludeDirs, [string] $root) {
     $norm = [IO.Path]::GetFullPath($fullPath).TrimEnd('\', '/')
@@ -161,6 +180,59 @@ function Test-IsProcessableFile ([string] $fullPath, [string[]] $excludedExtensi
     return ($excludedExtensions -notcontains $extension.ToLowerInvariant())
 }
 
+# Discovers only files that currently appear in Git status for the repository.
+function Get-GitChangedFiles {
+    param(
+        [string] $Root
+    )
+
+    if (-not (Test-GitAvailable)) {
+        throw 'GitChangedOnly requires git to be available on PATH.'
+    }
+
+    $statusOutput = git -C "$Root" status --porcelain=v1 -z --untracked-files=all 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        throw "GitChangedOnly requires a valid git repository root: $Root"
+    }
+
+    $entries = @($statusOutput -split "`0" | Where-Object { $_ -ne '' })
+    $selectedFiles = New-Object System.Collections.Generic.List[string]
+
+    for ($index = 0; $index -lt $entries.Count; $index++) {
+        $entry = [string] $entries[$index]
+        if ($entry.Length -lt 4) {
+            continue
+        }
+
+        $statusCode = $entry.Substring(0, 2)
+        $relativePath = $entry.Substring(3)
+
+        if ($statusCode[0] -eq 'D' -or $statusCode[1] -eq 'D') {
+            continue
+        }
+
+        if ($statusCode[0] -eq 'R' -or $statusCode[1] -eq 'R' -or $statusCode[0] -eq 'C' -or $statusCode[1] -eq 'C') {
+            if (($index + 1) -ge $entries.Count) {
+                continue
+            }
+
+            $index++
+            $relativePath = [string] $entries[$index]
+        }
+
+        if ([string]::IsNullOrWhiteSpace($relativePath)) {
+            continue
+        }
+
+        $fullPath = Join-Path -Path $Root -ChildPath $relativePath
+        if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
+            $selectedFiles.Add($fullPath) | Out-Null
+        }
+    }
+
+    return @($selectedFiles | Select-Object -Unique)
+}
+
 # -------------------------------
 # Configuration (extensions and exclusions)
 # -------------------------------
@@ -195,36 +267,58 @@ else {
 
     Write-ColorLine -Message ("Root: {0}" -f $root) -Color Blue
 
-    try {
-        # Git method: tracked + untracked (non-ignored)
-        $gitFiles = git -C "$root" ls-files -z --cached -o --exclude-standard 2>$null
-        if ($LASTEXITCODE -eq 0 -and $gitFiles) {
-            $files = ($gitFiles -split "`0") |
-                Where-Object { $_ -ne '' } |
-                ForEach-Object { Join-Path -Path $root -ChildPath $_ }
-
-            # Apply directory and extension exclusions to git list as well.
-            $files = $files |
+    if ($GitChangedOnly) {
+        try {
+            $files = Get-GitChangedFiles -Root $root |
                 Where-Object {
                     Test-IsProcessableFile -fullPath $_ -excludedExtensions $BinaryExtensions -excludeDirs $ExcludeDirs -root $root
                 }
+
+            Write-ColorLine -Message 'Git changed files mode: enabled' -Color Cyan
+        }
+        catch {
+            throw ("Failed to discover changed Git files: {0}" -f $_.Exception.Message)
         }
     }
-    catch {
-        Write-VerboseColor 'Git file discovery failed; falling back to filesystem scan.' 'Yellow'
-    }
+    else {
+        try {
+            # Git method: tracked + untracked (non-ignored)
+            $gitFiles = git -C "$root" ls-files -z --cached -o --exclude-standard 2>$null
+            if ($LASTEXITCODE -eq 0 -and $gitFiles) {
+                $files = ($gitFiles -split "`0") |
+                    Where-Object { $_ -ne '' } |
+                    ForEach-Object { Join-Path -Path $root -ChildPath $_ }
 
-    if (-not $files) {
-        # Filesystem method
-        $files = Get-ChildItem -Path $root -Recurse -File |
-            Where-Object {
-                Test-IsProcessableFile -fullPath $_.FullName -excludedExtensions $BinaryExtensions -excludeDirs $ExcludeDirs -root $root
-            } |
-            ForEach-Object { $_.FullName }
+                # Apply directory and extension exclusions to git list as well.
+                $files = $files |
+                    Where-Object {
+                        Test-IsProcessableFile -fullPath $_ -excludedExtensions $BinaryExtensions -excludeDirs $ExcludeDirs -root $root
+                    }
+            }
+        }
+        catch {
+            Write-VerboseColor 'Git file discovery failed; falling back to filesystem scan.' 'Yellow'
+        }
+
+        if (-not $files) {
+            # Filesystem method
+            $files = Get-ChildItem -Path $root -Recurse -File |
+                Where-Object {
+                    Test-IsProcessableFile -fullPath $_.FullName -excludedExtensions $BinaryExtensions -excludeDirs $ExcludeDirs -root $root
+                } |
+                ForEach-Object { $_.FullName }
+        }
     }
 }
 
 Write-ColorLine -Message ("Files found: {0}" -f $files.Count) -Color Yellow
+
+if ($GitChangedOnly -and $files.Count -gt 0) {
+    Write-ColorLine -Message 'Git changed files selected for trim:' -Color Cyan
+    foreach ($selectedFile in $files) {
+        Write-ColorLine -Message ("  - {0}" -f [IO.Path]::GetRelativePath($root, $selectedFile)) -Color DarkGray
+    }
+}
 
 # -------------------------------
 # Processing

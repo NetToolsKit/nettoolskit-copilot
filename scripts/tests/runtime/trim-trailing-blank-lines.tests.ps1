@@ -6,6 +6,7 @@
     Verifies that the maintenance script:
     - removes trailing blank lines for default text files without adding a final newline
     - applies the same no-final-newline policy to Rust files
+    - can limit trimming to files currently reported as changed by Git
 
 .PARAMETER RepoRoot
     Optional repository root. If omitted, auto-detects a root containing .github and .codex.
@@ -99,6 +100,17 @@ function Write-TextFile {
     [System.IO.File]::WriteAllText($Path, $Content, [System.Text.UTF8Encoding]::new($false))
 }
 
+# Initializes a deterministic temporary git repository for runtime tests.
+function Initialize-GitRepository {
+    param(
+        [string] $Path
+    )
+
+    & git -C $Path init | Out-Null
+    & git -C $Path config user.name 'Test User' | Out-Null
+    & git -C $Path config user.email 'test@example.com' | Out-Null
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $scriptPath = Join-Path $resolvedRepoRoot 'scripts/maintenance/trim-trailing-blank-lines.ps1'
 
@@ -119,6 +131,35 @@ try {
         $rustText = [System.IO.File]::ReadAllText($rustFile)
         Assert-Equal -Actual $rustText -Expected 'pub fn sample() {}' -Message 'Rust files must end on the last content character with no final newline.'
         Assert-True -Condition (-not $rustText.EndsWith("`n")) -Message 'Rust files must not keep a final newline under the repository policy.'
+
+        $gitRepoRoot = Join-Path $tempRoot 'git-repo'
+        [void] (New-Item -ItemType Directory -Path $gitRepoRoot -Force)
+        Initialize-GitRepository -Path $gitRepoRoot
+
+        $changedFile = Join-Path $gitRepoRoot 'changed.cs'
+        $cleanTrackedFile = Join-Path $gitRepoRoot 'clean.cs'
+        $untrackedChangedFile = Join-Path $gitRepoRoot 'new.md'
+
+        Write-TextFile -Path $changedFile -Content 'public sealed class Changed { }'
+        Write-TextFile -Path $cleanTrackedFile -Content "public sealed class Clean { }`n`n"
+        & git -C $gitRepoRoot add changed.cs clean.cs | Out-Null
+        & git -C $gitRepoRoot commit -m 'initial' | Out-Null
+
+        Write-TextFile -Path $changedFile -Content "public sealed class Changed { }`n`n"
+        Write-TextFile -Path $untrackedChangedFile -Content "# new file`n`n"
+
+        $gitModeOutput = & $scriptPath -Path $gitRepoRoot -GitChangedOnly
+        $changedText = [System.IO.File]::ReadAllText($changedFile)
+        $cleanTrackedText = [System.IO.File]::ReadAllText($cleanTrackedFile)
+        $untrackedChangedText = [System.IO.File]::ReadAllText($untrackedChangedFile)
+
+        Assert-Equal -Actual $changedText -Expected 'public sealed class Changed { }' -Message 'GitChangedOnly mode must trim modified tracked files.'
+        Assert-Equal -Actual $cleanTrackedText -Expected "public sealed class Clean { }`n`n" -Message 'GitChangedOnly mode must not touch clean tracked files that are absent from git status.'
+        Assert-Equal -Actual $untrackedChangedText -Expected '# new file' -Message 'GitChangedOnly mode must trim untracked files that appear in git status.'
+        Assert-True -Condition (($gitModeOutput -join "`n") -match 'Git changed files mode: enabled') -Message 'GitChangedOnly mode should announce that git-status-based discovery is active.'
+        Assert-True -Condition (($gitModeOutput -join "`n") -match 'changed\.cs') -Message 'GitChangedOnly mode should list modified tracked files selected for trim.'
+        Assert-True -Condition (($gitModeOutput -join "`n") -match 'new\.md') -Message 'GitChangedOnly mode should list untracked files selected for trim.'
+        Assert-True -Condition (-not (($gitModeOutput -join "`n") -match 'clean\.cs')) -Message 'GitChangedOnly mode should not list clean tracked files.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

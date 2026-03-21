@@ -84,6 +84,9 @@
   - `.github/hooks/scripts/subagent-start.ps1`
   - `scripts/validation/validate-agent-hooks.ps1`
   - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+- Extended the manual EOF cleanup helper with a Git-status-scoped mode so trimming can be limited to files currently reported as changed instead of scanning the whole repository:
+  - `scripts/maintenance/trim-trailing-blank-lines.ps1`
+  - `scripts/tests/runtime/trim-trailing-blank-lines.tests.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:
