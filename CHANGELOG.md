@@ -77,6 +77,13 @@
 - Aligned the picker-visible Super Agent skills with the runtime activation contract so `Using Super Agent` and `Super Agent` both declare the visible startup banner expectation:
   - `.codex/skills/using-super-agent/SKILL.md`
   - `.codex/skills/super-agent/SKILL.md`
+- Simplified the VS Code Super Agent runtime to match the lighter `superpowers` activation model by keeping SessionStart as the primary visible bootstrap point, preserving the one-time activation banner contract, and removing prompt-level reinforcement plus local hook telemetry:
+  - `.github/hooks/super-agent.bootstrap.json`
+  - `.github/hooks/scripts/common.ps1`
+  - `.github/hooks/scripts/session-start.ps1`
+  - `.github/hooks/scripts/subagent-start.ps1`
+  - `scripts/validation/validate-agent-hooks.ps1`
+  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
 
 ### Added
 - Added a versioned brainstorm/spec layer before execution planning:
