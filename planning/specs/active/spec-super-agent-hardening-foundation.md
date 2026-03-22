@@ -23,6 +23,8 @@ The implementation will extend the current orchestration runner instead of intro
 
 The first implementation slice will land these capabilities as repository-owned runtime artifacts and shared helpers. Sandbox isolation and full A2A interoperability are intentionally deferred because they require broader runtime boundaries than the current PowerShell-first orchestration foundation safely provides in one slice.
 
+Token and cost optimization are also intentionally deferred as a follow-up slice. This foundation may add the routing contract and traceability needed for later optimization, but it does not need to spend the current execution window on aggressive cheaper-model routing, broad context-compression heuristics, or eval-driven cost tuning.
+
 ## Key Decisions
 
 1. Keep `scripts/runtime/run-agent-pipeline.ps1` as the authoritative runner and extend it through shared helpers instead of adding a second orchestration engine.
@@ -31,6 +33,7 @@ The first implementation slice will land these capabilities as repository-owned 
 4. Keep the first policy engine deterministic and local: rule evaluation is based on stage metadata, planned commands, approval state, changed paths, and dispatch records already available inside the runner.
 5. Start model routing as a repository-owned catalog that selects an effective model per stage/agent while preserving current defaults.
 6. Add resume and replay as explicit entrypoints instead of hiding retry semantics inside hooks.
+7. Keep true token-economy improvements as explicit follow-up work after the hardening foundation is stable and weekly usage limits recover.
 
 ## Alternatives Considered
 
@@ -48,6 +51,7 @@ The first implementation slice will land these capabilities as repository-owned 
 - The runtime must stay PowerShell-first and compatible with the current Codex/Copilot setup.
 - Shared helpers should reduce duplication rather than create another layer of ad-hoc script-local functions.
 - Resume must only continue from completed safe stages; it must not guess partial stage recovery.
+- The first slice should prefer stable defaults over premature cheaper-model routing so cost optimization can be introduced later with eval evidence instead of guesswork.
 
 ## Risks
 
@@ -55,6 +59,7 @@ The first implementation slice will land these capabilities as repository-owned 
 - Policy rules that are too coarse can block normal work and create workflow friction.
 - Model routing can drift from agent contracts if validations are not tightened.
 - Resume logic can become unsafe if checkpoints are not explicit about stage success boundaries.
+- Early token-saving changes can reduce answer quality if cheaper models are applied without eval-backed routing rules.
 
 ## Acceptance Criteria
 
@@ -65,6 +70,15 @@ The first implementation slice will land these capabilities as repository-owned 
 5. A resume entrypoint can continue a run from the last safe completed stage.
 6. A replay/eval entrypoint can summarize run artifacts and execute versioned eval fixtures.
 7. Runtime schemas, templates, tests, and docs are updated and validation remains green.
+
+## Deferred Follow-Up Scope
+
+This spec intentionally leaves the following work for a later focused spec:
+
+1. stage-by-stage cheaper-model routing for low-risk operations
+2. tighter minimal-context pack generation to reduce unnecessary token use
+3. token/cost scorecards that compare routing policies using the new eval and trace artifacts
+4. approval-ready routing changes only after the eval harness proves no meaningful quality regression
 
 ## Planning Readiness Statement
 

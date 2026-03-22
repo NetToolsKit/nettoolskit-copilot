@@ -11,6 +11,15 @@ Generated: 2026-03-22
 
 Implement the shared runtime foundation for the next tier of Super Agent hardening: contextual policy enforcement, structured trace/replay, checkpoint-aware resume, eval execution, and model routing. Keep the current orchestration runner authoritative and avoid duplicated helper logic.
 
+## Explicit Deferrals
+
+- Defer true token/cost optimization to a later slice after weekly limits recover.
+- The current slice may introduce the routing contract and artifact plumbing, but it must not expand into aggressive model downgrades, per-stage cost tuning, or broader prompt/context compression work in this execution window.
+- Future follow-up work should explicitly cover:
+  - cheaper-model routing for low-risk stages such as validate, replay, closeout, and parsing-heavy checks
+  - stricter minimal-context packing to avoid loading unnecessary repository surfaces
+  - eval-backed token/cost comparison before changing the default routing policy
+
 ## Normalized Request Summary
 
 The user wants the repository to adopt the highest-value capabilities seen in strong public agent systems and start implementation immediately. The requested improvements must improve performance, quality, and security while remaining repo-owned and PowerShell-first.
@@ -107,6 +116,8 @@ The user wants the repository to adopt the highest-value capabilities seen in st
   - Fallback: only resume from the first pending stage after the last successful checkpointed stage.
 - Risk: artifacts proliferate without operational value.
   - Fallback: keep trace/policy/checkpoint outputs summarized and deterministic, and reuse a shared helper for all serialization.
+- Risk: this slice grows into model-cost optimization work and burns remaining usage budget.
+  - Fallback: keep token/cost optimization explicitly documented as deferred and limit this slice to the hardening foundation only.
 
 ## Recommended Specialists
 
