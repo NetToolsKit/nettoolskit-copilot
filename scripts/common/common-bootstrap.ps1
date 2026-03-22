@@ -43,6 +43,8 @@ function Resolve-CommonHelperFileName {
         'repository-paths' { return 'repository-paths.ps1' }
         'git-hook-eof-settings' { return 'git-hook-eof-settings.ps1' }
         'runtime-paths' { return 'runtime-paths.ps1' }
+        'runtime-execution-context' { return 'runtime-execution-context.ps1' }
+        'runtime-operation-support' { return 'runtime-operation-support.ps1' }
         'runtime-install-profiles' { return 'runtime-install-profiles.ps1' }
         'validation-logging' { return 'validation-logging.ps1' }
         default {

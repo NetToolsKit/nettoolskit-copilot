@@ -136,7 +136,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'git-hook-eof-settings')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'git-hook-eof-settings', 'runtime-execution-context')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 $script:LogFilePath = $null
@@ -251,9 +251,21 @@ function Resolve-InstallGitHookEofScope {
     return (Resolve-GitHookEofScope -ResolvedRepoRoot $ResolvedRepoRoot -ScopeName 'local-repo')
 }
 
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile
-$effectiveRuntimeLocations = Get-EffectiveRuntimeLocations
+$runtimeContext = Resolve-RuntimeExecutionContext `
+    -RequestedRepoRoot $RepoRoot `
+    -ProfileName $RuntimeProfile `
+    -RequestedTargetGithubPath $TargetGithubPath `
+    -RequestedTargetCodexPath $TargetCodexPath `
+    -RequestedTargetAgentsSkillsPath $TargetAgentsSkillsPath `
+    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath
+
+$resolvedRepoRoot = $runtimeContext.ResolvedRepoRoot
+$resolvedRuntimeProfile = $runtimeContext.RuntimeProfile
+$effectiveRuntimeLocations = $runtimeContext.EffectiveRuntimeLocations
+$TargetGithubPath = $runtimeContext.Targets.GithubRuntimeRoot
+$TargetCodexPath = $runtimeContext.Targets.CodexRuntimeRoot
+$TargetAgentsSkillsPath = $runtimeContext.Targets.AgentsSkillsRoot
+$TargetCopilotSkillsPath = $runtimeContext.Targets.CopilotSkillsRoot
 $requestedGitHookEofSelection = (-not [string]::IsNullOrWhiteSpace($GitHookEofMode)) -or (-not [string]::IsNullOrWhiteSpace($GitHookEofScope))
 $currentEffectiveGitHookEofMode = if ($requestedGitHookEofSelection) {
     Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
@@ -283,22 +295,7 @@ if ($SkipGitHooks -and ($null -ne $resolvedGitHookEofMode -or $null -ne $resolve
 }
 
 if ($resolvedRuntimeProfile.InstallBootstrap) {
-    $bootstrapArguments = @{
-        RepoRoot = $resolvedRepoRoot
-        RuntimeProfile = $resolvedRuntimeProfile.Name
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-        $bootstrapArguments.TargetGithubPath = $TargetGithubPath
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-        $bootstrapArguments.TargetCodexPath = $TargetCodexPath
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-        $bootstrapArguments.TargetAgentsSkillsPath = $TargetAgentsSkillsPath
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-        $bootstrapArguments.TargetCopilotSkillsPath = $TargetCopilotSkillsPath
-    }
+    $bootstrapArguments = New-RuntimeTargetArgumentMap -Context $runtimeContext -IncludeRepoRoot -IncludeRuntimeProfile
     if ($Mirror) {
         $bootstrapArguments.Mirror = $true
     }
@@ -352,30 +349,15 @@ if ($shouldConfigureLocalGitHooks) {
 if ($resolvedRuntimeProfile.InstallGlobalGitAliases -and -not $SkipGitHooks) {
     $globalAliasArguments = @{
         RepoRoot = $resolvedRepoRoot
-        TargetCodexPath = if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) { $TargetCodexPath } else { Resolve-CodexRuntimePath }
+        TargetCodexPath = $TargetCodexPath
     }
     $steps.Add((New-InstallStep -Name 'Configure global Git aliases' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-global-git-aliases.ps1') -Arguments $globalAliasArguments)) | Out-Null
 }
 
 if ($resolvedRuntimeProfile.InstallHealthcheck -and -not $SkipHealthcheck) {
-    $healthcheckArguments = @{
-        RepoRoot = $resolvedRepoRoot
-        RuntimeProfile = $resolvedRuntimeProfile.Name
-        ValidationProfile = $ValidationProfile
-        WarningOnly = $true
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-        $healthcheckArguments.TargetGithubPath = $TargetGithubPath
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-        $healthcheckArguments.TargetCodexPath = $TargetCodexPath
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-        $healthcheckArguments.TargetAgentsSkillsPath = $TargetAgentsSkillsPath
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-        $healthcheckArguments.TargetCopilotSkillsPath = $TargetCopilotSkillsPath
-    }
+    $healthcheckArguments = New-RuntimeTargetArgumentMap -Context $runtimeContext -IncludeRepoRoot -IncludeRuntimeProfile
+    $healthcheckArguments.ValidationProfile = $ValidationProfile
+    $healthcheckArguments.WarningOnly = $true
 
     $steps.Add((New-InstallStep -Name 'Run repository healthcheck' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/healthcheck.ps1') -Arguments $healthcheckArguments)) | Out-Null
 }

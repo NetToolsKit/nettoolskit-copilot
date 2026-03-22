@@ -108,137 +108,37 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'runtime-execution-context', 'runtime-operation-support')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ExecutionIssueTracking
-# Runs a script check and captures status and execution metrics.
-function Invoke-ScriptCheck {
-    param(
-        [string] $Name,
-        [string] $ScriptPath,
-        [hashtable] $Arguments,
-        [bool] $TreatFailureAsWarning
-    )
-
-    $startedAt = Get-Date
-    $status = 'failed'
-    $exitCode = 1
-    $errorMessage = $null
-
-    if (-not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
-        $errorMessage = "Script not found: $ScriptPath"
-        if ($TreatFailureAsWarning) {
-            $status = 'warning'
-            $exitCode = 0
-            Write-ExecutionLog -Level 'WARN' -Code 'HEALTHCHECK_SCRIPT_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
-        }
-        else {
-            Write-ExecutionLog -Level 'ERROR' -Code 'HEALTHCHECK_SCRIPT_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
-        }
-    }
-    else {
-        Write-ExecutionLog -Level 'INFO' -Message ("Starting check: {0}" -f $Name)
-        try {
-            & $ScriptPath @Arguments | Out-Host
-            $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-
-            if ($exitCode -eq 0) {
-                $status = 'passed'
-                Write-ExecutionLog -Level 'OK' -Message ("Check passed: {0}" -f $Name)
-            }
-            elseif ($TreatFailureAsWarning) {
-                $status = 'warning'
-                $exitCode = 0
-                Write-ExecutionLog -Level 'WARN' -Code 'HEALTHCHECK_CHECK_WARNING' -Message ("Check warning: {0} (non-zero exit converted to warning)" -f $Name)
-            }
-            else {
-                $status = 'failed'
-                Write-ExecutionLog -Level 'ERROR' -Code 'HEALTHCHECK_CHECK_FAILED' -Message ("Check failed: {0} (exit code {1})" -f $Name, $exitCode)
-            }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            if ($TreatFailureAsWarning) {
-                $status = 'warning'
-                $exitCode = 0
-                Write-ExecutionLog -Level 'WARN' -Code 'HEALTHCHECK_CHECK_EXCEPTION_WARNING' -Message ("Check warning: {0} (exception converted to warning: {1})" -f $Name, $errorMessage)
-            }
-            else {
-                $status = 'failed'
-                $exitCode = 1
-                Write-ExecutionLog -Level 'ERROR' -Code 'HEALTHCHECK_CHECK_EXCEPTION' -Message ("Check exception: {0} :: {1}" -f $Name, $errorMessage)
-            }
-        }
-    }
-
-    $finishedAt = Get-Date
-    $durationMs = [int] ($finishedAt - $startedAt).TotalMilliseconds
-    $relativeScriptPath = [System.IO.Path]::GetRelativePath((Get-Location).Path, $ScriptPath)
-    $argumentList = @()
-    foreach ($entry in ($Arguments.GetEnumerator() | Sort-Object Name)) {
-        $argumentList += ("-{0}={1}" -f $entry.Key, $entry.Value)
-    }
-
-    return [pscustomobject]@{
-        name = $Name
-        script = $relativeScriptPath
-        arguments = $argumentList
-        status = $status
-        exitCode = $exitCode
-        durationMs = $durationMs
-        startedAt = $startedAt.ToString('o')
-        finishedAt = $finishedAt.ToString('o')
-        error = $errorMessage
-    }
-}
 
 # -------------------------------
 # Main execution
 # -------------------------------
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$runtimeContext = Resolve-RuntimeExecutionContext `
+    -RequestedRepoRoot $RepoRoot `
+    -ProfileName $RuntimeProfile `
+    -FallbackProfileName 'all' `
+    -RequestedTargetGithubPath $TargetGithubPath `
+    -RequestedTargetCodexPath $TargetCodexPath `
+    -RequestedTargetAgentsSkillsPath $TargetAgentsSkillsPath `
+    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath
+
+$resolvedRepoRoot = $runtimeContext.ResolvedRepoRoot
+$resolvedRuntimeProfile = $runtimeContext.RuntimeProfile
+$resolvedRuntimeTargets = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot
+$TargetGithubPath = $resolvedRuntimeTargets.TargetGithubPath
+$TargetCodexPath = $resolvedRuntimeTargets.TargetCodexPath
+$TargetAgentsSkillsPath = $resolvedRuntimeTargets.TargetAgentsSkillsPath
+$TargetCopilotSkillsPath = $resolvedRuntimeTargets.TargetCopilotSkillsPath
+
 Set-Location -Path $resolvedRepoRoot
-$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
 
-if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $TargetGithubPath = Resolve-GithubRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Resolve-CodexRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
-}
-
-$resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
-$resolvedTargetGithubPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetGithubPath
-$resolvedTargetCodexPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetCodexPath
-$resolvedTargetAgentsSkillsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetAgentsSkillsPath
-$resolvedTargetCopilotSkillsPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $TargetCopilotSkillsPath
-
-$resolvedLogPath = if ([string]::IsNullOrWhiteSpace($LogPath)) {
-    $timestampToken = Get-Date -Format 'yyyyMMdd-HHmmss'
-    Resolve-RepoPath -Root $resolvedRepoRoot -Path (".temp/logs/healthcheck-{0}.log" -f $timestampToken)
-}
-else {
-    Resolve-RepoPath -Root $resolvedRepoRoot -Path $LogPath
-}
-
-$outputParent = Get-ParentDirectoryPath -Path $resolvedOutputPath
-if (-not [string]::IsNullOrWhiteSpace($outputParent)) {
-    New-Item -ItemType Directory -Path $outputParent -Force | Out-Null
-}
-
-$logParent = Get-ParentDirectoryPath -Path $resolvedLogPath
-if (-not [string]::IsNullOrWhiteSpace($logParent)) {
-    New-Item -ItemType Directory -Path $logParent -Force | Out-Null
-}
-
-Set-Content -LiteralPath $resolvedLogPath -Value ("# healthcheck log`n# generatedAt={0}" -f (Get-Date).ToString('o'))
+$operationArtifacts = Initialize-OperationArtifacts -ResolvedRepoRoot $resolvedRepoRoot -PrimaryOutputPath $OutputPath -LogPath $LogPath -DefaultLogFilePrefix 'healthcheck' -LogName 'healthcheck'
+$resolvedOutputPath = $operationArtifacts.PrimaryOutputPath
+$resolvedLogPath = $operationArtifacts.LogPath
 $script:LogFilePath = $resolvedLogPath
 
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
@@ -255,19 +155,12 @@ $validateAllScript = Join-Path $resolvedRepoRoot 'scripts/validation/validate-al
 $doctorScript = Join-Path $resolvedRepoRoot 'scripts/runtime/doctor.ps1'
 
 if ($SyncRuntime) {
-    $bootstrapArgs = @{
-        RepoRoot = $resolvedRepoRoot
-        TargetGithubPath = $resolvedTargetGithubPath
-        TargetCodexPath = $resolvedTargetCodexPath
-        TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
-        TargetCopilotSkillsPath = $resolvedTargetCopilotSkillsPath
-        RuntimeProfile = $resolvedRuntimeProfile.Name
-    }
+    $bootstrapArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
     if ($Mirror) {
         $bootstrapArgs.Mirror = $true
     }
 
-    $bootstrapCheck = @(Invoke-ScriptCheck -Name 'runtime-bootstrap' -ScriptPath $bootstrapScript -Arguments $bootstrapArgs -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
+    $bootstrapCheck = @(Invoke-ManagedRuntimeCheck -Name 'runtime-bootstrap' -ScriptPath $bootstrapScript -Arguments $bootstrapArgs -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
     if ($null -ne $bootstrapCheck) {
         $checks.Add($bootstrapCheck) | Out-Null
     }
@@ -278,25 +171,18 @@ $validateAllArgs = @{
     ValidationProfile = $ValidationProfile
     WarningOnly = $WarningOnly
 }
-$validateAllCheck = @(Invoke-ScriptCheck -Name 'validate-all' -ScriptPath $validateAllScript -Arguments $validateAllArgs -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
+$validateAllCheck = @(Invoke-ManagedRuntimeCheck -Name 'validate-all' -ScriptPath $validateAllScript -Arguments $validateAllArgs -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
 if ($null -ne $validateAllCheck) {
     $checks.Add($validateAllCheck) | Out-Null
 }
 
-$doctorArgs = @{
-    RepoRoot = $resolvedRepoRoot
-    TargetGithubPath = $resolvedTargetGithubPath
-    TargetCodexPath = $resolvedTargetCodexPath
-    TargetAgentsSkillsPath = $resolvedTargetAgentsSkillsPath
-    TargetCopilotSkillsPath = $resolvedTargetCopilotSkillsPath
-    RuntimeProfile = $resolvedRuntimeProfile.Name
-}
+$doctorArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
 if ($StrictExtras) {
     $doctorArgs.StrictExtras = $true
 }
 
 $doctorAsWarning = [bool] ($WarningOnly -or $TreatRuntimeDriftAsWarning)
-$doctorCheck = @(Invoke-ScriptCheck -Name 'runtime-doctor' -ScriptPath $doctorScript -Arguments $doctorArgs -TreatFailureAsWarning:$doctorAsWarning) | Select-Object -Last 1
+$doctorCheck = @(Invoke-ManagedRuntimeCheck -Name 'runtime-doctor' -ScriptPath $doctorScript -Arguments $doctorArgs -TreatFailureAsWarning:$doctorAsWarning) | Select-Object -Last 1
 if ($null -ne $doctorCheck) {
     $checks.Add($doctorCheck) | Out-Null
 }

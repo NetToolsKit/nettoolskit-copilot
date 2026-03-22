@@ -113,6 +113,10 @@ Use one of these explicit profiles:
 | `codex` | Only the Codex runtime surface: `agentsSkillsRoot` plus `codexRuntimeRoot/shared-*`. |
 | `all` | Everything above plus global VS Code settings/snippets, local Git hooks, global Git aliases, and installer healthcheck. |
 
+- `install.ps1` stays non-intrusive by default because `RuntimeProfile` defaults to `none`
+- automatic runtime sync is not installed globally by default; it only runs in repositories that explicitly opt into the local `.githooks` runtime
+- `pull` / `post-merge` does not run runtime bootstrap sync; it only runs validation and cleanup
+
 Runtime locations are also centralized now:
 
 - versioned defaults live in `.github/governance/runtime-location-catalog.json`

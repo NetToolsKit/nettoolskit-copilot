@@ -5,7 +5,6 @@
 .DESCRIPTION
     Provides reusable helpers for validation-oriented scripts:
     - warning/failure list initialization
-    - verbose logging
     - standardized warning/failure output
     - compact validation summary rendering
 
@@ -13,8 +12,8 @@
     - `$script:IsVerboseEnabled`
     - `$script:IsWarningOnly` when warning-only behavior applies
 
-    Consumers should also dot-source `repository-paths.ps1` when shared root
-    and path resolution helpers are required.
+    Consumers must also dot-source `repository-paths.ps1` first so the shared
+    verbose helpers remain centralized in one place.
 
 .PARAMETER None
     This helper script does not require input parameters.
@@ -33,6 +32,10 @@
 param()
 
 $ErrorActionPreference = 'Stop'
+
+if (-not (Get-Command -Name Write-VerboseLog -ErrorAction SilentlyContinue)) {
+    throw 'validation-logging.ps1 requires repository-paths.ps1 to be loaded first.'
+}
 
 # Initializes validation warning/failure state for the current script scope.
 function Initialize-ValidationState {
@@ -67,31 +70,6 @@ function Write-ValidationOutput {
     }
 
     Write-Host $Message
-}
-
-# Writes verbose diagnostics when verbose mode is enabled.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    $verboseVariable = Get-Variable -Name IsVerboseEnabled -Scope Script -ErrorAction SilentlyContinue
-    if ($null -ne $verboseVariable -and [bool] $verboseVariable.Value) {
-        Write-ValidationOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
-
-# Writes color-tagged verbose diagnostics when verbose mode is enabled.
-function Write-VerboseColor {
-    param(
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    $verboseVariable = Get-Variable -Name IsVerboseEnabled -Scope Script -ErrorAction SilentlyContinue
-    if ($null -ne $verboseVariable -and [bool] $verboseVariable.Value) {
-        Write-ValidationOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message)
-    }
 }
 
 # Registers a validation warning and prints a standardized warning message.

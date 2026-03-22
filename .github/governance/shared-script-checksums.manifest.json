@@ -9,7 +9,7 @@
   "entries": [
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "d813c39e21eea63feca72b8cddff2efa168dba582287d2920fc739bd704e07c9"
+      "sha256": "a73bd0c5af5c7e35f8b29c32f874977ea229cb52e88d2b0d3984140332a89680"
     },
     {
       "path": "scripts/common/console-style.ps1",
@@ -17,23 +17,31 @@
     },
     {
       "path": "scripts/common/git-hook-eof-settings.ps1",
-      "sha256": "9f254073cc0fad77f161d300729124307c075f8a9eef45ccbb560d0f509506da"
+      "sha256": "e9fa7d3de17dc55ffd7477a9eb516db3fe5acc6e4134cbdaa24b17289176d368"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
-      "sha256": "61d2c7d59fe48f46e8ea1a9cab9d0d61b7c7f5028af5278fa502e83202e0d2d3"
+      "sha256": "6e34948fc0924d75380f611e8fa9f154d5208d4b8617d2612f3fa8299fcb3943"
+    },
+    {
+      "path": "scripts/common/runtime-execution-context.ps1",
+      "sha256": "54e01e966da1592b5633ce4fab25cafdc773aa932ced8345675bdfec4a5f0174"
     },
     {
       "path": "scripts/common/runtime-install-profiles.ps1",
-      "sha256": "797049632cd3a5edc6b950616db5dbef75558dc1f42f833906f25668a3c55596"
+      "sha256": "ca1ad5e811351bfa401a47229f526c4d99180d6b8138cdf50df05c1ecc13d138"
+    },
+    {
+      "path": "scripts/common/runtime-operation-support.ps1",
+      "sha256": "a2dfdc064f3cd8ba550f119962fab41b816916123282518f0838f8e11a6d9c1a"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "285fa9efdb34f44a7fa8010069fdfae660f635377d27f6d439d54608521d4d46"
+      "sha256": "d2ca931e515327ad478487fd7b897774d5f3eb337cbbf64ea69096680c71df46"
     },
     {
       "path": "scripts/common/validation-logging.ps1",
-      "sha256": "7ca273b943afc91f0f836b4e9914f7f105f20ddc3f94e54d8c56fecdba3ee90c"
+      "sha256": "3a8a1f19d92475ee53874cd3c1f22ab1503b63dcc1895c0536c9a9a0f03c266b"
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",

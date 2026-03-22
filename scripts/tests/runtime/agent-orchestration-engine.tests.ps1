@@ -78,23 +78,24 @@ function Write-JsonFile {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+$repoSmokeRoot = Join-Path $resolvedRepoRoot '.temp/agent-orchestration-engine-smoke'
+$repoSmokeReadmePath = Join-Path $repoSmokeRoot 'README.md'
+$repoSmokeChangelogPath = Join-Path $repoSmokeRoot 'CHANGELOG.md'
 $createdCompletedPlanPath = $null
 $createdCompletedSpecPath = $null
-$originalPlanningReadmeBytes = $null
-$originalChangelogBytes = $null
 $originalApprovalDeniedCompletedPlanBytes = $null
 $originalApprovalDeniedCompletedSpecBytes = $null
 $activePlanLastWriteTimeUtc = $null
 $activeSpecLastWriteTimeUtc = $null
+$testExitCode = 1
 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
-    $planningReadmePath = Join-Path $resolvedRepoRoot 'planning/README.md'
-    $changelogPath = Join-Path $resolvedRepoRoot 'CHANGELOG.md'
+    New-Item -ItemType Directory -Path $repoSmokeRoot -Force | Out-Null
+    Set-Content -LiteralPath $repoSmokeReadmePath -Value '# Runtime Smoke README' -Encoding UTF8 -NoNewline
+    Set-Content -LiteralPath $repoSmokeChangelogPath -Value '## [0.0.0] - 2026-03-20' -Encoding UTF8 -NoNewline
     $approvalDeniedCompletedPlanPath = Join-Path $resolvedRepoRoot 'planning/completed/plan-approval-denied-test-implement-enterprise-orchestration-support.md'
     $approvalDeniedCompletedSpecPath = Join-Path $resolvedRepoRoot 'planning/specs/completed/spec-approval-denied-test-implement-enterprise-orchestration-support.md'
-    $originalPlanningReadmeBytes = [System.IO.File]::ReadAllBytes($planningReadmePath)
-    $originalChangelogBytes = [System.IO.File]::ReadAllBytes($changelogPath)
     if (Test-Path -LiteralPath $approvalDeniedCompletedPlanPath -PathType Leaf) {
         $originalApprovalDeniedCompletedPlanBytes = [System.IO.File]::ReadAllBytes($approvalDeniedCompletedPlanPath)
     }
@@ -266,12 +267,19 @@ end {
         }
     }
     elseif ($allInput -match '# Super Agent Intake Stage Contract') {
+        $normalizedRequest = 'Implement enterprise orchestration support.'
+        $workstreamSlug = 'implement-enterprise-orchestration-support'
+        if ($allInput -match 'Implement closeout smoke orchestration support\.') {
+            $normalizedRequest = 'Implement closeout smoke orchestration support.'
+            $workstreamSlug = 'implement-closeout-smoke-orchestration-support'
+        }
+
         $payload = [ordered]@{
             stage = 'super-agent-intake'
-            normalizedRequest = 'Implement enterprise orchestration support.'
+            normalizedRequest = $normalizedRequest
             changeBearing = $true
             planningRequired = $true
-            workstreamSlug = 'implement-enterprise-orchestration-support'
+            workstreamSlug = $workstreamSlug
             explicitWorkItems = @('Normalize request', 'Plan execution')
             constraints = @('Preserve repository policy and validation gates.')
             risks = @('Skipping planning would violate the lifecycle.')
@@ -329,17 +337,17 @@ end {
             readmeActions = @('README already aligned for mock flow.')
             readmeUpdates = @(
                 [ordered]@{
-                    path = 'planning/README.md'
-                    summary = 'Refresh planning README from the closeout stage.'
-                    content = "# Planning Workspace`n`nCloseout automation updated this README during the orchestration smoke test."
+                    path = '.temp/agent-orchestration-engine-smoke/README.md'
+                    summary = 'Refresh the temporary README from the closeout stage.'
+                    content = "# Runtime Smoke README`n`nCloseout automation updated this README during the orchestration smoke test."
                 }
             )
             commitMessage = 'feat: close orchestration smoke test'
             changelogSummary = 'Close the orchestration smoke test plan.'
             changelogUpdate = [ordered]@{
                 apply = $true
-                path = 'CHANGELOG.md'
-                summary = 'Record closeout documentation automation coverage.'
+                path = '.temp/agent-orchestration-engine-smoke/CHANGELOG.md'
+                summary = 'Record closeout documentation automation coverage in the temporary changelog.'
                 entry = "## [9.9.9] - 2026-03-20`n`n### Changed`n- Added smoke-test coverage for closeout-driven README and CHANGELOG updates."
             }
             followUps = @()
@@ -361,7 +369,7 @@ end {
     New-Item -ItemType Directory -Path (Join-Path $runDirectory 'stages') -Force | Out-Null
 
     $requestPath = Join-Path $runDirectory 'artifacts/request.md'
-    Set-Content -LiteralPath $requestPath -Value 'Implement enterprise orchestration support.' -Encoding UTF8 -NoNewline
+    Set-Content -LiteralPath $requestPath -Value 'Implement closeout smoke orchestration support.' -Encoding UTF8 -NoNewline
 
     $intakeOutputManifestPath = Join-Path $runDirectory 'stages/intake-output.json'
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/intake-stage.ps1') `
@@ -466,6 +474,11 @@ end {
         -DispatchCommand $fakeCodexPath `
         -ExecutionBackend 'codex-exec' | Out-Null
     Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Repeated spec stage should succeed with fake Codex.'
+    $specManifest = Get-Content -Raw -LiteralPath $specOutputManifestPath | ConvertFrom-Json -Depth 100
+    $specArtifacts = @{}
+    foreach ($artifact in @($specManifest.artifacts)) {
+        $specArtifacts[[string] $artifact.name] = Join-Path $resolvedRepoRoot ([string] $artifact.path)
+    }
     Assert-Equal -Actual ((Get-Item -LiteralPath $specArtifacts['active-spec']).LastWriteTimeUtc) -Expected $activeSpecLastWriteTimeUtc -Message 'Repeated spec stage should not rewrite the versioned spec when content is unchanged.'
 
     & (Join-Path $resolvedRepoRoot 'scripts/orchestration/stages/plan-stage.ps1') `
@@ -483,6 +496,11 @@ end {
         -DispatchCommand $fakeCodexPath `
         -ExecutionBackend 'codex-exec' | Out-Null
     Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Repeated plan stage should succeed with fake Codex.'
+    $planManifest = Get-Content -Raw -LiteralPath $planOutputManifestPath | ConvertFrom-Json -Depth 100
+    $planArtifacts = @{}
+    foreach ($artifact in @($planManifest.artifacts)) {
+        $planArtifacts[[string] $artifact.name] = Join-Path $resolvedRepoRoot ([string] $artifact.path)
+    }
     Assert-Equal -Actual ((Get-Item -LiteralPath $planArtifacts['active-plan']).LastWriteTimeUtc) -Expected $activePlanLastWriteTimeUtc -Message 'Repeated plan stage should not rewrite the versioned plan when content is unchanged.'
 
     $routeInputManifestPath = Join-Path $runDirectory 'stages/route-input.json'
@@ -675,9 +693,9 @@ end {
     }
     Assert-Equal -Actual $closeoutReport.status -Expected 'ready-for-commit' -Message 'Closeout stage should be commit-ready in fake flow.'
     Assert-True ([bool] $readmeUpdatesReport.updated) 'Closeout stage should report applied README updates in fake flow.'
-    Assert-True ((Get-Content -Raw -LiteralPath $planningReadmePath) -match 'Closeout automation updated this README') 'Closeout stage should rewrite the planning README in fake flow.'
-    Assert-True ((Get-Content -Raw -LiteralPath $changelogPath).StartsWith("## [9.9.9] - 2026-03-20", [System.StringComparison]::Ordinal)) 'Closeout stage should prepend the changelog entry in fake flow.'
-    Assert-True (([bool] $changelogUpdateReport.applied) -or ((Get-Content -Raw -LiteralPath $changelogPath).StartsWith("## [9.9.9] - 2026-03-20", [System.StringComparison]::Ordinal))) 'Closeout stage should either apply the changelog update or keep the idempotent changelog state already at the expected entry.'
+    Assert-True ((Get-Content -Raw -LiteralPath $repoSmokeReadmePath) -match 'Closeout automation updated this README') 'Closeout stage should rewrite the temporary README in fake flow.'
+    Assert-True ((Get-Content -Raw -LiteralPath $repoSmokeChangelogPath).StartsWith("## [9.9.9] - 2026-03-20", [System.StringComparison]::Ordinal)) 'Closeout stage should prepend the temporary changelog entry in fake flow.'
+    Assert-True (([bool] $changelogUpdateReport.applied) -or ((Get-Content -Raw -LiteralPath $repoSmokeChangelogPath).StartsWith("## [9.9.9] - 2026-03-20", [System.StringComparison]::Ordinal))) 'Closeout stage should either apply the changelog update or keep the idempotent temporary changelog state already at the expected entry.'
     Assert-True (-not (Test-Path -LiteralPath $planArtifacts['active-plan'] -PathType Leaf)) 'Closeout stage should move the active plan out of planning/active.'
     Assert-True (-not (Test-Path -LiteralPath $specArtifacts['active-spec'] -PathType Leaf)) 'Closeout stage should move the active spec out of planning/specs/active.'
     Assert-Equal -Actual ((Get-Item -LiteralPath $createdCompletedPlanPath).LastWriteTimeUtc) -Expected $activePlanLastWriteTimeUtc -Message 'Closeout stage should preserve the plan LastWriteTime when moving to completed.'
@@ -725,7 +743,7 @@ end {
     Assert-Equal -Actual @($approvalRecord.approvals).Count -Expected 2 -Message 'Approval record should be persisted as an artifact.'
 
     Write-Host '[OK] agent orchestration engine tests passed.'
-    exit 0
+    $testExitCode = 0
 }
 catch {
     $message = $_.Exception.Message
@@ -736,15 +754,9 @@ catch {
     else {
         Write-Host ("[FAIL] agent orchestration engine tests failed: {0}`n{1}" -f $message, $trace)
     }
-    exit 1
+    $testExitCode = 1
 }
 finally {
-    if ($null -ne $originalPlanningReadmeBytes) {
-        [System.IO.File]::WriteAllBytes((Join-Path $resolvedRepoRoot 'planning/README.md'), $originalPlanningReadmeBytes)
-    }
-    if ($null -ne $originalChangelogBytes) {
-        [System.IO.File]::WriteAllBytes((Join-Path $resolvedRepoRoot 'CHANGELOG.md'), $originalChangelogBytes)
-    }
     if ($null -ne $originalApprovalDeniedCompletedPlanBytes) {
         [System.IO.File]::WriteAllBytes((Join-Path $resolvedRepoRoot 'planning/completed/plan-approval-denied-test-implement-enterprise-orchestration-support.md'), $originalApprovalDeniedCompletedPlanBytes)
     }
@@ -769,4 +781,9 @@ finally {
     if (Test-Path -LiteralPath $tempRoot) {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
+    if (Test-Path -LiteralPath $repoSmokeRoot) {
+        Remove-Item -LiteralPath $repoSmokeRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
+
+exit $testExitCode

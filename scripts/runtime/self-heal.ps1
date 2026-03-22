@@ -104,114 +104,37 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'runtime-execution-context', 'runtime-operation-support')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ExecutionIssueTracking
 
 # -------------------------------
-# Helpers
-# -------------------------------
-# Runs a script step and captures status, timing, and error metadata.
-function Invoke-ScriptStep {
-    param(
-        [string] $Name,
-        [string] $ScriptPath,
-        [hashtable] $Arguments
-    )
-
-    $startedAt = Get-Date
-    $status = 'failed'
-    $exitCode = 1
-    $errorMessage = $null
-
-    if (-not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
-        $errorMessage = "Script not found: $ScriptPath"
-        Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_SCRIPT_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
-    }
-    else {
-        Write-ExecutionLog -Level 'INFO' -Message ("Starting step: {0}" -f $Name)
-
-        try {
-            & $ScriptPath @Arguments
-            $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-            if ($exitCode -eq 0) {
-                $status = 'passed'
-                Write-ExecutionLog -Level 'OK' -Message ("Step passed: {0}" -f $Name)
-            }
-            else {
-                Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_STEP_FAILED' -Message ("Step failed: {0} (exit code {1})" -f $Name, $exitCode)
-            }
-        }
-        catch {
-            $exitCode = 1
-            $errorMessage = $_.Exception.Message
-            Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_STEP_EXCEPTION' -Message ("Step exception: {0} :: {1}" -f $Name, $errorMessage)
-        }
-    }
-
-    $finishedAt = Get-Date
-    $durationMs = [int] ($finishedAt - $startedAt).TotalMilliseconds
-    $relativeScriptPath = [System.IO.Path]::GetRelativePath((Get-Location).Path, $ScriptPath)
-    $argumentList = @()
-    foreach ($entry in ($Arguments.GetEnumerator() | Sort-Object Name)) {
-        $argumentList += ("-{0}={1}" -f $entry.Key, $entry.Value)
-    }
-
-    return [pscustomobject]@{
-        name = $Name
-        script = $relativeScriptPath
-        arguments = $argumentList
-        status = $status
-        exitCode = $exitCode
-        durationMs = $durationMs
-        startedAt = $startedAt.ToString('o')
-        finishedAt = $finishedAt.ToString('o')
-        error = $errorMessage
-    }
-}
-
-# -------------------------------
 # Main execution
 # -------------------------------
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$runtimeContext = Resolve-RuntimeExecutionContext `
+    -RequestedRepoRoot $RepoRoot `
+    -ProfileName $RuntimeProfile `
+    -FallbackProfileName 'all' `
+    -RequestedTargetGithubPath $TargetGithubPath `
+    -RequestedTargetCodexPath $TargetCodexPath `
+    -RequestedTargetAgentsSkillsPath $TargetAgentsSkillsPath `
+    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath
+
+$resolvedRepoRoot = $runtimeContext.ResolvedRepoRoot
+$resolvedRuntimeProfile = $runtimeContext.RuntimeProfile
+$resolvedRuntimeTargets = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot
+$TargetGithubPath = $resolvedRuntimeTargets.TargetGithubPath
+$TargetCodexPath = $resolvedRuntimeTargets.TargetCodexPath
+$TargetAgentsSkillsPath = $resolvedRuntimeTargets.TargetAgentsSkillsPath
+$TargetCopilotSkillsPath = $resolvedRuntimeTargets.TargetCopilotSkillsPath
+
 Set-Location -Path $resolvedRepoRoot
-$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
 
-if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $TargetGithubPath = Resolve-GithubRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Resolve-CodexRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
-}
-
-$resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
-
-$resolvedLogPath = if ([string]::IsNullOrWhiteSpace($LogPath)) {
-    $timestampToken = Get-Date -Format 'yyyyMMdd-HHmmss'
-    Resolve-RepoPath -Root $resolvedRepoRoot -Path (".temp/logs/self-heal-{0}.log" -f $timestampToken)
-}
-else {
-    Resolve-RepoPath -Root $resolvedRepoRoot -Path $LogPath
-}
-
-$outputParent = Get-ParentDirectoryPath -Path $resolvedOutputPath
-if (-not [string]::IsNullOrWhiteSpace($outputParent)) {
-    New-Item -ItemType Directory -Path $outputParent -Force | Out-Null
-}
-
-$logParent = Get-ParentDirectoryPath -Path $resolvedLogPath
-if (-not [string]::IsNullOrWhiteSpace($logParent)) {
-    New-Item -ItemType Directory -Path $logParent -Force | Out-Null
-}
-Set-Content -LiteralPath $resolvedLogPath -Value ("# self-heal log`n# generatedAt={0}" -f (Get-Date).ToString('o'))
+$operationArtifacts = Initialize-OperationArtifacts -ResolvedRepoRoot $resolvedRepoRoot -PrimaryOutputPath $OutputPath -LogPath $LogPath -DefaultLogFilePrefix 'self-heal' -LogName 'self-heal'
+$resolvedOutputPath = $operationArtifacts.PrimaryOutputPath
+$resolvedLogPath = $operationArtifacts.LogPath
 $script:LogFilePath = $resolvedLogPath
 
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
@@ -225,14 +148,7 @@ $bootstrapScript = Join-Path $resolvedRepoRoot 'scripts/runtime/bootstrap.ps1'
 $applyVscodeTemplatesScript = Join-Path $resolvedRepoRoot 'scripts/runtime/apply-vscode-templates.ps1'
 $healthcheckScript = Join-Path $resolvedRepoRoot 'scripts/runtime/healthcheck.ps1'
 
-$bootstrapArgs = @{
-    RepoRoot = $resolvedRepoRoot
-    TargetGithubPath = $TargetGithubPath
-    TargetCodexPath = $TargetCodexPath
-    TargetAgentsSkillsPath = $TargetAgentsSkillsPath
-    TargetCopilotSkillsPath = $TargetCopilotSkillsPath
-    RuntimeProfile = $resolvedRuntimeProfile.Name
-}
+$bootstrapArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
 if ($Mirror) {
     $bootstrapArgs.Mirror = $true
 }
@@ -243,13 +159,13 @@ if ($BackupConfig) {
     $bootstrapArgs.BackupConfig = $true
 }
 
-$bootstrapStep = @(Invoke-ScriptStep -Name 'runtime-bootstrap' -ScriptPath $bootstrapScript -Arguments $bootstrapArgs) | Select-Object -Last 1
+$bootstrapStep = @(Invoke-ManagedRuntimeStep -Name 'runtime-bootstrap' -ScriptPath $bootstrapScript -Arguments $bootstrapArgs) | Select-Object -Last 1
 if ($null -ne $bootstrapStep) {
     $steps.Add($bootstrapStep) | Out-Null
 }
 
 if ($ApplyVscodeTemplates) {
-    $vscodeStep = @(Invoke-ScriptStep -Name 'apply-vscode-templates' -ScriptPath $applyVscodeTemplatesScript -Arguments @{ RepoRoot = $resolvedRepoRoot; Force = $true }) | Select-Object -Last 1
+    $vscodeStep = @(Invoke-ManagedRuntimeStep -Name 'apply-vscode-templates' -ScriptPath $applyVscodeTemplatesScript -Arguments @{ RepoRoot = $resolvedRepoRoot; Force = $true }) | Select-Object -Last 1
     if ($null -ne $vscodeStep) {
         $steps.Add($vscodeStep) | Out-Null
     }
@@ -260,21 +176,14 @@ else {
 
 $healthcheckReportPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path '.temp/healthcheck-report.json'
 $healthcheckLogPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path '.temp/logs/healthcheck-from-self-heal.log'
-$healthcheckArgs = @{
-    RepoRoot = $resolvedRepoRoot
-    TargetGithubPath = $TargetGithubPath
-    TargetCodexPath = $TargetCodexPath
-    TargetAgentsSkillsPath = $TargetAgentsSkillsPath
-    TargetCopilotSkillsPath = $TargetCopilotSkillsPath
-    RuntimeProfile = $resolvedRuntimeProfile.Name
-    OutputPath = $healthcheckReportPath
-    LogPath = $healthcheckLogPath
-}
+$healthcheckArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
+$healthcheckArgs.OutputPath = $healthcheckReportPath
+$healthcheckArgs.LogPath = $healthcheckLogPath
 if ($StrictExtras) {
     $healthcheckArgs.StrictExtras = $true
 }
 
-$healthcheckStep = @(Invoke-ScriptStep -Name 'healthcheck' -ScriptPath $healthcheckScript -Arguments $healthcheckArgs) | Select-Object -Last 1
+$healthcheckStep = @(Invoke-ManagedRuntimeStep -Name 'healthcheck' -ScriptPath $healthcheckScript -Arguments $healthcheckArgs) | Select-Object -Last 1
 if ($null -ne $healthcheckStep) {
     $steps.Add($healthcheckStep) | Out-Null
 }

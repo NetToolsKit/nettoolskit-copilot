@@ -96,7 +96,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'runtime-execution-context')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 $script:RobocopyCommand = Get-Command -Name 'robocopy' -ErrorAction SilentlyContinue
@@ -322,31 +322,31 @@ function Invoke-McpConfigApply {
 # -------------------------------
 # Main execution
 # -------------------------------
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$runtimeContext = Resolve-RuntimeExecutionContext `
+    -RequestedRepoRoot $RepoRoot `
+    -ProfileName $RuntimeProfile `
+    -FallbackProfileName 'all' `
+    -RequestedTargetGithubPath $TargetGithubPath `
+    -RequestedTargetCodexPath $TargetCodexPath `
+    -RequestedTargetAgentsSkillsPath $TargetAgentsSkillsPath `
+    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath
+
+$resolvedRepoRoot = $runtimeContext.ResolvedRepoRoot
+$resolvedRuntimeProfile = $runtimeContext.RuntimeProfile
+$effectiveRuntimeLocations = $runtimeContext.EffectiveRuntimeLocations
+$TargetGithubPath = $runtimeContext.Targets.GithubRuntimeRoot
+$TargetCodexPath = $runtimeContext.Targets.CodexRuntimeRoot
+$TargetAgentsSkillsPath = $runtimeContext.Targets.AgentsSkillsRoot
+$TargetCopilotSkillsPath = $runtimeContext.Targets.CopilotSkillsRoot
+$sourceGithub = $runtimeContext.Sources.GithubRoot
+$sourceCodex = $runtimeContext.Sources.CodexRoot
+$sourceScripts = $runtimeContext.Sources.ScriptsRoot
+$sourceCodexScripts = $runtimeContext.Sources.CodexScriptsRoot
+$sourceCommonScripts = $runtimeContext.Sources.CommonScriptsRoot
+$sourceSecurityScripts = $runtimeContext.Sources.SecurityScriptsRoot
+$sourceMaintenanceScripts = $runtimeContext.Sources.MaintenanceScriptsRoot
+
 Set-Location -Path $resolvedRepoRoot
-$resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
-$effectiveRuntimeLocations = Get-EffectiveRuntimeLocations
-
-if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $TargetGithubPath = Resolve-GithubRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Resolve-CodexRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
-}
-
-$sourceGithub = Join-Path $resolvedRepoRoot '.github'
-$sourceCodex = Join-Path $resolvedRepoRoot '.codex'
-$sourceScripts = Join-Path $resolvedRepoRoot 'scripts'
-$sourceCodexScripts = Join-Path $sourceCodex 'scripts'
-$sourceCommonScripts = Join-Path $sourceScripts 'common'
-$sourceSecurityScripts = Join-Path $sourceScripts 'security'
-$sourceMaintenanceScripts = Join-Path $sourceScripts 'maintenance'
 
 Assert-PathPresent -Path $sourceGithub -Label 'source .github folder'
 Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
@@ -359,27 +359,27 @@ if ($ApplyMcpConfig -and -not $resolvedRuntimeProfile.EnableCodexRuntime) {
 if ($resolvedRuntimeProfile.EnableGithubRuntime) {
     Invoke-DirectorySync -Source $sourceGithub -Destination $TargetGithubPath -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceScripts -Destination (Join-Path $TargetGithubPath 'scripts') -MirrorMode:$Mirror
-    Invoke-CopilotSkillSync -SourceRoot (Join-Path $sourceGithub 'skills') -DestinationRoot $TargetCopilotSkillsPath -MirrorMode:$Mirror
+    Invoke-CopilotSkillSync -SourceRoot $runtimeContext.Sources.GithubSkillsRoot -DestinationRoot $TargetCopilotSkillsPath -MirrorMode:$Mirror
 }
 else {
     Write-VerboseColor ("Skipping GitHub runtime projection for profile '{0}'." -f $resolvedRuntimeProfile.Name) 'Yellow'
 }
 
 if ($resolvedRuntimeProfile.EnableCodexRuntime) {
-    Invoke-AgentsSkillSync -SourceRoot (Join-Path $sourceCodex 'skills') -DestinationRoot $TargetAgentsSkillsPath -MirrorMode:$Mirror
-    Remove-ManagedCodexSkillDuplicates -ManagedSourceRoot (Join-Path $sourceCodex 'skills') -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills')
-    Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
+    Invoke-AgentsSkillSync -SourceRoot $runtimeContext.Sources.CodexSkillsRoot -DestinationRoot $TargetAgentsSkillsPath -MirrorMode:$Mirror
+    Remove-ManagedCodexSkillDuplicates -ManagedSourceRoot $runtimeContext.Sources.CodexSkillsRoot -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills')
+    Invoke-DirectorySync -Source $runtimeContext.Sources.CodexMcpRoot -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceCommonScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'common') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceSecurityScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'security') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceMaintenanceScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'maintenance') -MirrorMode:$Mirror
-    Invoke-DirectorySync -Source (Join-Path $sourceCodex 'orchestration') -Destination (Join-Path $TargetCodexPath 'shared-orchestration') -MirrorMode:$Mirror
+    Invoke-DirectorySync -Source $runtimeContext.Sources.CodexOrchestrationRoot -Destination (Join-Path $TargetCodexPath 'shared-orchestration') -MirrorMode:$Mirror
 }
 else {
     Write-VerboseColor ("Skipping Codex runtime projection for profile '{0}'." -f $resolvedRuntimeProfile.Name) 'Yellow'
 }
 
-$sharedReadme = Join-Path $sourceCodex 'README.md'
+$sharedReadme = Join-Path $runtimeContext.Sources.CodexRoot 'README.md'
 if ($resolvedRuntimeProfile.EnableCodexRuntime -and (Test-Path -LiteralPath $sharedReadme)) {
     New-Item -ItemType Directory -Path $TargetCodexPath -Force | Out-Null
     Copy-Item -LiteralPath $sharedReadme -Destination (Join-Path $TargetCodexPath 'README.shared.md') -Force

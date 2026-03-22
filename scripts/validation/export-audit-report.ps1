@@ -99,7 +99,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'runtime-execution-context', 'runtime-operation-support')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
@@ -139,48 +139,27 @@ function Get-GitState {
 # -------------------------------
 # Main execution
 # -------------------------------
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$runtimeContext = Resolve-RuntimeExecutionContext `
+    -RequestedRepoRoot $RepoRoot `
+    -FallbackProfileName 'all' `
+    -RequestedTargetGithubPath $TargetGithubPath `
+    -RequestedTargetCodexPath $TargetCodexPath `
+    -RequestedTargetAgentsSkillsPath $TargetAgentsSkillsPath `
+    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath
+
+$resolvedRepoRoot = $runtimeContext.ResolvedRepoRoot
+$resolvedRuntimeTargets = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot
+$TargetGithubPath = $resolvedRuntimeTargets.TargetGithubPath
+$TargetCodexPath = $resolvedRuntimeTargets.TargetCodexPath
+$TargetAgentsSkillsPath = $resolvedRuntimeTargets.TargetAgentsSkillsPath
+$TargetCopilotSkillsPath = $resolvedRuntimeTargets.TargetCopilotSkillsPath
+
 Set-Location -Path $resolvedRepoRoot
 
-if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $TargetGithubPath = Resolve-GithubRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Resolve-CodexRuntimePath
-}
-if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
-    $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
-}
-if ([string]::IsNullOrWhiteSpace($TargetCopilotSkillsPath)) {
-    $TargetCopilotSkillsPath = Resolve-CopilotSkillsPath
-}
-
-$resolvedOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $OutputPath
-$resolvedHealthcheckOutputPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $HealthcheckOutputPath
-
-$resolvedLogPath = if ([string]::IsNullOrWhiteSpace($LogPath)) {
-    $timestampToken = Get-Date -Format 'yyyyMMdd-HHmmss'
-    Resolve-RepoPath -Root $resolvedRepoRoot -Path (".temp/logs/audit-report-{0}.log" -f $timestampToken)
-}
-else {
-    Resolve-RepoPath -Root $resolvedRepoRoot -Path $LogPath
-}
-
-$outputParent = Get-ParentDirectoryPath -Path $resolvedOutputPath
-if (-not [string]::IsNullOrWhiteSpace($outputParent)) {
-    New-Item -ItemType Directory -Path $outputParent -Force | Out-Null
-}
-
-$healthcheckOutputParent = Get-ParentDirectoryPath -Path $resolvedHealthcheckOutputPath
-if (-not [string]::IsNullOrWhiteSpace($healthcheckOutputParent)) {
-    New-Item -ItemType Directory -Path $healthcheckOutputParent -Force | Out-Null
-}
-
-$logParent = Get-ParentDirectoryPath -Path $resolvedLogPath
-if (-not [string]::IsNullOrWhiteSpace($logParent)) {
-    New-Item -ItemType Directory -Path $logParent -Force | Out-Null
-}
-Set-Content -LiteralPath $resolvedLogPath -Value ("# audit-report log`n# generatedAt={0}" -f (Get-Date).ToString('o'))
+$operationArtifacts = Initialize-OperationArtifacts -ResolvedRepoRoot $resolvedRepoRoot -PrimaryOutputPath $OutputPath -AdditionalOutputPaths @($HealthcheckOutputPath) -LogPath $LogPath -DefaultLogFilePrefix 'audit-report' -LogName 'audit-report'
+$resolvedOutputPath = $operationArtifacts.PrimaryOutputPath
+$resolvedHealthcheckOutputPath = $operationArtifacts.AdditionalOutputPaths[0]
+$resolvedLogPath = $operationArtifacts.LogPath
 $script:LogFilePath = $resolvedLogPath
 
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
@@ -189,18 +168,12 @@ Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
 
 $healthcheckScript = Join-Path $resolvedRepoRoot 'scripts/runtime/healthcheck.ps1'
 $healthcheckLogPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path '.temp/logs/healthcheck-from-audit.log'
-$healthcheckArgs = @{
-    RepoRoot = $resolvedRepoRoot
-    TargetGithubPath = $TargetGithubPath
-    TargetCodexPath = $TargetCodexPath
-    TargetAgentsSkillsPath = $TargetAgentsSkillsPath
-    TargetCopilotSkillsPath = $TargetCopilotSkillsPath
-    OutputPath = $resolvedHealthcheckOutputPath
-    LogPath = $healthcheckLogPath
-    ValidationProfile = $ValidationProfile
-    WarningOnly = $WarningOnly
-    TreatRuntimeDriftAsWarning = $TreatRuntimeDriftAsWarning
-}
+$healthcheckArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
+$healthcheckArgs.OutputPath = $resolvedHealthcheckOutputPath
+$healthcheckArgs.LogPath = $healthcheckLogPath
+$healthcheckArgs.ValidationProfile = $ValidationProfile
+$healthcheckArgs.WarningOnly = $WarningOnly
+$healthcheckArgs.TreatRuntimeDriftAsWarning = $TreatRuntimeDriftAsWarning
 if ($SyncRuntime) {
     $healthcheckArgs.SyncRuntime = $true
 }
@@ -211,16 +184,9 @@ if ($StrictExtras) {
     $healthcheckArgs.StrictExtras = $true
 }
 
-$healthcheckExitCode = 1
-try {
-    Write-ExecutionLog -Level 'INFO' -Message 'Executing runtime healthcheck for audit baseline.'
-    & $healthcheckScript @healthcheckArgs
-    $healthcheckExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-}
-catch {
-    $healthcheckExitCode = 1
-    Write-ExecutionLog -Level 'ERROR' -Message ("Healthcheck execution exception: {0}" -f $_.Exception.Message)
-}
+Write-ExecutionLog -Level 'INFO' -Message 'Executing runtime healthcheck for audit baseline.'
+$healthcheckExecution = @(Invoke-ManagedRuntimeCheck -Name 'runtime-healthcheck' -ScriptPath $healthcheckScript -Arguments $healthcheckArgs -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
+$healthcheckExitCode = if ($null -eq $healthcheckExecution) { 1 } else { [int] $healthcheckExecution.exitCode }
 
 $healthcheckReport = $null
 if (Test-Path -LiteralPath $resolvedHealthcheckOutputPath -PathType Leaf) {

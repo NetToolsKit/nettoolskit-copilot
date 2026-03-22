@@ -3,6 +3,31 @@
 ### Changed
 - Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
 
+## [9.9.9] - 2026-03-20
+
+### Changed
+- Centralized the shared runtime execution contract so install/bootstrap/doctor/healthcheck/self-heal/audit export now resolve repo root, runtime profile, effective runtime locations, canonical targets, and source layout from one shared helper instead of duplicating target/profile resolution logic:
+  - `scripts/common/runtime-execution-context.ps1`
+  - `scripts/common/common-bootstrap.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/validation/export-audit-report.ps1`
+  - `README.md`
+  - `scripts/README.md`
+- Added a second shared runtime operation helper so healthcheck/self-heal/audit export now reuse one contract for resolved output/log artifact initialization and managed `check`/`step` child-script invocation, while validation logging now reuses the verbose helpers already centralized in `repository-paths.ps1`:
+  - `scripts/common/runtime-operation-support.ps1`
+  - `scripts/common/runtime-execution-context.ps1`
+  - `scripts/common/validation-logging.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/validation/export-audit-report.ps1`
+  - `scripts/README.md`
+- Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
+
 ## [1.2.0] - 2026-03-20
 
 ### Changed
