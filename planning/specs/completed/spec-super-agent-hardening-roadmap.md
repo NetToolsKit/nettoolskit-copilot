@@ -2,10 +2,16 @@
 
 Generated: 2026-03-21
 
+## Status
+
+- State: completed
+- Completed: 2026-03-22
+- Result: Phase 1 approval gate is implemented and validated, and the umbrella roadmap is now archived as historical design intent. Future phases should open phase-specific active specs only when execution actually starts.
+
 ## Current Status
 
 - Phase 1 approval gate is implemented and validated.
-- Next recommended increment: contextual security policy engine for tool-call sequences and prompt-injection resistance.
+- Next recommended increment when work resumes: contextual security policy engine for tool-call sequences and prompt-injection resistance.
 
 ## Objective
 
@@ -26,7 +32,7 @@ The Super Agent remains a repository-owned controller on top of Codex/Copilot. W
 5. eval harness for agentic regression tracking
 6. interoperability and model-routing improvements
 
-Phase 1 is complete: approval gating for sensitive stages and agents is now enforced in the orchestration runner. The roadmap remains active for the next phases.
+Phase 1 is complete: approval gating for sensitive stages and agents is now enforced in the orchestration runner. This umbrella roadmap is now archived in `planning/specs/completed/`; future phases should be represented by smaller phase-specific specs in `planning/specs/active/` only while execution is active.
 
 ## Key Decisions
 
@@ -66,11 +72,11 @@ Phase 1 is complete: approval gating for sensitive stages and agents is now enfo
 3. Sensitive stage execution fails clearly when explicit approval is missing.
 4. Approval metadata is versioned, validated, and persisted in run artifacts.
 5. The impacted runtime and orchestration tests pass.
-6. The roadmap remains open for later phases covering guardrails, observability, resume, evals, and interoperability.
+6. Later phases remain explicitly identified for future work, but must reopen as phase-specific active specs only when execution resumes.
 
-## Planning Readiness Statement
+## Closeout Statement
 
-Planning is ready. The workstream is intentionally phased, with Phase 1 limited to approval gating so implementation can begin immediately without blocking later security and observability layers.
+The roadmap served its purpose for Phase 1. It is now closed as an umbrella reference so `planning/specs/active/` does not carry a long-lived strategic placeholder. The next execution phase should start with a new active spec focused on the immediate slice being implemented.
 
 ## Recommended Specialist Focus
 

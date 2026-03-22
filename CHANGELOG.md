@@ -1,6 +1,7 @@
 ## [9.9.9] - 2026-03-20
 
 ### Changed
+- Archived the umbrella `spec-super-agent-hardening-roadmap.md` in `planning/specs/completed/` after Phase 1 finished and clarified that future Super Agent hardening increments must reopen as phase-specific active specs instead of leaving a long-lived roadmap in `planning/specs/active/`.
 - Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
 - Clarified the global EOF autofix contract in `README.md` and `scripts/README.md`, including the `core.hooksPath` override limit, the absence of a native Git `pre-add` hook, and when the manual `git trim-eof` alias is still useful even after enabling machine-wide `autofix`.
 - Hardened `trim-trailing-blank-lines.tests.ps1` so its temporary git repositories opt out of the machine-global hook path and line-ending policy, keeping runtime test results deterministic even when global EOF autofix is enabled on the workstation.

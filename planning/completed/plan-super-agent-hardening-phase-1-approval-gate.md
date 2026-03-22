@@ -18,7 +18,7 @@ The user wants a concrete roadmap of high-value Super Agent improvements and wan
 
 ## Active Spec
 
-- `planning/specs/active/spec-super-agent-hardening-roadmap.md`
+- `planning/specs/completed/spec-super-agent-hardening-roadmap.md`
 
 ## Phase Roadmap
 
@@ -135,4 +135,4 @@ The user wants a concrete roadmap of high-value Super Agent improvements and wan
 
 - Update README and scripts README for the approval flow.
 - Return a commit message for the stable phase 1 checkpoint.
-- Keep later roadmap phases in active planning/spec only until phase 1 is materially complete.
+- Keep the umbrella roadmap archived in completed planning/spec once phase 1 is materially complete, and open later phases as smaller active specs only when execution resumes.
