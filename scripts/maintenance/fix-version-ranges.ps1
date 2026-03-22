@@ -59,47 +59,10 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
 $script:IsVerboseEnabled = [bool] $Verbose
 
-# Writes output text using ANSI color sequences when available.
-function Write-ColorLine {
-  param(
-    [string] $Message,
-    [ConsoleColor] $Color = [ConsoleColor]::Gray
-  )
-
-  if ($null -eq $PSStyle) {
-    Microsoft.PowerShell.Utility\Write-Output $Message
-    return
-  }
-
-  $ansiColor = switch ($Color) {
-    ([ConsoleColor]::Blue) { $PSStyle.Foreground.Blue; break }
-    ([ConsoleColor]::Cyan) { $PSStyle.Foreground.Cyan; break }
-    ([ConsoleColor]::Green) { $PSStyle.Foreground.Green; break }
-    ([ConsoleColor]::Yellow) { $PSStyle.Foreground.Yellow; break }
-    ([ConsoleColor]::Red) { $PSStyle.Foreground.Red; break }
-    ([ConsoleColor]::DarkGray) { $PSStyle.Foreground.BrightBlack; break }
-    default { $PSStyle.Foreground.White }
-  }
-
-  Microsoft.PowerShell.Utility\Write-Output ("{0}{1}{2}" -f $ansiColor, $Message, $PSStyle.Reset)
-}
-
-# Writes verbose diagnostics with a logical color label.
-function Write-VerboseColor {
-  param(
-    [string] $Message,
-    [ConsoleColor] $Color = [ConsoleColor]::Gray
-  )
-
-  if ($script:IsVerboseEnabled) {
-    Write-ColorLine -Message ("[VERBOSE:{0}] {1}" -f $Color, $Message) -Color $Color
-  }
-}
-
-Write-ColorLine -Message ("===== Start fix-version-ranges {0} =====" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')) -Color Cyan
+Write-ColorLine -Message ("===== Start fix-version-ranges {0} =====" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')) -Color 'Cyan'
 
 # 1) Define the max version limit per package (match exact Include name)
 $limits = @{
@@ -128,7 +91,7 @@ else {
 # 3) Process each .csproj
 foreach ($file in $csprojs) {
   $projName = Split-Path $file -Leaf
-  Write-ColorLine -Message ("→ Processing project: {0}" -f $projName) -Color Blue
+  Write-ColorLine -Message ("→ Processing project: {0}" -f $projName) -Color 'Blue'
   $adjustments = @()
 
   try {
@@ -198,7 +161,7 @@ foreach ($file in $csprojs) {
   if ($adjustments.Count -gt 0) {
     try {
       [System.IO.File]::WriteAllText($file, $updated, [System.Text.Encoding]::UTF8)
-      Write-ColorLine -Message '  ✔ Applied adjustments:' -Color Green
+      Write-ColorLine -Message '  ✔ Applied adjustments:' -Color 'Green'
       foreach ($a in $adjustments) { Write-StyledOutput ("    - {0}" -f $a) }
     }
     catch {
@@ -212,4 +175,4 @@ foreach ($file in $csprojs) {
   Write-StyledOutput ""
 }
 
-Write-ColorLine -Message ("===== End fix-version-ranges {0} =====" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')) -Color Cyan
+Write-ColorLine -Message ("===== End fix-version-ranges {0} =====" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')) -Color 'Cyan'

@@ -64,89 +64,13 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 
 # -------------------------------
 # Helpers
 # -------------------------------
-# Writes output text using ANSI color sequences when available.
-function Write-ColorLine {
-    param(
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    if ($null -eq $PSStyle) {
-        Microsoft.PowerShell.Utility\Write-Output $Message
-        return
-    }
-
-    $ansiColor = switch ($Color) {
-        ([ConsoleColor]::Blue) { $PSStyle.Foreground.Blue; break }
-        ([ConsoleColor]::Cyan) { $PSStyle.Foreground.Cyan; break }
-        ([ConsoleColor]::Green) { $PSStyle.Foreground.Green; break }
-        ([ConsoleColor]::Yellow) { $PSStyle.Foreground.Yellow; break }
-        ([ConsoleColor]::Red) { $PSStyle.Foreground.Red; break }
-        ([ConsoleColor]::DarkGray) { $PSStyle.Foreground.BrightBlack; break }
-        default { $PSStyle.Foreground.White }
-    }
-
-    Microsoft.PowerShell.Utility\Write-Output ("{0}{1}{2}" -f $ansiColor, $Message, $PSStyle.Reset)
-}
-
-# Resolves the repository root using explicit and fallback location candidates.
-function Resolve-SolutionRoot {
-    param (
-        [string] $StartPath
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($StartPath)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $StartPath).Path
-        }
-        catch {
-            Write-Warning ("Unable to resolve path '{0}': {1}" -f $StartPath, $_.Exception.Message)
-        }
-    }
-
-    if ($script:ScriptRoot) {
-        $candidates += $script:ScriptRoot
-    }
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($i = 0; $i -lt 5 -and $current; $i++) {
-            $hasSln = Test-Path (Join-Path -Path $current -ChildPath 'NetToolsKit.sln')
-            $hasLayout = (Test-Path (Join-Path -Path $current -ChildPath 'src')) -and (Test-Path (Join-Path -Path $current -ChildPath '.github'))
-
-            if ($hasSln -or $hasLayout) {
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw "Could not find solution root."
-}
-
-# Writes verbose diagnostics with a logical color label.
-function Write-VerboseColor {
-    param (
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-ColorLine -Message ("[VERBOSE:{0}] {1}" -f $Color, $Message) -Color $Color
-    }
-}
-
 # Prompts for deletion confirmation when interactive safeguards are enabled.
 function Confirm-Deletion {
     param (
@@ -183,12 +107,12 @@ function Get-TargetPath {
 # -------------------------------
 # Main execution
 # -------------------------------
-$repoRoot = Resolve-SolutionRoot -StartPath $Path
+$repoRoot = Resolve-SolutionOrLayoutRoot -RequestedRoot $Path -StartPath (Get-Location).Path
 Set-Location -Path $repoRoot
 $targetPath = Get-TargetPath -RequestedPath $Path -RepoRoot $repoRoot
 
-Write-ColorLine -Message ("Solution root found: {0}" -f $repoRoot) -Color Blue
-Write-ColorLine -Message ("Scanning from: {0}" -f $targetPath) -Color Blue
+Write-ColorLine -Message ("Solution root found: {0}" -f $repoRoot) -Color 'Blue'
+Write-ColorLine -Message ("Scanning from: {0}" -f $targetPath) -Color 'Blue'
 
 $artifactNames = @(
     '.build',
@@ -200,21 +124,21 @@ $artifactNames = @(
 $directories = Get-ChildItem -Path $targetPath -Recurse -Directory |
     Where-Object { $artifactNames -contains $_.Name }
 
-Write-ColorLine -Message ("Directories found: {0}" -f $directories.Count) -Color Yellow
+Write-ColorLine -Message ("Directories found: {0}" -f $directories.Count) -Color 'Yellow'
 
 if ($directories.Count -eq 0) {
-    Write-ColorLine -Message 'No build artifacts found.' -Color Green
+    Write-ColorLine -Message 'No build artifacts found.' -Color 'Green'
     exit 0
 }
 
 if ($DryRun) {
-    Write-ColorLine -Message 'Dry run mode. The following directories would be removed:' -Color Yellow
+    Write-ColorLine -Message 'Dry run mode. The following directories would be removed:' -Color 'Yellow'
     $directories | ForEach-Object { Write-StyledOutput $_.FullName }
     exit 0
 }
 
 if (-not (Confirm-Deletion -Prompt "Delete the listed directories?" -SkipPrompt:$Force)) {
-    Write-ColorLine -Message 'Operation cancelled by user.' -Color Yellow
+    Write-ColorLine -Message 'Operation cancelled by user.' -Color 'Yellow'
     exit 0
 }
 
@@ -228,4 +152,4 @@ foreach ($dir in $directories) {
     }
 }
 
-Write-ColorLine -Message 'Cleanup completed.' -Color Green
+Write-ColorLine -Message 'Cleanup completed.' -Color 'Green'

@@ -85,6 +85,8 @@ function Initialize-GitRepository {
     )
 
     & git -C $Path init | Out-Null
+    & git -C $Path config core.hooksPath .git/hooks | Out-Null
+    & git -C $Path config core.autocrlf false | Out-Null
     & git -C $Path config user.name 'Test User' | Out-Null
     & git -C $Path config user.email 'test@example.com' | Out-Null
 }

@@ -167,8 +167,9 @@ function Resolve-SolutionOrLayoutRoot {
         $hasSolution = @(Get-ChildItem -LiteralPath $candidatePath -Filter *.sln -File -ErrorAction SilentlyContinue).Count -gt 0
         $hasSrc = Test-Path -LiteralPath (Join-Path $candidatePath 'src') -PathType Container
         $hasModules = Test-Path -LiteralPath (Join-Path $candidatePath 'modules') -PathType Container
+        $hasGithub = Test-Path -LiteralPath (Join-Path $candidatePath '.github') -PathType Container
 
-        if ($hasSolution -or ($hasSrc -and $hasModules)) {
+        if ($hasSolution -or ($hasSrc -and ($hasModules -or $hasGithub))) {
             return $candidatePath
         }
 

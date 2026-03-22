@@ -3,6 +3,8 @@
 ### Changed
 - Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
 - Clarified the global EOF autofix contract in `README.md` and `scripts/README.md`, including the `core.hooksPath` override limit, the absence of a native Git `pre-add` hook, and when the manual `git trim-eof` alias is still useful even after enabling machine-wide `autofix`.
+- Hardened `trim-trailing-blank-lines.tests.ps1` so its temporary git repositories opt out of the machine-global hook path and line-ending policy, keeping runtime test results deterministic even when global EOF autofix is enabled on the workstation.
+- Removed duplicate local root/verbose/color helper logic from `clean-build-artifacts.ps1`, `fix-version-ranges.ps1`, and `check-test-naming.ps1` by reusing the shared `console-style.ps1` and `repository-paths.ps1` helpers, and expanded `Resolve-SolutionOrLayoutRoot` to cover solution roots plus `src + .github` layouts.
 
 ## [9.9.9] - 2026-03-20
 

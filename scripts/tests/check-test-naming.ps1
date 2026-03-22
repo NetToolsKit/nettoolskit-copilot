@@ -71,7 +71,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 
@@ -81,59 +81,6 @@ $methodPattern = '(?ms)((?:\s*\[[^\]]+\]\s*)+)\s*public\s+(?:async\s+)?(?:Task|V
 # -------------------------------
 # Helpers
 # -------------------------------
-# Writes verbose diagnostics with a logical color label.
-function Write-VerboseColor {
-    param (
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message)
-    }
-}
-
-# Resolves the repository root using explicit and fallback location candidates.
-function Resolve-SolutionRoot {
-    param (
-        [string] $StartPath
-    )
-
-    $candidates = @()
-
-    if (-not [string]::IsNullOrWhiteSpace($StartPath)) {
-        try {
-            $candidates += (Resolve-Path -LiteralPath $StartPath).Path
-        }
-        catch {
-            Write-Warning ("Unable to resolve path '{0}': {1}" -f $StartPath, $_.Exception.Message)
-        }
-    }
-
-    if ($script:ScriptRoot) {
-        $candidates += $script:ScriptRoot
-    }
-
-    $candidates += (Get-Location).Path
-
-    foreach ($candidate in ($candidates | Select-Object -Unique)) {
-        $current = $candidate
-        for ($i = 0; $i -lt 5 -and $current; $i++) {
-            $hasSln = Test-Path (Join-Path -Path $current -ChildPath 'NetToolsKit.sln')
-            $hasLayout = (Test-Path (Join-Path -Path $current -ChildPath 'src')) -and (Test-Path (Join-Path -Path $current -ChildPath '.github'))
-
-            if ($hasSln -or $hasLayout) {
-                Write-StyledOutput ("Solution root found: {0}" -f $current)
-                return $current
-            }
-
-            $current = Split-Path -Path $current -Parent
-        }
-    }
-
-    throw "Could not find solution root."
-}
-
 # Resolves target test project files from explicit inputs or defaults.
 function Resolve-TestProject {
     param (
@@ -224,8 +171,9 @@ function Get-TestMethodsFromFile {
 # -------------------------------
 # Discovery Phase
 # -------------------------------
-$repoRoot = Resolve-SolutionRoot -StartPath $Path
+$repoRoot = Resolve-SolutionOrLayoutRoot -RequestedRoot $Path -StartPath (Get-Location).Path
 Set-Location -Path $repoRoot
+Write-StyledOutput ("Solution root found: {0}" -f $repoRoot)
 
 $projects = Resolve-TestProject -Root $repoRoot -RequestedProjects $Projects
 
