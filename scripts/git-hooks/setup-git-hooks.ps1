@@ -277,6 +277,15 @@ $sourceRepoRoot = Resolve-RepositoryRoot -RequestedRoot $null
 $resolvedRepoRoot = Resolve-ExplicitOrGitRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 Assert-CommandAvailable -CommandName 'git'
+Start-ExecutionSession `
+    -Name 'setup-git-hooks' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Requested scope' = $(if ([string]::IsNullOrWhiteSpace($EofHygieneScope)) { 'default(local-repo)' } else { $EofHygieneScope })
+            'Requested mode' = $(if ([string]::IsNullOrWhiteSpace($EofHygieneMode)) { 'inherit' } else { $EofHygieneMode })
+            'Uninstall' = [bool] $Uninstall
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 $gitRoot = (& git -C $resolvedRepoRoot rev-parse --show-toplevel 2>$null)
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitRoot)) {
@@ -297,6 +306,10 @@ if ($Uninstall) {
         Write-StyledOutput 'Removed managed global Git hook path (core.hooksPath).'
         Write-StyledOutput ("  global core.hooksPath: {0}" -f $removedGlobalHooksPath)
         Write-StyledOutput ("  removed EOF hook settings ({0}): {1}" -f $resolvedScope.Name, $removedSettingsPath)
+        Complete-ExecutionSession -Name 'setup-git-hooks' -Status 'passed' -Summary ([ordered]@{
+                'Scope' = $resolvedScope.Name
+                'Operation' = 'uninstall'
+            }) | Out-Null
         exit 0
     }
 
@@ -307,12 +320,20 @@ if ($Uninstall) {
         if (Test-Path -LiteralPath $removedSettingsPath -PathType Leaf) {
             Write-StyledOutput ("Warning: could not remove local EOF hook settings: {0}" -f $removedSettingsPath)
         }
+        Complete-ExecutionSession -Name 'setup-git-hooks' -Status 'passed' -Summary ([ordered]@{
+                'Scope' = $resolvedScope.Name
+                'Operation' = 'uninstall'
+            }) | Out-Null
         exit 0
     }
 
     $removedSettingsPath = Remove-GitHookEofModeSelection -ResolvedRepoRoot $resolvedRepoRoot -ScopeName $resolvedScope.Name
     Write-StyledOutput 'Removed local Git hook path (core.hooksPath).'
     Write-StyledOutput ("  removed EOF hook settings ({0}): {1}" -f $resolvedScope.Name, $removedSettingsPath)
+    Complete-ExecutionSession -Name 'setup-git-hooks' -Status 'passed' -Summary ([ordered]@{
+            'Scope' = $resolvedScope.Name
+            'Operation' = 'uninstall'
+        }) | Out-Null
     exit 0
 }
 
@@ -393,5 +414,10 @@ else {
 Write-StyledOutput '  skip sync (temporary): set CODEX_SKIP_POST_COMMIT_SYNC=1'
 Write-StyledOutput '  optional MCP apply on manifest change: set CODEX_APPLY_MCP_ON_POST_COMMIT=1'
 Write-StyledOutput '  MCP apply backup default: CODEX_BACKUP_MCP_CONFIG=1 (set 0 to disable backup)'
+Complete-ExecutionSession -Name 'setup-git-hooks' -Status 'passed' -Summary ([ordered]@{
+        'Scope' = $eofModeSelection.Scope.Name
+        'Mode' = $eofModeSelection.Mode.Name
+        'Configured path' = $configuredPath
+    }) | Out-Null
 
 exit 0

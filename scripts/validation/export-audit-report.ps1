@@ -162,6 +162,17 @@ $resolvedHealthcheckOutputPath = $operationArtifacts.AdditionalOutputPaths[0]
 $resolvedLogPath = $operationArtifacts.LogPath
 $script:LogFilePath = $resolvedLogPath
 
+Start-RuntimeOperationSession `
+    -Name 'export-audit-report' `
+    -ResolvedRepoRoot $resolvedRepoRoot `
+    -PrimaryOutputPath $resolvedOutputPath `
+    -LogPath $resolvedLogPath `
+    -AdditionalMetadata ([ordered]@{
+            'Validation profile' = $ValidationProfile
+            'Warning-only mode' = [bool] $WarningOnly
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
+
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
 Write-ExecutionLog -Level 'INFO' -Message ("Audit report output: {0}" -f $resolvedOutputPath)
 Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
@@ -257,6 +268,10 @@ $auditReport = [ordered]@{
 $auditJson = $auditReport | ConvertTo-Json -Depth 100
 Set-Content -LiteralPath $resolvedOutputPath -Value $auditJson
 Write-ExecutionLog -Level 'INFO' -Message ("Audit report generated: {0}" -f $resolvedOutputPath)
+Complete-RuntimeOperationSession -Name 'export-audit-report' -Status $overallStatus -Summary ([ordered]@{
+        'Healthcheck exit code' = $healthcheckExitCode
+        'Policy files' = $policyFiles.Count
+    }) | Out-Null
 
 if ($overallStatus -ne 'passed') {
     if (-not $WarningOnly) {

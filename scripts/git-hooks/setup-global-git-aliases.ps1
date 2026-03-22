@@ -91,6 +91,12 @@ function Get-ManagedGlobalGitAliases {
 
 $null = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Assert-CommandAvailable -CommandName 'git'
+Start-ExecutionSession `
+    -Name 'setup-global-git-aliases' `
+    -Metadata ([ordered]@{
+            'Uninstall' = [bool] $Uninstall
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Resolve-CodexRuntimePath
@@ -109,6 +115,10 @@ if ($Uninstall) {
         }
     }
 
+    Complete-ExecutionSession -Name 'setup-global-git-aliases' -Status 'passed' -Summary ([ordered]@{
+            'Alias count' = $aliasMap.Count
+            'Operation' = 'uninstall'
+        }) | Out-Null
     exit 0
 }
 
@@ -125,5 +135,9 @@ foreach ($aliasName in $aliasMap.Keys) {
     Write-StyledOutput ("    {0}" -f (& git config --global --get ("alias.{0}" -f $aliasName)))
 }
 Write-StyledOutput '  usage: run `git trim-eof` manually before `git add` when you want to normalize changed files.'
+Complete-ExecutionSession -Name 'setup-global-git-aliases' -Status 'passed' -Summary ([ordered]@{
+        'Alias count' = $aliasMap.Count
+        'Codex runtime root' = $TargetCodexPath
+    }) | Out-Null
 
 exit 0

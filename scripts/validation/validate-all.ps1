@@ -1031,4 +1031,13 @@ else {
     Write-StyledOutput 'All validation checks passed.'
 }
 
+Complete-ValidationSession -Metrics ([ordered]@{
+        'Profile' = $profileId
+        'Total checks' = $results.Count
+        'Passed' = $passed
+        'Warnings' = $warningChecks
+        'Failures' = $failed
+        'Suite warnings' = $suiteWarningCount
+    }) | Out-Null
+
 exit 0

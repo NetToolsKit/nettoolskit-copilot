@@ -1,12 +1,37 @@
 <#
 .SYNOPSIS
     Summarizes a recorded Super Agent run from trace, policy, and checkpoint artifacts.
+
+.DESCRIPTION
+    Loads run-artifact, trace, policy, and checkpoint files from a completed
+    run directory and emits a compact replay summary that can also be written
+    as JSON for later inspection.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.PARAMETER RunDirectory
+    Existing run directory that contains the recorded orchestration artifacts.
+
+.PARAMETER OutputPath
+    Optional output path for the generated replay summary JSON.
+
+.PARAMETER DetailedOutput
+    Shows detailed diagnostics for the replay session.
+
+.EXAMPLE
+    pwsh -File scripts/runtime/replay-agent-run.ps1 -RunDirectory .temp/runs/run-20260322-010203
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 param(
     [string] $RepoRoot,
     [Parameter(Mandatory = $true)] [string] $RunDirectory,
-    [string] $OutputPath
+    [string] $OutputPath,
+    [switch] $DetailedOutput
 )
 
 Set-StrictMode -Version Latest
@@ -23,8 +48,17 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
 . $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'agent-runtime-hardening')
+$script:IsVerboseEnabled = [bool] $DetailedOutput
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+Start-ExecutionSession `
+    -Name 'replay-agent-run' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Run directory' = $RunDirectory
+            'Output path' = $(if ([string]::IsNullOrWhiteSpace($OutputPath)) { 'none' } else { $OutputPath })
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 $resolvedRunDirectory = Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $RunDirectory
 $runArtifactPath = Join-Path $resolvedRunDirectory 'run-artifact.json'
 $traceRecordPath = Join-Path $resolvedRunDirectory 'trace-record.json'
@@ -70,4 +104,9 @@ if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
     Write-HardeningJsonFile -Path $resolvedOutputPath -Value $summary
 }
 
+Complete-ExecutionSession -Name 'replay-agent-run' -Status $(if ([string] $summary.status -eq 'failed') { 'failed' } elseif ([int] $summary.policyBlockCount -gt 0) { 'warning' } else { 'passed' }) -Summary ([ordered]@{
+        'Stage count' = $summary.stageCount
+        'Policy warnings' = $summary.policyWarningCount
+        'Policy blocks' = $summary.policyBlockCount
+    }) | Out-Null
 $summary | ConvertTo-Json -Depth 50

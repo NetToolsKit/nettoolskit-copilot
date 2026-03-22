@@ -37,6 +37,69 @@ if (-not (Get-Command -Name Write-VerboseLog -ErrorAction SilentlyContinue)) {
     throw 'validation-logging.ps1 requires repository-paths.ps1 to be loaded first.'
 }
 
+# Resolves the current validation session name from the caller script path.
+function Get-ValidationSessionName {
+    $commandPathVariable = Get-Variable -Name PSCommandPath -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $commandPathVariable -and -not [string]::IsNullOrWhiteSpace([string] $commandPathVariable.Value)) {
+        return [System.IO.Path]::GetFileNameWithoutExtension([string] $commandPathVariable.Value)
+    }
+
+    return 'validation-script'
+}
+
+# Starts the validation session once for the current script scope.
+function Start-ValidationSession {
+    param(
+        [switch] $IncludeMetadataInDefaultOutput
+    )
+
+    $sessionStateVariable = Get-Variable -Name ValidationSessionState -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $sessionStateVariable -and $null -ne $sessionStateVariable.Value -and -not [bool] $sessionStateVariable.Value.Completed) {
+        return $sessionStateVariable.Value
+    }
+
+    $warningOnlyVariable = Get-Variable -Name IsWarningOnly -Scope Script -ErrorAction SilentlyContinue
+    $sessionMetadata = [ordered]@{
+        'Verbose enabled' = [bool] $script:IsVerboseEnabled
+    }
+    if ($null -ne $warningOnlyVariable) {
+        $sessionMetadata['Warning-only mode'] = [bool] $warningOnlyVariable.Value
+    }
+
+    $script:ValidationSessionState = Start-ExecutionSession `
+        -Name (Get-ValidationSessionName) `
+        -Metadata $sessionMetadata `
+        -IncludeMetadataInDefaultOutput:$IncludeMetadataInDefaultOutput
+
+    return $script:ValidationSessionState
+}
+
+# Completes the validation session using current warning/failure counts and
+# any supplied metrics.
+function Complete-ValidationSession {
+    param(
+        [hashtable] $Metrics,
+        [switch] $IncludeWarningOnlyMode
+    )
+
+    $counts = Get-ValidationCounts
+    $summary = [ordered]@{}
+    if ($IncludeWarningOnlyMode) {
+        $summary['Warning-only mode'] = [bool] $script:IsWarningOnly
+    }
+    if ($null -ne $Metrics) {
+        foreach ($entry in ($Metrics.GetEnumerator() | Sort-Object Name)) {
+            $summary[[string] $entry.Key] = $entry.Value
+        }
+    }
+    $summary['Warnings'] = $counts.warnings
+    $summary['Failures'] = $counts.failures
+
+    $status = if ($counts.failures -gt 0) { 'failed' } elseif ($counts.warnings -gt 0) { 'warning' } else { 'passed' }
+    $script:ValidationSessionState = Complete-ExecutionSession -Name (Get-ValidationSessionName) -Status $status -Summary $summary
+    return $script:ValidationSessionState
+}
+
 # Initializes validation warning/failure state for the current script scope.
 function Initialize-ValidationState {
     param(
@@ -56,6 +119,8 @@ function Initialize-ValidationState {
     if ($null -eq $failuresVariable -or $null -eq $failuresVariable.Value -or -not ($failuresVariable.Value -is [System.Collections.Generic.List[string]])) {
         $script:Failures = New-Object System.Collections.Generic.List[string]
     }
+
+    Start-ValidationSession | Out-Null
 }
 
 # Writes styled validation output with a simple host fallback.
@@ -151,6 +216,8 @@ function Write-ValidationSummary {
 
     Write-ValidationOutput ("  Warnings: {0}" -f $counts.warnings)
     Write-ValidationOutput ("  Failures: {0}" -f $counts.failures)
+
+    Complete-ValidationSession | Out-Null
 
     if ($counts.failures -eq 0 -and $counts.warnings -eq 0) {
         if (-not [string]::IsNullOrWhiteSpace($PassMessage)) {

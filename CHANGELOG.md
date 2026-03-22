@@ -1,6 +1,32 @@
 ## [9.9.9] - 2026-03-20
 
 ### Changed
+- Standardized shared execution-session logging across operational PowerShell entrypoints so default runs now emit deterministic `Session start` / `Session end` markers, verbose-capable scripts consistently expose `-Verbose`, `-DetailedLogs`, or `-DetailedOutput`, and runtime/validation helpers centralize the session lifecycle without duplicating script-local scaffolding:
+  - `scripts/common/repository-paths.ps1`
+  - `scripts/common/runtime-operation-support.ps1`
+  - `scripts/common/validation-logging.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/runtime/run-agent-pipeline.ps1`
+  - `scripts/runtime/replay-agent-run.ps1`
+  - `scripts/runtime/evaluate-agent-pipeline.ps1`
+  - `scripts/git-hooks/setup-git-hooks.ps1`
+  - `scripts/git-hooks/setup-global-git-aliases.ps1`
+  - `scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1`
+  - `scripts/maintenance/trim-trailing-blank-lines.ps1`
+  - `scripts/security/Invoke-VulnerabilityAudit.ps1`
+  - `scripts/validation/validate-all.ps1`
+  - `scripts/validation/export-audit-report.ps1`
+  - `scripts/validation/validate-agent-hooks.ps1`
+  - `scripts/validation/validate-planning-structure.ps1`
+  - `scripts/tests/runtime/execution-session-logging.tests.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `README.md`
+  - `scripts/README.md`
+- Expanded `scripts/README.md` with the full execution-session contract, switch map, expected output shape, and concrete examples by runtime, validation, orchestration, git-hook, maintenance, and security script families so operators can consistently choose between concise default runs and detailed diagnostics.
 - Archived the umbrella `spec-super-agent-hardening-roadmap.md` in `planning/specs/completed/` after Phase 1 finished and clarified that future Super Agent hardening increments must reopen as phase-specific active specs instead of leaving a long-lived roadmap in `planning/specs/active/`.
 - Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
 - Clarified the global EOF autofix contract in `README.md` and `scripts/README.md`, including the `core.hooksPath` override limit, the absence of a native Git `pre-add` hook, and when the manual `git trim-eof` alias is still useful even after enabling machine-wide `autofix`.

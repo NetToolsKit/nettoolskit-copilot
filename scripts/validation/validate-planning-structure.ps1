@@ -14,6 +14,9 @@
 .PARAMETER WarningOnly
     When true, structural failures are emitted as warnings and exit code remains 0.
 
+.PARAMETER Verbose
+    Shows detailed diagnostics.
+
 .EXAMPLE
     pwsh -File scripts/validation/validate-planning-structure.ps1 -RepoRoot . -WarningOnly:$false
 
@@ -24,7 +27,8 @@
 
 param(
     [string] $RepoRoot,
-    [bool] $WarningOnly = $true
+    [bool] $WarningOnly = $true,
+    [switch] $Verbose
 )
 
 Set-StrictMode -Version Latest
@@ -42,6 +46,13 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 }
 . $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'validation-logging')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
+$script:IsVerboseEnabled = [bool] $Verbose
+Start-ExecutionSession `
+    -Name 'validate-planning-structure' `
+    -Metadata ([ordered]@{
+            'Warning-only mode' = [bool] $WarningOnly
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 # Records either a failure or a warning based on the selected validation mode.
 function Add-ValidationMessage {
@@ -113,6 +124,12 @@ Write-ValidationOutput ''
 Write-ValidationOutput 'Planning structure validation summary'
 Write-ValidationOutput ("  Warnings: {0}" -f $warnings.Count)
 Write-ValidationOutput ("  Failures: {0}" -f $failures.Count)
+
+$sessionStatus = if ($failures.Count -gt 0) { 'failed' } elseif ($warnings.Count -gt 0) { 'warning' } else { 'passed' }
+Complete-ExecutionSession -Name 'validate-planning-structure' -Status $sessionStatus -Summary ([ordered]@{
+        'Warnings' = $warnings.Count
+        'Failures' = $failures.Count
+    }) | Out-Null
 
 if ($failures.Count -gt 0) {
     exit 1

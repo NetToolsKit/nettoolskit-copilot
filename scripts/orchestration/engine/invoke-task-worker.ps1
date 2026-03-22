@@ -71,6 +71,9 @@
 .PARAMETER ExecutionBackend
     `script-only` or `codex-exec`.
 
+.PARAMETER EffectiveModel
+    Optional resolved model override for implementer and reviewer dispatches in this task loop.
+
 .PARAMETER MaxIterations
     Maximum implement-review retry iterations for the task.
 
@@ -79,6 +82,10 @@
 
 .EXAMPLE
     pwsh -File .\scripts\orchestration\engine\invoke-task-worker.ps1 -RepoRoot . -WorkingDirectory . -RunDirectory .temp\runs\trace-001 -TraceId trace-001 -StageId implement -AgentId specialist -TaskJsonPath .temp\task.json -RequestPath .temp\request.txt -ContextPackPath .temp\context.json -RouteSelectionPath .temp\route.json -SpecialistContextPackPath .temp\specialist-context.json -SpecSummaryPath .temp\spec.json -AgentsManifestPath .codex\orchestration\agents.manifest.json -ImplementerPromptTemplatePath .codex\orchestration\prompts\executor-task.prompt.md -ImplementerResponseSchemaPath .github\schemas\agent.stage-implementation-result.schema.json -SpecReviewPromptTemplatePath .codex\orchestration\prompts\task-spec-review.prompt.md -QualityReviewPromptTemplatePath .codex\orchestration\prompts\task-quality-review.prompt.md -ReviewResponseSchemaPath .github\schemas\agent.task-review-result.schema.json -ResultPath .temp\task-result.json -ExecutionBackend script-only
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 param(

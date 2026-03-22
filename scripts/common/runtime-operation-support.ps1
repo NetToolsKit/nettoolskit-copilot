@@ -88,6 +88,56 @@ function Initialize-OperationArtifacts {
     }
 }
 
+# Starts a standardized runtime operation session after output/log paths are resolved.
+function Start-RuntimeOperationSession {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Name,
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot,
+        [string] $RuntimeProfileName,
+        [string] $PrimaryOutputPath,
+        [string] $LogPath,
+        [hashtable] $AdditionalMetadata,
+        [switch] $IncludeMetadataInDefaultOutput
+    )
+
+    $metadata = [ordered]@{}
+    if (-not [string]::IsNullOrWhiteSpace($RuntimeProfileName)) {
+        $metadata['Runtime profile'] = $RuntimeProfileName
+    }
+    if (-not [string]::IsNullOrWhiteSpace($PrimaryOutputPath)) {
+        $metadata['Output path'] = $PrimaryOutputPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+        $metadata['Log path'] = $LogPath
+    }
+    if ($null -ne $AdditionalMetadata) {
+        foreach ($entry in ($AdditionalMetadata.GetEnumerator() | Sort-Object Name)) {
+            $metadata[[string] $entry.Key] = $entry.Value
+        }
+    }
+
+    return Start-ExecutionSession `
+        -Name $Name `
+        -RootPath $ResolvedRepoRoot `
+        -Metadata $metadata `
+        -IncludeMetadataInDefaultOutput:$IncludeMetadataInDefaultOutput
+}
+
+# Completes a standardized runtime operation session with status and summary values.
+function Complete-RuntimeOperationSession {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Name,
+        [ValidateSet('passed', 'warning', 'failed', 'preview', 'skipped')]
+        [string] $Status = 'passed',
+        [hashtable] $Summary
+    )
+
+    return Complete-ExecutionSession -Name $Name -Status $Status -Summary $Summary
+}
+
 # Invokes a child script with standardized logging, duration, and failure handling.
 function Invoke-ManagedScriptInvocation {
     param(

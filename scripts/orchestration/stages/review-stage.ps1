@@ -48,6 +48,9 @@
 .PARAMETER ExecutionBackend
     Runtime backend selection. `codex-exec` enables live dispatch.
 
+.PARAMETER EffectiveModel
+    Optional resolved model override for live reviewer dispatch.
+
 .PARAMETER StageStatePath
     Optional path where stage execution metadata is written.
 

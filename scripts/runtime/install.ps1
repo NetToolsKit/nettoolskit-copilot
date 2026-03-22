@@ -362,6 +362,16 @@ if ($resolvedRuntimeProfile.InstallHealthcheck -and -not $SkipHealthcheck) {
     $steps.Add((New-InstallStep -Name 'Run repository healthcheck' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/healthcheck.ps1') -Arguments $healthcheckArguments)) | Out-Null
 }
 
+Start-ExecutionSession `
+    -Name 'runtime-install' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Runtime profile' = $resolvedRuntimeProfile.Name
+            'Preview-only' = [bool] $PreviewOnly
+            'Planned steps' = $steps.Count
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
+
 $results = New-Object System.Collections.Generic.List[object]
 foreach ($step in $steps) {
     $stepResult = Invoke-InstallStep -Step $step -Preview ([bool] $PreviewOnly)
@@ -391,6 +401,12 @@ Write-StyledOutput ("  Executed steps: {0}" -f $resultItems.Count) | Out-Host
 Write-StyledOutput ("  Passed steps: {0}" -f $passedSteps) | Out-Host
 Write-StyledOutput ("  Failed steps: {0}" -f $failedSteps) | Out-Host
 Write-StyledOutput ("  Overall status: {0}" -f $overallStatus) | Out-Host
+Complete-ExecutionSession -Name 'runtime-install' -Status $overallStatus -Summary ([ordered]@{
+        'Planned steps' = $steps.Count
+        'Executed steps' = $resultItems.Count
+        'Passed steps' = $passedSteps
+        'Failed steps' = $failedSteps
+    }) | Out-Null
 
 $output = [pscustomobject]@{
     previewOnly = [bool] $PreviewOnly

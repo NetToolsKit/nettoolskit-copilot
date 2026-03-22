@@ -49,6 +49,9 @@
 .PARAMETER ExecutionBackend
     Selected backend for the run, such as `script-only` or `codex-exec`.
 
+.PARAMETER EffectiveModel
+    Optional resolved model override for live router dispatch.
+
 .PARAMETER StageStatePath
     Optional override path for the persisted stage-state artifact.
 

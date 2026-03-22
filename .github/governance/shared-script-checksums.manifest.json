@@ -8,8 +8,12 @@
   ],
   "entries": [
     {
+      "path": "scripts/common/agent-runtime-hardening.ps1",
+      "sha256": "56652a318580378fc420200a8dc08ea537bc8d97bd84db20909b8574ed4778bf"
+    },
+    {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "1382fda268081fb615b62eac0f5f86decc19be9b3b693ef29419dfbedead8eec"
+      "sha256": "272eda373a71951ccf9ea9ebe8c69182029273466b27fd5f012784c5bd2e825e"
     },
     {
       "path": "scripts/common/console-style.ps1",
@@ -21,7 +25,7 @@
     },
     {
       "path": "scripts/common/repository-paths.ps1",
-      "sha256": "e550574c7980eceb1abb67d8d645efaeac5d79af90f01ca80be63375f50e0db2"
+      "sha256": "533dd202e850ca602afdb12568cfb9c8976f2407b4fbf3a3c1ec504a9ea06da5"
     },
     {
       "path": "scripts/common/runtime-execution-context.ps1",
@@ -33,7 +37,7 @@
     },
     {
       "path": "scripts/common/runtime-operation-support.ps1",
-      "sha256": "f369081d18df4d96a87dd650255c42c4bda54a68ce17568a991e94249b655ee6"
+      "sha256": "0db1062c38bcc491cecfa1b28b03e75901e38b594ff39c727265cdc01bebb329"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
@@ -41,7 +45,7 @@
     },
     {
       "path": "scripts/common/validation-logging.ps1",
-      "sha256": "6841bdf9c89557ee007acf5ee92592c97629e709a2fd60553ad8b62b67540ddd"
+      "sha256": "3e73c6286c41a71e760e0fdbfa285c5d994026db87a10e5cd8930c8c8e5f0dc6"
     },
     {
       "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
@@ -65,7 +69,7 @@
     },
     {
       "path": "scripts/security/Invoke-VulnerabilityAudit.ps1",
-      "sha256": "c02ae7eba56e84ec8136435de60b730958e0686e8a7344193ddd62728d9abfc5"
+      "sha256": "b385f2256ed87cb27ac966c75996f7108142536a0ddfc37f957aa49e982f3193"
     }
   ]
 }

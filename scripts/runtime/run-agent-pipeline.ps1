@@ -57,6 +57,18 @@
 .PARAMETER StopAfterStageId
     Optional stage id that truncates the pipeline after the selected stage.
 
+.PARAMETER StartAtStageId
+    Optional stage id that skips earlier stages and begins execution at the selected stage.
+
+.PARAMETER ResumeFromRunDirectory
+    Optional prior run directory used to preload checkpoint, trace, and policy artifacts before resuming execution.
+
+.PARAMETER PolicyCatalogPath
+    Optional override path to the runtime policy catalog.
+
+.PARAMETER ModelRoutingCatalogPath
+    Optional override path to the model routing catalog.
+
 .PARAMETER ApprovedStageIds
     Optional list of stage ids explicitly approved for sensitive execution.
 
@@ -474,6 +486,15 @@ function Write-RunStateArtifact {
 # -------------------------------
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
+Start-ExecutionSession `
+    -Name 'run-agent-pipeline' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Execution backend' = $(if ([string]::IsNullOrWhiteSpace($ExecutionBackend)) { 'default' } else { $ExecutionBackend })
+            'Warning-only mode' = [bool] $WarningOnly
+            'Start stage' = $(if ([string]::IsNullOrWhiteSpace($StartAtStageId)) { 'pipeline-start' } else { $StartAtStageId })
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 $validationScriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-agent-orchestration.ps1'
 if (-not (Test-Path -LiteralPath $validationScriptPath -PathType Leaf)) {
@@ -1504,6 +1525,14 @@ if ($runWarnings.Count -gt 0) {
         Write-StyledOutput ("    [WARN] {0}" -f $warning)
     }
 }
+
+Complete-ExecutionSession -Name 'run-agent-pipeline' -Status $(if ($overallStatus -eq 'failed') { 'failed' } elseif ($overallStatus -eq 'partial') { 'warning' } else { 'passed' }) -Summary ([ordered]@{
+        'Trace id' = $trace
+        'Stages total' = $stageResults.Count
+        'Stages failed' = $failedStages
+        'Warnings' = $runWarnings.Count
+        'Failures' = $runFailures.Count
+    }) | Out-Null
 
 if ($overallStatus -eq 'failed') {
     exit 1

@@ -61,6 +61,23 @@ function Assert-Contains {
     }
 }
 
+# Fails the current test when the collection does not contain any expected value.
+function Assert-ContainsAny {
+    param(
+        [string[]] $Collection,
+        [string[]] $ExpectedValues,
+        [string] $Message
+    )
+
+    foreach ($expectedValue in @($ExpectedValues)) {
+        if ($Collection -contains $expectedValue) {
+            return
+        }
+    }
+
+    throw $Message
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $runtimeScriptRoot = Join-Path $resolvedRepoRoot 'scripts/runtime'
 
@@ -165,6 +182,22 @@ try {
     Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'install missing RuntimeProfile parameter.'
     Assert-Contains -Collection $keys -Value 'GitHookEofMode' -Message 'install missing GitHookEofMode parameter.'
     Assert-Contains -Collection $keys -Value 'GitHookEofScope' -Message 'install missing GitHookEofScope parameter.'
+
+    $operationalScriptDirectories = @(
+        (Join-Path $resolvedRepoRoot 'scripts/runtime'),
+        (Join-Path $resolvedRepoRoot 'scripts/validation'),
+        (Join-Path $resolvedRepoRoot 'scripts/git-hooks'),
+        (Join-Path $resolvedRepoRoot 'scripts/governance'),
+        (Join-Path $resolvedRepoRoot 'scripts/maintenance'),
+        (Join-Path $resolvedRepoRoot 'scripts/security')
+    )
+    foreach ($scriptDirectory in $operationalScriptDirectories) {
+        foreach ($operationalScript in @(Get-ChildItem -LiteralPath $scriptDirectory -Filter *.ps1 -File | Sort-Object Name)) {
+            $command = Get-Command -Name $operationalScript.FullName -ErrorAction Stop
+            $keys = @($command.Parameters.Keys)
+            Assert-ContainsAny -Collection $keys -ExpectedValues @('Verbose', 'DetailedLogs', 'DetailedOutput') -Message ("Operational script is missing a verbose-style parameter: {0}" -f $operationalScript.FullName)
+        }
+    }
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $targetGithub = Join-Path $tempRoot '.github'

@@ -166,6 +166,13 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile a
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
 
+Operational PowerShell entrypoints now share one execution-session pattern:
+
+- default runs emit deterministic `Session start` / `Session end` markers
+- default runs keep only necessary progress, errors, and final summaries
+- verbose runs expand metadata and diagnostic detail through `-Verbose`, `-DetailedLogs`, or `-DetailedOutput` depending on the script contract
+- the detailed user-facing contract, switch map, and family-by-family examples live in [scripts/README.md](./scripts/README.md)
+
 ### Cross-Platform Prerequisites
 
 - PowerShell 7+ (`pwsh`) installed on Windows, Linux, or macOS.

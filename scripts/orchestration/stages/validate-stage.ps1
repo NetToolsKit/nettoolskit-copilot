@@ -50,6 +50,9 @@
 .PARAMETER ExecutionBackend
     Validation backend selector. Defaults to `script-only`.
 
+.PARAMETER EffectiveModel
+    Optional resolved model override for future delegated validation backends.
+
 .PARAMETER StageStatePath
     Optional path where stage execution metadata is written.
 

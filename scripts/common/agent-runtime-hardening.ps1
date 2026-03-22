@@ -5,16 +5,26 @@
 .DESCRIPTION
     Provides deterministic helpers for policy evaluation, model routing,
     trace scaffolding, checkpoint state, and resume selection.
+
+.EXAMPLE
+    . ./scripts/common/agent-runtime-hardening.ps1
+    $policyCatalog = Get-AgentRuntimePolicyCatalog -Root $RepoRoot
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Reads a hardening JSON file with orchestration-safe depth.
 function Read-HardeningJsonFile {
     param([Parameter(Mandatory = $true)][string] $Path)
     return (Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json -Depth 200)
 }
 
+# Writes a hardening JSON artifact and creates parent folders when needed.
 function Write-HardeningJsonFile {
     param(
         [Parameter(Mandatory = $true)][string] $Path,
@@ -29,6 +39,7 @@ function Write-HardeningJsonFile {
     Set-Content -LiteralPath $Path -Value ($Value | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
 }
 
+# Reads an optional property from hashtables or PSCustomObjects safely.
 function Get-HardeningOptionalValue {
     param(
         [object] $Object,
@@ -48,6 +59,7 @@ function Get-HardeningOptionalValue {
     return $property.Value
 }
 
+# Resolves a versioned hardening catalog path from explicit or default input.
 function Resolve-HardeningCatalogPath {
     param(
         [Parameter(Mandatory = $true)][string] $Root,
@@ -62,6 +74,7 @@ function Resolve-HardeningCatalogPath {
     return (Resolve-RepoPath -Root $Root -Path $DefaultRelativePath)
 }
 
+# Loads the runtime policy catalog and returns both path and parsed content.
 function Get-AgentRuntimePolicyCatalog {
     param([Parameter(Mandatory = $true)][string] $Root, [string] $CatalogPath)
 
@@ -72,6 +85,7 @@ function Get-AgentRuntimePolicyCatalog {
     }
 }
 
+# Loads the model routing catalog and returns both path and parsed content.
 function Get-AgentModelRoutingCatalog {
     param([Parameter(Mandatory = $true)][string] $Root, [string] $CatalogPath)
 
@@ -82,6 +96,7 @@ function Get-AgentModelRoutingCatalog {
     }
 }
 
+# Resolves the effective model for a stage/agent from routing rules and defaults.
 function Resolve-AgentModelRoutingDecision {
     param(
         [object] $Catalog,
@@ -133,6 +148,7 @@ function Resolve-AgentModelRoutingDecision {
     }
 }
 
+# Extracts planned command text from the current task-plan artifact map.
 function Get-ArtifactPlannedCommands {
     param([hashtable] $ArtifactMap)
 
@@ -159,6 +175,7 @@ function Get-ArtifactPlannedCommands {
     return @($commands | Select-Object -Unique)
 }
 
+# Reads the normalized request text from the orchestration artifact map.
 function Get-NormalizedRequestText {
     param([hashtable] $ArtifactMap)
 
@@ -174,6 +191,7 @@ function Get-NormalizedRequestText {
     return (Get-Content -Raw -LiteralPath $path)
 }
 
+# Tests whether a policy rule applies to the current stage/agent context.
 function Test-PolicyRuleAppliesToContext {
     param(
         [object] $Rule,
@@ -193,6 +211,7 @@ function Test-PolicyRuleAppliesToContext {
     return $true
 }
 
+# Evaluates pre/post stage policy rules and returns warning/block outcomes.
 function Invoke-StagePolicyEvaluation {
     param(
         [Parameter(Mandatory = $true)][object] $Catalog,
@@ -296,6 +315,7 @@ function Invoke-StagePolicyEvaluation {
     }
 }
 
+# Creates the initial trace record scaffold for a pipeline run.
 function Initialize-TraceRecord {
     param([string] $TraceId, [string] $PipelineId, [datetime] $StartedAt)
 
@@ -316,6 +336,7 @@ function Initialize-TraceRecord {
     }
 }
 
+# Appends a stage trace entry and refreshes aggregate summary counters.
 function Add-TraceStageEntry {
     param([object] $TraceRecord, [object] $StageEntry)
 
@@ -328,6 +349,7 @@ function Add-TraceStageEntry {
     $TraceRecord.summary.totalDurationMs = @($TraceRecord.stages | ForEach-Object { [int] $_.durationMs } | Measure-Object -Sum).Sum
 }
 
+# Creates the initial checkpoint state scaffold for a pipeline run.
 function Initialize-CheckpointState {
     param([string] $TraceId, [string] $PipelineId, [datetime] $StartedAt)
 
@@ -343,6 +365,7 @@ function Initialize-CheckpointState {
     }
 }
 
+# Updates checkpoint state for one stage and advances the resumable pointer.
 function Set-CheckpointStageStatus {
     param(
         [object] $CheckpointState,
@@ -375,6 +398,7 @@ function Set-CheckpointStageStatus {
     }
 }
 
+# Selects the next resumable stage from checkpoint state and pipeline order.
 function Get-ResumeCheckpointDecision {
     param(
         [Parameter(Mandatory = $true)][object] $CheckpointState,

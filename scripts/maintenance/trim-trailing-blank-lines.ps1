@@ -79,7 +79,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
 $script:IsVerboseEnabled = [bool] $Verbose
 
 # -------------------------------
@@ -108,18 +108,6 @@ function Write-ColorLine {
     }
 
     Microsoft.PowerShell.Utility\Write-Output ("{0}{1}{2}" -f $ansiColor, $Message, $PSStyle.Reset)
-}
-
-# Writes verbose diagnostics with a logical color label.
-function Write-VerboseColor {
-    param (
-        [string] $Message,
-        [ConsoleColor] $Color = [ConsoleColor]::Gray
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-ColorLine -Message ("[VERBOSE:{0}] {1}" -f $Color, $Message) -Color $Color
-    }
 }
 
 # Resolves the repository root by searching for known repository markers.
@@ -342,6 +330,16 @@ else {
 
 $files = @($files)
 
+Start-ExecutionSession `
+    -Name 'trim-trailing-blank-lines' `
+    -RootPath $root `
+    -Metadata ([ordered]@{
+            'Check-only' = [bool] $CheckOnly
+            'Git changed only' = [bool] $GitChangedOnly
+            'Explicit file mode' = [bool] $hasLiteralPaths
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
+
 Write-ColorLine -Message ("Files found: {0}" -f $files.Count) -Color Yellow
 
 if (($GitChangedOnly -or $hasLiteralPaths) -and $files.Count -gt 0) {
@@ -407,6 +405,11 @@ if ($Verbose -and $changed.Count -gt 0) {
 }
 
 if ($CheckOnly) {
+    $checkOnlyStatus = if ($changed.Count -gt 0) { 'warning' } else { 'passed' }
+    Complete-ExecutionSession -Name 'trim-trailing-blank-lines' -Status $checkOnlyStatus -Summary ([ordered]@{
+            'Files found' = $files.Count
+            'Changed files' = $changed.Count
+        }) | Out-Null
     if ($changed.Count -gt 0) {
         exit 1
     }
@@ -414,5 +417,10 @@ if ($CheckOnly) {
         exit 0
     }
 }
+
+Complete-ExecutionSession -Name 'trim-trailing-blank-lines' -Status 'passed' -Summary ([ordered]@{
+        'Files found' = $files.Count
+        'Changed files' = $changed.Count
+    }) | Out-Null
 
 exit 0

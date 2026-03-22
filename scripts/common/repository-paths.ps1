@@ -245,6 +245,159 @@ function Get-ParentDirectoryPath {
     return $parent
 }
 
+# Writes a session line to console output and optional log file.
+function Write-ExecutionSessionOutput {
+    param(
+        [AllowEmptyString()]
+        [string] $Message
+    )
+
+    $styledOutputCommand = Get-Command -Name Write-StyledOutput -ErrorAction SilentlyContinue
+    if ($null -ne $styledOutputCommand) {
+        Write-StyledOutput $Message | Out-Host
+    }
+    else {
+        Write-Host $Message
+    }
+
+    $logFilePathVariable = Get-Variable -Name LogFilePath -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $logFilePathVariable -and -not [string]::IsNullOrWhiteSpace([string] $logFilePathVariable.Value)) {
+        Add-Content -LiteralPath ([string] $logFilePathVariable.Value) -Value $Message
+    }
+}
+
+# Converts session metadata values into stable single-line text.
+function Convert-ExecutionSessionValueToText {
+    param(
+        [object] $Value
+    )
+
+    if ($null -eq $Value) {
+        return 'none'
+    }
+
+    if ($Value -is [bool]) {
+        return ([bool] $Value).ToString()
+    }
+
+    if ($Value -is [System.Collections.IEnumerable] -and -not ($Value -is [string])) {
+        $items = @($Value | ForEach-Object { [string] $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        if ($items.Count -eq 0) {
+            return 'none'
+        }
+
+        return ($items -join ', ')
+    }
+
+    $text = [string] $Value
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return 'none'
+    }
+
+    return $text
+}
+
+# Starts a deterministic execution session with concise default output and
+# verbose-expanded metadata.
+function Start-ExecutionSession {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Name,
+        [string] $RootPath,
+        [hashtable] $Metadata,
+        [switch] $IncludeMetadataInDefaultOutput
+    )
+
+    $existingStateVariable = Get-Variable -Name ExecutionSessionState -Scope Script -ErrorAction SilentlyContinue
+    if ($null -ne $existingStateVariable -and $null -ne $existingStateVariable.Value -and -not [bool] $existingStateVariable.Value.Completed) {
+        return $existingStateVariable.Value
+    }
+
+    $verboseVariable = Get-Variable -Name IsVerboseEnabled -Scope Script -ErrorAction SilentlyContinue
+    $isVerbose = ($null -ne $verboseVariable) -and [bool] $verboseVariable.Value
+    $resolvedRootPath = if ([string]::IsNullOrWhiteSpace($RootPath)) { $null } else { [string] $RootPath }
+    $sessionMetadata = [ordered]@{}
+    if ($null -ne $Metadata) {
+        foreach ($entry in ($Metadata.GetEnumerator() | Sort-Object Name)) {
+            $sessionMetadata[[string] $entry.Key] = $entry.Value
+        }
+    }
+
+    $sessionState = [pscustomobject]@{
+        Name = $Name
+        StartedAt = Get-Date
+        RootPath = $resolvedRootPath
+        Metadata = $sessionMetadata
+        VerboseEnabled = $isVerbose
+        Completed = $false
+    }
+    $script:ExecutionSessionState = $sessionState
+
+    Write-ExecutionSessionOutput ''
+    Write-ExecutionSessionOutput ("Session start: {0}" -f $Name)
+    if (-not [string]::IsNullOrWhiteSpace($resolvedRootPath)) {
+        Write-ExecutionSessionOutput ("  Repo root: {0}" -f $resolvedRootPath)
+    }
+
+    if ($sessionMetadata.Count -gt 0 -and ($IncludeMetadataInDefaultOutput -or $isVerbose)) {
+        foreach ($entry in $sessionMetadata.GetEnumerator()) {
+            Write-ExecutionSessionOutput ("  {0}: {1}" -f $entry.Key, (Convert-ExecutionSessionValueToText -Value $entry.Value))
+        }
+    }
+
+    return $sessionState
+}
+
+# Completes the current execution session with deterministic status and
+# duration output plus optional summary metrics.
+function Complete-ExecutionSession {
+    param(
+        [string] $Name,
+        [ValidateSet('passed', 'warning', 'failed', 'preview', 'skipped')]
+        [string] $Status = 'passed',
+        [hashtable] $Summary
+    )
+
+    $sessionStateVariable = Get-Variable -Name ExecutionSessionState -Scope Script -ErrorAction SilentlyContinue
+    $sessionState = if ($null -ne $sessionStateVariable) { $sessionStateVariable.Value } else { $null }
+
+    if ($null -eq $sessionState) {
+        $sessionState = [pscustomobject]@{
+            Name = if ([string]::IsNullOrWhiteSpace($Name)) { 'execution' } else { $Name }
+            StartedAt = Get-Date
+            Completed = $false
+        }
+        $script:ExecutionSessionState = $sessionState
+    }
+
+    if ([bool] $sessionState.Completed) {
+        return $sessionState
+    }
+
+    $sessionName = if ([string]::IsNullOrWhiteSpace($Name)) { [string] $sessionState.Name } else { $Name }
+    $finishedAt = Get-Date
+    $durationMs = [int] ($finishedAt - [datetime] $sessionState.StartedAt).TotalMilliseconds
+
+    Write-ExecutionSessionOutput ''
+    Write-ExecutionSessionOutput ("Session end: {0}" -f $sessionName)
+    Write-ExecutionSessionOutput ("  Status: {0}" -f $Status)
+    Write-ExecutionSessionOutput ("  Duration (ms): {0}" -f $durationMs)
+
+    if ($null -ne $Summary) {
+        foreach ($entry in ($Summary.GetEnumerator() | Sort-Object Name)) {
+            Write-ExecutionSessionOutput ("  {0}: {1}" -f $entry.Key, (Convert-ExecutionSessionValueToText -Value $entry.Value))
+        }
+    }
+
+    $sessionState | Add-Member -NotePropertyName FinishedAt -NotePropertyValue $finishedAt -Force
+    $sessionState | Add-Member -NotePropertyName Status -NotePropertyValue $Status -Force
+    $sessionState | Add-Member -NotePropertyName DurationMs -NotePropertyValue $durationMs -Force
+    $sessionState | Add-Member -NotePropertyName Completed -NotePropertyValue $true -Force
+    $script:ExecutionSessionState = $sessionState
+
+    return $sessionState
+}
+
 # Resets the runtime issue registry used by execution logging.
 function Initialize-ExecutionIssueTracking {
     $script:ExecutionIssuesBySignature = @{}

@@ -48,6 +48,9 @@
 .PARAMETER Detailed
     Prints file-level entries for missing, extra, and drifted files.
 
+.PARAMETER Verbose
+    Enables verbose diagnostics in addition to any detailed mapping output.
+
 .PARAMETER SyncOnDrift
     When provided, runs scripts/runtime/bootstrap.ps1 if drift is detected and re-checks.
 
@@ -76,6 +79,7 @@ param(
     [string] $TargetCopilotSkillsPath,
     [string] $RuntimeProfile,
     [switch] $Detailed,
+    [switch] $Verbose,
     [switch] $SyncOnDrift,
     [switch] $StrictExtras
 )
@@ -95,6 +99,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 }
 . $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'runtime-install-profiles', 'runtime-execution-context')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
+$script:IsVerboseEnabled = [bool] ($Verbose -or $Detailed)
 # Builds a file hash inventory for drift comparison operations.
 function Get-FileInventory {
     param(
@@ -441,6 +446,16 @@ $TargetAgentsSkillsPath = $resolvedRuntimeTargets.TargetAgentsSkillsPath
 $TargetCopilotSkillsPath = $resolvedRuntimeTargets.TargetCopilotSkillsPath
 
 Set-Location -Path $resolvedRepoRoot
+Start-ExecutionSession `
+    -Name 'runtime-doctor' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Runtime profile' = $resolvedRuntimeProfile.Name
+            'Detailed output' = [bool] $Detailed
+            'Strict extras' = [bool] $StrictExtras
+            'Sync on drift' = [bool] $SyncOnDrift
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 Write-StyledOutput 'Runtime doctor report'
 Write-StyledOutput ("  repo root: {0}" -f $resolvedRepoRoot)
@@ -493,6 +508,13 @@ if ($hasExtras -and (-not $StrictExtras)) {
     Write-StyledOutput 'Runtime has extra files not tracked by source mappings.'
     Write-StyledOutput 'Use -Detailed to inspect extras and -StrictExtras to fail on extras.'
 }
+
+$doctorStatus = if ($hasDrift) { 'failed' } elseif ($hasExtras) { 'warning' } else { 'passed' }
+Complete-ExecutionSession -Name 'runtime-doctor' -Status $doctorStatus -Summary ([ordered]@{
+        'Mappings checked' = $reports.Count
+        'Has extras' = [bool] $hasExtras
+        'Has drift' = [bool] $hasDrift
+    }) | Out-Null
 
 if ($hasDrift) {
     exit 1

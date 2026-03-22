@@ -347,6 +347,15 @@ $sourceSecurityScripts = $runtimeContext.Sources.SecurityScriptsRoot
 $sourceMaintenanceScripts = $runtimeContext.Sources.MaintenanceScriptsRoot
 
 Set-Location -Path $resolvedRepoRoot
+Start-ExecutionSession `
+    -Name 'runtime-bootstrap' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Runtime profile' = $resolvedRuntimeProfile.Name
+            'Mirror mode' = [bool] $Mirror
+            'Apply MCP config' = [bool] $ApplyMcpConfig
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 Assert-PathPresent -Path $sourceGithub -Label 'source .github folder'
 Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
@@ -413,5 +422,10 @@ else {
 if ($ApplyMcpConfig) {
     Invoke-McpConfigApply -ResolvedRepoRoot $resolvedRepoRoot -CodexPath $TargetCodexPath -CreateBackup:$BackupConfig
 }
+Complete-ExecutionSession -Name 'runtime-bootstrap' -Status 'passed' -Summary ([ordered]@{
+        'GitHub runtime enabled' = [bool] $resolvedRuntimeProfile.EnableGithubRuntime
+        'Codex runtime enabled' = [bool] $resolvedRuntimeProfile.EnableCodexRuntime
+        'MCP config applied' = [bool] $ApplyMcpConfig
+    }) | Out-Null
 
 exit 0

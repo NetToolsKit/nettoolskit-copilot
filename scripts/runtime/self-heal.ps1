@@ -137,6 +137,18 @@ $resolvedOutputPath = $operationArtifacts.PrimaryOutputPath
 $resolvedLogPath = $operationArtifacts.LogPath
 $script:LogFilePath = $resolvedLogPath
 
+Start-RuntimeOperationSession `
+    -Name 'runtime-self-heal' `
+    -ResolvedRepoRoot $resolvedRepoRoot `
+    -RuntimeProfileName $resolvedRuntimeProfile.Name `
+    -PrimaryOutputPath $resolvedOutputPath `
+    -LogPath $resolvedLogPath `
+    -AdditionalMetadata ([ordered]@{
+            'Apply VS Code templates' = [bool] $ApplyVscodeTemplates
+            'Strict extras' = [bool] $StrictExtras
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
+
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
 Write-ExecutionLog -Level 'INFO' -Message ("Runtime profile: {0}" -f $resolvedRuntimeProfile.Name)
 Write-ExecutionLog -Level 'INFO' -Message ("Output report: {0}" -f $resolvedOutputPath)
@@ -240,6 +252,11 @@ Set-Content -LiteralPath $resolvedOutputPath -Value $reportJson
 
 Write-ExecutionLog -Level 'INFO' -Message ("Self-heal summary: total={0} passed={1} failed={2}" -f $steps.Count, $passedSteps, $failedSteps)
 Write-ExecutionLog -Level 'INFO' -Message ("Self-heal report generated: {0}" -f $resolvedOutputPath)
+Complete-RuntimeOperationSession -Name 'runtime-self-heal' -Status $overallStatus -Summary ([ordered]@{
+        'Total steps' = $steps.Count
+        'Passed steps' = $passedSteps
+        'Failed steps' = $failedSteps
+    }) | Out-Null
 
 if ($overallStatus -ne 'passed') {
     exit 1

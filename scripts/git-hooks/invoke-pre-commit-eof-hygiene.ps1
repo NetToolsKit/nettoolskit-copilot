@@ -124,15 +124,29 @@ function Resolve-EofTrimScriptPath {
 $resolvedRepoRoot = Resolve-ExplicitOrGitRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 $effectiveMode = Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
+Start-ExecutionSession `
+    -Name 'pre-commit-eof-hygiene' `
+    -RootPath $resolvedRepoRoot `
+    -Metadata ([ordered]@{
+            'Mode' = $effectiveMode.Name
+            'Source' = $effectiveMode.Source
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 Write-VerboseLog ("EOF hook mode: {0} ({1})" -f $effectiveMode.Name, $effectiveMode.Source)
 
 if (-not $effectiveMode.AutoFixStagedFiles) {
+    Complete-ExecutionSession -Name 'pre-commit-eof-hygiene' -Status 'skipped' -Summary ([ordered]@{
+            'Reason' = 'autofix disabled'
+        }) | Out-Null
     exit 0
 }
 
 $stagedFiles = @(Get-StagedFilePathList -ResolvedRepoRoot $resolvedRepoRoot)
 if ($stagedFiles.Count -eq 0) {
+    Complete-ExecutionSession -Name 'pre-commit-eof-hygiene' -Status 'skipped' -Summary ([ordered]@{
+            'Reason' = 'no staged files'
+        }) | Out-Null
     exit 0
 }
 
@@ -163,4 +177,7 @@ foreach ($stagedFile in $stagedFiles) {
 }
 
 Write-StyledOutput '[pre-commit] EOF autofix completed.'
+Complete-ExecutionSession -Name 'pre-commit-eof-hygiene' -Status 'passed' -Summary ([ordered]@{
+        'Staged files' = $stagedFiles.Count
+    }) | Out-Null
 exit 0

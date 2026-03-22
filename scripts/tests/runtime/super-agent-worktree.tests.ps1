@@ -53,6 +53,8 @@ try {
     & git -C $repoPath init | Out-Null
     & git -C $repoPath config user.email 'super-agent-test@example.invalid' | Out-Null
     & git -C $repoPath config user.name 'Super Agent Test' | Out-Null
+    & git -C $repoPath config core.hooksPath '.git-hooks-disabled' | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $repoPath '.git-hooks-disabled') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $repoPath 'README.md') -Value '# temp repo' -Encoding UTF8 -NoNewline
     & git -C $repoPath add README.md | Out-Null
     & git -C $repoPath commit -m 'init' | Out-Null
@@ -68,8 +70,9 @@ try {
     Assert-True (Test-Path -LiteralPath ([string] $result.worktreePath) -PathType Container) 'Worktree path should exist after creation.'
 
     $worktreeList = @(git -C $repoPath worktree list --porcelain) -join "`n"
+    $normalizedWorktreeList = $worktreeList -replace '\\', '/'
     $normalizedReportedPath = ([string] $result.worktreePath) -replace '\\', '/'
-    Assert-True ($worktreeList -match [regex]::Escape($normalizedReportedPath)) 'git worktree list should include the created worktree.'
+    Assert-True ($normalizedWorktreeList -match [regex]::Escape($normalizedReportedPath)) 'git worktree list should include the created worktree.'
 
     Write-Host '[OK] super-agent worktree tests passed.'
     exit 0

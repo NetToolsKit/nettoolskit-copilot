@@ -174,6 +174,162 @@ pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -GitHookEofMode aut
 
 The VS Code hook bootstrap selects its startup controller from `.github/hooks/super-agent.selector.json`. Keep the repository default in version control and override locally only through `~/.github/hooks/super-agent.selector.local.json` or the environment variables `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`.
 
+Operational scripts now follow a shared execution-session contract:
+
+- default mode stays concise and always emits a deterministic `Session start` / `Session end`
+- default mode keeps only necessary progress, failures, and final summaries
+- verbose mode expands session metadata and script-specific diagnostics
+- supported detail switches are standardized to one of:
+  - `-Verbose`
+  - `-DetailedLogs`
+  - `-DetailedOutput`
+
+Use this contract as the user-facing baseline for every operational entrypoint:
+
+- default run:
+  - prints `Session start`
+  - prints only necessary progress lines
+  - prints warnings/errors
+  - prints the final summary
+  - prints `Session end`
+- detailed run:
+  - keeps the same start/end markers
+  - adds script-specific diagnostics, resolved paths, and child-script detail
+- helper and test scripts may stay internal, but top-level operational entrypoints must expose one of the standardized detail switches above
+
+### Execution Session Examples
+
+#### Default concise runs
+
+```powershell
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all
+pwsh -File .\scripts\runtime\bootstrap.ps1
+pwsh -File .\scripts\runtime\healthcheck.ps1
+pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile dev
+pwsh -File .\scripts\maintenance\trim-trailing-blank-lines.ps1 -GitChangedOnly
+pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1
+```
+
+#### Verbose runtime diagnostics
+
+```powershell
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -Verbose
+pwsh -File .\scripts\runtime\bootstrap.ps1 -Verbose
+pwsh -File .\scripts\runtime\doctor.ps1 -Verbose
+pwsh -File .\scripts\runtime\healthcheck.ps1 -Verbose
+pwsh -File .\scripts\runtime\self-heal.ps1 -Verbose
+pwsh -File .\scripts\runtime\sync-vscode-global-settings.ps1 -Verbose
+pwsh -File .\scripts\runtime\sync-vscode-global-snippets.ps1 -Verbose
+pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -Verbose
+```
+
+#### Detailed orchestration diagnostics
+
+```powershell
+pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Smoke run" -DetailedOutput
+pwsh -File .\scripts\runtime\resume-agent-pipeline.ps1 -RunDirectory .\.temp\runs\<traceId> -DetailedOutput
+pwsh -File .\scripts\runtime\replay-agent-run.ps1 -RunDirectory .\.temp\runs\<traceId> -DetailedOutput
+pwsh -File .\scripts\runtime\evaluate-agent-pipeline.ps1 -OutputPath .\.temp\agent-evals\pipeline-scorecard.json -DetailedOutput
+pwsh -File .\scripts\runtime\invoke-super-agent-brainstorm.ps1 -RequestText "Design the workstream" -DetailedOutput
+pwsh -File .\scripts\runtime\invoke-super-agent-plan.ps1 -RequestText "Write the execution plan" -DetailedOutput
+pwsh -File .\scripts\runtime\invoke-super-agent-execute.ps1 -RequestText "Implement the approved plan" -DetailedOutput
+pwsh -File .\scripts\runtime\invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items" -DetailedOutput
+pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice" -DetailedOutput
+pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -DetailedOutput
+```
+
+#### Validation diagnostics
+
+```powershell
+pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile dev -Verbose
+pwsh -File .\scripts\validation\validate-runtime-script-tests.ps1 -Verbose
+pwsh -File .\scripts\validation\validate-readme-standards.ps1 -Verbose
+pwsh -File .\scripts\validation\validate-powershell-standards.ps1 -Verbose
+pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -Verbose
+pwsh -File .\scripts\validation\validate-planning-structure.ps1 -Verbose
+pwsh -File .\scripts\validation\validate-shared-script-checksums.ps1 -DetailedOutput
+pwsh -File .\scripts\validation\validate-instruction-architecture.ps1 -DetailedOutput
+pwsh -File .\scripts\validation\validate-authoritative-source-policy.ps1 -DetailedOutput
+pwsh -File .\scripts\validation\validate-workspace-efficiency.ps1 -DetailedOutput
+```
+
+#### Security and maintenance diagnostics
+
+```powershell
+pwsh -File .\scripts\security\Invoke-VulnerabilityAudit.ps1 -DetailedLogs
+pwsh -File .\scripts\security\Install-SecurityAuditPrerequisites.ps1 -DetailedLogs
+pwsh -File .\scripts\security\Invoke-FrontendPackageVulnerabilityAudit.ps1 -DetailedLogs
+pwsh -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -DetailedLogs
+pwsh -File .\scripts\security\Invoke-PreBuildSecurityGate.ps1 -DetailedLogs
+pwsh -File .\scripts\security\Invoke-CiPreBuildSecuritySnapshot.ps1 -Verbose
+pwsh -File .\scripts\maintenance\trim-trailing-blank-lines.ps1 -GitChangedOnly -Verbose
+pwsh -File .\scripts\maintenance\clean-build-artifacts.ps1 -Verbose
+pwsh -File .\scripts\maintenance\fix-version-ranges.ps1 -Verbose
+```
+
+#### Git hook and alias diagnostics
+
+```powershell
+pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1 -Verbose
+pwsh -File .\scripts\git-hooks\setup-global-git-aliases.ps1 -Verbose
+pwsh -File .\scripts\git-hooks\invoke-pre-commit-eof-hygiene.ps1 -Verbose
+```
+
+#### Expected default output shape
+
+```text
+Session start: Runtime install
+[STEP] Bootstrap shared runtime assets
+[OK] Bootstrap shared runtime assets
+[STEP] Run repository healthcheck
+[OK] Run repository healthcheck
+Runtime install summary
+  Overall status: passed
+Session end: Runtime install
+```
+
+#### Expected detailed output shape
+
+```text
+Session start: Runtime healthcheck
+[INFO] Repo root: C:\repo
+[INFO] Runtime profile: all
+[INFO] Output report: C:\repo\.temp\healthcheck-report.json
+[INFO] Starting check: validate-all
+...
+Healthcheck summary
+  Passed checks: 2
+  Failed checks: 0
+Session end: Runtime healthcheck
+```
+
+#### Switch map by script family
+
+| Script family | Standard detail switch | Notes |
+| --- | --- | --- |
+| `scripts/runtime/*.ps1` | Usually `-Verbose`; orchestration/replay/eval entrypoints use `-DetailedOutput` where the output is artifact-heavy. | Default mode still prints the same session markers and summary. |
+| `scripts/validation/*.ps1` | Usually `-Verbose`; governance validators with artifact/path-heavy inspection may also expose `-DetailedOutput`. | Default mode stays concise to keep hook/CI output readable. |
+| `scripts/security/*.ps1` | Usually `-DetailedLogs`; some support `-Verbose`. | Use detailed logs when the script shells out to scanners or package managers. |
+| `scripts/maintenance/*.ps1` | Usually `-Verbose`. | Default mode should stay safe for routine cleanup runs. |
+| `scripts/git-hooks/*.ps1` | Usually `-Verbose`. | Helpful when debugging `core.hooksPath`, local/global scope, or staged-file EOF handling. |
+
+#### Practical guidance
+
+- use default mode in normal day-to-day runs, hooks, and onboarding
+- use `-Verbose` when you need resolved paths, extra progress lines, or child-step detail
+- use `-DetailedLogs` for vulnerability/security flows that shell out to external scanners
+- use `-DetailedOutput` for orchestration, replay, evaluation, and artifact-heavy validators
+- if a script is called from another script, keep the parent concise by default and opt in to detail explicitly only when debugging
+- session markers are deterministic by design so hook logs and CI output stay easy to scan
+
+Short examples:
+
+```powershell
+pwsh -File .\scripts\runtime\healthcheck.ps1 -Verbose
+pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Smoke run" -DetailedOutput
+pwsh -File .\scripts\security\Invoke-VulnerabilityAudit.ps1 -DetailedLogs
+```
+
 ---
 
 ## Usage Examples

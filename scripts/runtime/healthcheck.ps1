@@ -141,6 +141,18 @@ $resolvedOutputPath = $operationArtifacts.PrimaryOutputPath
 $resolvedLogPath = $operationArtifacts.LogPath
 $script:LogFilePath = $resolvedLogPath
 
+Start-RuntimeOperationSession `
+    -Name 'runtime-healthcheck' `
+    -ResolvedRepoRoot $resolvedRepoRoot `
+    -RuntimeProfileName $resolvedRuntimeProfile.Name `
+    -PrimaryOutputPath $resolvedOutputPath `
+    -LogPath $resolvedLogPath `
+    -AdditionalMetadata ([ordered]@{
+            'Validation profile' = $ValidationProfile
+            'Warning-only mode' = [bool] $WarningOnly
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
+
 Write-ExecutionLog -Level 'INFO' -Message ("Repo root: {0}" -f $resolvedRepoRoot)
 Write-ExecutionLog -Level 'INFO' -Message ("Validation profile: {0}" -f $ValidationProfile)
 Write-ExecutionLog -Level 'INFO' -Message ("Runtime profile: {0}" -f $resolvedRuntimeProfile.Name)
@@ -206,10 +218,10 @@ $report = [ordered]@{
     generatedAt = (Get-Date).ToString('o')
     repoRoot = $resolvedRepoRoot
     targets = [ordered]@{
-        github = $resolvedTargetGithubPath
-        codex = $resolvedTargetCodexPath
-        agentsSkills = $resolvedTargetAgentsSkillsPath
-        copilotSkills = $resolvedTargetCopilotSkillsPath
+        github = $TargetGithubPath
+        codex = $TargetCodexPath
+        agentsSkills = $TargetAgentsSkillsPath
+        copilotSkills = $TargetCopilotSkillsPath
     }
     options = [ordered]@{
         syncRuntime = [bool] $SyncRuntime
@@ -238,6 +250,12 @@ $report.issues = $issueSummary
 
 Set-Content -LiteralPath $resolvedOutputPath -Value ($report | ConvertTo-Json -Depth 100)
 Write-ExecutionLog -Level 'INFO' -Message ("Healthcheck report generated: {0}" -f $resolvedOutputPath)
+Complete-RuntimeOperationSession -Name 'runtime-healthcheck' -Status $overallStatus -Summary ([ordered]@{
+        'Total checks' = $checks.Count
+        'Passed checks' = $passedChecks
+        'Warning checks' = $warningChecks
+        'Failed checks' = $failedChecks
+    }) | Out-Null
 
 if ($failedChecks -gt 0 -and -not $WarningOnly) {
     exit 1

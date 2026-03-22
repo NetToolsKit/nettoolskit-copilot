@@ -1,6 +1,51 @@
 <#
 .SYNOPSIS
     Resumes a Super Agent pipeline from the last safe checkpoint.
+
+.DESCRIPTION
+    Loads checkpoint state and request artifacts from an existing run
+    directory, resolves the next resumable stage, and re-enters the main
+    pipeline runner from that safe checkpoint.
+
+.PARAMETER RepoRoot
+    Optional repository root. If omitted, auto-detects a root containing .github and .codex.
+
+.PARAMETER RunDirectory
+    Existing run directory that contains checkpoint-state.json and request artifacts.
+
+.PARAMETER ExecutionBackend
+    Pipeline execution backend. Choose between `script-only` and `codex-exec`.
+
+.PARAMETER DispatchCommand
+    Command used to invoke delegated Codex execution when the backend requires it.
+
+.PARAMETER WarningOnly
+    When true (default), pipeline failures are reported as warnings and exit code remains zero.
+
+.PARAMETER StartAtStageId
+    Optional explicit stage override. When omitted, resume uses the checkpoint-declared next safe stage.
+
+.PARAMETER ApprovedStageIds
+    Optional list of stage ids explicitly approved for sensitive execution.
+
+.PARAMETER ApprovedAgentIds
+    Optional list of agent ids explicitly approved for sensitive execution.
+
+.PARAMETER ApprovedBy
+    Required when approval ids are supplied. Identifies who approved the resumed run.
+
+.PARAMETER ApprovalJustification
+    Required when approval ids are supplied. Explains why the resumed sensitive execution was approved.
+
+.PARAMETER DetailedOutput
+    Shows detailed diagnostics.
+
+.EXAMPLE
+    pwsh -File scripts/runtime/resume-agent-pipeline.ps1 -RunDirectory .temp/runs/run-20260322-010203
+
+.NOTES
+    Version: 1.0
+    Requirements: PowerShell 7+.
 #>
 
 param(

@@ -83,8 +83,29 @@ $repoSmokeReadmePath = Join-Path $repoSmokeRoot 'README.md'
 $repoSmokeChangelogPath = Join-Path $repoSmokeRoot 'CHANGELOG.md'
 $createdCompletedPlanPath = $null
 $createdCompletedSpecPath = $null
-$originalApprovalDeniedCompletedPlanBytes = $null
-$originalApprovalDeniedCompletedSpecBytes = $null
+$preservedPlanningArtifacts = [ordered]@{}
+$planningArtifactPathsToPreserve = @(
+    'planning/active/plan-approval-denied-test-implement-enterprise-orchestration-support.md',
+    'planning/specs/active/spec-approval-denied-test-implement-enterprise-orchestration-support.md',
+    'planning/completed/plan-approval-denied-test-implement-enterprise-orchestration-support.md',
+    'planning/specs/completed/spec-approval-denied-test-implement-enterprise-orchestration-support.md',
+    'planning/active/plan-approval-approved-test-implement-enterprise-orchestration-support.md',
+    'planning/specs/active/spec-approval-approved-test-implement-enterprise-orchestration-support.md',
+    'planning/completed/plan-approval-approved-test-implement-enterprise-orchestration-support.md',
+    'planning/specs/completed/spec-approval-approved-test-implement-enterprise-orchestration-support.md',
+    'planning/active/plan-resume-source-test-implement-closeout-smoke-orchestration-support.md',
+    'planning/specs/active/spec-resume-source-test-implement-enterprise-orchestration-support.md',
+    'planning/completed/plan-resume-source-test-implement-closeout-smoke-orchestration-support.md',
+    'planning/specs/completed/spec-resume-source-test-implement-enterprise-orchestration-support.md',
+    'planning/active/plan-run-test-implement-closeout-smoke-orchestration-support.md',
+    'planning/specs/active/spec-run-test-implement-enterprise-orchestration-support.md',
+    'planning/completed/plan-run-test-implement-closeout-smoke-orchestration-support.md',
+    'planning/specs/completed/spec-run-test-implement-enterprise-orchestration-support.md',
+    'planning/active/plan-implement-closeout-smoke-orchestration-support.md',
+    'planning/specs/active/spec-implement-enterprise-orchestration-support.md',
+    'planning/completed/plan-implement-closeout-smoke-orchestration-support.md',
+    'planning/specs/completed/spec-implement-enterprise-orchestration-support.md'
+)
 $activePlanLastWriteTimeUtc = $null
 $activeSpecLastWriteTimeUtc = $null
 $testExitCode = 1
@@ -94,13 +115,14 @@ try {
     New-Item -ItemType Directory -Path $repoSmokeRoot -Force | Out-Null
     Set-Content -LiteralPath $repoSmokeReadmePath -Value '# Runtime Smoke README' -Encoding UTF8 -NoNewline
     Set-Content -LiteralPath $repoSmokeChangelogPath -Value '## [0.0.0] - 2026-03-20' -Encoding UTF8 -NoNewline
-    $approvalDeniedCompletedPlanPath = Join-Path $resolvedRepoRoot 'planning/completed/plan-approval-denied-test-implement-enterprise-orchestration-support.md'
-    $approvalDeniedCompletedSpecPath = Join-Path $resolvedRepoRoot 'planning/specs/completed/spec-approval-denied-test-implement-enterprise-orchestration-support.md'
-    if (Test-Path -LiteralPath $approvalDeniedCompletedPlanPath -PathType Leaf) {
-        $originalApprovalDeniedCompletedPlanBytes = [System.IO.File]::ReadAllBytes($approvalDeniedCompletedPlanPath)
-    }
-    if (Test-Path -LiteralPath $approvalDeniedCompletedSpecPath -PathType Leaf) {
-        $originalApprovalDeniedCompletedSpecBytes = [System.IO.File]::ReadAllBytes($approvalDeniedCompletedSpecPath)
+    foreach ($relativePath in $planningArtifactPathsToPreserve) {
+        $absolutePath = Join-Path $resolvedRepoRoot $relativePath
+        if (Test-Path -LiteralPath $absolutePath -PathType Leaf) {
+            $preservedPlanningArtifacts[$absolutePath] = [ordered]@{
+                bytes = [System.IO.File]::ReadAllBytes($absolutePath)
+                lastWriteTimeUtc = (Get-Item -LiteralPath $absolutePath).LastWriteTimeUtc
+            }
+        }
     }
     $fakeCodexRunnerPath = Join-Path $tempRoot 'fake-codex-runner.ps1'
     $fakeCodexPath = Join-Path $tempRoot 'fake-codex.cmd'
@@ -828,25 +850,21 @@ catch {
     $testExitCode = 1
 }
 finally {
-    if ($null -ne $originalApprovalDeniedCompletedPlanBytes) {
-        [System.IO.File]::WriteAllBytes((Join-Path $resolvedRepoRoot 'planning/completed/plan-approval-denied-test-implement-enterprise-orchestration-support.md'), $originalApprovalDeniedCompletedPlanBytes)
-    }
-    if ($null -ne $originalApprovalDeniedCompletedSpecBytes) {
-        [System.IO.File]::WriteAllBytes((Join-Path $resolvedRepoRoot 'planning/specs/completed/spec-approval-denied-test-implement-enterprise-orchestration-support.md'), $originalApprovalDeniedCompletedSpecBytes)
-    }
-    if (
-        -not [string]::IsNullOrWhiteSpace($createdCompletedPlanPath) -and
-        (Test-Path -LiteralPath $createdCompletedPlanPath -PathType Leaf) -and
-        $createdCompletedPlanPath -ne (Join-Path $resolvedRepoRoot 'planning/completed/plan-approval-denied-test-implement-enterprise-orchestration-support.md')
-    ) {
-        Remove-Item -LiteralPath $createdCompletedPlanPath -Force -ErrorAction SilentlyContinue
-    }
-    if (
-        -not [string]::IsNullOrWhiteSpace($createdCompletedSpecPath) -and
-        (Test-Path -LiteralPath $createdCompletedSpecPath -PathType Leaf) -and
-        $createdCompletedSpecPath -ne (Join-Path $resolvedRepoRoot 'planning/specs/completed/spec-approval-denied-test-implement-enterprise-orchestration-support.md')
-    ) {
-        Remove-Item -LiteralPath $createdCompletedSpecPath -Force -ErrorAction SilentlyContinue
+    foreach ($relativePath in $planningArtifactPathsToPreserve) {
+        $absolutePath = Join-Path $resolvedRepoRoot $relativePath
+        if ($preservedPlanningArtifacts.Contains($absolutePath)) {
+            $backup = $preservedPlanningArtifacts[$absolutePath]
+            $parent = Split-Path -Parent $absolutePath
+            if (-not [string]::IsNullOrWhiteSpace($parent)) {
+                New-Item -ItemType Directory -Path $parent -Force | Out-Null
+            }
+
+            [System.IO.File]::WriteAllBytes($absolutePath, $backup.bytes)
+            (Get-Item -LiteralPath $absolutePath).LastWriteTimeUtc = [datetime] $backup.lastWriteTimeUtc
+        }
+        elseif (Test-Path -LiteralPath $absolutePath -PathType Leaf) {
+            Remove-Item -LiteralPath $absolutePath -Force -ErrorAction SilentlyContinue
+        }
     }
 
     if (Test-Path -LiteralPath $tempRoot) {

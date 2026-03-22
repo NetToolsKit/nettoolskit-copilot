@@ -12,6 +12,9 @@
 .PARAMETER WarningOnly
     When true, failures are emitted as warnings and the script exits with code 0.
 
+.PARAMETER Verbose
+    Shows detailed diagnostics.
+
 .EXAMPLE
     pwsh -File scripts/validation/validate-agent-hooks.ps1 -RepoRoot . -WarningOnly:$false
 
@@ -22,7 +25,8 @@
 
 param(
     [string] $RepoRoot,
-    [bool] $WarningOnly = $true
+    [bool] $WarningOnly = $true,
+    [switch] $Verbose
 )
 
 Set-StrictMode -Version Latest
@@ -40,6 +44,13 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 }
 . $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'validation-logging')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
+$script:IsVerboseEnabled = [bool] $Verbose
+Start-ExecutionSession `
+    -Name 'validate-agent-hooks' `
+    -Metadata ([ordered]@{
+            'Warning-only mode' = [bool] $WarningOnly
+        }) `
+    -IncludeMetadataInDefaultOutput | Out-Null
 
 # Records either a failure or a warning based on validation mode.
 function Add-ValidationMessage {
@@ -185,6 +196,12 @@ Write-ValidationOutput ''
 Write-ValidationOutput 'Agent hooks validation summary'
 Write-ValidationOutput ("  Warnings: {0}" -f $warnings.Count)
 Write-ValidationOutput ("  Failures: {0}" -f $failures.Count)
+
+$sessionStatus = if ($failures.Count -gt 0) { 'failed' } elseif ($warnings.Count -gt 0) { 'warning' } else { 'passed' }
+Complete-ExecutionSession -Name 'validate-agent-hooks' -Status $sessionStatus -Summary ([ordered]@{
+        'Warnings' = $warnings.Count
+        'Failures' = $failures.Count
+    }) | Out-Null
 
 if ($failures.Count -gt 0) {
     exit 1
