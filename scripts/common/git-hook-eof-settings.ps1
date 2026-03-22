@@ -67,7 +67,7 @@ function Get-GitHookEofModeCatalogPath {
         [string] $ResolvedRepoRoot
     )
 
-    $localCatalogPath = Join-Path $ResolvedRepoRoot '.github\governance\git-hook-eof-modes.json'
+    $localCatalogPath = Join-Path (Join-Path $ResolvedRepoRoot '.github') 'governance/git-hook-eof-modes.json'
     if (Test-Path -LiteralPath $localCatalogPath -PathType Leaf) {
         return $localCatalogPath
     }
@@ -79,7 +79,7 @@ function Get-GitHookEofModeCatalogPath {
         }
     }
 
-    $globalCatalogPath = Join-Path (Resolve-GitHookEofUserHomePath) '.github\governance\git-hook-eof-modes.json'
+    $globalCatalogPath = Join-Path (Join-Path (Resolve-GitHookEofUserHomePath) '.github') 'governance/git-hook-eof-modes.json'
     if (Test-Path -LiteralPath $globalCatalogPath -PathType Leaf) {
         return $globalCatalogPath
     }
@@ -182,7 +182,7 @@ function Resolve-GlobalGitHookEofSettingsPath {
         return [System.IO.Path]::GetFullPath($env:CODEX_GIT_HOOK_EOF_SETTINGS_PATH)
     }
 
-    return (Join-Path (Resolve-GitHookEofUserHomePath) '.codex\git-hook-eof-settings.json')
+    return (Join-Path (Join-Path (Resolve-GitHookEofUserHomePath) '.codex') 'git-hook-eof-settings.json')
 }
 
 # Resolves a scope-aware settings path for EOF hook mode selection.

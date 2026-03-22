@@ -83,12 +83,12 @@ param(
 $ErrorActionPreference = 'Stop'
 
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -324,7 +324,7 @@ function Invoke-Doctor {
         [object] $ResolvedRuntimeProfile
     )
 
-    $managedSkillRoot = Join-Path $ResolvedRepoRoot '.codex\skills'
+    $managedSkillRoot = Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'skills'
     $managedSkillPrefixes = @((Get-ManagedSkillNameList -SkillRoot $managedSkillRoot))
 
     $mappings = @()
@@ -344,7 +344,7 @@ function Invoke-Doctor {
             },
             [pscustomobject]@{
                 Name = '.github/skills -> runtime .copilot/skills'
-                Source = Join-Path $ResolvedRepoRoot '.github\skills'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot '.github') 'skills'
                 Target = $TargetCopilotSkillsPath
                 IgnoreExtraPrefixes = @()
             }
@@ -363,37 +363,37 @@ function Invoke-Doctor {
             },
             [pscustomobject]@{
                 Name = '.codex/mcp -> runtime'
-                Source = Join-Path $ResolvedRepoRoot '.codex\mcp'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'mcp'
                 Target = Join-Path $TargetCodexPath 'shared-mcp'
                 IgnoreExtraPrefixes = @()
             },
             [pscustomobject]@{
                 Name = '.codex/scripts (root tools) -> runtime'
-                Source = Join-Path $ResolvedRepoRoot '.codex\scripts'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'scripts'
                 Target = Join-Path $TargetCodexPath 'shared-scripts'
                 IgnoreExtraPrefixes = @('common\', 'common/', 'security\', 'security/', 'maintenance\', 'maintenance/')
             },
             [pscustomobject]@{
                 Name = 'scripts/common -> runtime'
-                Source = Join-Path $ResolvedRepoRoot 'scripts\common'
-                Target = Join-Path $TargetCodexPath 'shared-scripts\common'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot 'scripts') 'common'
+                Target = Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'common'
                 IgnoreExtraPrefixes = @()
             },
             [pscustomobject]@{
                 Name = 'scripts/security -> runtime'
-                Source = Join-Path $ResolvedRepoRoot 'scripts\security'
-                Target = Join-Path $TargetCodexPath 'shared-scripts\security'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot 'scripts') 'security'
+                Target = Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'security'
                 IgnoreExtraPrefixes = @()
             },
             [pscustomobject]@{
                 Name = 'scripts/maintenance -> runtime'
-                Source = Join-Path $ResolvedRepoRoot 'scripts\maintenance'
-                Target = Join-Path $TargetCodexPath 'shared-scripts\maintenance'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot 'scripts') 'maintenance'
+                Target = Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'maintenance'
                 IgnoreExtraPrefixes = @()
             },
             [pscustomobject]@{
                 Name = '.codex/orchestration -> runtime'
-                Source = Join-Path $ResolvedRepoRoot '.codex\orchestration'
+                Source = Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'orchestration'
                 Target = Join-Path $TargetCodexPath 'shared-orchestration'
                 IgnoreExtraPrefixes = @()
             }
@@ -427,12 +427,11 @@ $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 $resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
 
-$userHome = Resolve-UserHomePath
 if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $TargetGithubPath = Join-Path $userHome '.github'
+    $TargetGithubPath = Resolve-GithubRuntimePath
 }
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Join-Path $userHome '.codex'
+    $TargetCodexPath = Resolve-CodexRuntimePath
 }
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
@@ -456,7 +455,7 @@ $hasExtras = Test-HasExtraRuntimeFile -Reports $reports
 
 if ($hasDrift -and $SyncOnDrift) {
     Write-StyledOutput 'Drift detected. Running bootstrap sync...'
-    $bootstrapScript = Join-Path $resolvedRepoRoot 'scripts\runtime\bootstrap.ps1'
+    $bootstrapScript = Join-Path (Join-Path (Join-Path $resolvedRepoRoot 'scripts') 'runtime') 'bootstrap.ps1'
     if (-not (Test-Path -LiteralPath $bootstrapScript)) {
         throw "Bootstrap script not found: $bootstrapScript"
     }

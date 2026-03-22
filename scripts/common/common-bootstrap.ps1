@@ -62,17 +62,22 @@ function Get-CommonHelperRootCandidates {
         [string] $ScriptRoot
     )
 
+    $candidates = New-Object System.Collections.Generic.List[string]
     $relativeCandidates = @(
-        '.\common',
-        '..\common',
-        '..\..\common',
-        '..\shared-scripts\common',
-        '..\..\shared-scripts\common'
+        @('.', 'common'),
+        @('..', 'common'),
+        @('..', '..', 'common'),
+        @('..', '..', 'scripts', 'common'),
+        @('..', 'shared-scripts', 'common'),
+        @('..', '..', 'shared-scripts', 'common')
     )
 
-    $candidates = New-Object System.Collections.Generic.List[string]
     foreach ($relativeCandidate in $relativeCandidates) {
-        $candidatePath = [System.IO.Path]::GetFullPath((Join-Path $ScriptRoot $relativeCandidate))
+        $candidatePath = [System.IO.Path]::GetFullPath($ScriptRoot)
+        foreach ($segment in $relativeCandidate) {
+            $candidatePath = Join-Path $candidatePath $segment
+        }
+        $candidatePath = [System.IO.Path]::GetFullPath($candidatePath)
         if ((Test-Path -LiteralPath $candidatePath -PathType Container) -and -not $candidates.Contains($candidatePath)) {
             $candidates.Add($candidatePath) | Out-Null
         }

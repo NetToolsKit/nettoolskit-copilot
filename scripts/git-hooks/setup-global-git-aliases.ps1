@@ -44,12 +44,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -75,7 +75,7 @@ function Get-ManagedGlobalGitAliases {
     )
 
     $sharedScriptsPath = Join-Path $CodexRuntimeRoot 'shared-scripts'
-    $trimScriptPath = Join-Path $sharedScriptsPath 'maintenance\trim-trailing-blank-lines.ps1'
+    $trimScriptPath = Join-Path (Join-Path $sharedScriptsPath 'maintenance') 'trim-trailing-blank-lines.ps1'
 
     if (-not (Test-Path -LiteralPath $trimScriptPath -PathType Leaf)) {
         throw ("Missing runtime-synced trim script: {0}. Run scripts/runtime/bootstrap.ps1 first." -f $trimScriptPath)
@@ -93,7 +93,7 @@ $null = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Assert-CommandAvailable -CommandName 'git'
 
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Join-Path (Resolve-UserHomePath) '.codex'
+    $TargetCodexPath = Resolve-CodexRuntimePath
 }
 
 $aliasMap = Get-ManagedGlobalGitAliases -CodexRuntimeRoot $TargetCodexPath

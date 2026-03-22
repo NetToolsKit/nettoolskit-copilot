@@ -1,12 +1,21 @@
 [CmdletBinding()]
 param(
-    [string]$ManifestPath = (Join-Path $PSScriptRoot "..\mcp\servers.manifest.json"),
-    [string]$TargetConfigPath = "$env:USERPROFILE\.codex\config.toml",
+    [string]$ManifestPath = (Join-Path $PSScriptRoot '../mcp/servers.manifest.json'),
+    [string]$TargetConfigPath,
     [switch]$CreateBackup,
     [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
+
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../scripts/common/common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
+}
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
+}
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('runtime-paths')
 
 function Escape-TomlString {
     param([Parameter(Mandatory = $true)][string]$Value)
@@ -138,6 +147,10 @@ function Render-McpToml {
     }
 
     return $lines
+}
+
+if ([string]::IsNullOrWhiteSpace($TargetConfigPath)) {
+    $TargetConfigPath = Join-Path (Resolve-CodexRuntimePath) 'config.toml'
 }
 
 if (!(Test-Path $ManifestPath)) {

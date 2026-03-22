@@ -5,6 +5,7 @@ set -u
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$REPO_ROOT"
 CODEX_HOME="${HOME:-${USERPROFILE:-}}"
+CHANGED_FILES="$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null || true)"
 
 # Emergency bypass for troubleshooting sessions.
 if [ "${CODEX_SKIP_POST_COMMIT_SYNC:-0}" = "1" ]; then
@@ -43,10 +44,65 @@ run_ps_file() {
   return $?
 }
 
+# Checks whether the current commit touched a path relevant to one runtime action.
+commit_touched_path() {
+  pattern="$1"
+  if [ -z "$CHANGED_FILES" ]; then
+    return 1
+  fi
+
+  printf '%s\n' "$CHANGED_FILES" | grep -Eq "$pattern"
+}
+
+# Returns true when the current commit touched runtime-managed source assets.
+should_run_runtime_sync() {
+  commit_touched_path '^(\.github/|\.codex/|scripts/)'
+}
+
+# Returns true when the current commit touched VS Code global alignment inputs.
+should_run_vscode_global_check() {
+  commit_touched_path '^(\.vscode/|scripts/runtime/(sync-vscode-global-settings|sync-vscode-global-snippets|validate-vscode-global-alignment)\.ps1)$'
+}
+
+# Resolves the effective Codex runtime root so hooks can honor machine-local overrides.
+resolve_codex_runtime_root() {
+  cmd="$1"
+
+  if [ -n "${CODEX_CODEX_RUNTIME_PATH:-}" ]; then
+    printf '%s\n' "$CODEX_CODEX_RUNTIME_PATH"
+    return 0
+  fi
+
+  resolved_path="$(
+    if [ "$cmd" = "powershell" ]; then
+      "$cmd" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command ". '$REPO_ROOT/scripts/common/common-bootstrap.ps1' -CallerScriptRoot '$REPO_ROOT/scripts/runtime' -Helpers @('runtime-paths'); Resolve-CodexRuntimePath" 2>/dev/null
+    else
+      "$cmd" -NoLogo -NoProfile -Command ". '$REPO_ROOT/scripts/common/common-bootstrap.ps1' -CallerScriptRoot '$REPO_ROOT/scripts/runtime' -Helpers @('runtime-paths'); Resolve-CodexRuntimePath" 2>/dev/null
+    fi
+  )"
+
+  if [ -n "$resolved_path" ]; then
+    printf '%s\n' "$resolved_path"
+    return 0
+  fi
+
+  if [ -n "$CODEX_HOME" ]; then
+    printf '%s\n' "$CODEX_HOME/.codex"
+    return 0
+  fi
+
+  return 1
+}
+
 # Keep local runtime folders aligned with repo source-of-truth.
 run_sync() {
   cmd="$1"
-  echo "[post-commit] Syncing ~/.github and ~/.codex from repository..."
+  if ! should_run_runtime_sync; then
+    echo "[post-commit] Runtime sync skipped; HEAD did not change runtime-managed source assets."
+    return 0
+  fi
+
+  echo "[post-commit] Syncing managed runtime assets from repository..."
   mirror_mode="${CODEX_POST_COMMIT_MIRROR:-1}"
   if [ "$mirror_mode" = "0" ]; then
     sync_args=""
@@ -117,12 +173,13 @@ run_optional_mcp_apply() {
     return 0
   fi
 
-  if [ -z "$CODEX_HOME" ]; then
-    echo "[post-commit] Warning: HOME/USERPROFILE not found; MCP apply skipped." >&2
+  codex_runtime_root="$(resolve_codex_runtime_root "$cmd" || true)"
+  if [ -z "$codex_runtime_root" ]; then
+    echo "[post-commit] Warning: Codex runtime root could not be resolved; MCP apply skipped." >&2
     return 0
   fi
 
-  target_config="$CODEX_HOME/.codex/config.toml"
+  target_config="$codex_runtime_root/config.toml"
   echo "[post-commit] MCP manifest changed. Applying mcp_servers to $target_config ..."
 
   if [ "${CODEX_BACKUP_MCP_CONFIG:-1}" = "1" ]; then
@@ -151,6 +208,11 @@ run_vscode_global_check() {
 
   if [ "${CODEX_SKIP_VSCODE_GLOBAL_CHECK:-0}" = "1" ]; then
     echo "[post-commit] VS Code global check skipped (CODEX_SKIP_VSCODE_GLOBAL_CHECK=1)."
+    return 0
+  fi
+
+  if ! should_run_vscode_global_check; then
+    echo "[post-commit] VS Code global check skipped; HEAD did not change VS Code template inputs."
     return 0
   fi
 

@@ -109,9 +109,35 @@ Use one of these explicit profiles:
 | Profile | What it enables |
 | --- | --- |
 | `none` | Default. No runtime projection, no VS Code global changes, no Git integration changes. |
-| `github` | Only the GitHub/Copilot runtime surface: `%USERPROFILE%\\.github`, `%USERPROFILE%\\.github\\scripts`, and `%USERPROFILE%\\.copilot\\skills`. |
-| `codex` | Only the Codex runtime surface: `%USERPROFILE%\\.agents\\skills` plus `%USERPROFILE%\\.codex\\shared-*`. |
+| `github` | Only the GitHub/Copilot runtime surface: `githubRuntimeRoot`, its mirrored `scripts/`, and `copilotSkillsRoot`. |
+| `codex` | Only the Codex runtime surface: `agentsSkillsRoot` plus `codexRuntimeRoot/shared-*`. |
 | `all` | Everything above plus global VS Code settings/snippets, local Git hooks, global Git aliases, and installer healthcheck. |
+
+Runtime locations are also centralized now:
+
+- versioned defaults live in `.github/governance/runtime-location-catalog.json`
+- optional machine-local overrides live in `${HOME}/.codex/runtime-location-settings.json`
+- every runtime/install script reads the same effective locations from `scripts/common/runtime-paths.ps1`
+
+Example machine-local override:
+
+```json
+{
+  "schemaVersion": 1,
+  "paths": {
+    "githubRuntimeRoot": "D:/ai-runtime/.github",
+    "codexRuntimeRoot": "D:/ai-runtime/.codex",
+    "agentsSkillsRoot": "D:/ai-runtime/.agents/skills",
+    "copilotSkillsRoot": "D:/ai-runtime/.copilot/skills",
+    "codexGitHooksRoot": "D:/ai-runtime/.codex/git-hooks"
+  }
+}
+```
+
+Defaults stay home-relative when no override file exists:
+
+- Windows: `%USERPROFILE%/.github`, `%USERPROFILE%/.codex`, `%USERPROFILE%/.agents/skills`, `%USERPROFILE%/.copilot/skills`
+- Linux/macOS: `$HOME/.github`, `$HOME/.codex`, `$HOME/.agents/skills`, `$HOME/.copilot/skills`
 
 Examples:
 
@@ -249,13 +275,13 @@ pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 
 `bootstrap.ps1` remains the direct runtime sync entrypoint and defaults to runtime profile `all` when called on its own. Use `-RuntimeProfile github` or `-RuntimeProfile codex` when you want the projection to stay scoped to one runtime surface.
 
-With profile `all`, bootstrap syncs versioned `.github/` and `.codex/` assets into your local runtime paths (`~/.github` and `~/.codex`), projects the single visible repository-owned starter/controller into `~/.agents/skills`, projects native Copilot skills into `~/.copilot/skills`, mirrors shared helper scripts from `scripts/common`, `scripts/security`, and `scripts/maintenance` into `~/.codex/shared-scripts`, removes stale duplicate repo-managed skill folders from `~/.codex/skills`, and applies MCP servers into `~/.codex/config.toml` when `-ApplyMcpConfig` is included.
+With profile `all`, bootstrap syncs versioned `.github/` and `.codex/` assets into the effective runtime locations from `runtime-location-catalog.json` plus any local override file, projects the single visible repository-owned starter/controller into `agentsSkillsRoot`, projects native Copilot skills into `copilotSkillsRoot`, mirrors shared helper scripts from `scripts/common`, `scripts/security`, and `scripts/maintenance` into `codexRuntimeRoot/shared-scripts`, removes stale duplicate repo-managed skill folders from `codexRuntimeRoot/skills`, and applies MCP servers into `codexRuntimeRoot/config.toml` when `-ApplyMcpConfig` is included.
 
-The synced `.github/` runtime also carries VS Code hook configuration under `~/.github/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
+The synced GitHub runtime also carries VS Code hook configuration under `githubRuntimeRoot/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 
 The startup controller injected by those hooks is selected from `.github/hooks/super-agent.selector.json`. The repository default remains `Super Agent`, and you can override it without changing tracked files by either:
 
-- creating `~/.github/hooks/super-agent.selector.local.json`
+- creating `githubRuntimeRoot/hooks/super-agent.selector.local.json`
 - setting `COPILOT_SUPER_AGENT_SKILL` and optionally `COPILOT_SUPER_AGENT_NAME`
 
 The repository-owned `PreToolUse` hook also normalizes supported AI edit payloads (`createFile`, `insertEdit`, `replaceString`, and `multiReplaceString`) so files created or edited through VS Code agents preserve the repository EOF policy instead of gaining a terminal newline.
@@ -316,9 +342,12 @@ function Resolve-UserHome {
     throw 'Could not resolve user home path. Set USERPROFILE or HOME.'
 }
 
-$UserHome = Resolve-UserHome
-$GithubRuntimePath = Join-Path $UserHome '.github'
-$CodexRuntimePath = Join-Path $UserHome '.codex'
+. (Join-Path $RepoRoot 'scripts/common/common-bootstrap.ps1') `
+    -CallerScriptRoot (Join-Path $RepoRoot 'scripts/runtime') `
+    -Helpers @('runtime-paths')
+
+$GithubRuntimePath = Resolve-GithubRuntimePath
+$CodexRuntimePath = Resolve-CodexRuntimePath
 
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/bootstrap.ps1') `
     -RepoRoot $RepoRoot `
@@ -331,21 +360,26 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/bootstrap.ps1') `
 
 ```bash
 export REPO_ROOT="${REPO_ROOT:-$(pwd)}"
-export HOME_DIR="${HOME:-$USERPROFILE}"
 
 pwsh -File "$REPO_ROOT/scripts/runtime/bootstrap.ps1" \
   -RepoRoot "$REPO_ROOT" \
-  -TargetGithubPath "$HOME_DIR/.github" \
-  -TargetCodexPath "$HOME_DIR/.codex" \
   -Mirror
 ```
 
 ### Optional Local Override (Not Committed)
 
-Set local environment variables in your shell profile and keep them out of versioned files:
+Prefer the machine-local runtime override file and keep it out of versioned files:
 
 ```powershell
-$env:REPO_ROOT = (Get-Location).Path
+$runtimeOverride = @{
+  schemaVersion = 1
+  paths = @{
+    githubRuntimeRoot = 'D:/ai-runtime/.github'
+    codexRuntimeRoot = 'D:/ai-runtime/.codex'
+  }
+} | ConvertTo-Json -Depth 20
+
+Set-Content -LiteralPath (Join-Path $HOME '.codex/runtime-location-settings.json') -Value $runtimeOverride
 ```
 
 ---
@@ -441,9 +475,9 @@ Use it in any Git repository before `git add` when you want to trim only the fil
 
 ### post-commit
 
-- Runs `scripts/runtime/bootstrap.ps1 -Mirror` (best effort) to sync and clean drift in `~/.github` and managed `~/.codex` folders
+- Runs `scripts/runtime/bootstrap.ps1 -Mirror` (best effort) only when `HEAD` changed runtime-managed source paths under `.github/`, `.codex/`, or `scripts/`
 - If `.codex/mcp/servers.manifest.json` changed in `HEAD`, can optionally apply MCP config
-- Runs `scripts/runtime/validate-vscode-global-alignment.ps1` (best effort) to verify repository `.vscode` templates/snippets are contained in global VS Code User files
+- Runs `scripts/runtime/validate-vscode-global-alignment.ps1` (best effort) only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts
 - Runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort) to clean runtime garbage and stale session/history files by **LastWriteTime** (last update)
 
 ### post-merge

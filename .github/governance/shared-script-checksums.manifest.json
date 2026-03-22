@@ -9,7 +9,7 @@
   "entries": [
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "b28285529d7b220da28bdf9dcf76a91acb2dd49095442ed267babc8a09ceefe7"
+      "sha256": "d813c39e21eea63feca72b8cddff2efa168dba582287d2920fc739bd704e07c9"
     },
     {
       "path": "scripts/common/console-style.ps1",
@@ -17,19 +17,19 @@
     },
     {
       "path": "scripts/common/git-hook-eof-settings.ps1",
-      "sha256": "51013febb2f1c93a48d9107b26177c3d0b9ec0c9ee47ff0d4f0c02ae1c57be52"
+      "sha256": "9f254073cc0fad77f161d300729124307c075f8a9eef45ccbb560d0f509506da"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
-      "sha256": "4869124784ba480b3fe3cec189b1d5b0867b8952bc52770de20ee60f7b8a2bc1"
+      "sha256": "61d2c7d59fe48f46e8ea1a9cab9d0d61b7c7f5028af5278fa502e83202e0d2d3"
     },
     {
       "path": "scripts/common/runtime-install-profiles.ps1",
-      "sha256": "fedea077fa5641a7d6f98a4f432643eaabdcacc71ef9702fced138f3f2a07e40"
+      "sha256": "797049632cd3a5edc6b950616db5dbef75558dc1f42f833906f25668a3c55596"
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "43a7b308279606637db7bf7cc06b361fec7ea5b18e833e7d7c23eeb2106a5ba9"
+      "sha256": "285fa9efdb34f44a7fa8010069fdfae660f635377d27f6d439d54608521d4d46"
     },
     {
       "path": "scripts/common/validation-logging.ps1",

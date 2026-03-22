@@ -75,7 +75,9 @@ function Resolve-RepositoryRoot {
     }
 
     if ($null -ne $scriptRootVariable -and -not [string]::IsNullOrWhiteSpace([string] $scriptRootVariable.Value)) {
-        $candidates += (Resolve-Path -LiteralPath (Join-Path ([string] $scriptRootVariable.Value) '..\..')).Path
+        $scriptRootPath = [string] $scriptRootVariable.Value
+        $repositoryCandidate = Join-Path (Join-Path $scriptRootPath '..') '..'
+        $candidates += (Resolve-Path -LiteralPath $repositoryCandidate).Path
     }
 
     $candidates += (Get-Location).Path

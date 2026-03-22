@@ -126,12 +126,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -253,6 +253,7 @@ function Resolve-InstallGitHookEofScope {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile
+$effectiveRuntimeLocations = Get-EffectiveRuntimeLocations
 $requestedGitHookEofSelection = (-not [string]::IsNullOrWhiteSpace($GitHookEofMode)) -or (-not [string]::IsNullOrWhiteSpace($GitHookEofScope))
 $currentEffectiveGitHookEofMode = if ($requestedGitHookEofSelection) {
     Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
@@ -351,7 +352,7 @@ if ($shouldConfigureLocalGitHooks) {
 if ($resolvedRuntimeProfile.InstallGlobalGitAliases -and -not $SkipGitHooks) {
     $globalAliasArguments = @{
         RepoRoot = $resolvedRepoRoot
-        TargetCodexPath = if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) { $TargetCodexPath } else { Join-Path (Resolve-UserHomePath) '.codex' }
+        TargetCodexPath = if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) { $TargetCodexPath } else { Resolve-CodexRuntimePath }
     }
     $steps.Add((New-InstallStep -Name 'Configure global Git aliases' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-global-git-aliases.ps1') -Arguments $globalAliasArguments)) | Out-Null
 }
@@ -400,6 +401,8 @@ Write-StyledOutput '' | Out-Host
 Write-StyledOutput 'Runtime install summary' | Out-Host
 Write-StyledOutput ("  Runtime profile: {0}" -f $resolvedRuntimeProfile.Name) | Out-Host
 Write-StyledOutput ("  Profile catalog: {0}" -f $resolvedRuntimeProfile.CatalogPath) | Out-Host
+Write-StyledOutput ("  Runtime location catalog: {0}" -f $effectiveRuntimeLocations.catalogPath) | Out-Host
+Write-StyledOutput ("  Runtime location overrides: {0}" -f ($(if ($effectiveRuntimeLocations.settingsExists) { $effectiveRuntimeLocations.settingsPath } else { 'none' }))) | Out-Host
 Write-StyledOutput ("  Preview-only: {0}" -f ([bool] $PreviewOnly)) | Out-Host
 Write-StyledOutput ("  Planned steps: {0}" -f $steps.Count) | Out-Host
 Write-StyledOutput ("  Executed steps: {0}" -f $resultItems.Count) | Out-Host
@@ -415,6 +418,16 @@ $output = [pscustomobject]@{
         description = $resolvedRuntimeProfile.Description
         defaultProfile = $resolvedRuntimeProfile.DefaultProfile
         catalogPath = $resolvedRuntimeProfile.CatalogPath
+    }
+    runtimeLocations = [pscustomobject]@{
+        catalogPath = $effectiveRuntimeLocations.catalogPath
+        settingsPath = $effectiveRuntimeLocations.settingsPath
+        settingsExists = [bool] $effectiveRuntimeLocations.settingsExists
+        githubRuntimeRoot = $effectiveRuntimeLocations.githubRuntimeRoot
+        codexRuntimeRoot = $effectiveRuntimeLocations.codexRuntimeRoot
+        agentsSkillsRoot = $effectiveRuntimeLocations.agentsSkillsRoot
+        copilotSkillsRoot = $effectiveRuntimeLocations.copilotSkillsRoot
+        codexGitHooksRoot = $effectiveRuntimeLocations.codexGitHooksRoot
     }
     gitHookEofMode = if ($null -ne $resolvedGitHookEofMode) {
         [pscustomobject]@{

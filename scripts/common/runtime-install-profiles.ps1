@@ -50,7 +50,7 @@ function Get-RuntimeInstallProfileCatalogPath {
         [string] $ResolvedRepoRoot
     )
 
-    return (Join-Path $ResolvedRepoRoot '.github\governance\runtime-install-profiles.json')
+    return (Join-Path (Join-Path $ResolvedRepoRoot '.github') 'governance/runtime-install-profiles.json')
 }
 
 # Loads the versioned runtime install profile catalog.

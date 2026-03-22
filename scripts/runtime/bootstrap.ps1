@@ -86,12 +86,12 @@ param(
 $ErrorActionPreference = 'Stop'
 
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -299,8 +299,8 @@ function Invoke-McpConfigApply {
         [switch] $CreateBackup
     )
 
-    $syncScript = Join-Path $ResolvedRepoRoot '.codex\scripts\sync-mcp-to-codex-config.ps1'
-    $manifest = Join-Path $ResolvedRepoRoot '.codex\mcp\servers.manifest.json'
+    $syncScript = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'scripts') 'sync-mcp-to-codex-config.ps1'
+    $manifest = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'mcp') 'servers.manifest.json'
     $targetConfig = Join-Path $CodexPath 'config.toml'
 
     Assert-PathPresent -Path $syncScript -Label 'MCP sync script'
@@ -325,13 +325,13 @@ function Invoke-McpConfigApply {
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 $resolvedRuntimeProfile = Resolve-RuntimeInstallProfile -ResolvedRepoRoot $resolvedRepoRoot -ProfileName $RuntimeProfile -FallbackProfileName 'all'
+$effectiveRuntimeLocations = Get-EffectiveRuntimeLocations
 
-$userHome = Resolve-UserHomePath
 if ([string]::IsNullOrWhiteSpace($TargetGithubPath)) {
-    $TargetGithubPath = Join-Path $userHome '.github'
+    $TargetGithubPath = Resolve-GithubRuntimePath
 }
 if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
-    $TargetCodexPath = Join-Path $userHome '.codex'
+    $TargetCodexPath = Resolve-CodexRuntimePath
 }
 if ([string]::IsNullOrWhiteSpace($TargetAgentsSkillsPath)) {
     $TargetAgentsSkillsPath = Resolve-AgentsSkillsPath
@@ -370,9 +370,9 @@ if ($resolvedRuntimeProfile.EnableCodexRuntime) {
     Remove-ManagedCodexSkillDuplicates -ManagedSourceRoot (Join-Path $sourceCodex 'skills') -CodexSkillsRoot (Join-Path $TargetCodexPath 'skills')
     Invoke-DirectorySync -Source (Join-Path $sourceCodex 'mcp') -Destination (Join-Path $TargetCodexPath 'shared-mcp') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceCodexScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts') -MirrorMode:$Mirror
-    Invoke-DirectorySync -Source $sourceCommonScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\common') -MirrorMode:$Mirror
-    Invoke-DirectorySync -Source $sourceSecurityScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\security') -MirrorMode:$Mirror
-    Invoke-DirectorySync -Source $sourceMaintenanceScripts -Destination (Join-Path $TargetCodexPath 'shared-scripts\maintenance') -MirrorMode:$Mirror
+    Invoke-DirectorySync -Source $sourceCommonScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'common') -MirrorMode:$Mirror
+    Invoke-DirectorySync -Source $sourceSecurityScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'security') -MirrorMode:$Mirror
+    Invoke-DirectorySync -Source $sourceMaintenanceScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'maintenance') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source (Join-Path $sourceCodex 'orchestration') -Destination (Join-Path $TargetCodexPath 'shared-orchestration') -MirrorMode:$Mirror
 }
 else {
@@ -388,6 +388,8 @@ if ($resolvedRuntimeProfile.EnableCodexRuntime -and (Test-Path -LiteralPath $sha
 Write-StyledOutput 'Sync complete.'
 Write-StyledOutput ("  runtime profile: {0}" -f $resolvedRuntimeProfile.Name)
 Write-StyledOutput ("  profile catalog: {0}" -f $resolvedRuntimeProfile.CatalogPath)
+Write-StyledOutput ("  runtime location catalog: {0}" -f $effectiveRuntimeLocations.catalogPath)
+Write-StyledOutput ("  runtime location overrides: {0}" -f ($(if ($effectiveRuntimeLocations.settingsExists) { $effectiveRuntimeLocations.settingsPath } else { 'none' })))
 if ($resolvedRuntimeProfile.EnableGithubRuntime) {
     Write-StyledOutput ("  .github -> {0}" -f $TargetGithubPath)
     Write-StyledOutput ("  scripts -> {0}" -f (Join-Path $TargetGithubPath 'scripts'))

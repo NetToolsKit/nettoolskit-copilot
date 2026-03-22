@@ -47,6 +47,37 @@
   - `scripts/README.md`
 
 ### Fixed
+- Made runtime sync/install and Git hook helpers portable across machines and OS layouts by introducing a versioned runtime location catalog plus machine-local overrides, replacing hardcoded `%USERPROFILE%\\.github` / `%USERPROFILE%\\.codex` assumptions with shared `githubRuntimeRoot`, `codexRuntimeRoot`, `agentsSkillsRoot`, and `copilotSkillsRoot` resolution across the runtime toolchain:
+  - `.github/governance/runtime-location-catalog.json`
+  - `scripts/common/runtime-paths.ps1`
+  - `scripts/common/common-bootstrap.ps1`
+  - `scripts/common/repository-paths.ps1`
+  - `scripts/common/runtime-install-profiles.ps1`
+  - `scripts/common/git-hook-eof-settings.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/runtime/healthcheck.ps1`
+  - `scripts/runtime/self-heal.ps1`
+  - `scripts/runtime/clean-codex-runtime.ps1`
+  - `scripts/runtime/sync-vscode-global-settings.ps1`
+  - `scripts/runtime/sync-vscode-global-snippets.ps1`
+  - `scripts/runtime/validate-vscode-global-alignment.ps1`
+  - `scripts/git-hooks/setup-git-hooks.ps1`
+  - `scripts/git-hooks/setup-global-git-aliases.ps1`
+  - `scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1`
+  - `.codex/scripts/sync-mcp-to-codex-config.ps1`
+  - `scripts/validation/export-audit-report.ps1`
+  - `README.md`
+  - `scripts/README.md`
+- Reduced `post-commit` latency by gating expensive work on the actual files changed in `HEAD`, so runtime bootstrap and VS Code global alignment now skip unrelated commits while MCP apply still targets the effective Codex runtime root:
+  - `.githooks/post-commit`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/install.ps1`
+  - `scripts/runtime/doctor.ps1`
+  - `scripts/common/runtime-paths.ps1`
+  - `README.md`
+  - `scripts/README.md`
 - Added a configurable EOF hygiene mode for Git hooks so each clone/PC can keep the default `manual` behavior, opt into intrusive staged-file autofix during `pre-commit`, and choose whether the setting is stored per repo clone or globally for the machine, with `global` now configuring a real machine-wide `core.hooksPath` and the effective mode resolved on every commit:
   - `.github/governance/git-hook-eof-modes.json`
   - `scripts/common/git-hook-eof-settings.ps1`

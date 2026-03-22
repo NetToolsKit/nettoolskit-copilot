@@ -91,6 +91,8 @@ try {
     Assert-True -Condition ($null -ne $previewResult) -Message 'Install preview must return a result object.'
     Assert-Equal -Actual $previewResult.previewOnly -Expected $true -Message 'Install preview must flag previewOnly.'
     Assert-Equal -Actual $previewResult.runtimeProfile.name -Expected 'none' -Message 'Install preview must default to the non-intrusive none profile.'
+    Assert-True -Condition ($null -ne $previewResult.runtimeLocations) -Message 'Install preview must expose effective runtime locations.'
+    Assert-True -Condition (-not [string]::IsNullOrWhiteSpace([string] $previewResult.runtimeLocations.catalogPath)) -Message 'Install preview must report the runtime location catalog path.'
     Assert-Equal -Actual @($previewResult.steps).Count -Expected 0 -Message 'Install preview must not plan any steps for the default none profile.'
     Assert-Equal -Actual $previewResult.summary.overallStatus -Expected 'preview' -Message 'Install preview must report preview summary status.'
     Assert-Equal -Actual $previewResult.issues.totalIssues -Expected 0 -Message 'Install preview must not report issues when only planning.'

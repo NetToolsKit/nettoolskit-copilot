@@ -98,7 +98,8 @@ search = true
 '@ | Set-Content -LiteralPath $configPath
 
     & $scriptPath -ManifestPath $manifestPath -TargetConfigPath $configPath -CreateBackup | Out-Null
-    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
+    $exitCode = if ($null -eq $lastExitCodeVariable) { 0 } else { [int] $lastExitCodeVariable.Value }
     Assert-True -Condition ($exitCode -eq 0) -Message 'sync-mcp-to-codex-config should succeed for mixed stdio/http manifests.'
 
     $content = Get-Content -LiteralPath $configPath -Raw

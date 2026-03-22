@@ -29,12 +29,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -108,12 +108,12 @@ function Resolve-EofTrimScriptPath {
         }
     }
 
-    $repoLocalTrimPath = Join-Path $ResolvedRepoRoot 'scripts\maintenance\trim-trailing-blank-lines.ps1'
+    $repoLocalTrimPath = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot 'scripts') 'maintenance') 'trim-trailing-blank-lines.ps1'
     if (Test-Path -LiteralPath $repoLocalTrimPath -PathType Leaf) {
         return $repoLocalTrimPath
     }
 
-    $runtimeTrimPath = Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance\trim-trailing-blank-lines.ps1'
+    $runtimeTrimPath = Join-Path (Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance') 'trim-trailing-blank-lines.ps1'
     if (Test-Path -LiteralPath $runtimeTrimPath -PathType Leaf) {
         return $runtimeTrimPath
     }

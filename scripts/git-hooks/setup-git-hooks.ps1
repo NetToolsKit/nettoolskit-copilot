@@ -63,12 +63,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -163,13 +163,13 @@ function Get-ManagedGlobalGitHookPaths {
 
     $globalHooksPath = Resolve-CodexGitHooksPath
     $runtimeGithubPath = Resolve-GithubRuntimePath
-    $runtimeRunnerPath = Join-Path $runtimeGithubPath 'scripts\git-hooks\invoke-pre-commit-eof-hygiene.ps1'
-    $runtimeCatalogPath = Join-Path $runtimeGithubPath 'governance\git-hook-eof-modes.json'
-    $runtimeTrimScriptPath = Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance\trim-trailing-blank-lines.ps1'
+    $runtimeRunnerPath = Join-Path (Join-Path (Join-Path $runtimeGithubPath 'scripts') 'git-hooks') 'invoke-pre-commit-eof-hygiene.ps1'
+    $runtimeCatalogPath = Join-Path (Join-Path $runtimeGithubPath 'governance') 'git-hook-eof-modes.json'
+    $runtimeTrimScriptPath = Join-Path (Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance') 'trim-trailing-blank-lines.ps1'
 
-    $repoRunnerPath = Join-Path $SourceRepoRoot 'scripts\git-hooks\invoke-pre-commit-eof-hygiene.ps1'
-    $repoCatalogPath = Join-Path $SourceRepoRoot '.github\governance\git-hook-eof-modes.json'
-    $repoTrimScriptPath = Join-Path $SourceRepoRoot 'scripts\maintenance\trim-trailing-blank-lines.ps1'
+    $repoRunnerPath = Join-Path (Join-Path (Join-Path $SourceRepoRoot 'scripts') 'git-hooks') 'invoke-pre-commit-eof-hygiene.ps1'
+    $repoCatalogPath = Join-Path (Join-Path $SourceRepoRoot '.github') 'governance/git-hook-eof-modes.json'
+    $repoTrimScriptPath = Join-Path (Join-Path (Join-Path $SourceRepoRoot 'scripts') 'maintenance') 'trim-trailing-blank-lines.ps1'
 
     return [pscustomobject]@{
         GlobalHooksPath = $globalHooksPath
@@ -381,7 +381,7 @@ else {
 }
 
 if ($eofModeSelection.Scope.Name -eq 'local-repo') {
-    Write-StyledOutput '  post-commit: .githooks/post-commit (syncs ~/.github and ~/.codex via scripts/runtime/bootstrap.ps1)'
+    Write-StyledOutput '  post-commit: .githooks/post-commit (syncs effective runtime targets via scripts/runtime/bootstrap.ps1)'
     Write-StyledOutput '  post-merge: .githooks/post-merge (runs validate-all with profile=release, warning-only, best effort)'
     Write-StyledOutput '  post-checkout: .githooks/post-checkout (runs validate-all with profile=dev, warning-only, best effort)'
 }

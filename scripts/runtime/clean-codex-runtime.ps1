@@ -57,12 +57,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\common\common-bootstrap.ps1'
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
-    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '..\..\shared-scripts\common\common-bootstrap.ps1'
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
 }
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
@@ -269,8 +269,7 @@ function Invoke-EmptyDirectoryRemoval {
 }
 
 if ([string]::IsNullOrWhiteSpace($CodexHome)) {
-    $userHome = Resolve-UserHomePath
-    $CodexHome = Join-Path $userHome '.codex'
+    $CodexHome = Resolve-CodexRuntimePath
 }
 
 $resolvedCodexHome = Resolve-CodexHomePath -RequestedPath $CodexHome
