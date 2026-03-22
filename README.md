@@ -463,6 +463,39 @@ git trim-eof
 
 Use it in any Git repository before `git add` when you want to trim only the files currently reported by `git status`.
 
+### Do You Still Need `git trim-eof`?
+
+- If you enabled `autofix` with `-EofHygieneScope global` and the current repository inherits the global `core.hooksPath`, you do not need to run `git trim-eof` manually for normal commits on that machine. The managed global `pre-commit` hook trims staged files automatically.
+- `git trim-eof` is still useful when you want to clean files before staging, inspect the diff before commit, or work in repositories that intentionally stay in `manual` mode.
+- `git trim-eof` remains a manual helper. Automatic cleanup happens only on `pre-commit`.
+
+### Global Autofix Limits
+
+- Git has no native `pre-add` hook. Automatic cleanup does not run on `git add` or the VS Code stage action itself; it runs on `pre-commit`.
+- Local hook-path precedence still applies:
+  - `git config --local core.hooksPath` overrides `git config --global core.hooksPath`
+  - repositories with a local override do not inherit the managed global `pre-commit`
+- The managed global hook only applies EOF hygiene. Repository-specific validation and `post-*` hooks still require a local `.githooks` setup in that repository.
+- In `autofix` mode, the commit is blocked when a file has both staged and unstaged changes, because automatic restaging would be unsafe.
+
+Examples:
+
+```powershell
+# enable global EOF autofix for repositories that inherit the machine-wide hooks path
+pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global
+
+# confirm the global hook path that repositories will inherit
+git config --global --get core.hooksPath
+
+# check whether the current repository is overriding the global hook path
+git config --local --get core.hooksPath
+
+# optional manual cleanup when you want to inspect EOF fixes before staging
+git trim-eof
+git add .
+git commit -m "Apply change"
+```
+
 ### pre-commit
 
 - Resolves EOF hygiene from `.git/codex-hook-eof-settings.json`, then `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`, then the catalog default

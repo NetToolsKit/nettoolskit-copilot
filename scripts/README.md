@@ -580,6 +580,9 @@ After setup, hooks behavior is:
 - `pre-commit` in `autofix` mode: trims only staged files, re-stages them, and blocks the commit when a file has both staged and unstaged changes because auto-restaging would be unsafe
 - repo-local `pre-commit`: then runs `validate-all -ValidationProfile dev -WarningOnly true` (best effort, warning-only)
 - global `pre-commit`: runs only EOF hygiene; repository-specific validation/post-* hooks still require a local `.githooks` override
+- if `autofix` is configured in `global` scope and the repository does not override `core.hooksPath` locally, you do not need to run `git trim-eof` manually for normal commits
+- `git trim-eof` still matters when you want cleanup before staging, when you want to inspect the diff first, or when the repository stays in `manual` mode
+- Git has no native `pre-add` hook, so automatic EOF cleanup happens on commit, not on `git add` or the VS Code stage action
 - `post-commit`: runs `scripts/runtime/bootstrap.ps1 -Mirror` only when `HEAD` changed runtime-managed source paths under `.github/`, `.codex/`, or `scripts/` (best effort)
 - `post-commit`: runs `scripts/runtime/validate-vscode-global-alignment.ps1` only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts (best effort)
 - `post-commit`: runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort)
@@ -594,6 +597,24 @@ After setup, hooks behavior is:
 - `post-commit` and `post-merge` log retention: `CODEX_LOG_RETENTION_DAYS=<n>` (`30` default, by `LastWriteTime`)
 - `post-commit` and `post-merge` session cleanup toggle: `CODEX_INCLUDE_SESSIONS_CLEANUP=0|1` (`1` default)
 - `post-commit` and `post-merge` session retention: `CODEX_SESSION_RETENTION_DAYS=<n>` (`30` default, by `LastWriteTime`)
+
+Practical examples:
+
+```powershell
+# machine-wide EOF autofix for repositories that inherit the global hooks path
+pwsh -File .\scripts\git-hooks\setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global
+
+# verify the global hook path
+git config --global --get core.hooksPath
+
+# verify whether the current repository overrides the global hook path
+git config --local --get core.hooksPath
+
+# optional manual cleanup before staging when you want to inspect the diff
+git trim-eof
+git add .
+git commit -m "Apply change"
+```
 
 To skip sync for a single shell session:
 ```powershell

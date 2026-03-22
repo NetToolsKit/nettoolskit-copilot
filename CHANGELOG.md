@@ -2,6 +2,7 @@
 
 ### Changed
 - Added smoke-test coverage for closeout-driven README and CHANGELOG updates.
+- Clarified the global EOF autofix contract in `README.md` and `scripts/README.md`, including the `core.hooksPath` override limit, the absence of a native Git `pre-add` hook, and when the manual `git trim-eof` alias is still useful even after enabling machine-wide `autofix`.
 
 ## [9.9.9] - 2026-03-20
 
