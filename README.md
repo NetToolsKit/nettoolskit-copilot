@@ -352,7 +352,11 @@ $env:REPO_ROOT = (Get-Location).Path
 
 ## Git Hooks
 
-Local hooks are managed by `core.hooksPath=.githooks`.
+Git hook authority is scope-aware:
+
+- `local-repo` uses `git config --local core.hooksPath .githooks`
+- `global` uses `git config --global core.hooksPath %USERPROFILE%/.codex/git-hooks`
+- local repo config still overrides the global hook path when both exist
 
 ### Setup
 
@@ -372,7 +376,7 @@ Supported modes and scopes are defined in `.github/governance/git-hook-eof-modes
 | Scope | Behavior |
 | --- | --- |
 | `local-repo` | Less intrusive default scope. Persists the selection only for the current clone/worktree under `.git/`. |
-| `global` | Persists the selection once under `%USERPROFILE%\\.codex\\git-hook-eof-settings.json` so repositories using this hook runtime inherit it unless they define a local override. |
+| `global` | Persists the selection once under `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`, installs a managed machine-wide `pre-commit` hook under `%USERPROFILE%\\.codex\\git-hooks`, and configures `git config --global core.hooksPath` so repositories inherit it unless they define a local override. |
 
 Examples:
 
@@ -383,7 +387,7 @@ pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode manual -EofHy
 # opt this clone/PC into automatic staged EOF cleanup during pre-commit
 pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope local-repo
 
-# apply the same EOF mode globally for repositories using this hook runtime
+# apply the same EOF mode globally and make global core.hooksPath the authority
 pwsh -File ./scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global
 
 # same opt-in through the installer; when scope is omitted it asks whether you want global
@@ -394,6 +398,8 @@ Settings files:
 
 - `.git/codex-hook-eof-settings.json`
 - `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`
+- local hook path: `git config --local core.hooksPath`
+- global hook path: `git config --global core.hooksPath`
 
 Resolution order on every commit:
 
@@ -402,6 +408,8 @@ Resolution order on every commit:
 3. catalog default (`manual` + `local-repo`)
 
 `pre-commit` reads that configuration on every commit, so changing local or global scope takes effect immediately on the next commit without editing tracked files.
+
+When `global` is configured, the managed global hook directory contains the shared `pre-commit` EOF hygiene hook only. Repository-specific `post-commit`, `post-merge`, and `post-checkout` flows remain local to repos that explicitly opt into `.githooks`.
 
 ### Global Manual Alias
 

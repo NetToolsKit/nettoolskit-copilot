@@ -67,7 +67,24 @@ function Get-GitHookEofModeCatalogPath {
         [string] $ResolvedRepoRoot
     )
 
-    return (Join-Path $ResolvedRepoRoot '.github\governance\git-hook-eof-modes.json')
+    $localCatalogPath = Join-Path $ResolvedRepoRoot '.github\governance\git-hook-eof-modes.json'
+    if (Test-Path -LiteralPath $localCatalogPath -PathType Leaf) {
+        return $localCatalogPath
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_GIT_HOOK_EOF_CATALOG_PATH)) {
+        $overrideCatalogPath = [System.IO.Path]::GetFullPath($env:CODEX_GIT_HOOK_EOF_CATALOG_PATH)
+        if (Test-Path -LiteralPath $overrideCatalogPath -PathType Leaf) {
+            return $overrideCatalogPath
+        }
+    }
+
+    $globalCatalogPath = Join-Path (Resolve-GitHookEofUserHomePath) '.github\governance\git-hook-eof-modes.json'
+    if (Test-Path -LiteralPath $globalCatalogPath -PathType Leaf) {
+        return $globalCatalogPath
+    }
+
+    return $localCatalogPath
 }
 
 # Loads the versioned EOF hook mode catalog.

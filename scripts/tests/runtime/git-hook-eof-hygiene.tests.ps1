@@ -168,7 +168,12 @@ $runnerScriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/invoke-pre-co
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $previousGlobalSettingsOverride = $env:CODEX_GIT_HOOK_EOF_SETTINGS_PATH
+    $previousGlobalHooksPathOverride = $env:CODEX_GIT_HOOKS_PATH
+    $previousGitConfigGlobal = $env:GIT_CONFIG_GLOBAL
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'global') -Force | Out-Null
     $env:CODEX_GIT_HOOK_EOF_SETTINGS_PATH = Join-Path $tempRoot 'global\git-hook-eof-settings.json'
+    $env:CODEX_GIT_HOOKS_PATH = Join-Path $tempRoot 'global-hooks'
+    $env:GIT_CONFIG_GLOBAL = Join-Path $tempRoot 'global\.gitconfig'
     try {
         $manualRepoRoot = Join-Path $tempRoot 'manual-repo'
         New-MinimalHookTestRepository -SourceRepoRoot $resolvedRepoRoot -TargetRepoRoot $manualRepoRoot
@@ -247,6 +252,11 @@ try {
         Assert-Equal -Actual $globalSettings.selectedMode -Expected 'autofix' -Message 'Global mode setup must persist the selected EOF mode.'
         Assert-Equal -Actual $globalSettings.selectedScope -Expected 'global' -Message 'Global mode setup must persist the selected EOF scope.'
         Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $globalRepoRoot '.git\codex-hook-eof-settings.json') -PathType Leaf)) -Message 'Global mode setup must not leave a local override file behind.'
+        $globalConfiguredHooksPath = (& git config --global --get core.hooksPath 2>$null)
+        Assert-Equal -Actual ([System.IO.Path]::GetFullPath($globalConfiguredHooksPath.Trim())) -Expected ([System.IO.Path]::GetFullPath($env:CODEX_GIT_HOOKS_PATH)) -Message 'Global mode setup must configure global core.hooksPath to the managed global hooks path.'
+        $globalLocalConfiguredHooksPath = (& git -C $globalRepoRoot config --local --get core.hooksPath 2>$null)
+        Assert-True -Condition ([string]::IsNullOrWhiteSpace([string] $globalLocalConfiguredHooksPath)) -Message 'Global mode setup must not leave a local core.hooksPath override behind.'
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $env:CODEX_GIT_HOOKS_PATH 'pre-commit') -PathType Leaf) -Message 'Global mode setup must install a managed pre-commit hook in the global hooks path.'
 
         $globalFile = Join-Path $globalRepoRoot 'global.cs'
         Write-TextFile -Path $globalFile -Content 'public sealed class GlobalMode { }'
@@ -293,6 +303,20 @@ try {
         }
         else {
             $env:CODEX_GIT_HOOK_EOF_SETTINGS_PATH = $previousGlobalSettingsOverride
+        }
+
+        if ([string]::IsNullOrWhiteSpace($previousGlobalHooksPathOverride)) {
+            Remove-Item Env:CODEX_GIT_HOOKS_PATH -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:CODEX_GIT_HOOKS_PATH = $previousGlobalHooksPathOverride
+        }
+
+        if ([string]::IsNullOrWhiteSpace($previousGitConfigGlobal)) {
+            Remove-Item Env:GIT_CONFIG_GLOBAL -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:GIT_CONFIG_GLOBAL = $previousGitConfigGlobal
         }
 
         if (Test-Path -LiteralPath $tempRoot) {

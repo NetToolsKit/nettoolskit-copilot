@@ -39,19 +39,8 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'git-hook-eof-settings')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'git-hook-eof-settings')
 $script:IsVerboseEnabled = [bool] $Verbose
-
-# Writes verbose diagnostics only when requested.
-function Write-VerboseLog {
-    param(
-        [string] $Message
-    )
-
-    if ($script:IsVerboseEnabled) {
-        Write-StyledOutput ("[VERBOSE] {0}" -f $Message)
-    }
-}
 
 # Normalizes repository-relative paths into Git CLI-safe slash format.
 function Convert-ToGitRelativePath {
@@ -106,7 +95,33 @@ function Get-UnsafeMixedStageFileList {
     return @($unsafeFiles)
 }
 
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+# Resolves the trim script path from explicit override, repo-local source, or shared runtime.
+function Resolve-EofTrimScriptPath {
+    param(
+        [string] $ResolvedRepoRoot
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH)) {
+        $overridePath = [System.IO.Path]::GetFullPath($env:CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH)
+        if (Test-Path -LiteralPath $overridePath -PathType Leaf) {
+            return $overridePath
+        }
+    }
+
+    $repoLocalTrimPath = Join-Path $ResolvedRepoRoot 'scripts\maintenance\trim-trailing-blank-lines.ps1'
+    if (Test-Path -LiteralPath $repoLocalTrimPath -PathType Leaf) {
+        return $repoLocalTrimPath
+    }
+
+    $runtimeTrimPath = Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance\trim-trailing-blank-lines.ps1'
+    if (Test-Path -LiteralPath $runtimeTrimPath -PathType Leaf) {
+        return $runtimeTrimPath
+    }
+
+    throw "Missing trim script required by EOF autofix. Checked repo-local and runtime paths."
+}
+
+$resolvedRepoRoot = Resolve-ExplicitOrGitRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 $effectiveMode = Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
 
@@ -131,10 +146,7 @@ if ($unsafeFiles.Count -gt 0) {
     exit 1
 }
 
-$trimScriptPath = Join-Path $resolvedRepoRoot 'scripts\maintenance\trim-trailing-blank-lines.ps1'
-if (-not (Test-Path -LiteralPath $trimScriptPath -PathType Leaf)) {
-    throw "Missing trim script required by EOF autofix: $trimScriptPath"
-}
+$trimScriptPath = Resolve-EofTrimScriptPath -ResolvedRepoRoot $resolvedRepoRoot
 
 Write-StyledOutput ('[pre-commit] EOF autofix mode active. Checking {0} staged file(s)...' -f $stagedFiles.Count)
 & $trimScriptPath -LiteralPaths $stagedFiles

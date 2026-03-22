@@ -46,10 +46,26 @@ function Resolve-AgentsSkillsPath {
     return Join-Path $homePath '.agents\skills'
 }
 
+# Resolves the local `.github` runtime root used by shared GitHub/Copilot assets.
+function Resolve-GithubRuntimePath {
+    $homePath = Resolve-UserHomePath
+    return Join-Path $homePath '.github'
+}
+
 # Resolves the personal Copilot skill path used by GitHub Copilot native skill discovery.
 function Resolve-CopilotSkillsPath {
     $homePath = Resolve-UserHomePath
     return Join-Path $homePath '.copilot\skills'
+}
+
+# Resolves the managed global Git hooks path. Allows test/runtime overrides.
+function Resolve-CodexGitHooksPath {
+    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_GIT_HOOKS_PATH)) {
+        return [System.IO.Path]::GetFullPath($env:CODEX_GIT_HOOKS_PATH)
+    }
+
+    $homePath = Resolve-UserHomePath
+    return Join-Path $homePath '.codex\git-hooks'
 }
 
 # Resolves the shared Codex scripts path used by mirrored repository-owned helper tools.

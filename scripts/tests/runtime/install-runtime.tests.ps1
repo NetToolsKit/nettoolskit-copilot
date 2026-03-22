@@ -132,7 +132,7 @@ try {
     $gitHookModePreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -GitHookEofMode autofix
 
     Assert-Equal -Actual @($gitHookModePreviewResult.steps).Count -Expected 1 -Message 'Install preview must allow GitHookEofMode to force local hook setup on top of the default none profile.'
-    Assert-Equal -Actual $gitHookModePreviewResult.steps[0].name -Expected 'Configure local Git hooks' -Message 'GitHookEofMode preview must plan local Git hook setup.'
+    Assert-Equal -Actual $gitHookModePreviewResult.steps[0].name -Expected 'Configure Git hooks' -Message 'GitHookEofMode preview must plan Git hook setup.'
     Assert-Equal -Actual $gitHookModePreviewResult.steps[0].arguments.EofHygieneMode -Expected 'autofix' -Message 'GitHookEofMode preview must forward the selected EOF hygiene mode to setup-git-hooks.'
     Assert-Equal -Actual $gitHookModePreviewResult.steps[0].arguments.EofHygieneScope -Expected 'local-repo' -Message 'Install preview must assume the less-intrusive local-repo scope when prompting is skipped.'
     Assert-Equal -Actual $gitHookModePreviewResult.gitHookEofMode.name -Expected 'autofix' -Message 'Install preview must expose the explicit EOF hook mode in the output contract.'
@@ -142,7 +142,8 @@ try {
 
     $gitHookGlobalPreviewResult = & $scriptPath -RepoRoot $resolvedRepoRoot -PreviewOnly -GitHookEofMode autofix -GitHookEofScope global
 
-    Assert-Equal -Actual @($gitHookGlobalPreviewResult.steps).Count -Expected 1 -Message 'Install preview must still plan a single local hook setup step for explicit global scope.'
+    Assert-Equal -Actual @($gitHookGlobalPreviewResult.steps).Count -Expected 1 -Message 'Install preview must still plan a single Git hook setup step for explicit global scope.'
+    Assert-Equal -Actual $gitHookGlobalPreviewResult.steps[0].name -Expected 'Configure Git hooks' -Message 'Install preview must use the generic Git hook step label for global scope.'
     Assert-Equal -Actual $gitHookGlobalPreviewResult.steps[0].arguments.EofHygieneScope -Expected 'global' -Message 'Install preview must forward the explicit global hook scope to setup-git-hooks.'
     Assert-Equal -Actual $gitHookGlobalPreviewResult.gitHookEofScope.name -Expected 'global' -Message 'Install preview must expose the explicit global hook scope in the output contract.'
     Assert-Equal -Actual $gitHookGlobalPreviewResult.gitHookEofScope.prompted -Expected $false -Message 'Install preview must not mark explicit hook scope selection as prompted.'

@@ -9,7 +9,7 @@
   "entries": [
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "883d65c3e4b11b49bed9386ca21f94ba9c5d1e4ac5da10a9cf0f2d2359daf615"
+      "sha256": "b28285529d7b220da28bdf9dcf76a91acb2dd49095442ed267babc8a09ceefe7"
     },
     {
       "path": "scripts/common/console-style.ps1",
@@ -17,7 +17,7 @@
     },
     {
       "path": "scripts/common/git-hook-eof-settings.ps1",
-      "sha256": "c1d2d33ad5deb54534d7f17bbbd53b773b552742affa74a539550205ae0aad67"
+      "sha256": "51013febb2f1c93a48d9107b26177c3d0b9ec0c9ee47ff0d4f0c02ae1c57be52"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
@@ -29,7 +29,7 @@
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "b6562fb277b090f8a56fb06046c4257dbb90856734ced68192a5a18a67b5264f"
+      "sha256": "43a7b308279606637db7bf7cc06b361fec7ea5b18e833e7d7c23eeb2106a5ba9"
     },
     {
       "path": "scripts/common/validation-logging.ps1",

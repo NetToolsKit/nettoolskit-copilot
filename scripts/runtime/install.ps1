@@ -345,7 +345,7 @@ if ($shouldConfigureLocalGitHooks) {
     if ($null -ne $resolvedGitHookEofScope) {
         $gitHookArguments.EofHygieneScope = $resolvedGitHookEofScope.Name
     }
-    $steps.Add((New-InstallStep -Name 'Configure local Git hooks' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-git-hooks.ps1') -Arguments $gitHookArguments)) | Out-Null
+    $steps.Add((New-InstallStep -Name 'Configure Git hooks' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/git-hooks/setup-git-hooks.ps1') -Arguments $gitHookArguments)) | Out-Null
 }
 
 if ($resolvedRuntimeProfile.InstallGlobalGitAliases -and -not $SkipGitHooks) {

@@ -47,9 +47,10 @@
   - `scripts/README.md`
 
 ### Fixed
-- Added a configurable EOF hygiene mode for Git hooks so each clone/PC can keep the default `manual` behavior, opt into intrusive staged-file autofix during `pre-commit`, and choose whether the setting is stored per repo clone or globally for the machine, with the effective mode resolved on every commit:
+- Added a configurable EOF hygiene mode for Git hooks so each clone/PC can keep the default `manual` behavior, opt into intrusive staged-file autofix during `pre-commit`, and choose whether the setting is stored per repo clone or globally for the machine, with `global` now configuring a real machine-wide `core.hooksPath` and the effective mode resolved on every commit:
   - `.github/governance/git-hook-eof-modes.json`
   - `scripts/common/git-hook-eof-settings.ps1`
+  - `scripts/common/runtime-paths.ps1`
   - `scripts/git-hooks/setup-git-hooks.ps1`
   - `scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1`
   - `.githooks/pre-commit`
