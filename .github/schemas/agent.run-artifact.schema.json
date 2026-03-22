@@ -51,6 +51,27 @@
     "summary": {
       "$ref": "#/$defs/summary"
     },
+    "traceRecordPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "policyEvaluationsPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "checkpointStatePath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resume": {
+      "$ref": "#/$defs/resume"
+    },
     "approvals": {
       "type": "array",
       "items": {
@@ -183,6 +204,32 @@
                 "string",
                 "null"
               ]
+            },
+            "resolvedModel": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "modelRoutingSource": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "modelRoutingRuleId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "policyDecisionCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "policyBlockCount": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         }
@@ -229,6 +276,8 @@
         "stageCount",
         "failedStages",
         "warningCount",
+        "policyWarningCount",
+        "policyBlockCount",
         "estimatedCostUsd",
         "totalDurationMs"
       ],
@@ -246,6 +295,14 @@
           "type": "integer",
           "minimum": 0
         },
+        "policyWarningCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "policyBlockCount": {
+          "type": "integer",
+          "minimum": 0
+        },
         "estimatedCostUsd": {
           "type": "number",
           "minimum": 0
@@ -256,6 +313,27 @@
         },
         "notes": {
           "type": "string"
+        }
+      }
+    },
+    "resume": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resumed": {
+          "type": "boolean"
+        },
+        "sourceRunDirectory": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startStageId": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     }

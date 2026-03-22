@@ -76,6 +76,7 @@ param(
     [string] $ResponseSchemaPath,
     [string] $DispatchCommand = 'codex',
     [string] $ExecutionBackend = 'script-only',
+    [string] $EffectiveModel,
     [string] $StageStatePath,
     [switch] $DetailedOutput
 )
@@ -677,7 +678,8 @@ for ($batchIndex = 0; $batchIndex -lt $executionBatches.Count; $batchIndex++) {
                 '-ReviewResponseSchemaPath', $taskReviewSchemaPath,
                 '-ResultPath', $taskResultPath,
                 '-DispatchCommand', $DispatchCommand,
-                '-ExecutionBackend', $ExecutionBackend
+                '-ExecutionBackend', $ExecutionBackend,
+                '-EffectiveModel', $(if ([string]::IsNullOrWhiteSpace($EffectiveModel)) { [string] $agent.model } else { $EffectiveModel })
             )
             if ($DetailedOutput) {
                 $argumentList += '-DetailedOutput'
@@ -709,6 +711,7 @@ for ($batchIndex = 0; $batchIndex -lt $executionBatches.Count; $batchIndex++) {
                 -ResultPath $taskResultPath `
                 -DispatchCommand $DispatchCommand `
                 -ExecutionBackend $ExecutionBackend `
+                -EffectiveModel $(if ([string]::IsNullOrWhiteSpace($EffectiveModel)) { [string] $agent.model } else { $EffectiveModel }) `
                 -DetailedOutput:$DetailedOutput | Out-Null
         }
 

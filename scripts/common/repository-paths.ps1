@@ -43,7 +43,7 @@ function Write-VerboseColor {
 
     $verboseVariable = Get-Variable -Name IsVerboseEnabled -Scope Script -ErrorAction SilentlyContinue
     if ($null -ne $verboseVariable -and [bool] $verboseVariable.Value) {
-        Write-StyledOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message)
+        Write-StyledOutput ("[VERBOSE:{0}] {1}" -f $Color, $Message) | Out-Null
     }
 }
 

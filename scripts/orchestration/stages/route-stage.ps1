@@ -78,6 +78,7 @@ param(
     [string] $ResponseSchemaPath,
     [string] $DispatchCommand = 'codex',
     [string] $ExecutionBackend = 'script-only',
+    [string] $EffectiveModel,
     [string] $StageStatePath,
     [switch] $DetailedOutput
 )
@@ -349,7 +350,7 @@ if ($shouldUseCodexDispatch) {
             ResultPath = $dispatchResultPath
             DispatchRecordPath = $dispatchRecordPath
             CommandName = $DispatchCommand
-            Model = [string] $agent.model
+            Model = if ([string]::IsNullOrWhiteSpace($EffectiveModel)) { [string] $agent.model } else { $EffectiveModel }
             DetailedOutput = [bool] $DetailedOutput
         }
         & $dispatchScriptPath @dispatchParams

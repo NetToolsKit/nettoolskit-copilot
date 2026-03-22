@@ -104,6 +104,10 @@ param(
     [ValidateSet('script-only', 'codex-exec')] [string] $ExecutionBackend,
     [string] $DispatchCommand = 'codex',
     [string] $StopAfterStageId,
+    [string] $StartAtStageId,
+    [string] $ResumeFromRunDirectory,
+    [string] $PolicyCatalogPath,
+    [string] $ModelRoutingCatalogPath,
     [string[]] $ApprovedStageIds = @(),
     [string[]] $ApprovedAgentIds = @(),
     [string] $ApprovedBy,
@@ -124,7 +128,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'agent-runtime-hardening')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $DetailedOutput
 # Reads and parses JSON from path.
@@ -505,6 +509,8 @@ $runtimeRetryDelayValue = Get-OptionalPropertyValue -Object $runtimeConfig -Prop
 $runtimeMaxDurationValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'maxPipelineDurationSeconds'
 $runtimeContinueOnFailureValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'continueOnStageFailure'
 $runtimeWriteRunStateValue = Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'writeRunState'
+$runtimePolicyCatalogPathValue = [string] (Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'policyCatalogPath' -DefaultValue '')
+$runtimeModelRoutingCatalogPathValue = [string] (Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName 'modelRoutingCatalogPath' -DefaultValue '')
 
 $effectiveRetryDelaySeconds = if ($RetryDelaySeconds -gt 0) {
     $RetryDelaySeconds
@@ -550,22 +556,45 @@ else {
     [bool] $WriteRunState
 }
 
-$selectedStages = $pipelineStages
-if (-not [string]::IsNullOrWhiteSpace($StopAfterStageId)) {
-    $stopStageIndex = -1
+$startStageIndex = 0
+if (-not [string]::IsNullOrWhiteSpace($StartAtStageId)) {
+    $matchedStartIndex = -1
     for ($index = 0; $index -lt $pipelineStages.Count; $index++) {
-        if ([string] $pipelineStages[$index].id -eq $StopAfterStageId) {
-            $stopStageIndex = $index
+        if ([string] $pipelineStages[$index].id -eq $StartAtStageId) {
+            $matchedStartIndex = $index
             break
         }
     }
 
-    if ($stopStageIndex -lt 0) {
+    if ($matchedStartIndex -lt 0) {
+        throw ("Unknown StartAtStageId: {0}" -f $StartAtStageId)
+    }
+
+    $startStageIndex = $matchedStartIndex
+}
+
+$stopStageIndex = $pipelineStages.Count - 1
+if (-not [string]::IsNullOrWhiteSpace($StopAfterStageId)) {
+    $matchedStopIndex = -1
+    for ($index = 0; $index -lt $pipelineStages.Count; $index++) {
+        if ([string] $pipelineStages[$index].id -eq $StopAfterStageId) {
+            $matchedStopIndex = $index
+            break
+        }
+    }
+
+    if ($matchedStopIndex -lt 0) {
         throw ("Unknown StopAfterStageId: {0}" -f $StopAfterStageId)
     }
 
-    $selectedStages = @($pipelineStages[0..$stopStageIndex])
+    $stopStageIndex = $matchedStopIndex
 }
+
+if ($startStageIndex -gt $stopStageIndex) {
+    throw ("StartAtStageId '{0}' occurs after StopAfterStageId '{1}'." -f $StartAtStageId, $StopAfterStageId)
+}
+
+$selectedStages = @($pipelineStages[$startStageIndex..$stopStageIndex])
 
 $selectedStageIds = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($selectedStage in $selectedStages) {
@@ -593,12 +622,27 @@ else {
     $TraceId
 }
 
-$runDirectory = Join-Path $resolvedRunRoot $trace
+$resumeRunDirectory = if ([string]::IsNullOrWhiteSpace($ResumeFromRunDirectory)) {
+    $null
+}
+else {
+    Resolve-FullPath -BasePath $resolvedRepoRoot -Candidate $ResumeFromRunDirectory
+}
+
+$runDirectory = if ($null -ne $resumeRunDirectory) {
+    $resumeRunDirectory
+}
+else {
+    Join-Path $resolvedRunRoot $trace
+}
 $artifactsDirectory = Join-Path $runDirectory 'artifacts'
 $stagesDirectory = Join-Path $runDirectory 'stages'
 $handoffsDirectory = Join-Path $runDirectory 'handoffs'
 $runStatePath = Join-Path $runDirectory 'run-state.json'
 $approvalRecordPath = Join-Path $artifactsDirectory 'approval-record.json'
+$traceRecordPath = Join-Path $runDirectory 'trace-record.json'
+$policyEvaluationsPath = Join-Path $runDirectory 'policy-evaluations.json'
+$checkpointStatePath = Join-Path $runDirectory 'checkpoint-state.json'
 
 New-Item -ItemType Directory -Path $artifactsDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $stagesDirectory -Force | Out-Null
@@ -614,9 +658,14 @@ foreach ($agent in @($agentsManifest.agents)) {
 
 $artifactMap = @{}
 $artifactMap['request'] = $requestPath
+$effectivePolicyCatalogPath = if (-not [string]::IsNullOrWhiteSpace($PolicyCatalogPath)) { $PolicyCatalogPath } else { $runtimePolicyCatalogPathValue }
+$effectiveModelRoutingCatalogPath = if (-not [string]::IsNullOrWhiteSpace($ModelRoutingCatalogPath)) { $ModelRoutingCatalogPath } else { $runtimeModelRoutingCatalogPathValue }
+$policyCatalogInfo = Get-AgentRuntimePolicyCatalog -Root $resolvedRepoRoot -CatalogPath $effectivePolicyCatalogPath
+$modelRoutingCatalogInfo = Get-AgentModelRoutingCatalog -Root $resolvedRepoRoot -CatalogPath $effectiveModelRoutingCatalogPath
 $approvedStageSet = Convert-ToStringSet -Values $ApprovedStageIds
 $approvedAgentSet = Convert-ToStringSet -Values $ApprovedAgentIds
 $approvalEntries = New-Object System.Collections.Generic.List[object]
+$policyEvaluationEntries = New-Object System.Collections.Generic.List[object]
 
 if (($approvedStageSet.Count -gt 0 -or $approvedAgentSet.Count -gt 0) -and [string]::IsNullOrWhiteSpace($ApprovedBy)) {
     throw 'ApprovedBy is required when ApprovedStageIds or ApprovedAgentIds are supplied.'
@@ -669,6 +718,54 @@ foreach ($agent in @($agentsManifest.agents)) {
 }
 
 $pipelineStartedAt = Get-Date
+$resumeInfo = [ordered]@{
+    resumed = ($null -ne $resumeRunDirectory)
+    sourceRunDirectory = if ($null -ne $resumeRunDirectory) { Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $resumeRunDirectory } else { $null }
+    startStageId = if ([string]::IsNullOrWhiteSpace($StartAtStageId)) { $null } else { $StartAtStageId }
+}
+$traceRecord = Initialize-TraceRecord -TraceId $trace -PipelineId ([string] $pipeline.id) -StartedAt $pipelineStartedAt
+$checkpointState = Initialize-CheckpointState -TraceId $trace -PipelineId ([string] $pipeline.id) -StartedAt $pipelineStartedAt
+
+if ($null -ne $resumeRunDirectory) {
+    $existingRunArtifactPath = Join-Path $resumeRunDirectory 'run-artifact.json'
+    if (Test-Path -LiteralPath $existingRunArtifactPath -PathType Leaf) {
+        $existingRunArtifact = Read-JsonFile -Path $existingRunArtifactPath
+        foreach ($existingStage in @($existingRunArtifact.stages | Where-Object { $_.status -eq 'success' -and -not $selectedStageIds.Contains([string] $_.stageId) })) {
+            $stageResults.Add($existingStage) | Out-Null
+        }
+    }
+
+    $existingCheckpointPath = Join-Path $resumeRunDirectory 'checkpoint-state.json'
+    if (Test-Path -LiteralPath $existingCheckpointPath -PathType Leaf) {
+        $checkpointState = Read-HardeningJsonFile -Path $existingCheckpointPath
+    }
+
+    $existingTracePath = Join-Path $resumeRunDirectory 'trace-record.json'
+    if (Test-Path -LiteralPath $existingTracePath -PathType Leaf) {
+        $existingTraceRecord = Read-HardeningJsonFile -Path $existingTracePath
+        $traceRecord.stages = @($existingTraceRecord.stages)
+        $traceRecord.summary = $existingTraceRecord.summary
+        $traceRecord.updatedAt = (Get-Date).ToString('o')
+    }
+
+    foreach ($completedStageId in @($stageResults | ForEach-Object { [string] $_.stageId })) {
+        $resumeOutputManifestPath = Join-Path $stagesDirectory ("{0}-output.json" -f $completedStageId)
+        if (-not (Test-Path -LiteralPath $resumeOutputManifestPath -PathType Leaf)) {
+            continue
+        }
+
+        $resumeOutputManifest = Read-JsonFile -Path $resumeOutputManifestPath
+        $resumeArtifactMap = Convert-ManifestToArtifactMap -Manifest $resumeOutputManifest -Root $resolvedRepoRoot
+        foreach ($entry in $resumeArtifactMap.GetEnumerator()) {
+            $artifactMap[$entry.Key] = $entry.Value
+        }
+    }
+
+    if (Test-Path -LiteralPath $approvalRecordPath -PathType Leaf) {
+        $artifactMap['approval-record'] = $approvalRecordPath
+    }
+}
+
 Write-StyledOutput ("[INFO] Pipeline warning-only mode: {0}" -f $WarningOnly)
 Write-StyledOutput ("[INFO] Continue on stage failure: {0}" -f $effectiveContinueOnStageFailure)
 Write-StyledOutput ("[INFO] Retry delay seconds: {0}" -f $effectiveRetryDelaySeconds)
@@ -676,6 +773,12 @@ Write-StyledOutput ("[INFO] Max pipeline duration seconds: {0}" -f $effectiveMax
 Write-StyledOutput ("[INFO] Execution backend: {0}" -f $effectiveExecutionBackend)
 if (-not [string]::IsNullOrWhiteSpace($StopAfterStageId)) {
     Write-StyledOutput ("[INFO] Stop after stage: {0}" -f $StopAfterStageId)
+}
+if (-not [string]::IsNullOrWhiteSpace($StartAtStageId)) {
+    Write-StyledOutput ("[INFO] Start at stage: {0}" -f $StartAtStageId)
+}
+if ($resumeInfo.resumed) {
+    Write-StyledOutput ("[INFO] Resume from run directory: {0}" -f $resumeRunDirectory)
 }
 
 if ($effectiveWriteRunState) {
@@ -757,6 +860,11 @@ foreach ($stage in @($selectedStages)) {
         approvalRequired = $false
         approvalSatisfied = $false
         approvalRecordPath = $null
+        resolvedModel = $null
+        modelRoutingSource = $null
+        modelRoutingRuleId = $null
+        policyDecisionCount = 0
+        policyBlockCount = 0
     }
 
     $approvalEvaluation = Get-StageApprovalEvaluation `
@@ -772,6 +880,17 @@ foreach ($stage in @($selectedStages)) {
     if ($approvalEntries.Count -gt 0) {
         $stageExecutionDetails.approvalRecordPath = Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $approvalRecordPath
     }
+
+    $modelRoutingDecision = Resolve-AgentModelRoutingDecision `
+        -Catalog $modelRoutingCatalogInfo.Catalog `
+        -StageId $stageId `
+        -AgentId $agentId `
+        -AgentRole ([string] $agent.role) `
+        -StageMode $stageMode `
+        -AgentModel ([string] $agent.model)
+    $stageExecutionDetails.resolvedModel = [string] $modelRoutingDecision.model
+    $stageExecutionDetails.modelRoutingSource = [string] $modelRoutingDecision.source
+    $stageExecutionDetails.modelRoutingRuleId = [string] $modelRoutingDecision.ruleId
 
     if ($stageBlockedByApproval) {
         $instructionsText = if ([string]::IsNullOrWhiteSpace([string] $approvalEvaluation.instructions)) {
@@ -810,6 +929,35 @@ foreach ($stage in @($selectedStages)) {
                 Start-Sleep -Seconds $effectiveRetryDelaySeconds
             }
             continue
+        }
+
+        $plannedCommands = Get-ArtifactPlannedCommands -ArtifactMap $artifactMap
+        $normalizedRequestText = Get-NormalizedRequestText -ArtifactMap $artifactMap
+        $prePolicyEvaluation = Invoke-StagePolicyEvaluation `
+            -Catalog $policyCatalogInfo.Catalog `
+            -Phase 'pre-stage' `
+            -TraceId $trace `
+            -StageId $stageId `
+            -AgentId $agentId `
+            -StageMode $stageMode `
+            -EffectiveModel ([string] $modelRoutingDecision.model) `
+            -RequestText $RequestText `
+            -NormalizedRequestText $normalizedRequestText `
+            -PlannedCommands $plannedCommands `
+            -ApprovalRequired ([bool] $approvalEvaluation.required) `
+            -ApprovalSatisfied ([bool] $approvalEvaluation.satisfied)
+        foreach ($evaluation in @($prePolicyEvaluation.evaluations)) {
+            $policyEvaluationEntries.Add($evaluation) | Out-Null
+            if ([string] $evaluation.action -eq 'warn') {
+                $runWarnings.Add(("Policy warning [{0}] stage {1}: {2}" -f [string] $evaluation.ruleId, $stageId, [string] $evaluation.message)) | Out-Null
+            }
+        }
+        $stageExecutionDetails.policyDecisionCount = [int] $prePolicyEvaluation.evaluations.Count
+        $stageExecutionDetails.policyBlockCount = [int] $prePolicyEvaluation.blockCount
+        if ([bool] $prePolicyEvaluation.blocked) {
+            $lastFailureMessage = ("Stage {0} blocked by policy rules: {1}" -f $stageId, ((@($prePolicyEvaluation.evaluations | Where-Object { $_.action -eq 'block' } | ForEach-Object { [string] $_.ruleId }) | Select-Object -Unique) -join ', '))
+            Write-StyledOutput ("[ERROR] {0}" -f $lastFailureMessage)
+            break
         }
 
         if (-not $SkipGuardrails) {
@@ -894,6 +1042,7 @@ foreach ($stage in @($selectedStages)) {
             ResponseSchemaPath = $responseSchemaPathValue
             DispatchCommand = $DispatchCommand
             ExecutionBackend = $effectiveExecutionBackend
+            EffectiveModel = [string] $modelRoutingDecision.model
             StageStatePath = $stageStatePath
             DetailedOutput = [bool] $DetailedOutput
         }
@@ -1059,6 +1208,37 @@ foreach ($stage in @($selectedStages)) {
             }
         }
 
+        $postPolicyEvaluation = Invoke-StagePolicyEvaluation `
+            -Catalog $policyCatalogInfo.Catalog `
+            -Phase 'post-stage' `
+            -TraceId $trace `
+            -StageId $stageId `
+            -AgentId $agentId `
+            -StageMode $stageMode `
+            -EffectiveModel ([string] $modelRoutingDecision.model) `
+            -RequestText $RequestText `
+            -NormalizedRequestText $normalizedRequestText `
+            -PlannedCommands $plannedCommands `
+            -ChangedPaths $changedDelta `
+            -ApprovalRequired ([bool] $approvalEvaluation.required) `
+            -ApprovalSatisfied ([bool] $approvalEvaluation.satisfied)
+        foreach ($evaluation in @($postPolicyEvaluation.evaluations)) {
+            $policyEvaluationEntries.Add($evaluation) | Out-Null
+            if ([string] $evaluation.action -eq 'warn') {
+                $runWarnings.Add(("Policy warning [{0}] stage {1}: {2}" -f [string] $evaluation.ruleId, $stageId, [string] $evaluation.message)) | Out-Null
+            }
+        }
+        $stageExecutionDetails.policyDecisionCount = [int] $stageExecutionDetails.policyDecisionCount + [int] $postPolicyEvaluation.evaluations.Count
+        $stageExecutionDetails.policyBlockCount = [int] $stageExecutionDetails.policyBlockCount + [int] $postPolicyEvaluation.blockCount
+        if ([bool] $postPolicyEvaluation.blocked) {
+            $lastFailureMessage = ("Stage {0} blocked by post-stage policy rules: {1}" -f $stageId, ((@($postPolicyEvaluation.evaluations | Where-Object { $_.action -eq 'block' } | ForEach-Object { [string] $_.ruleId }) | Select-Object -Unique) -join ', '))
+            Write-StyledOutput ("[ERROR] {0}" -f $lastFailureMessage)
+            if ($attempt -lt $maxAttempts -and $effectiveRetryDelaySeconds -gt 0) {
+                Start-Sleep -Seconds $effectiveRetryDelaySeconds
+            }
+            continue
+        }
+
         $stageSucceeded = $true
     }
 
@@ -1089,6 +1269,70 @@ foreach ($stage in @($selectedStages)) {
         execution = [pscustomobject]$stageExecutionDetails
     }
     $stageResults.Add($stageResult) | Out-Null
+
+    $nextSelectedStageId = ''
+    $nextPipelineStageId = ''
+    for ($stageCursor = 0; $stageCursor -lt $pipelineStages.Count; $stageCursor++) {
+        if ([string] $pipelineStages[$stageCursor].id -ne $stageId) {
+            continue
+        }
+
+        if (($stageCursor + 1) -lt $pipelineStages.Count) {
+            $nextPipelineStageId = [string] $pipelineStages[$stageCursor + 1].id
+        }
+
+        for ($nextCursor = $stageCursor + 1; $nextCursor -lt $pipelineStages.Count; $nextCursor++) {
+            $candidateNextStageId = [string] $pipelineStages[$nextCursor].id
+            if ($selectedStageIds.Contains($candidateNextStageId)) {
+                $nextSelectedStageId = $candidateNextStageId
+                break
+            }
+        }
+
+        Set-CheckpointStageStatus `
+            -CheckpointState $checkpointState `
+            -StageId $stageId `
+            -StageIndex $stageCursor `
+            -Status $stageStatus `
+            -CheckpointEligible ($stageStatus -eq 'success') `
+            -NextStageId $nextPipelineStageId
+        break
+    }
+
+    Add-TraceStageEntry -TraceRecord $traceRecord -StageEntry ([ordered]@{
+            stageId = $stageId
+            agentId = $agentId
+            status = $stageStatus
+            startedAt = $stageStartedAt.ToString('o')
+            finishedAt = $stageFinishedAt.ToString('o')
+            durationMs = $stageDurationMs
+            model = [ordered]@{
+                effectiveModel = [string] $modelRoutingDecision.model
+                source = [string] $modelRoutingDecision.source
+                ruleId = [string] $modelRoutingDecision.ruleId
+                reason = [string] $modelRoutingDecision.reason
+            }
+            policy = [ordered]@{
+                warningCount = [Math]::Max(0, [int] $stageExecutionDetails.policyDecisionCount - [int] $stageExecutionDetails.policyBlockCount)
+                blockCount = [int] $stageExecutionDetails.policyBlockCount
+                evaluationCount = [int] $stageExecutionDetails.policyDecisionCount
+            }
+            dispatch = [ordered]@{
+                backend = [string] $stageExecutionDetails.backend
+                dispatchMode = [string] $stageExecutionDetails.dispatchMode
+                dispatchCount = [int] $stageExecutionDetails.dispatchCount
+            }
+            checkpoint = [ordered]@{
+                eligible = ($stageStatus -eq 'success')
+                resumableFromStageId = $nextPipelineStageId
+            }
+        })
+    Write-HardeningJsonFile -Path $traceRecordPath -Value $traceRecord
+    Write-HardeningJsonFile -Path $policyEvaluationsPath -Value ([ordered]@{
+            traceId = $trace
+            evaluations = $policyEvaluationEntries.ToArray()
+        })
+    Write-HardeningJsonFile -Path $checkpointStatePath -Value $checkpointState
 
     if ($stageSucceeded) {
         foreach ($handoff in @($pipeline.handoffs | Where-Object { $_.fromStage -eq $stageId -and $selectedStageIds.Contains([string] $_.toStage) })) {
@@ -1187,10 +1431,17 @@ $runSummary = [pscustomobject]@{
     stageCount = $stageResults.Count
     failedStages = $failedStages
     warningCount = $runWarnings.Count
+    policyWarningCount = @($policyEvaluationEntries | Where-Object { $_.action -eq 'warn' }).Count
+    policyBlockCount = @($policyEvaluationEntries | Where-Object { $_.action -eq 'block' }).Count
     estimatedCostUsd = 0
     totalDurationMs = [int] ($pipelineFinishedAt - $pipelineStartedAt).TotalMilliseconds
     notes = $guardrailNotes
 }
+$traceRecord.status = $overallStatus
+$traceRecord.updatedAt = $pipelineFinishedAt.ToString('o')
+$traceRecord.summary.totalDurationMs = [int] ($pipelineFinishedAt - $pipelineStartedAt).TotalMilliseconds
+$checkpointState.status = $overallStatus
+$checkpointState.updatedAt = $pipelineFinishedAt.ToString('o')
 $runArtifact = [pscustomobject]@{
     traceId = $trace
     pipelineId = [string] $pipeline.id
@@ -1199,10 +1450,20 @@ $runArtifact = [pscustomobject]@{
     finishedAt = $pipelineFinishedAt.ToString('o')
     stages = $stagesForArtifact
     summary = $runSummary
+    traceRecordPath = Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $traceRecordPath
+    policyEvaluationsPath = Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $policyEvaluationsPath
+    checkpointStatePath = Convert-ToRepoRelativePath -Root $resolvedRepoRoot -Path $checkpointStatePath
+    resume = [pscustomobject]$resumeInfo
     approvals = $approvalEntries.ToArray()
 }
 
 Set-Content -LiteralPath $runArtifactPath -Value ($runArtifact | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
+Write-HardeningJsonFile -Path $traceRecordPath -Value $traceRecord
+Write-HardeningJsonFile -Path $policyEvaluationsPath -Value ([ordered]@{
+        traceId = $trace
+        evaluations = $policyEvaluationEntries.ToArray()
+    })
+Write-HardeningJsonFile -Path $checkpointStatePath -Value $checkpointState
 
 if ($effectiveWriteRunState) {
     Write-RunStateArtifact `

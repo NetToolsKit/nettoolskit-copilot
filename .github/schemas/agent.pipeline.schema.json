@@ -170,6 +170,14 @@
         },
         "writeRunState": {
           "type": "boolean"
+        },
+        "policyCatalogPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "modelRoutingCatalogPath": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },

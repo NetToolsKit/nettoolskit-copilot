@@ -103,6 +103,7 @@ param(
     [Parameter(Mandatory = $true)] [string] $ResultPath,
     [string] $DispatchCommand = 'codex',
     [string] $ExecutionBackend = 'script-only',
+    [string] $EffectiveModel,
     [int] $MaxIterations = 3,
     [switch] $DetailedOutput
 )
@@ -351,7 +352,7 @@ while ($attempt -lt $MaxIterations) {
                 ResultPath = $dispatchResultPath
                 DispatchRecordPath = $dispatchRecordPath
                 CommandName = $DispatchCommand
-                Model = [string] $specialistAgent.model
+                Model = if ([string]::IsNullOrWhiteSpace($EffectiveModel)) { [string] $specialistAgent.model } else { $EffectiveModel }
                 DetailedOutput = [bool] $DetailedOutput
             }
             & $dispatchScriptPath @implementerDispatchParams
@@ -413,7 +414,7 @@ while ($attempt -lt $MaxIterations) {
                 ResultPath = $specResultPath
                 DispatchRecordPath = $specDispatchRecordPath
                 CommandName = $DispatchCommand
-                Model = [string] $reviewerAgent.model
+                Model = if ([string]::IsNullOrWhiteSpace($EffectiveModel)) { [string] $reviewerAgent.model } else { $EffectiveModel }
                 DetailedOutput = [bool] $DetailedOutput
             }
             & $dispatchScriptPath @specReviewDispatchParams
@@ -463,7 +464,7 @@ while ($attempt -lt $MaxIterations) {
                 ResultPath = $qualityResultPath
                 DispatchRecordPath = $qualityDispatchRecordPath
                 CommandName = $DispatchCommand
-                Model = [string] $reviewerAgent.model
+                Model = if ([string]::IsNullOrWhiteSpace($EffectiveModel)) { [string] $reviewerAgent.model } else { $EffectiveModel }
                 DetailedOutput = [bool] $DetailedOutput
             }
             & $dispatchScriptPath @qualityReviewDispatchParams

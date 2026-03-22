@@ -78,6 +78,7 @@ param(
     [string] $ResponseSchemaPath,
     [string] $DispatchCommand = 'codex',
     [string] $ExecutionBackend = 'script-only',
+    [string] $EffectiveModel,
     [string] $StageStatePath,
     [switch] $DetailedOutput
 )

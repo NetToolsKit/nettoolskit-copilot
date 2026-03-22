@@ -7,7 +7,9 @@
     "defaultRetryDelaySeconds": 2,
     "maxPipelineDurationSeconds": 3000,
     "continueOnStageFailure": false,
-    "writeRunState": true
+    "writeRunState": true,
+    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
     {

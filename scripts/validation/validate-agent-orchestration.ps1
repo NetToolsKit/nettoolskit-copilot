@@ -391,6 +391,25 @@ function Test-PipelineManifestIntegrity {
             Add-ValidationFailure ("Completion criteria references artifact not produced by any stage: {0}" -f $artifactName)
         }
     }
+
+    $runtimeConfig = Get-OptionalPropertyValue -Object $Pipeline -PropertyName 'runtime'
+    if ($null -eq $runtimeConfig) {
+        Add-ValidationFailure 'Pipeline manifest must declare a runtime configuration object.'
+        return
+    }
+
+    foreach ($runtimeCatalogProperty in @('policyCatalogPath', 'modelRoutingCatalogPath')) {
+        $runtimeCatalogPath = [string] (Get-OptionalPropertyValue -Object $runtimeConfig -PropertyName $runtimeCatalogProperty -DefaultValue '')
+        if ([string]::IsNullOrWhiteSpace($runtimeCatalogPath)) {
+            Add-ValidationFailure ("Pipeline runtime is missing {0}." -f $runtimeCatalogProperty)
+            continue
+        }
+
+        $absoluteRuntimeCatalogPath = Resolve-RepoPath -Root $Root -Path $runtimeCatalogPath
+        if (-not (Test-Path -LiteralPath $absoluteRuntimeCatalogPath -PathType Leaf)) {
+            Add-ValidationFailure ("Pipeline runtime catalog not found for {0}: {1}" -f $runtimeCatalogProperty, $runtimeCatalogPath)
+        }
+    }
 }
 
 # Validates the handoff template against pipeline stage ids.
@@ -533,7 +552,11 @@ foreach ($relativeDirectory in $requiredDirectories) {
 }
 
 $requiredFiles = @(
+    'scripts/common/agent-runtime-hardening.ps1',
     'scripts/runtime/run-agent-pipeline.ps1',
+    'scripts/runtime/resume-agent-pipeline.ps1',
+    'scripts/runtime/replay-agent-run.ps1',
+    'scripts/runtime/evaluate-agent-pipeline.ps1',
     'scripts/orchestration/engine/invoke-codex-dispatch.ps1',
     'scripts/orchestration/stages/intake-stage.ps1',
     'scripts/orchestration/stages/spec-stage.ps1',
@@ -551,6 +574,9 @@ $requiredFiles = @(
     '.github/schemas/agent.stage-review-result.schema.json',
     '.github/schemas/agent.stage-closeout-result.schema.json',
     '.github/schemas/agent.task-review-result.schema.json',
+    '.github/schemas/agent.trace-record.schema.json',
+    '.github/schemas/agent.policy-evaluation.schema.json',
+    '.github/schemas/agent.checkpoint-state.schema.json',
     '.codex/orchestration/prompts/super-agent-intake-stage.prompt.md',
     '.codex/orchestration/prompts/spec-stage.prompt.md',
     '.codex/orchestration/prompts/planner-stage.prompt.md',
@@ -560,6 +586,11 @@ $requiredFiles = @(
     '.codex/orchestration/prompts/task-quality-review.prompt.md',
     '.codex/orchestration/prompts/reviewer-stage.prompt.md',
     '.codex/orchestration/prompts/closeout-stage.prompt.md',
+    '.codex/orchestration/templates/trace-record.template.json',
+    '.codex/orchestration/templates/policy-evaluations.template.json',
+    '.codex/orchestration/templates/checkpoint-state.template.json',
+    '.github/governance/agent-runtime-policy.catalog.json',
+    '.github/governance/agent-model-routing.catalog.json',
     'scripts/orchestration/engine/invoke-task-worker.ps1'
 )
 
@@ -571,6 +602,9 @@ $agentsManifest = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath 
 $pipelineManifest = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/pipelines/default.pipeline.json' -SchemaPath '.github/schemas/agent.pipeline.schema.json'
 $handoffTemplate = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/templates/handoff.template.json' -SchemaPath '.github/schemas/agent.handoff.schema.json'
 $runArtifactTemplate = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/templates/run-artifact.template.json' -SchemaPath '.github/schemas/agent.run-artifact.schema.json'
+$traceRecordTemplate = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/templates/trace-record.template.json' -SchemaPath '.github/schemas/agent.trace-record.schema.json'
+$policyEvaluationTemplate = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/templates/policy-evaluations.template.json' -SchemaPath '.github/schemas/agent.policy-evaluation.schema.json'
+$checkpointStateTemplate = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/templates/checkpoint-state.template.json' -SchemaPath '.github/schemas/agent.checkpoint-state.schema.json'
 $evalFixtures = Test-JsonSchemaDocument -Root $resolvedRepoRoot -DocumentPath '.codex/orchestration/evals/golden-tests.json' -SchemaPath '.github/schemas/agent.evals.schema.json'
 
 $manifestStats = Test-AgentManifestIntegrity -Root $resolvedRepoRoot -Manifest $agentsManifest

@@ -119,6 +119,30 @@ try {
     Assert-Contains -Collection $keys -Value 'ApprovedBy' -Message 'run-agent-pipeline missing ApprovedBy parameter.'
     Assert-Contains -Collection $keys -Value 'ApprovalJustification' -Message 'run-agent-pipeline missing ApprovalJustification parameter.'
     Assert-Contains -Collection $keys -Value 'WriteRunState' -Message 'run-agent-pipeline missing WriteRunState parameter.'
+    Assert-Contains -Collection $keys -Value 'StopAfterStageId' -Message 'run-agent-pipeline missing StopAfterStageId parameter.'
+    Assert-Contains -Collection $keys -Value 'StartAtStageId' -Message 'run-agent-pipeline missing StartAtStageId parameter.'
+    Assert-Contains -Collection $keys -Value 'ResumeFromRunDirectory' -Message 'run-agent-pipeline missing ResumeFromRunDirectory parameter.'
+    Assert-Contains -Collection $keys -Value 'PolicyCatalogPath' -Message 'run-agent-pipeline missing PolicyCatalogPath parameter.'
+    Assert-Contains -Collection $keys -Value 'ModelRoutingCatalogPath' -Message 'run-agent-pipeline missing ModelRoutingCatalogPath parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'resume-agent-pipeline.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RunDirectory' -Message 'resume-agent-pipeline missing RunDirectory parameter.'
+    Assert-Contains -Collection $keys -Value 'StartAtStageId' -Message 'resume-agent-pipeline missing StartAtStageId parameter.'
+    Assert-Contains -Collection $keys -Value 'ApprovedAgentIds' -Message 'resume-agent-pipeline missing ApprovedAgentIds parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'replay-agent-run.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RunDirectory' -Message 'replay-agent-run missing RunDirectory parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'replay-agent-run missing OutputPath parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'evaluate-agent-pipeline.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'EvalsPath' -Message 'evaluate-agent-pipeline missing EvalsPath parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'evaluate-agent-pipeline missing OutputPath parameter.'
 
     $scriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/setup-global-git-aliases.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop

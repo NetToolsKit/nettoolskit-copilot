@@ -131,8 +131,19 @@
     "stageCount": 8,
     "failedStages": 0,
     "warningCount": 1,
+    "policyWarningCount": 0,
+    "policyBlockCount": 0,
     "estimatedCostUsd": 0.48,
     "totalDurationMs": 840000,
     "notes": "Reference template for run artifact shape."
+  }
+  ,
+  "traceRecordPath": ".temp/runs/run-20260226-0001/trace-record.json",
+  "policyEvaluationsPath": ".temp/runs/run-20260226-0001/policy-evaluations.json",
+  "checkpointStatePath": ".temp/runs/run-20260226-0001/checkpoint-state.json",
+  "resume": {
+    "resumed": false,
+    "sourceRunDirectory": null,
+    "startStageId": null
   }
 }

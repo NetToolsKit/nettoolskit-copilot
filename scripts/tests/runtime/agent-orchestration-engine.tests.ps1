@@ -741,6 +741,77 @@ end {
     Assert-Equal -Actual @($approvedRunArtifact.approvals).Count -Expected 2 -Message 'Approved pipeline should persist both approval entries.'
     $approvalRecord = Get-Content -Raw -LiteralPath (Join-Path $approvedRunDirectory 'artifacts\approval-record.json') | ConvertFrom-Json -Depth 100
     Assert-Equal -Actual @($approvalRecord.approvals).Count -Expected 2 -Message 'Approval record should be persisted as an artifact.'
+    Assert-True (-not [string]::IsNullOrWhiteSpace([string] $approvedRunArtifact.traceRecordPath)) 'Approved pipeline should record traceRecordPath.'
+    Assert-True (-not [string]::IsNullOrWhiteSpace([string] $approvedRunArtifact.policyEvaluationsPath)) 'Approved pipeline should record policyEvaluationsPath.'
+    Assert-True (-not [string]::IsNullOrWhiteSpace([string] $approvedRunArtifact.checkpointStatePath)) 'Approved pipeline should record checkpointStatePath.'
+    $traceRecordPath = Join-Path $resolvedRepoRoot ([string] $approvedRunArtifact.traceRecordPath)
+    $policyEvaluationsPath = Join-Path $resolvedRepoRoot ([string] $approvedRunArtifact.policyEvaluationsPath)
+    $checkpointStatePath = Join-Path $resolvedRepoRoot ([string] $approvedRunArtifact.checkpointStatePath)
+    Assert-True (Test-Path -LiteralPath $traceRecordPath -PathType Leaf) 'Approved pipeline should write trace-record.json.'
+    Assert-True (Test-Path -LiteralPath $policyEvaluationsPath -PathType Leaf) 'Approved pipeline should write policy-evaluations.json.'
+    Assert-True (Test-Path -LiteralPath $checkpointStatePath -PathType Leaf) 'Approved pipeline should write checkpoint-state.json.'
+
+    $traceRecord = Get-Content -Raw -LiteralPath $traceRecordPath | ConvertFrom-Json -Depth 100
+    $policyEvaluations = Get-Content -Raw -LiteralPath $policyEvaluationsPath | ConvertFrom-Json -Depth 100
+    $checkpointState = Get-Content -Raw -LiteralPath $checkpointStatePath | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual ([int] $traceRecord.summary.stageCount) -Expected @($approvedRunArtifact.stages).Count -Message 'Trace record should mirror run artifact stage count.'
+    Assert-Equal -Actual ([string] $checkpointState.status) -Expected 'success' -Message 'Checkpoint state should mirror final success.'
+    Assert-Equal -Actual ([int] @($policyEvaluations.evaluations).Count) -Expected ([int] $approvedRunArtifact.summary.policyWarningCount + [int] $approvedRunArtifact.summary.policyBlockCount) -Message 'Policy evaluation artifact should mirror the recorded decision count for the mock run.'
+
+    $replayScriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/replay-agent-run.ps1'
+    $replayOutputPath = Join-Path $approvedRunDirectory 'replay-summary.json'
+    & $replayScriptPath `
+        -RepoRoot $resolvedRepoRoot `
+        -RunDirectory $approvedRunDirectory `
+        -OutputPath $replayOutputPath | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Replay script should summarize a completed run.'
+    $replaySummary = Get-Content -Raw -LiteralPath $replayOutputPath | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual ([string] $replaySummary.status) -Expected 'success' -Message 'Replay summary should report the completed run status.'
+    Assert-Equal -Actual ([string] $replaySummary.traceId) -Expected 'approval-approved-test' -Message 'Replay summary should keep the original trace id.'
+
+    $evalScriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/evaluate-agent-pipeline.ps1'
+    $evalOutputPath = Join-Path $tempRoot 'pipeline-scorecard.json'
+    & $evalScriptPath `
+        -RepoRoot $resolvedRepoRoot `
+        -OutputPath $evalOutputPath | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Pipeline eval script should succeed against the repository fixtures.'
+    $evalScorecard = Get-Content -Raw -LiteralPath $evalOutputPath | ConvertFrom-Json -Depth 100
+    Assert-True ([int] $evalScorecard.totalCases -gt 0) 'Pipeline eval scorecard should include at least one case.'
+    Assert-Equal -Actual ([int] $evalScorecard.failedCases) -Expected 0 -Message 'Pipeline eval scorecard should not report failed cases.'
+
+    & $pipelineScriptPath `
+        -RepoRoot $resolvedRepoRoot `
+        -RunRoot $pipelineRunRoot `
+        -TraceId 'resume-source-test' `
+        -RequestText 'Implement closeout smoke orchestration support.' `
+        -ExecutionBackend 'codex-exec' `
+        -DispatchCommand $fakeCodexPath `
+        -ApprovedAgentIds specialist,release-engineer `
+        -ApprovedBy 'runtime-test' `
+        -ApprovalJustification 'resume smoke test' `
+        -StopAfterStageId 'validate' `
+        -WarningOnly:$false | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Partial pipeline run for resume smoke test should succeed.'
+
+    $resumeSourceRunDirectory = Join-Path $pipelineRunRoot 'resume-source-test'
+    $resumeSourceCheckpoint = Get-Content -Raw -LiteralPath (Join-Path $resumeSourceRunDirectory 'checkpoint-state.json') | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual ([string] $resumeSourceCheckpoint.resumableFromStageId) -Expected 'review' -Message 'Checkpoint state should resume from review after stopping at validate.'
+
+    $resumeScriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/resume-agent-pipeline.ps1'
+    & $resumeScriptPath `
+        -RepoRoot $resolvedRepoRoot `
+        -RunDirectory $resumeSourceRunDirectory `
+        -ExecutionBackend 'codex-exec' `
+        -DispatchCommand $fakeCodexPath `
+        -ApprovedAgentIds specialist,release-engineer `
+        -ApprovedBy 'runtime-test' `
+        -ApprovalJustification 'resume smoke test' | Out-Null
+    Assert-Equal -Actual ([int] $LASTEXITCODE) -Expected 0 -Message 'Resume script should continue from the last successful checkpoint.'
+
+    $resumedRunArtifact = Get-Content -Raw -LiteralPath (Join-Path $resumeSourceRunDirectory 'run-artifact.json') | ConvertFrom-Json -Depth 100
+    Assert-Equal -Actual ([string] $resumedRunArtifact.status) -Expected 'success' -Message 'Resumed run should finish successfully.'
+    Assert-True ([bool] $resumedRunArtifact.resume.resumed) 'Resumed run should mark resume metadata.'
+    Assert-Equal -Actual ([string] $resumedRunArtifact.resume.startStageId) -Expected 'review' -Message 'Resumed run should record the resume start stage.'
 
     Write-Host '[OK] agent orchestration engine tests passed.'
     $testExitCode = 0
