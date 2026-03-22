@@ -41,9 +41,10 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
    - create or update the active plan in `planning/active/` when available, otherwise in `.build/super-agent/planning/active/`
    - consume the current active spec and require explicit planning readiness before planning starts
    - define scope, ordered tasks, validations, risks, and closeout requirements
-4. `context-token-optimizer` agent
-   - reduce token load by selecting the minimal context pack
+4. `context-token-optimizer` agent, when needed
+   - use it only when the task spans multiple domains or the context pack has obvious redundancy
    - recommend the correct specialist path
+   - never remove required working context by default solely for token savings
 5. worktree isolation decision
    - for risky, long-running, or broad-scope work, prefer `instructions/worktree-isolation.instructions.md`
    - use the repository-owned helper `scripts/runtime/new-super-agent-worktree.ps1` when isolation is warranted

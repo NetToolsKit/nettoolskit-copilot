@@ -20,6 +20,7 @@ Rules:
 - If review or validation is blocked, return a blocked closeout.
 - Only return `readmeUpdates` for repository-relative `README.md` files that should be fully rewritten now.
 - Only return `changelogUpdate.apply = true` when a concrete `CHANGELOG.md` entry should be prepended now.
+- Keep `summary`, commit guidance, and documentation notes concise; do not repeat full review or validation details when the structured decision already captures them.
 - Return JSON only, matching the provided schema.
 
 Request:

@@ -36,6 +36,8 @@ Include relevant context gathering; avoid repeating already provided information
 - Focus exclusively on deltas
 - Minimal examples
 - Prioritize clarity over verbosity
+- Target duplicated output and repeated narration before attempting any input/context reduction
+- Never cut required working context by default just to save tokens; do that only with explicit proof that quality is preserved
 
 # Workspace Awareness
 Consider current workspace traits; apply appropriate architectural patterns when relevant; keep consistency with existing patterns; adapt approach to present technologies.
@@ -55,6 +57,9 @@ strategy:
 
 # Response Structure
 Use shortest preambles before commands/tools; use minimal plans for non-trivial tasks; avoid unnecessary text; focus on essential output only.
+- Prefer a single concise final summary over multiple overlapping recap sections.
+- Do not restate plan text, validation output, or retrieved repository context when a short delta plus file references is sufficient.
+- Keep progress updates short and avoid re-reporting the same status in the final completion message.
 
 # Confirmation
 Use concise completion cues when appropriate; keep confirmations minimal and aligned with structured answer guidelines.

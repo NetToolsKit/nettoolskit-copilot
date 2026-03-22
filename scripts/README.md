@@ -197,6 +197,12 @@ Use this contract as the user-facing baseline for every operational entrypoint:
   - adds script-specific diagnostics, resolved paths, and child-script detail
 - helper and test scripts may stay internal, but top-level operational entrypoints must expose one of the standardized detail switches above
 
+Super Agent and orchestration-facing entrypoints also follow a quality-first output-economy rule:
+
+- default output stays concise and should avoid repeating the same status in stage summaries, review notes, closeout text, and final completion text
+- detailed artifact narration belongs in `-DetailedOutput`, `-Verbose`, or explicit troubleshooting runs
+- token reduction must come from less duplicated output first, not from trimming required execution context by default
+
 ### Execution Session Examples
 
 #### Default concise runs
@@ -236,6 +242,33 @@ pwsh -File .\scripts\runtime\invoke-super-agent-execute.ps1 -RequestText "Implem
 pwsh -File .\scripts\runtime\invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items" -DetailedOutput
 pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice" -DetailedOutput
 pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -DetailedOutput
+```
+
+#### Concise orchestration defaults
+
+Default orchestration runs should keep the operator-facing output short:
+
+- one stable outcome summary
+- one validation status block
+- blockers or next steps only when they exist
+- no repeated restatement of request, plan, review, and closeout content when artifact paths already exist
+
+Example concise completion:
+
+```text
+- updated route/review prompts
+- validation: passed `validate-all`
+- install: passed `install.ps1 -RuntimeProfile all`
+```
+
+Example detailed completion on demand:
+
+```text
+- outcome
+- changed files
+- validation evidence
+- residual risks
+- optional next steps
 ```
 
 #### Validation diagnostics

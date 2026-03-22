@@ -10,6 +10,7 @@ priority: high
 - Ensure planning, routing, specialist selection, testing, review, closeout, and planning-state updates happen in a fixed order.
 - Prevent silent skipping of skills, instructions, or validation stages.
 - Provide a workspace-safe bootstrap controller that can operate in both repository-adapter mode and global-runtime mode without making external skills or unrelated repositories the source of truth.
+- Keep user-facing orchestration output concise by default without hiding failures, validation state, or operator decisions.
 
 ## Scope
 - Apply this lifecycle to any task that changes code, scripts, instructions, docs, runtime assets, workspace settings, pipelines, or repository governance.
@@ -62,10 +63,18 @@ priority: high
 
 ## Delegation Rules
 - Use the planner first for non-trivial work.
-- Use the context optimizer before specialist execution when the task spans multiple domains or risks context bloat.
+- Use the context optimizer only when the task spans multiple domains or the context pack contains obvious redundancy; do not trim required working context by default solely to save tokens.
 - Use the tester whenever repository state changed beyond pure discussion.
 - Use the reviewer before claiming completion.
 - Use release closeout for commit-message and changelog output.
+
+## Output Economy Rules
+- Prefer one concise final completion summary for each stable checkpoint instead of repeating the same facts in multiple recap sections.
+- Keep progress updates short and only report new information.
+- Use file references and artifact paths instead of restating large plan/spec/validation content already persisted elsewhere.
+- Keep planner, reviewer, and closeout summaries delta-focused; do not echo the original request or prior stage outputs when the structured fields already carry them.
+- Use detailed breakdowns only on explicit user request, for blocked/failing states, or when the changed area is complex enough that a short summary would be ambiguous.
+- Token economy must prioritize output brevity and duplication removal first; do not trade away execution quality by shrinking required context unless later evidence proves that safe.
 
 ## Parallelization Rules
 - Parallel subagents are allowed only when:

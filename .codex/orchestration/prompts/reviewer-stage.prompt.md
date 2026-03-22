@@ -18,6 +18,7 @@ Rules:
 - Treat missing verification evidence as a real review issue for code-bearing work.
 - Do not rewrite code in this stage.
 - Base the decision on the provided artifacts.
+- Keep `summary` concise and focused on the release decision; do not restate the full validation report when findings and decision already capture the delta.
 - Return JSON only, matching the provided schema.
 
 Request:

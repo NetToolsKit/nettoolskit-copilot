@@ -14,6 +14,8 @@ The user does not want token economy to reduce quality. They also suspect the ru
 
 This follow-up must treat token economy as a quality-preserving optimization, not a blind context-cutting exercise. The reverted input/context compaction should stay reverted unless later evidence proves it harmless. The safer path is output-side economy: shorter default responses, less repeated status text, less duplicated logs, and stronger use of local RAG/CAG so retrieval quality stays high without over-explaining the same state repeatedly. That should be backed by a local incremental index/cache so the system can reuse repository knowledge without rereading everything on each turn. In parallel, the runtime-sync flow needs a focused audit to identify whether mirrored `.github` content, duplicate adapters, or duplicate agent-surface registration is causing repeated slash-command entries in VS Code.
 
+The instruction and prompt layer can safely enforce the first slice immediately: concise default responses, delta-focused stage summaries, and an explicit prohibition on trimming required execution context by default purely for token savings.
+
 ## Key Decisions
 
 1. Quality remains the primary objective; token economy is acceptable only when it preserves or improves task quality.

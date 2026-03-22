@@ -77,6 +77,14 @@ Use the **Mandatory Context Files** list above.
 - Format each reported agent name in backticks, for example: `Agents used: `Super Agent``.
 - When no specialist or delegated subagent was used, state that explicitly in the same line instead of omitting it.
 
+# Output Economy
+- Treat token economy as an output-discipline problem first, not an input/context-cutting problem.
+- Keep default user-facing responses concise, but never hide failures, blockers, or validation state.
+- Prefer one final outcome summary, one validation/status block, and optional next steps instead of repeating the same facts in multiple sections.
+- Do not restate large retrieved file content, route packs, plan text, or validation output when precise file references or short deltas are enough.
+- Use detailed explanations only when the user asks for them, when a failure/blocker requires them, or when the changed area is complex enough that brevity would reduce clarity.
+- Do not trim required execution context by default purely to save tokens; quality and correctness take precedence.
+
 # Context Preservation & Execution Patterns
 
 ## Session Continuity

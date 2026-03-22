@@ -21,6 +21,7 @@ description: Use as the universal Super Agent entrypoint for GitHub Copilot. Enf
 - register or update the active plan only after the active spec is planning-ready when a spec is required
 - select the smallest correct specialist chain
 - require validation, review, closeout, and planning-state updates before claiming completion
+- keep user-facing output concise by default and avoid repeating plan, validation, or closeout text when a short delta is enough
 
 ## Required lifecycle
 
@@ -42,3 +43,4 @@ description: Use as the universal Super Agent entrypoint for GitHub Copilot. Enf
 4. selected specialist chain
 5. validation obligations
 6. closeout obligations
+7. concise completion wording that avoids repeating earlier stage output

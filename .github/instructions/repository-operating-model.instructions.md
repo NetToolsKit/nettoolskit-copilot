@@ -155,7 +155,8 @@ priority: high
   - create a short plan
   - use a short preamble before tool calls
   - validate namespace, TFMs, XML docs, sealing, `using` directives, and EOF policy when relevant
-  - follow super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+  - follow super-agent -> brainstorm-spec -> planner -> specialist -> tester -> reviewer -> release-closeout
+  - use `context-token-optimizer` only when the task is multi-domain or the context pack has obvious redundancy; do not trim required working context purely for token savings
   - prefer isolated worktrees for risky or long-running workstreams
   - treat verification evidence as mandatory before completion claims
   - keep plan artifacts in `planning/active/` and spec artifacts in `planning/specs/active/` until the work is genuinely complete

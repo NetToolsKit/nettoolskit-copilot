@@ -1,6 +1,25 @@
 ## [9.9.9] - 2026-03-20
 
 ### Changed
+- Shifted the Super Agent token-efficiency direction to the safe output side only by making Copilot/Codex instructions, skills, and orchestration prompts explicitly quality-first: concise default responses, delta-focused stage summaries, less repeated narration, and a hard rule against trimming required execution context purely to save tokens:
+  - `.github/AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/instructions/super-agent.instructions.md`
+  - `.github/instructions/workflow-optimization.instructions.md`
+  - `.github/instructions/subagent-planning-workflow.instructions.md`
+  - `.github/instructions/repository-operating-model.instructions.md`
+  - `.github/skills/super-agent/SKILL.md`
+  - `.codex/skills/super-agent/SKILL.md`
+  - `.codex/orchestration/prompts/spec-stage.prompt.md`
+  - `.codex/orchestration/prompts/planner-stage.prompt.md`
+  - `.codex/orchestration/prompts/router-stage.prompt.md`
+  - `.codex/orchestration/prompts/executor-task.prompt.md`
+  - `.codex/orchestration/prompts/reviewer-stage.prompt.md`
+  - `.codex/orchestration/prompts/closeout-stage.prompt.md`
+  - `README.md`
+  - `scripts/README.md`
+  - `planning/active/plan-super-agent-token-quality-and-runtime-sync-cleanup.md`
+  - `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
 - Standardized shared execution-session logging across operational PowerShell entrypoints so default runs now emit deterministic `Session start` / `Session end` markers, verbose-capable scripts consistently expose `-Verbose`, `-DetailedLogs`, or `-DetailedOutput`, and runtime/validation helpers centralize the session lifecycle without duplicating script-local scaffolding:
   - `scripts/common/repository-paths.ps1`
   - `scripts/common/runtime-operation-support.ps1`

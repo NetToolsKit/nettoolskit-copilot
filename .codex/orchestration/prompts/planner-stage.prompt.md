@@ -29,6 +29,7 @@ Rules:
 - For code-bearing tasks, prefer red/green style checkpoints with targeted verification commands.
 - Validation must be explicit per work item.
 - Keep response factual and concise.
+- Keep `scopeSummary`, `assumptions`, `risks`, and work-item descriptions delta-focused; do not restate the full request or spec text in prose when the structured fields already capture it.
 - Return JSON only, matching the provided schema.
 
 Request:

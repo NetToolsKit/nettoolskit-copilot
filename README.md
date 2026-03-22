@@ -18,7 +18,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
 - ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
 - ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
-- ✅ **Mandatory Non-Trivial Flow:** super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout
+- ✅ **Quality-First Non-Trivial Flow:** super-agent -> brainstorm-spec -> planner -> context-token-optimizer (when needed) -> specialist -> tester -> reviewer -> release-closeout
 - ✅ **Approval Gate For Sensitive Execution:** sensitive implementation and closeout agents require explicit approval metadata before the runner dispatches file-mutating or release-mutating work
 - ✅ **Worker-Ready Planning:** planner work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
 - ✅ **Task-Level Review Loop:** each implementation slice can pass through task spec review and task quality review before completion
@@ -173,6 +173,29 @@ Operational PowerShell entrypoints now share one execution-session pattern:
 - verbose runs expand metadata and diagnostic detail through `-Verbose`, `-DetailedLogs`, or `-DetailedOutput` depending on the script contract
 - the detailed user-facing contract, switch map, and family-by-family examples live in [scripts/README.md](./scripts/README.md)
 
+Super Agent response economy is now quality-first as well:
+
+- default chat and orchestration-facing output stays concise by design
+- duplicated recap text across progress, review, closeout, and final completion should be avoided
+- detailed breakdowns belong behind explicit user request or detailed/verbose modes
+- token economy should target duplicated output first, not required execution context
+
+Examples:
+
+```text
+Concise default:
+- updated `scripts/runtime/install.ps1`
+- validation: passed `validate-all`, passed `install.ps1 -RuntimeProfile all`
+- remaining risk: none
+
+Detailed on demand:
+- outcome
+- affected files
+- validation evidence
+- open risks
+- follow-up options
+```
+
 ### Cross-Platform Prerequisites
 
 - PowerShell 7+ (`pwsh`) installed on Windows, Linux, or macOS.
@@ -235,7 +258,8 @@ The repository uses versioned planning artifacts to keep non-trivial work audita
 - `planning/completed/` stores closed plans after implementation, validation, review, and closeout.
 - `instructions/super-agent.instructions.md` defines the mandatory intake-to-closeout lifecycle for change-bearing work.
 - `instructions/brainstorm-spec-workflow.instructions.md` defines when a separate spec is required before planning.
-- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory super-agent -> brainstorm-spec -> planner -> context-token-optimizer -> specialist -> tester -> reviewer -> release-closeout flow.
+- `instructions/subagent-planning-workflow.instructions.md` defines the mandatory super-agent -> brainstorm-spec -> planner -> specialist -> tester -> reviewer -> release-closeout flow, with `context-token-optimizer` as an optional routing aid when the task is multi-domain or the context pack is clearly redundant.
+- `instructions/subagent-planning-workflow.instructions.md` treats `context-token-optimizer` as conditional: use it when the task is multi-domain or the context pack has obvious redundancy, but do not trim required working context purely for token savings.
 - `instructions/worktree-isolation.instructions.md` defines when isolated worktrees should be created for risky or multi-slice execution.
 - `instructions/tdd-verification.instructions.md` defines the default test-first and verification-before-completion workflow contract.
 

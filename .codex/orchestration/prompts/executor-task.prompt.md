@@ -20,6 +20,7 @@ Rules:
 - Run only the validations that are relevant to this work item when practical.
 - Keep the implementation aligned with the declared verification checkpoints for the task.
 - If the task cannot be completed safely, return `blocked` with concrete reasons.
+- Keep `summary`, `changes`, and `notes` delta-focused; do not restate unchanged request, plan, or context-pack content.
 - Return JSON only, matching the provided schema.
 
 Request:

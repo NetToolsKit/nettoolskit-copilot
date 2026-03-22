@@ -27,6 +27,7 @@ description: Use as the single visible starter and controller for workspace work
 - require tester, reviewer, and closeout before claiming workspace work is complete
 - always prepare a commit message suggestion and update planning state after execution
 - make controller activation visible by surfacing the injected Super Agent banner exactly once in the first substantive reply of the session
+- keep user-facing output concise by default and avoid repeating plan, validation, or closeout text when a short delta is enough
 
 ## Required lifecycle
 
@@ -56,3 +57,4 @@ description: Use as the single visible starter and controller for workspace work
 6. closeout obligations
 7. planning update instructions
 8. visible activation banner surfaced once near the start of the first substantive reply
+9. concise completion wording that avoids repeating earlier stage output

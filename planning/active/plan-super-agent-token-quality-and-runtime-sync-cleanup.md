@@ -6,6 +6,8 @@ Generated: 2026-03-22
 
 - State: active
 - Spec: `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
+- Current safe slice implemented: instruction/prompt-level output economy and quality-first routing guidance
+- Remaining deferred scope: local incremental RAG/CAG index plus mirrored `.github` runtime-sync duplication audit
 
 ## Objective And Scope
 

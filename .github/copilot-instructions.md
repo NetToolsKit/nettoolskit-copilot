@@ -122,6 +122,18 @@ Follow this order of operations on every task:
 - Final task reporting must include checklist status using `passed`, `pending`, or `blocked`.
 - If a validation item cannot be executed, keep it in the checklist and state why it remained pending or blocked.
 
+# Output Economy Policy
+- Optimize token usage through shorter default responses, less repeated narration, and better reuse of retrieved local context.
+- Do not optimize token usage by shrinking required execution context by default; quality and correctness take precedence over raw token reduction.
+- Keep default final answers in this order when relevant:
+  1. outcome
+  2. changed files or affected area
+  3. validation status
+  4. open risks or next steps only when they exist
+- Avoid repeating the same status in progress updates, final summaries, commit guidance, and closeout text.
+- When repository artifacts already hold the detail, reference the artifact path and summarize only the delta instead of restating the full content.
+- Keep subagent, planner, reviewer, and closeout outputs delta-focused and concise unless the user explicitly asks for the detailed version.
+
 # Chat Session Naming and Runtime Paths
 - Start each new Copilot or Codex chat by normalizing the session title to `<project-prefix> - <task summary>` as soon as the client or runtime allows it.
 - The project prefix must come from the active workspace or repository name; do not omit it and do not duplicate it when the title is already prefixed.

@@ -15,6 +15,7 @@ Rules:
 - Use repository context first.
 - Do not invent frameworks, files, or runtime behavior that are not justified by the request and current repository.
 - Keep the spec concise, explicit, and versionable.
+- Keep `specSummary` and `notes` short and delta-focused; do not restate the full request or intake report when the structured fields already cover it.
 - Return JSON only, matching the provided schema.
 Request:
 {{REQUEST_TEXT}}
