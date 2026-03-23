@@ -171,6 +171,19 @@ routing:
       - path: instructions/feedback-changelog.instructions.md
         reason: CHANGELOG process and versioning rules
 
+  - id: context-economy
+    tags: [context, token-economy, checkpoint, compression, continuity, session]
+    triggers:
+      - "checkpoint"
+      - "compress context"
+      - "update plan"
+      - "show status"
+      - "show progress"
+      - "resume from summary"
+    include:
+      - path: instructions/context-economy-checkpoint.instructions.md
+        reason: Full context economy, compression triggers, CHECKPOINT format, and command vocabulary
+
   - id: dotnet-backend
     tags: [dotnet, csharp, backend, api, clean-architecture, cqrs]
     triggers:

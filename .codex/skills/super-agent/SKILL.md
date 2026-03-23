@@ -41,6 +41,15 @@ description: Use as the single visible starter and controller for workspace work
 8. closeout
 9. planning update
 
+## Context Economy Protocol (always active)
+
+This protocol is mandatory and runs automatically alongside the lifecycle above.
+Full protocol, state model, CHECKPOINT format, and trigger list: `.github/instructions/context-economy-checkpoint.instructions.md`.
+
+- Auto-compress silently when a task completes, a phase transitions, a decision is closed, topic shifts, or context grows.
+- Show CHECKPOINT only on demand, at phase boundaries, or when continuity requires it.
+- User commands (execute immediately; PT-BR aliases in `.github/COMMANDS.md`): `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`.
+
 ## Invocation rule
 
 - In Codex, this skill should be the first repository-owned controller for change-bearing work whenever skill discovery can match it.

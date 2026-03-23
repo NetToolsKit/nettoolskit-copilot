@@ -85,6 +85,20 @@ Use the **Mandatory Context Files** list above.
 - Use detailed explanations only when the user asks for them, when a failure/blocker requires them, or when the changed area is complex enough that brevity would reduce clarity.
 - Do not trim required execution context by default purely to save tokens; quality and correctness take precedence.
 
+# Context Economy and Checkpoint Commands
+- Agents must apply context compression automatically — no explicit command needed — whenever a task completes, a phase transitions, or context grows beyond what is needed for the next step.
+- Compression preserves: active state, decisions, pending items, next step. It discards: resolved discussion, rejected alternatives, already-delivered explanations.
+- The internal state model uses six blocks: Current state / In progress / Completed / Decisions / Pending items / Next step.
+- The checkpoint is shown only when: the user requests it, a phase transition requires safe handoff, or continuity would otherwise be ambiguous.
+- Recognized user commands (execute immediately when received; PT-BR aliases in `.github/COMMANDS.md`):
+  - `checkpoint` — output the full six-block checkpoint
+  - `compress context` — apply compression immediately and confirm silently
+  - `update plan` — update the active plan artifact with current state
+  - `show status` — output the Current state block only
+  - `show progress` — output Completed + Next step blocks
+  - `resume from summary` — drop raw history, resume from last checkpoint
+- See `instructions/context-economy-checkpoint.instructions.md` for the full protocol.
+
 # Context Preservation & Execution Patterns
 
 ## Session Continuity

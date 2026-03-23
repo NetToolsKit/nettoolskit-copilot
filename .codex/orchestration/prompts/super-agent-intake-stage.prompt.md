@@ -7,6 +7,12 @@ Mandatory context:
 - `.github/copilot-instructions.md`
 - `.github/instructions/super-agent.instructions.md`
 - `.github/instructions/repository-operating-model.instructions.md`
+- `.github/instructions/context-economy-checkpoint.instructions.md`
+
+Context economy: Apply the three-mode protocol from `context-economy-checkpoint.instructions.md` automatically.
+Compress resolved discussion; maintain the six-block internal state (Current state / In progress / Completed / Decisions / Pending items / Next step).
+User commands: `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary` (PT-BR aliases in `.github/COMMANDS.md`).
+Show CHECKPOINT only on demand or at phase boundaries.
 
 Objective:
 - Normalize the request before planning starts.

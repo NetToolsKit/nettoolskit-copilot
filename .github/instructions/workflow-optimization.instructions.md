@@ -39,6 +39,11 @@ Include relevant context gathering; avoid repeating already provided information
 - Target duplicated output and repeated narration before attempting any input/context reduction
 - Never cut required working context by default just to save tokens; do that only with explicit proof that quality is preserved
 
+## Context Economy and Checkpoint
+Full protocol, compression triggers, six-block state model, CHECKPOINT format, and user commands: `instructions/context-economy-checkpoint.instructions.md`.
+
+User commands: `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary` (PT-BR aliases in `.github/COMMANDS.md`).
+
 # Workspace Awareness
 Consider current workspace traits; apply appropriate architectural patterns when relevant; keep consistency with existing patterns; adapt approach to present technologies.
 

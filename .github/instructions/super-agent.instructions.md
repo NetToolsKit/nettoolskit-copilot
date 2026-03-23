@@ -115,6 +115,11 @@ Context resets, compactions, and session boundaries are normal. The primary resi
 - **Claude Code**: `Stop` hook fires on session close → exports planning summary automatically
 - **Copilot / Codex**: no session-end event — continuity depends entirely on the dated planning artifact and the `SessionStart` hook injecting workspace context at the start of each new conversation
 
+### In-session context compression and checkpoints
+Context compression runs automatically — no user command required. Full protocol, six-block state model, CHECKPOINT format, compression triggers, and preserve/discard rules are defined in `instructions/context-economy-checkpoint.instructions.md`.
+
+User commands (execute immediately; PT-BR aliases in `.github/COMMANDS.md`): `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`.
+
 ## Preservation Rules
 - This lifecycle augments the existing repository governance model; it does not replace it.
 - Never drop existing mandatory instructions, baselines, or validations to satisfy the lifecycle.

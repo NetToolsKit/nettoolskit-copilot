@@ -1,3 +1,14 @@
+## [Unreleased] - 2026-03-23
+
+### Added
+- **Context Economy and Checkpoint Protocol** formalized as a first-class instruction `context-economy-checkpoint.instructions.md` (44th domain instruction file): defines a three-mode automatic operation model (Execution / Continuous Compression / Structured Checkpoint), a six-block internal state model (Current state / In progress / Completed / Decisions / Pending items / Next step), a compression-trigger list, the canonical CHECKPOINT format, and an English user command vocabulary (`checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`) with PT-BR convenience aliases documented in `.github/COMMANDS.md`.
+- Protocol enforced across all three AI runtimes:
+  - **GitHub Copilot**: `AGENTS.md` `# Context Economy and Checkpoint Commands` section; `instruction-routing.catalog.yml` `context-economy` route; `workflow-optimization.instructions.md` `## Context Economy and Checkpoint` section.
+  - **Claude Code**: `CLAUDE.md` `## Context Economy and Checkpoint Protocol` section; `.claude/settings.json` `contextEconomy` config block and `UserPromptSubmit` hook for command detection.
+  - **OpenAI Codex**: `.codex/skills/super-agent/SKILL.md` `## Context Economy Protocol` section; `context-economy-checkpoint.instructions.md` added to mandatory context in `super-agent-intake-stage.prompt.md`, `planner-stage.prompt.md`, `executor-task.prompt.md`, and `closeout-stage.prompt.md`.
+  - **Planning artifact**: `planning/active/plan-context-economy-checkpoint-protocol.md` created to track the workstream.
+- Context economy rules deduplicated: canonical detail lives only in `context-economy-checkpoint.instructions.md`; all other files carry a one-paragraph summary plus a reference to the canonical file.
+
 ## [9.9.9] - 2026-03-20
 
 ### Changed

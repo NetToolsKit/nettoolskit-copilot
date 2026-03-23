@@ -10,6 +10,11 @@ Mandatory context:
 - `.github/instructions/repository-operating-model.instructions.md`
 - `.github/instructions/tdd-verification.instructions.md`
 - `.github/instructions/workflow-optimization.instructions.md`
+- `.github/instructions/context-economy-checkpoint.instructions.md`
+
+Context economy: Apply the three-mode protocol from `context-economy-checkpoint.instructions.md` automatically.
+Compress resolved planning discussion; maintain the six-block internal state silently.
+Do not repeat spec text or prior stage output in prose when structured fields already capture it.
 
 Objective:
 - Produce a structured execution plan that can be consumed by later stages.

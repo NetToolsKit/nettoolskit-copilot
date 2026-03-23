@@ -24,7 +24,7 @@
 | ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
 | ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
 
-All three runtimes share the same **Super Agent lifecycle**, **43 domain instruction files**, **planning workspace**, and **governance catalogs** under `.github/`. Runtime-specific layers (skills, hooks, preferences) are the only divergence.
+All three runtimes share the same **Super Agent lifecycle**, **44 domain instruction files**, **planning workspace**, and **governance catalogs** under `.github/`. Runtime-specific layers (skills, hooks, preferences) are the only divergence.
 
 ---
 
@@ -59,6 +59,7 @@ All three runtimes share the same **Super Agent lifecycle**, **43 domain instruc
 - ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Planning-Anchored Continuity Bootstrap:** `SessionStart` and `SubagentStart` inject a short continuity summary from the latest active plan/spec so recovery after context compaction does not depend on replaying giant chat history
+  - ✅ **Context Economy and Checkpoint Protocol:** automatic three-mode context compression (Execution / Continuous Compression / Structured Checkpoint) with a six-block state model, CHECKPOINT format, and user command vocabulary; enforced across Copilot, Codex, and Claude Code via `context-economy-checkpoint.instructions.md`
 - ✅ **Safe Periodic Housekeeping:** `SessionStart` and `SubagentStart` can trigger a throttled housekeeping pass that exports planning continuity first and cleans only persisted Codex/VS Code runtime state, never the live active context window
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
 - ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files

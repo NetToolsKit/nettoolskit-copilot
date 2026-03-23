@@ -9,6 +9,10 @@ Mandatory context:
 - `.github/instructions/repository-operating-model.instructions.md`
 - `.github/instructions/feedback-changelog.instructions.md`
 - `.github/instructions/subagent-planning-workflow.instructions.md`
+- `.github/instructions/context-economy-checkpoint.instructions.md`
+
+Context economy: Apply compression at closeout — discard resolved review/validation detail; produce delta-focused CHANGELOG and README outputs only.
+Phase-boundary CHECKPOINT: after closeout output is produced, transition state to Completed and update Next step to planning-update.
 
 Objective:
 - Consolidate final release-facing outputs after review.

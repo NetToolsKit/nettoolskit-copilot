@@ -81,6 +81,17 @@ Rules that apply to every response in this workspace. These are additive to the 
 - **No closing filler** — skip sign-off lines like "Let me know if...", "Feel free to...", or "Is there anything else...".
 - **Structured over prose** — prefer bullets/tables when structure is clearer than narrative.
 
+## Context Economy and Checkpoint Protocol
+
+This protocol is **always active** — it applies automatically without any user command.
+Full protocol, six-block state model, CHECKPOINT format, and trigger list: `.github/instructions/context-economy-checkpoint.instructions.md`.
+
+- AUTO-COMPRESS when: a task completes, a phase transitions, a decision is closed, topic shifts, context grows beyond what the next step needs.
+- Show CHECKPOINT only on demand or at phase boundaries; never proactively.
+- User commands (execute immediately; PT-BR aliases in `.github/COMMANDS.md`): `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`.
+
+## Commit Rules
+
 ## Commit Rules
 
 - Never add `Co-Authored-By: Claude ...` trailers to commit messages.

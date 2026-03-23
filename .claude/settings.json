@@ -7,6 +7,17 @@
     ]
   },
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "checkpoint|compress context|update plan|show status|show progress|resume from summary",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoLogo -NoProfile -Command \"Write-Host '--- Context Economy Command Detected ---' -ForegroundColor Cyan; Write-Host 'Execute: .github/instructions/context-economy-checkpoint.instructions.md' -ForegroundColor Yellow\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
