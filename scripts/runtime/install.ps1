@@ -360,6 +360,7 @@ if ($resolvedRuntimeProfile.EnableClaudeRuntime) {
     }
 
     $steps.Add((New-InstallStep -Name 'Sync Claude Code skills' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/sync-claude-skills.ps1') -Arguments $claudeSyncArguments)) | Out-Null
+    $steps.Add((New-InstallStep -Name 'Sync Claude Code settings' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/sync-claude-settings.ps1') -Arguments $claudeSyncArguments)) | Out-Null
 }
 
 if ($resolvedRuntimeProfile.InstallGlobalVscodeSettings -and -not $SkipGlobalSettings) {

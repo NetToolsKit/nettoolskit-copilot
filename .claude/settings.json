@@ -3,9 +3,7 @@
     "allow": [
       "Edit(/.claude/skills/core-runtime-sync/**)",
       "Edit(/.claude/skills/worktree-isolation-engineer/**)",
-      "Bash(grep -E '\\\\.\\(js|ts\\)$')",
-      "Bash(ls -la \"c:\\\\Users\\\\tguis\\\\copilot-instructions\\\\.codex\\\\skills\\\\super-agent\"\" 2>/dev/null || echo \"Directory not found \")",
-      "Bash(find c:Userstguiscopilot-instructions.githubhooks -o -name *session* -o -name *session-end* -o -name *context-cleanup*)"
+      "Bash(grep -E '\\\\.\\(js|ts\\)$')"
     ]
   },
   "hooks": {

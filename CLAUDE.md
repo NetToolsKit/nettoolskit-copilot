@@ -66,7 +66,26 @@ Do not save: code patterns (read from source), git history (use `git log`), or e
 
 ## Transparency
 
-Surface Super Agent activation banner once at the start of the first substantive reply in change-bearing sessions. Include `Agents used:` line in every terminal completion.
+- Surface Super Agent activation banner once per change-bearing session, not on informational or trivial replies.
+- Include `Agents used:` only when one or more sub-agents were actually invoked. Omit on direct completions with no delegation.
+
+## Response Economy
+
+Rules that apply to every response in this workspace. These are additive to the output economy rules in `super-agent.instructions.md`.
+
+- **Lead with result or action** — no preamble, no "I'll now...", no restatement of the request.
+- **Don't recap completed tool calls** — the diff/output is visible; a trailing summary adds no value.
+- **Reference, don't inline** — use `file:line` links to persisted artifacts instead of repeating their content in chat.
+- **Sub-agent summaries are delta-only** — what changed, what is blocked, what requires user input. Skip re-echoing the original request or prior stage output.
+- **Detail on demand** — use detailed breakdowns only for: blocked states, test failures, complex decisions that need user input, or when explicitly requested.
+- **No closing filler** — skip sign-off lines like "Let me know if...", "Feel free to...", or "Is there anything else...".
+- **Structured over prose** — prefer bullets/tables when structure is clearer than narrative.
+
+## Commit Rules
+
+- Never add `Co-Authored-By: Claude ...` trailers to commit messages.
+- Commit messages use English (subject line + body when needed).
+- Always suggest the message; never auto-commit unless the user explicitly asks.
 
 ## Validation Commands
 
