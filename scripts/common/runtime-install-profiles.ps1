@@ -129,5 +129,6 @@ function Resolve-RuntimeInstallProfile {
         InstallHealthcheck = (Get-ProfileBooleanValue -InputObject $installNode -PropertyName 'healthcheck')
         EnableGithubRuntime = (Get-ProfileBooleanValue -InputObject $runtimeNode -PropertyName 'github')
         EnableCodexRuntime = (Get-ProfileBooleanValue -InputObject $runtimeNode -PropertyName 'codex')
+        EnableClaudeRuntime = (Get-ProfileBooleanValue -InputObject $runtimeNode -PropertyName 'claude')
     }
 }

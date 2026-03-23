@@ -12,6 +12,7 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
 - ✅ **Native Copilot Super Agent Surface:** repository-owned `.github/skills/super-agent` and `.github/agents/super-agent.agent.md` for GitHub Copilot-native discovery
+- ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files
 - ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
 - ✅ **Custom Chat Modes:** Architecture review, instruction generation
@@ -111,6 +112,7 @@ Use one of these explicit profiles:
 | `none` | Default. No runtime projection, no VS Code global changes, no Git integration changes. |
 | `github` | Only the GitHub/Copilot runtime surface: `githubRuntimeRoot`, its mirrored `scripts/`, and `copilotSkillsRoot`. |
 | `codex` | Only the Codex runtime surface: `agentsSkillsRoot` plus `codexRuntimeRoot/shared-*`. |
+| `claude` | Only the Claude Code runtime surface: `.claude/skills/` synced to `claudeRuntimeRoot/skills/` (`~/.claude/skills`). |
 | `all` | Everything above plus global VS Code settings/snippets, local Git hooks, global Git aliases, and installer healthcheck. |
 
 - `install.ps1` stays non-intrusive by default because `RuntimeProfile` defaults to `none`
@@ -133,15 +135,16 @@ Example machine-local override:
     "codexRuntimeRoot": "D:/ai-runtime/.codex",
     "agentsSkillsRoot": "D:/ai-runtime/.agents/skills",
     "copilotSkillsRoot": "D:/ai-runtime/.copilot/skills",
-    "codexGitHooksRoot": "D:/ai-runtime/.codex/git-hooks"
+    "codexGitHooksRoot": "D:/ai-runtime/.codex/git-hooks",
+    "claudeRuntimeRoot": "D:/ai-runtime/.claude"
   }
 }
 ```
 
 Defaults stay home-relative when no override file exists:
 
-- Windows: `%USERPROFILE%/.github`, `%USERPROFILE%/.codex`, `%USERPROFILE%/.agents/skills`, `%USERPROFILE%/.copilot/skills`
-- Linux/macOS: `$HOME/.github`, `$HOME/.codex`, `$HOME/.agents/skills`, `$HOME/.copilot/skills`
+- Windows: `%USERPROFILE%/.github`, `%USERPROFILE%/.codex`, `%USERPROFILE%/.agents/skills`, `%USERPROFILE%/.copilot/skills`, `%USERPROFILE%/.claude`
+- Linux/macOS: `$HOME/.github`, `$HOME/.codex`, `$HOME/.agents/skills`, `$HOME/.copilot/skills`, `$HOME/.claude`
 
 Examples:
 
@@ -154,6 +157,9 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile g
 
 # enable only the Codex runtime surface
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile codex -ApplyMcpConfig -BackupMcpConfig
+
+# enable only the Claude Code runtime surface (syncs .claude/skills to ~/.claude/skills)
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile claude
 
 # enable everything
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
@@ -226,6 +232,8 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 | Copilot instructions, prompts, and VS Code agent hooks | `.github/` | `%USERPROFILE%\\.github` |
 | Codex runtime skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
 | Picker-visible local skills for VS Code/Codex | `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
+| Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `.claude/settings.json` | loaded by Claude Code at workspace open |
+| Claude Code skill adapters (Super Agent pipeline) | `.claude/skills/` | `%USERPROFILE%\\.claude\\skills` |
 | VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
 | VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
 | VS Code workspaces | `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
@@ -245,7 +253,8 @@ The repository uses an explicit layered instruction architecture so context stay
 - `Prompts`: `.github/prompts/*` are execution helpers and must not become normative policy owners.
 - `Templates`: `.github/templates/*`, `.vscode/*.tamplate.jsonc`, `.vscode/snippets/*.tamplate.code-snippets`, and `.codex/mcp/*.template.*` define concrete artifact shapes only.
 - `Codex skills`: `.codex/skills/*/SKILL.md` specialize execution and must reference canonical repo instructions instead of duplicating policy.
-- `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, and the VS Code global profile.
+- `Claude Code skills`: `.claude/skills/*/SKILL.md` adapt the same pipeline roles to Claude Code native agent types (`Plan`, `Explore`, `general-purpose`) and must reference canonical repo instructions without duplicating policy.
+- `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, `%USERPROFILE%\\.claude`, and the VS Code global profile.
 
 ### Architecture Contracts
 

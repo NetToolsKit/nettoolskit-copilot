@@ -14,7 +14,8 @@
       },
       "runtime": {
         "github": false,
-        "codex": false
+        "codex": false,
+        "claude": false
       }
     },
     "github": {
@@ -29,7 +30,8 @@
       },
       "runtime": {
         "github": true,
-        "codex": false
+        "codex": false,
+        "claude": false
       }
     },
     "codex": {
@@ -44,7 +46,24 @@
       },
       "runtime": {
         "github": false,
-        "codex": true
+        "codex": true,
+        "claude": false
+      }
+    },
+    "claude": {
+      "description": "Project only the Claude Code runtime surface (.claude skills to ~/.claude/skills).",
+      "install": {
+        "bootstrap": false,
+        "globalVscodeSettings": false,
+        "globalVscodeSnippets": false,
+        "localGitHooks": false,
+        "globalGitAliases": false,
+        "healthcheck": true
+      },
+      "runtime": {
+        "github": false,
+        "codex": false,
+        "claude": true
       }
     },
     "all": {
@@ -59,7 +78,8 @@
       },
       "runtime": {
         "github": true,
-        "codex": true
+        "codex": true,
+        "claude": true
       }
     }
   }

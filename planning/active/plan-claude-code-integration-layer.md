@@ -14,43 +14,39 @@ Create Claude Code native bridge layer (CLAUDE.md + .claude/) that activates the
 
 ## Ordered Tasks
 
-1. Create `CLAUDE.md` at repo root
-   - Target path: `CLAUDE.md`
-   - Content: workspace-adapter declaration, language policy, EOF policy, agent type mapping, memory policy, Super Agent lifecycle reference
-   - Constraint: no duplication of `.github/` instruction content
+### Phase 1: Core adapter (completed 2026-03-23)
+1. `CLAUDE.md` ✓
+2. `.claude/skills/super-agent/SKILL.md` ✓
+3. `.claude/skills/brainstorm-spec-architect/SKILL.md` ✓
+4. `.claude/skills/plan-active-work-planner/SKILL.md` ✓
+5. `.claude/skills/context-token-optimizer/SKILL.md` ✓
+6. `.claude/skills/dev-software-engineer/SKILL.md` ✓
+7. `.claude/skills/review-code-engineer/SKILL.md` ✓
+8. `.claude/settings.json` ✓
 
-2. Create `.claude/skills/super-agent.md`
-   - Target path: `.claude/skills/super-agent/SKILL.md`
-   - Content: adapter for Super Agent lifecycle using Claude native primitives
+### Phase 2: Install system + README + domain coverage
 
-3. Create `.claude/skills/brainstorm-spec-architect/SKILL.md`
-   - Adapter for Plan agent → spec registration stage
-
-4. Create `.claude/skills/plan-active-work-planner/SKILL.md`
-   - Adapter for Plan agent → planning registration stage
-
-5. Create `.claude/skills/context-token-optimizer/SKILL.md`
-   - Adapter for Explore agent → context pack assembly
-
-6. Create `.claude/skills/dev-software-engineer/SKILL.md`
-   - Adapter for general-purpose agent → specialist execution
-
-7. Create `.claude/skills/review-code-engineer/SKILL.md`
-   - Adapter for general-purpose agent → risk-focused review
-
-8. Create `.claude/settings.json`
-   - Target path: `.claude/settings.json`
-   - Content: Stop hook (closeout reminder) + PostToolUse hook (git commit reminder)
+9. `.github/governance/runtime-location-catalog.json` — add `claudeRuntimeRoot`
+10. `.github/governance/runtime-install-profiles.json` — add `claude` profile, add `claude` flag to all profiles
+11. `scripts/common/runtime-install-profiles.ps1` — add `EnableClaudeRuntime`
+12. `scripts/common/runtime-paths.ps1` — add `Resolve-ClaudeRuntimePath` + update `Get-EffectiveRuntimeLocations`
+13. `scripts/common/runtime-execution-context.ps1` — add `RequestedTargetClaudePath` + `ClaudeSkillsRoot` to Targets
+14. `scripts/runtime/install.ps1` — add `TargetClaudePath` param + Claude install step
+15. `scripts/runtime/sync-claude-skills.ps1` — new minimal sync script
+16. `.claude/skills/dev-software-engineer/SKILL.md` — expand to all 43 domain instructions
+17. `README.md` — add Claude Code support (profiles table, integration matrix, install examples, layers)
 
 ## Validation
 
 - All new files exist with correct frontmatter
 - No `.github/` content duplicated
 - EOF: no trailing newlines on any file
-- `CLAUDE.md` reads cleanly as a workspace adapter without redundancy
+- Install step runs cleanly with `-RuntimeProfile claude`
+- README accurately describes Claude Code support
 
 ## Checkpoints
 
 - Spec is planning-ready: yes
-- Files created without duplicating `.github/`: verified per file
+- Phase 1 files created: ✓
+- Phase 2 completed: 2026-03-23
 - Planning artifact updated at completion: 2026-03-23 ✓

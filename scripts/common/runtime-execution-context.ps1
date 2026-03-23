@@ -52,7 +52,8 @@ function Resolve-RuntimeExecutionContext {
         [string] $RequestedTargetGithubPath,
         [string] $RequestedTargetCodexPath,
         [string] $RequestedTargetAgentsSkillsPath,
-        [string] $RequestedTargetCopilotSkillsPath
+        [string] $RequestedTargetCopilotSkillsPath,
+        [string] $RequestedTargetClaudePath
     )
 
     $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RequestedRepoRoot
@@ -87,6 +88,13 @@ function Resolve-RuntimeExecutionContext {
         $RequestedTargetCopilotSkillsPath
     }
 
+    $resolvedTargetClaudePath = if ([string]::IsNullOrWhiteSpace($RequestedTargetClaudePath)) {
+        Resolve-ClaudeRuntimePath
+    }
+    else {
+        $RequestedTargetClaudePath
+    }
+
     $sourceGithubRoot = Join-Path $resolvedRepoRoot '.github'
     $sourceCodexRoot = Join-Path $resolvedRepoRoot '.codex'
     $sourceScriptsRoot = Join-Path $resolvedRepoRoot 'scripts'
@@ -100,6 +108,7 @@ function Resolve-RuntimeExecutionContext {
             CodexRuntimeRoot = $resolvedTargetCodexPath
             AgentsSkillsRoot = $resolvedTargetAgentsSkillsPath
             CopilotSkillsRoot = $resolvedTargetCopilotSkillsPath
+            ClaudeRuntimeRoot = $resolvedTargetClaudePath
         }
         Sources = [pscustomobject]@{
             GithubRoot = $sourceGithubRoot
@@ -107,6 +116,7 @@ function Resolve-RuntimeExecutionContext {
             ScriptsRoot = $sourceScriptsRoot
             GithubSkillsRoot = Join-Path $sourceGithubRoot 'skills'
             CodexSkillsRoot = Join-Path $sourceCodexRoot 'skills'
+            ClaudeSkillsRoot = Join-Path $resolvedRepoRoot '.claude' 'skills'
             CodexMcpRoot = Join-Path $sourceCodexRoot 'mcp'
             CodexScriptsRoot = Join-Path $sourceCodexRoot 'scripts'
             CodexOrchestrationRoot = Join-Path $sourceCodexRoot 'orchestration'

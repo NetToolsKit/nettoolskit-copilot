@@ -99,6 +99,7 @@ function Get-BuiltInRuntimeLocationCatalog {
             agentsSkillsRoot = '${HOME}/.agents/skills'
             copilotSkillsRoot = '${HOME}/.copilot/skills'
             codexGitHooksRoot = '${HOME}/.codex/git-hooks'
+            claudeRuntimeRoot = '${HOME}/.claude'
         }
     }
 }
@@ -300,6 +301,11 @@ function Resolve-CodexGitHooksPath {
     return Resolve-ConfiguredRuntimeLocation -PathKey 'codexGitHooksRoot' -EnvironmentVariableName 'CODEX_GIT_HOOKS_PATH' -FallbackPath (Join-PathSegments -BasePath (Resolve-UserHomePath) -Segments @('.codex', 'git-hooks'))
 }
 
+# Resolves the Claude Code global runtime root (~/.claude). Allows test/runtime overrides.
+function Resolve-ClaudeRuntimePath {
+    return Resolve-ConfiguredRuntimeLocation -PathKey 'claudeRuntimeRoot' -EnvironmentVariableName 'CLAUDE_RUNTIME_PATH' -FallbackPath (Join-PathSegments -BasePath (Resolve-UserHomePath) -Segments @('.claude'))
+}
+
 # Resolves the shared Codex scripts path used by mirrored repository-owned helper tools.
 function Resolve-CodexSharedScriptsPath {
     return Join-PathSegments -BasePath (Resolve-CodexRuntimePath) -Segments @('shared-scripts')
@@ -320,5 +326,6 @@ function Get-EffectiveRuntimeLocations {
         copilotSkillsRoot = Resolve-CopilotSkillsPath
         codexGitHooksRoot = Resolve-CodexGitHooksPath
         codexSharedScriptsRoot = Resolve-CodexSharedScriptsPath
+        claudeRuntimeRoot = Resolve-ClaudeRuntimePath
     }
 }

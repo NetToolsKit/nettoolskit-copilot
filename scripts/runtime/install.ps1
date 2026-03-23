@@ -118,6 +118,7 @@ param(
     [string] $TargetCodexPath,
     [string] $TargetAgentsSkillsPath,
     [string] $TargetCopilotSkillsPath,
+    [string] $TargetClaudePath,
     [string] $GlobalVscodeUserPath,
     [string] $RuntimeProfile,
     [string] $GitHookEofMode,
@@ -272,7 +273,8 @@ $runtimeContext = Resolve-RuntimeExecutionContext `
     -RequestedTargetGithubPath $TargetGithubPath `
     -RequestedTargetCodexPath $TargetCodexPath `
     -RequestedTargetAgentsSkillsPath $TargetAgentsSkillsPath `
-    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath
+    -RequestedTargetCopilotSkillsPath $TargetCopilotSkillsPath `
+    -RequestedTargetClaudePath $TargetClaudePath
 
 $resolvedRepoRoot = $runtimeContext.ResolvedRepoRoot
 $resolvedRuntimeProfile = $runtimeContext.RuntimeProfile
@@ -281,6 +283,7 @@ $TargetGithubPath = $runtimeContext.Targets.GithubRuntimeRoot
 $TargetCodexPath = $runtimeContext.Targets.CodexRuntimeRoot
 $TargetAgentsSkillsPath = $runtimeContext.Targets.AgentsSkillsRoot
 $TargetCopilotSkillsPath = $runtimeContext.Targets.CopilotSkillsRoot
+$TargetClaudePath = $runtimeContext.Targets.ClaudeRuntimeRoot
 $requestedGitHookEofSelection = (-not [string]::IsNullOrWhiteSpace($GitHookEofMode)) -or (-not [string]::IsNullOrWhiteSpace($GitHookEofScope))
 $currentEffectiveGitHookEofMode = if ($requestedGitHookEofSelection) {
     Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
@@ -342,6 +345,17 @@ if ($resolvedRuntimeProfile.EnableCodexRuntime) {
     }
 
     $steps.Add((New-InstallStep -Name 'Apply Codex runtime preferences' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/set-codex-runtime-preferences.ps1') -Arguments $codexPreferenceArguments)) | Out-Null
+}
+
+if ($resolvedRuntimeProfile.EnableClaudeRuntime) {
+    $claudeSyncArguments = @{
+        RepoRoot = $resolvedRepoRoot
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TargetClaudePath)) {
+        $claudeSyncArguments.TargetClaudePath = $TargetClaudePath
+    }
+
+    $steps.Add((New-InstallStep -Name 'Sync Claude Code skills' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/sync-claude-skills.ps1') -Arguments $claudeSyncArguments)) | Out-Null
 }
 
 if ($resolvedRuntimeProfile.InstallGlobalVscodeSettings -and -not $SkipGlobalSettings) {
