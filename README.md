@@ -55,7 +55,7 @@ All three runtimes share the same **Super Agent lifecycle**, **43 domain instruc
 
 ### AI Runtime Support
 - ✅ **Native Copilot Super Agent Surface:** `.github/skills/super-agent` and `.github/agents/super-agent.agent.md` for GitHub Copilot-native discovery
-- ✅ **Codex Multi-Agent Orchestration:** 23 skills under `.codex/skills/`, pipeline manifests, and MCP configuration for OpenAI Codex
+- ✅ **Codex Multi-Agent Orchestration:** 22 skills under `.codex/skills/`, pipeline manifests, and MCP configuration for OpenAI Codex
 - ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
@@ -109,6 +109,9 @@ All three runtimes share the same **Super Agent lifecycle**, **43 domain instruc
   - [Layers](#layers)
   - [Architecture Contracts](#architecture-contracts)
   - [Planning Workspace](#planning-workspace)
+  - [Runbooks](#runbooks)
+  - [Policies](#policies)
+  - [MCP Configuration](#mcp-configuration)
 - [Dev Container](#dev-container)
   - [Includes](#includes)
   - [Usage](#usage)
@@ -129,6 +132,7 @@ All three runtimes share the same **Super Agent lifecycle**, **43 domain instruc
   - [post-merge](#post-merge)
   - [post-checkout](#post-checkout)
   - [Enterprise Ops](#enterprise-ops)
+  - [Issue Templates](#issue-templates)
 - [Quick Start](#quick-start)
   - [Recommended: Static RAGs Routing](#recommended-most-important-static-rags-routing)
   - [Basic Setup (3 Steps)](#basic-setup-3-steps)
@@ -378,6 +382,38 @@ The repository uses versioned planning artifacts to keep non-trivial work audita
 - `instructions/subagent-planning-workflow.instructions.md` treats `context-token-optimizer` as conditional: use it when the task is multi-domain or the context pack has obvious redundancy, but do not trim required working context purely for token savings.
 - `instructions/worktree-isolation.instructions.md` defines when isolated worktrees should be created for risky or multi-slice execution.
 - `instructions/tdd-verification.instructions.md` defines the default test-first and verification-before-completion workflow contract.
+
+### Runbooks
+
+Operational runbooks for critical scenarios live under `.github/runbooks/`:
+
+| Runbook | Purpose |
+| --- | --- |
+| `release-rollback.runbook.md` | Step-by-step rollback procedure for a failed or problematic release |
+| `runtime-drift.runbook.md` | Diagnosis and recovery for runtime assets that diverged from the versioned source |
+| `validation-failures.runbook.md` | Triage and fix guide for validation suite failures in CI and local runs |
+
+### Policies
+
+Governance policy files live under `.github/policies/`. They define hard rules for orchestration, branch protection, CI, git hooks, instruction authoring, and release governance:
+
+| Policy file | Scope |
+| --- | --- |
+| `agent-orchestration.policy.json` | Multi-agent pipeline rules, approval gates, budget limits |
+| `branch-protection.policy.json` | Branch protection baseline for main and release branches |
+| `ci-validation.policy.json` | CI validation suite profile and gate rules |
+| `git-hooks.policy.json` | Git hook behavior defaults and EOF hygiene rules |
+| `instruction-system.policy.json` | Instruction authoring rules, ownership, and hierarchy contracts |
+| `release-governance.policy.json` | Release governance checklist, traceability, and evidence requirements |
+
+### MCP Configuration
+
+The repository provides a single-source MCP server manifest for Codex and VS Code:
+
+- Source of truth: `.codex/mcp/servers.manifest.json`
+- Render VS Code template from manifest: `pwsh -File .codex/scripts/render-vscode-mcp.ps1`
+- Apply to Codex config: `pwsh -File .codex/scripts/sync-mcp-to-codex-config.ps1 -CreateBackup`
+- Applied automatically when `install.ps1` is run with `-ApplyMcpConfig`
 
 ## Dev Container
 
@@ -828,6 +864,17 @@ Security and governance observability workflows:
 
 `validate-agent-system.yml` owns push-time audit/healthcheck coverage; `enterprise-trends-dashboard.yml` is reserved for scheduled or manually-triggered trend exports to avoid duplicate `validate-all` runs on every push.
 
+### Issue Templates
+
+The repository provides GitHub issue templates under `.github/ISSUE_TEMPLATE/` to standardize how problems and requests are reported:
+
+| Template | Use when |
+| --- | --- |
+| `bug-instructions.yml` | An instruction file produces wrong, missing, or inconsistent AI behavior |
+| `new-skill-request.yml` | A new skill is needed for Codex or Claude Code |
+| `runtime-sync-problem.yml` | Runtime sync, bootstrap, or install is failing or producing stale assets |
+| `validation-gap.yml` | A validation rule is missing, incorrect, or producing false positives |
+
 ---
 
 ## Quick Start
@@ -983,26 +1030,28 @@ Located in `.github/prompts/poml/templates/`:
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| **.github/AGENTS.md** | Agent policies, workflow patterns, context selection rules | Always load FIRST in Copilot sessions |
-| **.github/copilot-instructions.md** | Global rules, domain mapping, repository structure | Always load SECOND in Copilot sessions |
+| `.github/AGENTS.md` | Agent policies, workflow patterns, context selection rules | Always load FIRST — all runtimes |
+| `.github/copilot-instructions.md` | Global rules, domain mapping, routing, language policy | Always load SECOND — Copilot and Codex sessions |
+| `CLAUDE.md` | Claude Code workspace adapter, agent type mapping, memory policy | Loaded automatically by Claude Code at workspace open |
 
-### Instruction Files
+### Instruction Files (43 total)
 
-| Domain | File | Description |
-|--------|------|-------------|
-| **.NET/C#** | `dotnet-csharp.instructions.md` | .NET 8+, naming, conventions |
-| **Rust** | `rust-testing.instructions.md` | Test patterns, async, error handling |
-| **Architecture** | `clean-architecture-code.instructions.md` | Clean Architecture, CQRS, DDD |
-| **Backend** | `backend.instructions.md` | REST APIs, validation, error handling |
-| **Frontend** | `frontend.instructions.md`, `vue-quasar.instructions.md` | SPA, Vue 3, Quasar, state management |
-| **Data** | `orm.instructions.md`, `database.instructions.md` | EF Core, SQL, schema design |
-| **DevOps** | `docker.instructions.md`, `k8s.instructions.md`, `ci-cd-devops.instructions.md` | Containers, orchestration, pipelines |
-| **Security** | `security-vulnerabilities.instructions.md` | OWASP/NIST-aligned controls for API, frontend, backend, and database |
-| **Testing** | `e2e-testing.instructions.md` | E2E strategies, test frameworks |
-| **Quality** | `static-analysis-sonarqube.instructions.md` | Code quality, static analysis |
-| **Documentation** | `readme.instructions.md`, `pr.instructions.md` | READMEs, PR guidelines |
-| **Workflow** | `workflow-optimization.instructions.md` | Development efficiency |
-| **Super Agent Workflow** | `super-agent.instructions.md`, `brainstorm-spec-workflow.instructions.md`, `subagent-planning-workflow.instructions.md`, `worktree-isolation.instructions.md`, `tdd-verification.instructions.md` | Intake, specs, planning, worktree isolation, TDD, verification, and closeout |
+All instruction files live under `.github/instructions/`. Select only the pack relevant to the task — see `.github/instruction-routing.catalog.yml` for the routing rules.
+
+| Domain | Files |
+|--------|-------|
+| **.NET / C# / Backend** | `dotnet-csharp`, `clean-architecture-code`, `backend`, `api-high-performance-security`, `microservices-performance`, `nettoolskit-rules` |
+| **Database / ORM** | `database`, `orm`, `database-configuration-operations` |
+| **Frontend / Vue / Quasar** | `frontend`, `vue-quasar`, `vue-quasar-architecture`, `ui-ux` |
+| **Rust** | `rust-code-organization`, `rust-testing` |
+| **PowerShell / Scripts** | `powershell-execution`, `powershell-script-creation` |
+| **Infrastructure / CI-CD** | `ci-cd-devops`, `docker`, `k8s`, `workflow-generation` |
+| **Security / Compliance** | `security-vulnerabilities`, `data-privacy-compliance` |
+| **Observability / SRE** | `observability-sre`, `platform-reliability-resilience` |
+| **Testing** | `tdd-verification`, `e2e-testing`, `static-analysis-sonarqube` |
+| **Documentation / Release** | `readme`, `pr`, `feedback-changelog`, `prompt-templates`, `copilot-instruction-creation`, `effort-estimation-ucp` |
+| **VS Code / Workspace** | `vscode-workspace-efficiency`, `workflow-optimization` |
+| **Super Agent / Orchestration** | `super-agent`, `brainstorm-spec-workflow`, `subagent-planning-workflow`, `worktree-isolation`, `artifact-layout`, `authoritative-sources`, `repository-operating-model` |
 
 ### Context Selection Rule (Hard Requirement)
 

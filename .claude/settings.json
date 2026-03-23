@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Edit(/.claude/skills/core-runtime-sync/**)",
+      "Edit(/.claude/skills/worktree-isolation-engineer/**)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
