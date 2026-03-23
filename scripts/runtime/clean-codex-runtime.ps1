@@ -80,9 +80,9 @@ param(
     [switch] $IncludeSessions,
     [Nullable[int]] $SessionRetentionDays,
     [Nullable[int]] $LogRetentionDays,
-    [Nullable[int]] $MaxSessionFileSizeMB,
+    [Nullable[long]] $MaxSessionFileSizeMB,
     [Nullable[int]] $OversizedSessionGraceHours,
-    [Nullable[int]] $MaxSessionStorageGB,
+    [Nullable[long]] $MaxSessionStorageGB,
     [Nullable[int]] $SessionStorageGraceHours,
     [switch] $Apply,
     [switch] $DetailedOutput
@@ -192,25 +192,25 @@ function Resolve-NumericHygieneSetting {
 # Resolves one optional numeric hygiene setting from explicit input, environment, or catalog defaults.
 function Resolve-OptionalNumericHygieneSetting {
     param(
-        [Nullable[int]] $ExplicitValue,
+        [Nullable[long]] $ExplicitValue,
         [string] $EnvironmentVariableName,
         [AllowNull()]
-        [Nullable[int]] $CatalogValue,
+        [Nullable[long]] $CatalogValue,
         [string] $SettingName
     )
 
     if ($null -ne $ExplicitValue) {
-        if ([int] $ExplicitValue -lt 1) {
+        if ([long] $ExplicitValue -lt 1) {
             throw ("{0} must be >= 1." -f $SettingName)
         }
 
-        return [Nullable[int]] ([int] $ExplicitValue)
+        return [Nullable[long]] ([long] $ExplicitValue)
     }
 
     $environmentValue = [Environment]::GetEnvironmentVariable($EnvironmentVariableName)
     if (-not [string]::IsNullOrWhiteSpace($environmentValue)) {
-        $parsedEnvironmentValue = 0
-        if (-not [int]::TryParse($environmentValue, [ref] $parsedEnvironmentValue)) {
+        [long] $parsedEnvironmentValue = 0
+        if (-not [long]::TryParse($environmentValue, [ref] $parsedEnvironmentValue)) {
             throw ("Environment variable {0} must be an integer. Actual='{1}'." -f $EnvironmentVariableName, $environmentValue)
         }
 
@@ -218,18 +218,18 @@ function Resolve-OptionalNumericHygieneSetting {
             throw ("Environment variable {0} must be >= 1." -f $EnvironmentVariableName)
         }
 
-        return [Nullable[int]] $parsedEnvironmentValue
+        return [Nullable[long]] $parsedEnvironmentValue
     }
 
     if ($null -eq $CatalogValue) {
         return $null
     }
 
-    if ([int] $CatalogValue -lt 1) {
+    if ([long] $CatalogValue -lt 1) {
         throw ("Catalog value for {0} must be >= 1 when defined." -f $SettingName)
     }
 
-    return [Nullable[int]] ([int] $CatalogValue)
+    return [Nullable[long]] ([long] $CatalogValue)
 }
 
 # Resolves the local Codex home path.
@@ -349,7 +349,7 @@ function Get-ExpiredSessionFile {
 function Get-OversizedSessionFiles {
     param(
         [string] $SessionsPath,
-        [int] $MaxFileSizeBytes,
+        [long] $MaxFileSizeBytes,
         [int] $GraceHours
     )
 
@@ -388,9 +388,9 @@ function Get-SessionCleanupPlan {
     param(
         [string] $SessionsPath,
         [int] $RetentionDays,
-        [Nullable[int]] $MaxSessionFileSizeMB,
+        [Nullable[long]] $MaxSessionFileSizeMB,
         [Nullable[int]] $OversizedSessionGraceHours,
-        [Nullable[int]] $MaxSessionStorageGB,
+        [Nullable[long]] $MaxSessionStorageGB,
         [Nullable[int]] $SessionStorageGraceHours
     )
 

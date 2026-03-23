@@ -192,6 +192,215 @@ function Get-SuperAgentWorkspaceSurface {
     }
 }
 
+# Resolves one workspace-relative artifact directory when it exists.
+function Resolve-WorkspaceArtifactDirectory {
+    param(
+        [string] $WorkspacePath,
+        [string] $RelativeDirectory
+    )
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath) -or [string]::IsNullOrWhiteSpace($RelativeDirectory)) {
+        return $null
+    }
+
+    $directoryPath = Join-Path $WorkspacePath $RelativeDirectory
+    if (-not (Test-Path -LiteralPath $directoryPath -PathType Container)) {
+        return $null
+    }
+
+    return $directoryPath
+}
+
+# Returns the most recently updated markdown artifact inside one workspace directory.
+function Get-LatestWorkspaceMarkdownArtifact {
+    param(
+        [string] $WorkspacePath,
+        [string] $RelativeDirectory
+    )
+
+    $directoryPath = Resolve-WorkspaceArtifactDirectory -WorkspacePath $WorkspacePath -RelativeDirectory $RelativeDirectory
+    if ([string]::IsNullOrWhiteSpace($directoryPath)) {
+        return $null
+    }
+
+    return @(Get-ChildItem -LiteralPath $directoryPath -File -Filter *.md -Force -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1)[0]
+}
+
+# Extracts the first markdown heading from a file body.
+function Get-FirstMarkdownHeadingText {
+    param(
+        [string[]] $Lines
+    )
+
+    foreach ($line in @($Lines)) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+
+        if ($line -match '^#\s+(.+?)\s*$') {
+            return [string] $Matches[1]
+        }
+    }
+
+    return $null
+}
+
+# Extracts the first matching status/value bullet from a markdown file.
+function Get-MarkdownStatusValue {
+    param(
+        [string[]] $Lines,
+        [string] $Label
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Label)) {
+        return $null
+    }
+
+    $escapedLabel = [regex]::Escape($Label)
+    foreach ($line in @($Lines)) {
+        if ($line -match ("^-\s+{0}:\s+(.+?)\s*$" -f $escapedLabel)) {
+            return [string] $Matches[1]
+        }
+    }
+
+    return $null
+}
+
+# Extracts the first short paragraph under one of the requested markdown headings.
+function Get-MarkdownSectionExcerpt {
+    param(
+        [string[]] $Lines,
+        [string[]] $HeadingCandidates
+    )
+
+    if (@($Lines).Count -eq 0 -or @($HeadingCandidates).Count -eq 0) {
+        return $null
+    }
+
+    $normalizedCandidates = @($HeadingCandidates | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($normalizedCandidates.Count -eq 0) {
+        return $null
+    }
+
+    for ($index = 0; $index -lt $Lines.Count; $index++) {
+        $line = [string] $Lines[$index]
+        if ($line -notmatch '^##\s+(.+?)\s*$') {
+            continue
+        }
+
+        $headingText = [string] $Matches[1]
+        if ($normalizedCandidates -notcontains $headingText) {
+            continue
+        }
+
+        $excerptLines = New-Object System.Collections.Generic.List[string]
+        for ($innerIndex = $index + 1; $innerIndex -lt $Lines.Count; $innerIndex++) {
+            $innerLine = [string] $Lines[$innerIndex]
+            if ($innerLine -match '^#') {
+                break
+            }
+
+            if ([string]::IsNullOrWhiteSpace($innerLine)) {
+                if ($excerptLines.Count -gt 0) {
+                    break
+                }
+
+                continue
+            }
+
+            $excerptLines.Add($innerLine.Trim()) | Out-Null
+        }
+
+        if ($excerptLines.Count -gt 0) {
+            return (($excerptLines.ToArray()) -join ' ')
+        }
+    }
+
+    return $null
+}
+
+# Trims a long summary to a bounded sentence-length output.
+function Compress-ContinuityText {
+    param(
+        [string] $Text,
+        [int] $MaxLength = 220
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return $null
+    }
+
+    $normalized = (($Text -replace '\s+', ' ').Trim())
+    if ($normalized.Length -le $MaxLength) {
+        return $normalized
+    }
+
+    return ($normalized.Substring(0, $MaxLength - 3).TrimEnd() + '...')
+}
+
+# Builds a short continuity summary anchored in the active plan/spec artifacts.
+function New-WorkspaceContinuitySummary {
+    param(
+        [string] $WorkspacePath,
+        [object] $WorkspaceSurface
+    )
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath) -or $null -eq $WorkspaceSurface) {
+        return 'Continuity summary: workspace path unavailable; when context is compacted, re-anchor on the active plan/spec before rereading large history.'
+    }
+
+    $planArtifact = Get-LatestWorkspaceMarkdownArtifact -WorkspacePath $WorkspacePath -RelativeDirectory ([string] $WorkspaceSurface.PlanningActivePath)
+    $specArtifact = Get-LatestWorkspaceMarkdownArtifact -WorkspacePath $WorkspacePath -RelativeDirectory ([string] $WorkspaceSurface.SpecActivePath)
+
+    if (($null -eq $planArtifact) -and ($null -eq $specArtifact)) {
+        return 'Continuity summary: no active plan/spec detected. If prior context was compacted, create or update the active planning artifact before continuing non-trivial change-bearing work.'
+    }
+
+    $segments = New-Object System.Collections.Generic.List[string]
+
+    if ($null -ne $planArtifact) {
+        $planLines = @(Get-Content -LiteralPath $planArtifact.FullName -ErrorAction SilentlyContinue)
+        $planHeading = Compress-ContinuityText -Text (Get-FirstMarkdownHeadingText -Lines $planLines) -MaxLength 100
+        $planState = Compress-ContinuityText -Text (Get-MarkdownStatusValue -Lines $planLines -Label 'State') -MaxLength 60
+        $currentSlice = Compress-ContinuityText -Text (Get-MarkdownStatusValue -Lines $planLines -Label 'Current urgent slice in progress') -MaxLength 180
+        if ($null -eq $currentSlice) {
+            $currentSlice = Compress-ContinuityText -Text (Get-MarkdownSectionExcerpt -Lines $planLines -HeadingCandidates @('Objective And Scope', 'Objective', 'Normalized Request Summary')) -MaxLength 180
+        }
+
+        $planSegment = "Active plan: $($WorkspaceSurface.PlanningActivePath)/$($planArtifact.Name)"
+        if (-not [string]::IsNullOrWhiteSpace($planHeading)) {
+            $planSegment += " ($planHeading)"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($planState)) {
+            $planSegment += ". State: $planState"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($currentSlice)) {
+            $planSegment += ". Resume point: $currentSlice"
+        }
+
+        $segments.Add($planSegment) | Out-Null
+    }
+
+    if ($null -ne $specArtifact) {
+        $specLines = @(Get-Content -LiteralPath $specArtifact.FullName -ErrorAction SilentlyContinue)
+        $specHeading = Compress-ContinuityText -Text (Get-FirstMarkdownHeadingText -Lines $specLines) -MaxLength 100
+        $specObjective = Compress-ContinuityText -Text (Get-MarkdownSectionExcerpt -Lines $specLines -HeadingCandidates @('Objective', 'Design Summary', 'Normalized Request Summary')) -MaxLength 180
+
+        $specSegment = "Active spec: $($WorkspaceSurface.SpecActivePath)/$($specArtifact.Name)"
+        if (-not [string]::IsNullOrWhiteSpace($specHeading)) {
+            $specSegment += " ($specHeading)"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($specObjective)) {
+            $specSegment += ". Focus: $specObjective"
+        }
+
+        $segments.Add($specSegment) | Out-Null
+    }
+
+    $segments.Add('If prior context was compacted, resume from these artifacts first instead of replaying large session history.') | Out-Null
+    return ('Continuity summary: ' + (($segments.ToArray()) -join ' '))
+}
+
 # Builds a workspace-aware EOF policy guidance string for startup and edit hooks.
 function Get-WorkspaceEofPolicyMessage {
     param(
@@ -495,6 +704,7 @@ function New-SessionContextString {
     $workspaceSurface = Get-SuperAgentWorkspaceSurface -WorkspacePath $workspacePath
     $eofMessage = Get-WorkspaceEofPolicyMessage -WorkspacePath $workspacePath
     $visibilityBanner = New-SuperAgentVisibilityBanner -WorkspaceName $workspaceName -Selection $selection -WorkspaceSurface $workspaceSurface
+    $continuitySummary = New-WorkspaceContinuitySummary -WorkspacePath $workspacePath -WorkspaceSurface $workspaceSurface
 
     $segments = New-Object System.Collections.Generic.List[string]
     $segments.Add(('Workspace: {0}' -f $workspaceName)) | Out-Null
@@ -511,6 +721,7 @@ function New-SessionContextString {
     $segments.Add([string] $workspaceSurface.RoutingMessage) | Out-Null
     $segments.Add(('Planning root: {0} -> {1}.' -f $workspaceSurface.PlanningActivePath, $workspaceSurface.PlanningCompletedPath)) | Out-Null
     $segments.Add(('Spec root: {0} -> {1}.' -f $workspaceSurface.SpecActivePath, $workspaceSurface.SpecCompletedPath)) | Out-Null
+    $segments.Add($continuitySummary) | Out-Null
     $segments.Add([string] $workspaceSurface.CloseoutMessage) | Out-Null
     $segments.Add('Super Agent lifecycle is mandatory for change-bearing work: intake -> planning -> spec when needed -> specialist -> test -> review -> closeout -> planning update.') | Out-Null
     $segments.Add($eofMessage) | Out-Null
@@ -536,8 +747,9 @@ function New-SubagentContextString {
     }
     $workspaceName = Get-WorkspaceName -WorkspacePath $workspacePath
     $visibilityBanner = New-SuperAgentVisibilityBanner -WorkspaceName $workspaceName -Selection $selection -WorkspaceSurface $workspaceSurface
+    $continuitySummary = New-WorkspaceContinuitySummary -WorkspacePath $workspacePath -WorkspaceSurface $workspaceSurface
 
-    return ('Startup controller: {0} ({1}) via {2}. Visibility banner: {3}. Workspace mode: {4}. {5} {6} Planning root: {7}. Spec root: {8}. {9} Super Agent bootstrap is active. Current worker type: {10}. {11} Keep scope minimal, follow the active routing decision for this workspace, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $visibilityBanner, $workspaceSurface.WorkspaceMode, $workspaceSurface.InstructionLoadMessage, $workspaceSurface.RoutingMessage, $workspaceSurface.PlanningActivePath, $workspaceSurface.SpecActivePath, $workspaceSurface.CloseoutMessage, $agentType, $eofMessage)
+    return ('Startup controller: {0} ({1}) via {2}. Visibility banner: {3}. Workspace mode: {4}. {5} {6} Planning root: {7}. Spec root: {8}. {9} {10} Super Agent bootstrap is active. Current worker type: {11}. {12} Keep scope minimal, follow the active routing decision for this workspace, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $visibilityBanner, $workspaceSurface.WorkspaceMode, $workspaceSurface.InstructionLoadMessage, $workspaceSurface.RoutingMessage, $workspaceSurface.PlanningActivePath, $workspaceSurface.SpecActivePath, $continuitySummary, $workspaceSurface.CloseoutMessage, $agentType, $eofMessage)
 }
 
 # Builds the PreToolUse payload used to normalize repository edit tool inputs before disk writes occur.

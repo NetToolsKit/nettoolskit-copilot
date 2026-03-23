@@ -32,6 +32,8 @@ In parallel, the runtime-sync flow still needs a focused audit to identify wheth
 
 The instruction and prompt layer can safely enforce the first slice immediately: concise default responses, delta-focused stage summaries, and an explicit prohibition on trimming required execution context by default purely for token savings.
 
+The next safe continuity slice can also ship immediately: the VS Code `SessionStart` and `SubagentStart` bootstrap hooks should inject a short continuity summary derived from the current active plan/spec artifacts. That gives the controller and workers a bounded restart point after context compaction or a new session, without relying on replaying oversized chat history.
+
 ## Key Decisions
 
 1. Quality remains the primary objective; token economy is acceptable only when it preserves or improves task quality.
@@ -44,6 +46,7 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 8. Local Codex runtime defaults must bias toward predictable cost and disk growth without disabling strategic multi-agent behavior.
 9. Runtime cleanup must protect active sessions by default, with stale-session retention as the normal path and oversized-file or storage-budget pruning reserved for explicit overrides.
 10. VS Code user-runtime cleanup must protect recent active work by using retention windows plus grace windows and by throttling repeated scans.
+11. Session bootstrap continuity should come from the active plan/spec artifacts so context compaction can recover from versioned repository state instead of large chat transcripts.
 
 ## Alternatives Considered
 
@@ -86,6 +89,7 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 8. Codex session cleanup defaults now enforce stale-session retention after 30 days without update, with documented environment overrides for optional oversized-file and storage-budget emergency cleanup.
 9. Managed global VS Code settings stop favoring runaway Copilot chat history/restore/request budgets.
 10. VS Code user-runtime cleanup defaults now enforce age plus oversized-file caps with documented environment overrides and a throttled hook execution window.
+11. Session bootstrap hooks inject a short continuity summary that references the latest active plan/spec artifact and tells the agent to resume from those artifacts first after context compaction.
 
 ## Planning Readiness Statement
 

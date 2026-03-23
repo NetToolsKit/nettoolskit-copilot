@@ -6,7 +6,7 @@ Generated: 2026-03-22
 
 - State: active
 - Spec: `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
-- Current safe slice implemented: instruction/prompt-level output economy and quality-first routing guidance
+- Current safe slice implemented: instruction/prompt-level output economy, quality-first routing guidance, and session-start continuity summaries anchored in active plan/spec artifacts
 - Current urgent slice in progress: Codex plus VS Code runtime bloat controls for safer hygiene defaults, strategic multi-agent use, and stale-session cleanup of local session/workspace artifacts
 - Remaining deferred scope: local incremental RAG/CAG index plus mirrored `.github` runtime-sync duplication audit
 
@@ -61,6 +61,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
      - default responses stay concise without hiding errors or summaries
      - verbose/detailed modes remain the place for full diagnostics
      - duplication between step logs, summaries, and closeout text is reduced safely
+     - session bootstrap injects a short continuity summary from the active plan/spec so post-compaction recovery does not require replaying giant chat history
 
 3. Define local RAG/CAG-first response guidance
    - Target paths:

@@ -29,7 +29,7 @@
     },
     {
       "path": "scripts/common/vscode-runtime-hygiene.ps1",
-      "sha256": "5485d0b9c5258d503d6dd9c71a784fd169952ff96f546b4b30155921051ba788"
+      "sha256": "ce7a91811425baa2bc1dc18e672ddeb4f3e75f6ac6745ca9b81d1eb34946e33e"
     },
     {
       "path": "scripts/common/validation-logging.ps1",
@@ -37,7 +37,7 @@
     },
     {
       "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "93c5d2e23a1c54ccc46972f31414914bd12d499eaf4b0acdb2f9cf7c25e76c9a"
+      "sha256": "39b5a5542fe95e00e75f5d865330d93c4ae88efff97328c906cd470a8f8e518a"
     },
     {
       "path": "scripts/common/runtime-operation-support.ps1",
@@ -45,11 +45,11 @@
     },
     {
       "path": "scripts/common/runtime-install-profiles.ps1",
-      "sha256": "ca1ad5e811351bfa401a47229f526c4d99180d6b8138cdf50df05c1ecc13d138"
+      "sha256": "4a44a43481cd796597ede7175a26b7cb47f909fa342f60a4a2ba427dd6c4d950"
     },
     {
       "path": "scripts/common/runtime-execution-context.ps1",
-      "sha256": "f42ad42683637794cffdce540a04ea0ed0a3cef22baa7b337716b4105ef9a6c9"
+      "sha256": "96ce307d6e00f29d3d11230ba100b3bdb17aec6f7599c852446a35b0dde0a5e2"
     },
     {
       "path": "scripts/common/repository-paths.ps1",
@@ -65,11 +65,11 @@
     },
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "56ff6d1f8f7d064c21cd5b28bcc7e266b06e4acf950f3a0c4b4d7882ca58fdd1"
+      "sha256": "dabd4ad940a09c9616987f76b097e89a730299d6ea0a8350f4f4eaec68747ca1"
     },
     {
       "path": "scripts/common/codex-runtime-hygiene.ps1",
-      "sha256": "fe75421380c0ec69630f643eb85e73635f12df60c3ab5e9c428b29392c694138"
+      "sha256": "e84dac1db623fafdcb78fe71231f740c5bdced6ab06a4bcf5f71636605e15d47"
     },
     {
       "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",

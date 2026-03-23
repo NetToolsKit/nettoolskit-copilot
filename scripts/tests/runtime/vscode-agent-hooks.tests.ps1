@@ -125,6 +125,10 @@ Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Super Agent lifecycle is mandatory') 'SessionStart hook should inject Super Agent lifecycle guidance.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Planning root: planning/active -> planning/completed') 'SessionStart hook should use workspace planning roots in workspace-adapter mode.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Spec root: planning/specs/active -> planning/specs/completed') 'SessionStart hook should use workspace spec roots in workspace-adapter mode.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Continuity summary:') 'SessionStart hook should inject a continuity summary.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'plan-super-agent-token-quality-and-runtime-sync-cleanup\.md') 'SessionStart hook should reference the active plan artifact in the continuity summary.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'spec-super-agent-token-quality-and-runtime-sync-cleanup\.md') 'SessionStart hook should reference the active spec artifact in the continuity summary.'
+Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'resume from these artifacts first') 'SessionStart hook should tell the agent to resume from plan/spec after compaction.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SessionStart hook should mention the repository EOF policy.'
 Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Keep non-versioned build outputs under \.build/ and deployment/runtime publish outputs under \.deployment/') 'SessionStart hook should mention the shared artifact layout policy.'
 
@@ -137,6 +141,7 @@ Assert-True ($subagentResult.hookSpecificOutput.hookEventName -eq 'SubagentStart
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'reviewer') 'SubagentStart hook should mention the spawned worker type.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=workspace-adapter') 'SubagentStart hook should propagate the visibility banner in workspace-adapter mode.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Planning root: planning/active') 'SubagentStart hook should preserve workspace planning roots.'
+Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Continuity summary:') 'SubagentStart hook should propagate the continuity summary.'
 Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SubagentStart hook should preserve workspace EOF guidance.'
 
 $globalWorkspacePath = New-TemporaryWorkspacePath
@@ -169,12 +174,14 @@ try {
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/planning/active -> \.build/super-agent/planning/completed') 'SessionStart hook should use .build planning roots in global-runtime mode.'
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/specs/active -> \.build/super-agent/specs/completed') 'SessionStart hook should use .build spec roots in global-runtime mode.'
     Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'Do not assume the runtime repository routing catalog') 'SessionStart hook should block runtime repo routing assumptions in global-runtime mode.'
+    Assert-True ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'no active plan/spec detected') 'SessionStart hook should explain the lack of active plan/spec artifacts in global-runtime mode.'
     Assert-True (-not ([string] $globalSessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false')) 'SessionStart hook should not claim insert_final_newline = false when the workspace has no matching .editorconfig rule.'
 
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'Workspace mode: global-runtime') 'SubagentStart hook should propagate global-runtime mode.'
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'implementer') 'SubagentStart hook should mention the worker type in global-runtime mode.'
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match '\.build/super-agent/planning/active') 'SubagentStart hook should preserve .build planning roots in global-runtime mode.'
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=global-runtime') 'SubagentStart hook should propagate the visibility banner in global-runtime mode.'
+    Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'no active plan/spec detected') 'SubagentStart hook should explain the lack of active plan/spec artifacts in global-runtime mode.'
 }
 finally {
     if (Test-Path -LiteralPath $globalWorkspacePath) {

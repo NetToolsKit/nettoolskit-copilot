@@ -30,6 +30,10 @@
 .PARAMETER TargetCopilotSkillsPath
     Optional runtime target path for GitHub Copilot native personal skills.
 
+.PARAMETER TargetClaudePath
+    Optional runtime target path for the Claude Code runtime used by
+    `scripts/runtime/sync-claude-skills.ps1`.
+
 .PARAMETER GlobalVscodeUserPath
     Optional VS Code global user settings folder.
 

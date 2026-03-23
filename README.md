@@ -58,6 +58,7 @@ All three runtimes share the same **Super Agent lifecycle**, **43 domain instruc
 - ✅ **Codex Multi-Agent Orchestration:** 22 skills under `.codex/skills/`, pipeline manifests, and MCP configuration for OpenAI Codex
 - ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
+- ✅ **Planning-Anchored Continuity Bootstrap:** `SessionStart` and `SubagentStart` inject a short continuity summary from the latest active plan/spec so recovery after context compaction does not depend on replaying giant chat history
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
 - ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files
 

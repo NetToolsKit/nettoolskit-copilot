@@ -564,6 +564,7 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
   - optional environment override: `COPILOT_SUPER_AGENT_SKILL`, `COPILOT_SUPER_AGENT_NAME`
 - EOF normalization:
   - `PreToolUse` normalizes supported edit/create tool payloads before disk writes
+  - `SessionStart` and `SubagentStart` inject a short continuity summary derived from the latest active plan/spec artifact so a fresh or compacted session can resume from versioned planning state instead of replaying large chat history
   - current supported tools: `createFile`, `insertEdit`, `replaceString`, `multiReplaceString`
   - `applyPatch` still relies on model compliance with the EOF policy because its patch grammar is not safely rewritten by the hook
 | `maintenance/generate-http-from-openapi.ps1` | Generates a REST Client .http file from OpenAPI (default) or Swagger JSON. | `pwsh -File scripts/maintenance/generate-http-from-openapi.ps1 -Source http://localhost:5000` |
