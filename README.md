@@ -1,45 +1,97 @@
 # Copilot Instructions
 
-Structured AI agent guidelines for software development projects. Focuses on repeatable engineering workflows (planning, implementation, testing, docs, and reviews) using hierarchical instruction files, domain-specific conventions, and reusable prompt templates. Includes examples for .NET, Rust, frontend stacks, and DevOps, but the core goal is consistent, high-quality software delivery across technologies.
+> Structured AI agent instructions for software development projects. Defines a universal Super Agent lifecycle, hierarchical domain instruction files, and multi-runtime support for GitHub Copilot, OpenAI Codex, and Claude Code — focused on repeatable, high-quality engineering workflows across planning, implementation, testing, docs, and reviews.
+
+[![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-supported-0969DA?logo=github&logoColor=white)](https://github.com/features/copilot)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-supported-D97706?logo=anthropic&logoColor=white)](https://claude.ai/code)
+[![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-supported-412991?logo=openai&logoColor=white)](https://openai.com/codex)
+[![VS Code](https://img.shields.io/badge/VS_Code-integrated-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com)
+
+[![.NET](https://img.shields.io/badge/.NET-supported-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
+[![Rust](https://img.shields.io/badge/Rust-supported-CE422B?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Vue.js](https://img.shields.io/badge/Vue.js%2FQuasar-supported-42B883?logo=vue.js&logoColor=white)](https://vuejs.org)
+[![Docker](https://img.shields.io/badge/Docker-supported-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-supported-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
+[![PowerShell](https://img.shields.io/badge/PowerShell-supported-5391FE?logo=powershell&logoColor=white)](https://learn.microsoft.com/powershell)
+
+---
+
+## Supported AI Runtimes
+
+| Runtime | Versioned source | Global target | Install profile | Entry point |
+| --- | --- | --- | --- | --- |
+| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
+| ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
+| ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
+
+All three runtimes share the same **Super Agent lifecycle**, **43 domain instruction files**, **planning workspace**, and **governance catalogs** under `.github/`. Runtime-specific layers (skills, hooks, preferences) are the only divergence.
+
+---
+
+## Supported Tech Stacks
+
+| Domain | Stack | Instruction files |
+| --- | --- | --- |
+| Backend / API | .NET 9 / C#, Clean Architecture, EF Core | `dotnet-csharp`, `clean-architecture-code`, `backend`, `api-high-performance-security` |
+| Frontend | Vue.js 3 / Quasar, TypeScript | `vue-quasar`, `vue-quasar-architecture`, `frontend`, `ui-ux` |
+| Systems | Rust | `rust-code-organization`, `rust-testing` |
+| Database / ORM | SQL Server, EF Core, Dapper | `database`, `orm`, `database-configuration-operations` |
+| Infrastructure | Docker, Kubernetes, CI/CD | `docker`, `k8s`, `ci-cd-devops`, `workflow-generation` |
+| Scripts / Automation | PowerShell 7+ | `powershell-execution`, `powershell-script-creation` |
+| Observability / SRE | OpenTelemetry, resilience | `observability-sre`, `platform-reliability-resilience` |
+| Security / Compliance | OWASP, GDPR | `security-vulnerabilities`, `data-privacy-compliance` |
+| Testing | TDD, E2E, static analysis | `tdd-verification`, `e2e-testing`, `static-analysis-sonarqube` |
+
+---
 
 ## Features
 
+### Instructions & Architecture
 - ✅ **Hierarchical Instruction Structure:** Solution-level → Global → Domain-specific guidelines
 - ✅ **Multi-Stack Coverage:** .NET/C#, Rust, Vue.js/Quasar, Docker, Kubernetes, databases
 - ✅ **Architecture Patterns:** Clean Architecture, CQRS, DDD, microservices
 - ✅ **Convention Standardization:** Code style, test patterns, commits, file organization
 - ✅ **Authoritative Source Policy:** Repository context first, then official docs by stack
+
+### AI Runtime Support
+- ✅ **Native Copilot Super Agent Surface:** `.github/skills/super-agent` and `.github/agents/super-agent.agent.md` for GitHub Copilot-native discovery
+- ✅ **Codex Multi-Agent Orchestration:** 23 skills under `.codex/skills/`, pipeline manifests, and MCP configuration for OpenAI Codex
+- ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
-- ✅ **Native Copilot Super Agent Surface:** repository-owned `.github/skills/super-agent` and `.github/agents/super-agent.agent.md` for GitHub Copilot-native discovery
-- ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files
-- ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
-- ✅ **Custom Chat Modes:** Architecture review, instruction generation
-- ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
-- ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
+
+### Super Agent Lifecycle & Orchestration
+- ✅ **Quality-First Non-Trivial Flow:** super-agent → brainstorm-spec → planner → context-token-optimizer → specialist → tester → reviewer → release-closeout
 - ✅ **Versioned Planning Workspace:** Active/completed plans under `planning/` plus active/completed specs under `planning/specs/`
-- ✅ **Quality-First Non-Trivial Flow:** super-agent -> brainstorm-spec -> planner -> context-token-optimizer (when needed) -> specialist -> tester -> reviewer -> release-closeout
-- ✅ **Approval Gate For Sensitive Execution:** sensitive implementation and closeout agents require explicit approval metadata before the runner dispatches file-mutating or release-mutating work
-- ✅ **Worker-Ready Planning:** planner work items now carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
-- ✅ **Task-Level Review Loop:** each implementation slice can pass through task spec review and task quality review before completion
+- ✅ **Multi-Agent Contracts:** Versioned orchestration manifests, schemas, and runtime artifacts
+- ✅ **Approval Gate For Sensitive Execution:** sensitive implementation and closeout agents require explicit approval metadata before dispatching file-mutating or release-mutating work
+- ✅ **Worker-Ready Planning:** planner work items carry target paths, explicit commands, expected checkpoints, and commit checkpoint suggestions
+- ✅ **Task-Level Review Loop:** each implementation slice passes through task spec review and task quality review before completion
 - ✅ **Safe Parallel Dispatch:** dependency-aware batching blocks overlapping write-sets before parallel worker fan-out
 - ✅ **Worktree Isolation Helpers:** repository-owned worktree creation flow for risky or long-running workstreams
 - ✅ **Workflow Entry Commands:** thin PowerShell entrypoints for brainstorm, plan, execute, and parallel dispatch flows
-- ✅ **Canonical Artifact Layout:** non-versioned generated outputs standardized under `.build/` and `.deployment/`
-- ✅ **TDD and Verification Contracts:** repository-owned workflow rules for test-first implementation and verification-before-completion
-- ✅ **Closeout Documentation Automation:** release closeout can rewrite repository README files and prepend CHANGELOG entries when the workstream is ready for commit
 - ✅ **Guardrailed Multi-Agent Runner:** Deterministic pipeline execution with handoffs, budgets, allowed-path enforcement, and optional live `codex-exec` dispatch
 - ✅ **Run-State Diagnostics:** Persisted `.temp/runs/<traceId>/run-state.json` snapshots for orchestration auditing and recovery analysis
+
+### Developer Experience
+- ✅ **Custom Chat Modes:** Architecture review, instruction generation
+- ✅ **Prompt Templates:** POML-based templates with CoT, SoT, ToT patterns
+- ✅ **Tool Integration:** Git, CLI tools, CI/CD pipelines, static analysis
+- ✅ **TDD and Verification Contracts:** repository-owned workflow rules for test-first implementation and verification-before-completion
+- ✅ **Closeout Documentation Automation:** release closeout can rewrite repository README files and prepend CHANGELOG entries when the workstream is ready for commit
+- ✅ **Canonical Artifact Layout:** non-versioned generated outputs standardized under `.build/` and `.deployment/`
+- ✅ **Enterprise Dev Container:** Standardized toolchain for .NET, Rust, Node, PowerShell, and GitHub CLI
+
+### Governance & Security
 - ✅ **Unified Validation Suite:** Single `validate-all` command for hooks/CI governance checks
 - ✅ **Security Baseline Validation:** Local enforcement for sensitive files and secret-like content patterns
 - ✅ **Release Provenance Validation:** Local traceability checks for release evidence and validation coverage
 - ✅ **Validation Profiles:** `dev`, `release`, and `enforced` profiles with warning-only policy
 - ✅ **Immutable Audit Trail:** Hash-chained validation ledger under `.temp/audit/`
 - ✅ **Agent Permission Matrix + Supply Chain:** Governance checks for agent permissions and dependency risk baseline
-- ✅ **Enterprise Dev Container:** Standardized toolchain for .NET, Rust, Node, PowerShell, and GitHub CLI
-- ✅ **Dependency Automation:** Dependabot updates and PR dependency severity policy in warning-only observability mode
 - ✅ **Security Observability Pipelines:** SBOM, provenance attestation, CodeQL, and Scorecard workflows without blocking merges
+- ✅ **Dependency Automation:** Dependabot updates and PR dependency severity policy in warning-only observability mode
 - ✅ **Trends Dashboard Export:** Consolidated metrics for validation warnings, vulnerability posture, and execution performance
 
 ---
@@ -47,19 +99,66 @@ Structured AI agent guidelines for software development projects. Focuses on rep
 ## Table of Contents
 
 - [Installation](#installation)
+  - [Using in Existing Projects](#using-in-existing-projects)
+  - [Repository Setup](#repository-setup)
+  - [One-Step Local Onboarding](#one-step-local-onboarding)
+  - [Cross-Platform Prerequisites](#cross-platform-prerequisites)
 - [Contribution Workflow](#contribution-workflow)
 - [Integration Matrix](#integration-matrix)
 - [Architecture Model](#architecture-model)
+  - [Layers](#layers)
+  - [Architecture Contracts](#architecture-contracts)
+  - [Planning Workspace](#planning-workspace)
 - [Dev Container](#dev-container)
+  - [Includes](#includes)
+  - [Usage](#usage)
+  - [Repository Layout](#repository-layout)
+  - [Bootstrap Local Folders](#bootstrap-local-folders)
 - [Parameterization & Privacy](#parameterization--privacy)
+  - [Rules](#rules)
+  - [PowerShell Example (Safe Defaults)](#powershell-example-safe-defaults)
+  - [Bash Example (Linux/macOS)](#bash-example-linuxmacos)
+  - [Optional Local Override (Not Committed)](#optional-local-override-not-committed)
 - [Git Hooks](#git-hooks)
+  - [Setup](#setup)
+  - [Global Manual Alias](#global-manual-alias)
+  - [Do You Still Need `git trim-eof`?](#do-you-still-need-git-trim-eof)
+  - [Global Autofix Limits](#global-autofix-limits)
+  - [pre-commit](#pre-commit)
+  - [post-commit](#post-commit)
+  - [post-merge](#post-merge)
+  - [post-checkout](#post-checkout)
+  - [Enterprise Ops](#enterprise-ops)
 - [Quick Start](#quick-start)
+  - [Recommended: Static RAGs Routing](#recommended-most-important-static-rags-routing)
+  - [Basic Setup (3 Steps)](#basic-setup-3-steps)
+  - [First AI Interaction](#first-ai-interaction)
 - [Usage Examples](#usage-examples)
+  - [Code Refactoring (.NET)](#code-refactoring-net)
+  - [Test Generation (Rust)](#test-generation-rust)
+  - [Architecture Review](#architecture-review)
+  - [Component Generation (Vue)](#component-generation-vue)
+  - [Using Prompt Templates](#using-prompt-templates)
 - [Chat Modes](#chat-modes)
+  - [clean-architecture-review](#clean-architecture-reviewchatmodemd)
+  - [instruction-writer](#instruction-writerchatmodemd)
 - [Prompt Templates](#prompt-templates)
+  - [Standard Templates (Markdown-based)](#standard-templates-markdown-based)
+  - [POML Templates (XML-based)](#poml-templates-xml-based)
 - [API Reference](#api-reference)
+  - [Core Files](#core-files)
+  - [Instruction Files](#instruction-files)
+  - [Context Selection Rule](#context-selection-rule-hard-requirement)
+  - [Static RAGs Routing](#static-rags-routing)
 - [Dependencies](#dependencies)
+  - [Runtime Dependencies](#runtime-dependencies)
+  - [Development Dependencies](#development-dependencies)
+  - [Optional Dependencies](#optional-dependencies)
 - [References](#references)
+  - [Official Documentation](#official-documentation)
+  - [Best Practices & Articles](#best-practices--articles)
+  - [Standards & Specifications](#standards--specifications)
+  - [Internal Documentation](#internal-documentation)
 
 ---
 
