@@ -52,14 +52,15 @@ priority: high
 7. code review
    - mandatory final risk-focused review for any repository change
 8. closeout
-   - always produce a commit message suggestion
+   - always produce a commit message suggestion — this step is NEVER optional
    - commit only when the user explicitly allows it or the active workflow policy authorizes it
-   - produce changelog-ready summary only when the target workspace actually tracks release history that way
-   - update README or stable docs only when the target workspace uses them as source of truth for the changed area
+   - CHANGELOG update: MANDATORY when the target workspace contains a CHANGELOG.md and the change is behavior-affecting, user-visible, or release-relevant; do NOT skip silently — if skipped, explicitly state why
+   - README update: MANDATORY when the target workspace uses README.md as source of truth for the changed area (e.g., new features, changed commands, modified workflows, updated architecture); do NOT skip silently — if skipped, explicitly state why
+   - when both CHANGELOG and README are skipped, the closeout response MUST include a one-line justification for each omission
 9. planning update
    - update plan status, validation status, blockers, and completion notes
-   - move the plan to `planning/completed/` or `.build/super-agent/planning/completed/` only when the workstream is materially finished
-   - move the spec to `planning/specs/completed/` or `.build/super-agent/specs/completed/` with the same completion standard
+   - move the plan to `planning/completed/`only when the workstream is materially finished
+   - move the spec to `planning/specs/completed/` with the same completion standard
 
 ## Delegation Rules
 - Use the planner first for non-trivial work.
