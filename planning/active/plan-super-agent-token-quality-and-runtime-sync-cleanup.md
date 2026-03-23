@@ -7,19 +7,46 @@ Generated: 2026-03-22
 - State: active
 - Spec: `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
 - Current safe slice implemented: instruction/prompt-level output economy and quality-first routing guidance
+- Current urgent slice in progress: Codex plus VS Code runtime bloat controls for safer hygiene defaults, strategic multi-agent use, and stale-session cleanup of local session/workspace artifacts
 - Remaining deferred scope: local incremental RAG/CAG index plus mirrored `.github` runtime-sync duplication audit
 
 ## Objective And Scope
 
-Prepare the deferred follow-up that will keep quality-first behavior, avoid risky input/context trimming, and instead target safer output-side token economy plus an audit of the mirrored `.github` runtime-sync flow for duplicate or garbage command surfaces in VS Code.
+Prepare the deferred follow-up that will keep quality-first behavior, avoid risky input/context trimming, and instead target safer output-side token economy plus an audit of the mirrored `.github` runtime-sync flow for duplicate or garbage command surfaces in VS Code. In the immediate slice, stop Codex local-session disk and token blowups and prune VS Code Copilot workspace trash by applying safer runtime defaults and stale-session cleanup that preserves active context.
 
 ## Normalized Request Summary
 
-The user does not want token-economy behavior to reduce quality. They want risky input/context compaction undone and the next optimization wave to focus on safer output-side economy, including shorter default responses, less duplication, and better local RAG/CAG usage. They also suspect the `.github` runtime sync may be leaving duplicate or garbage surfaces, visible as repeated `/super-agent` command entries in VS Code. This should be captured as planning for later, not executed now.
+The user does not want token-economy behavior to reduce quality. They want risky input/context compaction undone and the next optimization wave to focus on safer output-side economy, including shorter default responses, less duplication, and better local RAG/CAG usage. They also suspect the `.github` runtime sync may be leaving duplicate or garbage surfaces, visible as repeated `/super-agent` command entries in VS Code. In parallel, Codex local sessions are consuming extreme disk and likely amplifying token use through long reasoning chains and unbounded local session retention, while VS Code `Code/User/workspaceStorage` is accumulating multi-gigabyte Copilot state such as `GitHub.copilot-chat/local-index*.db` and huge `chatSessions/*.jsonl` files. The immediate safe fix is to enforce saner runtime defaults plus stale-session cleanup for both local runtimes without disabling strategic multi-agent use.
 
 ## Ordered Tasks
 
-1. Define safe output-economy rules
+1. Apply safe Codex and VS Code runtime defaults and cleanup controls
+   - Target paths:
+     - `.github/governance/codex-runtime-hygiene.catalog.json`
+     - `.github/governance/vscode-runtime-hygiene.catalog.json`
+     - `scripts/common/codex-runtime-hygiene.ps1`
+     - `scripts/common/vscode-runtime-hygiene.ps1`
+     - `scripts/runtime/set-codex-runtime-preferences.ps1`
+     - `scripts/runtime/clean-codex-runtime.ps1`
+     - `scripts/runtime/clean-vscode-user-runtime.ps1`
+     - `.vscode/settings.tamplate.jsonc`
+     - `.github/governance/workspace-efficiency.baseline.json`
+     - `scripts/runtime/install.ps1`
+     - `.githooks/post-commit`
+     - `.githooks/post-merge`
+   - Commands:
+     - `pwsh -NoLogo -NoProfile -File scripts/tests/runtime/runtime-scripts.tests.ps1 -RepoRoot .`
+     - `pwsh -NoLogo -NoProfile -File scripts/tests/runtime/install-runtime.tests.ps1 -RepoRoot .`
+   - Checkpoints:
+     - Codex config defaults keep `multi_agent` enabled while still applying repository-owned runtime hygiene defaults
+     - session cleanup defaults to LastWriteTime retention for conversations older than 30 days without update
+     - oversized-file and storage-budget pruning remain available only through explicit override paths
+     - VS Code global settings stop biasing Copilot toward runaway session restore/history/request budgets
+     - VS Code cleanup prunes stale workspaceStorage, old History, old backup files, and oversized Copilot local indexes safely
+     - install applies the safe runtime preferences deterministically
+     - post-commit/post-merge cleanup uses catalog-driven defaults instead of hardcoded 30-day retention and throttles the heavier VS Code cleanup path
+
+2. Define safe output-economy rules
    - Target paths:
      - `.github/AGENTS.md`
      - `.github/copilot-instructions.md`
@@ -35,7 +62,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
      - verbose/detailed modes remain the place for full diagnostics
      - duplication between step logs, summaries, and closeout text is reduced safely
 
-2. Define local RAG/CAG-first response guidance
+3. Define local RAG/CAG-first response guidance
    - Target paths:
      - `.github/AGENTS.md`
      - `.github/copilot-instructions.md`
@@ -48,7 +75,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
      - future guidance makes output shorter without trimming required working context
      - Copilot and Codex guidance stay aligned
 
-3. Design a local incremental index for RAG/CAG
+4. Design a local incremental index for RAG/CAG
    - Target paths:
      - `scripts/runtime/**`
      - `scripts/common/**`
@@ -61,7 +88,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
      - retrieval can reuse local code/instruction summaries without rereading everything
      - one canonical local cache/index location is defined
 
-4. Audit mirrored `.github` runtime-sync duplication
+5. Audit mirrored `.github` runtime-sync duplication
    - Target paths:
      - `scripts/runtime/bootstrap.ps1`
      - `scripts/runtime/install.ps1`
@@ -78,7 +105,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
      - local vs mirrored runtime ownership is mapped clearly
      - any garbage or duplicate registration paths are identified safely
 
-5. Define cleanup and validation strategy
+6. Define cleanup and validation strategy
    - Target paths:
      - `README.md`
      - `scripts/README.md`
@@ -111,7 +138,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
   - Fallback: keep retrieval/local-context guidance focused on answer construction, not on shrinking required execution context by default.
 - Risk: duplicated slash commands come from both repo-local and mirrored runtime surfaces.
   - Fallback: map discovery paths first and remove only one duplicated registration path at a time.
-- Risk: cleanup accidentally removes a legitimate runtime entry.
+- Risk: cleanup accidentally removes a legitimate runtime entry or a still-relevant local session.
   - Fallback: gate cleanup behind targeted runtime tests plus doctor/install validation.
 
 ## Recommended Specialists

@@ -469,9 +469,9 @@
     "chatgpt.localeOverride": "pt-BR",
 
     // Chat & AI Configuration
-    "chat.agent.maxRequests": 1000,
-    "chat.emptyState.history.enabled": true,
-    "chat.restoreLastPanelSession": true,
+    "chat.agent.maxRequests": 100,
+    "chat.emptyState.history.enabled": false,
+    "chat.restoreLastPanelSession": false,
     "chat.useAgentsMdFile": true,
     "chat.useNestedAgentsMdFiles": false,
     "chat.mcp.gallery.enabled": true,

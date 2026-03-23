@@ -117,6 +117,8 @@ The installer now uses a versioned runtime profile catalog at `.github/governanc
 
 - `none` is the default profile for `install.ps1`
 - `none` means the installer does not mutate runtime folders, VS Code globals, or Git configuration
+- Codex-enabled install profiles also apply safe local Codex runtime preferences by default: `model_reasoning_effort = "high"` and `[features].multi_agent = true`
+- Those defaults preserve multi-agent availability, but the repository-owned Super Agent workflow remains responsible for calling subagents strategically instead of using fan-out for trivial work.
 - `bootstrap.ps1`, `doctor.ps1`, `healthcheck.ps1`, and `self-heal.ps1` still default to `all` when called directly
 
 Supported install profiles:
@@ -164,6 +166,9 @@ pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile codex -ApplyMcpConfig -
 # full onboarding
 pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
+# full onboarding with explicit safer Codex runtime overrides
+pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -CodexReasoningEffort medium -CodexMultiAgentMode disabled -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
 # full onboarding plus intrusive EOF autofix on pre-commit
 # if scope is omitted, install asks whether this should be global and defaults to local-repo when you answer no
 pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -GitHookEofMode autofix -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
@@ -171,6 +176,12 @@ pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -GitHookEofMode aut
 # full onboarding plus explicit global EOF autofix
 pwsh -File .\scripts\runtime\install.ps1 -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 ```
+
+When the managed global VS Code settings template is applied, Copilot Chat is
+kept on a safer default profile for long-running sessions:
+- `chat.agent.maxRequests = 100`
+- `chat.emptyState.history.enabled = false`
+- `chat.restoreLastPanelSession = false`
 
 The VS Code hook bootstrap selects its startup controller from `.github/hooks/super-agent.selector.json`. Keep the repository default in version control and override locally only through `~/.github/hooks/super-agent.selector.local.json` or the environment variables `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`.
 
@@ -504,7 +515,8 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `governance/update-shared-script-checksums-manifest.ps1` | Regenerates `.github/governance/shared-script-checksums.manifest.json` with deterministic SHA256 entries for shared script roots. | `pwsh -File scripts/governance/update-shared-script-checksums-manifest.ps1` |
 | `git-hooks/setup-git-hooks.ps1` | Configures Git hooks in either repo-local or machine-global scope. `local-repo` sets `core.hooksPath=.githooks` and enables the repository-owned `pre-commit` validation plus `post-commit` sync. `global` persists EOF settings under `%USERPROFILE%\\.codex\\git-hook-eof-settings.json`, installs a managed machine-wide `pre-commit` hook under `%USERPROFILE%\\.codex\\git-hooks`, and sets `git config --global core.hooksPath` so the global hook path is authoritative unless a repo defines its own local override. | `pwsh -File scripts/git-hooks/setup-git-hooks.ps1 -EofHygieneMode autofix -EofHygieneScope global` |
 | `git-hooks/setup-global-git-aliases.ps1` | Configures manual global Git aliases for runtime-synced helper scripts. Currently installs `git trim-eof`, which runs the shared trim script in `-GitChangedOnly` mode before `git add` when you want manual EOF cleanup in any repository. | `pwsh -File scripts/git-hooks/setup-global-git-aliases.ps1` |
-| `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `git-hook-eof-settings`, `runtime-paths`, `runtime-execution-context`, `runtime-operation-support`, `runtime-install-profiles`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
+| `common/common-bootstrap.ps1` | Shared helper-loader bootstrap that resolves and imports `console-style`, `repository-paths`, `git-hook-eof-settings`, `runtime-paths`, `codex-runtime-hygiene`, `runtime-execution-context`, `runtime-operation-support`, `runtime-install-profiles`, and `validation-logging` from repository and mirrored runtime layouts. | `. ./scripts/common/common-bootstrap.ps1 -CallerScriptRoot $PSScriptRoot -Helpers @('console-style','repository-paths')` |
+| `common/codex-runtime-hygiene.ps1` | Shared Codex runtime hygiene helper that resolves `.github/governance/codex-runtime-hygiene.catalog.json` and exposes safe local defaults for reasoning effort, multi-agent mode, and session/log cleanup thresholds. | `. ./scripts/common/codex-runtime-hygiene.ps1; Get-CodexRuntimeHygieneSettings -ResolvedRepoRoot .` |
 | `common/git-hook-eof-settings.ps1` | Shared EOF hygiene mode helper that resolves `.github/governance/git-hook-eof-modes.json`, persists local-repo or global selections, and returns the effective mode on every commit with precedence `local-repo -> global -> default`. | `. ./scripts/common/git-hook-eof-settings.ps1; Get-EffectiveGitHookEofMode -ResolvedRepoRoot .` |
 | `common/runtime-paths.ps1` | Shared runtime location helper that resolves `.github/governance/runtime-location-catalog.json`, optional machine-local overrides, and effective cross-platform runtime targets for `.github`, `.codex`, `.agents`, `.copilot`, and managed global Git hooks. | `. ./scripts/common/runtime-paths.ps1; Get-EffectiveRuntimeLocations` |
 | `common/runtime-execution-context.ps1` | Shared runtime execution contract helper that resolves repo root, runtime profile, effective runtime locations, canonical runtime targets, and source layout once so install/bootstrap/doctor/healthcheck/self-heal/audit export reuse the same context. | `. ./scripts/common/runtime-execution-context.ps1; Resolve-RuntimeExecutionContext -RequestedRepoRoot . -FallbackProfileName all` |
@@ -513,12 +525,14 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `common/repository-paths.ps1` | Shared repository helper for repository/git/solution root discovery, repo-relative and full-path conversion, parent directory handling, verbose diagnostics, and structured execution logging reused across runtime, security, orchestration, and runtime test scripts. | `. ./scripts/common/repository-paths.ps1` |
 | `common/validation-logging.ps1` | Shared validation log helper for warning/failure registration and compact validation summaries reused across the validation script family. It relies on `repository-paths.ps1` for the shared verbose helpers. | `. ./scripts/common/validation-logging.ps1` |
 | `runtime/doctor.ps1` | Diagnoses drift between repository-managed runtime assets and local `~/.github`/`~/.codex` copies. | `pwsh -File scripts/runtime/doctor.ps1` |
-| `runtime/install.ps1` | Runs the profile-driven onboarding flow. Default profile is `none`, so the installer is non-intrusive unless `-RuntimeProfile github`, `codex`, or `all` is passed explicitly. Supports preview mode, parameterized runtime paths, and `-GitHookEofMode manual|autofix` plus `-GitHookEofScope local-repo|global` for hook behavior. When mode is provided without scope during a real run, the installer asks whether the selection should be global and defaults to the less-intrusive local-repo scope. In `global` scope, the installer configures a managed machine-wide `core.hooksPath` and leaves local repo hook paths for explicit overrides only. Warning/error lines carry runtime issue IDs and the script always closes with a deduplicated issue summary plus severity counts. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
+| `runtime/install.ps1` | Runs the profile-driven onboarding flow. Default profile is `none`, so the installer is non-intrusive unless `-RuntimeProfile github`, `codex`, or `all` is passed explicitly. Supports preview mode, parameterized runtime paths, and `-GitHookEofMode manual|autofix` plus `-GitHookEofScope local-repo|global` for hook behavior. For Codex-enabled profiles it also applies safe local runtime preferences through `set-codex-runtime-preferences.ps1`, defaulting to `model_reasoning_effort = "high"` and `[features].multi_agent = true` unless overridden with `-CodexReasoningEffort` or `-CodexMultiAgentMode`. When hook mode is provided without scope during a real run, the installer asks whether the selection should be global and defaults to the less-intrusive local-repo scope. In `global` scope, the installer configures a managed machine-wide `core.hooksPath` and leaves local repo hook paths for explicit overrides only. Warning/error lines carry runtime issue IDs and the script always closes with a deduplicated issue summary plus severity counts. | `$RepoRoot = '<REPO_ROOT>'; pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig` |
+| `runtime/set-codex-runtime-preferences.ps1` | Applies safe local Codex runtime preferences into `config.toml`, currently managing `model_reasoning_effort` and `[features].multi_agent` from the hygiene catalog or explicit overrides. The default contract keeps multi-agent available and leaves strategic subagent use to the repository-owned controller prompts/instructions. | `pwsh -File scripts/runtime/set-codex-runtime-preferences.ps1 -CreateBackup` |
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
 | `runtime/sync-workspace-settings.ps1` | Generates or refreshes `.code-workspace` files from `.vscode/base.code-workspace` plus the approved local override block derived from `.github/governance/workspace-efficiency.baseline.json`. Preserves folders, removes settings already covered by the global template, and merges workspace-specific extension recommendations with the shared base. | `pwsh -File scripts/runtime/sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api` |
 | `runtime/update-copilot-chat-titles.ps1` | Normalizes persisted GitHub Copilot chat titles to `<project-prefix> - <task summary>` using `%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json*`, with optional backups before writing. | `pwsh -File scripts/runtime/update-copilot-chat-titles.ps1 -Apply -CreateBackup` |
+| `runtime/clean-vscode-user-runtime.ps1` | Cleans stale VS Code user-runtime artifacts under `Code/User`, including old `workspaceStorage` directories, old Copilot chat sessions/transcripts, old `History` files, old `settings.json.*.bak`/`mcp.json.*.bak` backups, and oversized `GitHub.copilot-chat/local-index*.db` files. Hook-driven runs use a 12-hour throttle window and default to background execution so commits and pulls are not blocked. | `pwsh -File scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 0` |
 | `runtime/healthcheck.ps1` | Runs `validate-all` (profile-aware) plus `runtime-doctor`, emits report/log, and defaults to warning-only mode. Runtime warning/error lines use issue IDs and the final output/report include a deduplicated issue summary with severity counts. | `pwsh -File scripts/runtime/healthcheck.ps1 -ValidationProfile release` |
 | `runtime/self-heal.ps1` | Runs controlled repair flow (bootstrap + optional templates) and validates final state via healthcheck. Runtime warning/error lines use issue IDs and the final output/report include a deduplicated issue summary with severity counts. | `pwsh -File scripts/runtime/self-heal.ps1 -Mirror -StrictExtras` |
 | `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, budget, and approval guardrails; supports `script-only` and live `codex-exec` backends; writes `run-artifact.json`, `run-state.json`, `approval-record.json`, and stage artifacts under `.temp/runs/<traceId>/`. Sensitive stages require `-ApprovedStageIds` or `-ApprovedAgentIds` plus `-ApprovedBy` and `-ApprovalJustification`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change" -ExecutionBackend codex-exec -ApprovedAgentIds specialist,release-engineer -ApprovedBy "thiago.guislotti" -ApprovalJustification "Approved sensitive pipeline stages"` |
@@ -529,7 +543,7 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `runtime/invoke-super-agent-parallel-dispatch.ps1` | Runs the full Super Agent lifecycle and is intended for safe parallel worker dispatch once dependency-independent batches are present; forwards explicit approval parameters when sensitive stages are allowed to run. | `pwsh -File scripts/runtime/invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items" -ApprovedAgentIds specialist,release-engineer -ApprovedBy "thiago.guislotti" -ApprovalJustification "Approved full lifecycle execution"` |
 | `orchestration/engine/invoke-codex-dispatch.ps1` | Renders a stage prompt, invokes the local Codex CLI, captures JSON output, and persists dispatch logs/records for live planner, executor, and reviewer stages. | `pwsh -File scripts/orchestration/engine/invoke-codex-dispatch.ps1 -RepoRoot . -TraceId trace-001 -StageId plan -AgentId planner -PromptPath .temp\\planner.md -ResponseSchemaPath .github\\schemas\\agent.stage-plan-result.schema.json -ResultPath .temp\\planner-result.json -DispatchRecordPath .temp\\planner-dispatch.json` |
 | `orchestration/engine/invoke-task-worker.ps1` | Executes a single worker-ready task through implementer -> task spec review -> task quality review, with retry and allowed-path enforcement. | `pwsh -File scripts/orchestration/engine/invoke-task-worker.ps1 -RepoRoot . -TraceId trace-001 -TaskRecordPath .temp\\runs\\trace-001\\artifacts\\task-001.json -RunDirectory .temp\\runs\\trace-001 -ExecutionBackend codex-exec` |
-| `runtime/clean-codex-runtime.ps1` | Cleans local Codex runtime garbage (`tmp`, `vendor_imports`) and prunes `log`/`sessions` files older than retention using `LastWriteTime` (default 30 days). | `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30 -Apply` |
+| `runtime/clean-codex-runtime.ps1` | Cleans local Codex runtime garbage (`tmp`, `vendor_imports`) and prunes `log`/`sessions` using catalog-driven retention. Default catalog values are log retention `14` days and session retention `30` days by `LastWriteTime`, preserving active conversations by default. Oversized session thresholds and total session-storage budgets remain available only through explicit environment-variable or parameter overrides. | `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` |
 | `orchestration/stages/*.ps1` | Stage executors (`plan`, `implement`, `validate`, `review`) consumed by `run-agent-pipeline.ps1`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Smoke run"` |
 | `maintenance/clean-build-artifacts.ps1` | Deletes `.build`, `.deployment`, `bin`, and `obj` directories. Supports dry-run and prompts for confirmation. | `pwsh -File scripts/maintenance/clean-build-artifacts.ps1 -DryRun` |
 
@@ -633,10 +647,22 @@ pwsh -File .\scripts\runtime\invoke-super-agent-parallel-dispatch.ps1 -RequestTe
 pwsh -File .\scripts\maintenance\trim-trailing-blank-lines.ps1 -GitChangedOnly
 
 # preview/runtime cleanup (no deletion)
-pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30
+pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -IncludeSessions
 
-# apply runtime cleanup and session retention
-pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30 -Apply
+# apply runtime cleanup using the catalog defaults
+pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -IncludeSessions -Apply
+
+# preview VS Code user-runtime cleanup without the hook throttle
+pwsh -File .\scripts\runtime\clean-vscode-user-runtime.ps1 -RecentRunWindowHours 0
+
+# apply VS Code user-runtime cleanup immediately
+pwsh -File .\scripts\runtime\clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 0
+
+# apply safe local Codex runtime defaults explicitly
+pwsh -File .\scripts\runtime\set-codex-runtime-preferences.ps1 -CreateBackup
+
+# override the defaults only when you really want a different local profile
+pwsh -File .\scripts\runtime\set-codex-runtime-preferences.ps1 -ReasoningEffort xhigh -MultiAgentMode enabled -CreateBackup
 
 # validate instruction assets and static routing references
 pwsh -File .\scripts\validation\validate-instructions.ps1
@@ -773,19 +799,40 @@ After setup, hooks behavior is:
 - `git trim-eof` still matters when you want cleanup before staging, when you want to inspect the diff first, or when the repository stays in `manual` mode
 - Git has no native `pre-add` hook, so automatic EOF cleanup happens on commit, not on `git add` or the VS Code stage action
 - `post-commit`: runs `scripts/runtime/bootstrap.ps1 -Mirror` only when `HEAD` changed runtime-managed source paths under `.github/`, `.codex/`, or `scripts/` (best effort)
+- `post-commit`: re-applies safe Codex runtime preferences when `HEAD` changed runtime-managed source paths (best effort)
 - `post-commit`: runs `scripts/runtime/validate-vscode-global-alignment.ps1` only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts (best effort)
-- `post-commit`: runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort)
+- `post-commit`: runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort, using the hygiene catalog defaults unless environment overrides are set)
+- `post-commit`: schedules `scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 12` in the background (best effort, using the VS Code hygiene catalog defaults unless environment overrides are set)
 - `post-merge`: runs `validate-all -ValidationProfile release -WarningOnly true` (best effort, warning-only)
-- `post-merge`: runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort)
+- `post-merge`: re-applies safe Codex runtime preferences (best effort)
+- `post-merge`: runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort, using the hygiene catalog defaults unless environment overrides are set)
+- `post-merge`: schedules `scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 12` in the background (best effort, using the VS Code hygiene catalog defaults unless environment overrides are set)
 - `post-merge`: does not run runtime bootstrap sync
 - `post-checkout`: runs `validate-all -ValidationProfile dev -WarningOnly true` (best effort, warning-only)
 - `post-commit` optional MCP apply on manifest changes: set `CODEX_APPLY_MCP_ON_POST_COMMIT=1`
 - `post-commit` MCP backup control: `CODEX_BACKUP_MCP_CONFIG=1|0` (`1` default)
 - `post-commit` mirror control: `CODEX_POST_COMMIT_MIRROR=0|1` (`1` default)
+- `post-commit` and `post-merge` runtime preference apply bypass: `CODEX_SKIP_RUNTIME_PREFERENCES_APPLY=1`
 - `post-commit` and `post-merge` cleanup bypass: `CODEX_SKIP_RUNTIME_CLEANUP=1`
-- `post-commit` and `post-merge` log retention: `CODEX_LOG_RETENTION_DAYS=<n>` (`30` default, by `LastWriteTime`)
+- `post-commit` and `post-merge` VS Code cleanup bypass: `CODEX_SKIP_VSCODE_RUNTIME_CLEANUP=1`
+- `post-commit` and `post-merge` VS Code cleanup background control: `CODEX_VSCODE_RUNTIME_CLEANUP_BACKGROUND=0|1` (`1` default)
+- `post-commit` and `post-merge` log retention: `CODEX_LOG_RETENTION_DAYS=<n>` (`14` default from the hygiene catalog, by `LastWriteTime`)
 - `post-commit` and `post-merge` session cleanup toggle: `CODEX_INCLUDE_SESSIONS_CLEANUP=0|1` (`1` default)
-- `post-commit` and `post-merge` session retention: `CODEX_SESSION_RETENTION_DAYS=<n>` (`30` default, by `LastWriteTime`)
+- `post-commit` and `post-merge` session retention: `CODEX_SESSION_RETENTION_DAYS=<n>` (`30` default from the hygiene catalog, by `LastWriteTime`)
+- `post-commit` and `post-merge` oversized session threshold: `CODEX_MAX_SESSION_FILE_SIZE_MB=<n>` (disabled by default; opt-in emergency override)
+- `post-commit` and `post-merge` oversized session grace: `CODEX_OVERSIZED_SESSION_GRACE_HOURS=<n>` (disabled by default; paired with the oversized threshold override)
+- `post-commit` and `post-merge` total session budget: `CODEX_MAX_SESSION_STORAGE_GB=<n>` (disabled by default; opt-in emergency override)
+- `post-commit` and `post-merge` session storage grace: `CODEX_SESSION_STORAGE_GRACE_HOURS=<n>` (disabled by default; paired with the storage-budget override)
+- `post-commit` and `post-merge` VS Code cleanup throttle: `CODEX_VSCODE_RECENT_RUN_WINDOW_HOURS=<n>` (`12` default)
+- `post-commit` and `post-merge` stale workspaceStorage retention: `CODEX_VSCODE_WORKSPACE_STORAGE_RETENTION_DAYS=<n>` (`30` default)
+- `post-commit` and `post-merge` chat session retention: `CODEX_VSCODE_CHAT_SESSION_RETENTION_DAYS=<n>` (`14` default)
+- `post-commit` and `post-merge` chat editing retention: `CODEX_VSCODE_CHAT_EDITING_RETENTION_DAYS=<n>` (`7` default)
+- `post-commit` and `post-merge` transcript retention: `CODEX_VSCODE_TRANSCRIPT_RETENTION_DAYS=<n>` (`14` default)
+- `post-commit` and `post-merge` History retention: `CODEX_VSCODE_HISTORY_RETENTION_DAYS=<n>` (`30` default)
+- `post-commit` and `post-merge` settings backup retention: `CODEX_VSCODE_SETTINGS_BACKUP_RETENTION_DAYS=<n>` (`30` default)
+- `post-commit` and `post-merge` oversized chat session threshold: `CODEX_VSCODE_MAX_CHAT_SESSION_FILE_SIZE_MB=<n>` (`128` default)
+- `post-commit` and `post-merge` oversized workspace index threshold: `CODEX_VSCODE_MAX_WORKSPACE_INDEX_SIZE_MB=<n>` (`1024` default)
+- `post-commit` and `post-merge` oversized VS Code file grace: `CODEX_VSCODE_OVERSIZED_FILE_GRACE_HOURS=<n>` (`12` default)
 
 Practical examples:
 

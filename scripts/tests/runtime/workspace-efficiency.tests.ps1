@@ -77,7 +77,7 @@ try {
     { "path": "App" }
   ],
   "settings": {
-    "chat.agent.maxRequests": 200
+    "chat.agent.maxRequests": 80
   }
 }
 '@
@@ -137,7 +137,7 @@ try {
   ],
   "settings": {
     "git.openRepositoryInParentFolders": "always",
-    "chat.agent.maxRequests": 200
+    "chat.agent.maxRequests": 80
   }
 }
 '@
@@ -154,7 +154,7 @@ try {
     { "path": "./App" }
   ],
   "settings": {
-    "chat.agent.maxRequests": 200
+    "chat.agent.maxRequests": 80
   }
 }
 '@
@@ -174,7 +174,7 @@ try {
     { "path": "AppB" }
   ],
   "settings": {
-    "chat.agent.maxRequests": 200
+    "chat.agent.maxRequests": 80
   }
 }
 '@
@@ -190,7 +190,7 @@ try {
   ],
   "settings": {
     "extensions.autoUpdate": false,
-    "chat.agent.maxRequests": 200
+    "chat.agent.maxRequests": 80
   }
 }
 '@

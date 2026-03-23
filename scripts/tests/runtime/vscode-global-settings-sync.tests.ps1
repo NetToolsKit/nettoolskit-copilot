@@ -102,7 +102,8 @@ try {
         Write-TextFile -Path $templatePath -Content @'
 {
   "workbench.startupEditor": "welcomePage",
-  "chat.restoreLastPanelSession": true,
+  "chat.emptyState.history.enabled": false,
+  "chat.restoreLastPanelSession": false,
   "chat.instructionsFilesLocations": {
     "%USERPROFILE%\\.github\\": true
   }
@@ -119,7 +120,8 @@ try {
 
         $targetContent = Get-Content -Raw -LiteralPath $targetPath
         Assert-True -Condition ($targetContent -match '"workbench.startupEditor": "welcomePage"') -Message 'Global settings sync must render the standard welcome page startup value.'
-        Assert-True -Condition ($targetContent -match '"chat.restoreLastPanelSession": true') -Message 'Global settings sync must preserve chat restore settings.'
+        Assert-True -Condition ($targetContent -match '"chat.emptyState.history.enabled": false') -Message 'Global settings sync must keep empty-state chat history disabled by default.'
+        Assert-True -Condition ($targetContent -match '"chat.restoreLastPanelSession": false') -Message 'Global settings sync must keep chat session restore disabled by default.'
         Assert-True -Condition ($targetContent -notmatch '%USERPROFILE%') -Message 'Global settings sync must replace runtime placeholders.'
         Assert-True -Condition ($targetContent -match [regex]::Escape('.github')) -Message 'Global settings sync must preserve rendered instruction paths.'
 

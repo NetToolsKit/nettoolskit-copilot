@@ -9,59 +9,67 @@
   "entries": [
     {
       "path": "scripts/common/agent-runtime-hardening.ps1",
-      "sha256": "56652a318580378fc420200a8dc08ea537bc8d97bd84db20909b8574ed4778bf"
+      "sha256": "17d42d1e7eb145b1401718d339edc12178b204b41c95b5d0cd7f01e6bb549ac3"
     },
     {
-      "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "272eda373a71951ccf9ea9ebe8c69182029273466b27fd5f012784c5bd2e825e"
-    },
-    {
-      "path": "scripts/common/console-style.ps1",
-      "sha256": "fcfc3e587abbcc1a3a4ee5c00846dc8a29899bdb1d5b3aca0b40ac2d7c6e5ea6"
-    },
-    {
-      "path": "scripts/common/git-hook-eof-settings.ps1",
-      "sha256": "e9fa7d3de17dc55ffd7477a9eb516db3fe5acc6e4134cbdaa24b17289176d368"
-    },
-    {
-      "path": "scripts/common/repository-paths.ps1",
-      "sha256": "533dd202e850ca602afdb12568cfb9c8976f2407b4fbf3a3c1ec504a9ea06da5"
-    },
-    {
-      "path": "scripts/common/runtime-execution-context.ps1",
-      "sha256": "f42ad42683637794cffdce540a04ea0ed0a3cef22baa7b337716b4105ef9a6c9"
-    },
-    {
-      "path": "scripts/common/runtime-install-profiles.ps1",
-      "sha256": "ca1ad5e811351bfa401a47229f526c4d99180d6b8138cdf50df05c1ecc13d138"
-    },
-    {
-      "path": "scripts/common/runtime-operation-support.ps1",
-      "sha256": "0db1062c38bcc491cecfa1b28b03e75901e38b594ff39c727265cdc01bebb329"
-    },
-    {
-      "path": "scripts/common/runtime-paths.ps1",
-      "sha256": "d2ca931e515327ad478487fd7b897774d5f3eb337cbbf64ea69096680c71df46"
-    },
-    {
-      "path": "scripts/common/validation-logging.ps1",
-      "sha256": "3e73c6286c41a71e760e0fdbfa285c5d994026db87a10e5cd8930c8c8e5f0dc6"
-    },
-    {
-      "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
-      "sha256": "72297f17960c841386a29c35749af55ce2e396d74b8dbdfe5ed8c3a4a8f8069c"
-    },
-    {
-      "path": "scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1",
-      "sha256": "67975228023861560c59bf37852d0339f83f11cba99911e38faf2ee7d2eb3991"
+      "path": "scripts/security/Invoke-PreBuildSecurityGate.ps1",
+      "sha256": "22735954b413d1609c828fa21863bb6fc71f82038bfce194ebf9c142171a79cc"
     },
     {
       "path": "scripts/security/Invoke-FrontendPackageVulnerabilityAudit.ps1",
       "sha256": "723c6ed1e9aae204a2d889b21f2fff1fc7a8291a8c2f24e6d6045815cf1300f9"
     },
     {
-      "path": "scripts/security/Invoke-PreBuildSecurityGate.ps1",
-      "sha256": "22735954b413d1609c828fa21863bb6fc71f82038bfce194ebf9c142171a79cc"
+      "path": "scripts/security/Invoke-CiPreBuildSecuritySnapshot.ps1",
+      "sha256": "67975228023861560c59bf37852d0339f83f11cba99911e38faf2ee7d2eb3991"
+    },
+    {
+      "path": "scripts/security/Install-SecurityAuditPrerequisites.ps1",
+      "sha256": "72297f17960c841386a29c35749af55ce2e396d74b8dbdfe5ed8c3a4a8f8069c"
+    },
+    {
+      "path": "scripts/common/vscode-runtime-hygiene.ps1",
+      "sha256": "5485d0b9c5258d503d6dd9c71a784fd169952ff96f546b4b30155921051ba788"
+    },
+    {
+      "path": "scripts/common/validation-logging.ps1",
+      "sha256": "9b634166d3d7424419896082cfa56bdda86291170ddd735715b802735591f718"
+    },
+    {
+      "path": "scripts/common/runtime-paths.ps1",
+      "sha256": "93c5d2e23a1c54ccc46972f31414914bd12d499eaf4b0acdb2f9cf7c25e76c9a"
+    },
+    {
+      "path": "scripts/common/runtime-operation-support.ps1",
+      "sha256": "b300296deb2f0cb315ec32f4771e220fc8093cdeae1b007fc1032fa482346192"
+    },
+    {
+      "path": "scripts/common/runtime-install-profiles.ps1",
+      "sha256": "ca1ad5e811351bfa401a47229f526c4d99180d6b8138cdf50df05c1ecc13d138"
+    },
+    {
+      "path": "scripts/common/runtime-execution-context.ps1",
+      "sha256": "f42ad42683637794cffdce540a04ea0ed0a3cef22baa7b337716b4105ef9a6c9"
+    },
+    {
+      "path": "scripts/common/repository-paths.ps1",
+      "sha256": "0ce88487a1c7465fdae4f737d8757d3955abae366e45ff9e7a6a34ad05c8511f"
+    },
+    {
+      "path": "scripts/common/git-hook-eof-settings.ps1",
+      "sha256": "e9fa7d3de17dc55ffd7477a9eb516db3fe5acc6e4134cbdaa24b17289176d368"
+    },
+    {
+      "path": "scripts/common/console-style.ps1",
+      "sha256": "fcfc3e587abbcc1a3a4ee5c00846dc8a29899bdb1d5b3aca0b40ac2d7c6e5ea6"
+    },
+    {
+      "path": "scripts/common/common-bootstrap.ps1",
+      "sha256": "56ff6d1f8f7d064c21cd5b28bcc7e266b06e4acf950f3a0c4b4d7882ca58fdd1"
+    },
+    {
+      "path": "scripts/common/codex-runtime-hygiene.ps1",
+      "sha256": "fe75421380c0ec69630f643eb85e73635f12df60c3ab5e9c428b29392c694138"
     },
     {
       "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",
@@ -69,7 +77,7 @@
     },
     {
       "path": "scripts/security/Invoke-VulnerabilityAudit.ps1",
-      "sha256": "b385f2256ed87cb27ac966c75996f7108142536a0ddfc37f957aa49e982f3193"
+      "sha256": "e6a2511f86c6ce8d87927d1c2882d547f3e5bab8bc15c91ad67f9d0fa522ae65"
     }
   ]
 }

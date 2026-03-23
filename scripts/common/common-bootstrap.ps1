@@ -43,6 +43,8 @@ function Resolve-CommonHelperFileName {
         'repository-paths' { return 'repository-paths.ps1' }
         'git-hook-eof-settings' { return 'git-hook-eof-settings.ps1' }
         'runtime-paths' { return 'runtime-paths.ps1' }
+        'codex-runtime-hygiene' { return 'codex-runtime-hygiene.ps1' }
+        'vscode-runtime-hygiene' { return 'vscode-runtime-hygiene.ps1' }
         'runtime-execution-context' { return 'runtime-execution-context.ps1' }
         'agent-runtime-hardening' { return 'agent-runtime-hardening.ps1' }
         'runtime-operation-support' { return 'runtime-operation-support.ps1' }

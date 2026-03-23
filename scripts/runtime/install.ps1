@@ -48,6 +48,17 @@
     `-GitHookEofMode` is supplied during a non-preview run, the installer asks
     whether the selection should be global. The default remains local-repo.
 
+.PARAMETER CodexReasoningEffort
+    Optional Codex reasoning effort override applied through
+    `scripts/runtime/set-codex-runtime-preferences.ps1`. When omitted, the
+    repository-owned hygiene catalog default is used.
+
+.PARAMETER CodexMultiAgentMode
+    Optional Codex multi-agent mode override applied through
+    `scripts/runtime/set-codex-runtime-preferences.ps1`. Supported values are
+    `enabled` and `disabled`. When omitted, the repository-owned hygiene
+    catalog default is used.
+
 .PARAMETER ValidationProfile
     Validation profile used by the final healthcheck. Defaults to `dev`.
 
@@ -111,6 +122,10 @@ param(
     [string] $RuntimeProfile,
     [string] $GitHookEofMode,
     [string] $GitHookEofScope,
+    [ValidateSet('low', 'medium', 'high', 'xhigh')]
+    [string] $CodexReasoningEffort,
+    [ValidateSet('enabled', 'disabled')]
+    [string] $CodexMultiAgentMode,
     [string] $ValidationProfile = 'dev',
     [switch] $Mirror,
     [switch] $ApplyMcpConfig,
@@ -307,6 +322,26 @@ if ($resolvedRuntimeProfile.InstallBootstrap) {
     }
 
     $steps.Add((New-InstallStep -Name 'Bootstrap shared runtime assets' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/bootstrap.ps1') -Arguments $bootstrapArguments)) | Out-Null
+}
+
+if ($resolvedRuntimeProfile.EnableCodexRuntime) {
+    $codexPreferenceArguments = @{
+        RepoRoot = $resolvedRepoRoot
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TargetCodexPath)) {
+        $codexPreferenceArguments.TargetConfigPath = (Join-Path $TargetCodexPath 'config.toml')
+    }
+    if (-not [string]::IsNullOrWhiteSpace($CodexReasoningEffort)) {
+        $codexPreferenceArguments.ReasoningEffort = $CodexReasoningEffort
+    }
+    if (-not [string]::IsNullOrWhiteSpace($CodexMultiAgentMode)) {
+        $codexPreferenceArguments.MultiAgentMode = $CodexMultiAgentMode
+    }
+    if ($BackupMcpConfig) {
+        $codexPreferenceArguments.CreateBackup = $true
+    }
+
+    $steps.Add((New-InstallStep -Name 'Apply Codex runtime preferences' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/set-codex-runtime-preferences.ps1') -Arguments $codexPreferenceArguments)) | Out-Null
 }
 
 if ($resolvedRuntimeProfile.InstallGlobalVscodeSettings -and -not $SkipGlobalSettings) {

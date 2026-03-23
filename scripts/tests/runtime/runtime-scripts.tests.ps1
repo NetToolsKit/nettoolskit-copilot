@@ -124,6 +124,35 @@ try {
     Assert-Contains -Collection $keys -Value 'IncludeSessions' -Message 'clean-codex-runtime missing IncludeSessions parameter.'
     Assert-Contains -Collection $keys -Value 'SessionRetentionDays' -Message 'clean-codex-runtime missing SessionRetentionDays parameter.'
     Assert-Contains -Collection $keys -Value 'LogRetentionDays' -Message 'clean-codex-runtime missing LogRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'MaxSessionFileSizeMB' -Message 'clean-codex-runtime missing MaxSessionFileSizeMB parameter.'
+    Assert-Contains -Collection $keys -Value 'OversizedSessionGraceHours' -Message 'clean-codex-runtime missing OversizedSessionGraceHours parameter.'
+    Assert-Contains -Collection $keys -Value 'MaxSessionStorageGB' -Message 'clean-codex-runtime missing MaxSessionStorageGB parameter.'
+    Assert-Contains -Collection $keys -Value 'SessionStorageGraceHours' -Message 'clean-codex-runtime missing SessionStorageGraceHours parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'clean-vscode-user-runtime.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'GlobalVscodeUserPath' -Message 'clean-vscode-user-runtime missing GlobalVscodeUserPath parameter.'
+    Assert-Contains -Collection $keys -Value 'WorkspaceStorageRetentionDays' -Message 'clean-vscode-user-runtime missing WorkspaceStorageRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'ChatSessionRetentionDays' -Message 'clean-vscode-user-runtime missing ChatSessionRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'ChatEditingSessionRetentionDays' -Message 'clean-vscode-user-runtime missing ChatEditingSessionRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'TranscriptRetentionDays' -Message 'clean-vscode-user-runtime missing TranscriptRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'HistoryRetentionDays' -Message 'clean-vscode-user-runtime missing HistoryRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'SettingsBackupRetentionDays' -Message 'clean-vscode-user-runtime missing SettingsBackupRetentionDays parameter.'
+    Assert-Contains -Collection $keys -Value 'MaxChatSessionFileSizeMB' -Message 'clean-vscode-user-runtime missing MaxChatSessionFileSizeMB parameter.'
+    Assert-Contains -Collection $keys -Value 'MaxCopilotWorkspaceIndexSizeMB' -Message 'clean-vscode-user-runtime missing MaxCopilotWorkspaceIndexSizeMB parameter.'
+    Assert-Contains -Collection $keys -Value 'OversizedFileGraceHours' -Message 'clean-vscode-user-runtime missing OversizedFileGraceHours parameter.'
+    Assert-Contains -Collection $keys -Value 'RecentRunWindowHours' -Message 'clean-vscode-user-runtime missing RecentRunWindowHours parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'set-codex-runtime-preferences.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'set-codex-runtime-preferences missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'TargetConfigPath' -Message 'set-codex-runtime-preferences missing TargetConfigPath parameter.'
+    Assert-Contains -Collection $keys -Value 'ReasoningEffort' -Message 'set-codex-runtime-preferences missing ReasoningEffort parameter.'
+    Assert-Contains -Collection $keys -Value 'MultiAgentMode' -Message 'set-codex-runtime-preferences missing MultiAgentMode parameter.'
+    Assert-Contains -Collection $keys -Value 'CreateBackup' -Message 'set-codex-runtime-preferences missing CreateBackup parameter.'
+    Assert-Contains -Collection $keys -Value 'PreviewOnly' -Message 'set-codex-runtime-preferences missing PreviewOnly parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'run-agent-pipeline.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -182,6 +211,8 @@ try {
     Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'install missing RuntimeProfile parameter.'
     Assert-Contains -Collection $keys -Value 'GitHookEofMode' -Message 'install missing GitHookEofMode parameter.'
     Assert-Contains -Collection $keys -Value 'GitHookEofScope' -Message 'install missing GitHookEofScope parameter.'
+    Assert-Contains -Collection $keys -Value 'CodexReasoningEffort' -Message 'install missing CodexReasoningEffort parameter.'
+    Assert-Contains -Collection $keys -Value 'CodexMultiAgentMode' -Message 'install missing CodexMultiAgentMode parameter.'
 
     $operationalScriptDirectories = @(
         (Join-Path $resolvedRepoRoot 'scripts/runtime'),
@@ -244,6 +275,77 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCopilotSkills 'super-agent\SKILL.md') -PathType Leaf) 'bootstrap github profile must project native Copilot skills.'
         Assert-True (-not (Test-Path -LiteralPath $targetAgentsSkills)) 'bootstrap github profile must not project Codex picker-visible skills.'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts'))) 'bootstrap github profile must not project Codex shared scripts.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $globalUserPath = Join-Path $tempRoot 'Code\User'
+    $workspaceStorageRoot = Join-Path $globalUserPath 'workspaceStorage'
+    $staleWorkspaceRoot = Join-Path $workspaceStorageRoot 'stale-workspace'
+    $activeWorkspaceRoot = Join-Path $workspaceStorageRoot 'active-workspace'
+    $chatSessionsRoot = Join-Path $activeWorkspaceRoot 'chatSessions'
+    $editingSessionsRoot = Join-Path $activeWorkspaceRoot 'chatEditingSessions'
+    $copilotChatRoot = Join-Path $activeWorkspaceRoot 'GitHub.copilot-chat'
+    $transcriptsRoot = Join-Path $copilotChatRoot 'transcripts'
+    $historyRoot = Join-Path $globalUserPath 'History'
+    $emptyWindowRoot = Join-Path $globalUserPath 'globalStorage\emptyWindowChatSessions'
+    $scriptPath = Join-Path $runtimeScriptRoot 'clean-vscode-user-runtime.ps1'
+    try {
+        New-Item -ItemType Directory -Path $staleWorkspaceRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $chatSessionsRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $editingSessionsRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $transcriptsRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $historyRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $emptyWindowRoot -Force | Out-Null
+
+        $staleWorkspaceFile = Join-Path $staleWorkspaceRoot 'workspace.json'
+        $oldChatSession = Join-Path $chatSessionsRoot 'old.jsonl'
+        $oldEditingSession = Join-Path $editingSessionsRoot 'draft.tmp'
+        $oldTranscript = Join-Path $transcriptsRoot 'old-transcript.jsonl'
+        $oldHistoryFile = Join-Path $historyRoot 'old.history'
+        $oldEmptyWindowSession = Join-Path $emptyWindowRoot 'empty-session.jsonl'
+        $settingsBackup = Join-Path $globalUserPath 'settings.json.20260323-010101.bak'
+        $oversizedChatSession = Join-Path $chatSessionsRoot 'oversized.jsonl'
+        $oversizedWorkspaceIndex = Join-Path $copilotChatRoot 'local-index.1.db'
+
+        Set-Content -LiteralPath $staleWorkspaceFile -Value 'stale'
+        Set-Content -LiteralPath $oldChatSession -Value 'chat'
+        Set-Content -LiteralPath $oldEditingSession -Value 'editing'
+        Set-Content -LiteralPath $oldTranscript -Value 'transcript'
+        Set-Content -LiteralPath $oldHistoryFile -Value 'history'
+        Set-Content -LiteralPath $oldEmptyWindowSession -Value 'empty'
+        Set-Content -LiteralPath $settingsBackup -Value 'backup'
+        [System.IO.File]::WriteAllBytes($oversizedChatSession, (New-Object byte[] (2MB)))
+        [System.IO.File]::WriteAllBytes($oversizedWorkspaceIndex, (New-Object byte[] (3MB)))
+
+        $expiredDate = (Get-Date).AddDays(-40)
+        foreach ($path in @($staleWorkspaceRoot, $staleWorkspaceFile, $oldChatSession, $oldEditingSession, $oldTranscript, $oldHistoryFile, $oldEmptyWindowSession, $settingsBackup)) {
+            if (Test-Path -LiteralPath $path) {
+                (Get-Item -LiteralPath $path).LastWriteTime = $expiredDate
+            }
+        }
+        foreach ($path in @($oversizedChatSession, $oversizedWorkspaceIndex)) {
+            if (Test-Path -LiteralPath $path) {
+                (Get-Item -LiteralPath $path).LastWriteTime = (Get-Date).AddHours(-30)
+            }
+        }
+
+        & $scriptPath -GlobalVscodeUserPath $globalUserPath -WorkspaceStorageRetentionDays 30 -ChatSessionRetentionDays 14 -ChatEditingSessionRetentionDays 7 -TranscriptRetentionDays 14 -HistoryRetentionDays 30 -SettingsBackupRetentionDays 30 -MaxChatSessionFileSizeMB 1 -MaxCopilotWorkspaceIndexSizeMB 1 -OversizedFileGraceHours 1 -RecentRunWindowHours 0 -Apply | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'clean-vscode-user-runtime smoke test failed.'
+        Assert-True (-not (Test-Path -LiteralPath $staleWorkspaceRoot)) 'clean-vscode-user-runtime did not remove stale workspaceStorage directory.'
+        Assert-True (-not (Test-Path -LiteralPath $oldChatSession)) 'clean-vscode-user-runtime did not remove expired chat session.'
+        Assert-True (-not (Test-Path -LiteralPath $oldEditingSession)) 'clean-vscode-user-runtime did not remove expired chat editing session.'
+        Assert-True (-not (Test-Path -LiteralPath $oldTranscript)) 'clean-vscode-user-runtime did not remove expired transcript.'
+        Assert-True (-not (Test-Path -LiteralPath $oldHistoryFile)) 'clean-vscode-user-runtime did not remove expired History file.'
+        Assert-True (-not (Test-Path -LiteralPath $oldEmptyWindowSession)) 'clean-vscode-user-runtime did not remove expired empty-window session.'
+        Assert-True (-not (Test-Path -LiteralPath $settingsBackup)) 'clean-vscode-user-runtime did not remove expired settings backup.'
+        Assert-True (-not (Test-Path -LiteralPath $oversizedChatSession)) 'clean-vscode-user-runtime did not remove oversized chat session.'
+        Assert-True (-not (Test-Path -LiteralPath $oversizedWorkspaceIndex)) 'clean-vscode-user-runtime did not remove oversized workspace index.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -317,6 +419,79 @@ try {
         & $scriptPath -CodexHome $codexHome -IncludeSessions -SessionRetentionDays 1 -LogRetentionDays 1 -Apply | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'clean-codex-runtime must tolerate empty log/session collections.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $codexHome = Join-Path $tempRoot '.codex'
+    $sessionsDir = Join-Path $codexHome 'sessions\2026\03\17'
+    $scriptPath = Join-Path $runtimeScriptRoot 'clean-codex-runtime.ps1'
+    try {
+        New-Item -ItemType Directory -Path $sessionsDir -Force | Out-Null
+        $oversizedSession = Join-Path $sessionsDir 'oversized.jsonl'
+        $budgetSession = Join-Path $sessionsDir 'budget.jsonl'
+        [System.IO.File]::WriteAllBytes($oversizedSession, (New-Object byte[] (2MB)))
+        [System.IO.File]::WriteAllBytes($budgetSession, (New-Object byte[] (3MB)))
+        $expiredDate = (Get-Date).AddDays(-3)
+        (Get-Item -LiteralPath $oversizedSession).LastWriteTime = $expiredDate
+        (Get-Item -LiteralPath $budgetSession).LastWriteTime = $expiredDate
+
+        & $scriptPath -CodexHome $codexHome -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 14 -MaxSessionFileSizeMB 1 -OversizedSessionGraceHours 1 -MaxSessionStorageGB 1 -SessionStorageGraceHours 1 -Apply | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'clean-codex-runtime oversized/budget smoke test failed.'
+        Assert-True (-not (Test-Path -LiteralPath $budgetSession)) 'clean-codex-runtime did not remove oversized or budget-pruned session file.'
+        Assert-True (-not (Test-Path -LiteralPath $oversizedSession)) 'clean-codex-runtime did not remove the oversized session file.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $codexHome = Join-Path $tempRoot '.codex'
+    $sessionsDir = Join-Path $codexHome 'sessions\2026\03\17'
+    $scriptPath = Join-Path $runtimeScriptRoot 'clean-codex-runtime.ps1'
+    try {
+        New-Item -ItemType Directory -Path $sessionsDir -Force | Out-Null
+        $recentLargeSession = Join-Path $sessionsDir 'recent-large.jsonl'
+        [System.IO.File]::WriteAllBytes($recentLargeSession, (New-Object byte[] (3MB)))
+        (Get-Item -LiteralPath $recentLargeSession).LastWriteTime = (Get-Date).AddDays(-3)
+
+        & $scriptPath -CodexHome $codexHome -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 14 -Apply | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'clean-codex-runtime default retention smoke test failed.'
+        Assert-True (Test-Path -LiteralPath $recentLargeSession) 'clean-codex-runtime should preserve recent active sessions when oversized/budget cleanup is not explicitly enabled.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $configPath = Join-Path $tempRoot 'config.toml'
+    $scriptPath = Join-Path $runtimeScriptRoot 'set-codex-runtime-preferences.ps1'
+    try {
+        New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
+        Set-Content -LiteralPath $configPath -Value @(
+            'model = "gpt-5.4"',
+            'model_reasoning_effort = "xhigh"',
+            '',
+            '[features]',
+            'multi_agent = false'
+        )
+
+        & $scriptPath -RepoRoot $resolvedRepoRoot -TargetConfigPath $configPath -ReasoningEffort high | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'set-codex-runtime-preferences smoke test failed.'
+        $content = Get-Content -LiteralPath $configPath -Raw
+        Assert-True ($content -match 'model_reasoning_effort = "high"') 'set-codex-runtime-preferences did not update model_reasoning_effort.'
+        Assert-True ($content -match 'multi_agent = true') 'set-codex-runtime-preferences did not restore the catalog default multi_agent mode.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

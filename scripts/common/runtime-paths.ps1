@@ -28,6 +28,30 @@ $script:RuntimePathsHelperRoot = Split-Path -Path $PSCommandPath -Parent
 $script:RuntimeLocationCatalogCache = $null
 $script:RuntimeLocationOverrideCache = $null
 
+# Ensures script-scope cache variables exist even when the helper is loaded in
+# isolated or re-entrant contexts during tests and mirrored runtime usage.
+function Initialize-RuntimeLocationCaches {
+    $helperRootVariable = Get-Variable -Name 'RuntimePathsHelperRoot' -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $helperRootVariable -or [string]::IsNullOrWhiteSpace([string] $helperRootVariable.Value)) {
+        $script:RuntimePathsHelperRoot = if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+            $PSScriptRoot
+        }
+        else {
+            Join-Path (Get-Location) 'scripts/common'
+        }
+    }
+
+    $catalogCacheVariable = Get-Variable -Name 'RuntimeLocationCatalogCache' -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $catalogCacheVariable) {
+        $script:RuntimeLocationCatalogCache = $null
+    }
+
+    $overrideCacheVariable = Get-Variable -Name 'RuntimeLocationOverrideCache' -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $overrideCacheVariable) {
+        $script:RuntimeLocationOverrideCache = $null
+    }
+}
+
 # Resolves the current user home directory with cross-platform fallbacks.
 function Resolve-UserHomePath {
     if (-not [string]::IsNullOrWhiteSpace($env:USERPROFILE)) {
@@ -113,6 +137,8 @@ function ConvertTo-ExpandedRuntimeLocationPath {
 
 # Resolves the runtime location catalog path from environment, repository, or mirrored runtime candidates.
 function Resolve-RuntimeLocationCatalogPath {
+    Initialize-RuntimeLocationCaches
+
     if (-not [string]::IsNullOrWhiteSpace($env:CODEX_RUNTIME_LOCATION_CATALOG_PATH)) {
         return [System.IO.Path]::GetFullPath($env:CODEX_RUNTIME_LOCATION_CATALOG_PATH)
     }
@@ -151,6 +177,8 @@ function Resolve-RuntimeLocationCatalogPath {
 
 # Loads the effective runtime location catalog.
 function Get-RuntimeLocationCatalog {
+    Initialize-RuntimeLocationCaches
+
     if ($null -ne $script:RuntimeLocationCatalogCache) {
         return $script:RuntimeLocationCatalogCache
     }
@@ -190,6 +218,8 @@ function Resolve-RuntimeLocationSettingsPath {
 
 # Loads the optional user-local runtime location override payload.
 function Get-RuntimeLocationOverrideSettings {
+    Initialize-RuntimeLocationCaches
+
     if ($null -ne $script:RuntimeLocationOverrideCache) {
         return $script:RuntimeLocationOverrideCache
     }

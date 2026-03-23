@@ -115,7 +115,7 @@ Use one of these explicit profiles:
 
 - `install.ps1` stays non-intrusive by default because `RuntimeProfile` defaults to `none`
 - automatic runtime sync is not installed globally by default; it only runs in repositories that explicitly opt into the local `.githooks` runtime
-- `pull` / `post-merge` does not run runtime bootstrap sync; it only runs validation and cleanup
+- `pull` / `post-merge` does not run runtime bootstrap sync; it runs validation, reapplies safe Codex runtime preferences, and then runs cleanup
 
 Runtime locations are also centralized now:
 
@@ -158,12 +158,20 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile c
 # enable everything
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
+# enable everything with explicit safer Codex runtime overrides
+pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -CodexReasoningEffort medium -CodexMultiAgentMode disabled -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
 # enable full onboarding plus intrusive EOF autofix on pre-commit
 # if scope is omitted, install asks whether it should be global and defaults to local-repo when you answer no
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
 
 # enable full onboarding plus explicit global EOF autofix across repositories using this hook runtime
 pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile all -GitHookEofMode autofix -GitHookEofScope global -CreateSettingsBackup -ApplyMcpConfig -BackupMcpConfig
+
+# global VS Code settings now keep Copilot Chat less prone to runaway sessions:
+# - chat.agent.maxRequests = 100
+# - chat.emptyState.history.enabled = false
+# - chat.restoreLastPanelSession = false
 ```
 
 Operational PowerShell entrypoints now share one execution-session pattern:
@@ -311,6 +319,12 @@ pwsh -File ./scripts/runtime/healthcheck.ps1 -StrictExtras
 `bootstrap.ps1` remains the direct runtime sync entrypoint and defaults to runtime profile `all` when called on its own. Use `-RuntimeProfile github` or `-RuntimeProfile codex` when you want the projection to stay scoped to one runtime surface.
 
 With profile `all`, bootstrap syncs versioned `.github/` and `.codex/` assets into the effective runtime locations from `runtime-location-catalog.json` plus any local override file, projects the single visible repository-owned starter/controller into `agentsSkillsRoot`, projects native Copilot skills into `copilotSkillsRoot`, mirrors shared helper scripts from `scripts/common`, `scripts/security`, and `scripts/maintenance` into `codexRuntimeRoot/shared-scripts`, removes stale duplicate repo-managed skill folders from `codexRuntimeRoot/skills`, and applies MCP servers into `codexRuntimeRoot/config.toml` when `-ApplyMcpConfig` is included.
+
+For Codex-enabled install profiles, onboarding also applies safe local runtime preferences into `config.toml`:
+- `model_reasoning_effort = "high"`
+- `[features].multi_agent = true`
+
+Those defaults are versioned in `.github/governance/codex-runtime-hygiene.catalog.json` and are meant to preserve the normal multi-agent capability while keeping runtime hygiene focused on stale-session cleanup rather than trimming required execution context. The expectation is still strategic multi-agent use through the repository-owned Super Agent workflow, not fan-out for trivial work.
 
 The synced GitHub runtime also carries VS Code hook configuration under `githubRuntimeRoot/hooks`, and the global settings template loads hooks from that path so Copilot and Codex sessions in VS Code receive the repository-owned bootstrap automatically.
 
@@ -546,12 +560,16 @@ git commit -m "Apply change"
 - Runs `scripts/runtime/bootstrap.ps1 -Mirror` (best effort) only when `HEAD` changed runtime-managed source paths under `.github/`, `.codex/`, or `scripts/`
 - If `.codex/mcp/servers.manifest.json` changed in `HEAD`, can optionally apply MCP config
 - Runs `scripts/runtime/validate-vscode-global-alignment.ps1` (best effort) only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts
-- Runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort) to clean runtime garbage and stale session/history files by **LastWriteTime** (last update)
+- Re-applies safe Codex runtime preferences when runtime-managed source changed (best effort)
+- Runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort) to clean runtime garbage and stale session/history files that have not been updated for more than **30 days** by **LastWriteTime**; aggressive oversized-file and storage-budget pruning are available only through explicit overrides
+- Schedules `scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 12` in the background (best effort) to prune stale Copilot workspace state, old VS Code history, old settings backups, and oversized `GitHub.copilot-chat/local-index*.db` files without blocking normal commit flow
 
 ### post-merge
 
 - Runs `scripts/validation/validate-all.ps1 -ValidationProfile release -WarningOnly true` (best effort)
-- Runs `scripts/runtime/clean-codex-runtime.ps1 -LogRetentionDays 30 -IncludeSessions -SessionRetentionDays 30 -Apply` (best effort)
+- Re-applies safe Codex runtime preferences (best effort)
+- Runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort) with the same 30-day stale-session retention defaults
+- Schedules `scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 12` in the background (best effort)
 - Does not run runtime sync
 
 ### post-checkout
@@ -567,10 +585,26 @@ Environment variables:
 - `CODEX_SKIP_VSCODE_GLOBAL_CHECK=1`: skips `.vscode` containment check against global VS Code User files in `post-commit`
 - `CODEX_VSCODE_GLOBAL_USER_PATH=<path>`: overrides global VS Code User folder used by `post-commit` check
 - `CODEX_SKIP_VSCODE_SNIPPET_CHECK=1`: skips snippet containment checks in `post-commit`
+- `CODEX_SKIP_RUNTIME_PREFERENCES_APPLY=1`: skip automatic safe Codex runtime preference apply in `post-commit` and `post-merge`
 - `CODEX_SKIP_RUNTIME_CLEANUP=1`: skip automatic runtime cleanup in `post-commit` and `post-merge`
-- `CODEX_LOG_RETENTION_DAYS=<n>`: log retention window in days for automatic runtime cleanup (`30` default, by `LastWriteTime`)
+- `CODEX_SKIP_VSCODE_RUNTIME_CLEANUP=1`: skip automatic VS Code user-runtime cleanup in `post-commit` and `post-merge`
+- `CODEX_LOG_RETENTION_DAYS=<n>`: log retention window in days for automatic runtime cleanup (`14` default from the hygiene catalog, by `LastWriteTime`)
 - `CODEX_INCLUDE_SESSIONS_CLEANUP=0|1`: enable cleanup for old session/history files (`1` default)
-- `CODEX_SESSION_RETENTION_DAYS=<n>`: retention window for session/history cleanup (`30` default, by `LastWriteTime`)
+- `CODEX_SESSION_RETENTION_DAYS=<n>`: retention window for session/history cleanup (`30` default from the hygiene catalog, by `LastWriteTime`)
+- `CODEX_MAX_SESSION_FILE_SIZE_MB=<n>`: optional oversized session threshold override (disabled by default)
+- `CODEX_OVERSIZED_SESSION_GRACE_HOURS=<n>`: optional grace window paired with `CODEX_MAX_SESSION_FILE_SIZE_MB` (disabled by default)
+- `CODEX_MAX_SESSION_STORAGE_GB=<n>`: optional total session storage budget override (disabled by default)
+- `CODEX_SESSION_STORAGE_GRACE_HOURS=<n>`: optional grace window paired with `CODEX_MAX_SESSION_STORAGE_GB` (disabled by default)
+- `CODEX_VSCODE_RECENT_RUN_WINDOW_HOURS=<n>`: throttle window for automatic VS Code user-runtime cleanup (`12` default)
+- `CODEX_VSCODE_WORKSPACE_STORAGE_RETENTION_DAYS=<n>`: stale workspaceStorage directory retention (`30` default)
+- `CODEX_VSCODE_CHAT_SESSION_RETENTION_DAYS=<n>`: Copilot chat session retention (`14` default)
+- `CODEX_VSCODE_CHAT_EDITING_RETENTION_DAYS=<n>`: chat editing-session retention (`7` default)
+- `CODEX_VSCODE_TRANSCRIPT_RETENTION_DAYS=<n>`: Copilot transcript retention (`14` default)
+- `CODEX_VSCODE_HISTORY_RETENTION_DAYS=<n>`: VS Code `History` retention (`30` default)
+- `CODEX_VSCODE_SETTINGS_BACKUP_RETENTION_DAYS=<n>`: `settings.json.*.bak` / `mcp.json.*.bak` retention (`30` default)
+- `CODEX_VSCODE_MAX_CHAT_SESSION_FILE_SIZE_MB=<n>`: oversized Copilot chat session threshold (`128` default)
+- `CODEX_VSCODE_MAX_WORKSPACE_INDEX_SIZE_MB=<n>`: oversized `GitHub.copilot-chat/local-index*.db` threshold (`1024` default)
+- `CODEX_VSCODE_OVERSIZED_FILE_GRACE_HOURS=<n>`: grace window before oversized VS Code chat/index files become removable (`12` default)
 
 ### Enterprise Ops
 
@@ -650,8 +684,14 @@ pwsh -File ./scripts/governance/set-branch-protection.ps1 -Apply
 # repair runtime and validate final state
 pwsh -File ./scripts/runtime/self-heal.ps1 -Mirror -StrictExtras
 
-# clean local Codex runtime garbage and prune sessions by retention window
-pwsh -File ./scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -SessionRetentionDays 30 -LogRetentionDays 30 -Apply
+# clean local Codex runtime garbage and prune sessions using the safe catalog defaults
+pwsh -File ./scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply
+
+# preview VS Code user-runtime cleanup
+pwsh -File ./scripts/runtime/clean-vscode-user-runtime.ps1 -RecentRunWindowHours 0
+
+# apply VS Code user-runtime cleanup immediately
+pwsh -File ./scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 0
 
 # export consolidated audit report with git metadata and policy inventory
 pwsh -File ./scripts/validation/export-audit-report.ps1 -ValidationProfile release -StrictExtras
@@ -666,6 +706,11 @@ pwsh -File ./scripts/security/Invoke-PreBuildSecurityGate.ps1 -InstallMissingPre
 
 Audit logs are generated under `.temp/logs/`.
 Validation ledger and SBOM artifacts are generated under `.temp/audit/`.
+
+Notes for VS Code cleanup:
+- Hook-driven cleanup runs detached by default so a large `workspaceStorage` backlog does not stall `git commit` or `git pull`.
+- Set `CODEX_VSCODE_RUNTIME_CLEANUP_BACKGROUND=0` only when you explicitly want the hook to wait for cleanup completion.
+- The manual cleanup command can still take a while when draining a large existing backlog for the first time.
 
 Security and governance observability workflows:
 - `.github/workflows/dependency-risk-observability.yml`

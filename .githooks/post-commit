@@ -44,6 +44,21 @@ run_ps_file() {
   return $?
 }
 
+# Runs a PowerShell script detached so slow hygiene jobs do not block commit flow.
+run_ps_file_background() {
+  cmd="$1"
+  script_path="$2"
+  shift 2
+
+  if [ "$cmd" = "powershell" ]; then
+    "$cmd" -NoLogo -NoProfile -ExecutionPolicy Bypass -File "$script_path" "$@" >/dev/null 2>&1 &
+    return 0
+  fi
+
+  "$cmd" -NoLogo -NoProfile -File "$script_path" "$@" >/dev/null 2>&1 &
+  return 0
+}
+
 # Checks whether the current commit touched a path relevant to one runtime action.
 commit_touched_path() {
   pattern="$1"
@@ -118,12 +133,42 @@ run_sync() {
   return 0
 }
 
+# Reapply safe Codex runtime preferences when runtime-managed source changed.
+# Controlled by:
+# - CODEX_SKIP_RUNTIME_PREFERENCES_APPLY=1
+run_runtime_preferences_apply() {
+  cmd="$1"
+
+  if [ "${CODEX_SKIP_RUNTIME_PREFERENCES_APPLY:-0}" = "1" ]; then
+    echo "[post-commit] Runtime preferences apply skipped (CODEX_SKIP_RUNTIME_PREFERENCES_APPLY=1)."
+    return 0
+  fi
+
+  if ! should_run_runtime_sync; then
+    echo "[post-commit] Runtime preferences apply skipped; HEAD did not change runtime-managed source assets."
+    return 0
+  fi
+
+  echo "[post-commit] Applying safe Codex runtime preferences..."
+  if ! run_ps_file "$cmd" ./scripts/runtime/set-codex-runtime-preferences.ps1; then
+    echo "[post-commit] Warning: runtime preferences apply failed." >&2
+    return 0
+  fi
+
+  echo "[post-commit] Runtime preferences apply complete."
+  return 0
+}
+
 # Clean local Codex runtime garbage and keep only recent logs.
 # Controlled by:
 # - CODEX_SKIP_RUNTIME_CLEANUP=1
-# - CODEX_LOG_RETENTION_DAYS=<days> (default 30)
+# - CODEX_LOG_RETENTION_DAYS=<days> (catalog default when omitted)
 # - CODEX_INCLUDE_SESSIONS_CLEANUP=0|1 (default 1)
-# - CODEX_SESSION_RETENTION_DAYS=<days> (default 30)
+# - CODEX_SESSION_RETENTION_DAYS=<days> (catalog default when omitted)
+# - CODEX_MAX_SESSION_FILE_SIZE_MB=<mb> (optional emergency override; disabled by default)
+# - CODEX_OVERSIZED_SESSION_GRACE_HOURS=<hours> (optional emergency override; disabled by default)
+# - CODEX_MAX_SESSION_STORAGE_GB=<gb> (optional emergency override; disabled by default)
+# - CODEX_SESSION_STORAGE_GRACE_HOURS=<hours> (optional emergency override; disabled by default)
 run_runtime_cleanup() {
   cmd="$1"
 
@@ -132,14 +177,12 @@ run_runtime_cleanup() {
     return 0
   fi
 
-  log_retention_days="${CODEX_LOG_RETENTION_DAYS:-30}"
   include_sessions_cleanup="${CODEX_INCLUDE_SESSIONS_CLEANUP:-1}"
-  session_retention_days="${CODEX_SESSION_RETENTION_DAYS:-30}"
-  echo "[post-commit] Running runtime cleanup (log retention: ${log_retention_days} days)..."
+  echo "[post-commit] Running runtime cleanup..."
 
-  cleanup_args="-LogRetentionDays $log_retention_days -Apply"
+  cleanup_args="-Apply"
   if [ "$include_sessions_cleanup" = "1" ]; then
-    cleanup_args="$cleanup_args -IncludeSessions -SessionRetentionDays $session_retention_days"
+    cleanup_args="$cleanup_args -IncludeSessions"
   fi
 
   if ! run_ps_file "$cmd" ./scripts/runtime/clean-codex-runtime.ps1 $cleanup_args; then
@@ -148,6 +191,52 @@ run_runtime_cleanup() {
   fi
 
   echo "[post-commit] Runtime cleanup complete."
+  return 0
+}
+
+# Cleans stale VS Code user-runtime artifacts on a throttled window so the
+# hook does not rescan workspaceStorage on every commit.
+# Controlled by:
+# - CODEX_SKIP_VSCODE_RUNTIME_CLEANUP=1
+# - CODEX_VSCODE_RECENT_RUN_WINDOW_HOURS=<hours> (default 12)
+# - CODEX_VSCODE_WORKSPACE_STORAGE_RETENTION_DAYS=<days>
+# - CODEX_VSCODE_CHAT_SESSION_RETENTION_DAYS=<days>
+# - CODEX_VSCODE_CHAT_EDITING_RETENTION_DAYS=<days>
+# - CODEX_VSCODE_TRANSCRIPT_RETENTION_DAYS=<days>
+# - CODEX_VSCODE_HISTORY_RETENTION_DAYS=<days>
+# - CODEX_VSCODE_SETTINGS_BACKUP_RETENTION_DAYS=<days>
+# - CODEX_VSCODE_MAX_CHAT_SESSION_FILE_SIZE_MB=<mb>
+# - CODEX_VSCODE_MAX_WORKSPACE_INDEX_SIZE_MB=<mb>
+# - CODEX_VSCODE_OVERSIZED_FILE_GRACE_HOURS=<hours>
+# - CODEX_VSCODE_RUNTIME_CLEANUP_BACKGROUND=0|1 (default 1)
+run_vscode_user_runtime_cleanup() {
+  cmd="$1"
+
+  if [ "${CODEX_SKIP_VSCODE_RUNTIME_CLEANUP:-0}" = "1" ]; then
+    echo "[post-commit] VS Code user runtime cleanup skipped (CODEX_SKIP_VSCODE_RUNTIME_CLEANUP=1)."
+    return 0
+  fi
+
+  echo "[post-commit] Running VS Code user runtime cleanup..."
+  recent_window_hours="${CODEX_VSCODE_RECENT_RUN_WINDOW_HOURS:-12}"
+  background_mode="${CODEX_VSCODE_RUNTIME_CLEANUP_BACKGROUND:-1}"
+
+  if [ "$background_mode" = "1" ]; then
+    if ! run_ps_file_background "$cmd" ./scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours "$recent_window_hours"; then
+      echo "[post-commit] Warning: VS Code user runtime cleanup could not be scheduled." >&2
+      return 0
+    fi
+
+    echo "[post-commit] VS Code user runtime cleanup scheduled in background."
+    return 0
+  fi
+
+  if ! run_ps_file "$cmd" ./scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours "$recent_window_hours"; then
+    echo "[post-commit] Warning: VS Code user runtime cleanup failed." >&2
+    return 0
+  fi
+
+  echo "[post-commit] VS Code user runtime cleanup complete."
   return 0
 }
 
@@ -259,6 +348,7 @@ run_runtime_cleanup_concurrent() {
 
   (
     run_runtime_cleanup "$cmd"
+    run_vscode_user_runtime_cleanup "$cmd"
   ) >"$cleanup_log" 2>&1 &
   cleanup_pid=$!
 
@@ -281,6 +371,7 @@ if [ -z "$PS_CMD" ]; then
 fi
 
 run_sync "$PS_CMD"
+run_runtime_preferences_apply "$PS_CMD"
 run_optional_mcp_apply "$PS_CMD"
 run_runtime_cleanup_concurrent "$PS_CMD"
 exit 0

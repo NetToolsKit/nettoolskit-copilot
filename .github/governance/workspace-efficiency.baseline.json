@@ -90,11 +90,12 @@
     "extensions.autoUpdate": false,
     "github.copilot.nextEditSuggestions.enabled": false,
     "workbench.startupEditor": "welcomePage",
-    "chat.emptyState.history.enabled": true
+    "chat.emptyState.history.enabled": false,
+    "chat.restoreLastPanelSession": false
   },
   "recommendedNumericUpperBounds": {
     "scm.repositories.visible": 4,
-    "chat.agent.maxRequests": 400
+    "chat.agent.maxRequests": 100
   },
   "heuristics": {
     "maxFolderCountWarning": 4,

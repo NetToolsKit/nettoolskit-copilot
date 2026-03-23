@@ -4,15 +4,31 @@ Generated: 2026-03-22
 
 ## Objective
 
-Protect output quality while pursuing token savings through safer output-side controls, and investigate runtime-sync duplication or garbage under the mirrored `.github` surface that may be causing duplicated Copilot slash commands such as `/super-agent`.
+Protect output quality while pursuing token savings through safer output-side controls, investigate runtime-sync duplication or garbage under the mirrored `.github` surface that may be causing duplicated Copilot slash commands such as `/super-agent`, and immediately stop local Codex session/runtime blowups plus VS Code Copilot workspace bloat that are consuming excessive disk and likely inflating token use.
 
 ## Normalized Request Summary
 
-The user does not want token economy to reduce quality. They also suspect the runtime synchronization flow is leaving garbage or duplicated surfaces under `.github`, based on duplicated command entries visible in VS Code. The risky input/context compaction should stay reverted, and any future optimization should focus on safer output-side economy plus better local RAG/CAG usage.
+The user does not want token economy to reduce quality. They also suspect the runtime synchronization flow is leaving garbage or duplicated surfaces under `.github`, based on duplicated command entries visible in VS Code. The risky input/context compaction should stay reverted, and any future optimization should focus on safer output-side economy plus better local RAG/CAG usage. In parallel, local Codex sessions have grown into multi-gigabyte JSONL files dominated by compacted history, encrypted reasoning, and repeated worker/subagent context, while VS Code `workspaceStorage` now contains multi-gigabyte Copilot workspace indexes and huge chat session payloads. The runtime now needs safer defaults and stronger cleanup to prevent both from recurring.
 
 ## Design Summary
 
-This follow-up must treat token economy as a quality-preserving optimization, not a blind context-cutting exercise. The reverted input/context compaction should stay reverted unless later evidence proves it harmless. The safer path is output-side economy: shorter default responses, less repeated status text, less duplicated logs, and stronger use of local RAG/CAG so retrieval quality stays high without over-explaining the same state repeatedly. That should be backed by a local incremental index/cache so the system can reuse repository knowledge without rereading everything on each turn. In parallel, the runtime-sync flow needs a focused audit to identify whether mirrored `.github` content, duplicate adapters, or duplicate agent-surface registration is causing repeated slash-command entries in VS Code.
+This follow-up must treat token economy as a quality-preserving optimization, not a blind context-cutting exercise. The reverted input/context compaction should stay reverted unless later evidence proves it harmless. The safer path is output-side economy: shorter default responses, less repeated status text, less duplicated logs, and stronger use of local RAG/CAG so retrieval quality stays high without over-explaining the same state repeatedly. That should be backed by a local incremental index/cache so the system can reuse repository knowledge without rereading everything on each turn.
+
+The urgent runtime slice is separate and mechanical: it does not trim execution context. Instead, it applies safer local Codex defaults that directly reduce runaway session amplification:
+- keep the default reasoning effort at a safer repository-owned level
+- keep local multi-agent mode enabled, but rely on the repository-owned Super Agent guidance to call subagents strategically instead of for trivial work
+- enforce session cleanup primarily by stale age (`LastWriteTime`) so active conversations keep their context by default
+- leave oversized-file thresholds and total session-storage budgets available only as explicit override paths for emergency cleanup
+- wire these controls into install and runtime hooks so users do not need to remember manual cleanup
+
+The same urgent slice must also harden the VS Code global user runtime:
+- lower the managed global chat request budget from repository-owned runaway values to a safer cap
+- stop restoring the last chat panel session by default
+- stop keeping empty-state chat history by default
+- prune stale `workspaceStorage` directories, old Copilot session/transcript files, old `History` files, old `settings.json.*.bak` and `mcp.json.*.bak` files, and oversized `GitHub.copilot-chat/local-index*.db` files
+- throttle hook-driven VS Code cleanup so post-commit does not regress into a slow path again
+
+In parallel, the runtime-sync flow still needs a focused audit to identify whether mirrored `.github` content, duplicate adapters, or duplicate agent-surface registration is causing repeated slash-command entries in VS Code.
 
 The instruction and prompt layer can safely enforce the first slice immediately: concise default responses, delta-focused stage summaries, and an explicit prohibition on trimming required execution context by default purely for token savings.
 
@@ -25,6 +41,9 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 5. The local retrieval layer should eventually use an incremental index/cache with add/update/delete invalidation instead of full rereads.
 6. The duplicated `/super-agent` entries are treated as a runtime-sync hygiene defect until proven otherwise.
 7. Sync cleanup should prefer one canonical runtime authority per surface and should avoid duplicated adapter/agent registration between repo-local and mirrored runtime folders.
+8. Local Codex runtime defaults must bias toward predictable cost and disk growth without disabling strategic multi-agent behavior.
+9. Runtime cleanup must protect active sessions by default, with stale-session retention as the normal path and oversized-file or storage-budget pruning reserved for explicit overrides.
+10. VS Code user-runtime cleanup must protect recent active work by using retention windows plus grace windows and by throttling repeated scans.
 
 ## Alternatives Considered
 
@@ -34,6 +53,8 @@ The instruction and prompt layer can safely enforce the first slice immediately:
    - Rejected because the screenshot indicates a plausible repo-owned sync/config duplication that should be audited.
 3. Optimize only by switching to cheaper models immediately.
    - Rejected because that still requires quality proof and does not address duplicated output or orchestration verbosity.
+4. Keep `multi_agent = true` as the global local default.
+   - Accepted for the local runtime because the user wants subagents available; the remaining control point is strategic use, not blanket disablement.
 
 ## Assumptions And Constraints
 
@@ -41,7 +62,8 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 - A future local index/cache should be deterministic, incremental, and delete-safe.
 - The duplicate slash-command behavior is likely related to mirrored `.github` runtime sync, local adapter duplication, or overlapping agent/skill registration.
 - The follow-up should remain repo-owned and deterministic.
-- The workstream is intentionally deferred until the user decides to resume it.
+- The output-economy and local-index portions remain deferred until the user decides to resume them.
+- The Codex runtime blowup controls are safe to implement immediately because they do not trim required execution context.
 
 ## Risks
 
@@ -50,6 +72,7 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 - A stale local index/cache can return outdated context unless invalidation on add/update/delete is reliable.
 - Runtime sync may be projecting duplicate command/agent surfaces into VS Code and confusing discovery.
 - If the duplicated command source is not isolated precisely, cleanup could remove a valid runtime surface accidentally.
+- If runtime cleanup thresholds are too aggressive, they could remove older large sessions the user still wanted to inspect.
 
 ## Acceptance Criteria
 
@@ -59,6 +82,10 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 4. The future runtime-sync audit isolates the exact source of duplicated slash commands or `.github` garbage.
 5. The future cleanup defines one canonical registration path per mirrored surface and removes duplicated registration safely.
 6. README and runtime docs are updated when that cleanup eventually lands.
+7. Codex runtime install/onboarding applies safer local reasoning defaults while keeping multi-agent available by default and without trimming required execution context.
+8. Codex session cleanup defaults now enforce stale-session retention after 30 days without update, with documented environment overrides for optional oversized-file and storage-budget emergency cleanup.
+9. Managed global VS Code settings stop favoring runaway Copilot chat history/restore/request budgets.
+10. VS Code user-runtime cleanup defaults now enforce age plus oversized-file caps with documented environment overrides and a throttled hook execution window.
 
 ## Planning Readiness Statement
 
