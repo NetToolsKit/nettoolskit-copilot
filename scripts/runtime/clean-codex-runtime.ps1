@@ -58,6 +58,14 @@
 .PARAMETER Apply
     Executes deletions. When omitted, script runs in preview mode only.
 
+.PARAMETER ExportPlanningSummary
+    Exports a context handoff summary from active planning artifacts before
+    performing any cleanup. Requires the repo root to be resolvable.
+
+.PARAMETER RepoRoot
+    Repository root used when ExportPlanningSummary is set. Defaults to
+    auto-detection from script location.
+
 .PARAMETER DetailedOutput
     Prints additional diagnostics.
 
@@ -85,6 +93,8 @@ param(
     [Nullable[long]] $MaxSessionStorageGB,
     [Nullable[int]] $SessionStorageGraceHours,
     [switch] $Apply,
+    [switch] $ExportPlanningSummary,
+    [string] $RepoRoot,
     [switch] $DetailedOutput
 )
 
@@ -576,6 +586,17 @@ if ($IncludeSessions) {
     Write-StyledOutput ("  Storage-budget prunes: {0} (sizeMB={1})" -f @($sessionCleanupPlan.StorageBudgetPruneFiles).Count, (Convert-BytesToMB -Bytes (Get-FileCollectionByteSum -Files @($sessionCleanupPlan.StorageBudgetPruneFiles))))
     Write-StyledOutput ("  Planned session removals: {0} (sizeMB={1})" -f @($sessionCleanupPlan.PlannedRemovalFiles).Count, (Convert-BytesToMB -Bytes $sessionCleanupPlan.PlannedRemovalBytes))
     Write-StyledOutput ("  Remaining session size after plan: sizeGB={0} budgetGB={1}" -f [math]::Round(($sessionCleanupPlan.RemainingBytesAfterPlannedRun / 1GB), 2), $(if ($null -eq $effectiveMaxSessionStorageGB) { 'disabled' } else { [string] $effectiveMaxSessionStorageGB }))
+}
+
+if ($ExportPlanningSummary) {
+    $exportScript = Join-Path $PSScriptRoot 'export-planning-summary.ps1'
+    if (Test-Path -LiteralPath $exportScript -PathType Leaf) {
+        $exportRoot = if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) { $RepoRoot } else { Split-Path (Split-Path $PSScriptRoot -Parent) -Parent }
+        Write-StyledOutput 'Exporting planning handoff summary before cleanup...'
+        & $exportScript -RepoRoot $exportRoot
+    } else {
+        Write-Warning 'export-planning-summary.ps1 not found — skipping planning export.'
+    }
 }
 
 if (-not $Apply) {

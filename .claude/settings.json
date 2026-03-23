@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Edit(/.claude/skills/core-runtime-sync/**)",
-      "Edit(/.claude/skills/worktree-isolation-engineer/**)"
+      "Edit(/.claude/skills/worktree-isolation-engineer/**)",
+      "Bash(grep -E '\\\\.\\(js|ts\\)$')",
+      "Bash(ls -la \"c:\\\\Users\\\\tguis\\\\copilot-instructions\\\\.codex\\\\skills\\\\super-agent\"\" 2>/dev/null || echo \"Directory not found \")",
+      "Bash(find c:Userstguiscopilot-instructions.githubhooks -o -name *session* -o -name *session-end* -o -name *context-cleanup*)"
     ]
   },
   "hooks": {
@@ -13,6 +16,10 @@
           {
             "type": "command",
             "command": "pwsh -NoLogo -NoProfile -Command \"Write-Host '--- Super Agent Closeout Reminder ---' -ForegroundColor Cyan; Write-Host 'If this session was change-bearing:' -ForegroundColor Yellow; Write-Host '  1. Suggest a commit message' -ForegroundColor White; Write-Host '  2. Update planning/active/ plan status' -ForegroundColor White; Write-Host '  3. Update CHANGELOG.md if release-worthy' -ForegroundColor White; Write-Host '  4. Move spec/plan to completed/ when materially finished' -ForegroundColor White\""
+          },
+          {
+            "type": "command",
+            "command": "pwsh -NoLogo -NoProfile -Command \"$exportScript = Join-Path $PWD 'scripts/runtime/export-planning-summary.ps1'; $activePlans = @(Get-ChildItem 'planning/active/*.md' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch 'README' }); if ((Test-Path $exportScript -PathType Leaf) -and $activePlans.Count -gt 0) { Write-Host '' ; Write-Host '--- Active Planning Context ---' -ForegroundColor Cyan; & $exportScript -PrintOnly }\""
           }
         ]
       }

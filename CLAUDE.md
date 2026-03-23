@@ -56,7 +56,7 @@ Available: `super-agent`, `brainstorm-spec-architect`, `plan-active-work-planner
 
 ## Memory Policy
 
-Persist to `~/.claude/projects/c--Users-tguis-copilot-instructions/memory/`:
+Persist to the project memory directory (`~/.claude/projects/<project-slug>/memory/`, auto-resolved from working directory):
 
 - **project**: active plan/spec paths, current workstream state, key decisions
 - **feedback**: user corrections and confirmed approaches specific to this repo

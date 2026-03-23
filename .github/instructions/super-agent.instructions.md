@@ -87,6 +87,33 @@ priority: high
 - The lifecycle must always prepare a commit message when the state is stable.
 - The lifecycle must never auto-commit unless the user explicitly opted in to commit execution.
 
+## Context Boundary Monitoring
+
+Context resets, compactions, and session boundaries are normal. The primary resilience mechanism is **the planning artifact itself** — not hooks or memory. A correctly dated plan is the only thing an agent needs to resume from any interruption.
+
+### Planning-first continuity (primary)
+- Active plans and specs under `planning/active/` and `planning/specs/active/` are the authoritative resume point.
+- Every task must carry `[YYYY-MM-DD HH:mm]` dates so an agent resuming from a compacted context can determine the exact sequence and state of work without relying on session memory.
+- The `LastUpdated:` field in each plan's status block must be updated on every change so the most recent plan is always identifiable by date.
+- When resuming after a context reset, read the active plan first — the dates tell you what was completed, what is in progress, and what comes next.
+
+### Handoff export (supplementary)
+- Use `scripts/runtime/export-planning-summary.ps1` to generate a snapshot of active plans, specs, and recent commits when a long session must be paused deliberately.
+- `pwsh -File scripts/runtime/export-planning-summary.ps1` — saves to `.temp/context-handoff-<timestamp>.md`
+- `pwsh -File scripts/runtime/export-planning-summary.ps1 -PrintOnly` — prints to console
+
+### Cleanup with automatic export
+- Copilot context cleanup: `pwsh -File scripts/runtime/clean-vscode-user-runtime.ps1 -ExportPlanningSummary -Apply`
+- Codex session cleanup: `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -ExportPlanningSummary -Apply`
+- Safe periodic housekeeping: `pwsh -File scripts/runtime/invoke-super-agent-housekeeping.ps1 -WorkspacePath . -Apply`
+- `SessionStart` and `SubagentStart` dispatch the same housekeeping flow at most once every 2 hours per workspace.
+- The periodic flow exports a concise planning handoff first, then cleans only persisted Codex and VS Code runtime state.
+- The periodic flow does **not** clear or shrink the live active context window shown in the runtime UI.
+
+### What "session end" means per runtime
+- **Claude Code**: `Stop` hook fires on session close → exports planning summary automatically
+- **Copilot / Codex**: no session-end event — continuity depends entirely on the dated planning artifact and the `SessionStart` hook injecting workspace context at the start of each new conversation
+
 ## Preservation Rules
 - This lifecycle augments the existing repository governance model; it does not replace it.
 - Never drop existing mandatory instructions, baselines, or validations to satisfy the lifecycle.

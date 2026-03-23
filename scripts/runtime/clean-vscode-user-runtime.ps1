@@ -64,6 +64,15 @@
 .PARAMETER Apply
     Executes deletions. When omitted, the script runs in preview mode only.
 
+.PARAMETER ExportPlanningSummary
+    Exports a concise planning handoff summary before cleanup so the next
+    session can resume from active plan/spec artifacts instead of replaying a
+    large chat history.
+
+.PARAMETER RepoRoot
+    Repository root used when ExportPlanningSummary is set. Defaults to the
+    repository that owns this runtime script.
+
 .PARAMETER DetailedOutput
     Prints additional diagnostics.
 
@@ -78,6 +87,9 @@
 
 .EXAMPLE
     pwsh -File scripts/runtime/clean-vscode-user-runtime.ps1 -RecentRunWindowHours 0 -DetailedOutput
+
+.EXAMPLE
+    pwsh -File scripts/runtime/clean-vscode-user-runtime.ps1 -ExportPlanningSummary -Apply
 
 .NOTES
     Version: 1.0
@@ -98,6 +110,8 @@ param(
     [Nullable[int]] $RecentRunWindowHours,
     [string] $StateFilePath,
     [switch] $Apply,
+    [switch] $ExportPlanningSummary,
+    [string] $RepoRoot,
     [switch] $DetailedOutput,
     [switch] $Verbose
 )
@@ -475,19 +489,22 @@ function Compress-RemovalPlan {
         [object[]] $Items
     )
 
-    $directories = @(
-        $Items |
-            Where-Object { $_ -is [System.IO.DirectoryInfo] } |
-            Select-Object -ExpandProperty FullName
-    )
+    $directories = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($directoryItem in @($Items | Where-Object { $_ -is [System.IO.DirectoryInfo] })) {
+        $normalizedDirectoryPath = [System.IO.Path]::TrimEndingDirectorySeparator([System.IO.Path]::GetFullPath($directoryItem.FullName))
+        [void] $directories.Add($normalizedDirectoryPath)
+    }
 
     $compressed = New-Object System.Collections.ArrayList
+    $seenPaths = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
     foreach ($item in @($Items)) {
-        if ($item -is [System.IO.FileInfo] -and (Test-HasPlannedAncestor -Path $item.FullName -AncestorPaths $directories)) {
+        $normalizedItemPath = [System.IO.Path]::TrimEndingDirectorySeparator([System.IO.Path]::GetFullPath($item.FullName))
+
+        if ($item -is [System.IO.FileInfo] -and $directories.Count -gt 0 -and (Test-HasPlannedAncestor -Path $normalizedItemPath -AncestorPaths @($directories))) {
             continue
         }
 
-        if (-not ($compressed | Where-Object { $_.FullName -eq $item.FullName })) {
+        if ($seenPaths.Add($normalizedItemPath)) {
             [void] $compressed.Add($item)
         }
     }
@@ -513,7 +530,7 @@ function Invoke-RemovalPlan {
             [long] $item.PlannedBytes
         }
         elseif ($item -is [System.IO.DirectoryInfo]) {
-            (Get-PathStat -Path $fullPath).bytes
+            [long] 0
         }
         else {
             [long] $item.Length
@@ -576,39 +593,54 @@ $workspaceStoragePath = Join-Path $resolvedGlobalVscodeUserPath 'workspaceStorag
 $historyPath = Join-Path $resolvedGlobalVscodeUserPath 'History'
 $globalStorageEmptyWindowPath = Join-Path $resolvedGlobalVscodeUserPath 'globalStorage\emptyWindowChatSessions'
 
+Write-StyledOutput '  [1/7] Scanning History files...'
 $historyFiles = @(Get-RecursiveFileInventory -RootPath $historyPath)
+Write-StyledOutput '  [2/7] Scanning empty-window chat sessions...'
 $emptyWindowFiles = @(Get-RecursiveFileInventory -RootPath $globalStorageEmptyWindowPath)
+Write-StyledOutput '  [3/7] Listing workspaceStorage directories...'
 $workspaceDirectories = @()
 if (Test-Path -LiteralPath $workspaceStoragePath -PathType Container) {
     $workspaceDirectories = @(Get-ChildItem -LiteralPath $workspaceStoragePath -Force -Directory -ErrorAction SilentlyContinue)
 }
 $workspaceDirectoryCount = $workspaceDirectories.Count
+Write-StyledOutput ("  Found {0} workspace directories" -f $workspaceDirectoryCount)
 $historyStats = Get-PathStatFromInventory -RootPath $historyPath -Files $historyFiles
 $emptyWindowStats = Get-PathStatFromInventory -RootPath $globalStorageEmptyWindowPath -Files $emptyWindowFiles
 
 $staleWorkspaceDirectories = @($workspaceDirectories | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1 * $effectiveWorkspaceStorageRetentionDays) })
+foreach ($staleWorkspaceDirectory in @($staleWorkspaceDirectories)) {
+    if ($null -eq $staleWorkspaceDirectory.PSObject.Properties['PlannedBytes']) {
+        $staleWorkspaceDirectory | Add-Member -NotePropertyName PlannedBytes -NotePropertyValue 0 -Force
+    }
+}
 $staleWorkspaceDirectoryPaths = @($staleWorkspaceDirectories | Select-Object -ExpandProperty FullName)
 if ($staleWorkspaceDirectories.Count -lt $workspaceDirectoryCount) {
-    $activeWorkspaceDirectories = @($workspaceDirectories | Where-Object { -not (Test-HasPlannedAncestor -Path $_.FullName -AncestorPaths $staleWorkspaceDirectoryPaths) -and $staleWorkspaceDirectoryPaths -notcontains $_.FullName })
+    $activeWorkspaceDirectories = @($workspaceDirectories | Where-Object {
+        $staleWorkspaceDirectoryPaths -notcontains $_.FullName -and
+        ($staleWorkspaceDirectoryPaths.Count -eq 0 -or -not (Test-HasPlannedAncestor -Path $_.FullName -AncestorPaths $staleWorkspaceDirectoryPaths))
+    })
 }
 else {
     $activeWorkspaceDirectories = @()
 }
+Write-StyledOutput ("  Stale: {0}  Active: {1}" -f $staleWorkspaceDirectories.Count, $activeWorkspaceDirectories.Count)
 if ($script:IsDetailedOutputEnabled) {
     Write-DetailedLog ("Targeted workspace scan: totalDirectories={0} activeDirectories={1} staleDirectories={2}" -f $workspaceDirectoryCount, $activeWorkspaceDirectories.Count, $staleWorkspaceDirectories.Count)
 }
 
+Write-StyledOutput ("  [4/7] Scanning chat sessions ({0} active dirs)..." -f $activeWorkspaceDirectories.Count)
 $activeChatSessionFiles = @(Get-WorkspaceStorageTargetFiles -WorkspaceDirectories $activeWorkspaceDirectories -RelativeSegments @('chatSessions') -NamePatterns @('*.json', '*.jsonl'))
+Write-StyledOutput '  [5/7] Scanning editing sessions and transcripts...'
 $activeEditingSessionFiles = @(Get-WorkspaceStorageTargetFiles -WorkspaceDirectories $activeWorkspaceDirectories -RelativeSegments @('chatEditingSessions'))
 $activeTranscriptFiles = @(Get-WorkspaceStorageTargetFiles -WorkspaceDirectories $activeWorkspaceDirectories -RelativeSegments @('GitHub.copilot-chat', 'transcripts') -NamePatterns @('*.json', '*.jsonl'))
+Write-StyledOutput '  [6/7] Scanning workspace indexes...'
 $activeWorkspaceIndexFiles = @(Get-WorkspaceStorageTargetFiles -WorkspaceDirectories $activeWorkspaceDirectories -RelativeSegments @('GitHub.copilot-chat') -NamePatterns @('local-index*.db'))
 
-foreach ($directory in $staleWorkspaceDirectories) {
-    if ($Apply -or $script:IsDetailedOutputEnabled) {
-        $plannedBytes = (Get-PathStat -Path $directory.FullName).bytes
-        Add-Member -InputObject $directory -MemberType NoteProperty -Name PlannedBytes -Value $plannedBytes -Force
-    }
+Write-StyledOutput ("  [7/7] Finalizing plan for {0} stale directories..." -f $staleWorkspaceDirectories.Count)
+if ($staleWorkspaceDirectories.Count -gt 0) {
+    Write-StyledOutput '  Skipping recursive size pre-calculation for stale directories to avoid long blocking scans.'
 }
+Write-StyledOutput '  Scan complete.'
 
 $chatSessionThreshold = (Get-Date).AddDays(-1 * $effectiveChatSessionRetentionDays)
 $editingSessionThreshold = (Get-Date).AddDays(-1 * $effectiveChatEditingSessionRetentionDays)
@@ -678,9 +710,6 @@ foreach ($item in @($plannedRemovals)) {
     if ($null -ne $item.PSObject.Properties['PlannedBytes']) {
         $plannedRemovalBytes += [long] $item.PlannedBytes
     }
-    elseif ($item -is [System.IO.DirectoryInfo]) {
-        $plannedRemovalBytes += (Get-PathStat -Path $item.FullName).bytes
-    }
     else {
         $plannedRemovalBytes += [long] $item.Length
     }
@@ -713,6 +742,20 @@ Write-StyledOutput ("  Expired empty-window sessions: {0} (sizeMB={1})" -f $expi
 Write-StyledOutput ("  Oversized chat sessions: {0} (sizeMB={1})" -f ($oversizedChatSessions.Count + $oversizedEmptyWindowSessions.Count), (Convert-BytesToMB -Bytes ((Get-FileCollectionByteSum -Files $oversizedChatSessions) + (Get-FileCollectionByteSum -Files $oversizedEmptyWindowSessions))))
 Write-StyledOutput ("  Oversized Copilot workspace indexes: {0} (sizeMB={1})" -f $oversizedWorkspaceIndexes.Count, (Convert-BytesToMB -Bytes (Get-FileCollectionByteSum -Files $oversizedWorkspaceIndexes)))
 Write-StyledOutput ("  Planned removals: {0} (sizeMB={1})" -f $plannedRemovals.Count, (Convert-BytesToMB -Bytes $plannedRemovalBytes))
+if ($staleWorkspaceDirectories.Count -gt 0) {
+    Write-StyledOutput '  Planned size excludes recursive bytes for stale workspaceStorage directories to keep planning responsive.'
+}
+
+if ($ExportPlanningSummary) {
+    $exportScript = Join-Path $PSScriptRoot 'export-planning-summary.ps1'
+    if (Test-Path -LiteralPath $exportScript -PathType Leaf) {
+        $exportRoot = if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) { $RepoRoot } else { Split-Path (Split-Path $PSScriptRoot -Parent) -Parent }
+        Write-StyledOutput 'Exporting planning handoff summary before cleanup...'
+        & $exportScript -RepoRoot $exportRoot
+    } else {
+        Write-Warning 'export-planning-summary.ps1 not found — skipping planning export.'
+    }
+}
 
 if (-not $Apply) {
     Write-StyledOutput ''

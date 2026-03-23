@@ -59,6 +59,7 @@ All three runtimes share the same **Super Agent lifecycle**, **43 domain instruc
 - ✅ **Claude Code Integration Layer:** `CLAUDE.md` workspace adapter, `.claude/skills/` skill adapters, and `settings.json` lifecycle hooks for Claude Code-native discovery and Super Agent lifecycle activation
 - ✅ **VS Code Session Bootstrap Hooks:** repository-owned `SessionStart`, `PreToolUse`, and `SubagentStart` hooks for Copilot and Codex sessions inside VS Code
 - ✅ **Planning-Anchored Continuity Bootstrap:** `SessionStart` and `SubagentStart` inject a short continuity summary from the latest active plan/spec so recovery after context compaction does not depend on replaying giant chat history
+- ✅ **Safe Periodic Housekeeping:** `SessionStart` and `SubagentStart` can trigger a throttled housekeeping pass that exports planning continuity first and cleans only persisted Codex/VS Code runtime state, never the live active context window
 - ✅ **Configurable Startup Controller Selector:** repository-owned hook selector with repo default plus local and environment overrides for the startup controller injected by VS Code hooks
 - ✅ **Origin-Level EOF Guardrail:** repository-owned `PreToolUse` hook strips terminal newlines from supported AI edit payloads before VS Code writes tracked files
 
@@ -837,6 +838,9 @@ pwsh -File ./scripts/runtime/clean-vscode-user-runtime.ps1 -RecentRunWindowHours
 
 # apply VS Code user-runtime cleanup immediately
 pwsh -File ./scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 0
+
+# export planning continuity and clean only persisted runtime state for the active workspace
+pwsh -File ./scripts/runtime/invoke-super-agent-housekeeping.ps1 -WorkspacePath . -Apply
 
 # export consolidated audit report with git metadata and policy inventory
 pwsh -File ./scripts/validation/export-audit-report.ps1 -ValidationProfile release -StrictExtras

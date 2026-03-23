@@ -29,18 +29,25 @@ A separate spec is usually not required when all of these are true:
 - Reuse the same spec file for the same workstream instead of creating duplicates.
 - Use stable names such as `spec-<scope>.md`.
 
+## Dating Policy (Mandatory)
+- Every spec must include `Generated: YYYY-MM-DD HH:mm` at the top.
+- Every key decision, alternative, or assumption added after creation must carry a `[YYYY-MM-DD HH:mm]` prefix.
+- When planning readiness changes (e.g., spec updated after new information), append `Updated: YYYY-MM-DD HH:mm — <reason>` to the planning readiness statement.
+- Dates allow agents resuming from a compacted context to read the spec and understand exactly when each design decision was made and whether it is still current.
+
 ## Required Spec Content
-Each active spec should capture:
-1. objective
-2. normalized request summary
-3. design summary
-4. key decisions
-5. alternatives considered
-6. assumptions and constraints
-7. risks
-8. acceptance criteria
-9. planning readiness statement
-10. recommended specialist focus when it is already clear
+Each active spec must capture:
+1. `Generated: YYYY-MM-DD HH:mm`
+2. objective
+3. normalized request summary
+4. design summary
+5. key decisions — each prefixed with `[YYYY-MM-DD HH:mm]`
+6. alternatives considered
+7. assumptions and constraints
+8. risks
+9. acceptance criteria
+10. planning readiness statement (with `Updated: YYYY-MM-DD HH:mm` if revised)
+11. recommended specialist focus when it is already clear
 
 ## Relationship To Planning
 - A spec does not replace the active plan.

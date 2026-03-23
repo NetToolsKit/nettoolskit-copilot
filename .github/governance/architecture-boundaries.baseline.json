@@ -46,9 +46,9 @@
         "/home/[^/]+/"
       ],
       "allowedPatterns": [
-        "C:/Users/tguis/\\.github",
-        "C:/Users/tguis/\\.codex",
-        "\\$env:USERPROFILE"
+        "\\$env:USERPROFILE",
+        "\\$HOME",
+        "%USERPROFILE%"
       ]
     }
   ]

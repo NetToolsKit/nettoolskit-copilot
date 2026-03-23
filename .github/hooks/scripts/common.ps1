@@ -691,6 +691,222 @@ function New-SuperAgentVisibilityBanner {
     return ('[Super Agent: ACTIVE | controller={0} | skill={1} | mode={2} | workspace={3}]' -f $Selection.DisplayName, $Selection.SkillName, $WorkspaceSurface.WorkspaceMode, $WorkspaceName)
 }
 
+# Resolves the runtime housekeeping script path mirrored under ~/.github/scripts/runtime.
+function Resolve-SuperAgentHousekeepingScriptPath {
+    $hooksRoot = Resolve-HooksRootPath
+    $candidateRoots = @(
+        (Join-Path (Split-Path -Path $hooksRoot -Parent) 'scripts\runtime'),
+        (Join-Path (Split-Path -Path (Split-Path -Path $hooksRoot -Parent) -Parent) 'scripts\runtime')
+    )
+
+    foreach ($runtimeRoot in $candidateRoots) {
+        $scriptPath = Join-Path $runtimeRoot 'invoke-super-agent-housekeeping.ps1'
+        if (Test-Path -LiteralPath $scriptPath -PathType Leaf) {
+            return $scriptPath
+        }
+    }
+
+    return $null
+}
+
+# Resolves the state file path for periodic Super Agent housekeeping.
+function Resolve-SuperAgentHousekeepingStatePath {
+    param(
+        [string] $WorkspacePath
+    )
+
+    $overridePath = [Environment]::GetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_STATE_PATH')
+    if (-not [string]::IsNullOrWhiteSpace($overridePath)) {
+        return [System.IO.Path]::GetFullPath($overridePath)
+    }
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath)) {
+        $userProfile = if (-not [string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:USERPROFILE } else { $HOME }
+        if ([string]::IsNullOrWhiteSpace($userProfile)) {
+            return $null
+        }
+
+        return (Join-Path $userProfile '.github\hooks\super-agent-housekeeping.state.json')
+    }
+
+    return (Join-Path $WorkspacePath '.build/super-agent/runtime/housekeeping.state.json')
+}
+
+# Reads one optional JSON state file.
+function Read-SuperAgentHousekeepingState {
+    param(
+        [string] $StateFilePath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($StateFilePath)) {
+        return $null
+    }
+
+    if (-not (Test-Path -LiteralPath $StateFilePath -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        return (Get-Content -Raw -LiteralPath $StateFilePath | ConvertFrom-Json -Depth 20)
+    }
+    catch {
+        return $null
+    }
+}
+
+# Writes one JSON state file for the housekeeping throttle.
+function Save-SuperAgentHousekeepingState {
+    param(
+        [string] $StateFilePath,
+        [hashtable] $State
+    )
+
+    if ([string]::IsNullOrWhiteSpace($StateFilePath)) {
+        return
+    }
+
+    $parentPath = Split-Path -Path $StateFilePath -Parent
+    if (-not [string]::IsNullOrWhiteSpace($parentPath)) {
+        New-Item -ItemType Directory -Path $parentPath -Force | Out-Null
+    }
+
+    $State | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $StateFilePath
+}
+
+# Resolves the last housekeeping attempt or run timestamp from the state file.
+function Get-SuperAgentHousekeepingActivityTimestamp {
+    param(
+        [AllowNull()]
+        [object] $State
+    )
+
+    if ($null -eq $State) {
+        return $null
+    }
+
+    foreach ($propertyName in @('lastAttemptAt', 'lastRunAt')) {
+        $property = $State.PSObject.Properties[$propertyName]
+        if ($null -eq $property -or [string]::IsNullOrWhiteSpace([string] $property.Value)) {
+            continue
+        }
+
+        try {
+            return [datetime] $property.Value
+        }
+        catch {
+            continue
+        }
+    }
+
+    return $null
+}
+
+# Returns the effective housekeeping interval in hours.
+function Get-SuperAgentHousekeepingIntervalHours {
+    $environmentValue = [Environment]::GetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_INTERVAL_HOURS')
+    if (-not [string]::IsNullOrWhiteSpace($environmentValue)) {
+        $parsedValue = 0
+        if ([int]::TryParse($environmentValue, [ref] $parsedValue) -and $parsedValue -ge 1) {
+            return $parsedValue
+        }
+    }
+
+    return 2
+}
+
+# Returns true when housekeeping dispatch should be skipped.
+function Test-ShouldDispatchSuperAgentHousekeeping {
+    param(
+        [AllowNull()]
+        [Nullable[datetime]] $LastActivityAt,
+        [int] $IntervalHours
+    )
+
+    if ($null -eq $LastActivityAt) {
+        return $true
+    }
+
+    $threshold = (Get-Date).AddHours(-1 * $IntervalHours)
+    return ($LastActivityAt -le $threshold)
+}
+
+# Best-effort dispatch of safe periodic housekeeping for active sessions.
+function Invoke-SuperAgentHousekeepingDispatch {
+    param(
+        [object] $Payload
+    )
+
+    $disabled = [Environment]::GetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_DISABLE')
+    if ($disabled -eq '1') {
+        return
+    }
+
+    $workspacePath = [string] (Get-OptionalPayloadProperty -Payload $Payload -Name 'cwd')
+    if ([string]::IsNullOrWhiteSpace($workspacePath) -or -not (Test-Path -LiteralPath $workspacePath -PathType Container)) {
+        return
+    }
+
+    $housekeepingScriptPath = Resolve-SuperAgentHousekeepingScriptPath
+    if ([string]::IsNullOrWhiteSpace($housekeepingScriptPath)) {
+        return
+    }
+
+    $intervalHours = Get-SuperAgentHousekeepingIntervalHours
+    $stateFilePath = Resolve-SuperAgentHousekeepingStatePath -WorkspacePath $workspacePath
+    $existingState = Read-SuperAgentHousekeepingState -StateFilePath $stateFilePath
+    $lastActivityAt = Get-SuperAgentHousekeepingActivityTimestamp -State $existingState
+    if (-not (Test-ShouldDispatchSuperAgentHousekeeping -LastActivityAt $lastActivityAt -IntervalHours $intervalHours)) {
+        return
+    }
+
+    Save-SuperAgentHousekeepingState -StateFilePath $stateFilePath -State ([ordered]@{
+            workspacePath = $workspacePath
+            lastAttemptAt = (Get-Date).ToString('o')
+            lastRunAt = if ($null -ne $existingState -and $null -ne $existingState.PSObject.Properties['lastRunAt']) { [string] $existingState.lastRunAt } else { $null }
+            lastStatus = 'dispatching'
+        })
+
+    $pwshCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($null -eq $pwshCommand) {
+        return
+    }
+
+    $argumentList = @(
+        '-NoLogo',
+        '-NoProfile',
+        '-File',
+        $housekeepingScriptPath,
+        '-WorkspacePath',
+        $workspacePath,
+        '-RepoRoot',
+        $workspacePath,
+        '-IntervalHours',
+        [string] $intervalHours,
+        '-StateFilePath',
+        $stateFilePath,
+        '-BypassThrottle',
+        '-Apply'
+    )
+
+    $recordOnlyPath = [Environment]::GetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_RECORD_ONLY_PATH')
+    if (-not [string]::IsNullOrWhiteSpace($recordOnlyPath)) {
+        $argumentList += @('-RecordOnlyPath', $recordOnlyPath)
+    }
+
+    $foregroundMode = [Environment]::GetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_FOREGROUND')
+    try {
+        if ($foregroundMode -eq '1') {
+            & $pwshCommand.Source @argumentList | Out-Null
+        }
+        else {
+            Start-Process -FilePath $pwshCommand.Source -ArgumentList $argumentList -WindowStyle Hidden | Out-Null
+        }
+    }
+    catch {
+        # best effort only: do not break the hook contract
+    }
+}
+
 # Builds the SessionStart bootstrap context injected into VS Code agent sessions.
 function New-SessionContextString {
     param(
@@ -705,6 +921,8 @@ function New-SessionContextString {
     $eofMessage = Get-WorkspaceEofPolicyMessage -WorkspacePath $workspacePath
     $visibilityBanner = New-SuperAgentVisibilityBanner -WorkspaceName $workspaceName -Selection $selection -WorkspaceSurface $workspaceSurface
     $continuitySummary = New-WorkspaceContinuitySummary -WorkspacePath $workspacePath -WorkspaceSurface $workspaceSurface
+
+    Invoke-SuperAgentHousekeepingDispatch -Payload $Payload
 
     $segments = New-Object System.Collections.Generic.List[string]
     $segments.Add(('Workspace: {0}' -f $workspaceName)) | Out-Null
@@ -748,6 +966,8 @@ function New-SubagentContextString {
     $workspaceName = Get-WorkspaceName -WorkspacePath $workspacePath
     $visibilityBanner = New-SuperAgentVisibilityBanner -WorkspaceName $workspaceName -Selection $selection -WorkspaceSurface $workspaceSurface
     $continuitySummary = New-WorkspaceContinuitySummary -WorkspacePath $workspacePath -WorkspaceSurface $workspaceSurface
+
+    Invoke-SuperAgentHousekeepingDispatch -Payload $Payload
 
     return ('Startup controller: {0} ({1}) via {2}. Visibility banner: {3}. Workspace mode: {4}. {5} {6} Planning root: {7}. Spec root: {8}. {9} {10} Super Agent bootstrap is active. Current worker type: {11}. {12} Keep scope minimal, follow the active routing decision for this workspace, respect planning/spec artifacts, avoid write-scope conflicts, validate before completion, and return structured output only for the assigned slice.' -f $selection.DisplayName, (Format-SkillToken -SkillName $selection.SkillName), $selection.Source, $visibilityBanner, $workspaceSurface.WorkspaceMode, $workspaceSurface.InstructionLoadMessage, $workspaceSurface.RoutingMessage, $workspaceSurface.PlanningActivePath, $workspaceSurface.SpecActivePath, $continuitySummary, $workspaceSurface.CloseoutMessage, $agentType, $eofMessage)
 }

@@ -253,6 +253,7 @@ pwsh -File .\scripts\runtime\invoke-super-agent-execute.ps1 -RequestText "Implem
 pwsh -File .\scripts\runtime\invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items" -DetailedOutput
 pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature-slice" -DetailedOutput
 pwsh -File .\scripts\runtime\clean-codex-runtime.ps1 -DetailedOutput
+pwsh -File .\scripts\runtime\invoke-super-agent-housekeeping.ps1 -WorkspacePath . -DetailedOutput
 ```
 
 #### Concise orchestration defaults
@@ -416,10 +417,12 @@ scripts/
 │   ├── invoke-super-agent-plan.ps1
 │   ├── invoke-super-agent-execute.ps1
 │   ├── invoke-super-agent-parallel-dispatch.ps1
+│   ├── invoke-super-agent-housekeeping.ps1
 │   ├── healthcheck.ps1
 │   ├── self-heal.ps1
 │   ├── run-agent-pipeline.ps1
-│   └── clean-codex-runtime.ps1
+│   ├── clean-codex-runtime.ps1
+│   └── export-planning-summary.ps1
 ├── orchestration/
 │   ├── engine/
 │   │   ├── invoke-codex-dispatch.ps1
@@ -533,6 +536,7 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `runtime/sync-workspace-settings.ps1` | Generates or refreshes `.code-workspace` files from `.vscode/base.code-workspace` plus the approved local override block derived from `.github/governance/workspace-efficiency.baseline.json`. Preserves folders, removes settings already covered by the global template, and merges workspace-specific extension recommendations with the shared base. | `pwsh -File scripts/runtime/sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api` |
 | `runtime/update-copilot-chat-titles.ps1` | Normalizes persisted GitHub Copilot chat titles to `<project-prefix> - <task summary>` using `%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json*`, with optional backups before writing. | `pwsh -File scripts/runtime/update-copilot-chat-titles.ps1 -Apply -CreateBackup` |
 | `runtime/clean-vscode-user-runtime.ps1` | Cleans stale VS Code user-runtime artifacts under `Code/User`, including old `workspaceStorage` directories, old Copilot chat sessions/transcripts, old `History` files, old `settings.json.*.bak`/`mcp.json.*.bak` backups, and oversized `GitHub.copilot-chat/local-index*.db` files. Hook-driven runs use a 12-hour throttle window and default to background execution so commits and pulls are not blocked. | `pwsh -File scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 0` |
+| `runtime/invoke-super-agent-housekeeping.ps1` | Runs safe periodic housekeeping for one workspace. It exports a concise planning handoff first, then cleans persisted Codex and VS Code runtime state, while never attempting to clear the live active context window or UI token meter. Hook-driven dispatch is throttled per workspace every 2 hours by default. | `pwsh -File scripts/runtime/invoke-super-agent-housekeeping.ps1 -WorkspacePath . -Apply` |
 | `runtime/healthcheck.ps1` | Runs `validate-all` (profile-aware) plus `runtime-doctor`, emits report/log, and defaults to warning-only mode. Runtime warning/error lines use issue IDs and the final output/report include a deduplicated issue summary with severity counts. | `pwsh -File scripts/runtime/healthcheck.ps1 -ValidationProfile release` |
 | `runtime/self-heal.ps1` | Runs controlled repair flow (bootstrap + optional templates) and validates final state via healthcheck. Runtime warning/error lines use issue IDs and the final output/report include a deduplicated issue summary with severity counts. | `pwsh -File scripts/runtime/self-heal.ps1 -Mirror -StrictExtras` |
 | `runtime/run-agent-pipeline.ps1` | Executes default multi-agent pipeline with blocked-command, allowed-path, budget, and approval guardrails; supports `script-only` and live `codex-exec` backends; writes `run-artifact.json`, `run-state.json`, `approval-record.json`, and stage artifacts under `.temp/runs/<traceId>/`. Sensitive stages require `-ApprovedStageIds` or `-ApprovedAgentIds` plus `-ApprovedBy` and `-ApprovalJustification`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Implement and validate change" -ExecutionBackend codex-exec -ApprovedAgentIds specialist,release-engineer -ApprovedBy "thiago.guislotti" -ApprovalJustification "Approved sensitive pipeline stages"` |
@@ -543,7 +547,8 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `runtime/invoke-super-agent-parallel-dispatch.ps1` | Runs the full Super Agent lifecycle and is intended for safe parallel worker dispatch once dependency-independent batches are present; forwards explicit approval parameters when sensitive stages are allowed to run. | `pwsh -File scripts/runtime/invoke-super-agent-parallel-dispatch.ps1 -RequestText "Implement independent work items" -ApprovedAgentIds specialist,release-engineer -ApprovedBy "thiago.guislotti" -ApprovalJustification "Approved full lifecycle execution"` |
 | `orchestration/engine/invoke-codex-dispatch.ps1` | Renders a stage prompt, invokes the local Codex CLI, captures JSON output, and persists dispatch logs/records for live planner, executor, and reviewer stages. | `pwsh -File scripts/orchestration/engine/invoke-codex-dispatch.ps1 -RepoRoot . -TraceId trace-001 -StageId plan -AgentId planner -PromptPath .temp\\planner.md -ResponseSchemaPath .github\\schemas\\agent.stage-plan-result.schema.json -ResultPath .temp\\planner-result.json -DispatchRecordPath .temp\\planner-dispatch.json` |
 | `orchestration/engine/invoke-task-worker.ps1` | Executes a single worker-ready task through implementer -> task spec review -> task quality review, with retry and allowed-path enforcement. | `pwsh -File scripts/orchestration/engine/invoke-task-worker.ps1 -RepoRoot . -TraceId trace-001 -TaskRecordPath .temp\\runs\\trace-001\\artifacts\\task-001.json -RunDirectory .temp\\runs\\trace-001 -ExecutionBackend codex-exec` |
-| `runtime/clean-codex-runtime.ps1` | Cleans local Codex runtime garbage (`tmp`, `vendor_imports`) and prunes `log`/`sessions` using catalog-driven retention. Default catalog values are log retention `14` days and session retention `30` days by `LastWriteTime`, preserving active conversations by default. Oversized session thresholds and total session-storage budgets remain available only through explicit environment-variable or parameter overrides. | `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` |
+| `runtime/clean-codex-runtime.ps1` | Cleans local Codex runtime garbage (`tmp`, `vendor_imports`) and prunes `log`/`sessions` using catalog-driven retention. Default catalog values are log retention `14` days and session retention `30` days by `LastWriteTime`, preserving active conversations by default. Oversized session thresholds and total session-storage budgets remain available only through explicit environment-variable or parameter overrides. Supports `-ExportPlanningSummary` to snapshot active plans before cleaning. | `pwsh -File scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` |
+| `runtime/export-planning-summary.ps1` | Exports a context handoff summary from active planning artifacts (`planning/active/` and `planning/specs/active/`). Generates a structured markdown document with active plans, active specs, and recent git commits to allow sessions to resume from a known stable state. Saves to `.temp/context-handoff-<timestamp>.md` or prints to console with `-PrintOnly`. | `pwsh -File scripts/runtime/export-planning-summary.ps1 -PrintOnly` |
 | `orchestration/stages/*.ps1` | Stage executors (`plan`, `implement`, `validate`, `review`) consumed by `run-agent-pipeline.ps1`. | `pwsh -File scripts/runtime/run-agent-pipeline.ps1 -RequestText "Smoke run"` |
 | `maintenance/clean-build-artifacts.ps1` | Deletes `.build`, `.deployment`, `bin`, and `obj` directories. Supports dry-run and prompts for confirmation. | `pwsh -File scripts/maintenance/clean-build-artifacts.ps1 -DryRun` |
 
@@ -658,6 +663,9 @@ pwsh -File .\scripts\runtime\clean-vscode-user-runtime.ps1 -RecentRunWindowHours
 
 # apply VS Code user-runtime cleanup immediately
 pwsh -File .\scripts\runtime\clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 0
+
+# export planning continuity and clean persisted runtime state for the active workspace
+pwsh -File .\scripts\runtime\invoke-super-agent-housekeeping.ps1 -WorkspacePath . -Apply
 
 # apply safe local Codex runtime defaults explicitly
 pwsh -File .\scripts\runtime\set-codex-runtime-preferences.ps1 -CreateBackup
@@ -804,6 +812,9 @@ After setup, hooks behavior is:
 - `post-commit`: runs `scripts/runtime/validate-vscode-global-alignment.ps1` only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts (best effort)
 - `post-commit`: runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort, using the hygiene catalog defaults unless environment overrides are set)
 - `post-commit`: schedules `scripts/runtime/clean-vscode-user-runtime.ps1 -Apply -RecentRunWindowHours 12` in the background (best effort, using the VS Code hygiene catalog defaults unless environment overrides are set)
+- VS Code `SessionStart` and `SubagentStart`: dispatch `scripts/runtime/invoke-super-agent-housekeeping.ps1` at most once every 2 hours per workspace (best effort)
+- periodic Super Agent housekeeping exports a concise planning summary first, then cleans only persisted Codex and VS Code runtime state
+- periodic Super Agent housekeeping does not clear the live active context window or reset the runtime UI token meter
 - `post-merge`: runs `validate-all -ValidationProfile release -WarningOnly true` (best effort, warning-only)
 - `post-merge`: re-applies safe Codex runtime preferences (best effort)
 - `post-merge`: runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort, using the hygiene catalog defaults unless environment overrides are set)
@@ -817,6 +828,11 @@ After setup, hooks behavior is:
 - `post-commit` and `post-merge` cleanup bypass: `CODEX_SKIP_RUNTIME_CLEANUP=1`
 - `post-commit` and `post-merge` VS Code cleanup bypass: `CODEX_SKIP_VSCODE_RUNTIME_CLEANUP=1`
 - `post-commit` and `post-merge` VS Code cleanup background control: `CODEX_VSCODE_RUNTIME_CLEANUP_BACKGROUND=0|1` (`1` default)
+- `SUPER_AGENT_HOUSEKEEPING_DISABLE=1`: disables SessionStart/SubagentStart housekeeping dispatch
+- `SUPER_AGENT_HOUSEKEEPING_INTERVAL_HOURS=<n>`: interval between housekeeping runs for the same workspace (`2` default)
+- `SUPER_AGENT_HOUSEKEEPING_FOREGROUND=1`: runs housekeeping inline instead of detached background execution
+- `SUPER_AGENT_HOUSEKEEPING_STATE_PATH=<path>`: overrides the housekeeping state file path
+- `SUPER_AGENT_HOUSEKEEPING_RECORD_ONLY_PATH=<path>`: test-only override that records housekeeping intent without touching real runtime state
 - `post-commit` and `post-merge` log retention: `CODEX_LOG_RETENTION_DAYS=<n>` (`14` default from the hygiene catalog, by `LastWriteTime`)
 - `post-commit` and `post-merge` session cleanup toggle: `CODEX_INCLUDE_SESSIONS_CLEANUP=0|1` (`1` default)
 - `post-commit` and `post-merge` session retention: `CODEX_SESSION_RETENTION_DAYS=<n>` (`30` default from the hygiene catalog, by `LastWriteTime`)

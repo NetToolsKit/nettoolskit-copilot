@@ -1,14 +1,15 @@
 # Super Agent Token Quality And Runtime Sync Cleanup Plan
 
-Generated: 2026-03-22
+Generated: 2026-03-22 00:00
+LastUpdated: 2026-03-23 00:00
 
 ## Status
 
 - State: active
 - Spec: `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
-- Current safe slice implemented: instruction/prompt-level output economy, quality-first routing guidance, and session-start continuity summaries anchored in active plan/spec artifacts
-- Current urgent slice in progress: Codex plus VS Code runtime bloat controls for safer hygiene defaults, strategic multi-agent use, and stale-session cleanup of local session/workspace artifacts
-- Remaining deferred scope: local incremental RAG/CAG index plus mirrored `.github` runtime-sync duplication audit
+- Current safe slice implemented: instruction/prompt-level output economy, quality-first routing guidance, session-start continuity summaries, throttled housekeeping with planning export, runtime overflow fixes, context boundary monitoring, dating policy, progress logging, Stop hook for planning export, hardcoded-path removal
+- Current urgent slice completed: tasks 1a–1g below
+- Remaining deferred scope: local incremental RAG/CAG index plus mirrored `.github` runtime-sync duplication audit (tasks 4–6)
 
 ## Objective And Scope
 
@@ -20,50 +21,27 @@ The user does not want token-economy behavior to reduce quality. They want risky
 
 ## Ordered Tasks
 
-1. Apply safe Codex and VS Code runtime defaults and cleanup controls
-   - Target paths:
-     - `.github/governance/codex-runtime-hygiene.catalog.json`
-     - `.github/governance/vscode-runtime-hygiene.catalog.json`
-     - `scripts/common/codex-runtime-hygiene.ps1`
-     - `scripts/common/vscode-runtime-hygiene.ps1`
-     - `scripts/runtime/set-codex-runtime-preferences.ps1`
-     - `scripts/runtime/clean-codex-runtime.ps1`
-     - `scripts/runtime/clean-vscode-user-runtime.ps1`
-     - `.vscode/settings.tamplate.jsonc`
-     - `.github/governance/workspace-efficiency.baseline.json`
-     - `scripts/runtime/install.ps1`
-     - `.githooks/post-commit`
-     - `.githooks/post-merge`
-   - Commands:
-     - `pwsh -NoLogo -NoProfile -File scripts/tests/runtime/runtime-scripts.tests.ps1 -RepoRoot .`
-     - `pwsh -NoLogo -NoProfile -File scripts/tests/runtime/install-runtime.tests.ps1 -RepoRoot .`
-   - Checkpoints:
-     - Codex config defaults keep `multi_agent` enabled while still applying repository-owned runtime hygiene defaults
-     - session cleanup defaults to LastWriteTime retention for conversations older than 30 days without update
-     - oversized-file and storage-budget pruning remain available only through explicit override paths
-     - VS Code global settings stop biasing Copilot toward runaway session restore/history/request budgets
-     - VS Code cleanup prunes stale workspaceStorage, old History, old backup files, and oversized Copilot local indexes safely
-     - install applies the safe runtime preferences deterministically
-     - post-commit/post-merge cleanup uses catalog-driven defaults instead of hardcoded 30-day retention and throttles the heavier VS Code cleanup path
+1. Apply safe Codex and VS Code runtime defaults and cleanup controls ✓ [2026-03-23 00:00]
+   - [2026-03-22 00:00] Task 1 (runtime hygiene catalog, codex/vscode hygiene scripts, set-codex-runtime-preferences, install, hooks) — completed in prior session ✓ [2026-03-22 00:00]
+   - [2026-03-23 00:00] 1a. Fix Int32 overflow in `clean-codex-runtime.ps1` — `[int]` → `[long]` for `MaxFileSizeBytes`, `MaxSessionFileSizeMB`, `MaxSessionStorageGB`, and `Resolve-OptionalNumericHygieneSetting` ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1b. Add `export-planning-summary.ps1` — standalone context handoff export script, auto-detects repo root, writes to `.temp/context-handoff-<ts>.md` or prints with `-PrintOnly` ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1c. Add `-ExportPlanningSummary` param to `clean-codex-runtime.ps1` and `clean-vscode-user-runtime.ps1` — exports handoff before applying cleanup ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1d. Fix empty-array bugs in `clean-vscode-user-runtime.ps1` — `Test-HasPlannedAncestor` call guarded when `$staleWorkspaceDirectoryPaths.Count -eq 0`; same in `Compress-RemovalPlan` ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1e. Fix hanging at `[7/7]` in `clean-vscode-user-runtime.ps1` — removed recursive `Get-PathStat` pre-scan loop; replaced `Invoke-RemovalPlan` directory size with `[long] 0`; added 7-step progress markers ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1f. Add Stop hook to `.claude/settings.json` — auto-exports planning summary when active plans exist at session close ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1g. Remove all hardcoded `\Users\tguis` paths — `architecture-boundaries.baseline.json`, `CLAUDE.md`, `install.ps1` examples, `.claude/settings.json` Bash permission ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 1h. Update `runtime-scripts.tests.ps1` — cover new params (`ExportPlanningSummary`, `RepoRoot`) in both cleanup scripts plus `export-planning-summary.ps1` functional test ✓ [2026-03-23 00:00]
 
-2. Define safe output-economy rules
-   - Target paths:
-     - `.github/AGENTS.md`
-     - `.github/copilot-instructions.md`
-     - `README.md`
-     - `scripts/README.md`
-     - `scripts/common/repository-paths.ps1`
-     - `scripts/common/runtime-operation-support.ps1`
-     - `scripts/common/validation-logging.ps1`
-   - Commands:
-     - `pwsh -NoLogo -NoProfile -File scripts/validation/validate-readme-standards.ps1 -RepoRoot .`
-   - Checkpoints:
-     - default responses stay concise without hiding errors or summaries
-     - verbose/detailed modes remain the place for full diagnostics
-     - duplication between step logs, summaries, and closeout text is reduced safely
-     - session bootstrap injects a short continuity summary from the active plan/spec so post-compaction recovery does not require replaying giant chat history
+2. Define safe output-economy rules and context boundary monitoring ✓ [2026-03-23 00:00]
+   - [2026-03-22 00:00] Output economy rules, quality-first routing — completed in prior session ✓ [2026-03-22 00:00]
+   - [2026-03-23 00:00] 2a. Add `## Context Boundary Monitoring` to `super-agent.instructions.md` — planning-first continuity, handoff export usage, cleanup commands, per-runtime session-end semantics ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 2b. Add `## Dating Policy (Mandatory)` to `subagent-planning-workflow.instructions.md` — `[YYYY-MM-DD HH:mm]` on all tasks, `Generated`/`LastUpdated` fields, example format ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 2c. Add `## Dating Policy (Mandatory)` to `brainstorm-spec-workflow.instructions.md` — `Generated`, key-decision timestamps, planning-readiness `Updated` line ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 2d. Add `## Iterative In-Session Directive Exception` to `subagent-planning-workflow.instructions.md` — clarifies when retroactive plan updates replace upfront spec/plan ✓ [2026-03-23 00:00]
+   - [2026-03-23 00:00] 2e. Update `scripts/README.md` — add `export-planning-summary.ps1` to directory tree and API reference table ✓ [2026-03-23 00:00]
 
 3. Define local RAG/CAG-first response guidance
+   - [2026-03-22 00:00] Task created — deferred
    - Target paths:
      - `.github/AGENTS.md`
      - `.github/copilot-instructions.md`

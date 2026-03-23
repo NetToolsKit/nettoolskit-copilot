@@ -34,6 +34,8 @@ The instruction and prompt layer can safely enforce the first slice immediately:
 
 The next safe continuity slice can also ship immediately: the VS Code `SessionStart` and `SubagentStart` bootstrap hooks should inject a short continuity summary derived from the current active plan/spec artifacts. That gives the controller and workers a bounded restart point after context compaction or a new session, without relying on replaying oversized chat history.
 
+The same bootstrap surface can safely own periodic housekeeping as long as it stays bounded: `SessionStart` and `SubagentStart` may dispatch a throttled workspace-local maintenance pass that first exports a concise planning handoff and then cleans only persisted Codex and VS Code runtime state. This must never attempt to clear the live active context window or reset the runtime UI token meter.
+
 ## Key Decisions
 
 1. Quality remains the primary objective; token economy is acceptable only when it preserves or improves task quality.
@@ -90,6 +92,7 @@ The next safe continuity slice can also ship immediately: the VS Code `SessionSt
 9. Managed global VS Code settings stop favoring runaway Copilot chat history/restore/request budgets.
 10. VS Code user-runtime cleanup defaults now enforce age plus oversized-file caps with documented environment overrides and a throttled hook execution window.
 11. Session bootstrap hooks inject a short continuity summary that references the latest active plan/spec artifact and tells the agent to resume from those artifacts first after context compaction.
+12. Session bootstrap hooks can trigger safe periodic housekeeping no more than once per workspace interval, exporting planning continuity first and then cleaning only persisted runtime state.
 
 ## Planning Readiness Statement
 

@@ -128,6 +128,8 @@ try {
     Assert-Contains -Collection $keys -Value 'OversizedSessionGraceHours' -Message 'clean-codex-runtime missing OversizedSessionGraceHours parameter.'
     Assert-Contains -Collection $keys -Value 'MaxSessionStorageGB' -Message 'clean-codex-runtime missing MaxSessionStorageGB parameter.'
     Assert-Contains -Collection $keys -Value 'SessionStorageGraceHours' -Message 'clean-codex-runtime missing SessionStorageGraceHours parameter.'
+    Assert-Contains -Collection $keys -Value 'ExportPlanningSummary' -Message 'clean-codex-runtime missing ExportPlanningSummary parameter.'
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'clean-codex-runtime missing RepoRoot parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'clean-vscode-user-runtime.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -143,6 +145,8 @@ try {
     Assert-Contains -Collection $keys -Value 'MaxCopilotWorkspaceIndexSizeMB' -Message 'clean-vscode-user-runtime missing MaxCopilotWorkspaceIndexSizeMB parameter.'
     Assert-Contains -Collection $keys -Value 'OversizedFileGraceHours' -Message 'clean-vscode-user-runtime missing OversizedFileGraceHours parameter.'
     Assert-Contains -Collection $keys -Value 'RecentRunWindowHours' -Message 'clean-vscode-user-runtime missing RecentRunWindowHours parameter.'
+    Assert-Contains -Collection $keys -Value 'ExportPlanningSummary' -Message 'clean-vscode-user-runtime missing ExportPlanningSummary parameter.'
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'clean-vscode-user-runtime missing RepoRoot parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'set-codex-runtime-preferences.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -189,6 +193,25 @@ try {
     $keys = @($command.Parameters.Keys)
     Assert-Contains -Collection $keys -Value 'EvalsPath' -Message 'evaluate-agent-pipeline missing EvalsPath parameter.'
     Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'evaluate-agent-pipeline missing OutputPath parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'export-planning-summary missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'export-planning-summary missing OutputPath parameter.'
+    Assert-Contains -Collection $keys -Value 'PrintOnly' -Message 'export-planning-summary missing PrintOnly parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'invoke-super-agent-housekeeping.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'WorkspacePath' -Message 'invoke-super-agent-housekeeping missing WorkspacePath parameter.'
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'invoke-super-agent-housekeeping missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'IntervalHours' -Message 'invoke-super-agent-housekeeping missing IntervalHours parameter.'
+    Assert-Contains -Collection $keys -Value 'StateFilePath' -Message 'invoke-super-agent-housekeeping missing StateFilePath parameter.'
+    Assert-Contains -Collection $keys -Value 'Apply' -Message 'invoke-super-agent-housekeeping missing Apply parameter.'
+    Assert-Contains -Collection $keys -Value 'BypassThrottle' -Message 'invoke-super-agent-housekeeping missing BypassThrottle parameter.'
+    Assert-Contains -Collection $keys -Value 'RecordOnlyPath' -Message 'invoke-super-agent-housekeeping missing RecordOnlyPath parameter.'
+    Assert-Contains -Collection $keys -Value 'DetailedOutput' -Message 'invoke-super-agent-housekeeping missing DetailedOutput parameter.'
 
     $scriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/setup-global-git-aliases.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -275,6 +298,109 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCopilotSkills 'super-agent\SKILL.md') -PathType Leaf) 'bootstrap github profile must project native Copilot skills.'
         Assert-True (-not (Test-Path -LiteralPath $targetAgentsSkills)) 'bootstrap github profile must not project Codex picker-visible skills.'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts'))) 'bootstrap github profile must not project Codex shared scripts.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot 'planning\active') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot 'planning\specs\active') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $tempRoot 'planning\active\plan-example.md') -Value @(
+            '# Example Plan',
+            '',
+            'State: in_progress',
+            '',
+            'Current urgent slice in progress: finish cleanup regression safely.',
+            '',
+            'Longer details that should not be dumped verbatim into the handoff summary.'
+        )
+        Set-Content -LiteralPath (Join-Path $tempRoot 'planning\specs\active\spec-example.md') -Value @(
+            '# Example Spec',
+            '',
+            'Status: active',
+            '',
+            'Objective: keep context recovery concise and planning-anchored.'
+        )
+
+        $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'export-planning-summary smoke test failed.'
+        Assert-True ($summary -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
+        Assert-True ($summary -match 'finish cleanup regression safely') 'export-planning-summary did not include the concise current focus.'
+        Assert-True ($summary -match 'Example Spec') 'export-planning-summary did not include the active spec title.'
+        Assert-True ($summary -notmatch 'Full plan content') 'export-planning-summary should stay concise instead of embedding full plan content.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot '.build\super-agent\planning\active') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot '.build\super-agent\specs\active') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $tempRoot '.build\super-agent\planning\active\plan-global.md') -Value @(
+            '# Global Runtime Plan',
+            '',
+            '- State: in_progress',
+            '- Current urgent slice in progress: continue after compaction from .build artifacts.'
+        )
+        Set-Content -LiteralPath (Join-Path $tempRoot '.build\super-agent\specs\active\spec-global.md') -Value @(
+            '# Global Runtime Spec',
+            '',
+            '## Objective',
+            '',
+            'Recover continuity in global-runtime mode.'
+        )
+
+        $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'export-planning-summary .build fallback smoke test failed.'
+        Assert-True ($summary -match 'Global Runtime Plan') 'export-planning-summary should include the .build active plan title.'
+        Assert-True ($summary -match 'Global Runtime Spec') 'export-planning-summary should include the .build active spec title.'
+        Assert-True ($summary -match '\.build/super-agent/planning/active') 'export-planning-summary should describe the .build planning surface when no workspace planning exists.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $scriptPath = Join-Path $runtimeScriptRoot 'invoke-super-agent-housekeeping.ps1'
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot 'planning\active') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot 'planning\specs\active') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $tempRoot 'planning\active\plan-housekeeping.md') -Value @(
+            '# Housekeeping Plan',
+            '',
+            '- State: in_progress',
+            '- Current urgent slice in progress: export handoff before cleanup.'
+        )
+        Set-Content -LiteralPath (Join-Path $tempRoot 'planning\specs\active\spec-housekeeping.md') -Value @(
+            '# Housekeeping Spec',
+            '',
+            '## Objective',
+            '',
+            'Keep context recovery planning-anchored.'
+        )
+
+        $recordPath = Join-Path $tempRoot '.temp\housekeeping-record.json'
+        $statePath = Join-Path $tempRoot '.temp\housekeeping-state.json'
+        & $scriptPath -WorkspacePath $tempRoot -RepoRoot $tempRoot -StateFilePath $statePath -BypassThrottle -RecordOnlyPath $recordPath | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'invoke-super-agent-housekeeping record-only smoke test failed.'
+        Assert-True (Test-Path -LiteralPath $recordPath -PathType Leaf) 'invoke-super-agent-housekeeping did not emit the record-only artifact.'
+        Assert-True (Test-Path -LiteralPath $statePath -PathType Leaf) 'invoke-super-agent-housekeeping did not persist state in record-only mode.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
