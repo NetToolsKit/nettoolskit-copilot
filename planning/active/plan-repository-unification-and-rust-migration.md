@@ -4,12 +4,13 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 16:48
+- LastUpdated: 2026-03-26 17:05
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
 - Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
+- Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Worktree Isolation: not recommended for this planning-only checkpoint; a dedicated branch is active in the current checkout.
 
 ## Scope Summary
@@ -100,12 +101,14 @@ Status: `[x]` Completed
 
 ### Task 2: Freeze The Canonical Inventory And Rust Ownership Map
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Build a canonical script-to-domain, script-to-owner, and script-to-wave matrix for all tracked `.ps1` files
+- [2026-03-26 17:05] Captured the canonical matrix in `planning/active/rust-script-transcription-ownership-matrix.md` and locked every tracked PowerShell script to a Rust owner boundary and wave ✓ [2026-03-26 17:05]
 - Target paths:
   - `planning/active/plan-repository-unification-and-rust-migration.md`
   - `planning/active/plan-repository-operations-hygiene.md`
+  - `planning/active/rust-script-transcription-ownership-matrix.md`
   - `scripts/`
   - `Cargo.toml`
 - Commands:

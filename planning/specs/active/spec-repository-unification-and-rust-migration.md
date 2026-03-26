@@ -66,6 +66,8 @@ Partial migration by script family is no longer enough for the desired end state
 | background worker and retry runtime | `crates/task-worker` |
 | command export hub | `crates/commands` |
 
+The canonical script-to-owner lock is tracked in `planning/active/rust-script-transcription-ownership-matrix.md`.
+
 ## Key Decisions
 
 1. `nettoolskit-copilot` remains the canonical workspace for the migration.
