@@ -21,8 +21,15 @@ pub mod config;
 /// AI workspace-context collection and redaction utilities
 pub mod ai_context;
 
+/// Repository-owned local context indexing utilities.
+#[path = "local-context/lib.rs"]
+pub mod local_context;
+
 /// Shared runtime contracts for CLI and background-service execution modes.
 pub mod runtime;
+
+/// Runtime location catalog and user-path utilities.
+pub mod runtime_locations;
 
 /// String manipulation utilities
 #[path = "string-utils/lib.rs"]
