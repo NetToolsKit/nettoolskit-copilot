@@ -10,6 +10,8 @@ members = [
     "crates/commands/templating",
     "crates/commands/manifest",
     "crates/commands/help",
+    "crates/commands/runtime",
+    "crates/commands/validation",
     "benchmarks",
 ]
 resolver = "2"

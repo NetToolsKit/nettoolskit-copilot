@@ -14,6 +14,7 @@ nettoolskit-commands aggregates command subcrates used by the CLI and re-exports
 
 -   ✅ Single import point for command subcrates
 -   ✅ Re-exports command packages used by the CLI
+-   ✅ Locks the migration-ready `runtime` and `validation` command boundaries
 
 ---
 
@@ -48,11 +49,15 @@ nettoolskit-commands = { path = "../commands" }
 Minimal usage in 3–5 lines:
 
 ```rust
-use nettoolskit_commands::{nettoolskit_help, nettoolskit_manifest};
+use nettoolskit_commands::{
+    nettoolskit_help, nettoolskit_manifest, nettoolskit_runtime, nettoolskit_validation,
+};
 
 let _ = (
     nettoolskit_help::discover_manifests,
     nettoolskit_manifest::ManifestExecutor::new,
+    nettoolskit_runtime::runtime_surface_script_total,
+    nettoolskit_validation::validation_surface_script_total,
 );
 ```
 
@@ -63,7 +68,9 @@ let _ = (
 ### Example 1: Import command crates
 
 ```rust
-use nettoolskit_commands::{nettoolskit_help, nettoolskit_manifest};
+use nettoolskit_commands::{
+    nettoolskit_help, nettoolskit_manifest, nettoolskit_runtime, nettoolskit_validation,
+};
 
 # #[tokio::main]
 # async fn main() {
@@ -71,6 +78,9 @@ let manifests = nettoolskit_help::discover_manifests(None).await;
 println!("{}", manifests.len());
 
 let _executor = nettoolskit_manifest::ManifestExecutor::new();
+let runtime_total = nettoolskit_runtime::runtime_surface_script_total();
+let validation_total = nettoolskit_validation::validation_surface_script_total();
+println!("{runtime_total} / {validation_total}");
 # }
 ```
 
@@ -82,6 +92,8 @@ This crate re-exports the command subcrates:
 
 - `nettoolskit_help`
 - `nettoolskit_manifest`
+- `nettoolskit_runtime`
+- `nettoolskit_validation`
 
 ---
 

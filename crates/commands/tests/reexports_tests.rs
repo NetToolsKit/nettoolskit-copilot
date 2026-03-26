@@ -1,6 +1,8 @@
 //! Tests for public command re-exports.
 
-use nettoolskit_commands::{nettoolskit_help, nettoolskit_manifest};
+use nettoolskit_commands::{
+    nettoolskit_help, nettoolskit_manifest, nettoolskit_runtime, nettoolskit_validation,
+};
 use std::path::PathBuf;
 
 #[test]
@@ -34,4 +36,18 @@ fn test_manifest_action_full_command_keeps_parent_prefix() {
         action.description(),
         "Preview generated files without creating them"
     );
+}
+
+#[test]
+fn test_runtime_surface_lookup_works_via_commands_surface() {
+    let contract = nettoolskit_runtime::runtime_surface_contract("runtime-hooks")
+        .expect("runtime hook contract should exist");
+
+    assert_eq!(contract.legacy_script_count, 4);
+    assert_eq!(contract.legacy_root, "scripts/runtime/hooks");
+}
+
+#[test]
+fn test_validation_surface_total_matches_locked_scope() {
+    assert_eq!(nettoolskit_validation::validation_surface_script_total(), 41);
 }

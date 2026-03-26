@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 17:05
+- LastUpdated: 2026-03-26 17:11
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -29,9 +29,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 16:48] `cargo check --workspace` passed.
 - [2026-03-26 16:48] `cargo test --workspace` passed.
 - [2026-03-26 16:48] `cargo fmt --all -- --check` failed across many existing files, so repository-wide formatting is still a blocking hygiene item.
-- [2026-03-26 16:48] Rust testing-contract gaps remain in the current workspace:
-  - `crates/commands` has no `tests/test_suite.rs` or `tests/error_tests.rs`
-  - `crates/task-worker` has no mirrored external tests
+- [2026-03-26 17:11] The external Rust test-contract gap for `crates/commands` and `crates/task-worker` is now closed, but repository-wide formatting debt still blocks a fully green hygiene baseline.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -108,6 +106,7 @@ Status: `[ ]` Pending
 Status: `[ ]` Pending
 
 - [2026-03-26 16:20] Make validation and CI gates prefer Rust-backed execution as migration waves land, without removing fallback safety too early
+- [2026-03-26 17:11] The new `runtime` and `validation` command crates now exist and already carry contract tests, so CI hardening can target concrete Rust surfaces instead of future placeholders ✓ [2026-03-26 17:11]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`

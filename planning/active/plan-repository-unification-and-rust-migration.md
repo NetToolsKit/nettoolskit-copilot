@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 17:05
+- LastUpdated: 2026-03-26 17:11
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -52,14 +52,13 @@ The migration remains compatibility-first:
   - `crates/cli` for operator-facing verbs and compatibility entrypoints
   - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the best current examples of modular command crates with mirrored tests
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
-  - `crates/commands` lacks `tests/test_suite.rs` and `tests/error_tests.rs`
-  - `crates/task-worker` lacks mirrored external tests
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
     - `crates/orchestrator/src/execution/chatops_runtime.rs` (`2380` lines)
     - `crates/orchestrator/src/execution/chatops.rs` (`1618` lines)
     - `crates/cli/src/main.rs` (`2950` lines)
     - `crates/cli/src/lib.rs` (`2024` lines)
+- [2026-03-26 17:11] The earlier external test-surface gap for `crates/commands` and `crates/task-worker` has been closed; the remaining structural risk is now concentrated in formatting debt and oversized control-plane files.
 
 ## Target Rust Ownership Model
 
@@ -124,10 +123,11 @@ Status: `[x]` Completed
 
 ### Task 3: Harden The Existing Rust Workspace Before Expansion
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-26 16:48] Bring the current workspace into migration-ready shape before broad script transcription starts
 - [2026-03-26 17:05] Added external `tests/test_suite.rs` and `tests/error_tests.rs` surfaces for `crates/commands` and `crates/task-worker`, and removed the inline `task-worker` test module to align that crate with the repository Rust testing pattern ✓ [2026-03-26 17:05]
+- [2026-03-26 17:11] Validated the hardened baseline with `cargo test --workspace` after integrating the new migration boundary crates, keeping the workspace green at the architecture checkpoint ✓ [2026-03-26 17:11]
 - Target paths:
   - `Cargo.toml`
   - `crates/commands/`
@@ -148,9 +148,10 @@ Status: `[ ]` Pending
 
 ### Task 4: Define Rust Workspace Boundaries And Command Contracts
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-26 16:48] Lock the target Rust command surfaces for runtime, validation, orchestration, maintenance, hooks, governance, deploy, and test parity flows
+- [2026-03-26 17:11] Created `crates/commands/runtime` and `crates/commands/validation`, integrated both into the workspace and command aggregator, and backed the new boundaries with contract and error test suites ✓ [2026-03-26 17:11]
 - Target paths:
   - `Cargo.toml`
   - `crates/core/`

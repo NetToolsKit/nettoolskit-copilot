@@ -1,0 +1,21 @@
+[package]
+name = "nettoolskit-validation"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Validation migration command contracts for NetToolsKit"
+repository = "https://github.com/ThiagoGuislotti/NetToolsKit"
+readme = "README.md"
+keywords = ["validation", "commands", "migration"]
+categories = ["command-line-utilities", "development-tools"]
+
+[lib]
+name = "nettoolskit_validation"
+path = "src/lib.rs"
+
+[dependencies]
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

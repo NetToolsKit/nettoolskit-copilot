@@ -1842,6 +1842,8 @@ version = "1.0.0"
 dependencies = [
  "nettoolskit-help",
  "nettoolskit-manifest",
+ "nettoolskit-runtime",
+ "nettoolskit-validation",
  "tempfile",
 ]
 
@@ -1945,6 +1947,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "nettoolskit-runtime"
+version = "1.0.0"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
 name = "nettoolskit-task-worker"
 version = "1.0.0"
 dependencies = [
@@ -1988,6 +1997,13 @@ dependencies = [
  "supports-color",
  "tracing",
  "winrt-notification",
+]
+
+[[package]]
+name = "nettoolskit-validation"
+version = "1.0.0"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]

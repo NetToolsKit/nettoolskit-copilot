@@ -50,9 +50,8 @@ Partial migration by script family is no longer enough for the desired end state
   - `crates/cli` for user-facing verbs and compatibility aliases
   - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the best examples of modular command crates with mirrored tests
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
-  - `crates/commands` lacks `tests/test_suite.rs` and `tests/error_tests.rs`
-  - `crates/task-worker` lacks mirrored external tests
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
+- [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
 
 ## Target Rust Ownership Model
 
@@ -82,6 +81,7 @@ The canonical script-to-owner lock is tracked in `planning/active/rust-script-tr
 10. [2026-03-26 16:48] The migration should introduce `crates/commands/runtime` and `crates/commands/validation` as the first new command boundaries instead of overloading `cli` or `orchestrator`.
 11. [2026-03-26 16:48] `crates/commands` and `crates/task-worker` must be brought into the repository Rust testing contract before they become expansion anchors.
 12. [2026-03-26 16:48] Oversized orchestrator and CLI files are considered migration risk surfaces and should be reduced by extraction, not used as default landing zones for ported script logic.
+13. [2026-03-26 17:11] The first architecture checkpoint is implemented in code: `crates/commands/runtime` and `crates/commands/validation` now exist in the workspace, and the missing external test surfaces for `crates/commands` and `crates/task-worker` are no longer deferred.
 
 ## Constraints
 
@@ -133,6 +133,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 
 - `ready-for-plan`
 - Updated: `2026-03-26 16:48` — added the validated Rust baseline snapshot and concrete target ownership model.
+- Updated: `2026-03-26 17:11` — implemented the first migration boundary crates and aligned the baseline test surfaces with the Rust testing contract.
 
 ## Recommended Specialist Focus
 
