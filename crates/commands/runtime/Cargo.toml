@@ -15,7 +15,12 @@ name = "nettoolskit_runtime"
 path = "src/lib.rs"
 
 [dependencies]
+anyhow = { workspace = true }
+nettoolskit-core = { path = "../../core" }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

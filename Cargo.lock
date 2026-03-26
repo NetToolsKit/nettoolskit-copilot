@@ -1962,6 +1962,9 @@ dependencies = [
 name = "nettoolskit-runtime"
 version = "1.0.0"
 dependencies = [
+ "anyhow",
+ "nettoolskit-core",
+ "tempfile",
  "thiserror",
 ]
 

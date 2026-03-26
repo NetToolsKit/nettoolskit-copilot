@@ -10,6 +10,7 @@ This crate locks the owned runtime surfaces before full implementation lands. It
 - runtime lifecycle hooks
 - maintenance operator flows
 - git hook install and hygiene flows
+- local context index update and query commands
 
 ## Scope
 
@@ -26,3 +27,7 @@ The current contract covers `54` legacy PowerShell scripts:
 - `runtime_surface_contract`
 - `require_runtime_surface_contract`
 - `runtime_surface_script_total`
+- `update_local_context_index`
+- `query_local_context_index`
+- `UpdateLocalContextIndexRequest`
+- `QueryLocalContextIndexRequest`

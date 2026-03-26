@@ -2,12 +2,17 @@
 
 pub mod contracts;
 pub mod error;
+pub mod local_context;
 
 pub use contracts::{
     runtime_surface_contract, runtime_surface_script_total, MigrationWave, RuntimeSurfaceContract,
     RuntimeSurfaceKind, RUNTIME_SURFACE_CONTRACTS,
 };
-pub use error::RuntimeSurfaceError;
+pub use error::{LocalContextCommandError, RuntimeSurfaceError};
+pub use local_context::{
+    query_local_context_index, update_local_context_index, QueryLocalContextIndexRequest,
+    QueryLocalContextIndexResult, UpdateLocalContextIndexRequest, UpdateLocalContextIndexResult,
+};
 
 /// Require a registered runtime surface contract.
 ///

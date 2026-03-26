@@ -2,3 +2,4 @@
 
 mod contracts_tests;
 mod error_tests;
+mod local_context_tests;
