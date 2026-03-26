@@ -14,6 +14,7 @@ This crate locks the owned runtime surfaces before full implementation lands. It
 - runtime drift diagnosis and hygiene checks
 - runtime healthcheck orchestration and report generation
 - runtime asset bootstrap synchronization
+- runtime VS Code template application
 - runtime self-heal orchestration and repair reporting
 
 ## Scope
@@ -37,6 +38,7 @@ The current contract covers `54` legacy PowerShell scripts:
 - `invoke_runtime_doctor`
 - `invoke_runtime_healthcheck`
 - `invoke_runtime_bootstrap`
+- `invoke_apply_vscode_templates`
 - `invoke_runtime_self_heal`
 - `UpdateLocalContextIndexRequest`
 - `QueryLocalContextIndexRequest`
@@ -44,4 +46,5 @@ The current contract covers `54` legacy PowerShell scripts:
 - `RuntimeDoctorRequest`
 - `RuntimeHealthcheckRequest`
 - `RuntimeBootstrapRequest`
+- `RuntimeApplyVscodeTemplatesRequest`
 - `RuntimeSelfHealRequest`

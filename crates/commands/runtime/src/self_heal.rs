@@ -10,12 +10,12 @@ use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use crate::{
-    error::RuntimeSelfHealCommandError, invoke_runtime_bootstrap, invoke_runtime_healthcheck,
-    RuntimeBootstrapRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckResult,
+    error::RuntimeSelfHealCommandError, invoke_apply_vscode_templates, invoke_runtime_bootstrap,
+    invoke_runtime_healthcheck, RuntimeApplyVscodeTemplatesRequest, RuntimeBootstrapRequest,
+    RuntimeHealthcheckRequest, RuntimeHealthcheckResult,
 };
 
 /// Request payload for `self-heal`.
@@ -140,12 +140,6 @@ pub struct RuntimeSelfHealResult {
     pub report_json: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct CommandArgument {
-    name: &'static str,
-    value: Option<String>,
-}
-
 /// Execute the runtime self-heal flow.
 ///
 /// # Errors
@@ -214,23 +208,8 @@ pub fn invoke_runtime_self_heal(
     ));
 
     if request.apply_vscode_templates {
-        let vscode_arguments = vec![
-            CommandArgument {
-                name: "RepoRoot",
-                value: Some(context.resolved_repo_root.display().to_string()),
-            },
-            CommandArgument {
-                name: "Force",
-                value: Some("true".to_string()),
-            },
-        ];
-        steps.push(run_external_step(
-            "apply-vscode-templates",
-            &context
-                .resolved_repo_root
-                .join("scripts/runtime/apply-vscode-templates.ps1"),
-            "scripts/runtime/apply-vscode-templates.ps1",
-            &vscode_arguments,
+        steps.push(run_apply_vscode_templates_step(
+            &context.resolved_repo_root,
             &log_path,
         ));
     } else {
@@ -493,71 +472,36 @@ fn map_healthcheck_step_result(
     }
 }
 
-fn run_external_step(
-    name: &str,
-    script_path: &Path,
-    relative_script_path: &str,
-    arguments: &[CommandArgument],
-    log_path: &Path,
-) -> RuntimeSelfHealStepResult {
+fn run_apply_vscode_templates_step(repo_root: &Path, log_path: &Path) -> RuntimeSelfHealStepResult {
     let started_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
     let started = Instant::now();
-    let formatted_arguments = format_argument_list(arguments);
-
-    let result = if !script_path.is_file() {
-        build_step_result(
-            name,
-            relative_script_path,
-            formatted_arguments,
-            1,
-            Some(format!("script not found: {}", script_path.display())),
+    let arguments = vec![
+        format!("-RepoRoot={}", repo_root.display()),
+        "-Force".to_string(),
+    ];
+    let result = match invoke_apply_vscode_templates(&RuntimeApplyVscodeTemplatesRequest {
+        repo_root: Some(repo_root.to_path_buf()),
+        force: true,
+        ..RuntimeApplyVscodeTemplatesRequest::default()
+    }) {
+        Ok(_) => build_step_result(
+            "apply-vscode-templates",
+            "rust:nettoolskit-runtime::apply-vscode-templates",
+            arguments,
+            0,
+            None,
             started_at,
             started.elapsed().as_millis(),
-        )
-    } else {
-        let mut command = Command::new("pwsh");
-        command
-            .arg("-NoLogo")
-            .arg("-NoProfile")
-            .arg("-ExecutionPolicy")
-            .arg("Bypass")
-            .arg("-File")
-            .arg(script_path);
-        for argument in arguments {
-            command.arg(format!("-{}", argument.name));
-            if let Some(value) = &argument.value {
-                command.arg(value);
-            }
-        }
-
-        match command.output() {
-            Ok(output) => {
-                let exit_code = output.status.code().unwrap_or(1);
-                let error = if exit_code == 0 {
-                    None
-                } else {
-                    command_output_error_message(&output.stdout, &output.stderr)
-                };
-                build_step_result(
-                    name,
-                    relative_script_path,
-                    formatted_arguments,
-                    exit_code,
-                    error,
-                    started_at,
-                    started.elapsed().as_millis(),
-                )
-            }
-            Err(error) => build_step_result(
-                name,
-                relative_script_path,
-                formatted_arguments,
-                1,
-                Some(error.to_string()),
-                started_at,
-                started.elapsed().as_millis(),
-            ),
-        }
+        ),
+        Err(error) => build_step_result(
+            "apply-vscode-templates",
+            "rust:nettoolskit-runtime::apply-vscode-templates",
+            arguments,
+            1,
+            Some(error.to_string()),
+            started_at,
+            started.elapsed().as_millis(),
+        ),
     };
 
     let _ = append_log_line(
@@ -623,28 +567,6 @@ fn runtime_target_argument_list(target_arguments: &RuntimeTargetArguments) -> Ve
         arguments.push(format!("-RuntimeProfile={runtime_profile}"));
     }
     arguments
-}
-
-fn format_argument_list(arguments: &[CommandArgument]) -> Vec<String> {
-    arguments
-        .iter()
-        .map(|argument| match &argument.value {
-            Some(value) => format!("-{}={value}", argument.name),
-            None => format!("-{}", argument.name),
-        })
-        .collect()
-}
-
-fn command_output_error_message(stdout: &[u8], stderr: &[u8]) -> Option<String> {
-    let stderr = String::from_utf8_lossy(stderr).trim().to_string();
-    let stdout = String::from_utf8_lossy(stdout).trim().to_string();
-    if !stderr.is_empty() {
-        Some(stderr)
-    } else if !stdout.is_empty() {
-        Some(stdout)
-    } else {
-        None
-    }
 }
 
 fn read_json_payload(path: &Path) -> serde_json::Value {

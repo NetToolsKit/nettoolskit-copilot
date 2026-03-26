@@ -1,5 +1,6 @@
 //! Runtime command boundary contracts for the migration program.
 
+pub mod apply_vscode_templates;
 pub mod bootstrap;
 pub mod contracts;
 pub mod doctor;
@@ -9,6 +10,10 @@ pub mod local_context;
 pub mod planning_summary;
 pub mod self_heal;
 
+pub use apply_vscode_templates::{
+    invoke_apply_vscode_templates, RuntimeApplyVscodeTemplateFileResult,
+    RuntimeApplyVscodeTemplatesRequest, RuntimeApplyVscodeTemplatesResult,
+};
 pub use bootstrap::{invoke_runtime_bootstrap, RuntimeBootstrapRequest, RuntimeBootstrapResult};
 pub use contracts::{
     runtime_surface_contract, runtime_surface_script_total, MigrationWave, RuntimeSurfaceContract,
@@ -19,9 +24,9 @@ pub use doctor::{
     RuntimeDoctorStatus,
 };
 pub use error::{
-    LocalContextCommandError, PlanningSummaryCommandError, RuntimeBootstrapCommandError,
-    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError, RuntimeSelfHealCommandError,
-    RuntimeSurfaceError,
+    LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
+    RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimeSelfHealCommandError, RuntimeSurfaceError,
 };
 pub use healthcheck::{
     invoke_runtime_healthcheck, RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest,

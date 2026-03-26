@@ -3,8 +3,8 @@
 use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
-    RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
-    RuntimeSelfHealCommandError,
+    RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
+    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError, RuntimeSelfHealCommandError,
 };
 use std::error::Error;
 
@@ -114,6 +114,25 @@ fn test_runtime_healthcheck_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "disk full"
+    );
+}
+
+#[test]
+fn test_runtime_apply_vscode_templates_error_display_is_stable() {
+    let error = RuntimeApplyVscodeTemplatesCommandError::ApplyTemplates {
+        source: anyhow!("missing template"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to apply runtime vscode templates"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "missing template"
     );
 }
 

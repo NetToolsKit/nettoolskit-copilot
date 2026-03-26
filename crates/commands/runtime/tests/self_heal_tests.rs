@@ -24,6 +24,7 @@ fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
 fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
+    fs::create_dir_all(repo_root.join(".vscode")).expect("vscode directory should be created");
     fs::create_dir_all(repo_root.join("scripts/runtime"))
         .expect("runtime directory should be created");
     fs::create_dir_all(repo_root.join("scripts/validation"))
@@ -87,8 +88,12 @@ fn test_invoke_runtime_self_heal_applies_vscode_templates_when_requested() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join("scripts/runtime/apply-vscode-templates.ps1"),
-        "param([string]$RepoRoot,[object]$Force)\nNew-Item -ItemType Directory -Force -Path (Join-Path $RepoRoot '.temp') | Out-Null\n$marker = Join-Path $RepoRoot '.temp/vscode-applied.marker'\nSet-Content -LiteralPath $marker -NoNewline -Value 'applied'\nexit 0",
+        &repo.path().join(".vscode/settings.tamplate.jsonc"),
+        "{\n  \"editor.tabSize\": 4\n}",
+    );
+    write_file(
+        &repo.path().join(".vscode/mcp.tamplate.jsonc"),
+        "{\n  \"servers\": {}\n}",
     );
 
     let result = invoke_runtime_self_heal(&RuntimeSelfHealRequest {
@@ -99,17 +104,22 @@ fn test_invoke_runtime_self_heal_applies_vscode_templates_when_requested() {
 
     assert_eq!(result.overall_status, RuntimeSelfHealStatus::Passed);
     assert_eq!(result.total_steps, 3);
-    assert!(repo.path().join(".temp/vscode-applied.marker").is_file());
+    assert!(repo.path().join(".vscode/settings.json").is_file());
+    assert!(repo.path().join(".vscode/mcp.json").is_file());
     let vscode_step = result
         .steps
         .iter()
         .find(|step| step.name == "apply-vscode-templates")
         .expect("vscode step should be present");
     assert_eq!(vscode_step.status, RuntimeSelfHealStatus::Passed);
+    assert_eq!(
+        vscode_step.script,
+        "rust:nettoolskit-runtime::apply-vscode-templates"
+    );
 }
 
 #[test]
-fn test_invoke_runtime_self_heal_fails_when_vscode_template_script_is_missing() {
+fn test_invoke_runtime_self_heal_fails_when_vscode_template_files_are_missing() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
 
@@ -132,6 +142,6 @@ fn test_invoke_runtime_self_heal_fails_when_vscode_template_script_is_missing() 
     assert!(vscode_step
         .error
         .as_deref()
-        .expect("missing script error should be reported")
-        .contains("script not found"));
+        .expect("missing template error should be reported")
+        .contains("failed to apply runtime vscode templates"));
 }

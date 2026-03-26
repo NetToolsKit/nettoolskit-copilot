@@ -181,6 +181,38 @@ pub enum RuntimeHealthcheckCommandError {
     },
 }
 
+/// Errors raised by runtime VS Code template apply commands.
+#[derive(Debug, Error)]
+pub enum RuntimeApplyVscodeTemplatesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime vscode template workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// VS Code workspace path resolution failed.
+    #[error("failed to resolve runtime vscode template path")]
+    ResolveVscodePath {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target VS Code path does not exist.
+    #[error("VS Code path not found: {vscode_path}")]
+    VscodePathNotFound {
+        /// Resolved VS Code path expected by the command.
+        vscode_path: String,
+    },
+    /// Template application failed.
+    #[error("failed to apply runtime vscode templates")]
+    ApplyTemplates {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime self-heal commands.
 #[derive(Debug, Error)]
 pub enum RuntimeSelfHealCommandError {
