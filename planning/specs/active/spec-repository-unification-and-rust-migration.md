@@ -49,6 +49,7 @@ Partial migration by script family is no longer enough for the desired end state
   - `crates/orchestrator` for staged orchestration and control-plane behavior
   - `crates/cli` for user-facing verbs and compatibility aliases
   - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the best examples of modular command crates with mirrored tests
+- [2026-03-26 18:47] The first executable Wave 1 replacement is now live in Rust: `crates/core` owns repository/runtime path and local context index foundations, and `crates/commands/runtime` owns `update/query-local-context-index`.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -83,6 +84,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 11. [2026-03-26 16:48] `crates/commands` and `crates/task-worker` must be brought into the repository Rust testing contract before they become expansion anchors.
 12. [2026-03-26 16:48] Oversized orchestrator and CLI files are considered migration risk surfaces and should be reduced by extraction, not used as default landing zones for ported script logic.
 13. [2026-03-26 17:11] The first architecture checkpoint is implemented in code: `crates/commands/runtime` and `crates/commands/validation` now exist in the workspace, and the missing external test surfaces for `crates/commands` and `crates/task-worker` are no longer deferred.
+14. [2026-03-26 18:47] Wave 1 should start with reusable helper and index flows in `crates/core` and `crates/commands/runtime`, using the local context index path as the first executable compatibility target.
 
 ## Constraints
 
@@ -135,6 +137,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - `ready-for-plan`
 - Updated: `2026-03-26 16:48` — added the validated Rust baseline snapshot and concrete target ownership model.
 - Updated: `2026-03-26 17:11` — implemented the first migration boundary crates and aligned the baseline test surfaces with the Rust testing contract.
+- Updated: `2026-03-26 18:47` — implemented the first executable Wave 1 replacement around the local context index flow and promoted its shared foundations into `crates/core`.
 
 ## Recommended Specialist Focus
 
