@@ -35,6 +35,7 @@ planning/
 ## Current Active Plan
 
 - `planning/active/plan-repository-operations-hygiene.md`
+- `planning/active/plan-repository-unification-and-rust-migration.md`
 
 ## Current Delivery Snapshot
 
