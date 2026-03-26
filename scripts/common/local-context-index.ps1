@@ -20,6 +20,36 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Resolves the workspace root used by the local context index without forcing
+# the stricter repository-runtime layout that requires both .github and .codex.
+function Resolve-LocalContextIndexWorkspaceRoot {
+    param(
+        [string] $RequestedRoot,
+        [string] $FallbackPath
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        if (-not (Test-Path -LiteralPath $RequestedRoot -PathType Container)) {
+            throw "RepoRoot not found: $RequestedRoot"
+        }
+
+        return (Resolve-Path -LiteralPath $RequestedRoot).Path
+    }
+
+    $candidatePath = if ([string]::IsNullOrWhiteSpace($FallbackPath)) {
+        (Get-Location).Path
+    }
+    else {
+        $FallbackPath
+    }
+
+    if (-not (Test-Path -LiteralPath $candidatePath -PathType Container)) {
+        throw "RepoRoot not found: $candidatePath"
+    }
+
+    return (Resolve-Path -LiteralPath $candidatePath).Path
+}
+
 # Returns one direct property value or a fallback default.
 function Get-LocalContextIndexOptionalValue {
     param(
@@ -481,4 +511,92 @@ function Get-LocalContextChunkScore {
     }
 
     return $score
+}
+
+# Queries an in-memory local context index document and returns ranked hits.
+function Search-LocalContextIndexDocument {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $QueryText,
+        [Parameter(Mandatory = $true)]
+        [object] $IndexDocument,
+        [int] $Top = 5,
+        [string[]] $ExcludePaths = @()
+    )
+
+    if ([string]::IsNullOrWhiteSpace($QueryText) -or $null -eq $IndexDocument) {
+        return @()
+    }
+
+    $effectiveTop = [Math]::Max(1, [int] $Top)
+    $normalizedExcludedPaths = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($excludedPath in @($ExcludePaths)) {
+        if ([string]::IsNullOrWhiteSpace([string] $excludedPath)) {
+            continue
+        }
+
+        [void] $normalizedExcludedPaths.Add((([string] $excludedPath) -replace '\\', '/'))
+    }
+
+    $hits = New-Object System.Collections.Generic.List[object]
+    foreach ($chunk in @($IndexDocument.chunks)) {
+        $chunkPath = (([string] $chunk.path) -replace '\\', '/')
+        if ($normalizedExcludedPaths.Contains($chunkPath)) {
+            continue
+        }
+
+        $score = Get-LocalContextChunkScore -QueryText $QueryText -Chunk $chunk
+        if ($score -le 0) {
+            continue
+        }
+
+        $hits.Add([pscustomobject]@{
+                id = [string] $chunk.id
+                path = $chunkPath
+                heading = [string] (Get-LocalContextIndexOptionalValue -Object $chunk -PropertyName 'heading' -DefaultValue '')
+                score = $score
+                excerpt = [string] $chunk.text
+            }) | Out-Null
+    }
+
+    return @(
+        $hits |
+            Sort-Object @{ Expression = 'score'; Descending = $true }, @{ Expression = 'path'; Descending = $false } |
+            Select-Object -First $effectiveTop
+    )
+}
+
+# Loads the persisted local context index and executes a deterministic query.
+function Get-LocalContextIndexHits {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $RepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string] $QueryText,
+        [string] $CatalogPath,
+        [string] $OutputRoot,
+        [Nullable[int]] $Top,
+        [string[]] $ExcludePaths = @()
+    )
+
+    if ([string]::IsNullOrWhiteSpace($QueryText)) {
+        return @()
+    }
+
+    try {
+        $catalogInfo = Read-LocalContextIndexCatalog -RepoRoot $RepoRoot -CatalogPath $CatalogPath
+        $resolvedIndexRoot = Resolve-LocalContextIndexRoot -RepoRoot $RepoRoot -Catalog $catalogInfo.Catalog -OutputRoot $OutputRoot
+        $indexDocument = Read-LocalContextIndexDocument -IndexRoot $resolvedIndexRoot
+        if ($null -eq $indexDocument) {
+            return @()
+        }
+
+        $defaultTop = [int] (Get-LocalContextIndexOptionalValue -Object (Get-LocalContextIndexOptionalValue -Object $catalogInfo.Catalog -PropertyName 'queryDefaults') -PropertyName 'top' -DefaultValue 5)
+        $effectiveTop = if ($null -eq $Top) { $defaultTop } else { [Math]::Max(1, [int] $Top) }
+
+        return @(Search-LocalContextIndexDocument -QueryText $QueryText -IndexDocument $indexDocument -Top $effectiveTop -ExcludePaths $ExcludePaths)
+    }
+    catch {
+        return @()
+    }
 }

@@ -645,10 +645,33 @@ try {
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
+    $updateIndexScriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
     try {
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github\governance') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRoot 'planning\active') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRoot 'planning\specs\active') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $tempRoot '.github\governance\local-context-index.catalog.json') -Value @(
+            '{',
+            '  "version": 1,',
+            '  "indexRoot": ".temp/context-index",',
+            '  "maxFileSizeKb": 256,',
+            '  "chunking": {',
+            '    "maxChars": 1600,',
+            '    "maxLines": 40',
+            '  },',
+            '  "queryDefaults": {',
+            '    "top": 5',
+            '  },',
+            '  "includeGlobs": [',
+            '    "README.md",',
+            '    "planning/**/*.md"',
+            '  ],',
+            '  "excludeGlobs": [',
+            '    ".temp/**"',
+            '  ]',
+            '}'
+        )
         Set-Content -LiteralPath (Join-Path $tempRoot 'planning\active\plan-example.md') -Value @(
             '# Example Plan',
             '',
@@ -665,6 +688,13 @@ try {
             '',
             'Objective: keep context recovery concise and planning-anchored.'
         )
+        Set-Content -LiteralPath (Join-Path $tempRoot 'README.md') -Value @(
+            '# Example Runtime README',
+            '',
+            'This file documents cleanup regression handling and planning-anchored continuity recovery.'
+        )
+
+        & $updateIndexScriptPath -RepoRoot $tempRoot | Out-Null
 
         $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
@@ -672,6 +702,8 @@ try {
         Assert-True ($summary -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
         Assert-True ($summary -match 'finish cleanup regression safely') 'export-planning-summary did not include the concise current focus.'
         Assert-True ($summary -match 'Example Spec') 'export-planning-summary did not include the active spec title.'
+        Assert-True ($summary -match 'Suggested Local References') 'export-planning-summary should include suggested indexed references when a local context index exists.'
+        Assert-True ($summary -match 'README\.md') 'export-planning-summary should reference indexed repository files outside the active plan/spec when available.'
         Assert-True ($summary -notmatch 'Full plan content') 'export-planning-summary should stay concise instead of embedding full plan content.'
     }
     finally {

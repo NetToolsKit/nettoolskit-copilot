@@ -73,6 +73,10 @@ priority: high
   - syncs `.codex/skills` into `~/.agents/skills` as the single visible Codex/VS Code starter/controller surface
   - removes legacy starter/controller skill duplicates from both `~/.github/skills` and `~/.copilot/skills` so the shared `super-agent` starter stays canonical
   - syncs remaining `.codex` runtime assets into `~/.codex`
+- Local RAG/CAG continuity:
+  - `pwsh -File scripts/runtime/update-local-context-index.ps1 -RepoRoot .`
+  - `pwsh -File scripts/runtime/query-local-context-index.ps1 -RepoRoot . -QueryText "super agent clarification" -JsonOutput`
+  - prefer this index for targeted continuity recall before rereading broad repository surfaces
 - Non-versioned artifact layout:
   - `.build/` for transient build and generated outputs
   - `.deployment/` for publish, package, release, and deployment-ready outputs

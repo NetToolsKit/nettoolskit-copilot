@@ -57,11 +57,11 @@
     },
     {
       "path": "scripts/common/mcp-runtime-catalog.ps1",
-      "sha256": "19eb3f35e51d602fe9af4bcb88bf8681e5481440e09c167a0ead9cbf12b030df"
+      "sha256": "85d6fe36399fa176fc332848d93cce179b6b9187eda5403b371b4106205f658a"
     },
     {
       "path": "scripts/common/local-context-index.ps1",
-      "sha256": "c04788f30d48efbaa1f7e63ddb272f930ec5bd95aec889e9e1bd9b6200e9ff62"
+      "sha256": "9af1d3f5330bb5abc6e62b9e2b77cb61880a93137a3f800ed1c9e41385f60018"
     },
     {
       "path": "scripts/common/git-hook-eof-settings.ps1",

@@ -78,6 +78,12 @@ priority: high
 - Use detailed breakdowns only on explicit user request, for blocked/failing states, or when the changed area is complex enough that a short summary would be ambiguous.
 - Token economy must prioritize output brevity and duplication removal first; do not trade away execution quality by shrinking required context unless later evidence proves that safe.
 
+## Local RAG/CAG Usage
+- Prefer the repository-owned local context index when you need continuity or targeted repository recall beyond the active plan/spec summary.
+- Use the active plan/spec as the primary resume point, then use local indexed references to reopen only the most relevant repository files.
+- Keep retrieval short: path references and focused excerpts are preferred over replaying large chat history or rereading many files blindly.
+- Retrieval is additive, not a license to cut required execution context. If the retrieved references are insufficient, load the necessary source files explicitly.
+
 ## Clarification Gate
 - Do not silently assume missing scope when the ambiguity would change the actual plan.
 - The intake/controller layer must stop before spec or planning when it cannot proceed safely.

@@ -6,6 +6,19 @@ Generated: 2026-03-22
 
 Protect output quality while pursuing token savings through safer output-side controls, investigate runtime-sync duplication or garbage under the mirrored `.github` surface that may be causing duplicated Copilot slash commands such as `/super-agent`, and immediately stop local Codex session/runtime blowups plus VS Code Copilot workspace bloat that are consuming excessive disk and likely inflating token use.
 
+## Completion Outcome
+
+This workstream is completed. The repository now has:
+- a canonical MCP runtime catalog with derived VS Code and Codex runtime projections
+- a deterministic local incremental context index plus continuity reuse in session bootstrap and planning handoff export
+- clarification-gated Super Agent intake behavior across GitHub, Codex, and Claude surfaces
+- runtime hygiene controls for Codex and VS Code that preserve active context while cleaning stale persisted state
+- phase-1 separation between authoritative definitions and projected provider/runtime surfaces
+
+Out of scope by explicit decision:
+- Rust/Cargo migration
+- broad repository cleanup beyond the targeted runtime/controller work delivered here
+
 ## Normalized Request Summary
 
 The user does not want token economy to reduce quality. They also suspect the runtime synchronization flow is leaving garbage or duplicated surfaces under `.github`, based on duplicated command entries visible in VS Code. The risky input/context compaction should stay reverted, and any future optimization should focus on safer output-side economy plus better local RAG/CAG usage. In parallel, local Codex sessions have grown into multi-gigabyte JSONL files dominated by compacted history, encrypted reasoning, and repeated worker/subagent context, while VS Code `workspaceStorage` now contains multi-gigabyte Copilot workspace indexes and huge chat session payloads. The runtime now needs safer defaults and stronger cleanup to prevent both from recurring.
@@ -36,6 +49,8 @@ The next safe continuity slice can also ship immediately: the VS Code `SessionSt
 
 The same bootstrap surface can safely own periodic housekeeping as long as it stays bounded: `SessionStart` and `SubagentStart` may dispatch a throttled workspace-local maintenance pass that first exports a concise planning handoff and then cleans only persisted Codex and VS Code runtime state. This must never attempt to clear the live active context window or reset the runtime UI token meter.
 
+The next safe retrieval slice can now build on the incremental index without changing required execution context: when the local context index already exists, `SessionStart` and `SubagentStart` should inject a short `Local context refs:` segment pointing to the next best repository files to reopen, and `export-planning-summary.ps1` should emit the same kind of suggested indexed references in the handoff document. The planning artifact remains the primary resume anchor; indexed references are secondary accelerators for targeted rereads.
+
 The resumed planning slice also needs to absorb four concrete follow-ups discovered after the first hygiene pass:
 - `.vscode/profiles/` and `.vscode/mcp-vscode-global.json` now exist as local helper surfaces, but they are not yet clearly classified as runtime source-of-truth, generated artifacts, or removable references
 - Copilot is exposing multiple visible `super-agent` entries when typing `/`, which means the duplication audit now needs to isolate the exact registration surfaces and converge them to one canonical visible controller entry
@@ -51,6 +66,8 @@ The first resumed cleanup slice is now materially implemented:
 - the repository-owned `.github/skills/super-agent/SKILL.md` surface is removed to avoid keeping a second competing native Copilot-visible starter under version control
 - the canonical MCP runtime catalog now lives at `.github/governance/mcp-runtime.catalog.json`, and both `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json` are treated as generated projections
 - the initial local RAG/CAG slice now exists as a deterministic incremental index under `.temp/context-index/`, maintained by `scripts/runtime/update-local-context-index.ps1`, queried by `scripts/runtime/query-local-context-index.ps1`, and refreshed by `invoke-super-agent-housekeeping.ps1`
+- the continuity bootstrap now consumes that same index opportunistically to surface short local file references without replaying large transcript history
+- `export-planning-summary.ps1` now emits `Suggested Local References` when the local context index already contains relevant non-plan/spec hits
 - the Super Agent intake/controller contract now includes explicit clarification gating with `clarificationRequired`, `canProceedSafely`, `clarificationReason`, and `clarificationQuestions`
 - phase 1 of the definitions/projection cleanup is now in place for provider skill surfaces and VS Code profiles: executable profile setup moved under `scripts/runtime/`, authoritative non-code assets live under `definitions/providers/{codex,claude}/skills/` plus `definitions/providers/vscode/profiles/`, and `.codex/skills/`, `.claude/skills/`, plus `.vscode/profiles/` are treated as rendered outputs rather than primary edit locations
 
@@ -151,7 +168,7 @@ The repository should not copy `context-mode` blindly. Its plugin/hook architect
 
 ## Planning Readiness Statement
 
-Planning is ready. The workstream is clear enough to sequence, and the deferred local RAG/CAG + controller-parity slice is now resumed for execution planning.
+Completed. The planned slice was implemented and validated end-to-end on 2026-03-26.
 
 ## Recommended Specialist Focus
 

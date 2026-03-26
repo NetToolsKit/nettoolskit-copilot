@@ -72,6 +72,7 @@ $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $sessionStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/session-start.ps1'
 $preToolUseScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/pre-tool-use.ps1'
 $subagentStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/subagent-start.ps1'
+$updateLocalContextIndexScript = Join-Path $resolvedRepoRoot 'scripts/runtime/update-local-context-index.ps1'
 
 $workspacePath = New-TemporaryWorkspacePath
 $globalWorkspacePath = New-TemporaryWorkspacePath
@@ -86,6 +87,7 @@ try {
     Set-Content -LiteralPath (Join-Path $workspacePath '.github\copilot-instructions.md') -Value '# Workspace instructions'
     Set-Content -LiteralPath (Join-Path $workspacePath '.github\instruction-routing.catalog.yml') -Value 'routes: []'
     Set-Content -LiteralPath (Join-Path $workspacePath '.github\prompts\route-instructions.prompt.md') -Value '# Route prompt'
+    New-Item -ItemType Directory -Path (Join-Path $workspacePath '.github\governance') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $workspacePath 'planning\README.md') -Value '# Planning root'
     Set-Content -LiteralPath (Join-Path $workspacePath 'planning\specs\README.md') -Value '# Planning specs root'
     Set-Content -LiteralPath (Join-Path $workspacePath 'planning\active\plan-safe-housekeeping.md') -Value @(
@@ -111,7 +113,31 @@ try {
         '[*]',
         'insert_final_newline = false'
     )
-    Set-Content -LiteralPath (Join-Path $workspacePath 'README.md') -Value '# temp workspace' -NoNewline
+    Set-Content -LiteralPath (Join-Path $workspacePath '.github\governance\local-context-index.catalog.json') -Value @(
+        '{',
+        '  "version": 1,',
+        '  "indexRoot": ".temp/context-index",',
+        '  "maxFileSizeKb": 256,',
+        '  "chunking": {',
+        '    "maxChars": 1600,',
+        '    "maxLines": 40',
+        '  },',
+        '  "queryDefaults": {',
+        '    "top": 5',
+        '  },',
+        '  "includeGlobs": [',
+        '    "README.md",',
+        '    "planning/**/*.md"',
+        '  ],',
+        '  "excludeGlobs": [',
+        '    ".temp/**"',
+        '  ]',
+        '}'
+    )
+    Set-Content -LiteralPath (Join-Path $workspacePath 'README.md') -Value (
+        "# temp workspace`n`nThis workspace explains how to finish cleanup regression safely and recover continuity through a local context index."
+    ) -NoNewline
+    & $updateLocalContextIndexScript -RepoRoot $workspacePath | Out-Null
 
     [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath '.build\super-agent\planning\active') -Force)
     [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath '.build\super-agent\specs\active') -Force)
@@ -194,6 +220,8 @@ try {
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Continuity summary:') 'SessionStart hook should inject a continuity summary.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'plan-safe-housekeeping\.md') 'SessionStart hook should reference the active plan artifact in the continuity summary.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'spec-safe-housekeeping\.md') 'SessionStart hook should reference the active spec artifact in the continuity summary.'
+    Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Local context refs:') 'SessionStart hook should include local context references when an index is available.'
+    Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'README\.md') 'SessionStart hook should mention one indexed repository file in the local context references.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'resume from these artifacts first') 'SessionStart hook should tell the agent to resume from plan/spec after compaction.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SessionStart hook should mention the repository EOF policy.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Keep non-versioned build outputs under \.build/ and deployment/runtime publish outputs under \.deployment/') 'SessionStart hook should mention the shared artifact layout policy.'
@@ -216,6 +244,7 @@ try {
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match '\[Super Agent: ACTIVE \| controller=Super Agent \| skill=super-agent \| mode=workspace-adapter') 'SubagentStart hook should propagate the visibility banner in workspace-adapter mode.'
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Planning root: planning/active') 'SubagentStart hook should preserve workspace planning roots.'
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Continuity summary:') 'SubagentStart hook should propagate the continuity summary.'
+    Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Local context refs:') 'SubagentStart hook should propagate local context references when an index is available.'
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SubagentStart hook should preserve workspace EOF guidance.'
     Assert-True (-not (Test-Path -LiteralPath $housekeepingRecordPath -PathType Leaf)) 'SubagentStart hook should not re-dispatch housekeeping inside the throttle window.'
 

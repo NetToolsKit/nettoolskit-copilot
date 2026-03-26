@@ -126,6 +126,8 @@ Follow this order of operations on every task:
 # Output Economy Policy
 - Optimize token usage through shorter default responses, less repeated narration, and better reuse of retrieved local context.
 - Do not optimize token usage by shrinking required execution context by default; quality and correctness take precedence over raw token reduction.
+- Prefer the repository-owned local context index for continuity and targeted repository recall before rereading large artifacts or replaying long prior chat history.
+- Keep local retrieval bounded: use indexed file references and concise excerpts first, then load the actual file only when more detail is required.
 - Keep default final answers in this order when relevant:
   1. outcome
   2. changed files or affected area

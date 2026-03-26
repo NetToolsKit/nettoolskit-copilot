@@ -18,6 +18,13 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+$script:HasLocalContextIndexHelper = $false
+$script:LocalContextIndexHelperPath = Join-Path $PSScriptRoot '..\..\common\local-context-index.ps1'
+if (Test-Path -LiteralPath $script:LocalContextIndexHelperPath -PathType Leaf) {
+    . $script:LocalContextIndexHelperPath
+    $script:HasLocalContextIndexHelper = $true
+}
+
 # Reads the JSON payload emitted by the VS Code hook runtime from STDIN.
 function Read-HookInput {
     $raw = [Console]::In.ReadToEnd()
@@ -367,6 +374,94 @@ function Compress-ContinuityText {
     return ($normalized.Substring(0, $MaxLength - 3).TrimEnd() + '...')
 }
 
+# Converts one absolute workspace file path into a normalized repository-relative path.
+function Get-WorkspaceRelativePath {
+    param(
+        [string] $WorkspacePath,
+        [string] $ArtifactPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath) -or [string]::IsNullOrWhiteSpace($ArtifactPath)) {
+        return $null
+    }
+
+    try {
+        return ([System.IO.Path]::GetRelativePath($WorkspacePath, $ArtifactPath) -replace '\\', '/')
+    }
+    catch {
+        return $null
+    }
+}
+
+# Builds a compact local-context query from the current plan/spec focus areas.
+function New-WorkspaceContinuityQueryText {
+    param(
+        [string[]] $Segments
+    )
+
+    $normalizedSegments = @(
+        @($Segments) |
+            ForEach-Object { [string] $_ } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            ForEach-Object { ($_ -replace '\s+', ' ').Trim() } |
+            Select-Object -Unique
+    )
+
+    if ($normalizedSegments.Count -eq 0) {
+        return $null
+    }
+
+    return (($normalizedSegments -join ' ') -replace '\s+', ' ').Trim()
+}
+
+# Builds one short local-reference summary from the repository-owned context index.
+function New-LocalContextReferenceSummary {
+    param(
+        [string] $WorkspacePath,
+        [string] $QueryText,
+        [string[]] $ExcludePaths = @()
+    )
+
+    if (-not $script:HasLocalContextIndexHelper -or [string]::IsNullOrWhiteSpace($WorkspacePath) -or [string]::IsNullOrWhiteSpace($QueryText)) {
+        return $null
+    }
+
+    $hits = @(Get-LocalContextIndexHits -RepoRoot $WorkspacePath -QueryText $QueryText -Top 6 -ExcludePaths $ExcludePaths)
+    if ($hits.Count -eq 0) {
+        return $null
+    }
+
+    $seenPaths = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    $references = New-Object System.Collections.Generic.List[string]
+    foreach ($hit in $hits) {
+        $normalizedPath = (([string] $hit.path) -replace '\\', '/')
+        if ($normalizedPath.StartsWith('planning/', [System.StringComparison]::OrdinalIgnoreCase) -or
+            $normalizedPath.StartsWith('.build/super-agent/', [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+
+        if (-not $seenPaths.Add($normalizedPath)) {
+            continue
+        }
+
+        $referenceLabel = $normalizedPath
+        if (-not [string]::IsNullOrWhiteSpace([string] $hit.heading)) {
+            $referenceLabel += " ($([string] $hit.heading))"
+        }
+
+        $references.Add($referenceLabel) | Out-Null
+        if ($references.Count -ge 3) {
+            break
+        }
+    }
+
+    if ($references.Count -eq 0) {
+        return $null
+    }
+
+    return ('Local context refs: {0}. Use these first when repository detail is needed beyond the active plan/spec.' -f (($references.ToArray()) -join '; '))
+}
+
 # Builds a short continuity summary anchored in the active plan/spec artifacts.
 function New-WorkspaceContinuitySummary {
     param(
@@ -386,6 +481,8 @@ function New-WorkspaceContinuitySummary {
     }
 
     $segments = New-Object System.Collections.Generic.List[string]
+    $querySegments = New-Object System.Collections.Generic.List[string]
+    $excludePaths = New-Object System.Collections.Generic.List[string]
 
     if ($null -ne $planArtifact) {
         $planLines = @(Get-Content -LiteralPath $planArtifact.FullName -ErrorAction SilentlyContinue)
@@ -408,6 +505,13 @@ function New-WorkspaceContinuitySummary {
         }
 
         $segments.Add($planSegment) | Out-Null
+        [void] $querySegments.Add($planHeading)
+        [void] $querySegments.Add($planState)
+        [void] $querySegments.Add($currentSlice)
+        $relativePlanPath = Get-WorkspaceRelativePath -WorkspacePath $WorkspacePath -ArtifactPath $planArtifact.FullName
+        if (-not [string]::IsNullOrWhiteSpace($relativePlanPath)) {
+            [void] $excludePaths.Add($relativePlanPath)
+        }
     }
 
     if ($null -ne $specArtifact) {
@@ -424,6 +528,17 @@ function New-WorkspaceContinuitySummary {
         }
 
         $segments.Add($specSegment) | Out-Null
+        [void] $querySegments.Add($specHeading)
+        [void] $querySegments.Add($specObjective)
+        $relativeSpecPath = Get-WorkspaceRelativePath -WorkspacePath $WorkspacePath -ArtifactPath $specArtifact.FullName
+        if (-not [string]::IsNullOrWhiteSpace($relativeSpecPath)) {
+            [void] $excludePaths.Add($relativeSpecPath)
+        }
+    }
+
+    $localContextSummary = New-LocalContextReferenceSummary -WorkspacePath $WorkspacePath -QueryText (New-WorkspaceContinuityQueryText -Segments $querySegments.ToArray()) -ExcludePaths $excludePaths.ToArray()
+    if (-not [string]::IsNullOrWhiteSpace($localContextSummary)) {
+        $segments.Add($localContextSummary) | Out-Null
     }
 
     $segments.Add('If prior context was compacted, resume from these artifacts first instead of replaying large session history.') | Out-Null

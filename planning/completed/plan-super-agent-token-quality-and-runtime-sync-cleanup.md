@@ -1,16 +1,17 @@
 # Super Agent Token Quality And Runtime Sync Cleanup Plan
 
 Generated: 2026-03-22 00:00
-LastUpdated: 2026-03-25 18:30
+LastUpdated: 2026-03-26 05:17
 
 ## Status
 
-- State: active
-- Spec: `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
+- State: completed
+- Spec: `planning/specs/completed/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
 - Current safe slice implemented: instruction/prompt-level output economy, quality-first routing guidance, session-start continuity summaries, throttled housekeeping with planning export, runtime overflow fixes, context boundary monitoring, dating policy, progress logging, Stop hook for planning export, hardcoded-path removal, `.vscode` profile-base promotion, and Copilot `super-agent` deduplication across canonical skill plus secondary agent alias surfaces
 - Current urgent slice completed: tasks 1a–1h below
 - Current implementation slice completed: canonical MCP runtime catalog/renderers, initial local incremental RAG/CAG index, explicit intake clarification gate, and phase-1 definitions/projection separation for provider skills, GitHub instruction/runtime surfaces, and VS Code profiles are now in place
-- Active next scope: follow-on local RAG/CAG retrieval improvements, canonical MCP parity hardening, and remaining controller-quality cleanup (tasks 3–6)
+- Current safe retrieval slice completed: SessionStart/SubagentStart now inject short local indexed file references when available, `export-planning-summary.ps1` emits suggested indexed references, and housekeeping refreshes the local context index before exporting the handoff ✓ [2026-03-26 00:30]
+- Completion: canonical MCP runtime ownership, initial local incremental RAG/CAG continuity retrieval, clarification-gated Super Agent intake, runtime hygiene, and the phase-1 definitions/projection separation are implemented and validated end-to-end; Rust/Cargo migration and repository cleanup remain intentionally out of scope for a future workstream
 
 ## Objective And Scope
 
@@ -54,6 +55,8 @@ Fresh observations for the resumed slice on 2026-03-25:
 
 3. Define local RAG/CAG-first response guidance plus clarifying-question behavior
 - [2026-03-25 00:00] Resume this slice with explicit clarification behavior instead of silent assumptions on ambiguous requests.
+  - [2026-03-26 00:30] 3a. Aligned GitHub/Codex/Claude Super Agent instructions and skills to explicitly prefer the repository-owned local context index for targeted continuity recall instead of replaying large chat history, while preserving the clarification gate as a material-ambiguity stop ✓ [2026-03-26 00:30]
+  - [2026-03-26 00:30] 3b. Updated bootstrap continuity to inject short `Local context refs:` suggestions from the repository-owned local context index when an index already exists, keeping plan/spec artifacts primary and indexed references secondary ✓ [2026-03-26 00:30]
    - Target paths:
      - `.github/AGENTS.md`
      - `.github/copilot-instructions.md`
@@ -78,6 +81,7 @@ Fresh observations for the resumed slice on 2026-03-25:
    - [2026-03-25 18:30] 4c. Implemented the canonical MCP runtime catalog at `.github/governance/mcp-runtime.catalog.json` plus shared renderers/helpers for VS Code and Codex projections ✓ [2026-03-25 18:30]
    - [2026-03-25 18:30] 4d. Added renderer-parity validation so `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json` are both treated as generated outputs from the canonical catalog instead of hand-maintained primaries ✓ [2026-03-25 18:30]
    - [2026-03-25 18:30] 4e. Implemented the initial local incremental context index (`update-local-context-index.ps1`, `query-local-context-index.ps1`) and wired housekeeping to refresh it before cleanup ✓ [2026-03-25 18:30]
+   - [2026-03-26 00:30] 4e.1. Enriched `export-planning-summary.ps1` with `Suggested Local References` derived from the local context index so planning handoffs can point directly to the next best repository files without replaying large transcripts ✓ [2026-03-26 00:30]
    - [2026-03-25 19:00] 4f. Started structural definitions/projection cleanup by moving the VS Code profile entrypoint into `scripts/runtime/setup-vscode-profiles.ps1`, introducing `definitions/providers/{codex,claude}/skills/` plus `definitions/providers/vscode/profiles/` as authoritative non-code sources, and rendering `.codex/skills/`, `.claude/skills/`, and `.vscode/profiles/` through dedicated renderers instead of editing provider surfaces directly ✓ [2026-03-25 19:00]
    - Target paths:
      - `.github/governance/**`
@@ -105,9 +109,9 @@ Fresh observations for the resumed slice on 2026-03-25:
      - the Codex MCP manifest is treated as a generated subset instead of the primary source of truth
      - future README work documents `infra/github/main.json` as GitHub governance/ruleset configuration, not MCP/runtime config
 
-5. Audit mirrored `.github` runtime-sync duplication plus Claude parity
+5. Audit mirrored `.github` runtime-sync duplication plus Claude parity ✓ [2026-03-26 05:17]
    - [2026-03-25 00:00] 5a. Isolated duplicated Copilot `super-agent` visibility to overlapping legacy starter surfaces and switched bootstrap from projecting `.github/skills` into `copilotSkillsRoot` to removing legacy `super-agent` / `using-super-agent` entries from both `githubRuntimeRoot/skills` and `copilotSkillsRoot`, leaving the shared `%USERPROFILE%\\.agents\\skills` surface canonical ✓ [2026-03-25 00:00]
-   - [2026-03-25 18:30] 5b. Claude runtime docs/skills now point to the same canonical MCP catalog and explicit clarification behavior; keep a follow-up parity audit open for any future Claude-specific MCP projection needs.
+   - [2026-03-26 05:17] 5b. Claude runtime docs/skills/settings remained aligned with the same canonical MCP catalog, clarification behavior, and continuity guidance after the local RAG/CAG and controller cleanup slice; any future Claude-only MCP projection work must reopen as a new targeted workstream ✓ [2026-03-26 05:17]
    - Target paths:
      - `scripts/runtime/bootstrap.ps1`
      - `scripts/runtime/install.ps1`
@@ -130,7 +134,8 @@ Fresh observations for the resumed slice on 2026-03-25:
      - any garbage or duplicate registration paths are identified safely
      - Claude `super-agent` skill, settings, hooks, and runtime sync remain aligned with the same controller contract after cleanup
 
-6. Define cleanup and validation strategy
+6. Define cleanup and validation strategy ✓ [2026-03-26 05:17]
+   - [2026-03-26 05:17] 6a. Completed docs + validation closeout: canonical sync authority is documented, `infra/github/main.json` is documented as GitHub governance/ruleset infrastructure, clarification/runtime duplication coverage exists in the runtime tests, and `validate-all` plus full `install` are green ✓ [2026-03-26 05:17]
    - Target paths:
      - `README.md`
      - `scripts/README.md`
@@ -184,7 +189,6 @@ Fresh observations for the resumed slice on 2026-03-25:
 
 ## Closeout Expectations
 
-- Do not implement this slice until the user explicitly resumes it.
-- This workstream is now explicitly resumed for planning and execution sequencing.
-- When resumed, keep quality preservation explicit in README/changelog language.
-- Return a commit message only when the deferred cleanup and quality-safe response economy changes are materially implemented and validated.
+- Workstream completed on 2026-03-26 after runtime/install validation returned clean.
+- README/changelog language keeps quality preservation explicit and classifies `infra/github/main.json` correctly as governance infrastructure.
+- Any future Rust/Cargo engine work, deeper retrieval-quality tuning, or repository cleanup must reopen as separate targeted workstreams instead of extending this completed plan.

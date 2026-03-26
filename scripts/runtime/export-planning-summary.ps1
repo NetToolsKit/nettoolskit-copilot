@@ -47,6 +47,18 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$script:CommonBootstrapPath = Join-Path $PSScriptRoot '../common/common-bootstrap.ps1'
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../common/common-bootstrap.ps1'
+}
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    $script:CommonBootstrapPath = Join-Path $PSScriptRoot '../../shared-scripts/common/common-bootstrap.ps1'
+}
+if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
+    throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
+}
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('local-context-index')
+
 # Resolves one planning/spec surface pair for the current workspace.
 function Resolve-PlanningSurface {
     param(
@@ -113,10 +125,10 @@ function Get-PlanFileMeta {
         ($statusLine -replace '.*(?:State|Status):\s*', '').Trim()
     } else { '' }
     $focusLine = ($lines | Where-Object {
-            $_ -match '^\s*(Current urgent slice in progress|Current focus|Objective|Next step|Summary):'
+            $_ -match '^\s*(?:[-*]\s+)?(Current urgent slice in progress|Current focus|Objective|Next step|Summary):'
         } | Select-Object -First 1)
     $focus = if (-not [string]::IsNullOrWhiteSpace($focusLine)) {
-        ($focusLine -replace '^\s*(Current urgent slice in progress|Current focus|Objective|Next step|Summary):\s*', '').Trim()
+        ($focusLine -replace '^\s*(?:[-*]\s+)?(Current urgent slice in progress|Current focus|Objective|Next step|Summary):\s*', '').Trim()
     }
     else {
         $firstBodyLine = ($lines |
@@ -143,6 +155,96 @@ function Get-PlanFileMeta {
     }
 }
 
+# Converts one workspace file path into a repository-relative path.
+function Get-PlanningSummaryRelativePath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string] $FilePath
+    )
+
+    return ([System.IO.Path]::GetRelativePath($ResolvedRepoRoot, $FilePath) -replace '\\', '/')
+}
+
+# Returns one concise suggested-reference section from the local context index.
+function Get-PlanningSummaryLocalReferences {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot,
+        [Parameter(Mandatory = $true)]
+        [object[]] $PlanArtifacts,
+        [Parameter(Mandatory = $true)]
+        [object[]] $SpecArtifacts
+    )
+
+    $querySegments = New-Object System.Collections.Generic.List[string]
+    $excludePaths = New-Object System.Collections.Generic.List[string]
+
+    foreach ($artifact in @($PlanArtifacts + $SpecArtifacts)) {
+        if ($null -eq $artifact) {
+            continue
+        }
+
+        foreach ($segment in @($artifact.Title, $artifact.Status, $artifact.Focus)) {
+            if ([string]::IsNullOrWhiteSpace([string] $segment)) {
+                continue
+            }
+
+            [void] $querySegments.Add((([string] $segment) -replace '\s+', ' ').Trim())
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace([string] $artifact.RelativePath)) {
+            [void] $excludePaths.Add([string] $artifact.RelativePath)
+        }
+    }
+
+    if ($querySegments.Count -eq 0) {
+        return @()
+    }
+
+    $queryText = (($querySegments.ToArray() | Select-Object -Unique) -join ' ').Trim()
+    $hits = @(Get-LocalContextIndexHits -RepoRoot $ResolvedRepoRoot -QueryText $queryText -Top 6 -ExcludePaths $excludePaths.ToArray())
+    if ($hits.Count -eq 0) {
+        return @()
+    }
+
+    $references = New-Object System.Collections.Generic.List[string]
+    $seenPaths = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($hit in $hits) {
+        $normalizedPath = ([string] $hit.path -replace '\\', '/')
+        if ($normalizedPath.StartsWith('planning/', [System.StringComparison]::OrdinalIgnoreCase) -or
+            $normalizedPath.StartsWith('.build/super-agent/', [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+
+        if (-not $seenPaths.Add($normalizedPath)) {
+            continue
+        }
+
+        $referenceLine = "- `"$normalizedPath`""
+        if (-not [string]::IsNullOrWhiteSpace([string] $hit.heading)) {
+            $referenceLine += " - $([string] $hit.heading)"
+        }
+
+        $references.Add($referenceLine) | Out-Null
+        if ($references.Count -ge 5) {
+            break
+        }
+    }
+
+    if ($references.Count -eq 0) {
+        return @()
+    }
+
+    return @(
+        '## Suggested Local References',
+        '',
+        'Use these indexed repository paths first if you need more detail than the active plan/spec summary already provides.',
+        ''
+    ) + $references.ToArray() + @('', '---', '')
+}
+
 # Collect active plans
 $activePlansPath = Join-Path $RepoRoot $planningSurface.PlanRoot
 $activePlans = @()
@@ -163,6 +265,28 @@ if (Test-Path -LiteralPath $activeSpecsPath -PathType Container) {
             Where-Object { $_.Name -notmatch '^README' } |
             Sort-Object LastWriteTime -Descending
     )
+}
+
+$activePlanMetas = @()
+foreach ($planFile in $activePlans) {
+    $meta = Get-PlanFileMeta -FilePath $planFile.FullName
+    if ($null -eq $meta) {
+        continue
+    }
+
+    $meta | Add-Member -NotePropertyName RelativePath -NotePropertyValue (Get-PlanningSummaryRelativePath -ResolvedRepoRoot $RepoRoot -FilePath $planFile.FullName)
+    $activePlanMetas += $meta
+}
+
+$activeSpecMetas = @()
+foreach ($specFile in $activeSpecs) {
+    $meta = Get-PlanFileMeta -FilePath $specFile.FullName
+    if ($null -eq $meta) {
+        continue
+    }
+
+    $meta | Add-Member -NotePropertyName RelativePath -NotePropertyValue (Get-PlanningSummaryRelativePath -ResolvedRepoRoot $RepoRoot -FilePath $specFile.FullName)
+    $activeSpecMetas += $meta
 }
 
 # Get recent git log
@@ -193,9 +317,7 @@ if ($activePlans.Count -eq 0) {
     $out.Add('_No active plans._')
     $out.Add('')
 } else {
-    foreach ($f in $activePlans) {
-        $meta = Get-PlanFileMeta -FilePath $f.FullName
-        if ($null -eq $meta) { continue }
+    foreach ($meta in $activePlanMetas) {
         $out.Add("### $($meta.Title)")
         $out.Add('')
         $out.Add('- **File:** `' + $planningSurface.PlanRoot + '/' + $meta.FileName + '`')
@@ -219,9 +341,7 @@ if ($activeSpecs.Count -eq 0) {
     $out.Add('_No active specs._')
     $out.Add('')
 } else {
-    foreach ($f in $activeSpecs) {
-        $meta = Get-PlanFileMeta -FilePath $f.FullName
-        if ($null -eq $meta) { continue }
+    foreach ($meta in $activeSpecMetas) {
         $out.Add("### $($meta.Title)")
         $out.Add('')
         $out.Add('- **File:** `' + $planningSurface.SpecRoot + '/' + $meta.FileName + '`')
@@ -237,6 +357,10 @@ if ($activeSpecs.Count -eq 0) {
 
 $out.Add('---')
 $out.Add('')
+
+foreach ($localReferenceLine in @(Get-PlanningSummaryLocalReferences -ResolvedRepoRoot $RepoRoot -PlanArtifacts $activePlanMetas -SpecArtifacts $activeSpecMetas)) {
+    $out.Add([string] $localReferenceLine)
+}
 
 # Recent commits
 $out.Add('## Recent Commits')

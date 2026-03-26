@@ -454,6 +454,8 @@ For safe local RAG/CAG continuity, the repository also owns a deterministic loca
 - Catalog: `.github/governance/local-context-index.catalog.json`
 - Build or refresh: `pwsh -File scripts/runtime/update-local-context-index.ps1 -RepoRoot .`
 - Query locally: `pwsh -File scripts/runtime/query-local-context-index.ps1 -RepoRoot . -QueryText "context compaction continuity" -JsonOutput`
+- `SessionStart` / `SubagentStart` now reuse this index opportunistically to inject short local file references alongside the planning continuity summary when an index already exists
+- `export-planning-summary.ps1` now adds `Suggested Local References` when indexed repository hits exist, so handoff exports stay planning-first but can still point to the next best files to reopen
 
 ## Dev Container
 

@@ -25,6 +25,7 @@ description: Use as the single visible starter and controller for workspace work
 - Normalize the request before any planning or implementation.
 - Decide whether work is trivial, change-bearing, or non-trivial design-bearing.
 - Ask up to 3 concise clarification questions and stop before planning when ambiguity would materially change scope, architecture, runtime behavior, validation, or safety.
+- Prefer the repository-owned local context index for targeted continuity recall before rereading many repository files after compaction or restart.
 - Enforce the lifecycle order; do not skip stages.
 - Always produce a commit message suggestion at closeout.
 - Always update planning state before claiming completion.
@@ -41,3 +42,4 @@ description: Use as the single visible starter and controller for workspace work
 8. Planning update instructions
 9. Activation banner (once, near start of first reply)
 10. `Agents used:` line in terminal completion
+11. Use indexed file references and concise excerpts when local retrieval is needed instead of replaying large prior chat history

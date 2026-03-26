@@ -6,7 +6,7 @@
   - **GitHub Copilot**: `AGENTS.md` `# Context Economy and Checkpoint Commands` section; `instruction-routing.catalog.yml` `context-economy` route; `workflow-optimization.instructions.md` `## Context Economy and Checkpoint` section.
   - **Claude Code**: `CLAUDE.md` `## Context Economy and Checkpoint Protocol` section; `.claude/settings.json` `contextEconomy` config block and `UserPromptSubmit` hook for command detection.
   - **OpenAI Codex**: `.codex/skills/super-agent/SKILL.md` `## Context Economy Protocol` section; `context-economy-checkpoint.instructions.md` added to mandatory context in `super-agent-intake-stage.prompt.md`, `planner-stage.prompt.md`, `executor-task.prompt.md`, and `closeout-stage.prompt.md`.
-  - **Planning artifact**: `planning/active/plan-context-economy-checkpoint-protocol.md` created to track the workstream.
+- **Planning artifact**: `planning/completed/plan-context-economy-checkpoint-protocol.md` tracks the completed workstream.
 - Context economy rules deduplicated: canonical detail lives only in `context-economy-checkpoint.instructions.md`; all other files carry a one-paragraph summary plus a reference to the canonical file.
 
 ### Changed
@@ -31,6 +31,7 @@
   - `planning/specs/completed/spec-runtime-source-projection-architecture-migration.md`
 - Canonicalized MCP runtime ownership around `.github/governance/mcp-runtime.catalog.json`, added a tracked renderer pipeline for `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json`, updated bootstrap/post-commit/install-facing documentation to treat the Codex manifest as a generated subset instead of the primary source of truth, and extended validation/runtime tests to enforce renderer parity.
 - Added the first deterministic local RAG/CAG slice through `.github/governance/local-context-index.catalog.json`, `scripts/common/local-context-index.ps1`, `scripts/runtime/update-local-context-index.ps1`, `scripts/runtime/query-local-context-index.ps1`, and housekeeping refresh integration so local repository continuity can be reused from `.temp/context-index/` without replaying large chat transcripts.
+- Extended the local RAG/CAG slice so `SessionStart` / `SubagentStart` now inject short indexed repository references when the local context index already exists, `export-planning-summary.ps1` emits `Suggested Local References` in handoff exports, and housekeeping refreshes the local context index before exporting the handoff summary.
 - Added an explicit Super Agent clarification gate across intake runtime/schema/instruction surfaces so ambiguous requests now stop cleanly after intake with concise clarification questions only when the ambiguity would materially change planning scope, architecture, runtime behavior, validation, or operational safety.
 - Documented `.vscode/profiles/` as the versioned MCP/profile baseline selector surface, documented `infra/github/main.json` as GitHub ruleset/governance infrastructure, and aligned Claude/Codex runtime-sync skills with the same canonical MCP catalog and clarification contract.
 
@@ -61,8 +62,8 @@
   - `.codex/orchestration/prompts/closeout-stage.prompt.md`
   - `README.md`
   - `scripts/README.md`
-  - `planning/active/plan-super-agent-token-quality-and-runtime-sync-cleanup.md`
-  - `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
+  - `planning/completed/plan-super-agent-token-quality-and-runtime-sync-cleanup.md`
+  - `planning/specs/completed/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
 - Standardized shared execution-session logging across operational PowerShell entrypoints so default runs now emit deterministic `Session start` / `Session end` markers, verbose-capable scripts consistently expose `-Verbose`, `-DetailedLogs`, or `-DetailedOutput`, and runtime/validation helpers centralize the session lifecycle without duplicating script-local scaffolding:
   - `scripts/common/repository-paths.ps1`
   - `scripts/common/runtime-operation-support.ps1`

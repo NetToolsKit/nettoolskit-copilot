@@ -66,7 +66,7 @@ function Write-DetailedLog {
     }
 }
 
-$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$resolvedRepoRoot = Resolve-LocalContextIndexWorkspaceRoot -RequestedRoot $RepoRoot -FallbackPath (Get-Location).Path
 $catalogInfo = Read-LocalContextIndexCatalog -RepoRoot $resolvedRepoRoot -CatalogPath $CatalogPath
 $resolvedIndexRoot = Resolve-LocalContextIndexRoot -RepoRoot $resolvedRepoRoot -Catalog $catalogInfo.Catalog -OutputRoot $OutputRoot
 $existingIndex = if ($ForceFullRebuild) { $null } else { Read-LocalContextIndexDocument -IndexRoot $resolvedIndexRoot }

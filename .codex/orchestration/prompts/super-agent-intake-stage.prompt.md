@@ -29,6 +29,7 @@ Rules:
   - runtime/configuration behavior
   - validation obligations
   - operational safety or risk handling
+- When clarification is not required, keep the normalized request compact and prefer repository/local retrieved evidence over restating large artifact content.
 - Keep clarification to at most 3 short questions.
 - If clarification is required, set `clarificationRequired=true`, `canProceedSafely=false`, populate `clarificationReason` plus `clarificationQuestions`, and keep downstream work items high-level only.
 - If clarification is not required, set `clarificationRequired=false`, `canProceedSafely=true`, `clarificationReason=null`, and `clarificationQuestions=[]`.

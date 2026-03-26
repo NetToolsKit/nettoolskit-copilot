@@ -104,6 +104,8 @@ Use the **Mandatory Context Files** list above.
 ## Session Continuity
 - Review recent changes and current state at session start
 - Preserve established patterns, boundaries, and previous technical choices unless explicitly changing direction
+- Treat the active plan/spec as the primary resume anchor; use the repository-owned local context index only to reopen the smallest relevant set of files after compaction or restart.
+- Prefer indexed local references and file paths over replaying large chat history when continuity detail is needed.
 
 ## Execution Flow for Development Tasks
 1. Super Agent intake: normalize the request, identify constraints and risk, and decide whether the work is change-bearing

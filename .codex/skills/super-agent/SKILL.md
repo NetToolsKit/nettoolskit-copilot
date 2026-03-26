@@ -21,6 +21,7 @@ description: Use as the single visible starter and controller for workspace work
 - act as the first controller for any change-bearing workspace request, even when not explicitly named
 - decide whether the task is change-bearing, non-trivial, or safe to keep lightweight
 - ask up to 3 concise clarification questions and stop before spec/planning when ambiguity would materially change scope, architecture, runtime behavior, validation, or operational safety
+- prefer the repository-owned local context index for targeted continuity recall before rereading many repository files after compaction or restart
 - create or update the active spec first for non-trivial change-bearing work under `planning/` when available, otherwise under `.build/super-agent/`
 - create or update the active plan for any change-bearing workstream under `planning/` when available, otherwise under `.build/super-agent/`
 - identify the smallest correct specialist chain
@@ -29,6 +30,7 @@ description: Use as the single visible starter and controller for workspace work
 - always prepare a commit message suggestion and update planning state after execution
 - make controller activation visible by surfacing the injected Super Agent banner exactly once in the first substantive reply of the session
 - keep user-facing output concise by default and avoid repeating plan, validation, or closeout text when a short delta is enough
+- when local retrieval is needed, prefer indexed file references and concise excerpts over replaying large chat history
 
 ## Required lifecycle
 
