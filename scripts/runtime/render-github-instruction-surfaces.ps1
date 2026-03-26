@@ -3,20 +3,20 @@
     Renders repository-owned GitHub/Copilot instruction surfaces from the authoritative definitions tree.
 
 .DESCRIPTION
-    Mirrors the authoritative `definitions/providers/github/` tree into the tracked
-    `.github/` instruction/runtime surfaces:
-    - managed root files (`AGENTS.md`, `COMMANDS.md`, `copilot-instructions.md`, `instruction-routing.catalog.yml`, `PULL_REQUEST_TEMPLATE.md`, `dependabot.yml`, `dependency-review-config.yml`)
+    Mirrors the authoritative GitHub provider tree plus shared instruction assets
+    into the tracked `.github/` instruction/runtime surfaces:
+    - managed provider root files (`AGENTS.md`, `COMMANDS.md`,
+      `copilot-instructions.md`, `instruction-routing.catalog.yml`)
     - `.github/agents/`
     - `.github/chatmodes/`
-    - `.github/instructions/`
-    - `.github/ISSUE_TEMPLATE/`
+    - `.github/instructions/` from `definitions/shared/instructions/`
     - `.github/prompts/`
     - `.github/hooks/`
-    - `.github/templates/`
+    - `.github/templates/` from `definitions/shared/templates/`
 
-    This keeps GitHub/Copilot instruction assets authoritative under `definitions/`
-    while `.github/` remains the projected surface consumed by repository tooling,
-    runtime sync, and Copilot.
+    GitHub-native repository/community assets such as `.github/ISSUE_TEMPLATE/`,
+    `.github/PULL_REQUEST_TEMPLATE.md`, `.github/dependabot.yml`, and
+    `.github/dependency-review-config.yml` stay authored directly in `.github/`.
 
 .PARAMETER RepoRoot
     Optional repository root. Auto-detected when omitted.
@@ -24,6 +24,11 @@
 .PARAMETER SourceRoot
     Optional override path to the authoritative GitHub provider source tree.
     Defaults to `<RepoRoot>/definitions/providers/github`.
+
+.PARAMETER SharedRoot
+    Optional override path to the shared authoritative definitions tree used for
+    projected instructions and templates.
+    Defaults to `<RepoRoot>/definitions/shared`.
 
 .PARAMETER OutputRoot
     Optional override path for the rendered `.github/` surface.
@@ -43,6 +48,7 @@
 param(
     [string] $RepoRoot,
     [string] $SourceRoot,
+    [string] $SharedRoot,
     [string] $OutputRoot,
     [switch] $Verbose
 )
@@ -106,6 +112,7 @@ function Invoke-SurfaceMirror {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $resolvedSourceRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $SourceRoot -DefaultRelativePath 'definitions/providers/github'
+$resolvedSharedRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $SharedRoot -DefaultRelativePath 'definitions/shared'
 $resolvedOutputRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $OutputRoot -DefaultRelativePath '.github'
 
 $rootSourcePath = Join-Path $resolvedSourceRoot 'root'
@@ -116,6 +123,7 @@ Start-ExecutionSession `
     -RootPath $resolvedRepoRoot `
     -Metadata ([ordered]@{
             'Source root' = $resolvedSourceRoot
+            'Shared root' = $resolvedSharedRoot
             'Output root' = $resolvedOutputRoot
         }) `
     -IncludeMetadataInDefaultOutput | Out-Null
@@ -127,11 +135,10 @@ foreach ($rootFile in $managedRootFiles) {
 $directorySpecs = @(
     [pscustomobject]@{ Name = 'agents'; Source = Join-Path $resolvedSourceRoot 'agents'; Destination = Join-Path $resolvedOutputRoot 'agents' }
     [pscustomobject]@{ Name = 'chatmodes'; Source = Join-Path $resolvedSourceRoot 'chatmodes'; Destination = Join-Path $resolvedOutputRoot 'chatmodes' }
-    [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedSourceRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
-    [pscustomobject]@{ Name = 'ISSUE_TEMPLATE'; Source = Join-Path $resolvedSourceRoot 'ISSUE_TEMPLATE'; Destination = Join-Path $resolvedOutputRoot 'ISSUE_TEMPLATE' }
+    [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedSharedRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
     [pscustomobject]@{ Name = 'prompts'; Source = Join-Path $resolvedSourceRoot 'prompts'; Destination = Join-Path $resolvedOutputRoot 'prompts' }
     [pscustomobject]@{ Name = 'hooks'; Source = Join-Path $resolvedSourceRoot 'hooks'; Destination = Join-Path $resolvedOutputRoot 'hooks' }
-    [pscustomobject]@{ Name = 'templates'; Source = Join-Path $resolvedSourceRoot 'templates'; Destination = Join-Path $resolvedOutputRoot 'templates' }
+    [pscustomobject]@{ Name = 'templates'; Source = Join-Path $resolvedSharedRoot 'templates'; Destination = Join-Path $resolvedOutputRoot 'templates' }
 )
 
 foreach ($directorySpec in $directorySpecs) {

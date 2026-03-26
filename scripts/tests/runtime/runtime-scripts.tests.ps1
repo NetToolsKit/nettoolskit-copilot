@@ -503,6 +503,7 @@ try {
         $renderCodexOrchestrationScriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
         $renderClaudeRuntimeScriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
+        $sharedDefinitionRoot = Join-Path $tempRepoRoot 'definitions\shared'
         $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
         $githubProviderSourceRoot = Join-Path $providerSourceRoot 'github'
         $codexCompatibilitySourceRoot = Join-Path $providerSourceRoot 'codex'
@@ -535,14 +536,13 @@ try {
         New-Item -ItemType Directory -Path $claudeRuntimeSourceRoot -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $vscodeWorkspaceSourceRoot 'snippets') -Force | Out-Null
         New-Item -ItemType Directory -Path $profileDefinitionRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $sharedDefinitionRoot 'instructions') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $sharedDefinitionRoot 'templates') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'root') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'agents') -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'instructions') -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'ISSUE_TEMPLATE') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'chatmodes') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'templates') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRepoRoot 'scripts\runtime') -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
@@ -593,12 +593,8 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\COMMANDS.md') -Value '# Demo Commands' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\copilot-instructions.md') -Value '# Demo Instructions' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\instruction-routing.catalog.yml') -Value 'routes: []' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\PULL_REQUEST_TEMPLATE.md') -Value '# Demo PR Template' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\dependabot.yml') -Value 'version: 2' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\dependency-review-config.yml') -Value 'version: 1' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'agents\super-agent.agent.md') -Value '# Agent' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'instructions\super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'ISSUE_TEMPLATE\config.yml') -Value 'blank_issues_enabled: false' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'instructions\super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'prompts\route-instructions.prompt.md') -Value '# Prompt' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'chatmodes\demo.chatmode.md') -Value '# Chatmode' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\super-agent.bootstrap.json') -Value '{}' -Encoding UTF8 -NoNewline
@@ -607,7 +603,7 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\session-start.ps1') -Value '# hook session' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'templates\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'templates\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\render-vscode-mcp-template.ps1') -Value @(
             "param([string] `$OutputPath)",
             "New-Item -ItemType Directory -Path (Split-Path -Path `$OutputPath -Parent) -Force | Out-Null",
@@ -656,7 +652,6 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'AGENTS.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub root files.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\super-agent.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'chatmodes\demo.chatmode.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub chatmode surface.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'ISSUE_TEMPLATE\config.yml') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub issue template surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'hooks\scripts\session-start.ps1') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub hook wrapper.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'templates\readme-template.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub template surface.'
 

@@ -102,7 +102,7 @@
       "validation": {
         "enabled": true,
         "mode": "selectedFiles",
-        "fileNames": ["AGENTS.md", "COMMANDS.md", "copilot-instructions.md", "instruction-routing.catalog.yml", "PULL_REQUEST_TEMPLATE.md", "dependabot.yml", "dependency-review-config.yml"]
+        "fileNames": ["AGENTS.md", "COMMANDS.md", "copilot-instructions.md", "instruction-routing.catalog.yml"]
       },
       "description": "GitHub root instruction files.",
       "repoTracked": true
@@ -139,28 +139,14 @@
       "id": "github-instructions",
       "provider": "github",
       "authority": "definitions",
-      "sourcePath": "definitions/providers/github/instructions",
+      "sourcePath": "definitions/shared/instructions",
       "projectedPath": ".github/instructions",
       "rendererId": "github-instruction-surfaces",
       "validation": {
         "enabled": true,
         "mode": "directory"
       },
-      "description": "GitHub instruction files.",
-      "repoTracked": true
-    },
-    {
-      "id": "github-issue-templates",
-      "provider": "github",
-      "authority": "definitions",
-      "sourcePath": "definitions/providers/github/ISSUE_TEMPLATE",
-      "projectedPath": ".github/ISSUE_TEMPLATE",
-      "rendererId": "github-instruction-surfaces",
-      "validation": {
-        "enabled": true,
-        "mode": "directory"
-      },
-      "description": "GitHub issue template surfaces.",
+      "description": "Shared instruction files projected into the GitHub/Copilot surface.",
       "repoTracked": true
     },
     {
@@ -195,14 +181,14 @@
       "id": "github-templates",
       "provider": "github",
       "authority": "definitions",
-      "sourcePath": "definitions/providers/github/templates",
+      "sourcePath": "definitions/shared/templates",
       "projectedPath": ".github/templates",
       "rendererId": "github-instruction-surfaces",
       "validation": {
         "enabled": true,
         "mode": "directory"
       },
-      "description": "GitHub reusable template assets.",
+      "description": "Shared reusable template assets projected into the GitHub surface.",
       "repoTracked": true
     },
     {

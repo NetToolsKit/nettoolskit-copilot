@@ -18,7 +18,9 @@ exceptions, projected destinations, and renderer ownership lives in
 
 ## Current coverage
 
-- `definitions/providers/github/{root,agents,chatmodes,instructions,ISSUE_TEMPLATE,prompts,hooks,templates}/` -> projected instruction/runtime surface in `.github/`
+- `definitions/shared/instructions/` -> projected reusable instruction surface in `.github/instructions/`
+- `definitions/shared/templates/` -> projected reusable template surface in `.github/templates/`
+- `definitions/providers/github/{root,agents,chatmodes,prompts,hooks}/` -> projected GitHub/Copilot runtime surface in `.github/`
 - `definitions/providers/codex/skills/` -> `.codex/skills/`
 - `definitions/providers/codex/{mcp,scripts}/` -> projected `.codex/mcp/` support files and `.codex/scripts/` compatibility wrappers (`.codex/mcp/servers.manifest.json` stays generated from the canonical MCP catalog)
 - `definitions/providers/codex/orchestration/` -> `.codex/orchestration/`
@@ -33,10 +35,21 @@ Generated provider projections that intentionally stay outside `definitions/`:
 - `.vscode/mcp-vscode-global.json` -> local helper mirror rendered from the same canonical MCP catalog
 - `.codex/mcp/servers.manifest.json` -> generated Codex MCP projection from the canonical MCP catalog
 
-GitHub-native repository governance assets such as workflows, schemas, policies,
-runbooks, and governance catalogs remain authored directly in `.github/`; only
-the provider-authored GitHub surfaces above are projected from
-`definitions/providers/github/`.
+GitHub-native repository/community/governance assets remain authored directly in
+`.github/`, including:
+
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/ISSUE_TEMPLATE/**`
+- `.github/dependabot.yml`
+- `.github/dependency-review-config.yml`
+- `.github/workflows/**`
+- `.github/policies/**`
+- `.github/runbooks/**`
+- `.github/schemas/**`
+- `.github/governance/**`
+
+Only the provider-authored GitHub/Copilot runtime surfaces above are projected
+from `definitions/providers/github/`.
 
 Use:
 

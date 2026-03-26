@@ -57,7 +57,7 @@
     },
     {
       "path": "scripts/common/provider-surface-catalog.ps1",
-      "sha256": "8aaac9b8b7837621b6b83335b8cbd425de30fd7afe0d1b770c67f3ebd09aa35c"
+      "sha256": "86648d6abe84e4b7b21f7e85cc8b89d5a00d0e74d2693c977bb479d3896dde8c"
     },
     {
       "path": "scripts/common/mcp-runtime-catalog.ps1",
@@ -77,7 +77,7 @@
     },
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "99aec8f558f131bcf2df1a90db0c4466999dac013ba4ccb3f554b9e04ff112ad"
+      "sha256": "f955e6990e50fb8fbb176168c46f967ccb43de4c1d900b10c24bb5b856f56444"
     },
     {
       "path": "scripts/common/codex-runtime-hygiene.ps1",
