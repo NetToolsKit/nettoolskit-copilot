@@ -16,7 +16,7 @@ inquire = { workspace = true }
 owo-colors = "3.5"
 supports-color = { workspace = true }
 tracing = "0.1"
-once_cell = "1.19"
+once_cell = "1.21"
 nettoolskit-core = { path = "../core" }
 strum = { workspace = true }
 regex = { workspace = true }
