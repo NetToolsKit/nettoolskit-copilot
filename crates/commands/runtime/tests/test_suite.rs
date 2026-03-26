@@ -1,5 +1,6 @@
 //! Runtime command contract test suite entry point.
 
+mod bootstrap_tests;
 mod contracts_tests;
 mod doctor_tests;
 mod error_tests;

@@ -3,7 +3,7 @@
 use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
-    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
 };
 use std::error::Error;
 
@@ -75,6 +75,25 @@ fn test_runtime_doctor_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "hash failure"
+    );
+}
+
+#[test]
+fn test_runtime_bootstrap_error_display_is_stable() {
+    let error = RuntimeBootstrapCommandError::SyncAssets {
+        source: anyhow!("copy failure"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to synchronize runtime bootstrap assets"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "copy failure"
     );
 }
 

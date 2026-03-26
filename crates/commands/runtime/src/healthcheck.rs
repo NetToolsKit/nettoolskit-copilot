@@ -12,8 +12,8 @@ use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use crate::{
-    error::RuntimeHealthcheckCommandError, invoke_runtime_doctor, RuntimeDoctorRequest,
-    RuntimeDoctorStatus,
+    error::RuntimeHealthcheckCommandError, invoke_runtime_bootstrap, invoke_runtime_doctor,
+    RuntimeBootstrapRequest, RuntimeDoctorRequest, RuntimeDoctorStatus,
 };
 
 /// Request payload for `healthcheck`.
@@ -211,22 +211,7 @@ pub fn invoke_runtime_healthcheck(
     let mut checks = Vec::new();
 
     if request.sync_runtime {
-        let mut bootstrap_arguments = runtime_target_arguments(&context, true);
-        if request.mirror {
-            bootstrap_arguments.push(CommandArgument {
-                name: "Mirror",
-                value: None,
-            });
-        }
-
-        checks.push(run_external_script_check(
-            "runtime-bootstrap",
-            &context.resolved_repo_root.join("scripts/runtime/bootstrap.ps1"),
-            "scripts/runtime/bootstrap.ps1",
-            &bootstrap_arguments,
-            request.warning_only,
-            &log_path,
-        ));
+        checks.push(run_bootstrap_check(request, &context.resolved_repo_root, &log_path));
     }
 
     let validate_arguments = vec![
@@ -355,40 +340,6 @@ pub fn invoke_runtime_healthcheck(
     })
 }
 
-fn runtime_target_arguments(
-    context: &nettoolskit_core::runtime_execution::RuntimeExecutionContext,
-    include_repo_root: bool,
-) -> Vec<CommandArgument> {
-    let mut arguments = Vec::new();
-    if include_repo_root {
-        arguments.push(CommandArgument {
-            name: "RepoRoot",
-            value: Some(context.resolved_repo_root.display().to_string()),
-        });
-    }
-    arguments.push(CommandArgument {
-        name: "TargetGithubPath",
-        value: Some(context.targets.github_runtime_root.display().to_string()),
-    });
-    arguments.push(CommandArgument {
-        name: "TargetCodexPath",
-        value: Some(context.targets.codex_runtime_root.display().to_string()),
-    });
-    arguments.push(CommandArgument {
-        name: "TargetAgentsSkillsPath",
-        value: Some(context.targets.agents_skills_root.display().to_string()),
-    });
-    arguments.push(CommandArgument {
-        name: "TargetCopilotSkillsPath",
-        value: Some(context.targets.copilot_skills_root.display().to_string()),
-    });
-    arguments.push(CommandArgument {
-        name: "RuntimeProfile",
-        value: Some(context.runtime_profile.name.clone()),
-    });
-    arguments
-}
-
 fn run_doctor_check(
     request: &RuntimeHealthcheckRequest,
     repo_root: &Path,
@@ -436,6 +387,85 @@ fn run_doctor_check(
     let result = RuntimeHealthcheckCheckResult {
         name: "runtime-doctor".to_string(),
         script: "rust:nettoolskit-runtime::doctor".to_string(),
+        arguments,
+        status,
+        exit_code,
+        duration_ms: started.elapsed().as_millis(),
+        started_at,
+        finished_at,
+        error,
+    };
+    let _ = append_log_line(
+        log_path,
+        &format!(
+            "check {} => {} (exit code {})",
+            result.name,
+            result.status.as_str(),
+            result.exit_code
+        ),
+    );
+    result
+}
+
+fn run_bootstrap_check(
+    request: &RuntimeHealthcheckRequest,
+    repo_root: &Path,
+    log_path: &Path,
+) -> RuntimeHealthcheckCheckResult {
+    let mut arguments = Vec::new();
+    arguments.push(format!("-RepoRoot={}", repo_root.display()));
+    if let Some(path) = &request.target_github_path {
+        arguments.push(format!("-TargetGithubPath={}", path.display()));
+    }
+    if let Some(path) = &request.target_codex_path {
+        arguments.push(format!("-TargetCodexPath={}", path.display()));
+    }
+    if let Some(path) = &request.target_agents_skills_path {
+        arguments.push(format!("-TargetAgentsSkillsPath={}", path.display()));
+    }
+    if let Some(path) = &request.target_copilot_skills_path {
+        arguments.push(format!("-TargetCopilotSkillsPath={}", path.display()));
+    }
+    if let Some(profile) = &request.runtime_profile {
+        arguments.push(format!("-RuntimeProfile={profile}"));
+    }
+    if request.mirror {
+        arguments.push("-Mirror".to_string());
+    }
+
+    let started_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
+    let started = Instant::now();
+    let bootstrap_result = invoke_runtime_bootstrap(&RuntimeBootstrapRequest {
+        repo_root: request.repo_root.clone().or_else(|| Some(repo_root.to_path_buf())),
+        target_github_path: request.target_github_path.clone(),
+        target_codex_path: request.target_codex_path.clone(),
+        target_agents_skills_path: request.target_agents_skills_path.clone(),
+        target_copilot_skills_path: request.target_copilot_skills_path.clone(),
+        runtime_profile: request.runtime_profile.clone(),
+        fallback_runtime_profile: request.fallback_runtime_profile.clone(),
+        mirror: request.mirror,
+        apply_mcp_config: false,
+        backup_config: false,
+    });
+
+    let (status, exit_code, error) = match bootstrap_result {
+        Ok(_) => (RuntimeHealthcheckStatus::Passed, 0, None),
+        Err(error) if request.warning_only => (
+            RuntimeHealthcheckStatus::Warning,
+            1,
+            Some(error.to_string()),
+        ),
+        Err(error) => (
+            RuntimeHealthcheckStatus::Failed,
+            1,
+            Some(error.to_string()),
+        ),
+    };
+
+    let finished_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
+    let result = RuntimeHealthcheckCheckResult {
+        name: "runtime-bootstrap".to_string(),
+        script: "rust:nettoolskit-runtime::bootstrap".to_string(),
         arguments,
         status,
         exit_code,

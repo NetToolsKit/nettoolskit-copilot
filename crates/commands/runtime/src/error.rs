@@ -108,6 +108,46 @@ pub enum RuntimeDoctorCommandError {
     },
 }
 
+/// Errors raised by runtime bootstrap commands.
+#[derive(Debug, Error)]
+pub enum RuntimeBootstrapCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime bootstrap workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Runtime execution context resolution failed.
+    #[error("failed to resolve runtime bootstrap execution context")]
+    ResolveExecutionContext {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Provider surface rendering failed.
+    #[error("failed to render runtime bootstrap provider surfaces")]
+    RenderProviderSurfaces {
+        /// Underlying render failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Runtime file synchronization failed.
+    #[error("failed to synchronize runtime bootstrap assets")]
+    SyncAssets {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// MCP configuration application failed.
+    #[error("failed to apply runtime bootstrap MCP configuration")]
+    ApplyMcpConfig {
+        /// Underlying delegate or validation failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime healthcheck commands.
 #[derive(Debug, Error)]
 pub enum RuntimeHealthcheckCommandError {

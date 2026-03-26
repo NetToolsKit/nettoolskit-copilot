@@ -13,6 +13,7 @@ This crate locks the owned runtime surfaces before full implementation lands. It
 - local context index update and query commands
 - runtime drift diagnosis and hygiene checks
 - runtime healthcheck orchestration and report generation
+- runtime asset bootstrap synchronization
 
 ## Scope
 
@@ -34,8 +35,10 @@ The current contract covers `54` legacy PowerShell scripts:
 - `export_planning_summary`
 - `invoke_runtime_doctor`
 - `invoke_runtime_healthcheck`
+- `invoke_runtime_bootstrap`
 - `UpdateLocalContextIndexRequest`
 - `QueryLocalContextIndexRequest`
 - `ExportPlanningSummaryRequest`
 - `RuntimeDoctorRequest`
 - `RuntimeHealthcheckRequest`
+- `RuntimeBootstrapRequest`

@@ -118,3 +118,45 @@ fn test_invoke_runtime_healthcheck_fails_when_runtime_drift_warning_override_is_
     assert_eq!(result.exit_code, 1);
     assert_eq!(result.failed_checks, 1);
 }
+
+#[test]
+fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path());
+    write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
+    write_file(
+        &repo.path().join("scripts/runtime/query-local-context-index.ps1"),
+        "Write-Output 'query'",
+    );
+    write_file(
+        &repo.path().join("scripts/runtime/render-provider-surfaces.ps1"),
+        "param([string]$RepoRoot,[string]$ConsumerName,[object]$EnableCodexRuntime,[object]$EnableClaudeRuntime)\nexit 0",
+    );
+    write_file(
+        &repo.path().join("scripts/validation/validate-all.ps1"),
+        "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",
+    );
+
+    let result = invoke_runtime_healthcheck(&RuntimeHealthcheckRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        runtime_profile: Some("github".to_string()),
+        target_github_path: Some(repo.path().join(".runtime/github")),
+        target_copilot_skills_path: Some(repo.path().join(".runtime/copilot-skills")),
+        sync_runtime: true,
+        warning_only: false,
+        treat_runtime_drift_as_warning: false,
+        ..RuntimeHealthcheckRequest::default()
+    })
+    .expect("healthcheck should execute");
+
+    assert_eq!(result.overall_status, RuntimeHealthcheckStatus::Passed);
+    assert_eq!(result.exit_code, 0);
+    assert_eq!(result.total_checks, 3);
+    assert!(
+        result
+            .checks
+            .iter()
+            .any(|check| check.name == "runtime-bootstrap"
+                && check.script == "rust:nettoolskit-runtime::bootstrap")
+    );
+}
