@@ -29,5 +29,7 @@ The current contract covers `54` legacy PowerShell scripts:
 - `runtime_surface_script_total`
 - `update_local_context_index`
 - `query_local_context_index`
+- `export_planning_summary`
 - `UpdateLocalContextIndexRequest`
 - `QueryLocalContextIndexRequest`
+- `ExportPlanningSummaryRequest`

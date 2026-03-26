@@ -55,3 +55,29 @@ pub enum LocalContextCommandError {
         source: AnyhowError,
     },
 }
+
+/// Errors raised by runtime planning-summary commands.
+#[derive(Debug, Error)]
+pub enum PlanningSummaryCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve planning summary workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output document rendering failed.
+    #[error("failed to render planning summary document")]
+    RenderDocument {
+        /// Underlying rendering failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output path creation or write failed.
+    #[error("failed to write planning summary output")]
+    WriteOutput {
+        /// Underlying I/O failure.
+        #[source]
+        source: AnyhowError,
+    },
+}

@@ -1,7 +1,9 @@
 //! Tests for runtime surface errors.
 
 use anyhow::anyhow;
-use nettoolskit_runtime::{require_runtime_surface_contract, LocalContextCommandError};
+use nettoolskit_runtime::{
+    require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
+};
 use std::error::Error;
 
 #[test]
@@ -37,5 +39,18 @@ fn test_local_context_command_error_preserves_source_message() {
     assert_eq!(
         error.source().expect("source should be preserved").to_string(),
         "boom"
+    );
+}
+
+#[test]
+fn test_planning_summary_error_display_is_stable() {
+    let error = PlanningSummaryCommandError::WriteOutput {
+        source: anyhow!("disk full"),
+    };
+
+    assert_eq!(error.to_string(), "failed to write planning summary output");
+    assert_eq!(
+        error.source().expect("source should be preserved").to_string(),
+        "disk full"
     );
 }
