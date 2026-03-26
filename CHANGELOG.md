@@ -10,6 +10,12 @@
 - Context economy rules deduplicated: canonical detail lives only in `context-economy-checkpoint.instructions.md`; all other files carry a one-paragraph summary plus a reference to the canonical file.
 
 ### Changed
+- Extended the non-destructive source/projection topology one more step for the remaining authored Codex compatibility assets so `.codex/` keeps behaving as a runtime surface while wrapper/docs authority moves fully behind `definitions/`:
+  - `definitions/providers/codex/mcp/{README.md,codex.config.template.toml,vscode.mcp.template.json}` -> projected authored support files in `.codex/mcp/`
+  - `definitions/providers/codex/scripts/**` -> projected `.codex/scripts/**`
+  - `.codex/mcp/servers.manifest.json` remains generated from `.github/governance/mcp-runtime.catalog.json`
+  - `scripts/runtime/render-codex-compatibility-surfaces.ps1` now renders the remaining authored Codex compatibility surfaces before bootstrap/runtime sync consumes them
+  - `scripts/validation/validate-instructions.ps1` and `scripts/tests/runtime/runtime-scripts.tests.ps1` now enforce parity and wrapper forwarding coverage for the new Codex compatibility source tree
 - Completed the non-destructive source/projection topology refactor for provider-managed non-code assets: `definitions/` is now the authoritative tree for provider skill definitions and VS Code profile baselines, `scripts/` remains the only operational entrypoint layer, `src/` and `tests/` are reserved as the future engine layout, and `.codex/.claude/.vscode` remain projected runtime surfaces rendered from authoritative definitions rather than primary edit locations. This includes:
   - `scripts/runtime/render-provider-skill-surfaces.ps1`
   - `scripts/runtime/render-vscode-profile-surfaces.ps1`

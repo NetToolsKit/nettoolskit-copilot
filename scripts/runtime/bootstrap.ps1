@@ -16,7 +16,7 @@
     - scripts (repository root scripts)
 
     Shared-scripts are synchronized from:
-    - .codex/scripts (MCP utility scripts and docs)
+    - .codex/scripts (projected MCP utility wrappers/docs)
     - scripts/common (shared PowerShell helpers)
     - scripts/security (shared security audit gates)
     - scripts/maintenance (repository-owned maintenance helpers)
@@ -406,6 +406,23 @@ function Invoke-CodexOrchestrationSurfaceRender {
     }
 }
 
+# Renders repository-owned Codex compatibility surfaces before runtime sync consumes them.
+function Invoke-CodexCompatibilitySurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-codex-compatibility-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'Codex compatibility renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("Codex compatibility surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
+}
+
 # Renders repository-owned Claude runtime surfaces before sync consumes them.
 function Invoke-ClaudeRuntimeSurfaceRender {
     param(
@@ -470,6 +487,7 @@ Invoke-VscodeProfileSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
 Invoke-VscodeWorkspaceSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
 
 if ($resolvedRuntimeProfile.EnableCodexRuntime) {
+    Invoke-CodexCompatibilitySurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
     Invoke-ProviderSkillSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot -Providers @('codex')
     Invoke-CodexOrchestrationSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
 }
@@ -557,8 +575,8 @@ else {
 if ($resolvedRuntimeProfile.EnableCodexRuntime) {
     Write-StyledOutput ("  definitions/providers/codex/skills -> rendered .codex/skills (runtime duplicates removed from {0})" -f (Join-Path $TargetCodexPath 'skills'))
     Write-StyledOutput ("  .agents/skills (canonical picker/runtime skills) -> {0}" -f $TargetAgentsSkillsPath)
-    Write-StyledOutput ("  .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
-    Write-StyledOutput ("  .codex/scripts + scripts/common + scripts/security + scripts/maintenance -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
+    Write-StyledOutput ("  definitions/providers/codex/mcp + catalog-generated manifest -> rendered .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
+    Write-StyledOutput ("  definitions/providers/codex/scripts + scripts/common + scripts/security + scripts/maintenance -> rendered .codex/scripts -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
     Write-StyledOutput ("  .codex/orchestration -> {0}" -f (Join-Path $TargetCodexPath 'shared-orchestration'))
 }
 else {

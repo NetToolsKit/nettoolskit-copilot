@@ -238,6 +238,14 @@ try {
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-workspace-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-workspace-surfaces missing OutputRoot parameter.'
 
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-compatibility-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-codex-compatibility-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-codex-compatibility-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'ScriptsOutputRoot' -Message 'render-codex-compatibility-surfaces missing ScriptsOutputRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'McpOutputRoot' -Message 'render-codex-compatibility-surfaces missing McpOutputRoot parameter.'
+
     $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
@@ -478,17 +486,23 @@ try {
         $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
         $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
         $renderVscodeWorkspaceScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
+        $renderCodexCompatibilityScriptPath = Join-Path $runtimeScriptRoot 'render-codex-compatibility-surfaces.ps1'
         $renderCodexOrchestrationScriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
         $renderClaudeRuntimeScriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
         $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
         $githubProviderSourceRoot = Join-Path $providerSourceRoot 'github'
+        $codexCompatibilitySourceRoot = Join-Path $providerSourceRoot 'codex'
         $codexSkillSource = Join-Path $providerSourceRoot 'codex\skills\demo-skill'
+        $codexMcpSourceRoot = Join-Path $providerSourceRoot 'codex\mcp'
+        $codexScriptsSourceRoot = Join-Path $providerSourceRoot 'codex\scripts'
         $claudeSkillSource = Join-Path $providerSourceRoot 'claude\skills\demo-skill'
         $codexOrchestrationSourceRoot = Join-Path $providerSourceRoot 'codex\orchestration'
         $claudeRuntimeSourceRoot = Join-Path $providerSourceRoot 'claude\runtime'
         $vscodeWorkspaceSourceRoot = Join-Path $providerSourceRoot 'vscode\workspace'
         $codexSkillOutput = Join-Path $tempRepoRoot '.codex\skills'
+        $codexMcpOutputRoot = Join-Path $tempRepoRoot '.codex\mcp'
+        $codexScriptsOutputRoot = Join-Path $tempRepoRoot '.codex\scripts'
         $claudeSkillOutput = Join-Path $tempRepoRoot '.claude\skills'
         $codexOrchestrationOutputRoot = Join-Path $tempRepoRoot '.codex\orchestration'
         $claudeRuntimeOutputRoot = Join-Path $tempRepoRoot '.claude'
@@ -499,6 +513,8 @@ try {
 
         New-Item -ItemType Directory -Path $codexSkillSource -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $codexSkillSource 'agents') -Force | Out-Null
+        New-Item -ItemType Directory -Path $codexMcpSourceRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $codexScriptsSourceRoot -Force | Out-Null
         New-Item -ItemType Directory -Path $claudeSkillSource -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $codexOrchestrationSourceRoot 'pipelines') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $codexOrchestrationSourceRoot 'prompts') -Force | Out-Null
@@ -512,8 +528,35 @@ try {
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'chatmodes') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $tempRepoRoot 'scripts\runtime') -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'README.md') -Value '# Demo Codex MCP' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'codex.config.template.toml') -Value '[mcp_servers.demo]' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'vscode.mcp.template.json') -Value '{ "servers": {} }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'README.md') -Value '# Demo Codex Scripts' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'render-vscode-mcp.ps1') -Value @(
+            "[CmdletBinding()]",
+            "param([string] `$OutputPath)",
+            "`$ErrorActionPreference = 'Stop'",
+            "function Resolve-CanonicalRuntimeScriptPath {",
+            "    param([Parameter(Mandatory = `$true)][string] `$ScriptName)",
+            "    return [System.IO.Path]::GetFullPath((Join-Path `$PSScriptRoot (Join-Path '..\\..\\scripts\\runtime' `$ScriptName)))",
+            "}",
+            "& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'render-vscode-mcp-template.ps1') @PSBoundParameters",
+            "exit `$LASTEXITCODE"
+        ) -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'sync-mcp-to-codex-config.ps1') -Value @(
+            "[CmdletBinding()]",
+            "param([string] `$TargetConfigPath)",
+            "`$ErrorActionPreference = 'Stop'",
+            "function Resolve-CanonicalRuntimeScriptPath {",
+            "    param([Parameter(Mandatory = `$true)][string] `$ScriptName)",
+            "    return [System.IO.Path]::GetFullPath((Join-Path `$PSScriptRoot (Join-Path '..\\..\\scripts\\runtime' `$ScriptName)))",
+            "}",
+            "& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'sync-codex-mcp-config.ps1') @PSBoundParameters",
+            "exit `$LASTEXITCODE"
+        ) -Encoding UTF8
         Set-Content -LiteralPath (Join-Path $claudeSkillSource 'SKILL.md') -Value '# Demo Claude Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'README.md') -Value '# Demo Codex Orchestration' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'agents.manifest.json') -Value '{ "agents": [] }' -Encoding UTF8 -NoNewline
@@ -545,12 +588,42 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\session-start.ps1') -Value '# hook session' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\render-vscode-mcp-template.ps1') -Value @(
+            "param([string] `$OutputPath)",
+            "New-Item -ItemType Directory -Path (Split-Path -Path `$OutputPath -Parent) -Force | Out-Null",
+            'Set-Content -LiteralPath $OutputPath -Value ''{ "demo": true }'' -Encoding UTF8 -NoNewline'
+        ) -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\sync-codex-mcp-config.ps1') -Value @(
+            "param([string] `$TargetConfigPath)",
+            "New-Item -ItemType Directory -Path (Split-Path -Path `$TargetConfigPath -Parent) -Force | Out-Null",
+            "Set-Content -LiteralPath `$TargetConfigPath -Value '[mcp_servers.demo]' -Encoding UTF8 -NoNewline"
+        ) -Encoding UTF8
 
         & $renderProviderSkillsScriptPath -RepoRoot $tempRepoRoot -Provider codex,claude | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'render-provider-skill-surfaces smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $codexSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Codex skill output.'
         Assert-True (Test-Path -LiteralPath (Join-Path $claudeSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Claude skill output.'
+
+        & $renderCodexCompatibilityScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-codex-compatibility-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex MCP README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex config template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex VS Code template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'render-vscode-mcp.ps1') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex wrapper surface.'
+
+        $wrapperRenderOutputPath = Join-Path $tempRepoRoot '.temp\wrapper-vscode-mcp.json'
+        $wrapperConfigOutputPath = Join-Path $tempRepoRoot '.temp\wrapper-config.toml'
+        & (Join-Path $codexScriptsOutputRoot 'render-vscode-mcp.ps1') -OutputPath $wrapperRenderOutputPath | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'Projected render-vscode-mcp wrapper smoke test failed.'
+        Assert-True (Test-Path -LiteralPath $wrapperRenderOutputPath -PathType Leaf) 'Projected render-vscode-mcp wrapper did not forward to the canonical runtime script.'
+
+        & (Join-Path $codexScriptsOutputRoot 'sync-mcp-to-codex-config.ps1') -TargetConfigPath $wrapperConfigOutputPath | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'Projected sync-mcp-to-codex-config wrapper smoke test failed.'
+        Assert-True (Test-Path -LiteralPath $wrapperConfigOutputPath -PathType Leaf) 'Projected sync-mcp-to-codex-config wrapper did not forward to the canonical runtime script.'
 
         & $renderVscodeProfilesScriptPath -RepoRoot $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }

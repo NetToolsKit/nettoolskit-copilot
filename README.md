@@ -21,7 +21,7 @@
 | Runtime | Authoritative source | Projected repo surface | Global target | Install profile | Entry point |
 | --- | --- | --- | --- | --- | --- |
 | ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `definitions/providers/github/{root,agents,instructions,prompts,hooks}/` | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
-| ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `definitions/providers/codex/skills/` + `.codex/` runtime metadata | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
+| ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `definitions/providers/codex/{skills,mcp,scripts,orchestration}/` + generated MCP manifest from `.github/governance/mcp-runtime.catalog.json` | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
 | ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `definitions/providers/claude/skills/` + `.claude/` runtime metadata | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
 
 All three runtimes share the same **Super Agent lifecycle**, **44 domain instruction files**, **planning workspace**, and **governance catalogs**. Repository-owned instruction assets are now authored under `definitions/` and projected into `.github/`, while GitHub-native governance assets such as workflows, policies, schemas, templates, and runbooks remain native in `.github/`.
@@ -347,7 +347,7 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 | Integration target | Authoritative source of truth | Runtime target |
 | --- | --- | --- |
 | Copilot instructions, prompts, agents, chatmodes, and VS Code agent hooks | `definitions/providers/github/{root,agents,instructions,prompts,chatmodes,hooks}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
-| Codex runtime skills, orchestration, MCP, shared scripts | `definitions/providers/codex/{skills,orchestration}/` + `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
+| Codex runtime skills, orchestration, MCP, shared scripts | `definitions/providers/codex/{skills,mcp,scripts,orchestration}/` + generated MCP manifest + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
 | Picker-visible local skills for VS Code/Codex | `definitions/providers/codex/skills/` -> rendered `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
 | Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `definitions/providers/claude/runtime/settings.json` -> rendered `.claude/settings.json` | loaded by Claude Code at workspace open |
 | Claude Code skill adapters (Super Agent pipeline) | `definitions/providers/claude/skills/` -> rendered `.claude/skills/` | `%USERPROFILE%\\.claude\\skills` |
@@ -375,6 +375,8 @@ The repository uses an explicit layered instruction architecture so context stay
 - `Claude Code skills`: `.claude/skills/*` are rendered provider surfaces that adapt the same pipeline roles to Claude Code native agent types (`Plan`, `Explore`, `general-purpose`) and must reference canonical repo instructions without duplicating policy.
 - `VS Code profiles`: `.vscode/profiles/*` is a rendered repository surface projected from `definitions/providers/vscode/profiles/`; operational entrypoints still live under `scripts/runtime/`.
 - `VS Code workspace surfaces`: `.vscode/README.md`, `.vscode/base.code-workspace`, `.vscode/settings.tamplate.jsonc`, and `.vscode/snippets/*` are rendered from `definitions/providers/vscode/workspace/`.
+- `VS Code MCP template`: `.vscode/mcp.tamplate.jsonc` stays a generated projection from `.github/governance/mcp-runtime.catalog.json`, not an authored `definitions/` surface.
+- `Codex compatibility surfaces`: `.codex/scripts/*` and the authored support files under `.codex/mcp/` are rendered from `definitions/providers/codex/{scripts,mcp}/`; only `.codex/mcp/servers.manifest.json` stays generated from the canonical MCP catalog.
 - `Codex orchestration surfaces`: `.codex/orchestration/*` is a rendered repository surface projected from `definitions/providers/codex/orchestration/`.
 - `Claude runtime settings`: `.claude/settings.json` is a rendered repository surface projected from `definitions/providers/claude/runtime/`.
 - `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `.codex/`, `.claude/`, `.vscode/profiles/`, `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, `%USERPROFILE%\\.claude`, and the VS Code global profile.
@@ -441,6 +443,8 @@ The repository now uses one canonical MCP runtime catalog plus generated per-run
 - Canonical source of truth: `.github/governance/mcp-runtime.catalog.json`
 - Generated VS Code projection: `.vscode/mcp.tamplate.jsonc`
 - Generated Codex projection: `.codex/mcp/servers.manifest.json`
+- Authored Codex MCP support files: `definitions/providers/codex/mcp/` -> projected `.codex/mcp/{README.md,codex.config.template.toml,vscode.mcp.template.json}`
+- Codex compatibility wrappers/docs: `definitions/providers/codex/scripts/` -> projected `.codex/scripts/`
 - Regenerate tracked projections: `pwsh -File scripts/runtime/render-mcp-runtime-artifacts.ps1`
 - Apply to Codex config: `pwsh -File scripts/runtime/sync-codex-mcp-config.ps1 -CreateBackup`
 - Applied automatically when `install.ps1` is run with `-ApplyMcpConfig`

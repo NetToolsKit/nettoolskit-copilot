@@ -996,6 +996,12 @@ $requiredFiles = @(
     'definitions/providers/vscode/workspace/base.code-workspace',
     'definitions/providers/vscode/workspace/settings.tamplate.jsonc',
     'definitions/providers/vscode/workspace/snippets/codex-cli.tamplate.code-snippets',
+    'definitions/providers/codex/mcp/README.md',
+    'definitions/providers/codex/mcp/codex.config.template.toml',
+    'definitions/providers/codex/mcp/vscode.mcp.template.json',
+    'definitions/providers/codex/scripts/README.md',
+    'definitions/providers/codex/scripts/render-vscode-mcp.ps1',
+    'definitions/providers/codex/scripts/sync-mcp-to-codex-config.ps1',
     'definitions/providers/codex/orchestration/agents.manifest.json',
     'definitions/providers/codex/orchestration/pipelines/default.pipeline.json',
     'definitions/providers/codex/orchestration/prompts/super-agent-intake-stage.prompt.md',
@@ -1035,6 +1041,12 @@ $requiredFiles = @(
     '.codex/orchestration/prompts/task-quality-review.prompt.md',
     '.codex/orchestration/prompts/reviewer-stage.prompt.md',
     '.codex/orchestration/prompts/closeout-stage.prompt.md',
+    '.codex/scripts/README.md',
+    '.codex/scripts/render-vscode-mcp.ps1',
+    '.codex/scripts/sync-mcp-to-codex-config.ps1',
+    '.codex/mcp/README.md',
+    '.codex/mcp/codex.config.template.toml',
+    '.codex/mcp/vscode.mcp.template.json',
     '.codex/orchestration/templates/handoff.template.json',
     '.codex/orchestration/templates/run-artifact.template.json',
     '.codex/orchestration/templates/trace-record.template.json',
@@ -1076,6 +1088,7 @@ $requiredFiles = @(
     'scripts/runtime/render-mcp-runtime-artifacts.ps1',
     'scripts/runtime/render-vscode-mcp-template.ps1',
     'scripts/runtime/render-provider-skill-surfaces.ps1',
+    'scripts/runtime/render-codex-compatibility-surfaces.ps1',
     'scripts/runtime/render-vscode-profile-surfaces.ps1',
     'scripts/runtime/render-vscode-workspace-surfaces.ps1',
     'scripts/runtime/render-codex-orchestration-surfaces.ps1',
@@ -1362,6 +1375,12 @@ $providerSkillSourcePairs = @(
         FixHint = 'Re-run scripts/runtime/render-vscode-workspace-surfaces.ps1 -RepoRoot .'
     }
     [pscustomobject]@{
+        Label = 'Codex compatibility script surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\scripts'
+        Destination = Join-Path $resolvedRepoRoot '.codex\scripts'
+        FixHint = 'Re-run scripts/runtime/render-codex-compatibility-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
         Label = 'Codex orchestration surface'
         Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\orchestration'
         Destination = Join-Path $resolvedRepoRoot '.codex\orchestration'
@@ -1395,6 +1414,13 @@ $selectedSurfacePairs = @(
         Destination = Join-Path $resolvedRepoRoot '.vscode'
         FileNames = @('README.md', 'base.code-workspace', 'settings.tamplate.jsonc')
         FixHint = 'Re-run scripts/runtime/render-vscode-workspace-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'Codex MCP support surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\mcp'
+        Destination = Join-Path $resolvedRepoRoot '.codex\mcp'
+        FileNames = @('README.md', 'codex.config.template.toml', 'vscode.mcp.template.json')
+        FixHint = 'Re-run scripts/runtime/render-codex-compatibility-surfaces.ps1 -RepoRoot .'
     }
     [pscustomobject]@{
         Label = 'Claude runtime settings surface'
