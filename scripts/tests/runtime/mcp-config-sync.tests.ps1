@@ -4,7 +4,7 @@
     catalog-driven Codex projections.
 
 .DESCRIPTION
-    Verifies that `.codex/scripts/sync-mcp-to-codex-config.ps1` can render a
+    Verifies that `scripts/runtime/sync-codex-mcp-config.ps1` can render a
     mixed manifest containing `stdio` and `http` servers without requiring
     every optional property to exist on every server entry.
 
@@ -64,7 +64,7 @@ function Assert-ContainsText {
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot '.codex/scripts/sync-mcp-to-codex-config.ps1'
+$scriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/sync-codex-mcp-config.ps1'
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
 $manifestPath = Join-Path $tempRoot 'servers.manifest.json'
 $catalogPath = Join-Path $tempRoot 'mcp-runtime.catalog.json'
@@ -102,7 +102,7 @@ search = true
     & $scriptPath -ManifestPath $manifestPath -TargetConfigPath $configPath -CreateBackup | Out-Null
     $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
     $exitCode = if ($null -eq $lastExitCodeVariable) { 0 } else { [int] $lastExitCodeVariable.Value }
-    Assert-True -Condition ($exitCode -eq 0) -Message 'sync-mcp-to-codex-config should succeed for mixed stdio/http manifests.'
+    Assert-True -Condition ($exitCode -eq 0) -Message 'sync-codex-mcp-config should succeed for mixed stdio/http manifests.'
 
     $content = Get-Content -LiteralPath $configPath -Raw
     Assert-ContainsText -Content $content -ExpectedText '[mcp_servers.playwright]' -Message 'Rendered config must include the stdio MCP server block.'
@@ -111,7 +111,7 @@ search = true
     Assert-ContainsText -Content $content -ExpectedText 'url = "https://learn.microsoft.com/api/mcp"' -Message 'Rendered config must include the http URL.'
 
     $backupFiles = @(Get-ChildItem -LiteralPath $tempRoot -Filter 'config.toml.bak.*' -File)
-    Assert-True -Condition ($backupFiles.Count -eq 1) -Message 'sync-mcp-to-codex-config should create one backup when -CreateBackup is specified.'
+    Assert-True -Condition ($backupFiles.Count -eq 1) -Message 'sync-codex-mcp-config should create one backup when -CreateBackup is specified.'
 
     @'
 {
@@ -168,7 +168,7 @@ search = true
     & $scriptPath -RepoRoot $resolvedRepoRoot -CatalogPath $catalogPath -TargetConfigPath $configPath | Out-Null
     $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
     $exitCode = if ($null -eq $lastExitCodeVariable) { 0 } else { [int] $lastExitCodeVariable.Value }
-    Assert-True -Condition ($exitCode -eq 0) -Message 'sync-mcp-to-codex-config should succeed for canonical catalog input.'
+    Assert-True -Condition ($exitCode -eq 0) -Message 'sync-codex-mcp-config should succeed for canonical catalog input.'
 
     $content = Get-Content -LiteralPath $configPath -Raw
     Assert-ContainsText -Content $content -ExpectedText '[mcp_servers.microsoftdocs]' -Message 'Catalog-driven sync must include the codex-enabled http server block.'

@@ -6,7 +6,9 @@
 
 ## Introduction
 
-This folder centralizes operational scripts used by this repository. It includes bootstrap sync for shared `.github/.codex` assets and utility scripts for maintenance and tests.
+This folder centralizes operational scripts used by this repository. It is the only supported execution layer for install, bootstrap, render, sync, maintenance, and validation entrypoints.
+
+Authoritative non-code assets now live under `definitions/`. Provider/runtime folders such as `.github/`, `.codex/`, `.claude/`, and `.vscode/` are projected/runtime surfaces that these scripts render, sync, and validate.
 
 ---
 
@@ -37,6 +39,7 @@ This folder centralizes operational scripts used by this repository. It includes
 - ✅ Agent/skill permission matrix checks and supply-chain baseline checks
 - ✅ Unified validation suite runner (`validate-all`) for local hooks and CI
 - ✅ Healthcheck and self-heal flows with JSON reports and execution logs
+- ✅ Source/projection architecture with `definitions/` as the authoritative non-code tree and `scripts/` as the execution layer
 
 ---
 
@@ -70,6 +73,11 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile a
 
 # Sync shared assets
 pwsh -File .\scripts\runtime\bootstrap.ps1
+
+# Render projected provider/runtime surfaces from authoritative definitions
+pwsh -File .\scripts\runtime\render-github-instruction-surfaces.ps1 -RepoRoot .
+pwsh -File .\scripts\runtime\render-provider-skill-surfaces.ps1 -RepoRoot . -Provider codex,claude
+pwsh -File .\scripts\runtime\render-vscode-profile-surfaces.ps1 -RepoRoot .
 
 # Sync and apply MCP servers into ~/.codex/config.toml
 pwsh -File .\scripts\runtime\bootstrap.ps1 -ApplyMcpConfig -BackupConfig
@@ -188,6 +196,14 @@ When the managed global VS Code MCP template is applied:
 - `%APPDATA%\\Code\\User\\mcp.json` is rendered from `.github/governance/mcp-runtime.catalog.json` via the tracked `.vscode/mcp.tamplate.jsonc` projection
 - `.vscode/mcp-vscode-global.json` is refreshed as an ignored local helper mirror
 - stable `${input:...}` ids let VS Code keep MCP credentials in its secure store after the first prompt instead of reauthenticating on every conversation
+
+The repository-owned source/projection model is now:
+
+- `definitions/`: authoritative non-code assets
+- `scripts/`: operational entrypoints and renderers
+- `src/`: reserved for future engine code
+- `tests/`: reserved for future engine coverage
+- `.github/.codex/.claude/.vscode`: projected/runtime surfaces consumed by external tools
 
 The VS Code hook bootstrap selects its startup controller from `.github/hooks/super-agent.selector.json`. Keep the repository default in version control and override locally only through `~/.github/hooks/super-agent.selector.local.json` or the environment variables `COPILOT_SUPER_AGENT_SKILL` and `COPILOT_SUPER_AGENT_NAME`.
 
@@ -544,7 +560,10 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `runtime/apply-vscode-templates.ps1` | Applies `.vscode/*.tamplate.jsonc` into active `.vscode/settings.json` and `.vscode/mcp.json` files. | `pwsh -File scripts/runtime/apply-vscode-templates.ps1 -Force` |
 | `runtime/sync-vscode-global-settings.ps1` | Renders `.vscode/settings.tamplate.jsonc` into the global VS Code user profile `settings.json`, replacing runtime placeholders such as `%USERPROFILE%` and optionally creating a backup first. | `pwsh -File scripts/runtime/sync-vscode-global-settings.ps1 -CreateBackup` |
 | `runtime/sync-vscode-global-mcp.ps1` | Renders the canonical MCP runtime catalog from `.github/governance/mcp-runtime.catalog.json` into the global VS Code user profile `mcp.json`, refreshes the ignored local helper `.vscode/mcp-vscode-global.json`, and keeps stable per-server `${input:...}` ids so VS Code can reuse securely stored MCP credentials after the first prompt. | `pwsh -File scripts/runtime/sync-vscode-global-mcp.ps1 -CreateBackup` |
+| `runtime/setup-vscode-profiles.ps1` | Lists or creates versioned VS Code profiles from `definitions/providers/vscode/profiles/profile-*.json`, refreshes the projected `.vscode/profiles/` surface, and can apply one selected profile as the MCP enable/disable overlay source through `sync-vscode-global-mcp.ps1`. This is the only executable entrypoint for profile setup. | `pwsh -File scripts/runtime/setup-vscode-profiles.ps1 -ProfileName Frontend -CreateMcpBackup` |
 | `runtime/render-mcp-runtime-artifacts.ps1` | Regenerates the tracked MCP runtime projections from `.github/governance/mcp-runtime.catalog.json`: `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json`. Use it after catalog edits or in parity checks. | `pwsh -File scripts/runtime/render-mcp-runtime-artifacts.ps1 -RepoRoot .` |
+| `runtime/render-provider-skill-surfaces.ps1` | Regenerates the rendered provider skill surfaces from the authoritative `definitions/providers/*/skills/` tree into `.codex/skills/` and `.claude/skills/`. Use it after skill-definition edits or in parity checks. | `pwsh -File scripts/runtime/render-provider-skill-surfaces.ps1 -RepoRoot .` |
+| `runtime/render-vscode-profile-surfaces.ps1` | Regenerates the rendered `.vscode/profiles/` surface from the authoritative `definitions/providers/vscode/profiles/` tree. Use it after profile-definition edits or in parity checks. | `pwsh -File scripts/runtime/render-vscode-profile-surfaces.ps1 -RepoRoot .` |
 | `runtime/sync-vscode-global-snippets.ps1` | Synchronizes versioned `.vscode/snippets/*.tamplate.code-snippets` files into the global VS Code user profile under `Code/User/snippets`, removing `.tamplate` from target names. | `pwsh -File scripts/runtime/sync-vscode-global-snippets.ps1` |
 | `runtime/sync-workspace-settings.ps1` | Generates or refreshes `.code-workspace` files from `.vscode/base.code-workspace` plus the approved local override block derived from `.github/governance/workspace-efficiency.baseline.json`. Preserves folders, removes settings already covered by the global template, and merges workspace-specific extension recommendations with the shared base. | `pwsh -File scripts/runtime/sync-workspace-settings.ps1 -WorkspacePath .\workspaces\api.code-workspace -FolderPath src\Api` |
 | `runtime/update-copilot-chat-titles.ps1` | Normalizes persisted GitHub Copilot chat titles to `<project-prefix> - <task summary>` using `%APPDATA%\\Code\\User\\workspaceStorage\\<workspace-id>\\chatSessions\\*.json*`, with optional backups before writing. | `pwsh -File scripts/runtime/update-copilot-chat-titles.ps1 -Apply -CreateBackup` |
@@ -834,7 +853,7 @@ After setup, hooks behavior is:
 - if `autofix` is configured in `global` scope and the repository does not override `core.hooksPath` locally, you do not need to run `git trim-eof` manually for normal commits
 - `git trim-eof` still matters when you want cleanup before staging, when you want to inspect the diff first, or when the repository stays in `manual` mode
 - Git has no native `pre-add` hook, so automatic EOF cleanup happens on commit, not on `git add` or the VS Code stage action
-- `post-commit`: runs `scripts/runtime/bootstrap.ps1 -Mirror` only when `HEAD` changed runtime-managed source paths under `.github/`, `.codex/`, or `scripts/` (best effort)
+- `post-commit`: runs `scripts/runtime/bootstrap.ps1 -Mirror` only when `HEAD` changed runtime-managed source paths under `definitions/`, `.github/`, `.codex/`, or `scripts/` (best effort)
 - `post-commit`: re-applies safe Codex runtime preferences when `HEAD` changed runtime-managed source paths (best effort)
 - `post-commit`: runs `scripts/runtime/validate-vscode-global-alignment.ps1` only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts (best effort)
 - `post-commit`: runs `scripts/runtime/clean-codex-runtime.ps1 -IncludeSessions -Apply` (best effort, using the hygiene catalog defaults unless environment overrides are set)

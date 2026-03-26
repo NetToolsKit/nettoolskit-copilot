@@ -9,6 +9,10 @@
     artifacts such as `.vscode/mcp.tamplate.jsonc` and
     `.codex/mcp/servers.manifest.json` are rendered from this catalog.
 
+.EXAMPLE
+    . .\scripts\common\mcp-runtime-catalog.ps1
+    $catalog = Read-McpRuntimeCatalog -RepoRoot (Get-Location)
+
 .NOTES
     Version: 1.0
     Requirements: PowerShell 7+.

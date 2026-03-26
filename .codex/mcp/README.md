@@ -36,15 +36,15 @@ This folder contains the generated Codex MCP subset and helper templates derived
 
 ## Installation
 
-No package installation is required. Edit the canonical catalog and run scripts from `.codex/scripts/` or `scripts/runtime/`.
+No package installation is required. Edit the canonical catalog and run the canonical scripts from `scripts/runtime/`. The `.codex/scripts/` files remain compatibility wrappers only.
 
 ---
 
 ## Quick Start
 
 ```powershell
-pwsh -File .\.codex\scripts\render-vscode-mcp.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -CreateBackup
+pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -CreateBackup
 ```
 
 ---
@@ -54,14 +54,14 @@ pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -CreateBackup
 ### Example 1: Generate VS Code MCP File
 
 ```powershell
-pwsh -File .\.codex\scripts\render-vscode-mcp.ps1 `
+pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 `
   -OutputPath .\.vscode\mcp.tamplate.jsonc
 ```
 
 ### Example 2: Update Local Codex MCP Servers
 
 ```powershell
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 `
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 `
   -TargetConfigPath "$env:USERPROFILE\.codex\config.toml" `
   -CreateBackup
 ```
@@ -99,10 +99,10 @@ pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 `
 
 ```powershell
 # render output in temp for verification
-pwsh -File .\.codex\scripts\render-vscode-mcp.ps1 -OutputPath .\.temp\vscode.mcp.generated.json
+pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.temp\vscode.mcp.generated.json
 
 # preview codex config output without writing
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -DryRun
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 ```
 
 ---
@@ -125,8 +125,8 @@ pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -DryRun
 
 ## References
 
-- `.codex/scripts/sync-mcp-to-codex-config.ps1`
-- `.codex/scripts/render-vscode-mcp.ps1`
+- `scripts/runtime/sync-codex-mcp-config.ps1`
+- `scripts/runtime/render-vscode-mcp-template.ps1`
 - `.codex/mcp/codex.config.template.toml`
 - `.codex/mcp/vscode.mcp.template.json`
 

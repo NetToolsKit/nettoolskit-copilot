@@ -18,13 +18,13 @@
 
 ## Supported AI Runtimes
 
-| Runtime | Versioned source | Global target | Install profile | Entry point |
-| --- | --- | --- | --- | --- |
-| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
-| ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
-| ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
+| Runtime | Authoritative source | Projected repo surface | Global target | Install profile | Entry point |
+| --- | --- | --- | --- | --- | --- |
+| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `definitions/providers/github/{root,agents,instructions,prompts,hooks}/` | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
+| ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `definitions/providers/codex/skills/` + `.codex/` runtime metadata | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
+| ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `definitions/providers/claude/skills/` + `.claude/` runtime metadata | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
 
-All three runtimes share the same **Super Agent lifecycle**, **44 domain instruction files**, **planning workspace**, and **governance catalogs** under `.github/`. Runtime-specific layers (skills, hooks, preferences) are the only divergence.
+All three runtimes share the same **Super Agent lifecycle**, **44 domain instruction files**, **planning workspace**, and **governance catalogs**. Repository-owned instruction assets are now authored under `definitions/` and projected into `.github/`, while GitHub-native governance assets such as workflows, policies, schemas, templates, and runbooks remain native in `.github/`.
 
 ---
 
@@ -344,13 +344,14 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 
 ## Integration Matrix
 
-| Integration target | Versioned source of truth | Runtime target |
+| Integration target | Authoritative source of truth | Runtime target |
 | --- | --- | --- |
-| Copilot instructions, prompts, and VS Code agent hooks | `.github/` | `%USERPROFILE%\\.github` |
-| Codex runtime skills, MCP, orchestration, shared scripts | `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
-| Picker-visible local skills for VS Code/Codex | `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
+| Copilot instructions, prompts, agents, and VS Code agent hooks | `definitions/providers/github/{root,agents,instructions,prompts,hooks}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
+| Codex runtime skills, MCP, orchestration, shared scripts | `definitions/providers/codex/skills/` + `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
+| Picker-visible local skills for VS Code/Codex | `definitions/providers/codex/skills/` -> rendered `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
 | Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `.claude/settings.json` | loaded by Claude Code at workspace open |
-| Claude Code skill adapters (Super Agent pipeline) | `.claude/skills/` | `%USERPROFILE%\\.claude\\skills` |
+| Claude Code skill adapters (Super Agent pipeline) | `definitions/providers/claude/skills/` -> rendered `.claude/skills/` | `%USERPROFILE%\\.claude\\skills` |
+| VS Code profile baselines | `definitions/providers/vscode/profiles/` -> rendered `.vscode/profiles/` | local profile creation through `scripts/runtime/setup-vscode-profiles.ps1` |
 | VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
 | VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
 | VS Code workspaces | `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
@@ -369,9 +370,12 @@ The repository uses an explicit layered instruction architecture so context stay
 - `Domain instructions`: `.github/instructions/*.instructions.md` own stack-specific technical behavior.
 - `Prompts`: `.github/prompts/*` are execution helpers and must not become normative policy owners.
 - `Templates`: `.github/templates/*`, `.vscode/*.tamplate.jsonc`, `.vscode/snippets/*.tamplate.code-snippets`, and `.codex/mcp/*.template.*` define concrete artifact shapes only.
-- `Codex skills`: `.codex/skills/*/SKILL.md` specialize execution and must reference canonical repo instructions instead of duplicating policy.
-- `Claude Code skills`: `.claude/skills/*/SKILL.md` adapt the same pipeline roles to Claude Code native agent types (`Plan`, `Explore`, `general-purpose`) and must reference canonical repo instructions without duplicating policy.
-- `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, `%USERPROFILE%\\.claude`, and the VS Code global profile.
+- `Authoritative definitions`: `definitions/providers/*` contains the source-of-truth non-code assets projected into provider-specific runtime surfaces.
+- `Codex skills`: `.codex/skills/*` are rendered provider surfaces that specialize execution and must reference canonical repo instructions instead of duplicating policy.
+- `Claude Code skills`: `.claude/skills/*` are rendered provider surfaces that adapt the same pipeline roles to Claude Code native agent types (`Plan`, `Explore`, `general-purpose`) and must reference canonical repo instructions without duplicating policy.
+- `VS Code profiles`: `.vscode/profiles/*` is a rendered repository surface projected from `definitions/providers/vscode/profiles/`; operational entrypoints still live under `scripts/runtime/`.
+- `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `.codex/`, `.claude/`, `.vscode/profiles/`, `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, `%USERPROFILE%\\.claude`, and the VS Code global profile.
+- `Future engine code`: `src/` is reserved for executable engine code and `tests/` is reserved for its future test suite; the repository is separating authored definitions from execution code before introducing Cargo/Rust.
 
 ### Architecture Contracts
 
@@ -379,6 +383,7 @@ The repository uses an explicit layered instruction architecture so context stay
 - Keep global context stable: avoid regrowing `AGENTS.md` and `copilot-instructions.md` with domain detail that belongs elsewhere.
 - Keep policy centralized: if a rule can be defined once in governance or a shared instruction, do not duplicate it in domain files, prompts, templates, or skills.
 - Keep runtime non-authoritative: local runtime folders are projections of the repository, never the source of truth.
+- Keep executable logic centralized: operator entrypoints belong under `scripts/`, while provider/runtime folders keep projected assets only.
 - Keep non-trivial work on the mandatory planning chain and keep active plans in `planning/active/` plus active specs in `planning/specs/active/` until the work is materially complete.
 
 ### Planning Workspace
@@ -434,8 +439,15 @@ The repository now uses one canonical MCP runtime catalog plus generated per-run
 - Generated VS Code projection: `.vscode/mcp.tamplate.jsonc`
 - Generated Codex projection: `.codex/mcp/servers.manifest.json`
 - Regenerate tracked projections: `pwsh -File scripts/runtime/render-mcp-runtime-artifacts.ps1`
-- Apply to Codex config: `pwsh -File .codex/scripts/sync-mcp-to-codex-config.ps1 -CreateBackup`
+- Apply to Codex config: `pwsh -File scripts/runtime/sync-codex-mcp-config.ps1 -CreateBackup`
 - Applied automatically when `install.ps1` is run with `-ApplyMcpConfig`
+
+Runtime architecture note:
+
+- `definitions/` is the authoritative non-code tree for projected provider/runtime assets
+- `scripts/` is the only operational entrypoint layer
+- `src/` and `tests/` are reserved for the future engine layer
+- `.github/.codex/.claude/.vscode` remain runtime/projection surfaces, not the preferred place for new execution logic
 
 For safe local RAG/CAG continuity, the repository also owns a deterministic local context index:
 
@@ -465,8 +477,13 @@ Use `.devcontainer/devcontainer.json` to run this repository with a standardized
 
 ```text
 copilot-instructions/
+├─ definitions/ # authoritative non-code definitions projected into runtime surfaces
+├─ src/         # reserved for future executable engine code
+├─ tests/       # reserved for future engine tests
 ├─ .github/   # shared Copilot + Codex instructions, prompts, chatmodes, schemas
-├─ .codex/    # shared Codex assets (skills/mcp/scripts/orchestration)
+├─ .codex/    # rendered Codex provider surface + Codex-specific runtime assets
+├─ .claude/   # rendered Claude provider surface + Claude runtime settings
+├─ .vscode/   # VS Code templates, profiles, and local helper projections
 ├─ scripts/   # bootstrap + automation scripts
 ├─ README.md
 └─ .gitignore
@@ -729,7 +746,7 @@ git commit -m "Apply change"
 
 ### post-commit
 
-- Runs `scripts/runtime/bootstrap.ps1 -Mirror` (best effort) only when `HEAD` changed runtime-managed source paths under `.github/`, `.codex/`, or `scripts/`
+- Runs `scripts/runtime/bootstrap.ps1 -Mirror` (best effort) only when `HEAD` changed runtime-managed source paths under `definitions/`, `.github/`, `.codex/`, or `scripts/`
 - If the canonical MCP runtime catalog or its generated projections changed in `HEAD`, can optionally apply MCP config
 - Runs `scripts/runtime/validate-vscode-global-alignment.ps1` (best effort) only when `HEAD` changed `.vscode/` or the VS Code sync/alignment scripts
 - Re-applies safe Codex runtime preferences when runtime-managed source changed (best effort)

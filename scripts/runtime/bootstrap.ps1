@@ -3,7 +3,8 @@
     Syncs repository-managed .github and .codex assets into the local runtime folders.
 
 .DESCRIPTION
-    Detects the repository root and copies shared assets to:
+    Detects the repository root, renders projected provider surfaces from the
+    authoritative `definitions/` tree when required, and copies shared assets to:
     - <user-home>/.github
     - <user-home>/.github/scripts
     - <user-home>/.agents/skills
@@ -285,7 +286,7 @@ function Invoke-McpConfigApply {
         [switch] $CreateBackup
     )
 
-    $syncScript = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot '.codex') 'scripts') 'sync-mcp-to-codex-config.ps1'
+    $syncScript = Join-Path $ResolvedRepoRoot 'scripts\runtime\sync-codex-mcp-config.ps1'
     $catalog = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot '.github') 'governance') 'mcp-runtime.catalog.json'
     $targetConfig = Join-Path $CodexPath 'config.toml'
 
@@ -303,6 +304,72 @@ function Invoke-McpConfigApply {
     }
 
     & $syncScript @syncArgs
+}
+
+# Renders repository-owned GitHub/Copilot instruction surfaces before runtime sync consumes them.
+function Invoke-GithubInstructionSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-github-instruction-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'GitHub instruction renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("GitHub instruction surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
+}
+
+# Renders provider-owned skill surfaces before runtime sync consumes them.
+function Invoke-ProviderSkillSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot,
+        [string[]] $Providers
+    )
+
+    $requestedProviders = foreach ($providerName in @($Providers)) {
+        foreach ($providerToken in @(([string] $providerName) -split ',')) {
+            $trimmedProviderName = $providerToken.Trim()
+            if (-not [string]::IsNullOrWhiteSpace($trimmedProviderName)) {
+                $trimmedProviderName
+            }
+        }
+    }
+    $requestedProviders = @($requestedProviders | Sort-Object -Unique)
+
+    if ($requestedProviders.Count -eq 0) {
+        return
+    }
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-provider-skill-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'provider skill renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Provider $requestedProviders -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("Provider skill surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
+}
+
+# Renders repository-owned VS Code profile surfaces before repo tooling consumes them.
+function Invoke-VscodeProfileSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-vscode-profile-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'VS Code profile renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("VS Code profile surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
 }
 
 # -------------------------------
@@ -346,6 +413,13 @@ Start-ExecutionSession `
 Assert-PathPresent -Path $sourceGithub -Label 'source .github folder'
 Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
 Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
+
+Invoke-GithubInstructionSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
+Invoke-VscodeProfileSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
+
+if ($resolvedRuntimeProfile.EnableCodexRuntime) {
+    Invoke-ProviderSkillSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot -Providers @('codex')
+}
 
 if ($ApplyMcpConfig -and -not $resolvedRuntimeProfile.EnableCodexRuntime) {
     throw ("Runtime profile '{0}' does not enable the Codex runtime surface required by -ApplyMcpConfig." -f $resolvedRuntimeProfile.Name)
@@ -424,7 +498,7 @@ else {
 }
 
 if ($resolvedRuntimeProfile.EnableCodexRuntime) {
-    Write-StyledOutput ("  .codex/skills (source only; runtime duplicates removed from {0})" -f (Join-Path $TargetCodexPath 'skills'))
+    Write-StyledOutput ("  definitions/providers/codex/skills -> rendered .codex/skills (runtime duplicates removed from {0})" -f (Join-Path $TargetCodexPath 'skills'))
     Write-StyledOutput ("  .agents/skills (canonical picker/runtime skills) -> {0}" -f $TargetAgentsSkillsPath)
     Write-StyledOutput ("  .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
     Write-StyledOutput ("  .codex/scripts + scripts/common + scripts/security + scripts/maintenance -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))

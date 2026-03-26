@@ -170,11 +170,66 @@ try {
     Assert-Contains -Collection $keys -Value 'SyncWorkspaceHelper' -Message 'sync-vscode-global-mcp missing SyncWorkspaceHelper parameter.'
     Assert-Contains -Collection $keys -Value 'CreateBackup' -Message 'sync-vscode-global-mcp missing CreateBackup parameter.'
 
+    $scriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'DryRun' -Message 'setup-vscode-profiles missing DryRun parameter.'
+    Assert-Contains -Collection $keys -Value 'ListProfiles' -Message 'setup-vscode-profiles missing ListProfiles parameter.'
+    Assert-Contains -Collection $keys -Value 'ProfileName' -Message 'setup-vscode-profiles missing ProfileName parameter.'
+    Assert-Contains -Collection $keys -Value 'ProfilesRoot' -Message 'setup-vscode-profiles missing ProfilesRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SkipMcpSync' -Message 'setup-vscode-profiles missing SkipMcpSync parameter.'
+    Assert-Contains -Collection $keys -Value 'McpProfileName' -Message 'setup-vscode-profiles missing McpProfileName parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-github-instruction-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-github-instruction-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-github-instruction-surfaces missing OutputRoot parameter.'
+
     $scriptPath = Join-Path $runtimeScriptRoot 'render-mcp-runtime-artifacts.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
     Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-mcp-runtime-artifacts missing RepoRoot parameter.'
     Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-mcp-runtime-artifacts missing CatalogPath parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-mcp-template.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-vscode-mcp-template missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-vscode-mcp-template missing CatalogPath parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'render-vscode-mcp-template missing OutputPath parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'sync-codex-mcp-config.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'sync-codex-mcp-config missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'sync-codex-mcp-config missing CatalogPath parameter.'
+    Assert-Contains -Collection $keys -Value 'ManifestPath' -Message 'sync-codex-mcp-config missing ManifestPath parameter.'
+    Assert-Contains -Collection $keys -Value 'TargetConfigPath' -Message 'sync-codex-mcp-config missing TargetConfigPath parameter.'
+    Assert-Contains -Collection $keys -Value 'CreateBackup' -Message 'sync-codex-mcp-config missing CreateBackup parameter.'
+    Assert-Contains -Collection $keys -Value 'DryRun' -Message 'sync-codex-mcp-config missing DryRun parameter.'
+
+    foreach ($hookScriptName in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1', 'pre-tool-use.ps1')) {
+        $scriptPath = Join-Path $runtimeScriptRoot ('hooks\' + $hookScriptName)
+        Assert-True (Test-Path -LiteralPath $scriptPath -PathType Leaf) ("Missing runtime hook script: {0}" -f $hookScriptName)
+    }
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-provider-skill-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-provider-skill-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-provider-skill-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'Provider' -Message 'render-provider-skill-surfaces missing Provider parameter.'
+    Assert-Contains -Collection $keys -Value 'CodexOutputRoot' -Message 'render-provider-skill-surfaces missing CodexOutputRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'ClaudeOutputRoot' -Message 'render-provider-skill-surfaces missing ClaudeOutputRoot parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-vscode-profile-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-profile-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-profile-surfaces missing OutputRoot parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -397,6 +452,74 @@ try {
         Assert-True (Test-Path -LiteralPath $renderedManifestPath -PathType Leaf) 'render-mcp-runtime-artifacts did not write the Codex manifest.'
         $renderedManifest = Get-Content -LiteralPath $renderedManifestPath -Raw | ConvertFrom-Json -Depth 100
         Assert-True (@($renderedManifest.servers).Count -gt 0) 'render-mcp-runtime-artifacts should emit manifest servers.'
+
+        $renderProviderSkillsScriptPath = Join-Path $runtimeScriptRoot 'render-provider-skill-surfaces.ps1'
+        $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
+        $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
+        $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
+        $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
+        $githubProviderSourceRoot = Join-Path $providerSourceRoot 'github'
+        $codexSkillSource = Join-Path $providerSourceRoot 'codex\skills\demo-skill'
+        $claudeSkillSource = Join-Path $providerSourceRoot 'claude\skills\demo-skill'
+        $codexSkillOutput = Join-Path $tempRepoRoot '.codex\skills'
+        $claudeSkillOutput = Join-Path $tempRepoRoot '.claude\skills'
+        $profileDefinitionRoot = Join-Path $providerSourceRoot 'vscode\profiles'
+        $profileOutputRoot = Join-Path $tempRepoRoot '.vscode\profiles'
+        $githubInstructionOutputRoot = Join-Path $tempRepoRoot '.github'
+
+        New-Item -ItemType Directory -Path $codexSkillSource -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $codexSkillSource 'agents') -Force | Out-Null
+        New-Item -ItemType Directory -Path $claudeSkillSource -Force | Out-Null
+        New-Item -ItemType Directory -Path $profileDefinitionRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'root') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'agents') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'instructions') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $claudeSkillSource 'SKILL.md') -Value '# Demo Claude Skill' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $profileDefinitionRoot 'profile-base.json') -Value @(
+            '{',
+            '  "name": "Base",',
+            '  "description": "Base profile"',
+            '}'
+        )
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\AGENTS.md') -Value '# Demo Agents' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\COMMANDS.md') -Value '# Demo Commands' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\copilot-instructions.md') -Value '# Demo Instructions' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\instruction-routing.catalog.yml') -Value 'routes: []' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'agents\super-agent.agent.md') -Value '# Agent' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'instructions\super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'prompts\route-instructions.prompt.md') -Value '# Prompt' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\super-agent.bootstrap.json') -Value '{}' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\super-agent.selector.json') -Value '{}' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\common.ps1') -Value '# hook common' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\session-start.ps1') -Value '# hook session' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
+
+        & $renderProviderSkillsScriptPath -RepoRoot $tempRepoRoot -Provider codex,claude | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-provider-skill-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Codex skill output.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $claudeSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Claude skill output.'
+
+        & $renderVscodeProfilesScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-vscode-profile-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $profileOutputRoot 'profile-base.json') -PathType Leaf) 'render-vscode-profile-surfaces did not write the projected VS Code profile.'
+
+        & $renderGithubInstructionScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-github-instruction-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'AGENTS.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub root files.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\super-agent.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'hooks\scripts\session-start.ps1') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub hook wrapper.'
+
+        & $setupProfilesScriptPath -DryRun -SkipMcpSync -ProfilesRoot $profileDefinitionRoot -ProfileName Base | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'setup-vscode-profiles dry-run smoke test failed.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {

@@ -9,8 +9,8 @@ LastUpdated: 2026-03-25 18:30
 - Spec: `planning/specs/active/spec-super-agent-token-quality-and-runtime-sync-cleanup.md`
 - Current safe slice implemented: instruction/prompt-level output economy, quality-first routing guidance, session-start continuity summaries, throttled housekeeping with planning export, runtime overflow fixes, context boundary monitoring, dating policy, progress logging, Stop hook for planning export, hardcoded-path removal, `.vscode` profile-base promotion, and Copilot `super-agent` deduplication across canonical skill plus secondary agent alias surfaces
 - Current urgent slice completed: tasks 1a–1h below
-- Current implementation slice completed: canonical MCP runtime catalog/renderers, initial local incremental RAG/CAG index, and explicit intake clarification gate are now in place
-- Active next scope: Claude parity cleanup, remaining README/instruction alignment, and follow-on local RAG/CAG retrieval improvements (tasks 3–6)
+- Current implementation slice completed: canonical MCP runtime catalog/renderers, initial local incremental RAG/CAG index, explicit intake clarification gate, and phase-1 definitions/projection separation for provider skills, GitHub instruction/runtime surfaces, and VS Code profiles are now in place
+- Active next scope: follow-on local RAG/CAG retrieval improvements, canonical MCP parity hardening, and remaining controller-quality cleanup (tasks 3–6)
 
 ## Objective And Scope
 
@@ -24,7 +24,7 @@ The user does not want token-economy behavior to reduce quality. They want risky
 
 Fresh observations for the resumed slice on 2026-03-25:
 - `.vscode/profiles/` and `.vscode/mcp-vscode-global.json` now exist locally and appear to describe optional VS Code profile + MCP activation surfaces that were not yet folded into the runtime source-of-truth model.
-- `.vscode/profiles/README.md` and `setup-profiles.ps1` still reference `profile-vision-engine.json`, but that file does not exist in the folder, so the profile surface already has drift that must be classified before it becomes part of the RAG/CAG strategy.
+- the old `.vscode/profiles/setup-profiles.ps1` entrypoint was replaced by `scripts/runtime/setup-vscode-profiles.ps1`, and the stale `profile-vision-engine.json` references have already been removed from the versioned profile baseline.
 - Copilot currently exposes multiple visible `super-agent` slash surfaces, so the duplication audit must now treat both workspace-local and mirrored/global runtime registration as concrete suspects instead of a hypothetical defect.
 - Claude Code already has a `super-agent` skill and custom hooks under `.claude/settings.json`; this surface needs parity review so it does not drift from Copilot/Codex.
 - The current routing prompt already allows clarifying questions, but the Super Agent intake/controller layer does not yet have a strong explicit rule to ask concise clarification questions when ambiguity materially changes planning or execution.
@@ -78,13 +78,16 @@ Fresh observations for the resumed slice on 2026-03-25:
    - [2026-03-25 18:30] 4c. Implemented the canonical MCP runtime catalog at `.github/governance/mcp-runtime.catalog.json` plus shared renderers/helpers for VS Code and Codex projections ✓ [2026-03-25 18:30]
    - [2026-03-25 18:30] 4d. Added renderer-parity validation so `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json` are both treated as generated outputs from the canonical catalog instead of hand-maintained primaries ✓ [2026-03-25 18:30]
    - [2026-03-25 18:30] 4e. Implemented the initial local incremental context index (`update-local-context-index.ps1`, `query-local-context-index.ps1`) and wired housekeeping to refresh it before cleanup ✓ [2026-03-25 18:30]
+   - [2026-03-25 19:00] 4f. Started structural definitions/projection cleanup by moving the VS Code profile entrypoint into `scripts/runtime/setup-vscode-profiles.ps1`, introducing `definitions/providers/{codex,claude}/skills/` plus `definitions/providers/vscode/profiles/` as authoritative non-code sources, and rendering `.codex/skills/`, `.claude/skills/`, and `.vscode/profiles/` through dedicated renderers instead of editing provider surfaces directly ✓ [2026-03-25 19:00]
    - Target paths:
      - `.github/governance/**`
      - `.vscode/profiles/**`
      - `.vscode/mcp.tamplate.jsonc`
      - `.vscode/mcp-vscode-global.json`
      - `.codex/mcp/servers.manifest.json`
-     - `.codex/scripts/render-vscode-mcp.ps1`
+     - `scripts/runtime/render-vscode-mcp-template.ps1`
+     - `scripts/runtime/sync-codex-mcp-config.ps1`
+     - `definitions/providers/github/**`
      - `.claude/**`
      - `scripts/runtime/**`
      - `scripts/common/**`
@@ -92,7 +95,7 @@ Fresh observations for the resumed slice on 2026-03-25:
    - Commands:
      - `pwsh -NoLogo -NoProfile -File scripts/runtime/doctor.ps1 -RepoRoot . -RuntimeProfile all -DetailedOutput`
    - Checkpoints:
-     - `.vscode/profiles` is treated as a versioned reusable baseline with explicit local selection support
+     - `.vscode/profiles` is treated as a versioned reusable baseline with explicit local selection support through `scripts/runtime/setup-vscode-profiles.ps1`
      - `.vscode/mcp-vscode-global.json` is still classified as a local helper artifact until a runtime contract promotes it
      - the local index design explicitly documents which `context-mode` ideas are adopted, adapted, or rejected
      - index design covers add/update/delete invalidation

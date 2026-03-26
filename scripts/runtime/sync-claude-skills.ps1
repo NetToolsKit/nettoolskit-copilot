@@ -3,9 +3,11 @@
     Synchronizes repository-owned Claude Code skills to the global Claude runtime.
 
 .DESCRIPTION
-    Copies versioned skill definitions from .claude/skills/ in the repository
-    to the global Claude Code runtime under ~/.claude/skills/ so the skills
-    are available across all workspaces on this machine.
+    Renders versioned Claude skill definitions from the authoritative
+    `definitions/providers/claude/skills/` tree into `.claude/skills/` and then
+    copies the rendered surface to the global Claude Code runtime under
+    `~/.claude/skills/` so the skills are available across all workspaces on
+    this machine.
 
     Each skill is a subdirectory containing a SKILL.md file. The sync is
     additive: existing skill directories at the target that are not present
@@ -60,6 +62,17 @@ $resolvedTargetClaudePath = if ([string]::IsNullOrWhiteSpace($TargetClaudePath))
 }
 else {
     $TargetClaudePath
+}
+
+$renderScriptPath = Join-Path $resolvedRepoRoot 'scripts\runtime\render-provider-skill-surfaces.ps1'
+if (-not (Test-Path -LiteralPath $renderScriptPath -PathType Leaf)) {
+    throw "Missing provider skill renderer: $renderScriptPath"
+}
+
+& $renderScriptPath -RepoRoot $resolvedRepoRoot -Provider 'claude' -Verbose:$script:IsVerboseEnabled | Out-Null
+$renderExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+if ($renderExitCode -ne 0) {
+    throw ("Claude skill render failed before sync. ExitCode={0}" -f $renderExitCode)
 }
 
 $sourceSkillsRoot = Join-Path $resolvedRepoRoot '.claude' 'skills'

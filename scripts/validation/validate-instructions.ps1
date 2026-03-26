@@ -71,7 +71,7 @@ function Test-IsLinkTargetValidatable {
     if ($value.StartsWith('./') -or $value.StartsWith('../') -or $value.StartsWith('/')) { return $true }
     if ($value -match '[/\\]') { return $true }
     if ($value -match '\.[A-Za-z0-9]{1,10}([#?].*)?$') { return $true }
-    if ($value -match '^(\.github|\.codex|prompts|chatmodes|schemas|scripts|src|templates)/') { return $true }
+    if ($value -match '^(\.github|\.codex|prompts|chatmodes|schemas|scripts|src|tests|definitions|templates)/') { return $true }
 
     return $false
 }
@@ -165,6 +165,67 @@ function ConvertTo-StableJson {
     )
 
     return ($Value | ConvertTo-Json -Depth 100).Replace("`r`n", "`n")
+}
+
+# Returns a deterministic relative-path -> SHA256 map for one directory tree.
+function Get-StableDirectoryFileMap {
+    param(
+        [string] $RootPath
+    )
+
+    if (-not (Test-Path -LiteralPath $RootPath -PathType Container)) {
+        return $null
+    }
+
+    $result = [ordered]@{}
+    foreach ($file in @(Get-ChildItem -LiteralPath $RootPath -Recurse -File -ErrorAction SilentlyContinue | Sort-Object FullName)) {
+        $relativePath = [System.IO.Path]::GetRelativePath($RootPath, $file.FullName) -replace '\\', '/'
+        $result[$relativePath] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+
+    return $result
+}
+
+# Returns a deterministic relative-file-name -> SHA256 map for one flat directory.
+function Get-StableFileMap {
+    param(
+        [string] $RootPath
+    )
+
+    if (-not (Test-Path -LiteralPath $RootPath -PathType Container)) {
+        return $null
+    }
+
+    $result = [ordered]@{}
+    foreach ($file in @(Get-ChildItem -LiteralPath $RootPath -File -ErrorAction SilentlyContinue | Sort-Object Name)) {
+        $result[$file.Name] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+
+    return $result
+}
+
+# Returns a deterministic selected-file-name -> SHA256 map for one flat directory.
+function Get-StableSelectedFileMap {
+    param(
+        [string] $RootPath,
+        [string[]] $FileNames
+    )
+
+    if (-not (Test-Path -LiteralPath $RootPath -PathType Container)) {
+        return $null
+    }
+
+    $result = [ordered]@{}
+    foreach ($fileName in @($FileNames | Sort-Object -Unique)) {
+        $candidatePath = Join-Path $RootPath $fileName
+        if (-not (Test-Path -LiteralPath $candidatePath -PathType Leaf)) {
+            return $null
+        }
+
+        $result[$fileName] = (Get-FileHash -LiteralPath $candidatePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+
+    return $result
 }
 
 # Converts JSON-like objects into a hashtable keyed by property name.
@@ -916,6 +977,20 @@ $requiredFiles = @(
     '.github/governance/vscode-runtime-hygiene.catalog.json',
     '.github/governance/mcp-runtime.catalog.json',
     '.github/governance/local-context-index.catalog.json',
+    'definitions/README.md',
+    'definitions/providers/github/root/AGENTS.md',
+    'definitions/providers/github/root/COMMANDS.md',
+    'definitions/providers/github/root/copilot-instructions.md',
+    'definitions/providers/github/root/instruction-routing.catalog.yml',
+    'definitions/providers/github/agents/super-agent.agent.md',
+    'definitions/providers/github/instructions/repository-operating-model.instructions.md',
+    'definitions/providers/github/prompts/route-instructions.prompt.md',
+    'definitions/providers/github/hooks/super-agent.bootstrap.json',
+    'definitions/providers/github/hooks/super-agent.selector.json',
+    'definitions/providers/github/hooks/scripts/common.ps1',
+    'definitions/providers/github/hooks/scripts/session-start.ps1',
+    'definitions/providers/github/hooks/scripts/subagent-start.ps1',
+    'definitions/providers/github/hooks/scripts/pre-tool-use.ps1',
     '.vscode/base.code-workspace',
     '.github/runbooks/README.md',
     '.github/runbooks/validation-failures.runbook.md',
@@ -986,7 +1061,17 @@ $requiredFiles = @(
     'scripts/runtime/resume-agent-pipeline.ps1',
     'scripts/runtime/replay-agent-run.ps1',
     'scripts/runtime/evaluate-agent-pipeline.ps1',
+    'scripts/runtime/setup-vscode-profiles.ps1',
+    'scripts/runtime/render-github-instruction-surfaces.ps1',
     'scripts/runtime/render-mcp-runtime-artifacts.ps1',
+    'scripts/runtime/render-vscode-mcp-template.ps1',
+    'scripts/runtime/render-provider-skill-surfaces.ps1',
+    'scripts/runtime/render-vscode-profile-surfaces.ps1',
+    'scripts/runtime/sync-codex-mcp-config.ps1',
+    'scripts/runtime/hooks/common.ps1',
+    'scripts/runtime/hooks/session-start.ps1',
+    'scripts/runtime/hooks/subagent-start.ps1',
+    'scripts/runtime/hooks/pre-tool-use.ps1',
     'scripts/runtime/update-local-context-index.ps1',
     'scripts/runtime/query-local-context-index.ps1',
     'scripts/runtime/new-super-agent-worktree.ps1',
@@ -1158,6 +1243,117 @@ if ($null -ne $mcpRuntimeCatalog -and $null -ne $vscodeMcp) {
     }
     catch {
         Add-ValidationFailure ("Unable to validate MCP runtime catalog parity: {0}" -f $_.Exception.Message)
+    }
+}
+
+$githubInstructionSurfacePairs = @(
+    [pscustomobject]@{
+        Label = 'GitHub instruction root surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\root'
+        Destination = Join-Path $resolvedRepoRoot '.github'
+        UseSelectedFiles = $true
+        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'GitHub agents surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\agents'
+        Destination = Join-Path $resolvedRepoRoot '.github\agents'
+        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'GitHub instructions surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\instructions'
+        Destination = Join-Path $resolvedRepoRoot '.github\instructions'
+        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'GitHub prompts surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\prompts'
+        Destination = Join-Path $resolvedRepoRoot '.github\prompts'
+        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'GitHub hooks surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\hooks'
+        Destination = Join-Path $resolvedRepoRoot '.github\hooks'
+        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
+    }
+)
+
+foreach ($githubSurface in $githubInstructionSurfacePairs) {
+    $useSelectedFiles = $false
+    if ($null -ne $githubSurface.PSObject.Properties['UseSelectedFiles']) {
+        $useSelectedFiles = [bool] $githubSurface.UseSelectedFiles
+    }
+
+    $sourceMap = if ($useSelectedFiles) {
+        $sourceFiles = @(Get-ChildItem -LiteralPath $githubSurface.Source -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
+        Get-StableSelectedFileMap -RootPath $githubSurface.Source -FileNames $sourceFiles
+    }
+    else {
+        Get-StableDirectoryFileMap -RootPath $githubSurface.Source
+    }
+
+    $destinationMap = if ($useSelectedFiles) {
+        $sourceFiles = @(Get-ChildItem -LiteralPath $githubSurface.Source -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
+        Get-StableSelectedFileMap -RootPath $githubSurface.Destination -FileNames $sourceFiles
+    }
+    else {
+        Get-StableDirectoryFileMap -RootPath $githubSurface.Destination
+    }
+
+    if ($null -eq $sourceMap) {
+        Add-ValidationFailure ("Missing GitHub source tree: {0}" -f $githubSurface.Source)
+        continue
+    }
+
+    if ($null -eq $destinationMap) {
+        Add-ValidationFailure ("Missing GitHub destination tree: {0}" -f $githubSurface.Destination)
+        continue
+    }
+
+    if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
+        Add-ValidationFailure ("{0} drift detected. {1}" -f $githubSurface.Label, $githubSurface.FixHint)
+    }
+}
+
+$providerSkillSourcePairs = @(
+    [pscustomobject]@{
+        Label = 'Codex skill surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\skills'
+        Destination = Join-Path $resolvedRepoRoot '.codex\skills'
+        FixHint = 'Re-run scripts/runtime/render-provider-skill-surfaces.ps1 -RepoRoot . -Provider codex.'
+    }
+    [pscustomobject]@{
+        Label = 'Claude skill surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\claude\skills'
+        Destination = Join-Path $resolvedRepoRoot '.claude\skills'
+        FixHint = 'Re-run scripts/runtime/render-provider-skill-surfaces.ps1 -RepoRoot . -Provider claude.'
+    }
+    [pscustomobject]@{
+        Label = 'VS Code profile surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\vscode\profiles'
+        Destination = Join-Path $resolvedRepoRoot '.vscode\profiles'
+        FixHint = 'Re-run scripts/runtime/render-vscode-profile-surfaces.ps1 -RepoRoot .'
+    }
+)
+
+foreach ($skillSurface in $providerSkillSourcePairs) {
+    $sourceMap = Get-StableDirectoryFileMap -RootPath $skillSurface.Source
+    $destinationMap = Get-StableDirectoryFileMap -RootPath $skillSurface.Destination
+
+    if ($null -eq $sourceMap) {
+        Add-ValidationFailure ("Missing provider skill source tree: {0}" -f $skillSurface.Source)
+        continue
+    }
+
+    if ($null -eq $destinationMap) {
+        Add-ValidationFailure ("Missing provider skill destination tree: {0}" -f $skillSurface.Destination)
+        continue
+    }
+
+    if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
+        Add-ValidationFailure ("{0} drift detected. {1}" -f $skillSurface.Label, $skillSurface.FixHint)
     }
 }
 

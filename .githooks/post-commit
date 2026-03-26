@@ -71,7 +71,7 @@ commit_touched_path() {
 
 # Returns true when the current commit touched runtime-managed source assets.
 should_run_runtime_sync() {
-  commit_touched_path '^(\.github/|\.codex/|scripts/)'
+  commit_touched_path '^(definitions/|\.github/|\.codex/|scripts/)'
 }
 
 # Returns true when the current commit touched VS Code global alignment inputs.

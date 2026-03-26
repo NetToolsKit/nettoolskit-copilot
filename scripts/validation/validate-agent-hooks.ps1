@@ -180,6 +180,16 @@ $commonScriptPath = Join-Path $scriptDirectory 'common.ps1'
 if (Test-Path -LiteralPath $commonScriptPath -PathType Leaf) {
     $commonScriptContent = Get-Content -Raw -LiteralPath $commonScriptPath
 
+    if ($commonScriptContent -match 'Resolve-ProjectedRuntimeHookScriptPath') {
+        $canonicalCommonScriptPath = Join-Path $resolvedRepoRoot 'scripts\runtime\hooks\common.ps1'
+        if (-not (Test-Path -LiteralPath $canonicalCommonScriptPath -PathType Leaf)) {
+            Add-ValidationMessage -Message 'Canonical runtime hook helper missing: scripts/runtime/hooks/common.ps1.' -Warnings $warnings -Failures $failures -WarningOnlyMode $WarningOnly
+        }
+        else {
+            $commonScriptContent = Get-Content -Raw -LiteralPath $canonicalCommonScriptPath
+        }
+    }
+
     foreach ($requiredMarker in @(
         'workspace-adapter',
         'global-runtime',

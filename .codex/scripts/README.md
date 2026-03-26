@@ -6,10 +6,10 @@
 
 ## Introduction
 
-This folder contains MCP utility scripts.
+This folder contains compatibility wrappers for MCP utility scripts.
 
 `scripts/runtime/bootstrap.ps1` composes `~/.codex/shared-scripts` from:
-- `.codex/scripts/` (this folder)
+- `.codex/scripts/` (this folder, wrappers only)
 - `scripts/common/`
 - `scripts/security/`
 
@@ -48,8 +48,8 @@ No additional installation is required beyond PowerShell.
 ## Quick Start
 
 ```powershell
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -CreateBackup
-pwsh -File .\.codex\scripts\render-vscode-mcp.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -CreateBackup
+pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
 pwsh -File .\scripts\runtime\bootstrap.ps1
 ```
 
@@ -60,13 +60,13 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 ### Example 1: Preview Codex MCP Changes
 
 ```powershell
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -DryRun
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 ```
 
 ### Example 2: Apply MCP Config With Backup
 
 ```powershell
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 `
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 `
   -TargetConfigPath "$env:USERPROFILE\.codex\config.toml" `
   -CreateBackup
 ```
@@ -74,7 +74,7 @@ pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 `
 ### Example 3: Render VS Code MCP Output
 
 ```powershell
-pwsh -File .\.codex\scripts\render-vscode-mcp.ps1 `
+pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 `
   -OutputPath .\.vscode\mcp.tamplate.jsonc
 ```
 
@@ -92,11 +92,11 @@ pwsh -File (Join-Path $SecurityScriptsRoot 'Invoke-PreBuildSecurityGate.ps1') -R
 
 ### Scripts
 
-`sync-mcp-to-codex-config.ps1`
+`sync-codex-mcp-config.ps1`
 - Inputs: catalog path or manifest path, target config path, backup/dry-run flags.
 - Behavior: rewrites only `[mcp_servers.*]` sections in TOML.
 
-`render-vscode-mcp.ps1`
+`render-vscode-mcp-template.ps1`
 - Inputs: catalog path, output path.
 - Behavior: generates the VS Code MCP projection from the canonical runtime catalog.
 
@@ -126,17 +126,17 @@ pwsh -File (Join-Path $SecurityScriptsRoot 'Invoke-PreBuildSecurityGate.ps1') -R
 
 ```powershell
 # validate VS Code render
-pwsh -File .\.codex\scripts\render-vscode-mcp.ps1 -OutputPath .\.temp\vscode.mcp.generated.json
+pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.temp\vscode.mcp.generated.json
 
 # validate codex apply logic without writing
-pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -DryRun
+pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 ```
 
 ---
 
 ## Contributing
 
-- Keep script behavior deterministic and idempotent.
+- Keep wrapper behavior thin and deterministic.
 - Preserve local user configuration outside MCP sections.
 - Update `.codex/mcp/README.md` when script behavior changes.
 
@@ -154,3 +154,5 @@ pwsh -File .\.codex\scripts\sync-mcp-to-codex-config.ps1 -DryRun
 - `.github/governance/mcp-runtime.catalog.json`
 - `.codex/mcp/servers.manifest.json`
 - `.codex/mcp/README.md`
+- `scripts/runtime/sync-codex-mcp-config.ps1`
+- `scripts/runtime/render-vscode-mcp-template.ps1`

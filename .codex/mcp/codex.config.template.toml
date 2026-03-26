@@ -6,4 +6,4 @@ experimental_windows_sandbox = true
 
 # MCP servers are generated from .codex/mcp/servers.manifest.json
 # Use:
-#   pwsh -File .codex/scripts/sync-mcp-to-codex-config.ps1
+#   pwsh -File scripts/runtime/sync-codex-mcp-config.ps1

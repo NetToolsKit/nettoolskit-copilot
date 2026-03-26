@@ -3,8 +3,10 @@
     Creates repository-managed VS Code profiles and can apply the matching MCP selection.
 
 .DESCRIPTION
-    Reads `profile-*.json` files from `.vscode/profiles/`, lists them, and creates
-    the selected VS Code profiles through the local `code` command.
+    Reads `profile-*.json` files from `definitions/providers/vscode/profiles/`,
+    refreshes the projected `.vscode/profiles/` surface, lists the available
+    profile definitions, and creates the selected VS Code profiles through the
+    local `code` command.
 
     When one profile is selected, the script can also apply the profile MCP
     enable/disable map on top of the canonical
@@ -21,6 +23,10 @@
     One or more profile names, file stems, or file names to create.
     Accepts comma-separated values.
 
+.PARAMETER ProfilesRoot
+    Optional override path to the authoritative repository-managed profile
+    definition folder. Defaults to `<RepoRoot>/definitions/providers/vscode/profiles`.
+
 .PARAMETER SkipMcpSync
     Skips MCP synchronization after profile creation.
 
@@ -35,14 +41,17 @@
 .PARAMETER CreateMcpBackup
     Creates a timestamped backup of the global VS Code `mcp.json` before overwriting it.
 
-.EXAMPLE
-    pwsh -File .\.vscode\profiles\setup-profiles.ps1 -ListProfiles
+.PARAMETER Verbose
+    Shows detailed diagnostics.
 
 .EXAMPLE
-    pwsh -File .\.vscode\profiles\setup-profiles.ps1 -ProfileName Base
+    pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ListProfiles
 
 .EXAMPLE
-    pwsh -File .\.vscode\profiles\setup-profiles.ps1 -ProfileName Base,Frontend -McpProfileName Frontend -CreateMcpBackup
+    pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Base
+
+.EXAMPLE
+    pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Base,Frontend -McpProfileName Frontend -CreateMcpBackup
 
 .NOTES
     Version: 1.0
@@ -53,10 +62,12 @@ param(
     [switch] $DryRun,
     [switch] $ListProfiles,
     [string[]] $ProfileName,
+    [string] $ProfilesRoot,
     [switch] $SkipMcpSync,
     [string] $McpProfileName,
     [string] $GlobalVscodeUserPath,
-    [switch] $CreateMcpBackup
+    [switch] $CreateMcpBackup,
+    [switch] $Verbose
 )
 
 Set-StrictMode -Version Latest
@@ -79,8 +90,35 @@ function Get-CodeCommandPath {
 
 # Resolves the repository root from the profiles folder.
 function Resolve-RepoRoot {
-    $profilesRoot = Split-Path -Path $PSCommandPath -Parent
-    return [System.IO.Path]::GetFullPath((Join-Path $profilesRoot '..\..'))
+    $runtimeRoot = Split-Path -Path $PSCommandPath -Parent
+    return [System.IO.Path]::GetFullPath((Join-Path $runtimeRoot '..\..'))
+}
+
+# Resolves the authoritative repository-managed profiles root.
+function Resolve-ProfilesRoot {
+    param(
+        [string] $ResolvedRepoRoot,
+        [string] $RequestedPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($RequestedPath)) {
+        return Join-Path $ResolvedRepoRoot 'definitions\providers\vscode\profiles'
+    }
+
+    if ([System.IO.Path]::IsPathRooted($RequestedPath)) {
+        return [System.IO.Path]::GetFullPath($RequestedPath)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $ResolvedRepoRoot $RequestedPath))
+}
+
+# Resolves the rendered `.vscode/profiles` output root.
+function Resolve-RenderedProfilesRoot {
+    param(
+        [string] $ResolvedRepoRoot
+    )
+
+    return Join-Path $ResolvedRepoRoot '.vscode\profiles'
 }
 
 # Loads profile definition files.
@@ -109,6 +147,36 @@ function Get-ProfileDefinitions {
     }
 
     return @($definitions)
+}
+
+# Refreshes the projected `.vscode/profiles` surface when using repository-managed definitions.
+function Invoke-ProfileSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $RepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string] $SourceProfilesRoot,
+        [Parameter(Mandatory = $true)]
+        [string] $RenderedProfilesRoot
+    )
+
+    if ([string]::Equals(
+            [System.IO.Path]::GetFullPath($SourceProfilesRoot),
+            [System.IO.Path]::GetFullPath($RenderedProfilesRoot),
+            [System.StringComparison]::OrdinalIgnoreCase)) {
+        return
+    }
+
+    $renderScriptPath = Join-Path $RepoRoot 'scripts\runtime\render-vscode-profile-surfaces.ps1'
+    if (-not (Test-Path -LiteralPath $renderScriptPath -PathType Leaf)) {
+        throw "Script de render de profiles não encontrado: $renderScriptPath"
+    }
+
+    & $renderScriptPath -RepoRoot $RepoRoot -SourceRoot $SourceProfilesRoot -OutputRoot $RenderedProfilesRoot -Verbose:$Verbose | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("Falha ao renderizar a superfície projetada de profiles do VS Code. ExitCode={0}" -f $exitCode)
+    }
 }
 
 # Selects one or more requested profile definitions.
@@ -207,8 +275,10 @@ function Invoke-McpProfileSync {
     }
 }
 
-$profilesRoot = Split-Path -Path $PSCommandPath -Parent
 $repoRoot = Resolve-RepoRoot
+$profilesRoot = Resolve-ProfilesRoot -ResolvedRepoRoot $repoRoot -RequestedPath $ProfilesRoot
+$renderedProfilesRoot = Resolve-RenderedProfilesRoot -ResolvedRepoRoot $repoRoot
+Invoke-ProfileSurfaceRender -RepoRoot $repoRoot -SourceProfilesRoot $profilesRoot -RenderedProfilesRoot $renderedProfilesRoot
 $definitions = Get-ProfileDefinitions -ProfilesRoot $profilesRoot
 
 if ($definitions.Count -eq 0) {
@@ -272,10 +342,10 @@ Write-Host 'Feito! Profiles processados.' -ForegroundColor Green
 Write-Host 'Para alternar:' -ForegroundColor White
 Write-Host "  Ctrl+Shift+P -> 'Profiles: Switch Profile'" -ForegroundColor White
 Write-Host 'Para listar profiles disponíveis:' -ForegroundColor White
-Write-Host '  .\setup-profiles.ps1 -ListProfiles' -ForegroundColor White
+Write-Host '  .\scripts\runtime\setup-vscode-profiles.ps1 -ListProfiles' -ForegroundColor White
 Write-Host 'Para criar só alguns profiles:' -ForegroundColor White
-Write-Host '  .\setup-profiles.ps1 -ProfileName Base,Frontend' -ForegroundColor White
+Write-Host '  .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Base,Frontend' -ForegroundColor White
 Write-Host 'Para criar um profile e sincronizar o MCP global com ele:' -ForegroundColor White
-Write-Host '  .\setup-profiles.ps1 -ProfileName Frontend -CreateMcpBackup' -ForegroundColor White
+Write-Host '  .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Frontend -CreateMcpBackup' -ForegroundColor White
 Write-Host 'Para usar outro profile como fonte do MCP global:' -ForegroundColor White
-Write-Host '  .\setup-profiles.ps1 -ProfileName Base,Frontend -McpProfileName Frontend' -ForegroundColor White
+Write-Host '  .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Base,Frontend -McpProfileName Frontend' -ForegroundColor White

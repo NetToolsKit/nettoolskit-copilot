@@ -8,6 +8,10 @@
     designed for safe continuity and retrieval without shrinking required
     working context.
 
+.EXAMPLE
+    . .\scripts\common\local-context-index.ps1
+    $catalog = Read-LocalContextIndexCatalog -RepoRoot (Get-Location)
+
 .NOTES
     Version: 1.0
     Requirements: PowerShell 7+.
@@ -231,7 +235,8 @@ function New-MarkdownContextChunks {
     $currentLines = New-Object System.Collections.Generic.List[string]
     $chunkIndex = 0
 
-    function Flush-MarkdownChunk {
+    # Creates one markdown chunk from the current buffered heading and lines.
+    function New-MarkdownChunkFromBuffer {
         param(
             [string] $Heading,
             [System.Collections.Generic.List[string]] $Buffer,
@@ -260,7 +265,7 @@ function New-MarkdownContextChunks {
     foreach ($line in @($Lines)) {
         $trimmed = [string] $line
         if ($trimmed -match '^#{1,6}\s+(.+?)\s*$') {
-            $flushed = Flush-MarkdownChunk -Heading $currentHeading -Buffer $currentLines -Index $chunkIndex
+            $flushed = New-MarkdownChunkFromBuffer -Heading $currentHeading -Buffer $currentLines -Index $chunkIndex
             if ($null -ne $flushed) {
                 $chunks.Add($flushed) | Out-Null
                 $chunkIndex++
@@ -274,7 +279,7 @@ function New-MarkdownContextChunks {
         $currentLines.Add($trimmed) | Out-Null
         $currentText = Convert-ToNormalizedContextText -Text (($currentLines.ToArray()) -join [Environment]::NewLine)
         if (($currentLines.Count -ge $MaxLines) -or ($currentText.Length -ge $MaxChars)) {
-            $flushed = Flush-MarkdownChunk -Heading $currentHeading -Buffer $currentLines -Index $chunkIndex
+            $flushed = New-MarkdownChunkFromBuffer -Heading $currentHeading -Buffer $currentLines -Index $chunkIndex
             if ($null -ne $flushed) {
                 $chunks.Add($flushed) | Out-Null
                 $chunkIndex++
@@ -284,12 +289,12 @@ function New-MarkdownContextChunks {
         }
     }
 
-    $finalChunk = Flush-MarkdownChunk -Heading $currentHeading -Buffer $currentLines -Index $chunkIndex
+    $finalChunk = New-MarkdownChunkFromBuffer -Heading $currentHeading -Buffer $currentLines -Index $chunkIndex
     if ($null -ne $finalChunk) {
         $chunks.Add($finalChunk) | Out-Null
     }
 
-    return @($chunks)
+    return $chunks.ToArray()
 }
 
 # Builds bounded line-window chunks for non-markdown text files.
@@ -311,7 +316,8 @@ function New-TextContextChunks {
     $buffer = New-Object System.Collections.Generic.List[string]
     $chunkIndex = 0
 
-    function Flush-TextChunk {
+    # Creates one bounded text chunk from the current line buffer.
+    function New-TextChunkFromBuffer {
         param(
             [System.Collections.Generic.List[string]] $Buffer,
             [int] $Index
@@ -340,7 +346,7 @@ function New-TextContextChunks {
         $buffer.Add([string] $line) | Out-Null
         $currentText = Convert-ToNormalizedContextText -Text (($buffer.ToArray()) -join [Environment]::NewLine)
         if (($buffer.Count -ge $MaxLines) -or ($currentText.Length -ge $MaxChars)) {
-            $flushed = Flush-TextChunk -Buffer $buffer -Index $chunkIndex
+            $flushed = New-TextChunkFromBuffer -Buffer $buffer -Index $chunkIndex
             if ($null -ne $flushed) {
                 $chunks.Add($flushed) | Out-Null
                 $chunkIndex++
@@ -350,12 +356,12 @@ function New-TextContextChunks {
         }
     }
 
-    $finalChunk = Flush-TextChunk -Buffer $buffer -Index $chunkIndex
+    $finalChunk = New-TextChunkFromBuffer -Buffer $buffer -Index $chunkIndex
     if ($null -ne $finalChunk) {
         $chunks.Add($finalChunk) | Out-Null
     }
 
-    return @($chunks)
+    return $chunks.ToArray()
 }
 
 # Builds index chunks for one repository file.
@@ -376,10 +382,10 @@ function New-LocalContextChunksForFile {
     $maxLines = [int] (Get-LocalContextIndexOptionalValue -Object $chunking -PropertyName 'maxLines' -DefaultValue 40)
 
     if (Test-MarkdownLikeContextFile -Path $relativePath) {
-        return @(New-MarkdownContextChunks -RelativePath $relativePath -Lines $lines -MaxChars $maxChars -MaxLines $maxLines)
+        return (New-MarkdownContextChunks -RelativePath $relativePath -Lines $lines -MaxChars $maxChars -MaxLines $maxLines)
     }
 
-    return @(New-TextContextChunks -RelativePath $relativePath -Lines $lines -MaxChars $maxChars -MaxLines $maxLines)
+    return (New-TextContextChunks -RelativePath $relativePath -Lines $lines -MaxChars $maxChars -MaxLines $maxLines)
 }
 
 # Reads the persisted local context index document when present.
@@ -395,7 +401,7 @@ function Read-LocalContextIndexDocument {
     }
 
     try {
-        return (Get-Content -Raw -LiteralPath $indexPath | ConvertFrom-Json -Depth 200)
+        return (Get-Content -Raw -LiteralPath $indexPath | ConvertFrom-Json -Depth 100)
     }
     catch {
         return $null
@@ -413,7 +419,7 @@ function Write-LocalContextIndexDocument {
 
     New-Item -ItemType Directory -Path $IndexRoot -Force | Out-Null
     $indexPath = Join-Path $IndexRoot 'index.json'
-    Set-Content -LiteralPath $indexPath -Value ($Document | ConvertTo-Json -Depth 200) -Encoding UTF8 -NoNewline
+    Set-Content -LiteralPath $indexPath -Value ($Document | ConvertTo-Json -Depth 100) -Encoding UTF8 -NoNewline
     return $indexPath
 }
 

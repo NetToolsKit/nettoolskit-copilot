@@ -56,6 +56,14 @@
       "sha256": "0ce88487a1c7465fdae4f737d8757d3955abae366e45ff9e7a6a34ad05c8511f"
     },
     {
+      "path": "scripts/common/mcp-runtime-catalog.ps1",
+      "sha256": "19eb3f35e51d602fe9af4bcb88bf8681e5481440e09c167a0ead9cbf12b030df"
+    },
+    {
+      "path": "scripts/common/local-context-index.ps1",
+      "sha256": "c04788f30d48efbaa1f7e63ddb272f930ec5bd95aec889e9e1bd9b6200e9ff62"
+    },
+    {
       "path": "scripts/common/git-hook-eof-settings.ps1",
       "sha256": "e9fa7d3de17dc55ffd7477a9eb516db3fe5acc6e4134cbdaa24b17289176d368"
     },
@@ -65,7 +73,7 @@
     },
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "dabd4ad940a09c9616987f76b097e89a730299d6ea0a8350f4f4eaec68747ca1"
+      "sha256": "1d91022b6737cee2bb864758a0ebff886ad50a792b896d629487a8402e97ff76"
     },
     {
       "path": "scripts/common/codex-runtime-hygiene.ps1",

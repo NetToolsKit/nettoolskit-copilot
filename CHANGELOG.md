@@ -10,6 +10,25 @@
 - Context economy rules deduplicated: canonical detail lives only in `context-economy-checkpoint.instructions.md`; all other files carry a one-paragraph summary plus a reference to the canonical file.
 
 ### Changed
+- Completed the non-destructive source/projection topology refactor for provider-managed non-code assets: `definitions/` is now the authoritative tree for provider skill definitions and VS Code profile baselines, `scripts/` remains the only operational entrypoint layer, `src/` and `tests/` are reserved as the future engine layout, and `.codex/.claude/.vscode` remain projected runtime surfaces rendered from authoritative definitions rather than primary edit locations. This includes:
+  - `scripts/runtime/render-provider-skill-surfaces.ps1`
+  - `scripts/runtime/render-vscode-profile-surfaces.ps1`
+  - `scripts/runtime/setup-vscode-profiles.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/sync-claude-skills.ps1`
+  - `scripts/validation/validate-instructions.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `definitions/README.md`
+  - `definitions/providers/codex/skills/**`
+  - `definitions/providers/vscode/profiles/**`
+  - `.vscode/README.md`
+  - `.vscode/profiles/README.md`
+  - `.codex/skills/README.md`
+  - `README.md`
+  - `scripts/README.md`
+  - `.githooks/post-commit`
+  - `planning/completed/plan-runtime-source-projection-architecture-migration.md`
+  - `planning/specs/completed/spec-runtime-source-projection-architecture-migration.md`
 - Canonicalized MCP runtime ownership around `.github/governance/mcp-runtime.catalog.json`, added a tracked renderer pipeline for `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json`, updated bootstrap/post-commit/install-facing documentation to treat the Codex manifest as a generated subset instead of the primary source of truth, and extended validation/runtime tests to enforce renderer parity.
 - Added the first deterministic local RAG/CAG slice through `.github/governance/local-context-index.catalog.json`, `scripts/common/local-context-index.ps1`, `scripts/runtime/update-local-context-index.ps1`, `scripts/runtime/query-local-context-index.ps1`, and housekeeping refresh integration so local repository continuity can be reused from `.temp/context-index/` without replaying large chat transcripts.
 - Added an explicit Super Agent clarification gate across intake runtime/schema/instruction surfaces so ambiguous requests now stop cleanly after intake with concise clarification questions only when the ambiguity would materially change planning scope, architecture, runtime behavior, validation, or operational safety.

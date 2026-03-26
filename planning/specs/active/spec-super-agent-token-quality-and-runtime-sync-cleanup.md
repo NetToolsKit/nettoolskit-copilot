@@ -52,6 +52,7 @@ The first resumed cleanup slice is now materially implemented:
 - the canonical MCP runtime catalog now lives at `.github/governance/mcp-runtime.catalog.json`, and both `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json` are treated as generated projections
 - the initial local RAG/CAG slice now exists as a deterministic incremental index under `.temp/context-index/`, maintained by `scripts/runtime/update-local-context-index.ps1`, queried by `scripts/runtime/query-local-context-index.ps1`, and refreshed by `invoke-super-agent-housekeeping.ps1`
 - the Super Agent intake/controller contract now includes explicit clarification gating with `clarificationRequired`, `canProceedSafely`, `clarificationReason`, and `clarificationQuestions`
+- phase 1 of the definitions/projection cleanup is now in place for provider skill surfaces and VS Code profiles: executable profile setup moved under `scripts/runtime/`, authoritative non-code assets live under `definitions/providers/{codex,claude}/skills/` plus `definitions/providers/vscode/profiles/`, and `.codex/skills/`, `.claude/skills/`, plus `.vscode/profiles/` are treated as rendered outputs rather than primary edit locations
 
 ## External Reference Baseline
 
@@ -90,6 +91,8 @@ The repository should not copy `context-mode` blindly. Its plugin/hook architect
 16. The future local RAG/CAG implementation must explicitly document which `context-mode` patterns were adopted, adapted, or rejected.
 17. MCP configuration must use one canonical rich runtime catalog with per-runtime renderers; `.vscode/mcp.tamplate.jsonc` and the Codex manifest are both generated outputs from that catalog.
 18. Repository documentation must classify `infra/github/main.json` as GitHub governance/ruleset infrastructure.
+19. Provider skill surfaces for Codex and Claude must be editable from `definitions/providers/*/skills/` only, with rendered parity validation against `.codex/skills/` and `.claude/skills/`.
+20. GitHub instruction/runtime surfaces (`root`, `agents`, `instructions`, `prompts`, `hooks`) should follow the same `definitions/providers/github/` -> `.github/` projection model while leaving GitHub-native governance assets authored in `.github/`.
 
 ## Alternatives Considered
 
@@ -107,7 +110,7 @@ The repository should not copy `context-mode` blindly. Its plugin/hook architect
 - The risky input/context token-economy implementation is rolled back and should remain rolled back unless explicitly revisited.
 - A future local index/cache should be deterministic, incremental, and delete-safe.
 - The duplicate slash-command behavior is likely related to mirrored `.github` runtime sync, local adapter duplication, or overlapping agent/skill registration.
-- `.vscode/profiles/README.md` and `setup-profiles.ps1` already reference `profile-vision-engine.json`, but that file is absent from the folder, so the profile surface currently contains drift that must be resolved before broader adoption.
+- the former `.vscode/profiles/setup-profiles.ps1` entrypoint has been replaced by `scripts/runtime/setup-vscode-profiles.ps1`, and the stale `profile-vision-engine.json` drift has already been removed from the profile baseline.
 - The follow-up should remain repo-owned and deterministic.
 - The output-economy and local-index portions remain deferred until the user decides to resume them.
 - The Codex runtime blowup controls are safe to implement immediately because they do not trim required execution context.

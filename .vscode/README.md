@@ -122,24 +122,26 @@ pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath C:\Users
 - `scripts/runtime/sync-vscode-global-mcp.ps1`: renders the canonical MCP runtime catalog into the global VS Code user profile and refreshes `.vscode/mcp-vscode-global.json`.
 - `scripts/runtime/sync-vscode-global-snippets.ps1`: synchronizes canonical snippets into the global VS Code user profile.
 - `scripts/runtime/sync-workspace-settings.ps1`: merges `base.code-workspace` with target workspaces and regenerates the approved workspace `settings` block.
-- `.vscode/profiles/`: curated versioned VS Code profile definitions plus the setup helper that can list or create selected profiles.
-- `.vscode/profiles/README.md`: operator guide for profile creation and profile-driven MCP enablement.
+- `.vscode/profiles/`: rendered repository surface projected from `definitions/providers/vscode/profiles/` and consumed by the runtime setup entrypoint in `scripts/runtime/`.
+- `.vscode/profiles/README.md`: rendered operator guide for profile creation and profile-driven MCP enablement.
+- `scripts/runtime/render-vscode-profile-surfaces.ps1`: renders the authoritative VS Code profile definitions into `.vscode/profiles/`.
+- `scripts/runtime/render-vscode-mcp-template.ps1`: renders `.vscode/mcp.tamplate.jsonc` from the canonical MCP runtime catalog.
 
 ### VS Code profile baselines
 
-The repository treats `.vscode/profiles/` as a versioned baseline surface. Use it to keep a curated set of reusable VS Code profiles in source control and choose which ones to create locally.
+The repository treats `definitions/providers/vscode/profiles/` as the authoritative baseline surface and renders `.vscode/profiles/` from it. Use the rendered `.vscode/profiles/` folder for discovery and docs, but edit the definitions tree when profile content changes.
 
 Profiles can also drive MCP enable/disable selection for the global VS Code
 runtime through the `mcp.servers.<name>.enabled` map consumed by
-`.vscode/profiles/setup-profiles.ps1`.
+`scripts/runtime/setup-vscode-profiles.ps1`.
 
 Examples:
 
 ```powershell
-pwsh -File .\.vscode\profiles\setup-profiles.ps1 -ListProfiles
-pwsh -File .\.vscode\profiles\setup-profiles.ps1 -DryRun -ProfileName Base,Frontend
-pwsh -File .\.vscode\profiles\setup-profiles.ps1 -ProfileName "Backend .NET"
-pwsh -File .\.vscode\profiles\setup-profiles.ps1 -ProfileName Frontend -CreateMcpBackup
+pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ListProfiles
+pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -DryRun -ProfileName Base,Frontend
+pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName "Backend .NET"
+pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Frontend -CreateMcpBackup
 ```
 
 ### Local helper assets
@@ -160,6 +162,8 @@ Use the tracked files below as the only authoritative VS Code runtime inputs:
 - `.vscode/mcp.tamplate.jsonc`
 - `.vscode/base.code-workspace`
 - `.vscode/snippets/*.tamplate.code-snippets`
+- `definitions/providers/vscode/profiles/`
+- `scripts/runtime/setup-vscode-profiles.ps1`
 
 ### MCP authentication persistence
 
@@ -193,6 +197,7 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 - Treat `base.code-workspace` as the shared workspace inheritance baseline.
 - Treat `.vscode/snippets/*.tamplate.code-snippets` as the versioned snippet source and sync them into the global profile when they change.
 - Keep `.vscode/profiles/` versioned and internally consistent with the checked-in `profile-*.json` set.
+- Keep executable entrypoints under `scripts/`; `.vscode/profiles/` stores versioned profile definitions only.
 - Keep `.vscode/mcp-vscode-global.json` ignored and generated; do not hand-edit it.
 
 ---
@@ -208,7 +213,8 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 
 - `.github/governance/mcp-runtime.catalog.json`
 - `.codex/mcp/servers.manifest.json`
-- `.codex/scripts/render-vscode-mcp.ps1`
+- `scripts/runtime/render-vscode-mcp-template.ps1`
+- `scripts/runtime/sync-codex-mcp-config.ps1`
 - `.vscode/base.code-workspace`
 - `scripts/runtime/apply-vscode-templates.ps1`
 - `scripts/runtime/sync-vscode-global-settings.ps1`
