@@ -23,6 +23,9 @@
     One or more profile names, file stems, or file names to create.
     Accepts comma-separated values.
 
+.PARAMETER RepoRoot
+    Optional repository root. Defaults to the repository that owns this script.
+
 .PARAMETER ProfilesRoot
     Optional override path to the authoritative repository-managed profile
     definition folder. Defaults to `<RepoRoot>/definitions/providers/vscode/profiles`.
@@ -62,6 +65,7 @@ param(
     [switch] $DryRun,
     [switch] $ListProfiles,
     [string[]] $ProfileName,
+    [string] $RepoRoot,
     [string] $ProfilesRoot,
     [switch] $SkipMcpSync,
     [string] $McpProfileName,
@@ -88,10 +92,38 @@ function Get-CodeCommandPath {
     throw 'VS Code não encontrado. Adicione o comando `code` ao PATH ou ajuste o script.'
 }
 
-# Resolves the repository root from the profiles folder.
+# Resolves the repository root from the script location unless an explicit
+# repository root override is supplied.
 function Resolve-RepoRoot {
+    param(
+        [string] $RequestedRoot
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        if ([System.IO.Path]::IsPathRooted($RequestedRoot)) {
+            return [System.IO.Path]::GetFullPath($RequestedRoot)
+        }
+
+        return [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $RequestedRoot))
+    }
+
     $runtimeRoot = Split-Path -Path $PSCommandPath -Parent
     return [System.IO.Path]::GetFullPath((Join-Path $runtimeRoot '..\..'))
+}
+
+# Resolves one sibling runtime script path from the repository that owns this entrypoint.
+function Resolve-ToolingScriptPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $FileName
+    )
+
+    $candidatePath = Join-Path $PSScriptRoot $FileName
+    if (-not (Test-Path -LiteralPath $candidatePath -PathType Leaf)) {
+        throw "Script de runtime não encontrado: $candidatePath"
+    }
+
+    return [System.IO.Path]::GetFullPath($candidatePath)
 }
 
 # Resolves the authoritative repository-managed profiles root.
@@ -167,10 +199,7 @@ function Invoke-ProfileSurfaceRender {
         return
     }
 
-    $renderScriptPath = Join-Path $RepoRoot 'scripts\runtime\render-vscode-profile-surfaces.ps1'
-    if (-not (Test-Path -LiteralPath $renderScriptPath -PathType Leaf)) {
-        throw "Script de render de profiles não encontrado: $renderScriptPath"
-    }
+    $renderScriptPath = Resolve-ToolingScriptPath -FileName 'render-vscode-profile-surfaces.ps1'
 
     & $renderScriptPath -RepoRoot $RepoRoot -SourceRoot $SourceProfilesRoot -OutputRoot $RenderedProfilesRoot -Verbose:$Verbose | Out-Null
     $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
@@ -252,10 +281,7 @@ function Invoke-McpProfileSync {
         [switch] $CreateMcpBackup
     )
 
-    $syncScriptPath = Join-Path $RepoRoot 'scripts\runtime\sync-vscode-global-mcp.ps1'
-    if (-not (Test-Path -LiteralPath $syncScriptPath -PathType Leaf)) {
-        throw "Script de sync MCP não encontrado: $syncScriptPath"
-    }
+    $syncScriptPath = Resolve-ToolingScriptPath -FileName 'sync-vscode-global-mcp.ps1'
 
     $syncArguments = @{
         RepoRoot = $RepoRoot
@@ -275,7 +301,7 @@ function Invoke-McpProfileSync {
     }
 }
 
-$repoRoot = Resolve-RepoRoot
+$repoRoot = Resolve-RepoRoot -RequestedRoot $RepoRoot
 $profilesRoot = Resolve-ProfilesRoot -ResolvedRepoRoot $repoRoot -RequestedPath $ProfilesRoot
 $renderedProfilesRoot = Resolve-RenderedProfilesRoot -ResolvedRepoRoot $repoRoot
 Invoke-ProfileSurfaceRender -RepoRoot $repoRoot -SourceProfilesRoot $profilesRoot -RenderedProfilesRoot $renderedProfilesRoot

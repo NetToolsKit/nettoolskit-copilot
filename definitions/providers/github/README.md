@@ -1,15 +1,18 @@
 # GitHub Provider Definitions
 
-This tree is the authoritative source for repository-owned GitHub/Copilot instruction
-and hook surfaces that are rendered into `.github/`.
+This tree is the authoritative source for repository-owned GitHub/Copilot
+instruction, template, and hook surfaces that are rendered into `.github/`.
 
 ## Authoritative Coverage
 
 - `root/` -> managed root files rendered into `.github/`
 - `agents/` -> rendered into `.github/agents/`
+- `chatmodes/` -> rendered into `.github/chatmodes/`
 - `instructions/` -> rendered into `.github/instructions/`
+- `ISSUE_TEMPLATE/` -> rendered into `.github/ISSUE_TEMPLATE/`
 - `prompts/` -> rendered into `.github/prompts/`
 - `hooks/` -> rendered into `.github/hooks/`
+- `templates/` -> rendered into `.github/templates/`
 
 ## Projection Rules
 
@@ -20,6 +23,7 @@ and hook surfaces that are rendered into `.github/`.
 pwsh -File .\scripts\runtime\render-github-instruction-surfaces.ps1 -RepoRoot .
 ```
 
-- `.github/` still keeps GitHub-native assets such as workflows, policies, schemas,
-  runbooks, and templates authored in place. Only the instruction/runtime-oriented
-  surfaces above are projected from `definitions/providers/github/`.
+- `.github/` still keeps GitHub-native governance assets such as workflows,
+  policies, schemas, runbooks, and governance catalogs authored in place. Only
+  the provider-authored surfaces above are projected from
+  `definitions/providers/github/`.

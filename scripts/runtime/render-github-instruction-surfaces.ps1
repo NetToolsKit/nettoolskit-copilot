@@ -5,12 +5,14 @@
 .DESCRIPTION
     Mirrors the authoritative `definitions/providers/github/` tree into the tracked
     `.github/` instruction/runtime surfaces:
-    - root instruction files (`AGENTS.md`, `COMMANDS.md`, `copilot-instructions.md`, `instruction-routing.catalog.yml`)
+    - managed root files (`AGENTS.md`, `COMMANDS.md`, `copilot-instructions.md`, `instruction-routing.catalog.yml`, `PULL_REQUEST_TEMPLATE.md`, `dependabot.yml`, `dependency-review-config.yml`)
     - `.github/agents/`
     - `.github/chatmodes/`
     - `.github/instructions/`
+    - `.github/ISSUE_TEMPLATE/`
     - `.github/prompts/`
     - `.github/hooks/`
+    - `.github/templates/`
 
     This keeps GitHub/Copilot instruction assets authoritative under `definitions/`
     while `.github/` remains the projected surface consumed by repository tooling,
@@ -126,8 +128,10 @@ $directorySpecs = @(
     [pscustomobject]@{ Name = 'agents'; Source = Join-Path $resolvedSourceRoot 'agents'; Destination = Join-Path $resolvedOutputRoot 'agents' }
     [pscustomobject]@{ Name = 'chatmodes'; Source = Join-Path $resolvedSourceRoot 'chatmodes'; Destination = Join-Path $resolvedOutputRoot 'chatmodes' }
     [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedSourceRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
+    [pscustomobject]@{ Name = 'ISSUE_TEMPLATE'; Source = Join-Path $resolvedSourceRoot 'ISSUE_TEMPLATE'; Destination = Join-Path $resolvedOutputRoot 'ISSUE_TEMPLATE' }
     [pscustomobject]@{ Name = 'prompts'; Source = Join-Path $resolvedSourceRoot 'prompts'; Destination = Join-Path $resolvedOutputRoot 'prompts' }
     [pscustomobject]@{ Name = 'hooks'; Source = Join-Path $resolvedSourceRoot 'hooks'; Destination = Join-Path $resolvedOutputRoot 'hooks' }
+    [pscustomobject]@{ Name = 'templates'; Source = Join-Path $resolvedSourceRoot 'templates'; Destination = Join-Path $resolvedOutputRoot 'templates' }
 )
 
 foreach ($directorySpec in $directorySpecs) {

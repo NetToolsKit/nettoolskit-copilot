@@ -44,16 +44,20 @@
       "sha256": "b300296deb2f0cb315ec32f4771e220fc8093cdeae1b007fc1032fa482346192"
     },
     {
+      "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",
+      "sha256": "ac00a6dc1860b58bd99b4459e86f3557e5de83a84bd2a10ff8e324d6f61e4932"
+    },
+    {
       "path": "scripts/common/runtime-install-profiles.ps1",
       "sha256": "4a44a43481cd796597ede7175a26b7cb47f909fa342f60a4a2ba427dd6c4d950"
     },
     {
-      "path": "scripts/common/runtime-execution-context.ps1",
-      "sha256": "96ce307d6e00f29d3d11230ba100b3bdb17aec6f7599c852446a35b0dde0a5e2"
-    },
-    {
       "path": "scripts/common/repository-paths.ps1",
       "sha256": "0ce88487a1c7465fdae4f737d8757d3955abae366e45ff9e7a6a34ad05c8511f"
+    },
+    {
+      "path": "scripts/common/provider-surface-catalog.ps1",
+      "sha256": "8aaac9b8b7837621b6b83335b8cbd425de30fd7afe0d1b770c67f3ebd09aa35c"
     },
     {
       "path": "scripts/common/mcp-runtime-catalog.ps1",
@@ -73,15 +77,15 @@
     },
     {
       "path": "scripts/common/common-bootstrap.ps1",
-      "sha256": "1d91022b6737cee2bb864758a0ebff886ad50a792b896d629487a8402e97ff76"
+      "sha256": "99aec8f558f131bcf2df1a90db0c4466999dac013ba4ccb3f554b9e04ff112ad"
     },
     {
       "path": "scripts/common/codex-runtime-hygiene.ps1",
       "sha256": "e84dac1db623fafdcb78fe71231f740c5bdced6ab06a4bcf5f71636605e15d47"
     },
     {
-      "path": "scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1",
-      "sha256": "ac00a6dc1860b58bd99b4459e86f3557e5de83a84bd2a10ff8e324d6f61e4932"
+      "path": "scripts/common/runtime-execution-context.ps1",
+      "sha256": "96ce307d6e00f29d3d11230ba100b3bdb17aec6f7599c852446a35b0dde0a5e2"
     },
     {
       "path": "scripts/security/Invoke-VulnerabilityAudit.ps1",

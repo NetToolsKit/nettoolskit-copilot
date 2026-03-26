@@ -46,7 +46,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'validation-logging', 'mcp-runtime-catalog', 'local-context-index')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'validation-logging', 'mcp-runtime-catalog', 'local-context-index', 'provider-surface-catalog')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ValidationState -VerboseEnabled $script:IsVerboseEnabled
@@ -976,15 +976,20 @@ $requiredFiles = @(
     '.github/governance/codex-runtime-hygiene.catalog.json',
     '.github/governance/vscode-runtime-hygiene.catalog.json',
     '.github/governance/mcp-runtime.catalog.json',
+    '.github/governance/provider-surface-projection.catalog.json',
     '.github/governance/local-context-index.catalog.json',
     'definitions/README.md',
     'definitions/providers/github/root/AGENTS.md',
     'definitions/providers/github/root/COMMANDS.md',
     'definitions/providers/github/root/copilot-instructions.md',
     'definitions/providers/github/root/instruction-routing.catalog.yml',
+    'definitions/providers/github/root/PULL_REQUEST_TEMPLATE.md',
+    'definitions/providers/github/root/dependabot.yml',
+    'definitions/providers/github/root/dependency-review-config.yml',
     'definitions/providers/github/agents/super-agent.agent.md',
     'definitions/providers/github/chatmodes/clean-architecture-review.chatmode.md',
     'definitions/providers/github/instructions/repository-operating-model.instructions.md',
+    'definitions/providers/github/ISSUE_TEMPLATE/config.yml',
     'definitions/providers/github/prompts/route-instructions.prompt.md',
     'definitions/providers/github/hooks/super-agent.bootstrap.json',
     'definitions/providers/github/hooks/super-agent.selector.json',
@@ -992,6 +997,7 @@ $requiredFiles = @(
     'definitions/providers/github/hooks/scripts/session-start.ps1',
     'definitions/providers/github/hooks/scripts/subagent-start.ps1',
     'definitions/providers/github/hooks/scripts/pre-tool-use.ps1',
+    'definitions/providers/github/templates/readme-template.md',
     'definitions/providers/vscode/workspace/README.md',
     'definitions/providers/vscode/workspace/base.code-workspace',
     'definitions/providers/vscode/workspace/settings.tamplate.jsonc',
@@ -1021,6 +1027,7 @@ $requiredFiles = @(
     '.github/schemas/agent.policy-evaluation.schema.json',
     '.github/schemas/agent.checkpoint-state.schema.json',
     '.github/schemas/mcp-runtime.catalog.schema.json',
+    '.github/schemas/provider-surface-projection.catalog.schema.json',
     '.github/schemas/local-context-index.catalog.schema.json',
     '.github/schemas/agent.stage-intake-result.schema.json',
     '.github/schemas/agent.stage-spec-result.schema.json',
@@ -1087,6 +1094,7 @@ $requiredFiles = @(
     'scripts/runtime/render-github-instruction-surfaces.ps1',
     'scripts/runtime/render-mcp-runtime-artifacts.ps1',
     'scripts/runtime/render-vscode-mcp-template.ps1',
+    'scripts/runtime/render-provider-surfaces.ps1',
     'scripts/runtime/render-provider-skill-surfaces.ps1',
     'scripts/runtime/render-codex-compatibility-surfaces.ps1',
     'scripts/runtime/render-vscode-profile-surfaces.ps1',
@@ -1098,6 +1106,7 @@ $requiredFiles = @(
     'scripts/runtime/hooks/session-start.ps1',
     'scripts/runtime/hooks/subagent-start.ps1',
     'scripts/runtime/hooks/pre-tool-use.ps1',
+    'scripts/common/provider-surface-catalog.ps1',
     'scripts/runtime/update-local-context-index.ps1',
     'scripts/runtime/query-local-context-index.ps1',
     'scripts/runtime/new-super-agent-worktree.ps1',
@@ -1146,6 +1155,7 @@ if ($null -ne $schema) {
 }
 
 $mcpRuntimeCatalog = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/mcp-runtime.catalog.json'
+$providerSurfaceProjectionCatalog = Test-JsonFile -Root $resolvedRepoRoot -Path '.github/governance/provider-surface-projection.catalog.json'
 $mcpManifest = Test-JsonFile -Root $resolvedRepoRoot -Path '.codex/mcp/servers.manifest.json'
 if ($null -ne $mcpManifest) {
     if ($null -eq $mcpManifest.servers -or @($mcpManifest.servers).Count -eq 0) {
@@ -1157,6 +1167,22 @@ $localContextIndexCatalog = Test-JsonFile -Root $resolvedRepoRoot -Path '.github
 if ($null -ne $localContextIndexCatalog) {
     if ($null -eq $localContextIndexCatalog.includeGlobs -or @($localContextIndexCatalog.includeGlobs).Count -eq 0) {
         Add-ValidationFailure 'Local context index catalog must contain at least one includeGlobs entry.'
+    }
+}
+
+$providerSurfaceCatalogInfo = $null
+if ($null -ne $providerSurfaceProjectionCatalog) {
+    try {
+        $providerSurfaceCatalogInfo = Read-ProviderSurfaceProjectionCatalog -RepoRoot $resolvedRepoRoot
+        if (@($providerSurfaceCatalogInfo.Catalog.renderers).Count -eq 0) {
+            Add-ValidationFailure 'Provider surface projection catalog must contain at least one renderer.'
+        }
+        if (@($providerSurfaceCatalogInfo.Catalog.surfaces).Count -eq 0) {
+            Add-ValidationFailure 'Provider surface projection catalog must contain at least one surface.'
+        }
+    }
+    catch {
+        Add-ValidationFailure ("Unable to read provider surface projection catalog: {0}" -f $_.Exception.Message)
     }
 }
 
@@ -1272,181 +1298,76 @@ if ($null -ne $mcpRuntimeCatalog -and $null -ne $vscodeMcp) {
     }
 }
 
-$githubInstructionSurfacePairs = @(
-    [pscustomobject]@{
-        Label = 'GitHub instruction root surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\root'
-        Destination = Join-Path $resolvedRepoRoot '.github'
-        UseSelectedFiles = $true
-        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'GitHub agents surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\agents'
-        Destination = Join-Path $resolvedRepoRoot '.github\agents'
-        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'GitHub chatmodes surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\chatmodes'
-        Destination = Join-Path $resolvedRepoRoot '.github\chatmodes'
-        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'GitHub instructions surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\instructions'
-        Destination = Join-Path $resolvedRepoRoot '.github\instructions'
-        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'GitHub prompts surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\prompts'
-        Destination = Join-Path $resolvedRepoRoot '.github\prompts'
-        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'GitHub hooks surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\hooks'
-        Destination = Join-Path $resolvedRepoRoot '.github\hooks'
-        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
-    }
-)
+if ($null -ne $providerSurfaceCatalogInfo) {
+    $rendererMap = Get-ProviderSurfaceCatalogRendererMap -Catalog $providerSurfaceCatalogInfo.Catalog
+    $validatedProjectionSurfaces = Get-ProviderSurfaceProjectionSurfaces -Catalog $providerSurfaceCatalogInfo.Catalog -ValidationEnabledOnly:$true
+    foreach ($surface in @($validatedProjectionSurfaces)) {
+        $surfaceId = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $surface -PropertyName 'id' -DefaultValue '')
+        $surfaceLabel = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $surface -PropertyName 'description' -DefaultValue $surfaceId)
+        $rendererId = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $surface -PropertyName 'rendererId' -DefaultValue '')
+        $validation = Get-ProviderSurfaceCatalogOptionalValue -Object $surface -PropertyName 'validation'
+        $validationMode = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $validation -PropertyName 'mode' -DefaultValue 'skip')
 
-foreach ($githubSurface in $githubInstructionSurfacePairs) {
-    $useSelectedFiles = $false
-    if ($null -ne $githubSurface.PSObject.Properties['UseSelectedFiles']) {
-        $useSelectedFiles = [bool] $githubSurface.UseSelectedFiles
-    }
+        if (-not $rendererMap.ContainsKey($rendererId)) {
+            Add-ValidationFailure ("Projection surface '{0}' references unknown renderer '{1}'." -f $surfaceId, $rendererId)
+            continue
+        }
 
-    $sourceMap = if ($useSelectedFiles) {
-        $sourceFiles = @(Get-ChildItem -LiteralPath $githubSurface.Source -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
-        Get-StableSelectedFileMap -RootPath $githubSurface.Source -FileNames $sourceFiles
-    }
-    else {
-        Get-StableDirectoryFileMap -RootPath $githubSurface.Source
-    }
+        if ($validationMode -in @('skip', 'generatedCatalogMcp')) {
+            continue
+        }
 
-    $destinationMap = if ($useSelectedFiles) {
-        $sourceFiles = @(Get-ChildItem -LiteralPath $githubSurface.Source -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
-        Get-StableSelectedFileMap -RootPath $githubSurface.Destination -FileNames $sourceFiles
-    }
-    else {
-        Get-StableDirectoryFileMap -RootPath $githubSurface.Destination
-    }
+        $sourceRoot = Resolve-ProviderSurfaceCatalogPathValue -RepoRoot $resolvedRepoRoot -PathValue ([string] (Get-ProviderSurfaceCatalogOptionalValue -Object $surface -PropertyName 'sourcePath' -DefaultValue ''))
+        $destinationRoot = Resolve-ProviderSurfaceCatalogPathValue -RepoRoot $resolvedRepoRoot -PathValue ([string] (Get-ProviderSurfaceCatalogOptionalValue -Object $surface -PropertyName 'projectedPath' -DefaultValue ''))
+        $fixHint = ("Re-run scripts/runtime/render-provider-surfaces.ps1 -RepoRoot . -RendererId {0}." -f $rendererId)
 
-    if ($null -eq $sourceMap) {
-        Add-ValidationFailure ("Missing GitHub source tree: {0}" -f $githubSurface.Source)
-        continue
-    }
+        switch ($validationMode) {
+            'directory' {
+                $sourceMap = Get-StableDirectoryFileMap -RootPath $sourceRoot
+                $destinationMap = Get-StableDirectoryFileMap -RootPath $destinationRoot
 
-    if ($null -eq $destinationMap) {
-        Add-ValidationFailure ("Missing GitHub destination tree: {0}" -f $githubSurface.Destination)
-        continue
-    }
+                if ($null -eq $sourceMap) {
+                    Add-ValidationFailure ("Missing projected source tree: {0}" -f $sourceRoot)
+                    continue
+                }
 
-    if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
-        Add-ValidationFailure ("{0} drift detected. {1}" -f $githubSurface.Label, $githubSurface.FixHint)
-    }
-}
+                if ($null -eq $destinationMap) {
+                    Add-ValidationFailure ("Missing projected destination tree: {0}" -f $destinationRoot)
+                    continue
+                }
 
-$providerSkillSourcePairs = @(
-    [pscustomobject]@{
-        Label = 'Codex skill surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\skills'
-        Destination = Join-Path $resolvedRepoRoot '.codex\skills'
-        FixHint = 'Re-run scripts/runtime/render-provider-skill-surfaces.ps1 -RepoRoot . -Provider codex.'
-    }
-    [pscustomobject]@{
-        Label = 'Claude skill surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\claude\skills'
-        Destination = Join-Path $resolvedRepoRoot '.claude\skills'
-        FixHint = 'Re-run scripts/runtime/render-provider-skill-surfaces.ps1 -RepoRoot . -Provider claude.'
-    }
-    [pscustomobject]@{
-        Label = 'VS Code profile surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\vscode\profiles'
-        Destination = Join-Path $resolvedRepoRoot '.vscode\profiles'
-        FixHint = 'Re-run scripts/runtime/render-vscode-profile-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'VS Code workspace snippets surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\vscode\workspace\snippets'
-        Destination = Join-Path $resolvedRepoRoot '.vscode\snippets'
-        FixHint = 'Re-run scripts/runtime/render-vscode-workspace-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'Codex compatibility script surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\scripts'
-        Destination = Join-Path $resolvedRepoRoot '.codex\scripts'
-        FixHint = 'Re-run scripts/runtime/render-codex-compatibility-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'Codex orchestration surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\orchestration'
-        Destination = Join-Path $resolvedRepoRoot '.codex\orchestration'
-        FixHint = 'Re-run scripts/runtime/render-codex-orchestration-surfaces.ps1 -RepoRoot .'
-    }
-)
+                if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
+                    Add-ValidationFailure ("{0} drift detected. {1}" -f $surfaceLabel, $fixHint)
+                }
+            }
+            'selectedFiles' {
+                $fileNames = @((Get-ProviderSurfaceCatalogOptionalValue -Object $validation -PropertyName 'fileNames' -DefaultValue @()) | ForEach-Object { [string] $_ })
+                if ($fileNames.Count -eq 0) {
+                    Add-ValidationFailure ("Projection surface '{0}' uses selectedFiles validation but declares no fileNames." -f $surfaceId)
+                    continue
+                }
 
-foreach ($skillSurface in $providerSkillSourcePairs) {
-    $sourceMap = Get-StableDirectoryFileMap -RootPath $skillSurface.Source
-    $destinationMap = Get-StableDirectoryFileMap -RootPath $skillSurface.Destination
+                $sourceMap = Get-StableSelectedFileMap -RootPath $sourceRoot -FileNames $fileNames
+                $destinationMap = Get-StableSelectedFileMap -RootPath $destinationRoot -FileNames $fileNames
 
-    if ($null -eq $sourceMap) {
-        Add-ValidationFailure ("Missing provider skill source tree: {0}" -f $skillSurface.Source)
-        continue
-    }
+                if ($null -eq $sourceMap) {
+                    Add-ValidationFailure ("Missing selected-file source tree: {0}" -f $sourceRoot)
+                    continue
+                }
 
-    if ($null -eq $destinationMap) {
-        Add-ValidationFailure ("Missing provider skill destination tree: {0}" -f $skillSurface.Destination)
-        continue
-    }
+                if ($null -eq $destinationMap) {
+                    Add-ValidationFailure ("Missing selected-file destination tree: {0}" -f $destinationRoot)
+                    continue
+                }
 
-    if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
-        Add-ValidationFailure ("{0} drift detected. {1}" -f $skillSurface.Label, $skillSurface.FixHint)
-    }
-}
-
-$selectedSurfacePairs = @(
-    [pscustomobject]@{
-        Label = 'VS Code workspace root surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\vscode\workspace'
-        Destination = Join-Path $resolvedRepoRoot '.vscode'
-        FileNames = @('README.md', 'base.code-workspace', 'settings.tamplate.jsonc')
-        FixHint = 'Re-run scripts/runtime/render-vscode-workspace-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'Codex MCP support surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\mcp'
-        Destination = Join-Path $resolvedRepoRoot '.codex\mcp'
-        FileNames = @('README.md', 'codex.config.template.toml', 'vscode.mcp.template.json')
-        FixHint = 'Re-run scripts/runtime/render-codex-compatibility-surfaces.ps1 -RepoRoot .'
-    }
-    [pscustomobject]@{
-        Label = 'Claude runtime settings surface'
-        Source = Join-Path $resolvedRepoRoot 'definitions\providers\claude\runtime'
-        Destination = Join-Path $resolvedRepoRoot '.claude'
-        FileNames = @('settings.json')
-        FixHint = 'Re-run scripts/runtime/render-claude-runtime-surfaces.ps1 -RepoRoot .'
-    }
-)
-
-foreach ($surface in $selectedSurfacePairs) {
-    $sourceMap = Get-StableSelectedFileMap -RootPath $surface.Source -FileNames $surface.FileNames
-    $destinationMap = Get-StableSelectedFileMap -RootPath $surface.Destination -FileNames $surface.FileNames
-
-    if ($null -eq $sourceMap) {
-        Add-ValidationFailure ("Missing selected-file source tree: {0}" -f $surface.Source)
-        continue
-    }
-
-    if ($null -eq $destinationMap) {
-        Add-ValidationFailure ("Missing selected-file destination tree: {0}" -f $surface.Destination)
-        continue
-    }
-
-    if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
-        Add-ValidationFailure ("{0} drift detected. {1}" -f $surface.Label, $surface.FixHint)
+                if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
+                    Add-ValidationFailure ("{0} drift detected. {1}" -f $surfaceLabel, $fixHint)
+                }
+            }
+            default {
+                Add-ValidationFailure ("Projection surface '{0}' uses unsupported validation mode '{1}'." -f $surfaceId, $validationMode)
+            }
+        }
     }
 }
 

@@ -20,11 +20,11 @@
 
 | Runtime | Authoritative source | Projected repo surface | Global target | Install profile | Entry point |
 | --- | --- | --- | --- | --- | --- |
-| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `definitions/providers/github/{root,agents,instructions,prompts,hooks}/` | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
+| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `definitions/providers/github/{root,agents,chatmodes,instructions,ISSUE_TEMPLATE,prompts,hooks,templates}/` | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
 | ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `definitions/providers/codex/{skills,mcp,scripts,orchestration}/` + generated MCP manifest from `.github/governance/mcp-runtime.catalog.json` | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
 | ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `definitions/providers/claude/skills/` + `.claude/` runtime metadata | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
 
-All three runtimes share the same **Super Agent lifecycle**, **44 domain instruction files**, **planning workspace**, and **governance catalogs**. Repository-owned instruction assets are now authored under `definitions/` and projected into `.github/`, while GitHub-native governance assets such as workflows, policies, schemas, templates, and runbooks remain native in `.github/`.
+All three runtimes share the same **Super Agent lifecycle**, **44 domain instruction files**, **planning workspace**, and **governance catalogs**. Repository-owned provider assets are now authored under `definitions/` and projected into `.github/`, while GitHub-native governance assets such as workflows, policies, schemas, runbooks, and governance catalogs remain native in `.github/`. The canonical map of authored definitions, generated exceptions, projected destinations, and renderer ownership now lives in `.github/governance/provider-surface-projection.catalog.json`, and `scripts/runtime/render-provider-surfaces.ps1` dispatches renderer selection from that catalog instead of keeping the provider/runtime list duplicated in multiple scripts.
 
 ---
 
@@ -346,7 +346,7 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 
 | Integration target | Authoritative source of truth | Runtime target |
 | --- | --- | --- |
-| Copilot instructions, prompts, agents, chatmodes, and VS Code agent hooks | `definitions/providers/github/{root,agents,instructions,prompts,chatmodes,hooks}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
+| Copilot instructions, prompts, agents, chatmodes, issue templates, reusable templates, and VS Code agent hooks | `definitions/providers/github/{root,agents,chatmodes,instructions,ISSUE_TEMPLATE,prompts,hooks,templates}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
 | Codex runtime skills, orchestration, MCP, shared scripts | `definitions/providers/codex/{skills,mcp,scripts,orchestration}/` + generated MCP manifest + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
 | Picker-visible local skills for VS Code/Codex | `definitions/providers/codex/skills/` -> rendered `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
 | Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `definitions/providers/claude/runtime/settings.json` -> rendered `.claude/settings.json` | loaded by Claude Code at workspace open |
@@ -455,6 +455,7 @@ Runtime architecture note:
 - `scripts/` is the only operational entrypoint layer
 - `src/` and `tests/` are reserved for the future engine layer
 - `.github/.codex/.claude/.vscode` remain runtime/projection surfaces, not the preferred place for new execution logic
+- `.github/governance/provider-surface-projection.catalog.json` is the canonical authored map of projected surfaces and renderer ownership
 
 For safe local RAG/CAG continuity, the repository also owns a deterministic local context index:
 

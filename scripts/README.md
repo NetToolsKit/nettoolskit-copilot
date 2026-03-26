@@ -10,6 +10,8 @@ This folder centralizes operational scripts used by this repository. It is the o
 
 Authoritative non-code assets now live under `definitions/`. Provider/runtime folders such as `.github/`, `.codex/`, `.claude/`, and `.vscode/` are projected/runtime surfaces that these scripts render, sync, and validate.
 
+The canonical projection map lives in `.github/governance/provider-surface-projection.catalog.json`. Use `scripts/runtime/render-provider-surfaces.ps1` when you want one dispatcher to select the correct renderer set from that catalog instead of invoking each renderer manually.
+
 ---
 
 ## Features
@@ -75,6 +77,8 @@ pwsh -File (Join-Path $RepoRoot 'scripts/runtime/install.ps1') -RuntimeProfile a
 pwsh -File .\scripts\runtime\bootstrap.ps1
 
 # Render projected provider/runtime surfaces from authoritative definitions
+pwsh -File .\scripts\runtime\render-provider-surfaces.ps1 -RepoRoot .
+pwsh -File .\scripts\runtime\render-provider-surfaces.ps1 -RepoRoot . -ConsumerName bootstrap -EnableCodexRuntime -EnableClaudeRuntime
 pwsh -File .\scripts\runtime\render-github-instruction-surfaces.ps1 -RepoRoot .
 pwsh -File .\scripts\runtime\render-provider-skill-surfaces.ps1 -RepoRoot . -Provider codex,claude
 pwsh -File .\scripts\runtime\render-vscode-profile-surfaces.ps1 -RepoRoot .
@@ -204,6 +208,7 @@ The repository-owned source/projection model is now:
 - `src/`: reserved for future engine code
 - `tests/`: reserved for future engine coverage
 - `.github/.codex/.claude/.vscode`: projected/runtime surfaces consumed by external tools
+- `.github/governance/provider-surface-projection.catalog.json`: canonical map of authored `definitions/` assets, generated exceptions, projected targets, and renderer ownership
 - generated MCP projections remain catalog-driven rather than `definitions/`-authored:
   - `.vscode/mcp.tamplate.jsonc`
   - `.vscode/mcp-vscode-global.json`
@@ -566,7 +571,8 @@ Runtime-sensitive files such as `codexRuntimeRoot/auth.json`, `codexRuntimeRoot/
 | `runtime/sync-vscode-global-mcp.ps1` | Renders the canonical MCP runtime catalog from `.github/governance/mcp-runtime.catalog.json` into the global VS Code user profile `mcp.json`, refreshes the ignored local helper `.vscode/mcp-vscode-global.json`, and keeps stable per-server `${input:...}` ids so VS Code can reuse securely stored MCP credentials after the first prompt. | `pwsh -File scripts/runtime/sync-vscode-global-mcp.ps1 -CreateBackup` |
 | `runtime/setup-vscode-profiles.ps1` | Lists or creates versioned VS Code profiles from `definitions/providers/vscode/profiles/profile-*.json`, refreshes the projected `.vscode/profiles/` surface, and can apply one selected profile as the MCP enable/disable overlay source through `sync-vscode-global-mcp.ps1`. This is the only executable entrypoint for profile setup. | `pwsh -File scripts/runtime/setup-vscode-profiles.ps1 -ProfileName Frontend -CreateMcpBackup` |
 | `runtime/render-mcp-runtime-artifacts.ps1` | Regenerates the tracked MCP runtime projections from `.github/governance/mcp-runtime.catalog.json`: `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json`. Use it after catalog edits or in parity checks. | `pwsh -File scripts/runtime/render-mcp-runtime-artifacts.ps1 -RepoRoot .` |
-| `runtime/render-github-instruction-surfaces.ps1` | Regenerates the rendered GitHub instruction/runtime surface from `definitions/providers/github/{root,agents,instructions,prompts,chatmodes,hooks}/` into `.github/`. Use it after provider-authored GitHub asset edits or in parity checks. | `pwsh -File scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .` |
+| `runtime/render-github-instruction-surfaces.ps1` | Regenerates the rendered GitHub instruction/runtime surface from `definitions/providers/github/{root,agents,chatmodes,instructions,ISSUE_TEMPLATE,prompts,hooks,templates}/` into `.github/`. Use it after provider-authored GitHub asset edits or in parity checks. | `pwsh -File scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .` |
+| `runtime/render-provider-surfaces.ps1` | Reads `.github/governance/provider-surface-projection.catalog.json` and dispatches the correct renderer set for direct or bootstrap consumption. Use it when you want the canonical provider-surface selection logic in one place instead of manually invoking each renderer. | `pwsh -File scripts/runtime/render-provider-surfaces.ps1 -RepoRoot . -ConsumerName bootstrap -EnableCodexRuntime -EnableClaudeRuntime` |
 | `runtime/render-provider-skill-surfaces.ps1` | Regenerates the rendered provider skill surfaces from the authoritative `definitions/providers/*/skills/` tree into `.codex/skills/` and `.claude/skills/`. Use it after skill-definition edits or in parity checks. | `pwsh -File scripts/runtime/render-provider-skill-surfaces.ps1 -RepoRoot .` |
 | `runtime/render-codex-compatibility-surfaces.ps1` | Regenerates the rendered Codex compatibility surfaces from `definitions/providers/codex/{mcp,scripts}/` into `.codex/scripts/` and the authored support files in `.codex/mcp/`, while leaving `.codex/mcp/servers.manifest.json` under the canonical MCP catalog renderer. | `pwsh -File scripts/runtime/render-codex-compatibility-surfaces.ps1 -RepoRoot .` |
 | `runtime/render-codex-orchestration-surfaces.ps1` | Regenerates the rendered `.codex/orchestration/` surface from `definitions/providers/codex/orchestration/`. Use it after orchestration-definition edits or in parity checks. | `pwsh -File scripts/runtime/render-codex-orchestration-surfaces.ps1 -RepoRoot .` |
