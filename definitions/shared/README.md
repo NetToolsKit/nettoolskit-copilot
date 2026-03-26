@@ -7,6 +7,8 @@ more than one provider/runtime surface.
 
 - `instructions/` -> projected into `.github/instructions/` and consumed by the
   repository runtime/validation stack as the canonical instruction set
+- `prompts/poml/` -> projected into `.github/prompts/poml/` as the shared POML
+  prompt library used by GitHub/Copilot prompt surfaces
 - `templates/` -> projected into `.github/templates/` and reused by runtime
   helpers, validation, and authoring flows
 

@@ -150,7 +150,7 @@
       "repoTracked": true
     },
     {
-      "id": "github-prompts",
+      "id": "github-prompt-entrypoints",
       "provider": "github",
       "authority": "definitions",
       "sourcePath": "definitions/providers/github/prompts",
@@ -158,9 +158,37 @@
       "rendererId": "github-instruction-surfaces",
       "validation": {
         "enabled": true,
+        "mode": "selectedFiles",
+        "fileNames": [
+          "create-api-endpoint.prompt.md",
+          "create-docker-setup.prompt.md",
+          "create-dotnet-class.prompt.md",
+          "create-ef-migration.prompt.md",
+          "create-powershell-script.prompt.md",
+          "create-rust-module.prompt.md",
+          "create-vue-component.prompt.md",
+          "generate-changelog.prompt.md",
+          "generate-pr-description.prompt.md",
+          "generate-unit-tests.prompt.md",
+          "refactor-to-clean-architecture.prompt.md",
+          "route-instructions.prompt.md"
+        ]
+      },
+      "description": "GitHub prompt entrypoint files.",
+      "repoTracked": true
+    },
+    {
+      "id": "github-shared-poml",
+      "provider": "github",
+      "authority": "definitions",
+      "sourcePath": "definitions/shared/prompts/poml",
+      "projectedPath": ".github/prompts/poml",
+      "rendererId": "github-instruction-surfaces",
+      "validation": {
+        "enabled": true,
         "mode": "directory"
       },
-      "description": "GitHub prompt surfaces.",
+      "description": "Shared POML prompt library projected into the GitHub prompt surface.",
       "repoTracked": true
     },
     {

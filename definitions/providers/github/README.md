@@ -8,7 +8,7 @@ provider-specific runtime surfaces that are rendered into `.github/`.
 - `root/` -> managed root files rendered into `.github/`
 - `agents/` -> rendered into `.github/agents/`
 - `chatmodes/` -> rendered into `.github/chatmodes/`
-- `prompts/` -> rendered into `.github/prompts/`
+- `prompts/` -> provider-specific `*.prompt.md` entrypoints rendered into `.github/prompts/`
 - `hooks/` -> rendered into `.github/hooks/`
 
 ## Projection Rules
@@ -17,6 +17,8 @@ provider-specific runtime surfaces that are rendered into `.github/`.
   behavior.
 - Shared instructions and reusable templates are authored under
   `definitions/shared/`, not here.
+- Shared POML prompt assets are authored under `definitions/shared/prompts/poml/`,
+  not under this provider tree.
 - GitHub-native repository/community assets stay authored directly in `.github/`
   and are not projected from this provider tree:
   - `.github/PULL_REQUEST_TEMPLATE.md`

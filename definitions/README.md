@@ -19,6 +19,7 @@ exceptions, projected destinations, and renderer ownership lives in
 ## Current coverage
 
 - `definitions/shared/instructions/` -> projected reusable instruction surface in `.github/instructions/`
+- `definitions/shared/prompts/poml/` -> projected reusable POML prompt library in `.github/prompts/poml/`
 - `definitions/shared/templates/` -> projected reusable template surface in `.github/templates/`
 - `definitions/providers/github/{root,agents,chatmodes,prompts,hooks}/` -> projected GitHub/Copilot runtime surface in `.github/`
 - `definitions/providers/codex/skills/` -> `.codex/skills/`

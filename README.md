@@ -20,7 +20,7 @@
 
 | Runtime | Authoritative source | Projected repo surface | Global target | Install profile | Entry point |
 | --- | --- | --- | --- | --- | --- |
-| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `definitions/providers/github/{root,agents,chatmodes,prompts,hooks}/` + `definitions/shared/{instructions,templates}/` | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
+| ![GitHub Copilot](https://img.shields.io/badge/GitHub_Copilot-0969DA?logo=github&logoColor=white&style=flat-square) | `definitions/providers/github/{root,agents,chatmodes,prompts,hooks}/` + `definitions/shared/{instructions,prompts/poml,templates}/` | `.github/` | `~/.github` | `github` | `.github/copilot-instructions.md` |
 | ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-412991?logo=openai&logoColor=white&style=flat-square) | `definitions/providers/codex/{skills,mcp,scripts,orchestration}/` + generated MCP manifest from `.github/governance/mcp-runtime.catalog.json` | `.codex/` | `~/.codex` | `codex` | `.codex/skills/super-agent/SKILL.md` |
 | ![Claude Code](https://img.shields.io/badge/Claude_Code-D97706?logo=anthropic&logoColor=white&style=flat-square) | `definitions/providers/claude/skills/` + `.claude/` runtime metadata | `.claude/` | `~/.claude` | `claude` | `CLAUDE.md` |
 
@@ -346,7 +346,7 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 
 | Integration target | Authoritative source of truth | Runtime target |
 | --- | --- | --- |
-| Copilot instructions, prompts, agents, chatmodes, reusable templates, and VS Code agent hooks | `definitions/providers/github/{root,agents,chatmodes,prompts,hooks}/` + `definitions/shared/{instructions,templates}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
+| Copilot instructions, prompts, agents, chatmodes, reusable templates, shared POML prompt assets, and VS Code agent hooks | `definitions/providers/github/{root,agents,chatmodes,prompts,hooks}/` + `definitions/shared/{instructions,prompts/poml,templates}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
 | Codex runtime skills, orchestration, MCP, shared scripts | `definitions/providers/codex/{skills,mcp,scripts,orchestration}/` + generated MCP manifest + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
 | Picker-visible local skills for VS Code/Codex | `definitions/providers/codex/skills/` -> rendered `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
 | Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `definitions/providers/claude/runtime/settings.json` -> rendered `.claude/settings.json` | loaded by Claude Code at workspace open |
@@ -1073,6 +1073,9 @@ Located in `.github/prompts/`:
 - **generate-unit-tests.prompt.md** - Generate comprehensive xUnit/NUnit tests
 
 ### POML Templates (XML-based)
+
+Authoritative source: `definitions/shared/prompts/poml/`  
+Projected runtime/editor surface: `.github/prompts/poml/`
 
 Located in `.github/prompts/poml/templates/`:
 - **changelog-entry.poml** - Structured CHANGELOG generator with versioning
