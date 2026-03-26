@@ -55,6 +55,6 @@ pub mod ui;
 pub use core::{ManifestError, ManifestResult};
 pub use execution::{ExecutionConfig, ManifestExecutor};
 pub use handlers::execute_apply;
-pub use models::ManifestAction;
+pub use models::{get_action, ManifestAction};
 pub use parsing::ManifestParser;
 pub use ui::{show_apply_menu, show_menu};

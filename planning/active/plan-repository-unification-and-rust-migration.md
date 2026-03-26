@@ -127,6 +127,7 @@ Status: `[x]` Completed
 Status: `[ ]` Pending
 
 - [2026-03-26 16:48] Bring the current workspace into migration-ready shape before broad script transcription starts
+- [2026-03-26 17:05] Added external `tests/test_suite.rs` and `tests/error_tests.rs` surfaces for `crates/commands` and `crates/task-worker`, and removed the inline `task-worker` test module to align that crate with the repository Rust testing pattern ✓ [2026-03-26 17:05]
 - Target paths:
   - `Cargo.toml`
   - `crates/commands/`

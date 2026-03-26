@@ -60,6 +60,7 @@ Status: `[x]` Completed
 Status: `[ ]` Pending
 
 - [2026-03-26 16:20] Clear the dependency, formatting, and test-contract debt that would make broad Rust expansion noisy or unsafe
+- [2026-03-26 17:05] Added the missing external test entry surfaces for `crates/commands` and `crates/task-worker`; formatting debt remains open, but the most immediate test-contract gap is now reduced ✓ [2026-03-26 17:05]
 - Target paths:
   - `Cargo.toml`
   - `Cargo.lock`
