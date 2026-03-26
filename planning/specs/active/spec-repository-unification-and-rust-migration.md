@@ -52,6 +52,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-26 18:47] The first executable Wave 1 replacement is now live in Rust: `crates/core` owns repository/runtime path and local context index foundations, and `crates/commands/runtime` owns `update/query-local-context-index`.
 - [2026-03-26 18:59] The planning continuity surface has started migrating too: `crates/commands/runtime` now owns a Rust-backed `export-planning-summary` flow that reuses the local context index instead of depending on PowerShell orchestration.
 - [2026-03-26 19:06] The remaining Wave 1 runtime commands now have a typed shared foundation in Rust: `crates/core` owns the runtime install-profile catalog and execution-context contract previously centralized in PowerShell helpers.
+- [2026-03-26 19:55] The runtime drift diagnosis path is now live in Rust too: `crates/commands/runtime` owns audit-only `doctor` behavior for GitHub/Codex mappings, strict extras, and duplicate skill detection, while `SyncOnDrift` remains pending the `bootstrap` port.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -89,6 +90,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 14. [2026-03-26 18:47] Wave 1 should start with reusable helper and index flows in `crates/core` and `crates/commands/runtime`, using the local context index path as the first executable compatibility target.
 15. [2026-03-26 18:59] Wave 1 planning continuity helpers should follow immediately after index migration so context handoff/export stops depending on the legacy PowerShell runtime.
 16. [2026-03-26 19:06] Before porting `bootstrap`, `doctor`, and `healthcheck` end-to-end, the shared runtime profile and execution-context helpers must live in `crates/core` so those commands do not re-encode path/profile resolution independently.
+17. [2026-03-26 19:55] `doctor` should land in two steps: first the audit-only Rust path, then `SyncOnDrift` after `bootstrap` has a Rust owner, so diagnosis can cut over before remediation.
 
 ## Constraints
 
@@ -144,6 +146,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-26 18:47` — implemented the first executable Wave 1 replacement around the local context index flow and promoted its shared foundations into `crates/core`.
 - Updated: `2026-03-26 18:59` — implemented the Rust-backed planning summary export flow as the next executable Wave 1 compatibility target.
 - Updated: `2026-03-26 19:06` — implemented the runtime install-profile and execution-context foundations in `crates/core` for the remaining Wave 1 runtime commands.
+- Updated: `2026-03-26 19:55` — implemented the audit-only Rust `doctor` path in `crates/commands/runtime` and kept bootstrap-driven remediation explicitly deferred to the `bootstrap` migration slice.
 
 ## Recommended Specialist Focus
 

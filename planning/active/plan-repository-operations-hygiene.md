@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 19:06
+- LastUpdated: 2026-03-26 19:55
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -34,6 +34,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 18:47] `crates/commands/runtime` now carries an executable Rust replacement for the local context index flow with dedicated command tests, so CI hardening has a concrete runtime migration target.
 - [2026-03-26 18:59] `crates/commands/runtime` now carries an executable Rust replacement for `export-planning-summary`, extending the real migrated runtime surface beyond the local context index path.
 - [2026-03-26 19:06] `crates/core` now owns the runtime install-profile and execution-context helpers, reducing shared PowerShell coupling for the remaining runtime sync/doctor/health flows.
+- [2026-03-26 19:55] `crates/commands/runtime` now carries an executable Rust replacement for audit-only `doctor` drift checks, so hygiene hardening can validate runtime alignment without depending on PowerShell for diagnosis.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -114,6 +115,7 @@ Status: `[ ]` Pending
 - [2026-03-26 16:20] Make validation and CI gates prefer Rust-backed execution as migration waves land, without removing fallback safety too early
 - [2026-03-26 17:11] The new `runtime` and `validation` command crates now exist and already carry contract tests, so CI hardening can target concrete Rust surfaces instead of future placeholders ✓ [2026-03-26 17:11]
 - [2026-03-26 18:47] The first executable runtime replacement (`update/query-local-context-index`) now runs from Rust, so CI hardening can validate both contract and behavior on a real migrated surface ✓ [2026-03-26 18:47]
+- [2026-03-26 19:55] The runtime hygiene diagnosis path (`doctor`) now runs from Rust for audit-only flows, while bootstrap-driven remediation remains explicitly pending the `bootstrap` port ✓ [2026-03-26 19:55]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
