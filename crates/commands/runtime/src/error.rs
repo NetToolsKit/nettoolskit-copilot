@@ -81,3 +81,29 @@ pub enum PlanningSummaryCommandError {
         source: AnyhowError,
     },
 }
+
+/// Errors raised by runtime doctor commands.
+#[derive(Debug, Error)]
+pub enum RuntimeDoctorCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime doctor workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Runtime execution context resolution failed.
+    #[error("failed to resolve runtime doctor execution context")]
+    ResolveExecutionContext {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Drift report construction failed.
+    #[error("failed to build runtime doctor report")]
+    BuildReport {
+        /// Underlying inventory or hashing failure.
+        #[source]
+        source: AnyhowError,
+    },
+}

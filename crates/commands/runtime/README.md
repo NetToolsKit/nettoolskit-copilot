@@ -11,6 +11,7 @@ This crate locks the owned runtime surfaces before full implementation lands. It
 - maintenance operator flows
 - git hook install and hygiene flows
 - local context index update and query commands
+- runtime drift diagnosis and hygiene checks
 
 ## Scope
 
@@ -30,6 +31,8 @@ The current contract covers `54` legacy PowerShell scripts:
 - `update_local_context_index`
 - `query_local_context_index`
 - `export_planning_summary`
+- `invoke_runtime_doctor`
 - `UpdateLocalContextIndexRequest`
 - `QueryLocalContextIndexRequest`
 - `ExportPlanningSummaryRequest`
+- `RuntimeDoctorRequest`

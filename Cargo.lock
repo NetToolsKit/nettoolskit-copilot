@@ -1954,8 +1954,10 @@ version = "1.0.0"
 dependencies = [
  "anyhow",
  "nettoolskit-core",
+ "sha2",
  "tempfile",
  "thiserror",
+ "walkdir",
 ]
 
 [[package]]

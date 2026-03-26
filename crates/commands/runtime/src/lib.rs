@@ -1,6 +1,7 @@
 //! Runtime command boundary contracts for the migration program.
 
 pub mod contracts;
+pub mod doctor;
 pub mod error;
 pub mod local_context;
 pub mod planning_summary;
@@ -9,7 +10,14 @@ pub use contracts::{
     runtime_surface_contract, runtime_surface_script_total, MigrationWave, RuntimeSurfaceContract,
     RuntimeSurfaceKind, RUNTIME_SURFACE_CONTRACTS,
 };
-pub use error::{LocalContextCommandError, PlanningSummaryCommandError, RuntimeSurfaceError};
+pub use doctor::{
+    invoke_runtime_doctor, RuntimeDoctorMappingReport, RuntimeDoctorRequest, RuntimeDoctorResult,
+    RuntimeDoctorStatus,
+};
+pub use error::{
+    LocalContextCommandError, PlanningSummaryCommandError, RuntimeDoctorCommandError,
+    RuntimeSurfaceError,
+};
 pub use local_context::{
     query_local_context_index, update_local_context_index, QueryLocalContextIndexRequest,
     QueryLocalContextIndexResult, UpdateLocalContextIndexRequest, UpdateLocalContextIndexResult,

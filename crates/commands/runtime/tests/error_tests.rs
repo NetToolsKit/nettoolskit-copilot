@@ -3,6 +3,7 @@
 use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
+    RuntimeDoctorCommandError,
 };
 use std::error::Error;
 
@@ -37,7 +38,10 @@ fn test_local_context_command_error_preserves_source_message() {
 
     assert_eq!(error.to_string(), "failed to build local context index");
     assert_eq!(
-        error.source().expect("source should be preserved").to_string(),
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
         "boom"
     );
 }
@@ -50,7 +54,26 @@ fn test_planning_summary_error_display_is_stable() {
 
     assert_eq!(error.to_string(), "failed to write planning summary output");
     assert_eq!(
-        error.source().expect("source should be preserved").to_string(),
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
         "disk full"
+    );
+}
+
+#[test]
+fn test_runtime_doctor_error_display_is_stable() {
+    let error = RuntimeDoctorCommandError::BuildReport {
+        source: anyhow!("hash failure"),
+    };
+
+    assert_eq!(error.to_string(), "failed to build runtime doctor report");
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "hash failure"
     );
 }
