@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 19:55
+- LastUpdated: 2026-03-26 20:05
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -57,6 +57,7 @@ The migration remains compatibility-first:
 - [2026-03-26 18:59] `crates/commands/runtime` now executes a Rust-backed `export-planning-summary` flow that consumes the active planning surface and optional local context index references.
 - [2026-03-26 19:06] `crates/core` now owns the runtime install-profile catalog and shared runtime execution context used by `bootstrap`, `doctor`, `healthcheck`, `install`, and `self-heal`.
 - [2026-03-26 19:55] `crates/commands/runtime` now executes a Rust-backed `doctor` flow for GitHub/Codex runtime drift detection, strict-extra handling, and repo-managed Codex skill duplicate auditing; `SyncOnDrift` remains pending until `bootstrap` is ported.
+- [2026-03-26 20:05] `crates/commands/runtime` now executes a Rust-backed `healthcheck` flow that owns report/log generation and Rust `doctor` integration while delegating `validate-all` and optional `bootstrap` through explicit PowerShell bridge steps until those surfaces migrate.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -187,6 +188,7 @@ Status: `[~]` In Progress
 - [2026-03-26 18:59] Implemented Rust-backed `export_planning_summary` in `crates/commands/runtime` with coverage for workspace planning, `.build/super-agent` fallback, and persisted output ✓ [2026-03-26 18:59]
 - [2026-03-26 19:06] Ported `runtime-install-profiles` and `runtime-execution-context` shared helpers into `crates/core`, giving the remaining Wave 1 runtime scripts a typed Rust foundation ✓ [2026-03-26 19:06]
 - [2026-03-26 19:55] Implemented Rust-backed `doctor` in `crates/commands/runtime` with coverage for missing runtime files, strict extras, clean-with-extras semantics, duplicate Codex skill detection, and disabled-profile no-op behavior ✓ [2026-03-26 19:55]
+- [2026-03-26 20:05] Implemented Rust-backed `healthcheck` in `crates/commands/runtime` with coverage for passed runs, runtime-drift warning conversion, hard-fail mode, JSON report generation, and log persistence ✓ [2026-03-26 20:05]
 - Target paths:
   - `scripts/common/`
   - `scripts/runtime/`
@@ -206,6 +208,7 @@ Status: `[~]` In Progress
   - bootstrap/doctor/healthcheck/install/self-heal now share a Rust-owned execution context foundation
   - audit-only `doctor` drift detection no longer depends on PowerShell business logic
   - `doctor -SyncOnDrift` cutover remains blocked on the Rust `bootstrap` port
+  - `healthcheck` orchestration/reporting now runs from Rust while `validate-all` and optional bootstrap remain temporary delegated steps
 - Commit checkpoint:
   - `feat(rust): implement shared helper and runtime transcription wave`
 
