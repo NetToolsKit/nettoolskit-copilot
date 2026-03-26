@@ -56,7 +56,6 @@ pulldown-cmark = "0.13"
 arboard = "3.4"
 axum = "0.8"
 tower = "0.5"
-time = { version = "=0.3.36", features = ["formatting", "macros"] }
 tree-sitter = "0.22"
 tree-sitter-rust = "0.21"
 tree-sitter-c-sharp = "0.21"

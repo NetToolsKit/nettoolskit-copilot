@@ -6,8 +6,6 @@ use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use time::format_description::well_known::Rfc3339;
-use time::OffsetDateTime;
 
 use super::catalog::{
     local_context_index_file_candidates, resolve_local_context_index_root,
@@ -22,7 +20,7 @@ pub struct LocalContextIndexedFile {
     pub path: String,
     /// File content hash in `sha256:<hex>` format.
     pub hash: String,
-    /// Last write time in RFC 3339 format.
+    /// Last write time as UTC unix seconds.
     pub last_write_time_utc: String,
     /// File size in bytes.
     pub size_bytes: u64,
@@ -67,7 +65,7 @@ pub struct LocalContextChunk {
 pub struct LocalContextIndexDocument {
     /// Document schema version mirrored from the catalog.
     pub version: u32,
-    /// Generation timestamp in RFC 3339 format.
+    /// Generation timestamp as UTC unix seconds.
     pub generated_at: String,
     /// Resolved repository root path.
     pub repo_root: String,
@@ -243,7 +241,7 @@ pub fn build_local_context_index(
 
     let document = LocalContextIndexDocument {
         version: catalog_info.catalog.version,
-        generated_at: now_rfc3339()?,
+        generated_at: current_timestamp()?,
         repo_root: repo_root.to_string_lossy().to_string(),
         catalog_path,
         chunk_count: chunk_entries.len(),
@@ -493,14 +491,18 @@ fn compute_sha256_hex(path: &Path) -> Result<String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
-fn now_rfc3339() -> Result<String> {
-    Ok(OffsetDateTime::now_utc()
-        .format(&Rfc3339)
-        .context("failed to format generation timestamp")?)
+fn current_timestamp() -> Result<String> {
+    timestamp_to_string(std::time::SystemTime::now())
 }
 
 fn format_system_time(system_time: std::time::SystemTime) -> Result<String> {
-    Ok(OffsetDateTime::from(system_time)
-        .format(&Rfc3339)
-        .context("failed to format file timestamp")?)
+    timestamp_to_string(system_time)
+}
+
+fn timestamp_to_string(system_time: std::time::SystemTime) -> Result<String> {
+    Ok(system_time
+        .duration_since(std::time::UNIX_EPOCH)
+        .context("failed to convert timestamp to unix epoch seconds")?
+        .as_secs()
+        .to_string())
 }

@@ -32,7 +32,6 @@ tracing = { workspace = true }
 
 # Configuration
 toml = { workspace = true }
-time = { workspace = true }
 
 # Enum utilities
 strum = { workspace = true }
