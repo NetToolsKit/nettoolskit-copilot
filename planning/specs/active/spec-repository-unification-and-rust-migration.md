@@ -1,77 +1,98 @@
-# Repository Unification And Rust Migration
+# Repository Unification And Full Rust Script Transcription
 
 ## Objective
 
-Create `nettoolskit-copilot` as the unified successor workspace that combines the Rust product lineage from `nettoolskit-cli` with the automation/runtime lineage from `copilot-instructions`, while preserving both histories and enabling a phased migration of legacy PowerShell runtime scripts into Rust without carrying an embedded legacy subtree in the active worktree.
+Establish `nettoolskit-copilot` as the unified long-term workspace that preserves the `nettoolskit-cli` Rust lineage, keeps `C:\Users\tguis\copilot-instructions` as the external legacy reference, and transcribes the complete tracked PowerShell script portfolio into Rust-backed runtime capabilities without breaking current operator workflows.
 
 ## Problem Statement
 
-The current automation and runtime behavior that powers the Copilot-oriented repository lives primarily in PowerShell scripts and projected runtime surfaces inside `C:\Users\tguis\copilot-instructions`, while `nettoolskit-cli` already provides the Rust-first repository structure, Cargo workspace, and production-oriented execution model that should become the long-term home.
+The current repository already contains the unified runtime surfaces, but its executable automation model still depends on a large PowerShell estate spread across `scripts/`. As of `2026-03-26`, the workspace contains `147` tracked `.ps1` scripts that cover runtime bootstrap, rendering, synchronization, validation, security, orchestration, hooks, maintenance, governance, deploy helpers, and PowerShell-based test harnesses.
 
-If the repositories stay separate, shared runtime capabilities will continue to drift. If the PowerShell logic is rewritten before the repositories are unified, commit history, rationale, and migration traceability will be lost. The work therefore needs a compatibility-first unification step before code-porting begins.
+Partial migration by script family is no longer enough for the desired end state. Shared helpers in `scripts/common/`, parity-critical validation logic in `scripts/validation/`, and operational wrappers in `scripts/runtime/` create cross-cutting dependencies that keep the control plane split between Rust and PowerShell unless the full portfolio is accounted for up front.
+
+## Scope Inventory Snapshot
+
+| Domain | Script Count | Notes |
+| --- | ---: | --- |
+| `scripts/runtime` | 46 | bootstrap, render, sync, housekeeping, recovery, runtime wrappers |
+| `scripts/validation` | 31 | policy, architecture, parity, release, and standards validation |
+| `scripts/tests` | 27 | PowerShell-based runtime and policy test harnesses |
+| `scripts/common` | 15 | shared helpers, catalogs, paths, bootstrap support |
+| `scripts/orchestration` | 10 | staged Super Agent execution and task workers |
+| `scripts/security` | 6 | supply-chain and pre-build audit gates |
+| `scripts/maintenance` | 5 | cleanup and repository maintenance utilities |
+| `scripts/git-hooks` | 3 | git hook bootstrap and EOF hygiene |
+| `scripts/governance` | 2 | governance automation and protection helpers |
+| `scripts/deploy` | 1 | deployment helper |
+| `scripts/doc` | 1 | documentation validation helper |
+| Total | 147 | Full migration scope locked for planning |
 
 ## Design Summary
 
-- Use `nettoolskit-cli` as the root repository and primary lineage.
-- Create a new local repository named `nettoolskit-copilot` from `nettoolskit-cli`.
-- Keep `C:\Users\tguis\copilot-instructions` as the external legacy reference repository during the migration instead of carrying `legacy/copilot-instructions/` inside the active worktree.
-- Bring the organized AI/runtime folders into the new repository root early so the future Rust implementation has the correct destination topology before code-porting begins.
-- Preserve the `copilot-instructions` lineage through the dedicated source remote and reference repository while keeping the new workspace tree focused on the new product layout.
-- Port script families to Rust in slices, keeping compatibility wrappers until parity is validated.
-- Keep the Cargo workspace centered on `crates/`, not a monolithic root `src/`, so the new implementation stays aligned with normal multi-crate Rust repository structure.
+- Keep `nettoolskit-cli` history as the repository base and preserve the unified workspace already created in `nettoolskit-copilot`.
+- Keep `C:\Users\tguis\copilot-instructions` as an external reference repository during migration instead of embedding a `legacy/` working tree inside the active repository.
+- Treat every tracked `scripts/**/*.ps1` file as in-scope for Rust transcription, including validation, tests, security, governance, deploy, and hook surfaces.
+- Use an inventory-driven migration model: every script must have a Rust owner, a compatibility story, a parity strategy, and a cutover rule before implementation starts.
+- Keep `definitions/`, `.github/`, `.codex/`, `.claude/`, `.vscode/`, and `planning/` as the authoritative non-executable surfaces; Rust replaces execution logic, not those source-of-truth assets.
+- Keep PowerShell entrypoints available as compatibility wrappers until the Rust implementation reaches proven parity and the default cutover is explicitly approved.
+- Align Rust execution with the existing workspace topology first: `crates/core`, `crates/commands/*`, `crates/orchestrator`, and `crates/cli`; add new crates only when current boundaries cannot safely absorb a capability.
+- Treat `.temp/arquitetura_enterprise_llm.md` as temporary source input and preserve its durable architectural direction in `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`, while this spec remains the canonical migration design artifact.
 
 ## Key Decisions
 
-1. `nettoolskit-cli` remains the root/base repository for the unified workspace.
-2. `copilot-instructions` remains an external reference repository during migration instead of living under `legacy/copilot-instructions/` in the active tree.
-3. The organized AI/runtime folders (`definitions/`, `scripts/`, `.codex/`, `.claude/`, `.vscode/`, and the AI/runtime `.github` surfaces) should live directly in the new repository before the Rust port starts.
-4. `C:\Users\tguis\copilot-instructions` remains a reference repository during migration, but implementation work should target the hydrated root folders in `nettoolskit-copilot`.
-5. The Rust implementation will stay organized as a Cargo workspace under `crates/`, with new migration slices landing as dedicated crates rather than collapsing everything into a root `src/`.
-6. Rust migration starts only after unification, planning registration, legacy asset classification, and root-folder organization are complete.
-7. Legacy PowerShell entrypoints remain available until Rust replacements are validated and explicitly approved for cutover.
-8. The migration is compatibility-first: preserve working operator flows before optimizing or deleting legacy surfaces.
+1. `nettoolskit-copilot` remains the canonical workspace for the migration.
+2. `C:\Users\tguis\copilot-instructions` remains available as the external provenance and parity reference during the migration.
+3. The full `147`-script PowerShell portfolio is in scope; no script family is silently excluded.
+4. Migration waves are organized by capability domains and dependency layers, not just by ad hoc file-by-file rewrites.
+5. Shared helper logic in `scripts/common/` must be ported early because runtime, validation, hooks, and governance depend on it.
+6. Validation and test scripts are part of the productized runtime estate and must also receive Rust-native replacements or owners.
+7. PowerShell wrappers remain available until parity is validated; removing a wrapper before parity is not allowed.
+8. The Rust target should expose stable command contracts for render, sync, bootstrap, validate, security, orchestration, maintenance, hooks, governance, and deploy flows.
+9. LLM-driven reasoning remains a planning and orchestration aid only; deterministic execution and repository automation must move into Rust.
 
 ## Constraints
 
-- Preserve commit history from both repositories.
-- Avoid breaking the current `nettoolskit-cli` Rust workspace layout.
-- Do not modify or delete `C:\Users\tguis\copilot-instructions` during the early phases.
-- Keep the migration incremental so the user can supply Rust-specific directives before implementation slices begin.
+- Preserve repository history and current remote topology.
+- Avoid breaking the current Cargo workspace and existing Rust application flows.
+- Do not modify or delete `C:\Users\tguis\copilot-instructions` during early migration phases.
+- Maintain current operator-visible PowerShell entrypoints until approved cutover.
+- Keep migration artifacts and planning under the repository-owned Super Agent workflow.
+- Do not narrow the scope back to selected script families without explicit user approval.
 
 ## Alternatives Considered
 
-### Alternative 1: Flatten Both Repositories Into The Root Immediately
+### Alternative 1: Continue Migrating Only `render` And `sync` Families First
 
-Rejected. This would create path conflicts, obscure provenance, and make parity validation harder before the new Rust paths exist.
+Rejected. The user has now set the planning target to full script transcription, and the shared helper plus validation dependencies make a narrow-family scope insufficient as the canonical plan.
 
-### Alternative 2: Keep An Embedded `legacy/copilot-instructions/` Tree In The Unified Workspace
+### Alternative 2: Rewrite Everything Into One Monolithic Rust Runtime Crate
 
-Rejected. This keeps the new workspace noisy, duplicates the external source repo that will remain available anyway, and makes the final product layout harder to stabilize before Rust migration begins.
+Rejected. This would collapse unrelated concerns into one unstable boundary and create long-term maintenance friction.
 
-### Alternative 3: Rewrite PowerShell Logic Into Rust Before Unification
+### Alternative 3: Replace PowerShell Entry Points Immediately With Rust Binaries
 
-Rejected. This would sever the migration from its source history and make it much harder to prove behavior parity.
+Rejected. This would raise operational risk before parity, wrapper stability, and operator-path documentation are proven.
 
-### Alternative 4: Keep The Repositories Separate And Copy Files Manually
+### Alternative 4: Leave Validation And Test Scripts In PowerShell Indefinitely
 
-Rejected. This would preserve neither unified history nor a single long-term execution surface.
+Rejected. Validation and test harnesses are part of the executable control plane and must not become permanent exceptions to the Rust target.
 
 ## Risks
 
-- The external legacy repository contains runtime assets, projected provider surfaces, and PowerShell utilities that may not map one-to-one onto the Rust workspace boundaries.
-- A premature cutover to Rust could regress local runtime sync, projected surface rendering, or MCP-related behavior.
-- The unified repository could become difficult to navigate if the external legacy assets are not classified before Rust slices start landing.
+- Shared PowerShell helpers contain implicit coupling that may not be obvious from top-level script names alone.
+- Validation, security, and hook scripts interact with OS and toolchain behavior that may need platform-specific Rust abstractions.
+- The test estate is itself PowerShell-heavy, so parity coverage must evolve at the same time as the runtime implementation.
+- A broad rewrite without explicit capability ownership could blur boundaries across `crates/core`, `crates/commands/*`, `crates/orchestrator`, and `crates/cli`.
 
 ## Acceptance Criteria
 
-1. `nettoolskit-copilot` exists locally as a standalone git repository.
-2. `nettoolskit-cli` history is preserved as the root lineage.
-3. `copilot-instructions` remains traceable through the dedicated source remote and migration planning without requiring an embedded `legacy/copilot-instructions/` working tree.
-4. The new repository root already contains the organized AI/runtime folders needed for the migration, without relying on `legacy/copilot-instructions/`.
-5. `C:\Users\tguis\copilot-instructions` remains available as an external reference repository while the new root folders are migrated.
-6. The Rust migration target structure is based on `crates/` rather than collapsing the workspace into a root `src/`.
-7. A phased plan exists before any large-scale PowerShell-to-Rust conversion begins.
-8. Early migration slices preserve compatibility instead of deleting legacy behavior prematurely.
+1. The unified repository remains the execution home and preserves the current history model.
+2. The complete `147`-script PowerShell inventory is accounted for in active planning by domain, owner boundary, and migration wave.
+3. The active plan sequences implementation waves that eventually cover all runtime, validation, test, helper, security, governance, hook, deploy, and maintenance scripts.
+4. PowerShell wrappers remain available until Rust parity is demonstrated for the corresponding operator flow.
+5. Static authorities such as `definitions/`, `.github/`, `.codex/`, `.claude/`, `.vscode/`, and `planning/` remain source-of-truth assets instead of being collapsed into generated Rust state.
+6. The supporting architecture note at `.temp/arquitetura_enterprise_llm.md` is preserved as a dedicated versioned architecture spec and reflected in the versioned migration artifacts.
+7. Cutover planning includes README and CHANGELOG obligations before operator-visible defaults change.
 
 ## Planning Readiness
 
@@ -79,6 +100,7 @@ Rejected. This would preserve neither unified history nor a single long-term exe
 
 ## Recommended Specialist Focus
 
-- `dev-rust-engineer` for the future implementation slices
-- `plan-active-work-planner` for phased migration planning
-- `docs-release-engineer` for operator-path and migration documentation once the first slice lands
+- `dev-rust-engineer` for implementation waves and target crate boundaries
+- `plan-active-work-planner` for active migration sequencing and checkpoints
+- `test-engineer` for parity harness and replacement test coverage
+- `docs-release-engineer` for operator-path documentation and cutover messaging

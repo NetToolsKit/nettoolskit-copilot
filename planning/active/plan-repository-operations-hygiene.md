@@ -1,140 +1,169 @@
 # Repository Operations Hygiene Plan
 
+Generated: 2026-03-26 16:20
+
+## Status
+
+- LastUpdated: 2026-03-26 16:20
+- Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
+- Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
+- Active Branch: `feature/rust-script-transcription-planning`
+- Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
+- Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
+- Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
+
 ## Scope Summary
 
-This active plan tracks the current repository hygiene work after the enterprise delivery phases were closed.
+This plan complements the main migration roadmap. It does not own feature delivery slices; it owns the hygiene gates that must remain stable while the Rust transcription expands across the repository.
 
-Completed in the current workstream:
+Current hygiene priorities for the migration:
 
-- canonical planning moved out of temporary local storage and normalized under `planning/`
-- build, coverage, and local deployment/runtime artifacts centralized under `.build/` and `.deployment/`
-- service-mode local persistence and local audit defaults moved away from `.temp`
-
-Remaining follow-up backlog:
-
-- remove the remaining allowed Rust dependency warnings from the supply-chain baseline
-- propagate typed control-plane metadata into outbound Telegram/Discord notifications
-- reuse the real interactive CLI session identifier for local `/task submit` flows
+- keep the Cargo workspace and dependency baseline healthy before adding more Rust surface area
+- define parity evidence and audit visibility for all `147` PowerShell scripts
+- harden CI and validation expectations so Rust-backed replacements become the default quality gate
+- preserve wrapper safety, hook integrity, and artifact hygiene during the transition
 
 ## Ordered Tasks
 
-### Task 1: Normalize Canonical Planning Layout
+### Task 1: Rebaseline Repository Hygiene Around Full Script Transcription
 
 Status: `[x]` Completed
 
+- [2026-03-26 16:20] Updated the hygiene plan so it supports the full PowerShell-to-Rust transcription program instead of unrelated follow-up backlog ✓ [2026-03-26 16:20]
 - Target paths:
   - `planning/active/plan-repository-operations-hygiene.md`
-  - `planning/README.md`
-  - `planning/completed/`
-  - `planning/specs/README.md`
+  - `planning/active/plan-repository-unification-and-rust-migration.md`
+  - `planning/specs/active/spec-repository-unification-and-rust-migration.md`
 - Commands:
-  - `rg -n "planning/active|planning/completed|planning/specs" .`
-  - `git status --short`
+  - `git status --short --branch`
+  - `rg --files scripts -g *.ps1`
 - Checkpoints:
-  - canonical active plan exists under `planning/active/`
-  - completed roadmap/tracker/phase documents are preserved under `planning/completed/`
-  - planning workspace matches the shared `active/completed/specs` convention
+  - hygiene planning clearly supports the migration plan rather than competing with it
+  - migration guardrails are explicit and versioned
 - Commit checkpoint:
-  - `docs(planning): normalize active and completed planning layout`
+  - `docs(planning): align repository hygiene with rust transcription scope`
 
-### Task 2: Centralize Local Build And Deployment Artifacts
-
-Status: `[x]` Completed
-
-- Target paths:
-  - `.cargo/config.toml`
-  - `.gitignore`
-  - `.github/workflows/ci.yml`
-  - `.github/workflows/release.yml`
-  - `deployments/docker-compose.local.yml`
-  - `docs/operations/service-mode-local-runbook.md`
-- Commands:
-  - `cargo metadata --format-version 1 --no-deps | rg -o '"target_directory":"[^"]+"'`
-  - `docker compose -f deployments/docker-compose.local.yml config`
-- Checkpoints:
-  - Cargo target directory resolves to `.build/cargo-target`
-  - coverage outputs resolve to `.build/coverage`
-  - local service-mode data resolves to `.deployment/local/service-data`
-- Commit checkpoint:
-  - `chore(repo): centralize local build and deployment artifacts`
-
-### Task 3: Modernize Remaining Allowed Rust Dependency Warnings
+### Task 2: Remove Blocking Dependency And Toolchain Debt Before Expansion
 
 Status: `[ ]` Pending
 
+- [2026-03-26 16:20] Clear the dependency and toolchain debt that would make broad Rust expansion noisy or unsafe
 - Target paths:
   - `Cargo.toml`
   - `Cargo.lock`
-  - impacted crate manifests under `crates/*/Cargo.toml`
+  - `crates/*/Cargo.toml`
+  - `.github/workflows/`
 - Commands:
   - `cargo audit`
-  - `pwsh -File C:\\Users\\tguis\\.github\\scripts\\security\\Invoke-RustPackageVulnerabilityAudit.ps1 -ProjectPath . -FailOnSeverities Critical,High`
+  - `pwsh -File C:\Users\tguis\.github\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -ProjectPath . -FailOnSeverities Critical,High`
+  - `cargo test`
 - Checkpoints:
-  - no remaining allowed warning for `rustls-pemfile` via `reqwest 0.11`
-  - no remaining allowed warning for `windows 0.24.0` via `winrt-notification`
+  - no accepted dependency exception blocks the next Rust migration waves
+  - CI prerequisites for new crates and commands remain explicit
+  - migration work does not hide supply-chain debt behind feature pressure
 - Commit checkpoint:
-  - `chore(deps): modernize remaining allowed supply-chain warnings`
+  - `chore(deps): clear rust migration blocking debt`
 
-### Task 4: Propagate Typed Control-Plane Metadata To Outbound Notifications
+### Task 3: Define The Parity Ledger And Coverage Policy For All Scripts
 
 Status: `[ ]` Pending
 
+- [2026-03-26 16:20] Create the canonical evidence model that proves each PowerShell script is covered by Rust parity before cutover
 - Target paths:
-  - `crates/orchestrator/src/execution/chatops.rs`
-  - `crates/orchestrator/src/execution/chatops_runtime.rs`
-  - related tests under `crates/orchestrator/tests/`
+  - `planning/active/plan-repository-unification-and-rust-migration.md`
+  - `scripts/tests/`
+  - `tests/`
+  - `.github/workflows/`
 - Commands:
-  - `cargo test -p nettoolskit-orchestrator`
-  - `cargo clippy -p nettoolskit-orchestrator --all-targets -- -D warnings`
+  - `rg --files scripts -g *.ps1`
+  - `cargo test`
+  - `git diff --check`
 - Checkpoints:
-  - Telegram/Discord outbound notifications include normalized request/operator/session correlation metadata
-  - local audit and outbound notifier payloads stay aligned
+  - every script domain has a parity evidence expectation
+  - PowerShell-heavy runtime tests have a Rust-native successor plan
+  - cutover cannot happen without recorded parity status
 - Commit checkpoint:
-  - `feat(chatops): propagate control-plane metadata to outbound notifications`
+  - `docs(quality): define parity ledger for rust script migration`
 
-### Task 5: Reuse Real Interactive CLI Session Identity For Local Task Submit
+### Task 4: Harden CI, Validation, And Wrapper Governance For Rust Cutover
 
 Status: `[ ]` Pending
 
+- [2026-03-26 16:20] Make validation and CI gates prefer Rust-backed execution as migration waves land, without removing fallback safety too early
 - Target paths:
-  - `crates/cli/src/main.rs`
-  - `crates/cli/src/lib.rs`
-  - `crates/orchestrator/src/execution/processor.rs`
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/release.yml`
+  - `scripts/validation/`
+  - `scripts/runtime/`
+  - `scripts/git-hooks/`
 - Commands:
-  - `cargo test -p nettoolskit-cli --bin ntk`
-  - `cargo test -p nettoolskit-orchestrator`
+  - `cargo fmt --all -- --check`
+  - `cargo test`
+  - `cargo clippy --workspace --all-targets -- -D warnings`
 - Checkpoints:
-  - local `/task submit` reuses the active interactive session identity when available
-  - request-derived fallback remains only for non-interactive or sessionless paths
+  - CI can validate Rust-backed replacements per wave
+  - wrappers and hook entrypoints remain deterministic during partial migration
+  - policy scripts do not drift away from the real Rust execution path
 - Commit checkpoint:
-  - `feat(cli): reuse interactive session identity for local task submit`
+  - `ci(rust): harden migration validation and wrapper governance`
+
+### Task 5: Preserve Artifact Hygiene And Operator Recovery Paths During Transition
+
+Status: `[ ]` Pending
+
+- [2026-03-26 16:20] Keep `.build/`, `.deployment/`, local runtime state, and recovery helpers stable while the execution engine changes underneath
+- Target paths:
+  - `.build/`
+  - `.deployment/`
+  - `scripts/runtime/`
+  - `scripts/maintenance/`
+  - `docs/`
+- Commands:
+  - `git status --short`
+  - `cargo test`
+  - targeted local smoke tests for bootstrap, doctor, clean, and self-heal flows
+- Checkpoints:
+  - generated artifacts remain centralized and predictable
+  - operator recovery flows stay documented and usable
+  - migration work does not reintroduce ad hoc temporary-state sprawl
+- Commit checkpoint:
+  - `chore(ops): preserve artifact hygiene during rust cutover`
+
+## Deferred Backlog Preserved From Prior Hygiene Scope
+
+- `Propagate Typed Control-Plane Metadata To Outbound Notifications`
+- `Reuse Real Interactive CLI Session Identity For Local Task Submit`
+
+These items remain valid backlog, but they are intentionally deferred while the repository planning focus is the full PowerShell-to-Rust transcription program.
 
 ## Validation Checklist
 
-- `cargo metadata --format-version 1 --no-deps`
+- `git status --short --branch`
+- `rg --files scripts -g *.ps1`
+- `cargo audit`
 - `cargo fmt --all -- --check`
+- `cargo test`
+- `cargo clippy --workspace --all-targets -- -D warnings`
 - `git diff --check`
-- `docker compose -f deployments/docker-compose.local.yml config`
-- targeted `cargo test` and `cargo clippy` commands for each pending task
 
 ## Recommended Specialist
 
 - Primary: `ops-devops-platform-engineer`
-- Secondary: `docs-release-engineer`
-- Follow-up implementation specialists:
-  - `sec-security-vulnerability-engineer` for Task 3
-  - `dev-rust-engineer` for Tasks 4 and 5
+- Secondary:
+  - `sec-security-vulnerability-engineer`
+  - `test-engineer`
+  - `docs-release-engineer`
 
 ## Closeout Expectations
 
-- Update `README.md` if local developer workflow paths change again.
-- Keep `planning/README.md` aligned with the current active work plan.
-- Provide commit messages in English and in fenced code blocks when requested.
-- Update `CHANGELOG.md` only for user-visible or release-relevant behavior changes.
+- Keep `README.md` aligned when operator-visible runtime, recovery, or validation flows change.
+- Update `CHANGELOG.md` only when hygiene work affects release-visible behavior or migration defaults.
+- Keep commit messages in English and checkpoint-oriented.
+- Do not remove fallback wrappers or recovery paths without explicit parity evidence.
 
 ## Delivery Slices
 
-- Slice A: planning normalization and local artifact centralization
-- Slice B: dependency modernization
-- Slice C: outbound notification attribution
-- Slice D: local interactive session identity alignment
+- Slice A: planning and hygiene rebaseline
+- Slice B: dependency and toolchain cleanup
+- Slice C: parity ledger and CI hardening
+- Slice D: artifact hygiene and recovery-path protection during cutover
