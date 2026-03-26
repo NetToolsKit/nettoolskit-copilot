@@ -57,6 +57,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-26 20:14] The runtime sync path is now mostly live in Rust: `crates/commands/runtime` owns `bootstrap` file projection, mirror cleanup, and duplicate-skill hygiene, while provider render dispatch and MCP config apply remain temporary delegated PowerShell substeps.
 - [2026-03-26 20:33] The runtime repair path is now mostly live in Rust too: `crates/commands/runtime` owns `self-heal` sequencing, persisted evidence, and Rust bootstrap-plus-healthcheck chaining, while optional VS Code template application remains a temporary delegated PowerShell substep.
 - [2026-03-26 20:47] The runtime VS Code workspace apply path is now live in Rust too: `crates/commands/runtime` owns `apply-vscode-templates`, and `self-heal` no longer delegates that repair step to PowerShell.
+- [2026-03-26 20:53] The runtime crate has now been restructured by capability as well: `sync`, `diagnostics`, and `continuity` submodules replace the previous flat root layout, and the mirrored external test tree follows the same grouping.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -99,6 +100,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 19. [2026-03-26 20:14] `bootstrap` can land before render/apply helpers fully migrate as long as the delegated substeps stay explicit and the main sync logic plus mirror hygiene move under Rust ownership first.
 20. [2026-03-26 20:33] `self-heal` can land before `apply-vscode-templates` fully migrates as long as repair sequencing, persisted evidence, and the bootstrap-plus-healthcheck chain move under Rust ownership first.
 21. [2026-03-26 20:47] `apply-vscode-templates` should remain a narrow workspace-surface command in `crates/commands/runtime`; it does not belong in `core`, and `self-heal` should call it directly rather than shelling out.
+22. [2026-03-26 20:53] As Wave 1 expands, `crates/commands/runtime` should group modules by responsibility instead of keeping every command file at `src/` root; the external test tree must mirror that folder structure exactly.
 
 ## Constraints
 
@@ -159,6 +161,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-26 20:14` — implemented the Rust-backed `bootstrap` sync/mirror slice in `crates/commands/runtime` and switched `healthcheck -SyncRuntime` to the Rust bootstrap path.
 - Updated: `2026-03-26 20:33` — implemented the Rust-backed `self-heal` repair/report slice in `crates/commands/runtime` and kept optional VS Code template application as an explicit delegated bridge.
 - Updated: `2026-03-26 20:47` — implemented the Rust-backed `apply-vscode-templates` workspace slice in `crates/commands/runtime` and removed that bridge from the `self-heal` flow.
+- Updated: `2026-03-26 20:53` — reorganized the runtime crate and mirrored tests into `sync`, `diagnostics`, and `continuity` submodules so Wave 1 growth stays aligned with the repository Rust organization rules.
 
 ## Recommended Specialist Focus
 
