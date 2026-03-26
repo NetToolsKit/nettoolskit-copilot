@@ -66,6 +66,7 @@ Partial migration by script family is no longer enough for the desired end state
 | command export hub | `crates/commands` |
 
 The canonical script-to-owner lock is tracked in `planning/active/rust-script-transcription-ownership-matrix.md`.
+The parity evidence policy is tracked in `planning/active/rust-script-parity-ledger.md`.
 
 ## Key Decisions
 

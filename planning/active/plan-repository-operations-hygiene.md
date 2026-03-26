@@ -4,13 +4,14 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 17:11
+- LastUpdated: 2026-03-26 17:18
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
 - Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
+- Parity Ledger: `planning/active/rust-script-parity-ledger.md`
 - Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
 
 ## Scope Summary
@@ -82,11 +83,13 @@ Status: `[ ]` Pending
 
 ### Task 3: Define The Parity Ledger And Coverage Policy For All Scripts
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Create the canonical evidence model that proves each PowerShell script is covered by Rust parity before cutover
+- [2026-03-26 17:18] Captured the versioned parity ledger in `planning/active/rust-script-parity-ledger.md` and locked the required evidence model for every script domain ✓ [2026-03-26 17:18]
 - Target paths:
   - `planning/active/plan-repository-unification-and-rust-migration.md`
+  - `planning/active/rust-script-parity-ledger.md`
   - `scripts/tests/`
   - `tests/`
   - `.github/workflows/`
