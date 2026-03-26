@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 18:47
+- LastUpdated: 2026-03-26 18:59
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -32,6 +32,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 16:48] `cargo fmt --all -- --check` failed across many existing files, so repository-wide formatting is still a blocking hygiene item.
 - [2026-03-26 17:11] The external Rust test-contract gap for `crates/commands` and `crates/task-worker` is now closed, but repository-wide formatting debt still blocks a fully green hygiene baseline.
 - [2026-03-26 18:47] `crates/commands/runtime` now carries an executable Rust replacement for the local context index flow with dedicated command tests, so CI hardening has a concrete runtime migration target.
+- [2026-03-26 18:59] `crates/commands/runtime` now carries an executable Rust replacement for `export-planning-summary`, extending the real migrated runtime surface beyond the local context index path.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks

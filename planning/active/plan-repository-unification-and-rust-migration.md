@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 18:47
+- LastUpdated: 2026-03-26 18:59
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -54,6 +54,7 @@ The migration remains compatibility-first:
   - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the best current examples of modular command crates with mirrored tests
 - [2026-03-26 18:47] `crates/core` now owns the first Rust-backed shared-helper foundations for repository paths, runtime location catalogs, and local context index build/search.
 - [2026-03-26 18:47] `crates/commands/runtime` now executes Rust-backed `update/query-local-context-index` flows with dedicated external tests, making the first Wave 1 runtime replacement real rather than contract-only.
+- [2026-03-26 18:59] `crates/commands/runtime` now executes a Rust-backed `export-planning-summary` flow that consumes the active planning surface and optional local context index references.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -181,6 +182,7 @@ Status: `[~]` In Progress
 - [2026-03-26 16:20] Transcribe shared helper logic plus runtime/render/sync/index flows behind stable wrappers
 - [2026-03-26 18:47] Ported repository path resolution, runtime location catalog resolution, and local context index build/search primitives into `crates/core` ✓ [2026-03-26 18:47]
 - [2026-03-26 18:47] Implemented Rust-backed `update_local_context_index` and `query_local_context_index` commands in `crates/commands/runtime` with external test coverage ✓ [2026-03-26 18:47]
+- [2026-03-26 18:59] Implemented Rust-backed `export_planning_summary` in `crates/commands/runtime` with coverage for workspace planning, `.build/super-agent` fallback, and persisted output ✓ [2026-03-26 18:59]
 - Target paths:
   - `scripts/common/`
   - `scripts/runtime/`
@@ -196,6 +198,7 @@ Status: `[~]` In Progress
   - runtime wrappers can delegate to Rust without changing operator-visible command names
   - parity evidence exists for the first foundation wave
   - the local context index flow no longer depends on PowerShell business logic
+  - planning handoff export no longer depends on PowerShell business logic
 - Commit checkpoint:
   - `feat(rust): implement shared helper and runtime transcription wave`
 
