@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 20:14
+- LastUpdated: 2026-03-26 20:33
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -59,6 +59,7 @@ The migration remains compatibility-first:
 - [2026-03-26 19:55] `crates/commands/runtime` now executes a Rust-backed `doctor` flow for GitHub/Codex runtime drift detection, strict-extra handling, and repo-managed Codex skill duplicate auditing; `SyncOnDrift` remains pending until `bootstrap` is ported.
 - [2026-03-26 20:05] `crates/commands/runtime` now executes a Rust-backed `healthcheck` flow that owns report/log generation and Rust `doctor` integration while delegating `validate-all` and optional `bootstrap` through explicit PowerShell bridge steps until those surfaces migrate.
 - [2026-03-26 20:14] `crates/commands/runtime` now executes a Rust-backed `bootstrap` flow for GitHub/Codex runtime sync, mirror cleanup, duplicate-skill removal, and delegated MCP/provider render hooks; `healthcheck -SyncRuntime` now uses this Rust bootstrap path.
+- [2026-03-26 20:33] `crates/commands/runtime` now executes a Rust-backed `self-heal` flow that owns repair/report orchestration, Rust `bootstrap`, and Rust `healthcheck` chaining while delegating optional `apply-vscode-templates` as an explicit bridge step.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -191,6 +192,7 @@ Status: `[~]` In Progress
 - [2026-03-26 19:55] Implemented Rust-backed `doctor` in `crates/commands/runtime` with coverage for missing runtime files, strict extras, clean-with-extras semantics, duplicate Codex skill detection, and disabled-profile no-op behavior ✓ [2026-03-26 19:55]
 - [2026-03-26 20:05] Implemented Rust-backed `healthcheck` in `crates/commands/runtime` with coverage for passed runs, runtime-drift warning conversion, hard-fail mode, JSON report generation, and log persistence ✓ [2026-03-26 20:05]
 - [2026-03-26 20:14] Implemented Rust-backed `bootstrap` in `crates/commands/runtime` with coverage for GitHub sync, Codex sync, mirror cleanup, delegated MCP apply, and `healthcheck -SyncRuntime` integration ✓ [2026-03-26 20:14]
+- [2026-03-26 20:33] Implemented Rust-backed `self-heal` in `crates/commands/runtime` with coverage for passed runs, optional VS Code template application, structured JSON/log output, and step-failure propagation while reusing the Rust `bootstrap` and `healthcheck` paths ✓ [2026-03-26 20:33]
 - Target paths:
   - `scripts/common/`
   - `scripts/runtime/`
@@ -212,6 +214,8 @@ Status: `[~]` In Progress
   - `doctor -SyncOnDrift` cutover remains blocked on wiring Rust `doctor` to Rust `bootstrap` for remediation mode
   - `healthcheck` orchestration/reporting now runs from Rust and `-SyncRuntime` now uses Rust `bootstrap`
   - provider render dispatch and MCP config application remain temporary delegated steps inside the Rust bootstrap path
+  - `self-heal` orchestration/reporting now runs from Rust and reuses the Rust `bootstrap` plus `healthcheck` execution path
+  - optional `apply-vscode-templates` remains an explicit delegated PowerShell substep inside the Rust `self-heal` path
 - Commit checkpoint:
   - `feat(rust): implement shared helper and runtime transcription wave`
 

@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 20:14
+- LastUpdated: 2026-03-26 20:33
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -37,6 +37,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 19:55] `crates/commands/runtime` now carries an executable Rust replacement for audit-only `doctor` drift checks, so hygiene hardening can validate runtime alignment without depending on PowerShell for diagnosis.
 - [2026-03-26 20:05] `crates/commands/runtime` now carries an executable Rust replacement for `healthcheck` orchestration/report generation, so hygiene evidence can be emitted from Rust even before the validation suite itself migrates.
 - [2026-03-26 20:14] `crates/commands/runtime` now carries an executable Rust replacement for `bootstrap` sync and mirror hygiene, which also removes the remaining bootstrap delegation from `healthcheck -SyncRuntime`.
+- [2026-03-26 20:33] `crates/commands/runtime` now carries an executable Rust replacement for `self-heal`, so repository recovery evidence and repair orchestration no longer depend on the legacy PowerShell wrapper.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -120,6 +121,7 @@ Status: `[ ]` Pending
 - [2026-03-26 19:55] The runtime hygiene diagnosis path (`doctor`) now runs from Rust for audit-only flows, while bootstrap-driven remediation remains explicitly pending the `bootstrap` port ✓ [2026-03-26 19:55]
 - [2026-03-26 20:05] The runtime health evidence path (`healthcheck`) now runs from Rust for report/log orchestration, while `validate-all` remains a temporary delegated PowerShell step until Wave 2 ✓ [2026-03-26 20:05]
 - [2026-03-26 20:14] The runtime sync path (`bootstrap`) now runs from Rust for repository-managed asset projection, while provider render dispatch and MCP config apply remain explicit delegated substeps ✓ [2026-03-26 20:14]
+- [2026-03-26 20:33] The runtime repair path (`self-heal`) now runs from Rust for bootstrap-plus-healthcheck orchestration and persisted evidence, while optional VS Code template application remains an explicit delegated PowerShell step ✓ [2026-03-26 20:33]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -139,9 +141,10 @@ Status: `[ ]` Pending
 
 ### Task 5: Preserve Artifact Hygiene And Operator Recovery Paths During Transition
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - [2026-03-26 16:20] Keep `.build/`, `.deployment/`, local runtime state, and recovery helpers stable while the execution engine changes underneath
+- [2026-03-26 20:33] Migrated `self-heal` orchestration into `crates/commands/runtime`, preserving JSON/log evidence and repair sequencing while keeping the optional VS Code template bridge explicit ✓ [2026-03-26 20:33]
 - Target paths:
   - `.build/`
   - `.deployment/`
