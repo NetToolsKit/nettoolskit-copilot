@@ -180,3 +180,36 @@ pub enum RuntimeHealthcheckCommandError {
         source: AnyhowError,
     },
 }
+
+/// Errors raised by runtime self-heal commands.
+#[derive(Debug, Error)]
+pub enum RuntimeSelfHealCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime self-heal workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Runtime execution context resolution failed.
+    #[error("failed to resolve runtime self-heal execution context")]
+    ResolveExecutionContext {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output/log artifact preparation failed.
+    #[error("failed to prepare runtime self-heal artifacts")]
+    PrepareArtifacts {
+        /// Underlying filesystem or path resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Report or log writing failed.
+    #[error("failed to write runtime self-heal output")]
+    WriteOutput {
+        /// Underlying serialization or I/O failure.
+        #[source]
+        source: AnyhowError,
+    },
+}

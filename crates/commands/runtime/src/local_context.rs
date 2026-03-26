@@ -85,15 +85,15 @@ pub struct QueryLocalContextIndexResult {
 pub fn update_local_context_index(
     request: &UpdateLocalContextIndexRequest,
 ) -> Result<UpdateLocalContextIndexResult, LocalContextCommandError> {
-    let current_dir = env::current_dir().map_err(|source| {
-        LocalContextCommandError::ResolveWorkspaceRoot {
+    let current_dir =
+        env::current_dir().map_err(|source| LocalContextCommandError::ResolveWorkspaceRoot {
             source: source.into(),
-        }
-    })?;
+        })?;
     let repo_root = resolve_workspace_root(request.repo_root.as_deref(), Some(&current_dir))
         .map_err(|source| LocalContextCommandError::ResolveWorkspaceRoot { source })?;
-    let catalog_info = read_local_context_index_catalog(&repo_root, request.catalog_path.as_deref())
-        .map_err(|source| LocalContextCommandError::ReadCatalog { source })?;
+    let catalog_info =
+        read_local_context_index_catalog(&repo_root, request.catalog_path.as_deref())
+            .map_err(|source| LocalContextCommandError::ReadCatalog { source })?;
     let report = build_local_context_index(
         &repo_root,
         &catalog_info,
@@ -127,17 +127,20 @@ pub fn query_local_context_index(
         return Err(LocalContextCommandError::EmptyQuery);
     }
 
-    let current_dir = env::current_dir().map_err(|source| {
-        LocalContextCommandError::ResolveWorkspaceRoot {
+    let current_dir =
+        env::current_dir().map_err(|source| LocalContextCommandError::ResolveWorkspaceRoot {
             source: source.into(),
-        }
-    })?;
+        })?;
     let repo_root = resolve_workspace_root(request.repo_root.as_deref(), Some(&current_dir))
         .map_err(|source| LocalContextCommandError::ResolveWorkspaceRoot { source })?;
-    let catalog_info = read_local_context_index_catalog(&repo_root, request.catalog_path.as_deref())
-        .map_err(|source| LocalContextCommandError::ReadCatalog { source })?;
-    let index_root =
-        resolve_local_context_index_root(&repo_root, &catalog_info.catalog, request.output_root.as_deref());
+    let catalog_info =
+        read_local_context_index_catalog(&repo_root, request.catalog_path.as_deref())
+            .map_err(|source| LocalContextCommandError::ReadCatalog { source })?;
+    let index_root = resolve_local_context_index_root(
+        &repo_root,
+        &catalog_info.catalog,
+        request.output_root.as_deref(),
+    );
     let index_path = index_root.join("index.json");
     let index_document = read_local_context_index_document(&index_root)
         .map_err(|source| LocalContextCommandError::ReadIndex { source })?

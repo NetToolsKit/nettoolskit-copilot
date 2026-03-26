@@ -7,19 +7,21 @@ pub mod error;
 pub mod healthcheck;
 pub mod local_context;
 pub mod planning_summary;
+pub mod self_heal;
 
+pub use bootstrap::{invoke_runtime_bootstrap, RuntimeBootstrapRequest, RuntimeBootstrapResult};
 pub use contracts::{
     runtime_surface_contract, runtime_surface_script_total, MigrationWave, RuntimeSurfaceContract,
     RuntimeSurfaceKind, RUNTIME_SURFACE_CONTRACTS,
 };
-pub use bootstrap::{invoke_runtime_bootstrap, RuntimeBootstrapRequest, RuntimeBootstrapResult};
 pub use doctor::{
     invoke_runtime_doctor, RuntimeDoctorMappingReport, RuntimeDoctorRequest, RuntimeDoctorResult,
     RuntimeDoctorStatus,
 };
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeBootstrapCommandError,
-    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError, RuntimeSurfaceError,
+    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError, RuntimeSelfHealCommandError,
+    RuntimeSurfaceError,
 };
 pub use healthcheck::{
     invoke_runtime_healthcheck, RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest,
@@ -31,6 +33,10 @@ pub use local_context::{
 };
 pub use planning_summary::{
     export_planning_summary, ExportPlanningSummaryRequest, ExportPlanningSummaryResult,
+};
+pub use self_heal::{
+    invoke_runtime_self_heal, RuntimeSelfHealRequest, RuntimeSelfHealResult, RuntimeSelfHealStatus,
+    RuntimeSelfHealStepResult,
 };
 
 /// Require a registered runtime surface contract.

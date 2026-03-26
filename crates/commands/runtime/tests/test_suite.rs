@@ -7,3 +7,4 @@ mod error_tests;
 mod healthcheck_tests;
 mod local_context_tests;
 mod planning_summary_tests;
+mod self_heal_tests;

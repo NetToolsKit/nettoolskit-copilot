@@ -42,13 +42,15 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
     )
     .expect("readme should be written");
     fs::write(
-        repo.path().join("scripts/runtime/query-local-context-index.ps1"),
+        repo.path()
+            .join("scripts/runtime/query-local-context-index.ps1"),
         "Query-LocalContextIndex -QueryText \"runtime rewrite\"",
     )
     .expect("runtime script should be written");
 
-    let catalog_info = nettoolskit_core::local_context::read_local_context_index_catalog(repo.path(), None)
-        .expect("catalog should be readable");
+    let catalog_info =
+        nettoolskit_core::local_context::read_local_context_index_catalog(repo.path(), None)
+            .expect("catalog should be readable");
     build_local_context_index(repo.path(), &catalog_info, None, false)
         .expect("index should be built");
 
@@ -67,7 +69,12 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
     assert!(result.document.contains("`planning/active/plan-wave1.md`"));
     assert!(result.document.contains("## Active Specs"));
     assert!(result.document.contains("## Suggested Local References"));
-    assert!(result.document.contains("`README.md`") || result.document.contains("`scripts/runtime/query-local-context-index.ps1`"));
+    assert!(
+        result.document.contains("`README.md`")
+            || result
+                .document
+                .contains("`scripts/runtime/query-local-context-index.ps1`")
+    );
     assert!(result.document.contains("## Resume Instructions"));
 }
 
@@ -79,12 +86,14 @@ fn test_export_planning_summary_uses_build_fallback_when_workspace_planning_is_m
     fs::create_dir_all(repo.path().join(".build/super-agent/specs/active"))
         .expect("fallback spec directory should be created");
     fs::write(
-        repo.path().join(".build/super-agent/planning/active/plan-fallback.md"),
+        repo.path()
+            .join(".build/super-agent/planning/active/plan-fallback.md"),
         "# Fallback Plan\n\nSummary: fallback active planning surface\n",
     )
     .expect("fallback plan should be written");
     fs::write(
-        repo.path().join(".build/super-agent/specs/active/spec-fallback.md"),
+        repo.path()
+            .join(".build/super-agent/specs/active/spec-fallback.md"),
         "# Fallback Spec\n\nSummary: fallback active spec surface\n",
     )
     .expect("fallback spec should be written");

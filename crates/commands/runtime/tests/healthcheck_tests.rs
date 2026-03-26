@@ -125,7 +125,9 @@ fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
     write_file(
-        &repo.path().join("scripts/runtime/query-local-context-index.ps1"),
+        &repo
+            .path()
+            .join("scripts/runtime/query-local-context-index.ps1"),
         "Write-Output 'query'",
     );
     write_file(
@@ -152,11 +154,9 @@ fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
     assert_eq!(result.overall_status, RuntimeHealthcheckStatus::Passed);
     assert_eq!(result.exit_code, 0);
     assert_eq!(result.total_checks, 3);
-    assert!(
-        result
-            .checks
-            .iter()
-            .any(|check| check.name == "runtime-bootstrap"
-                && check.script == "rust:nettoolskit-runtime::bootstrap")
-    );
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.name == "runtime-bootstrap"
+            && check.script == "rust:nettoolskit-runtime::bootstrap"));
 }

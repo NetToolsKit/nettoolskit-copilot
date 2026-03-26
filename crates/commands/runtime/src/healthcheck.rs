@@ -166,10 +166,11 @@ struct CommandArgument {
 pub fn invoke_runtime_healthcheck(
     request: &RuntimeHealthcheckRequest,
 ) -> Result<RuntimeHealthcheckResult, RuntimeHealthcheckCommandError> {
-    let current_dir =
-        env::current_dir().map_err(|source| RuntimeHealthcheckCommandError::ResolveWorkspaceRoot {
+    let current_dir = env::current_dir().map_err(|source| {
+        RuntimeHealthcheckCommandError::ResolveWorkspaceRoot {
             source: source.into(),
-        })?;
+        }
+    })?;
     let fallback_profile = request.fallback_runtime_profile.as_deref().or(Some("all"));
     let context = resolve_runtime_execution_context(
         request.repo_root.as_deref(),
@@ -184,10 +185,14 @@ pub fn invoke_runtime_healthcheck(
     )
     .map_err(|source| RuntimeHealthcheckCommandError::ResolveExecutionContext { source })?;
 
-    let output_path = resolve_healthcheck_output_path(&context.resolved_repo_root, request.output_path.as_deref())
-        .map_err(|source| RuntimeHealthcheckCommandError::PrepareArtifacts { source })?;
-    let log_path = resolve_healthcheck_log_path(&context.resolved_repo_root, request.log_path.as_deref())
-        .map_err(|source| RuntimeHealthcheckCommandError::PrepareArtifacts { source })?;
+    let output_path = resolve_healthcheck_output_path(
+        &context.resolved_repo_root,
+        request.output_path.as_deref(),
+    )
+    .map_err(|source| RuntimeHealthcheckCommandError::PrepareArtifacts { source })?;
+    let log_path =
+        resolve_healthcheck_log_path(&context.resolved_repo_root, request.log_path.as_deref())
+            .map_err(|source| RuntimeHealthcheckCommandError::PrepareArtifacts { source })?;
     initialize_output_file_parent(&output_path)
         .map_err(|source| RuntimeHealthcheckCommandError::PrepareArtifacts { source })?;
     initialize_output_file_parent(&log_path)
@@ -195,23 +200,42 @@ pub fn invoke_runtime_healthcheck(
     initialize_log_file(&log_path)
         .map_err(|source| RuntimeHealthcheckCommandError::PrepareArtifacts { source })?;
 
-    append_log_line(&log_path, &format!("repo root: {}", context.resolved_repo_root.display()))
-        .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
-    append_log_line(&log_path, &format!("validation profile: {}", request.validation_profile))
-        .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
-    append_log_line(&log_path, &format!("runtime profile: {}", context.runtime_profile.name))
-        .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
-    append_log_line(&log_path, &format!("warning-only mode: {}", request.warning_only))
-        .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
-    append_log_line(&log_path, &format!("output report: {}", output_path.display()))
-        .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
+    append_log_line(
+        &log_path,
+        &format!("repo root: {}", context.resolved_repo_root.display()),
+    )
+    .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
+    append_log_line(
+        &log_path,
+        &format!("validation profile: {}", request.validation_profile),
+    )
+    .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
+    append_log_line(
+        &log_path,
+        &format!("runtime profile: {}", context.runtime_profile.name),
+    )
+    .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
+    append_log_line(
+        &log_path,
+        &format!("warning-only mode: {}", request.warning_only),
+    )
+    .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
+    append_log_line(
+        &log_path,
+        &format!("output report: {}", output_path.display()),
+    )
+    .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
     append_log_line(&log_path, &format!("log file: {}", log_path.display()))
         .map_err(|source| RuntimeHealthcheckCommandError::WriteOutput { source })?;
 
     let mut checks = Vec::new();
 
     if request.sync_runtime {
-        checks.push(run_bootstrap_check(request, &context.resolved_repo_root, &log_path));
+        checks.push(run_bootstrap_check(
+            request,
+            &context.resolved_repo_root,
+            &log_path,
+        ));
     }
 
     let validate_arguments = vec![
@@ -230,7 +254,9 @@ pub fn invoke_runtime_healthcheck(
     ];
     checks.push(run_external_script_check(
         "validate-all",
-        &context.resolved_repo_root.join("scripts/validation/validate-all.ps1"),
+        &context
+            .resolved_repo_root
+            .join("scripts/validation/validate-all.ps1"),
         "scripts/validation/validate-all.ps1",
         &validate_arguments,
         request.warning_only,
@@ -351,7 +377,10 @@ fn run_doctor_check(
     let started = Instant::now();
 
     let doctor_result = invoke_runtime_doctor(&RuntimeDoctorRequest {
-        repo_root: request.repo_root.clone().or_else(|| Some(repo_root.to_path_buf())),
+        repo_root: request
+            .repo_root
+            .clone()
+            .or_else(|| Some(repo_root.to_path_buf())),
         target_github_path: request.target_github_path.clone(),
         target_codex_path: request.target_codex_path.clone(),
         target_agents_skills_path: request.target_agents_skills_path.clone(),
@@ -376,11 +405,7 @@ fn run_doctor_check(
             1,
             Some(error.to_string()),
         ),
-        Err(error) => (
-            RuntimeHealthcheckStatus::Failed,
-            1,
-            Some(error.to_string()),
-        ),
+        Err(error) => (RuntimeHealthcheckStatus::Failed, 1, Some(error.to_string())),
     };
 
     let finished_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
@@ -436,7 +461,10 @@ fn run_bootstrap_check(
     let started_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
     let started = Instant::now();
     let bootstrap_result = invoke_runtime_bootstrap(&RuntimeBootstrapRequest {
-        repo_root: request.repo_root.clone().or_else(|| Some(repo_root.to_path_buf())),
+        repo_root: request
+            .repo_root
+            .clone()
+            .or_else(|| Some(repo_root.to_path_buf())),
         target_github_path: request.target_github_path.clone(),
         target_codex_path: request.target_codex_path.clone(),
         target_agents_skills_path: request.target_agents_skills_path.clone(),
@@ -455,11 +483,7 @@ fn run_bootstrap_check(
             1,
             Some(error.to_string()),
         ),
-        Err(error) => (
-            RuntimeHealthcheckStatus::Failed,
-            1,
-            Some(error.to_string()),
-        ),
+        Err(error) => (RuntimeHealthcheckStatus::Failed, 1, Some(error.to_string())),
     };
 
     let finished_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
@@ -656,7 +680,10 @@ fn check_to_json(check: &RuntimeHealthcheckCheckResult) -> serde_json::Value {
     })
 }
 
-fn resolve_healthcheck_output_path(repo_root: &Path, output_path: Option<&Path>) -> anyhow::Result<PathBuf> {
+fn resolve_healthcheck_output_path(
+    repo_root: &Path,
+    output_path: Option<&Path>,
+) -> anyhow::Result<PathBuf> {
     match output_path {
         Some(path) if path.is_absolute() => Ok(path.to_path_buf()),
         Some(path) => Ok(resolve_full_path(repo_root, path)),
@@ -664,7 +691,10 @@ fn resolve_healthcheck_output_path(repo_root: &Path, output_path: Option<&Path>)
     }
 }
 
-fn resolve_healthcheck_log_path(repo_root: &Path, log_path: Option<&Path>) -> anyhow::Result<PathBuf> {
+fn resolve_healthcheck_log_path(
+    repo_root: &Path,
+    log_path: Option<&Path>,
+) -> anyhow::Result<PathBuf> {
     match log_path {
         Some(path) if path.is_absolute() => Ok(path.to_path_buf()),
         Some(path) => Ok(resolve_full_path(repo_root, path)),
@@ -686,7 +716,10 @@ fn initialize_output_file_parent(path: &Path) -> anyhow::Result<()> {
 fn initialize_log_file(log_path: &Path) -> anyhow::Result<()> {
     fs::write(
         log_path,
-        format!("# healthcheck log\n# generatedAt={}", current_timestamp_string()?),
+        format!(
+            "# healthcheck log\n# generatedAt={}",
+            current_timestamp_string()?
+        ),
     )
     .with_context(|| format!("failed to initialize '{}'", log_path.display()))
 }

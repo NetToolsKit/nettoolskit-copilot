@@ -76,10 +76,7 @@ pub fn invoke_runtime_bootstrap(
             source: source.into(),
         }
     })?;
-    let fallback_profile = request
-        .fallback_runtime_profile
-        .as_deref()
-        .or(Some("all"));
+    let fallback_profile = request.fallback_runtime_profile.as_deref().or(Some("all"));
     let context = resolve_runtime_execution_context(
         request.repo_root.as_deref(),
         request.runtime_profile.as_deref(),
@@ -162,19 +159,28 @@ pub fn invoke_runtime_bootstrap(
         .map_err(|source| RuntimeBootstrapCommandError::SyncAssets { source })?;
         sync_directory(
             &context.sources.common_scripts_root,
-            &context.targets.codex_runtime_root.join("shared-scripts").join("common"),
+            &context
+                .targets
+                .codex_runtime_root
+                .join("shared-scripts")
+                .join("common"),
             request.mirror,
         )
         .map_err(|source| RuntimeBootstrapCommandError::SyncAssets { source })?;
         sync_directory(
             &context.sources.security_scripts_root,
-            &context.targets.codex_runtime_root.join("shared-scripts").join("security"),
+            &context
+                .targets
+                .codex_runtime_root
+                .join("shared-scripts")
+                .join("security"),
             request.mirror,
         )
         .map_err(|source| RuntimeBootstrapCommandError::SyncAssets { source })?;
         sync_directory(
             &context.sources.maintenance_scripts_root,
-            &context.targets
+            &context
+                .targets
                 .codex_runtime_root
                 .join("shared-scripts")
                 .join("maintenance"),
@@ -183,7 +189,10 @@ pub fn invoke_runtime_bootstrap(
         .map_err(|source| RuntimeBootstrapCommandError::SyncAssets { source })?;
         sync_directory(
             &context.sources.codex_orchestration_root,
-            &context.targets.codex_runtime_root.join("shared-orchestration"),
+            &context
+                .targets
+                .codex_runtime_root
+                .join("shared-orchestration"),
             request.mirror,
         )
         .map_err(|source| RuntimeBootstrapCommandError::SyncAssets { source })?;
@@ -296,7 +305,10 @@ fn invoke_mcp_config_apply(repo_root: &Path, codex_path: &Path, backup_config: b
     let target_config = codex_path.join("config.toml");
 
     if !sync_script.is_file() {
-        return Err(anyhow!("MCP sync script missing: {}", sync_script.display()));
+        return Err(anyhow!(
+            "MCP sync script missing: {}",
+            sync_script.display()
+        ));
     }
     if !catalog_path.is_file() {
         return Err(anyhow!(
@@ -348,7 +360,11 @@ fn invoke_mcp_config_apply(repo_root: &Path, codex_path: &Path, backup_config: b
     ))
 }
 
-fn sync_agents_skills(source_root: &Path, destination_root: &Path, mirror_mode: bool) -> Result<()> {
+fn sync_agents_skills(
+    source_root: &Path,
+    destination_root: &Path,
+    mirror_mode: bool,
+) -> Result<()> {
     if !source_root.is_dir() {
         return Ok(());
     }
@@ -380,9 +396,8 @@ fn sync_agents_skills(source_root: &Path, destination_root: &Path, mirror_mode: 
                 continue;
             };
             if !source_skill_names.contains(&name) {
-                fs::remove_dir_all(entry.path()).with_context(|| {
-                    format!("failed to remove '{}'", entry.path().display())
-                })?;
+                fs::remove_dir_all(entry.path())
+                    .with_context(|| format!("failed to remove '{}'", entry.path().display()))?;
             }
         }
     }
@@ -397,9 +412,8 @@ fn sync_agents_skills(source_root: &Path, destination_root: &Path, mirror_mode: 
 
     let destination_readme = destination_root.join("README.md");
     if destination_readme.exists() {
-        fs::remove_file(&destination_readme).with_context(|| {
-            format!("failed to remove '{}'", destination_readme.display())
-        })?;
+        fs::remove_file(&destination_readme)
+            .with_context(|| format!("failed to remove '{}'", destination_readme.display()))?;
     }
 
     Ok(())
@@ -426,9 +440,8 @@ fn remove_managed_codex_skill_duplicates(
     {
         let duplicate_path = codex_skills_root.join(&skill_name);
         if duplicate_path.exists() {
-            fs::remove_dir_all(&duplicate_path).with_context(|| {
-                format!("failed to remove '{}'", duplicate_path.display())
-            })?;
+            fs::remove_dir_all(&duplicate_path)
+                .with_context(|| format!("failed to remove '{}'", duplicate_path.display()))?;
         }
     }
 
@@ -438,9 +451,8 @@ fn remove_managed_codex_skill_duplicates(
         && duplicate_readme.is_file()
         && fs::read(&managed_readme)? == fs::read(&duplicate_readme)?
     {
-        fs::remove_file(&duplicate_readme).with_context(|| {
-            format!("failed to remove '{}'", duplicate_readme.display())
-        })?;
+        fs::remove_file(&duplicate_readme)
+            .with_context(|| format!("failed to remove '{}'", duplicate_readme.display()))?;
     }
 
     Ok(())
@@ -455,9 +467,8 @@ fn remove_legacy_starter_skill_duplicates(skill_roots: &[PathBuf]) -> Result<()>
         for skill_name in ["super-agent", "using-super-agent"] {
             let candidate_path = skill_root.join(skill_name);
             if candidate_path.exists() {
-                fs::remove_dir_all(&candidate_path).with_context(|| {
-                    format!("failed to remove '{}'", candidate_path.display())
-                })?;
+                fs::remove_dir_all(&candidate_path)
+                    .with_context(|| format!("failed to remove '{}'", candidate_path.display()))?;
             }
         }
     }
@@ -498,15 +509,13 @@ fn sync_directory(source: &Path, destination: &Path, mirror_mode: bool) -> Resul
         .collect::<Result<BTreeSet<_>>>()?;
 
     for source_file in &source_files {
-        let relative_path = source_file
-            .strip_prefix(source)
-            .with_context(|| {
-                format!(
-                    "failed to compute relative path for '{}' from '{}'",
-                    source_file.display(),
-                    source.display()
-                )
-            })?;
+        let relative_path = source_file.strip_prefix(source).with_context(|| {
+            format!(
+                "failed to compute relative path for '{}' from '{}'",
+                source_file.display(),
+                source.display()
+            )
+        })?;
         let destination_file = destination.join(relative_path);
         if let Some(parent) = destination_file.parent() {
             fs::create_dir_all(parent)

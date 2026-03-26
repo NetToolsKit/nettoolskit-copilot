@@ -4,6 +4,7 @@ use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
     RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimeSelfHealCommandError,
 };
 use std::error::Error;
 
@@ -103,12 +104,34 @@ fn test_runtime_healthcheck_error_display_is_stable() {
         source: anyhow!("disk full"),
     };
 
-    assert_eq!(error.to_string(), "failed to write runtime healthcheck output");
+    assert_eq!(
+        error.to_string(),
+        "failed to write runtime healthcheck output"
+    );
     assert_eq!(
         error
             .source()
             .expect("source should be preserved")
             .to_string(),
         "disk full"
+    );
+}
+
+#[test]
+fn test_runtime_self_heal_error_display_is_stable() {
+    let error = RuntimeSelfHealCommandError::PrepareArtifacts {
+        source: anyhow!("mkdir failure"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to prepare runtime self-heal artifacts"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "mkdir failure"
     );
 }

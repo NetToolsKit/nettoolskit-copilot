@@ -65,11 +65,10 @@ struct PlanningArtifactMeta {
 pub fn export_planning_summary(
     request: &ExportPlanningSummaryRequest,
 ) -> Result<ExportPlanningSummaryResult, PlanningSummaryCommandError> {
-    let current_dir = env::current_dir().map_err(|source| {
-        PlanningSummaryCommandError::ResolveWorkspaceRoot {
+    let current_dir =
+        env::current_dir().map_err(|source| PlanningSummaryCommandError::ResolveWorkspaceRoot {
             source: source.into(),
-        }
-    })?;
+        })?;
     let repo_root = resolve_workspace_root(request.repo_root.as_deref(), Some(&current_dir))
         .map_err(|source| PlanningSummaryCommandError::ResolveWorkspaceRoot { source })?;
     let planning_surface = resolve_planning_surface(&repo_root);
@@ -79,16 +78,18 @@ pub fn export_planning_summary(
     let output_path = if request.print_only {
         None
     } else {
-        let output_path = resolve_planning_summary_output_path(&repo_root, request.output_path.as_deref())
-            .map_err(|source| PlanningSummaryCommandError::WriteOutput { source })?;
+        let output_path =
+            resolve_planning_summary_output_path(&repo_root, request.output_path.as_deref())
+                .map_err(|source| PlanningSummaryCommandError::WriteOutput { source })?;
         if let Some(parent) = output_path.parent() {
-            fs::create_dir_all(parent).with_context(|| {
-                format!(
-                    "failed to create planning summary output directory '{}'",
-                    parent.display()
-                )
-            })
-            .map_err(|source| PlanningSummaryCommandError::WriteOutput { source })?;
+            fs::create_dir_all(parent)
+                .with_context(|| {
+                    format!(
+                        "failed to create planning summary output directory '{}'",
+                        parent.display()
+                    )
+                })
+                .map_err(|source| PlanningSummaryCommandError::WriteOutput { source })?;
         }
 
         fs::write(&output_path, &document)
@@ -135,7 +136,10 @@ fn render_planning_summary_document(
         for meta in &active_plan_metas {
             lines.push(format!("### {}", meta.title));
             lines.push(String::new());
-            lines.push(format!("- **File:** `{}/{}`", planning_surface.plan_root, meta.file_name));
+            lines.push(format!(
+                "- **File:** `{}/{}`",
+                planning_surface.plan_root, meta.file_name
+            ));
             if !meta.status.is_empty() {
                 lines.push(format!("- **Status:** {}", meta.status));
             }
@@ -157,7 +161,10 @@ fn render_planning_summary_document(
         for meta in &active_spec_metas {
             lines.push(format!("### {}", meta.title));
             lines.push(String::new());
-            lines.push(format!("- **File:** `{}/{}`", planning_surface.spec_root, meta.file_name));
+            lines.push(format!(
+                "- **File:** `{}/{}`",
+                planning_surface.spec_root, meta.file_name
+            ));
             if !meta.status.is_empty() {
                 lines.push(format!("- **Status:** {}", meta.status));
             }
@@ -176,7 +183,11 @@ fn render_planning_summary_document(
     if recent_commits.is_empty() {
         lines.push("_Could not retrieve git log._".to_string());
     } else {
-        lines.extend(recent_commits.into_iter().map(|commit| format!("- {commit}")));
+        lines.extend(
+            recent_commits
+                .into_iter()
+                .map(|commit| format!("- {commit}")),
+        );
     }
     lines.push(String::new());
     lines.push("---".to_string());
@@ -249,7 +260,10 @@ fn collect_planning_artifact_metas(
         .collect::<Vec<_>>();
     files.sort_by(|left, right| right.1.cmp(&left.1));
 
-    files.into_iter().map(|(path, _)| planning_artifact_meta(repo_root, &path)).collect()
+    files
+        .into_iter()
+        .map(|(path, _)| planning_artifact_meta(repo_root, &path))
+        .collect()
 }
 
 fn planning_artifact_meta(repo_root: &Path, file_path: &Path) -> Result<PlanningArtifactMeta> {
@@ -447,10 +461,9 @@ fn resolve_planning_summary_output_path(
     match output_path {
         Some(path) if path.is_absolute() => Ok(path.to_path_buf()),
         Some(path) => Ok(resolve_full_path(repo_root, path)),
-        None => Ok(repo_root.join(".temp").join(format!(
-            "context-handoff-{}.md",
-            current_timestamp_token()?
-        ))),
+        None => Ok(repo_root
+            .join(".temp")
+            .join(format!("context-handoff-{}.md", current_timestamp_token()?))),
     }
 }
 

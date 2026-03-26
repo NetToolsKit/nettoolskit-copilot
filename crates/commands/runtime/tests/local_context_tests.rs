@@ -31,7 +31,8 @@ fn test_update_local_context_index_builds_index_and_query_returns_hits() {
     )
     .expect("plan file should be written");
     fs::write(
-        repo.path().join("scripts/runtime/query-local-context-index.ps1"),
+        repo.path()
+            .join("scripts/runtime/query-local-context-index.ps1"),
         "Query-LocalContextIndex -QueryText \"rust migration\"",
     )
     .expect("script file should be written");
@@ -81,7 +82,10 @@ fn test_query_local_context_index_requires_existing_index() {
 
     match error {
         LocalContextCommandError::IndexNotFound { index_path } => {
-            assert!(index_path.ends_with(".temp\\context-index\\index.json") || index_path.ends_with(".temp/context-index/index.json"));
+            assert!(
+                index_path.ends_with(".temp\\context-index\\index.json")
+                    || index_path.ends_with(".temp/context-index/index.json")
+            );
         }
         other => panic!("unexpected error: {other}"),
     }

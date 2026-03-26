@@ -25,8 +25,8 @@ fn test_runtime_surface_contracts_have_unique_ids_and_roots() {
 
 #[test]
 fn test_runtime_surface_lookup_returns_expected_hook_contract() {
-    let contract = runtime_surface_contract("runtime-hooks")
-        .expect("runtime hook surface should exist");
+    let contract =
+        runtime_surface_contract("runtime-hooks").expect("runtime hook surface should exist");
 
     assert_eq!(contract.kind, RuntimeSurfaceKind::RuntimeHooks);
     assert_eq!(contract.wave, MigrationWave::Wave3);

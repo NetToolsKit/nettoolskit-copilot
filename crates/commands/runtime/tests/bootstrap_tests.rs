@@ -43,7 +43,9 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
     write_file(
-        &repo.path().join("scripts/runtime/query-local-context-index.ps1"),
+        &repo
+            .path()
+            .join("scripts/runtime/query-local-context-index.ps1"),
         "Write-Output 'query'",
     );
 
@@ -70,7 +72,9 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
     assert!(result.github_runtime_enabled);
     assert!(!result.codex_runtime_enabled);
     assert!(target_github.join("AGENTS.md").is_file());
-    assert!(target_github.join("scripts/runtime/query-local-context-index.ps1").is_file());
+    assert!(target_github
+        .join("scripts/runtime/query-local-context-index.ps1")
+        .is_file());
     assert!(!target_github.join("skills/super-agent").exists());
     assert!(!target_copilot.join("using-super-agent").exists());
     assert!(result.provider_rendered);
@@ -80,10 +84,16 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
 fn test_invoke_runtime_bootstrap_syncs_codex_runtime_assets_and_removes_duplicates() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
-    write_file(&repo.path().join(".codex/skills/runtime-skill/SKILL.md"), "# runtime-skill");
+    write_file(
+        &repo.path().join(".codex/skills/runtime-skill/SKILL.md"),
+        "# runtime-skill",
+    );
     write_file(&repo.path().join(".codex/skills/README.md"), "# ignored");
     write_file(&repo.path().join(".codex/mcp/catalog.json"), "{}");
-    write_file(&repo.path().join(".codex/scripts/root-tool.ps1"), "Write-Output 'tool'");
+    write_file(
+        &repo.path().join(".codex/scripts/root-tool.ps1"),
+        "Write-Output 'tool'",
+    );
     write_file(
         &repo.path().join(".codex/orchestration/flow.md"),
         "# orchestration flow",
@@ -127,9 +137,15 @@ fn test_invoke_runtime_bootstrap_syncs_codex_runtime_assets_and_removes_duplicat
     assert!(!target_codex.join("skills/README.md").exists());
     assert!(target_codex.join("shared-mcp/catalog.json").is_file());
     assert!(target_codex.join("shared-scripts/root-tool.ps1").is_file());
-    assert!(target_codex.join("shared-scripts/common/common-bootstrap.ps1").is_file());
-    assert!(target_codex.join("shared-scripts/security/audit.ps1").is_file());
-    assert!(target_codex.join("shared-scripts/maintenance/cleanup.ps1").is_file());
+    assert!(target_codex
+        .join("shared-scripts/common/common-bootstrap.ps1")
+        .is_file());
+    assert!(target_codex
+        .join("shared-scripts/security/audit.ps1")
+        .is_file());
+    assert!(target_codex
+        .join("shared-scripts/maintenance/cleanup.ps1")
+        .is_file());
     assert!(target_codex.join("shared-orchestration/flow.md").is_file());
     assert!(target_codex.join("README.shared.md").is_file());
 }
@@ -140,7 +156,9 @@ fn test_invoke_runtime_bootstrap_mirror_mode_removes_extra_files() {
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
     write_file(
-        &repo.path().join("scripts/runtime/query-local-context-index.ps1"),
+        &repo
+            .path()
+            .join("scripts/runtime/query-local-context-index.ps1"),
         "Write-Output 'query'",
     );
 
@@ -161,7 +179,9 @@ fn test_invoke_runtime_bootstrap_mirror_mode_removes_extra_files() {
     .expect("bootstrap should execute");
 
     assert!(!target_github.join("extra-file.md").exists());
-    assert!(!target_github.join("scripts/runtime/extra-script.ps1").exists());
+    assert!(!target_github
+        .join("scripts/runtime/extra-script.ps1")
+        .exists());
 }
 
 #[test]
@@ -174,7 +194,9 @@ fn test_invoke_runtime_bootstrap_applies_mcp_config_when_requested() {
         "param([string]$CatalogPath,[string]$TargetConfigPath,[switch]$CreateBackup)\nSet-Content -NoNewline -LiteralPath $TargetConfigPath 'applied=true'\nif ($CreateBackup) { Set-Content -NoNewline -LiteralPath ($TargetConfigPath + '.bak') 'backup=true' }\nexit 0",
     );
     write_file(
-        &repo.path().join(".github/governance/mcp-runtime.catalog.json"),
+        &repo
+            .path()
+            .join(".github/governance/mcp-runtime.catalog.json"),
         "{}",
     );
 
