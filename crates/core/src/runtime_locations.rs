@@ -250,3 +250,63 @@ pub fn effective_runtime_locations(
         ),
     }
 }
+
+/// Resolve the `.github` runtime root using built-in catalog defaults.
+#[must_use]
+pub fn resolve_github_runtime_path() -> PathBuf {
+    let home_path = resolve_user_home_path().unwrap_or_else(|_| PathBuf::from("."));
+    effective_runtime_locations(
+        &built_in_runtime_location_catalog(),
+        &RuntimeLocationOverrides::default(),
+        &home_path,
+    )
+    .github_runtime_root
+}
+
+/// Resolve the `.codex` runtime root using built-in catalog defaults.
+#[must_use]
+pub fn resolve_codex_runtime_path() -> PathBuf {
+    let home_path = resolve_user_home_path().unwrap_or_else(|_| PathBuf::from("."));
+    effective_runtime_locations(
+        &built_in_runtime_location_catalog(),
+        &RuntimeLocationOverrides::default(),
+        &home_path,
+    )
+    .codex_runtime_root
+}
+
+/// Resolve the `.agents/skills` runtime root using built-in catalog defaults.
+#[must_use]
+pub fn resolve_agents_skills_path() -> PathBuf {
+    let home_path = resolve_user_home_path().unwrap_or_else(|_| PathBuf::from("."));
+    effective_runtime_locations(
+        &built_in_runtime_location_catalog(),
+        &RuntimeLocationOverrides::default(),
+        &home_path,
+    )
+    .agents_skills_root
+}
+
+/// Resolve the `.copilot/skills` runtime root using built-in catalog defaults.
+#[must_use]
+pub fn resolve_copilot_skills_path() -> PathBuf {
+    let home_path = resolve_user_home_path().unwrap_or_else(|_| PathBuf::from("."));
+    effective_runtime_locations(
+        &built_in_runtime_location_catalog(),
+        &RuntimeLocationOverrides::default(),
+        &home_path,
+    )
+    .copilot_skills_root
+}
+
+/// Resolve the `.claude` runtime root using built-in catalog defaults.
+#[must_use]
+pub fn resolve_claude_runtime_path() -> PathBuf {
+    let home_path = resolve_user_home_path().unwrap_or_else(|_| PathBuf::from("."));
+    effective_runtime_locations(
+        &built_in_runtime_location_catalog(),
+        &RuntimeLocationOverrides::default(),
+        &home_path,
+    )
+    .claude_runtime_root
+}

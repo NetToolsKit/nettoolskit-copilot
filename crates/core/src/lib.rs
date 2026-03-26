@@ -28,6 +28,12 @@ pub mod local_context;
 /// Shared runtime contracts for CLI and background-service execution modes.
 pub mod runtime;
 
+/// Runtime execution context shared by bootstrap, doctor, and health flows.
+pub mod runtime_execution;
+
+/// Runtime install profile catalog helpers.
+pub mod runtime_install_profiles;
+
 /// Runtime location catalog and user-path utilities.
 pub mod runtime_locations;
 
