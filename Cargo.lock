@@ -1954,6 +1954,7 @@ version = "1.0.0"
 dependencies = [
  "anyhow",
  "nettoolskit-core",
+ "serde_json",
  "sha2",
  "tempfile",
  "thiserror",

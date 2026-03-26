@@ -3,6 +3,7 @@
 pub mod contracts;
 pub mod doctor;
 pub mod error;
+pub mod healthcheck;
 pub mod local_context;
 pub mod planning_summary;
 
@@ -16,7 +17,11 @@ pub use doctor::{
 };
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeDoctorCommandError,
-    RuntimeSurfaceError,
+    RuntimeHealthcheckCommandError, RuntimeSurfaceError,
+};
+pub use healthcheck::{
+    invoke_runtime_healthcheck, RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest,
+    RuntimeHealthcheckResult, RuntimeHealthcheckStatus,
 };
 pub use local_context::{
     query_local_context_index, update_local_context_index, QueryLocalContextIndexRequest,

@@ -107,3 +107,36 @@ pub enum RuntimeDoctorCommandError {
         source: AnyhowError,
     },
 }
+
+/// Errors raised by runtime healthcheck commands.
+#[derive(Debug, Error)]
+pub enum RuntimeHealthcheckCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime healthcheck workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Runtime execution context resolution failed.
+    #[error("failed to resolve runtime healthcheck execution context")]
+    ResolveExecutionContext {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output/log artifact preparation failed.
+    #[error("failed to prepare runtime healthcheck artifacts")]
+    PrepareArtifacts {
+        /// Underlying filesystem or path resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Report or log writing failed.
+    #[error("failed to write runtime healthcheck output")]
+    WriteOutput {
+        /// Underlying serialization or I/O failure.
+        #[source]
+        source: AnyhowError,
+    },
+}

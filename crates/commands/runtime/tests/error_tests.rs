@@ -3,7 +3,7 @@
 use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
-    RuntimeDoctorCommandError,
+    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
 };
 use std::error::Error;
 
@@ -75,5 +75,21 @@ fn test_runtime_doctor_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "hash failure"
+    );
+}
+
+#[test]
+fn test_runtime_healthcheck_error_display_is_stable() {
+    let error = RuntimeHealthcheckCommandError::WriteOutput {
+        source: anyhow!("disk full"),
+    };
+
+    assert_eq!(error.to_string(), "failed to write runtime healthcheck output");
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "disk full"
     );
 }
