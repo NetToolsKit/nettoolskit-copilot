@@ -7,6 +7,7 @@
     `.github/` instruction/runtime surfaces:
     - root instruction files (`AGENTS.md`, `COMMANDS.md`, `copilot-instructions.md`, `instruction-routing.catalog.yml`)
     - `.github/agents/`
+    - `.github/chatmodes/`
     - `.github/instructions/`
     - `.github/prompts/`
     - `.github/hooks/`
@@ -123,6 +124,7 @@ foreach ($rootFile in $managedRootFiles) {
 
 $directorySpecs = @(
     [pscustomobject]@{ Name = 'agents'; Source = Join-Path $resolvedSourceRoot 'agents'; Destination = Join-Path $resolvedOutputRoot 'agents' }
+    [pscustomobject]@{ Name = 'chatmodes'; Source = Join-Path $resolvedSourceRoot 'chatmodes'; Destination = Join-Path $resolvedOutputRoot 'chatmodes' }
     [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedSourceRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
     [pscustomobject]@{ Name = 'prompts'; Source = Join-Path $resolvedSourceRoot 'prompts'; Destination = Join-Path $resolvedOutputRoot 'prompts' }
     [pscustomobject]@{ Name = 'hooks'; Source = Join-Path $resolvedSourceRoot 'hooks'; Destination = Join-Path $resolvedOutputRoot 'hooks' }

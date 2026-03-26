@@ -61,7 +61,7 @@
     },
     {
       "path": "scripts/common/local-context-index.ps1",
-      "sha256": "9af1d3f5330bb5abc6e62b9e2b77cb61880a93137a3f800ed1c9e41385f60018"
+      "sha256": "e1b92fe3955040072d4121a86081933afcebe5f6b72ff05a44c9f7d10e2ece9a"
     },
     {
       "path": "scripts/common/git-hook-eof-settings.ps1",

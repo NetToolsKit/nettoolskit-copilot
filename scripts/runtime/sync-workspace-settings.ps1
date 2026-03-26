@@ -452,6 +452,16 @@ if ([string]::IsNullOrWhiteSpace($WorkspacePath)) {
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 
+$renderScriptPath = Join-Path $resolvedRepoRoot 'scripts\runtime\render-vscode-workspace-surfaces.ps1'
+if (-not (Test-Path -LiteralPath $renderScriptPath -PathType Leaf)) {
+    throw "Missing VS Code workspace renderer: $renderScriptPath"
+}
+& $renderScriptPath -RepoRoot $resolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+$renderExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+if ($renderExitCode -ne 0) {
+    throw ("VS Code workspace render failed before workspace sync. ExitCode={0}" -f $renderExitCode)
+}
+
 $resolvedWorkspacePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $WorkspacePath
 $resolvedBaselinePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $BaselinePath
 $resolvedSettingsTemplatePath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $SettingsTemplatePath

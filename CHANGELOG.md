@@ -29,6 +29,24 @@
   - `.githooks/post-commit`
   - `planning/completed/plan-runtime-source-projection-architecture-migration.md`
   - `planning/specs/completed/spec-runtime-source-projection-architecture-migration.md`
+- Expanded the same non-destructive projection model to the next provider-authored surfaces so authority keeps moving out of projected runtime folders and into `definitions/` without deleting `.github/.codex/.claude/.vscode`:
+  - `definitions/providers/github/chatmodes/**` -> rendered `.github/chatmodes/**`
+  - `definitions/providers/vscode/workspace/{README.md,base.code-workspace,settings.tamplate.jsonc,snippets/**}` -> rendered `.vscode/**`
+  - `definitions/providers/codex/orchestration/**` -> rendered `.codex/orchestration/**`
+  - `definitions/providers/claude/runtime/settings.json` -> rendered `.claude/settings.json`
+  - `scripts/runtime/render-github-instruction-surfaces.ps1`
+  - `scripts/runtime/render-vscode-workspace-surfaces.ps1`
+  - `scripts/runtime/render-codex-orchestration-surfaces.ps1`
+  - `scripts/runtime/render-claude-runtime-surfaces.ps1`
+  - `scripts/runtime/bootstrap.ps1`
+  - `scripts/runtime/sync-vscode-global-settings.ps1`
+  - `scripts/runtime/sync-vscode-global-snippets.ps1`
+  - `scripts/runtime/sync-workspace-settings.ps1`
+  - `scripts/runtime/sync-claude-settings.ps1`
+  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
+  - `scripts/validation/validate-instructions.ps1`
+  - `planning/completed/plan-provider-surface-projection-expansion-phase-2.md`
+  - `planning/specs/completed/spec-provider-surface-projection-expansion-phase-2.md`
 - Canonicalized MCP runtime ownership around `.github/governance/mcp-runtime.catalog.json`, added a tracked renderer pipeline for `.vscode/mcp.tamplate.jsonc` and `.codex/mcp/servers.manifest.json`, updated bootstrap/post-commit/install-facing documentation to treat the Codex manifest as a generated subset instead of the primary source of truth, and extended validation/runtime tests to enforce renderer parity.
 - Added the first deterministic local RAG/CAG slice through `.github/governance/local-context-index.catalog.json`, `scripts/common/local-context-index.ps1`, `scripts/runtime/update-local-context-index.ps1`, `scripts/runtime/query-local-context-index.ps1`, and housekeeping refresh integration so local repository continuity can be reused from `.temp/context-index/` without replaying large chat transcripts.
 - Extended the local RAG/CAG slice so `SessionStart` / `SubagentStart` now inject short indexed repository references when the local context index already exists, `export-planning-summary.ps1` emits `Suggested Local References` in handoff exports, and housekeeping refreshes the local context index before exporting the handoff summary.

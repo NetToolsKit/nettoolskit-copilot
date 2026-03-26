@@ -983,6 +983,7 @@ $requiredFiles = @(
     'definitions/providers/github/root/copilot-instructions.md',
     'definitions/providers/github/root/instruction-routing.catalog.yml',
     'definitions/providers/github/agents/super-agent.agent.md',
+    'definitions/providers/github/chatmodes/clean-architecture-review.chatmode.md',
     'definitions/providers/github/instructions/repository-operating-model.instructions.md',
     'definitions/providers/github/prompts/route-instructions.prompt.md',
     'definitions/providers/github/hooks/super-agent.bootstrap.json',
@@ -991,6 +992,15 @@ $requiredFiles = @(
     'definitions/providers/github/hooks/scripts/session-start.ps1',
     'definitions/providers/github/hooks/scripts/subagent-start.ps1',
     'definitions/providers/github/hooks/scripts/pre-tool-use.ps1',
+    'definitions/providers/vscode/workspace/README.md',
+    'definitions/providers/vscode/workspace/base.code-workspace',
+    'definitions/providers/vscode/workspace/settings.tamplate.jsonc',
+    'definitions/providers/vscode/workspace/snippets/codex-cli.tamplate.code-snippets',
+    'definitions/providers/codex/orchestration/agents.manifest.json',
+    'definitions/providers/codex/orchestration/pipelines/default.pipeline.json',
+    'definitions/providers/codex/orchestration/prompts/super-agent-intake-stage.prompt.md',
+    'definitions/providers/codex/orchestration/templates/run-artifact.template.json',
+    'definitions/providers/claude/runtime/settings.json',
     '.vscode/base.code-workspace',
     '.github/runbooks/README.md',
     '.github/runbooks/validation-failures.runbook.md',
@@ -1067,6 +1077,9 @@ $requiredFiles = @(
     'scripts/runtime/render-vscode-mcp-template.ps1',
     'scripts/runtime/render-provider-skill-surfaces.ps1',
     'scripts/runtime/render-vscode-profile-surfaces.ps1',
+    'scripts/runtime/render-vscode-workspace-surfaces.ps1',
+    'scripts/runtime/render-codex-orchestration-surfaces.ps1',
+    'scripts/runtime/render-claude-runtime-surfaces.ps1',
     'scripts/runtime/sync-codex-mcp-config.ps1',
     'scripts/runtime/hooks/common.ps1',
     'scripts/runtime/hooks/session-start.ps1',
@@ -1261,6 +1274,12 @@ $githubInstructionSurfacePairs = @(
         FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
     }
     [pscustomobject]@{
+        Label = 'GitHub chatmodes surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\chatmodes'
+        Destination = Join-Path $resolvedRepoRoot '.github\chatmodes'
+        FixHint = 'Re-run scripts/runtime/render-github-instruction-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
         Label = 'GitHub instructions surface'
         Source = Join-Path $resolvedRepoRoot 'definitions\providers\github\instructions'
         Destination = Join-Path $resolvedRepoRoot '.github\instructions'
@@ -1336,6 +1355,18 @@ $providerSkillSourcePairs = @(
         Destination = Join-Path $resolvedRepoRoot '.vscode\profiles'
         FixHint = 'Re-run scripts/runtime/render-vscode-profile-surfaces.ps1 -RepoRoot .'
     }
+    [pscustomobject]@{
+        Label = 'VS Code workspace snippets surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\vscode\workspace\snippets'
+        Destination = Join-Path $resolvedRepoRoot '.vscode\snippets'
+        FixHint = 'Re-run scripts/runtime/render-vscode-workspace-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'Codex orchestration surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\codex\orchestration'
+        Destination = Join-Path $resolvedRepoRoot '.codex\orchestration'
+        FixHint = 'Re-run scripts/runtime/render-codex-orchestration-surfaces.ps1 -RepoRoot .'
+    }
 )
 
 foreach ($skillSurface in $providerSkillSourcePairs) {
@@ -1354,6 +1385,42 @@ foreach ($skillSurface in $providerSkillSourcePairs) {
 
     if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
         Add-ValidationFailure ("{0} drift detected. {1}" -f $skillSurface.Label, $skillSurface.FixHint)
+    }
+}
+
+$selectedSurfacePairs = @(
+    [pscustomobject]@{
+        Label = 'VS Code workspace root surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\vscode\workspace'
+        Destination = Join-Path $resolvedRepoRoot '.vscode'
+        FileNames = @('README.md', 'base.code-workspace', 'settings.tamplate.jsonc')
+        FixHint = 'Re-run scripts/runtime/render-vscode-workspace-surfaces.ps1 -RepoRoot .'
+    }
+    [pscustomobject]@{
+        Label = 'Claude runtime settings surface'
+        Source = Join-Path $resolvedRepoRoot 'definitions\providers\claude\runtime'
+        Destination = Join-Path $resolvedRepoRoot '.claude'
+        FileNames = @('settings.json')
+        FixHint = 'Re-run scripts/runtime/render-claude-runtime-surfaces.ps1 -RepoRoot .'
+    }
+)
+
+foreach ($surface in $selectedSurfacePairs) {
+    $sourceMap = Get-StableSelectedFileMap -RootPath $surface.Source -FileNames $surface.FileNames
+    $destinationMap = Get-StableSelectedFileMap -RootPath $surface.Destination -FileNames $surface.FileNames
+
+    if ($null -eq $sourceMap) {
+        Add-ValidationFailure ("Missing selected-file source tree: {0}" -f $surface.Source)
+        continue
+    }
+
+    if ($null -eq $destinationMap) {
+        Add-ValidationFailure ("Missing selected-file destination tree: {0}" -f $surface.Destination)
+        continue
+    }
+
+    if ((ConvertTo-StableJson -Value $sourceMap) -ne (ConvertTo-StableJson -Value $destinationMap)) {
+        Add-ValidationFailure ("{0} drift detected. {1}" -f $surface.Label, $surface.FixHint)
     }
 }
 

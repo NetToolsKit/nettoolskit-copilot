@@ -346,15 +346,15 @@ Use the repository-managed community flow instead of ad-hoc issue and PR descrip
 
 | Integration target | Authoritative source of truth | Runtime target |
 | --- | --- | --- |
-| Copilot instructions, prompts, agents, and VS Code agent hooks | `definitions/providers/github/{root,agents,instructions,prompts,hooks}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
-| Codex runtime skills, MCP, orchestration, shared scripts | `definitions/providers/codex/skills/` + `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
+| Copilot instructions, prompts, agents, chatmodes, and VS Code agent hooks | `definitions/providers/github/{root,agents,instructions,prompts,chatmodes,hooks}/` -> rendered `.github/` | `%USERPROFILE%\\.github` |
+| Codex runtime skills, orchestration, MCP, shared scripts | `definitions/providers/codex/{skills,orchestration}/` + `.codex/` + `scripts/common` + `scripts/security` + `scripts/maintenance` | `%USERPROFILE%\\.codex` |
 | Picker-visible local skills for VS Code/Codex | `definitions/providers/codex/skills/` -> rendered `.codex/skills/` | `%USERPROFILE%\\.agents\\skills` |
-| Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `.claude/settings.json` | loaded by Claude Code at workspace open |
+| Claude Code workspace adapter and lifecycle hooks | `CLAUDE.md` + `definitions/providers/claude/runtime/settings.json` -> rendered `.claude/settings.json` | loaded by Claude Code at workspace open |
 | Claude Code skill adapters (Super Agent pipeline) | `definitions/providers/claude/skills/` -> rendered `.claude/skills/` | `%USERPROFILE%\\.claude\\skills` |
 | VS Code profile baselines | `definitions/providers/vscode/profiles/` -> rendered `.vscode/profiles/` | local profile creation through `scripts/runtime/setup-vscode-profiles.ps1` |
-| VS Code global settings | `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
-| VS Code global snippets | `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
-| VS Code workspaces | `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
+| VS Code global settings | `definitions/providers/vscode/workspace/settings.tamplate.jsonc` -> rendered `.vscode/settings.tamplate.jsonc` | `%APPDATA%\\Code\\User\\settings.json` |
+| VS Code global snippets | `definitions/providers/vscode/workspace/snippets/*.tamplate.code-snippets` -> rendered `.vscode/snippets/*.tamplate.code-snippets` | `%APPDATA%\\Code\\User\\snippets\\*.code-snippets` |
+| VS Code workspaces | `definitions/providers/vscode/workspace/base.code-workspace` -> rendered `.vscode/base.code-workspace` + `.github/governance/workspace-efficiency.baseline.json` | `.code-workspace` files refreshed by script |
 
 ## Architecture Model
 
@@ -374,6 +374,9 @@ The repository uses an explicit layered instruction architecture so context stay
 - `Codex skills`: `.codex/skills/*` are rendered provider surfaces that specialize execution and must reference canonical repo instructions instead of duplicating policy.
 - `Claude Code skills`: `.claude/skills/*` are rendered provider surfaces that adapt the same pipeline roles to Claude Code native agent types (`Plan`, `Explore`, `general-purpose`) and must reference canonical repo instructions without duplicating policy.
 - `VS Code profiles`: `.vscode/profiles/*` is a rendered repository surface projected from `definitions/providers/vscode/profiles/`; operational entrypoints still live under `scripts/runtime/`.
+- `VS Code workspace surfaces`: `.vscode/README.md`, `.vscode/base.code-workspace`, `.vscode/settings.tamplate.jsonc`, and `.vscode/snippets/*` are rendered from `definitions/providers/vscode/workspace/`.
+- `Codex orchestration surfaces`: `.codex/orchestration/*` is a rendered repository surface projected from `definitions/providers/codex/orchestration/`.
+- `Claude runtime settings`: `.claude/settings.json` is a rendered repository surface projected from `definitions/providers/claude/runtime/`.
 - `Runtime projection`: `scripts/runtime/*` renders the versioned source of truth into `.codex/`, `.claude/`, `.vscode/profiles/`, `%USERPROFILE%\\.github`, `%USERPROFILE%\\.codex`, `%USERPROFILE%\\.claude`, and the VS Code global profile.
 - `Future engine code`: `src/` is reserved for executable engine code and `tests/` is reserved for its future test suite; the repository is separating authored definitions from execution code before introducing Cargo/Rust.
 

@@ -185,6 +185,16 @@ function Sync-SnippetFile {
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 
+$renderScriptPath = Join-Path $resolvedRepoRoot 'scripts\runtime\render-vscode-workspace-surfaces.ps1'
+if (-not (Test-Path -LiteralPath $renderScriptPath -PathType Leaf)) {
+    throw "Missing VS Code workspace renderer: $renderScriptPath"
+}
+& $renderScriptPath -RepoRoot $resolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+$renderExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+if ($renderExitCode -ne 0) {
+    throw ("VS Code workspace render failed before snippet sync. ExitCode={0}" -f $renderExitCode)
+}
+
 $resolvedWorkspaceVscodePath = Resolve-WorkspaceVscodePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $WorkspaceVscodePath
 $resolvedGlobalVscodeUserPath = Resolve-GlobalVscodeUserPath -RequestedPath $GlobalVscodeUserPath
 $sourceSnippetsPath = Join-Path $resolvedWorkspaceVscodePath 'snippets'

@@ -231,6 +231,27 @@ try {
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-profile-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-profile-surfaces missing OutputRoot parameter.'
 
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-vscode-workspace-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-workspace-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-workspace-surfaces missing OutputRoot parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-codex-orchestration-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-codex-orchestration-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-codex-orchestration-surfaces missing OutputRoot parameter.'
+
+    $scriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
+    $command = Get-Command -Name $scriptPath -ErrorAction Stop
+    $keys = @($command.Parameters.Keys)
+    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-claude-runtime-surfaces missing RepoRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-claude-runtime-surfaces missing SourceRoot parameter.'
+    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-claude-runtime-surfaces missing OutputRoot parameter.'
+
     $scriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
@@ -456,29 +477,54 @@ try {
         $renderProviderSkillsScriptPath = Join-Path $runtimeScriptRoot 'render-provider-skill-surfaces.ps1'
         $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
         $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
+        $renderVscodeWorkspaceScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
+        $renderCodexOrchestrationScriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
+        $renderClaudeRuntimeScriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
         $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
         $githubProviderSourceRoot = Join-Path $providerSourceRoot 'github'
         $codexSkillSource = Join-Path $providerSourceRoot 'codex\skills\demo-skill'
         $claudeSkillSource = Join-Path $providerSourceRoot 'claude\skills\demo-skill'
+        $codexOrchestrationSourceRoot = Join-Path $providerSourceRoot 'codex\orchestration'
+        $claudeRuntimeSourceRoot = Join-Path $providerSourceRoot 'claude\runtime'
+        $vscodeWorkspaceSourceRoot = Join-Path $providerSourceRoot 'vscode\workspace'
         $codexSkillOutput = Join-Path $tempRepoRoot '.codex\skills'
         $claudeSkillOutput = Join-Path $tempRepoRoot '.claude\skills'
+        $codexOrchestrationOutputRoot = Join-Path $tempRepoRoot '.codex\orchestration'
+        $claudeRuntimeOutputRoot = Join-Path $tempRepoRoot '.claude'
         $profileDefinitionRoot = Join-Path $providerSourceRoot 'vscode\profiles'
         $profileOutputRoot = Join-Path $tempRepoRoot '.vscode\profiles'
+        $vscodeWorkspaceOutputRoot = Join-Path $tempRepoRoot '.vscode'
         $githubInstructionOutputRoot = Join-Path $tempRepoRoot '.github'
 
         New-Item -ItemType Directory -Path $codexSkillSource -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $codexSkillSource 'agents') -Force | Out-Null
         New-Item -ItemType Directory -Path $claudeSkillSource -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $codexOrchestrationSourceRoot 'pipelines') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $codexOrchestrationSourceRoot 'prompts') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $codexOrchestrationSourceRoot 'templates') -Force | Out-Null
+        New-Item -ItemType Directory -Path $claudeRuntimeSourceRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $vscodeWorkspaceSourceRoot 'snippets') -Force | Out-Null
         New-Item -ItemType Directory -Path $profileDefinitionRoot -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'root') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'agents') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'instructions') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'chatmodes') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $claudeSkillSource 'SKILL.md') -Value '# Demo Claude Skill' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'README.md') -Value '# Demo Codex Orchestration' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'agents.manifest.json') -Value '{ "agents": [] }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'pipelines\default.pipeline.json') -Value '{ "stages": [] }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'prompts\super-agent-intake-stage.prompt.md') -Value '# Intake Prompt' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'templates\run-artifact.template.json') -Value '{ "traceId": "" }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $claudeRuntimeSourceRoot 'settings.json') -Value '{ "permissions": { "allow": [] } }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $vscodeWorkspaceSourceRoot 'README.md') -Value '# Demo VS Code Workspace' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $vscodeWorkspaceSourceRoot 'base.code-workspace') -Value '{ "folders": [] }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $vscodeWorkspaceSourceRoot 'settings.tamplate.jsonc') -Value '{ "editor.tabSize": 4 }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $vscodeWorkspaceSourceRoot 'snippets\demo.tamplate.code-snippets') -Value '{ "demo": { "prefix": "demo", "body": ["demo"] } }' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $profileDefinitionRoot 'profile-base.json') -Value @(
             '{',
             '  "name": "Base",',
@@ -492,6 +538,7 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'agents\super-agent.agent.md') -Value '# Agent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'instructions\super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'prompts\route-instructions.prompt.md') -Value '# Prompt' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'chatmodes\demo.chatmode.md') -Value '# Chatmode' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\super-agent.bootstrap.json') -Value '{}' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\super-agent.selector.json') -Value '{}' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\common.ps1') -Value '# hook common' -Encoding UTF8 -NoNewline
@@ -515,7 +562,28 @@ try {
         Assert-True ($exitCode -eq 0) 'render-github-instruction-surfaces smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'AGENTS.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub root files.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\super-agent.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'chatmodes\demo.chatmode.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub chatmode surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'hooks\scripts\session-start.ps1') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub hook wrapper.'
+
+        & $renderVscodeWorkspaceScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-vscode-workspace-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'README.md') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected VS Code README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'base.code-workspace') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected base.code-workspace.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'settings.tamplate.jsonc') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected settings template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'snippets\demo.tamplate.code-snippets') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected snippets surface.'
+
+        & $renderCodexOrchestrationScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-codex-orchestration-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'README.md') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected orchestration README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'prompts\super-agent-intake-stage.prompt.md') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected prompts surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'templates\run-artifact.template.json') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected templates surface.'
+
+        & $renderClaudeRuntimeScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'render-claude-runtime-surfaces smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $claudeRuntimeOutputRoot 'settings.json') -PathType Leaf) 'render-claude-runtime-surfaces did not write the projected Claude settings.'
 
         & $setupProfilesScriptPath -DryRun -SkipMcpSync -ProfilesRoot $profileDefinitionRoot -ProfileName Base | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }

@@ -372,6 +372,57 @@ function Invoke-VscodeProfileSurfaceRender {
     }
 }
 
+# Renders repository-owned VS Code workspace surfaces before repo tooling consumes them.
+function Invoke-VscodeWorkspaceSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-vscode-workspace-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'VS Code workspace renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("VS Code workspace surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
+}
+
+# Renders repository-owned Codex orchestration surfaces before runtime sync consumes them.
+function Invoke-CodexOrchestrationSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-codex-orchestration-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'Codex orchestration renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("Codex orchestration surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
+}
+
+# Renders repository-owned Claude runtime surfaces before sync consumes them.
+function Invoke-ClaudeRuntimeSurfaceRender {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-claude-runtime-surfaces.ps1'
+    Assert-PathPresent -Path $renderScriptPath -Label 'Claude runtime renderer'
+
+    & $renderScriptPath -RepoRoot $ResolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("Claude runtime surface render failed before bootstrap sync. ExitCode={0}" -f $exitCode)
+    }
+}
+
 # -------------------------------
 # Main execution
 # -------------------------------
@@ -416,9 +467,15 @@ Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
 
 Invoke-GithubInstructionSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
 Invoke-VscodeProfileSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
+Invoke-VscodeWorkspaceSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
 
 if ($resolvedRuntimeProfile.EnableCodexRuntime) {
     Invoke-ProviderSkillSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot -Providers @('codex')
+    Invoke-CodexOrchestrationSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
+}
+
+if ($resolvedRuntimeProfile.EnableClaudeRuntime) {
+    Invoke-ClaudeRuntimeSurfaceRender -ResolvedRepoRoot $resolvedRepoRoot
 }
 
 if ($ApplyMcpConfig -and -not $resolvedRuntimeProfile.EnableCodexRuntime) {

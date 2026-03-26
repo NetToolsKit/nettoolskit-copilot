@@ -55,6 +55,16 @@ $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ExecutionIssueTracking
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$renderScriptPath = Join-Path $resolvedRepoRoot 'scripts\runtime\render-claude-runtime-surfaces.ps1'
+if (-not (Test-Path -LiteralPath $renderScriptPath -PathType Leaf)) {
+    throw "Missing Claude runtime renderer: $renderScriptPath"
+}
+& $renderScriptPath -RepoRoot $resolvedRepoRoot -Verbose:$script:IsVerboseEnabled | Out-Null
+$renderExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+if ($renderExitCode -ne 0) {
+    throw ("Claude runtime render failed before settings sync. ExitCode={0}" -f $renderExitCode)
+}
+
 $resolvedTargetClaudePath = if ([string]::IsNullOrWhiteSpace($TargetClaudePath)) {
     Resolve-ClaudeRuntimePath
 }
