@@ -1,5 +1,7 @@
 # Enterprise Rust Runtime Transcription Architecture
 
+Generated: 2026-03-26 16:20
+
 ## Objective
 
 Preserve the architectural intent captured in `.temp/arquitetura_enterprise_llm.md` as a versioned planning artifact and adapt it to the `nettoolskit-copilot` migration goal: transcribe the full PowerShell execution estate into a deterministic Rust runtime without losing enterprise-grade orchestration, structural intelligence, validation, and operator safety.
@@ -148,6 +150,48 @@ Constraint:
 - Wrapper removal is a cutover step, not a first-port step.
 - README and CHANGELOG updates are part of the architecture because operator-path clarity is part of enterprise runtime safety.
 
+## Current Rust Baseline Assessment
+
+- [2026-03-26 16:48] The workspace already has a viable Rust execution base with `11` Cargo members: `cli`, `core`, `ui`, `otel`, `orchestrator`, `task-worker`, `commands`, `commands/help`, `commands/manifest`, `commands/templating`, and `benchmarks`.
+- [2026-03-26 16:48] Baseline validation is partially healthy: `cargo check --workspace` passed, `cargo test --workspace` passed, and `cargo fmt --all -- --check` failed across many existing files because the repository formatting/EOF baseline is not currently green.
+- [2026-03-26 16:48] The best migration anchors already exist:
+  - `crates/core` for shared runtime contracts, path logic, config, file search, async utilities, and deterministic filesystem helpers
+  - `crates/orchestrator` for staged execution, policy-aware processing, chatops/service runtime, and control-plane dispatch
+  - `crates/cli` for operator-facing invocation and compatibility aliases
+  - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the strongest current examples of command-focused Rust subcrates with mirrored test structure
+- [2026-03-26 16:48] Structural debt is already visible and should not absorb new script-port logic directly:
+  - `crates/orchestrator/src/execution/processor.rs` is `8151` lines
+  - `crates/orchestrator/src/execution/chatops_runtime.rs` is `2380` lines
+  - `crates/orchestrator/src/execution/chatops.rs` is `1618` lines
+  - `crates/cli/src/main.rs` is `2950` lines
+  - `crates/cli/src/lib.rs` is `2024` lines
+- [2026-03-26 16:48] Test-structure debt also exists:
+  - top-level `crates/commands` does not yet provide `tests/test_suite.rs` or `tests/error_tests.rs`
+  - `crates/task-worker` does not yet provide external mirrored tests
+- [2026-03-26 16:48] Architectural conclusion: the repository does not need a reset or reclone to host the migration, but it does need boundary hardening before broad script transcription starts.
+
+## Target Rust Ownership Model
+
+| Capability Family | Target Owner | Architectural Direction |
+| --- | --- | --- |
+| `scripts/common` | `crates/core` | Shared path, env, process, manifest, catalog, runtime state, and filesystem primitives stay centralized here. |
+| `scripts/runtime`, `scripts/maintenance`, `scripts/git-hooks`, and `scripts/runtime/hooks` | `crates/commands/runtime` plus `crates/cli` | A dedicated runtime command crate should own bootstrap, render, sync, doctor, clean, self-heal, indexing, and hook install/check flows; `cli` stays a thin entry layer. |
+| `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/doc`, and `scripts/deploy` | `crates/commands/validation` | A dedicated validation command crate should own policy, security, governance, documentation, and deploy-preflight flows; split into smaller subcrates only if dependency or size pressure justifies it later. |
+| `scripts/orchestration` | `crates/orchestrator` | Staged execution, dispatch, replay/resume, service runtime, and policy-aware control-plane behavior remain orchestrator concerns. |
+| `scripts/tests` and `tests/runtime` | Mirrored Rust test suites under owning crates plus root integration harnesses | PowerShell parity tests should become crate-owned Rust tests instead of staying as a separate scripting runtime. |
+| Background queue and retry runtime | `crates/task-worker` | Keep this crate narrow and reusable; add the missing mirrored test surface before expanding responsibilities. |
+| Command discovery and re-export surface | `crates/commands` | Keep the top-level command aggregator, but bring it into compliance with the Rust testing contract before it becomes the public export hub for new migration subcrates. |
+
+The existing `help`, `manifest`, and `templating` command crates should be treated as the reference implementation style for new migration-focused subcrates.
+
+## Migration Readiness Gates
+
+1. Add the missing `tests/test_suite.rs` and `tests/error_tests.rs` surfaces for `crates/commands` and mirrored external tests for `crates/task-worker`.
+2. Create the dedicated runtime and validation command boundaries before large-scale script ports land in the workspace.
+3. Avoid placing new migration logic into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files; extract modules instead.
+4. Keep PowerShell entrypoints as thin wrappers only; do not allow new business logic to stay in PowerShell after a Rust owner exists.
+5. Bring the formatting baseline back to green so future migration waves can use `cargo fmt --check` as a reliable gate.
+
 ## Non-Goals
 
 - keeping a permanent mixed PowerShell and Rust execution core
@@ -168,7 +212,10 @@ Constraint:
 3. The active migration spec and plan can reference this artifact without depending on `.temp`.
 4. The architecture explicitly keeps LLM reasoning as a planning aid and Rust as the execution substrate.
 5. The architecture keeps static repository surfaces authoritative and PowerShell wrappers temporary.
+6. The architecture documents the current Rust baseline honestly, including compile/test health, formatting debt, and test-structure gaps.
+7. The architecture defines a target ownership model that explains where full-script transcription should land before implementation starts.
 
 ## Planning Readiness
 
 - `ready-for-plan`
+- Updated: `2026-03-26 16:48` — validated the current Rust baseline and refined the target ownership model for full script transcription.

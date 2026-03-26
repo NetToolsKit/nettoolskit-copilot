@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 16:20
+- LastUpdated: 2026-03-26 16:48
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -23,6 +23,16 @@ Current hygiene priorities for the migration:
 - harden CI and validation expectations so Rust-backed replacements become the default quality gate
 - preserve wrapper safety, hook integrity, and artifact hygiene during the transition
 
+## Current Rust Hygiene Snapshot
+
+- [2026-03-26 16:48] `cargo check --workspace` passed.
+- [2026-03-26 16:48] `cargo test --workspace` passed.
+- [2026-03-26 16:48] `cargo fmt --all -- --check` failed across many existing files, so repository-wide formatting is still a blocking hygiene item.
+- [2026-03-26 16:48] Rust testing-contract gaps remain in the current workspace:
+  - `crates/commands` has no `tests/test_suite.rs` or `tests/error_tests.rs`
+  - `crates/task-worker` has no mirrored external tests
+- [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
+
 ## Ordered Tasks
 
 ### Task 1: Rebaseline Repository Hygiene Around Full Script Transcription
@@ -30,6 +40,7 @@ Current hygiene priorities for the migration:
 Status: `[x]` Completed
 
 - [2026-03-26 16:20] Updated the hygiene plan so it supports the full PowerShell-to-Rust transcription program instead of unrelated follow-up backlog ✓ [2026-03-26 16:20]
+- [2026-03-26 16:48] Recorded the current Rust hygiene baseline so formatting debt and test-structure gaps are explicit before migration expansion ✓ [2026-03-26 16:48]
 - Target paths:
   - `planning/active/plan-repository-operations-hygiene.md`
   - `planning/active/plan-repository-unification-and-rust-migration.md`
@@ -47,18 +58,23 @@ Status: `[x]` Completed
 
 Status: `[ ]` Pending
 
-- [2026-03-26 16:20] Clear the dependency and toolchain debt that would make broad Rust expansion noisy or unsafe
+- [2026-03-26 16:20] Clear the dependency, formatting, and test-contract debt that would make broad Rust expansion noisy or unsafe
 - Target paths:
   - `Cargo.toml`
   - `Cargo.lock`
   - `crates/*/Cargo.toml`
+  - `crates/commands/`
+  - `crates/task-worker/`
   - `.github/workflows/`
 - Commands:
   - `cargo audit`
   - `pwsh -File C:\Users\tguis\.github\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -ProjectPath . -FailOnSeverities Critical,High`
-  - `cargo test`
+  - `cargo fmt --all -- --check`
+  - `cargo test --workspace`
 - Checkpoints:
   - no accepted dependency exception blocks the next Rust migration waves
+  - `cargo fmt --check` is restored as a reliable workspace gate
+  - `crates/commands` and `crates/task-worker` are aligned with the repository Rust test contract
   - CI prerequisites for new crates and commands remain explicit
   - migration work does not hide supply-chain debt behind feature pressure
 - Commit checkpoint:

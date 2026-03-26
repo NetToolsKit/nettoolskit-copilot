@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 16:20
+- LastUpdated: 2026-03-26 16:48
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -40,6 +40,38 @@ The migration remains compatibility-first:
 | `scripts/tests` | 27 | Wave 3 control plane and parity |
 | Total | 147 | Full migration scope |
 
+## Current Rust Baseline
+
+- [2026-03-26 16:48] `cargo check --workspace` passed.
+- [2026-03-26 16:48] `cargo test --workspace` passed.
+- [2026-03-26 16:48] `cargo fmt --all -- --check` failed across existing files, so the formatting/EOF baseline is not yet a dependable gate.
+- [2026-03-26 16:48] Reusable architectural anchors already exist:
+  - `crates/core` for shared helper, filesystem, path, config, and runtime primitives
+  - `crates/orchestrator` for staged orchestration and policy-aware execution
+  - `crates/cli` for operator-facing verbs and compatibility entrypoints
+  - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the best current examples of modular command crates with mirrored tests
+- [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
+  - `crates/commands` lacks `tests/test_suite.rs` and `tests/error_tests.rs`
+  - `crates/task-worker` lacks mirrored external tests
+  - oversized files should not become default landing zones for ported scripts:
+    - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
+    - `crates/orchestrator/src/execution/chatops_runtime.rs` (`2380` lines)
+    - `crates/orchestrator/src/execution/chatops.rs` (`1618` lines)
+    - `crates/cli/src/main.rs` (`2950` lines)
+    - `crates/cli/src/lib.rs` (`2024` lines)
+
+## Target Rust Ownership Model
+
+| Script Domain | Target Rust Owner | Planned End State |
+| --- | --- | --- |
+| `scripts/common` | `crates/core` | Shared primitives only; no operator verb logic should remain duplicated elsewhere. |
+| `scripts/runtime`, `scripts/maintenance`, `scripts/git-hooks`, `scripts/runtime/hooks` | `crates/commands/runtime` plus `crates/cli` | Rust owns runtime verbs, bootstrap, render/sync, doctor, clean, recovery, local index, and hook install/check; PowerShell becomes wrapper-only. |
+| `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/doc`, `scripts/deploy` | `crates/commands/validation` | Rust owns standards validation, policy/security gates, governance checks, doc validation, and deploy preflight. |
+| `scripts/orchestration` | `crates/orchestrator` | Orchestrator remains the staged control plane and event dispatch layer. |
+| `scripts/tests` and `tests/runtime` | Owning crate test suites plus root integration harnesses | Parity evidence moves into Rust test surfaces and stops depending on PowerShell harnesses. |
+| worker/retry runtime helpers | `crates/task-worker` | Keep background execution support narrow and reusable. |
+| top-level command exports | `crates/commands` | Aggregates migration subcrates once brought into test-contract compliance. |
+
 ## Ordered Tasks
 
 ### Task 1: Rebaseline The Migration Scope Around Full Script Transcription
@@ -48,6 +80,7 @@ Status: `[x]` Completed
 
 - [2026-03-26 16:20] Rewrote the active spec and this plan around the full `147`-script migration scope ✓ [2026-03-26 16:20]
 - [2026-03-26 16:20] Captured `.temp/arquitetura_enterprise_llm.md` into a versioned architecture spec under `planning/specs/active/` and folded the relevant direction into the migration artifacts ✓ [2026-03-26 16:20]
+- [2026-03-26 16:48] Captured the current Rust baseline and target ownership model so migration tasks align to the real workspace rather than an abstract future state ✓ [2026-03-26 16:48]
 - Target paths:
   - `planning/specs/active/spec-repository-unification-and-rust-migration.md`
   - `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
@@ -61,6 +94,7 @@ Status: `[x]` Completed
   - the active spec locks the new full-scope migration target
   - the active plan references the complete script inventory and migration waves
   - the supporting `.temp` note is treated as source input and the versioned architecture spec carries the durable architectural output
+  - the active artifacts describe the current Rust baseline honestly before implementation starts
 - Commit checkpoint:
   - `docs(planning): rebaseline rust migration around full script transcription`
 
@@ -85,11 +119,34 @@ Status: `[ ]` Pending
 - Commit checkpoint:
   - `docs(planning): freeze rust ownership map for all scripts`
 
-### Task 3: Define Rust Workspace Boundaries And Command Contracts
+### Task 3: Harden The Existing Rust Workspace Before Expansion
 
 Status: `[ ]` Pending
 
-- [2026-03-26 16:20] Lock the target Rust command surfaces for runtime, render, sync, validate, security, orchestration, maintenance, hooks, governance, deploy, and test parity flows
+- [2026-03-26 16:48] Bring the current workspace into migration-ready shape before broad script transcription starts
+- Target paths:
+  - `Cargo.toml`
+  - `crates/commands/`
+  - `crates/task-worker/`
+  - `crates/orchestrator/`
+  - `crates/cli/`
+- Commands:
+  - `cargo check --workspace`
+  - `cargo test --workspace`
+  - `cargo metadata --format-version 1 --no-deps`
+  - `cargo fmt --all -- --check`
+- Checkpoints:
+  - `crates/commands` and `crates/task-worker` have an explicit test-structure remediation path
+  - new migration logic no longer needs to land in the oversized orchestrator or CLI files by default
+  - the workspace is ready to add migration-focused command crates without compounding current layout debt
+- Commit checkpoint:
+  - `refactor(rust): harden workspace baseline for script migration`
+
+### Task 4: Define Rust Workspace Boundaries And Command Contracts
+
+Status: `[ ]` Pending
+
+- [2026-03-26 16:48] Lock the target Rust command surfaces for runtime, validation, orchestration, maintenance, hooks, governance, deploy, and test parity flows
 - Target paths:
   - `Cargo.toml`
   - `crates/core/`
@@ -100,16 +157,16 @@ Status: `[ ]` Pending
   - `scripts/runtime/`
 - Commands:
   - `cargo metadata --format-version 1 --no-deps`
-  - `cargo fmt --all -- --check`
-  - `cargo test`
+  - `cargo check --workspace`
+  - `cargo test --workspace`
 - Checkpoints:
-  - current workspace crates are reused where possible before introducing new crates
+  - `crates/commands/runtime` and `crates/commands/validation` are locked as the first migration-focused command boundaries
   - compatibility wrappers map to stable Rust commands and argument contracts
   - shared helper behavior has a clear home in Rust before family-level implementation starts
 - Commit checkpoint:
   - `docs(rust): define target command contracts for full script transcription`
 
-### Task 4: Implement Wave 1 Foundation For Shared Helpers And Runtime Surfaces
+### Task 5: Implement Wave 1 Foundation For Shared Helpers And Runtime Surfaces
 
 Status: `[ ]` Pending
 
@@ -131,7 +188,7 @@ Status: `[ ]` Pending
 - Commit checkpoint:
   - `feat(rust): implement shared helper and runtime transcription wave`
 
-### Task 5: Implement Wave 2 Quality, Policy, And Support Surfaces
+### Task 6: Implement Wave 2 Quality, Policy, And Support Surfaces
 
 Status: `[ ]` Pending
 
@@ -156,7 +213,7 @@ Status: `[ ]` Pending
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
-### Task 6: Implement Wave 3 Control Plane, Hooks, And Parity Harness
+### Task 7: Implement Wave 3 Control Plane, Hooks, And Parity Harness
 
 Status: `[ ]` Pending
 
@@ -180,7 +237,7 @@ Status: `[ ]` Pending
 - Commit checkpoint:
   - `feat(rust): implement control-plane and parity transcription wave`
 
-### Task 7: Cut Over Defaults And Retire Legacy PowerShell Execution Safely
+### Task 8: Cut Over Defaults And Retire Legacy PowerShell Execution Safely
 
 Status: `[ ]` Pending
 
@@ -207,9 +264,10 @@ Status: `[ ]` Pending
 - `git status --short --branch`
 - `rg --files scripts -g *.ps1`
 - `cargo metadata --format-version 1 --no-deps`
+- `cargo check --workspace`
 - `cargo fmt --all -- --check`
 - `cargo build`
-- `cargo test`
+- `cargo test --workspace`
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - targeted parity validation for each migration wave
 - `git diff --check`
@@ -232,6 +290,7 @@ Status: `[ ]` Pending
 ## Delivery Slices
 
 - Slice A: planning and architecture rebaseline for the full `147`-script scope
-- Slice B: Wave 1 foundation for `scripts/common` plus `scripts/runtime` (`61` scripts)
-- Slice C: Wave 2 quality and policy domains for `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/maintenance`, `scripts/doc`, and `scripts/deploy` (`46` scripts)
-- Slice D: Wave 3 control plane for `scripts/orchestration`, `scripts/git-hooks`, and `scripts/tests` (`40` scripts)
+- Slice B: current Rust baseline hardening and migration-boundary lock
+- Slice C: Wave 1 foundation for `scripts/common` plus `scripts/runtime` (`61` scripts)
+- Slice D: Wave 2 quality and policy domains for `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/maintenance`, `scripts/doc`, and `scripts/deploy` (`46` scripts)
+- Slice E: Wave 3 control plane for `scripts/orchestration`, `scripts/git-hooks`, and `scripts/tests` (`40` scripts)

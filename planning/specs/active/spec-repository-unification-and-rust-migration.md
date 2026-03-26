@@ -1,5 +1,7 @@
 # Repository Unification And Full Rust Script Transcription
 
+Generated: 2026-03-26 16:20
+
 ## Objective
 
 Establish `nettoolskit-copilot` as the unified long-term workspace that preserves the `nettoolskit-cli` Rust lineage, keeps `C:\Users\tguis\copilot-instructions` as the external legacy reference, and transcribes the complete tracked PowerShell script portfolio into Rust-backed runtime capabilities without breaking current operator workflows.
@@ -38,6 +40,32 @@ Partial migration by script family is no longer enough for the desired end state
 - Align Rust execution with the existing workspace topology first: `crates/core`, `crates/commands/*`, `crates/orchestrator`, and `crates/cli`; add new crates only when current boundaries cannot safely absorb a capability.
 - Treat `.temp/arquitetura_enterprise_llm.md` as temporary source input and preserve its durable architectural direction in `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`, while this spec remains the canonical migration design artifact.
 
+## Current Rust Readiness Snapshot
+
+- [2026-03-26 16:48] The current Rust workspace is execution-capable today: `cargo check --workspace` passed and `cargo test --workspace` passed.
+- [2026-03-26 16:48] The formatting baseline is not yet release-clean for migration scale: `cargo fmt --all -- --check` failed across many existing files, so formatting debt must be treated as a real hygiene item.
+- [2026-03-26 16:48] The strongest reuse candidates for the migration are:
+  - `crates/core` for shared helpers currently implemented in `scripts/common`
+  - `crates/orchestrator` for staged orchestration and control-plane behavior
+  - `crates/cli` for user-facing verbs and compatibility aliases
+  - `crates/commands/help`, `crates/commands/manifest`, and `crates/commands/templating` as the best examples of modular command crates with mirrored tests
+- [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
+  - `crates/commands` lacks `tests/test_suite.rs` and `tests/error_tests.rs`
+  - `crates/task-worker` lacks mirrored external tests
+  - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
+
+## Target Rust Ownership Model
+
+| Capability Domain | Target Owner |
+| --- | --- |
+| `scripts/common` | `crates/core` |
+| `scripts/runtime`, `scripts/maintenance`, `scripts/git-hooks`, `scripts/runtime/hooks` | `crates/commands/runtime` plus `crates/cli` |
+| `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/doc`, `scripts/deploy` | `crates/commands/validation` |
+| `scripts/orchestration` | `crates/orchestrator` |
+| `scripts/tests` and `tests/runtime` | Rust test suites under the owning crates plus root integration harnesses |
+| background worker and retry runtime | `crates/task-worker` |
+| command export hub | `crates/commands` |
+
 ## Key Decisions
 
 1. `nettoolskit-copilot` remains the canonical workspace for the migration.
@@ -49,6 +77,9 @@ Partial migration by script family is no longer enough for the desired end state
 7. PowerShell wrappers remain available until parity is validated; removing a wrapper before parity is not allowed.
 8. The Rust target should expose stable command contracts for render, sync, bootstrap, validate, security, orchestration, maintenance, hooks, governance, and deploy flows.
 9. LLM-driven reasoning remains a planning and orchestration aid only; deterministic execution and repository automation must move into Rust.
+10. [2026-03-26 16:48] The migration should introduce `crates/commands/runtime` and `crates/commands/validation` as the first new command boundaries instead of overloading `cli` or `orchestrator`.
+11. [2026-03-26 16:48] `crates/commands` and `crates/task-worker` must be brought into the repository Rust testing contract before they become expansion anchors.
+12. [2026-03-26 16:48] Oversized orchestrator and CLI files are considered migration risk surfaces and should be reduced by extraction, not used as default landing zones for ported script logic.
 
 ## Constraints
 
@@ -93,10 +124,13 @@ Rejected. Validation and test harnesses are part of the executable control plane
 5. Static authorities such as `definitions/`, `.github/`, `.codex/`, `.claude/`, `.vscode/`, and `planning/` remain source-of-truth assets instead of being collapsed into generated Rust state.
 6. The supporting architecture note at `.temp/arquitetura_enterprise_llm.md` is preserved as a dedicated versioned architecture spec and reflected in the versioned migration artifacts.
 7. Cutover planning includes README and CHANGELOG obligations before operator-visible defaults change.
+8. The current Rust baseline is explicitly assessed in the migration artifacts, including what already compiles/tests cleanly and what does not.
+9. The migration artifacts define a concrete Rust ownership target for every script domain before implementation waves begin.
 
 ## Planning Readiness
 
 - `ready-for-plan`
+- Updated: `2026-03-26 16:48` — added the validated Rust baseline snapshot and concrete target ownership model.
 
 ## Recommended Specialist Focus
 
