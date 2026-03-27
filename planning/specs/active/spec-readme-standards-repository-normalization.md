@@ -133,3 +133,16 @@ Normalize the full README estate around three repository-owned classes:
 - Root, crate/package, and workspace/reference READMEs use consistent section order and house style.
 - `cargo test -p nettoolskit-validation` passes after the baseline/rule changes.
 - `git diff --check` passes.
+
+## Implementation Outcome
+
+The workstream was executed in reviewable slices and completed across all `27` tracked README files.
+Repository instructions and the executable baseline now cover the real topology of `crates/*`, `crates/commands/*`, `planning/**`, `scripts/README.md`, and `definitions/**`.
+
+Observed outcome at closeout:
+
+- `validate-readme-standards.ps1`: passed for all `27` tracked README files
+- `git diff --check`: passed
+- `cargo test -p nettoolskit-validation`: currently fails because of concurrent non-README changes already present in `crates/commands/validation`
+
+That final Rust test failure is a branch-local parallel code issue, not a README standards regression.
