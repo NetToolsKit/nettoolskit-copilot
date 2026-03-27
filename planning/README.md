@@ -36,6 +36,7 @@ planning/
 
 - `planning/active/plan-repository-operations-hygiene.md`
 - `planning/active/plan-repository-unification-and-rust-migration.md`
+- `planning/active/plan-readme-standards-repository-normalization.md`
 
 ## Current Delivery Snapshot
 
