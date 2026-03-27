@@ -5,6 +5,7 @@ pub mod documentation;
 pub mod error;
 pub mod evidence;
 pub mod governance;
+pub mod instruction_graph;
 pub mod orchestration;
 pub mod structure;
 pub mod workspace;
@@ -20,10 +21,10 @@ pub use documentation::{
 };
 pub use error::{
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
-    ValidateInstructionMetadataCommandError, ValidatePlanningStructureCommandError,
-    ValidateReadmeStandardsCommandError, ValidateRoutingCoverageCommandError,
-    ValidateTemplateStandardsCommandError, ValidateWorkspaceEfficiencyCommandError,
-    ValidationSurfaceError,
+    ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionMetadataCommandError,
+    ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
+    ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
+    ValidateWorkspaceEfficiencyCommandError, ValidationSurfaceError,
 };
 pub use evidence::{
     invoke_validate_audit_ledger, ValidateAuditLedgerRequest, ValidateAuditLedgerResult,
@@ -32,6 +33,10 @@ pub use governance::{
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     ValidateRoutingCoverageRequest, ValidateRoutingCoverageResult,
     ValidateTemplateStandardsRequest, ValidateTemplateStandardsResult,
+};
+pub use instruction_graph::{
+    invoke_validate_authoritative_source_policy, ValidateAuthoritativeSourcePolicyRequest,
+    ValidateAuthoritativeSourcePolicyResult,
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,

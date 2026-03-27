@@ -1,11 +1,12 @@
 //! Tests for validation surface errors.
 
 use nettoolskit_validation::{
-    invoke_validate_all, invoke_validate_audit_ledger, invoke_validate_instruction_metadata,
-    invoke_validate_planning_structure, invoke_validate_readme_standards,
-    invoke_validate_routing_coverage, invoke_validate_template_standards,
-    invoke_validate_workspace_efficiency, require_validation_surface_contract, ValidateAllRequest,
-    ValidateAuditLedgerRequest, ValidateInstructionMetadataRequest,
+    invoke_validate_all, invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
+    invoke_validate_instruction_metadata, invoke_validate_planning_structure,
+    invoke_validate_readme_standards, invoke_validate_routing_coverage,
+    invoke_validate_template_standards, invoke_validate_workspace_efficiency,
+    require_validation_surface_contract, ValidateAllRequest, ValidateAuditLedgerRequest,
+    ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionMetadataRequest,
     ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
     ValidateRoutingCoverageRequest, ValidateTemplateStandardsRequest,
     ValidateWorkspaceEfficiencyRequest,
@@ -61,6 +62,21 @@ fn test_validate_audit_ledger_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve audit ledger workspace root"
+    );
+}
+
+#[test]
+fn test_validate_authoritative_source_policy_error_display_is_stable() {
+    let error =
+        invoke_validate_authoritative_source_policy(&ValidateAuthoritativeSourcePolicyRequest {
+            repo_root: Some(std::path::PathBuf::from("missing-repository")),
+            ..ValidateAuthoritativeSourcePolicyRequest::default()
+        })
+        .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve authoritative source policy workspace root"
     );
 }
 

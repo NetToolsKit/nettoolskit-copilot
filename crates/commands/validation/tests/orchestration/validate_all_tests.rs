@@ -193,6 +193,60 @@ fn write_template_standards_fixture(repo_root: &std::path::Path) {
     );
 }
 
+fn write_authoritative_source_policy_fixtures(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/governance/authoritative-source-map.json"),
+        r#"{
+  "version": 1,
+  "defaultPolicy": {
+    "repositoryContextFirst": true
+  },
+  "stackRules": [
+    { "id": "dotnet", "displayName": ".NET", "keywords": ["dotnet"], "officialDomains": ["learn.microsoft.com"] },
+    { "id": "github-copilot", "displayName": "GitHub Copilot", "keywords": ["copilot"], "officialDomains": ["docs.github.com"] },
+    { "id": "vscode", "displayName": "VS Code", "keywords": ["vscode"], "officialDomains": ["code.visualstudio.com"] },
+    { "id": "rust", "displayName": "Rust", "keywords": ["rust"], "officialDomains": ["doc.rust-lang.org"] },
+    { "id": "vue", "displayName": "Vue", "keywords": ["vue"], "officialDomains": ["vuejs.org"] },
+    { "id": "quasar", "displayName": "Quasar", "keywords": ["quasar"], "officialDomains": ["quasar.dev"] },
+    { "id": "docker", "displayName": "Docker", "keywords": ["docker"], "officialDomains": ["docs.docker.com"] },
+    { "id": "kubernetes", "displayName": "Kubernetes", "keywords": ["kubernetes"], "officialDomains": ["kubernetes.io"] },
+    { "id": "postgresql", "displayName": "PostgreSQL", "keywords": ["postgresql"], "officialDomains": ["postgresql.org"] },
+    { "id": "openai", "displayName": "OpenAI", "keywords": ["openai"], "officialDomains": ["platform.openai.com"] }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/instructions/authoritative-sources.instructions.md"),
+        r#"# Authoritative Sources
+
+Use `.github/governance/authoritative-source-map.json`.
+Repository context first.
+Use official documentation.
+Use community sources only as fallback.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/AGENTS.md"),
+        r#"# AGENTS
+
+Use `instructions/authoritative-sources.instructions.md`.
+Use `.github/governance/authoritative-source-map.json`.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/copilot-instructions.md"),
+        r#"# Global Instructions
+
+Use `instructions/authoritative-sources.instructions.md`.
+Use `.github/governance/authoritative-source-map.json`.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/instruction-routing.catalog.yml"),
+        "always:\n  - path: instructions/authoritative-sources.instructions.md\n",
+    );
+}
+
 fn write_workspace_efficiency_baseline(repo_root: &std::path::Path) {
     write_file(
         &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
@@ -477,5 +531,26 @@ fn test_invoke_validate_all_runs_native_workspace_efficiency_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-workspace-efficiency"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_authoritative_source_policy_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-authoritative-source-policy"]);
+    write_authoritative_source_policy_fixtures(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-authoritative-source-policy"
     );
 }

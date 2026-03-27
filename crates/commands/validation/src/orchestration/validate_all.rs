@@ -14,10 +14,11 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
-    invoke_validate_audit_ledger, invoke_validate_instruction_metadata,
-    invoke_validate_planning_structure, invoke_validate_readme_standards,
-    invoke_validate_routing_coverage, invoke_validate_template_standards,
-    invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
+    invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
+    invoke_validate_instruction_metadata, invoke_validate_planning_structure,
+    invoke_validate_readme_standards, invoke_validate_routing_coverage,
+    invoke_validate_template_standards, invoke_validate_workspace_efficiency,
+    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateInstructionMetadataRequest, ValidatePlanningStructureRequest,
     ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
     ValidateTemplateStandardsRequest, ValidateWorkspaceEfficiencyRequest,
@@ -216,6 +217,7 @@ enum NativeValidationCheck {
     InstructionMetadata,
     RoutingCoverage,
     TemplateStandards,
+    AuthoritativeSourcePolicy,
     WorkspaceEfficiency,
 }
 
@@ -240,6 +242,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
                 "rust:nettoolskit-validation::validate-template-standards"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
+                "rust:nettoolskit-validation::validate-authoritative-source-policy"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
                 "rust:nettoolskit-validation::validate-workspace-efficiency"
@@ -504,9 +509,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-authoritative-source-policy",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-authoritative-source-policy.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy),
         ),
         (
             "validate-instruction-architecture",
@@ -708,7 +711,8 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
         | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
         | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
-        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
+        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
             parameter_name == "WarningOnly"
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
@@ -910,6 +914,30 @@ fn run_native_validation_check(
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
                 ..ValidateTemplateStandardsRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::AuthoritativeSourcePolicy => {
+            invoke_validate_authoritative_source_policy(&ValidateAuthoritativeSourcePolicyRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                source_map_path: string_argument_path(&arguments, "SourceMapPath"),
+                instruction_path: string_argument_path(&arguments, "InstructionPath"),
+                agents_path: string_argument_path(&arguments, "AgentsPath"),
+                global_instructions_path: string_argument_path(
+                    &arguments,
+                    "GlobalInstructionsPath",
+                ),
+                routing_catalog_path: string_argument_path(&arguments, "RoutingCatalogPath"),
+                instruction_search_root: string_argument_path(&arguments, "InstructionSearchRoot"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
             })
             .map(|result| {
                 (

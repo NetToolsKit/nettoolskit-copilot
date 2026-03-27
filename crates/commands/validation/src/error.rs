@@ -98,6 +98,18 @@ pub enum ValidateTemplateStandardsCommandError {
     },
 }
 
+/// Errors raised by authoritative-source-policy validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateAuthoritativeSourcePolicyCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve authoritative source policy workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

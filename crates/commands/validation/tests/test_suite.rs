@@ -6,6 +6,9 @@ mod documentation {
     pub mod readme_standards_tests;
 }
 mod error_tests;
+mod instruction_graph {
+    pub mod authoritative_source_policy_tests;
+}
 
 mod governance {
     pub mod routing_coverage_tests;
