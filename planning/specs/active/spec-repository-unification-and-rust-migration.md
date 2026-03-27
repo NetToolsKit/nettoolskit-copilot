@@ -130,6 +130,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 36. [2026-03-27 11:03] Once `validate-agent-hooks` lands, the rest of the agent-policy work should stay inside `agent_orchestration/`; `validate-agent-permissions`, `validate-agent-skill-alignment`, and `validate-agent-orchestration` should close that whole block before the plan expands into release/security policy checks.
 37. [2026-03-27 11:24] Once `validate-agent-permissions` lands, the remaining agent-policy execution should stay on the same typed fixtures and shared models; `validate-agent-skill-alignment` should reuse the manifest/pipeline/eval graph next, and `validate-agent-orchestration` should close the block as the final structural integrity sweep.
 38. [2026-03-27 11:41] Once `validate-agent-skill-alignment` lands, only `validate-agent-orchestration` remains in the agent block; that last slice should be treated as the explicit completion point for all agent-policy and orchestration validation work in Wave 2.
+39. [2026-03-27 12:02] With `validate-agent-orchestration` now live, the full agent-policy and orchestration validation block is complete; the next Wave 2 execution should move entirely to release, supply-chain, architecture-boundary, and standards-policy surfaces.
 
 ## Constraints
 

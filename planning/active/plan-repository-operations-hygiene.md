@@ -153,6 +153,7 @@ Status: `[ ]` Pending
 - [2026-03-27 11:03] The Super Agent hook contract now runs through Rust too: `validate-agent-hooks` executes natively under `crates/commands/validation/agent_orchestration`, and `validate-all` routes it without the PowerShell bridge while keeping bootstrap/selector manifests, required hook scripts, and hook-helper contract markers inside a dedicated agent boundary ✓ [2026-03-27 11:03]
 - [2026-03-27 11:24] The agent permission matrix contract now runs through Rust too: `validate-agent-permissions` executes natively under `crates/commands/validation/agent_orchestration`, and `validate-all` routes it without the PowerShell bridge while keeping matrix/manifest/pipeline alignment, budget contracts, and stage permission rules inside the same dedicated agent boundary ✓ [2026-03-27 11:24]
 - [2026-03-27 11:41] The agent skill contract now runs through Rust too: `validate-agent-skill-alignment` executes natively under `crates/commands/validation/agent_orchestration`, and `validate-all` routes it without the PowerShell bridge while keeping skill folder/frontmatter integrity, mandatory instruction references, eval links, and pipeline role discipline inside the same dedicated agent boundary ✓ [2026-03-27 11:41]
+- [2026-03-27 12:02] The orchestration integrity contract now runs through Rust too: `validate-agent-orchestration` executes natively under `crates/commands/validation/agent_orchestration`, and `validate-all` routes it without the PowerShell bridge while keeping required orchestration assets, pipeline/handoff/run-artifact integrity, runtime catalog references, and eval-order warnings inside the same dedicated agent boundary ✓ [2026-03-27 12:02]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -181,6 +182,7 @@ Status: `[ ]` Pending
   - agent-hook drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining agent backlog is reduced to orchestration, skill-alignment, and permissions slices
   - agent-permission drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining agent backlog is reduced to orchestration plus skill-alignment slices
   - agent-skill drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining agent backlog is reduced to the final orchestration integrity sweep
+  - orchestration-asset drift now emits Rust-native warning/failure status without relying on the legacy validator, and the full agent policy plus orchestration validation block is now complete
 - Commit checkpoint:
   - `ci(rust): harden migration validation and wrapper governance`
 
