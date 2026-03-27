@@ -128,6 +128,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 34. [2026-03-27 10:28] After `validate-runtime-script-tests` lands, only `validate-shell-hooks` remains in the hygiene cluster, so closing that final slice should be treated as the explicit completion point for the entire workspace/runtime hygiene validation block.
 35. [2026-03-27 10:46] With `validate-shell-hooks` now live, the full workspace/runtime hygiene validation block is complete; the next Wave 2 execution should move to agent-orchestration and release/policy surfaces while keeping them grouped in similarly cohesive Rust module families.
 36. [2026-03-27 11:03] Once `validate-agent-hooks` lands, the rest of the agent-policy work should stay inside `agent_orchestration/`; `validate-agent-permissions`, `validate-agent-skill-alignment`, and `validate-agent-orchestration` should close that whole block before the plan expands into release/security policy checks.
+37. [2026-03-27 11:24] Once `validate-agent-permissions` lands, the remaining agent-policy execution should stay on the same typed fixtures and shared models; `validate-agent-skill-alignment` should reuse the manifest/pipeline/eval graph next, and `validate-agent-orchestration` should close the block as the final structural integrity sweep.
 
 ## Constraints
 
