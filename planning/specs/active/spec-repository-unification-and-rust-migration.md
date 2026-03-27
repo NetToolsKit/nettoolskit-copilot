@@ -77,6 +77,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-27 12:51] The compatibility lifecycle policy slice is now live in Rust too: `crates/commands/validation/policy` owns `validate-compatibility-lifecycle-policy`, and `validate-all` dispatches it natively while preserving COMPATIBILITY.md section discovery, reference-date parsing, markdown table ordering, EOL-plus-one enforcement, status alignment, hard-fail missing-file semantics, and warning-only conversion from the legacy validator.
 - [2026-03-27 13:21] The .NET standards slice is now live in Rust too: `crates/commands/validation/standards` owns `validate-dotnet-standards`, and `validate-all` dispatches it natively while preserving required template presence, placeholder regex enforcement, XML summary warnings, and whitespace hygiene semantics from the legacy validator.
 - [2026-03-27 13:28] The architecture boundaries slice is now live in Rust too: `crates/commands/validation/architecture` owns `validate-architecture-boundaries`, and `validate-all` dispatches it natively while preserving baseline loading, wildcard file resolution, severity-aware required/forbidden pattern enforcement, and unmatched-pattern warning semantics from the legacy validator.
+- [2026-03-27 13:29] The supply-chain slice is now live in Rust too: `crates/commands/validation/security` owns `validate-supply-chain`, and `validate-all` dispatches it natively while preserving manifest discovery, blocked and sensitive dependency pattern handling, optional license-evidence checks, and SBOM export semantics from the legacy validator.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -143,6 +144,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 43. [2026-03-27 12:51] With `validate-compatibility-lifecycle-policy` now live, the remaining Wave 2 backlog should stay focused on standards-policy, architecture-boundary, supply-chain, and release-governance surfaces; repository document lifecycle rules should remain grouped inside `policy/`.
 44. [2026-03-27 13:21] With `validate-dotnet-standards` now live in `standards/`, the remaining standards-policy backlog narrows to `validate-powershell-standards`; keep language-template quality rules grouped there instead of expanding `policy/` or `governance/`.
 45. [2026-03-27 13:28] With `validate-architecture-boundaries` now live in `architecture/`, the remaining Wave 2 backlog is now limited to PowerShell standards plus supply-chain and release governance/provenance surfaces.
+46. [2026-03-27 13:29] With `validate-supply-chain` now live in `security/`, the remaining Wave 2 backlog is limited to `validate-powershell-standards` plus the release governance/provenance pair; the next execution should open a dedicated `release/` boundary instead of spreading release checks across `policy/`, `governance/`, or `evidence/`.
 
 ## Constraints
 
@@ -223,6 +225,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 12:51` — implemented the `validate-compatibility-lifecycle-policy` Wave 2 repository-policy slice in `crates/commands/validation/policy`, routed it through `validate-all`, and reduced the remaining backlog to standards-policy, architecture-boundary, supply-chain, and release governance/provenance.
 - Updated: `2026-03-27 13:21` — implemented the `validate-dotnet-standards` Wave 2 standards slice in `crates/commands/validation/standards`, routed it through `validate-all`, and reduced the remaining backlog to PowerShell standards, architecture-boundary, supply-chain, and release governance/provenance.
 - Updated: `2026-03-27 13:28` — implemented the `validate-architecture-boundaries` Wave 2 architecture slice in `crates/commands/validation/architecture`, routed it through `validate-all`, and reduced the remaining backlog to PowerShell standards, supply-chain, and release governance/provenance.
+- Updated: `2026-03-27 13:29` — implemented the `validate-supply-chain` Wave 2 security slice in `crates/commands/validation/security`, routed it through `validate-all`, and reduced the remaining backlog to PowerShell standards plus release governance/provenance.
 
 ## Recommended Specialist Focus
 

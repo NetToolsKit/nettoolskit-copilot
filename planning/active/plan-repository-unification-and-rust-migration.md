@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 13:28
+- LastUpdated: 2026-03-27 13:29
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -76,6 +76,7 @@ The migration remains compatibility-first:
 - [2026-03-27 12:51] `crates/commands/validation/policy` now also owns `validate-compatibility-lifecycle-policy`, so COMPATIBILITY.md support-window enforcement runs natively in Rust beside the rest of the repository policy surfaces.
 - [2026-03-27 13:21] `crates/commands/validation/standards` now owns `validate-dotnet-standards`, so .NET template governance runs natively in Rust with direct required-template, placeholder, XML summary, and whitespace hygiene coverage through `validate-all`.
 - [2026-03-27 13:28] `crates/commands/validation/architecture` now owns `validate-architecture-boundaries`, so architecture baseline enforcement runs natively in Rust with direct wildcard matching, required-pattern, forbidden-pattern, allowed-exception, and severity-aware coverage through `validate-all`.
+- [2026-03-27 13:29] `crates/commands/validation/security` now also owns `validate-supply-chain`, so dependency inventory, blocked/sensitive package policy checks, SBOM export, and optional license-evidence enforcement now run natively in Rust through `validate-all`.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -267,6 +268,7 @@ Status: `[~]` In Progress
 - [2026-03-27 12:51] Implemented Rust-backed `validate-compatibility-lifecycle-policy` in `crates/commands/validation/policy`, with direct external coverage for support-window section discovery, reference-date parsing, markdown lifecycle table ordering, EOL-plus-one enforcement, status alignment, hard-fail missing-file semantics, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 12:51]
 - [2026-03-27 13:21] Implemented Rust-backed `validate-dotnet-standards` in `crates/commands/validation/standards`, with direct external coverage for required .NET template presence, regex placeholder enforcement, XML summary warnings, whitespace hygiene, and native dispatch through `validate-all` ✓ [2026-03-27 13:21]
 - [2026-03-27 13:28] Implemented Rust-backed `validate-architecture-boundaries` in `crates/commands/validation/architecture`, with direct external coverage for baseline loading, wildcard file resolution, severity-aware required/forbidden pattern enforcement, unmatched-pattern warnings, and native dispatch through `validate-all` ✓ [2026-03-27 13:28]
+- [2026-03-27 13:29] Implemented Rust-backed `validate-supply-chain` in `crates/commands/validation/security`, with direct external coverage for manifest discovery, blocked dependency enforcement, invalid package warnings, required license evidence, SBOM export, and native dispatch through `validate-all` ✓ [2026-03-27 13:29]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -304,13 +306,14 @@ Status: `[~]` In Progress
   - `validate-policy` no longer depends on PowerShell business logic, and repository policy contract enforcement now lives in a dedicated `policy/` capability boundary with native dispatch through `validate-all`
   - `validate-security-baseline` no longer depends on PowerShell business logic, and security baseline enforcement now lives in a dedicated `security/` capability boundary with native dispatch through `validate-all`
   - `validate-shared-script-checksums` no longer depends on PowerShell business logic, and checksum manifest enforcement now lives beside the rest of the security policy surfaces inside `crates/commands/validation/security/`
-  - `validate-compatibility-lifecycle-policy` no longer depends on PowerShell business logic, and COMPATIBILITY.md lifecycle governance now lives beside the rest of the repository policy surfaces inside `crates/commands/validation/policy/`
-  - `validate-dotnet-standards` no longer depends on PowerShell business logic, and .NET template governance now lives in a dedicated `standards/` capability boundary with native dispatch through `validate-all`
-  - `validate-architecture-boundaries` no longer depends on PowerShell business logic, and architecture baseline enforcement now lives in a dedicated `architecture/` capability boundary with native dispatch through `validate-all`
-  - security gates retain or improve current severity handling
-  - maintenance and deploy helpers remain deterministic and operator-safe
+- `validate-compatibility-lifecycle-policy` no longer depends on PowerShell business logic, and COMPATIBILITY.md lifecycle governance now lives beside the rest of the repository policy surfaces inside `crates/commands/validation/policy/`
+- `validate-dotnet-standards` no longer depends on PowerShell business logic, and .NET template governance now lives in a dedicated `standards/` capability boundary with native dispatch through `validate-all`
+- `validate-architecture-boundaries` no longer depends on PowerShell business logic, and architecture baseline enforcement now lives in a dedicated `architecture/` capability boundary with native dispatch through `validate-all`
+- `validate-supply-chain` no longer depends on PowerShell business logic, and dependency inventory plus SBOM/license evidence enforcement now live beside the rest of the security policy surfaces inside `crates/commands/validation/security/`
+- security gates retain or improve current severity handling
+- maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-powershell-standards`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
+  - policy/security/release/domain checks: `validate-powershell-standards`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
