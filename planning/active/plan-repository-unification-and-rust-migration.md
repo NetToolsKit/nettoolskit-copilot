@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 22:06
+- LastUpdated: 2026-03-26 22:24
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -66,6 +66,7 @@ The migration remains compatibility-first:
 - [2026-03-26 21:32] `crates/commands/runtime` now executes Rust-backed provider surface rendering for the `bootstrap` consumer too, so bootstrap no longer shells out to `render-provider-surfaces.ps1` before synchronizing runtime assets.
 - [2026-03-26 21:39] `crates/commands/runtime` now executes Rust-backed MCP config application inside `bootstrap`, so the bootstrap path no longer shells out to `sync-codex-mcp-config.ps1` to rewrite Codex `config.toml`.
 - [2026-03-26 22:06] `crates/commands/validation` now executes Rust-backed `validate-all` orchestration for profile selection, delegated validation sequencing, JSON report generation, and hash-chained ledger repair/write; `crates/commands/runtime` `healthcheck` now calls this Rust validation surface instead of shelling out to `validate-all.ps1`.
+- [2026-03-26 22:24] `crates/commands/validation` now executes Rust-backed `validate-planning-structure` and `validate-audit-ledger` checks too, and `validate-all` dispatches those checks natively while the remaining Wave 2 checks stay explicitly delegated.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -237,6 +238,7 @@ Status: `[~]` In Progress
 
 - [2026-03-26 16:20] Transcribe validation, security, governance, maintenance, deploy, and documentation helper flows into Rust-native commands
 - [2026-03-26 22:06] Implemented Rust-backed `validate-all` orchestration in `crates/commands/validation`, with profile selection, delegated check execution, JSON report generation, hash-chained ledger repair/write, and targeted external tests ✓ [2026-03-26 22:06]
+- [2026-03-26 22:24] Implemented Rust-backed `validate-planning-structure` and `validate-audit-ledger` in `crates/commands/validation`, with direct external coverage and native dispatch through `validate-all` for the first per-check Wave 2 cutover ✓ [2026-03-26 22:24]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -253,6 +255,8 @@ Status: `[~]` In Progress
 - Checkpoints:
   - validation suite orchestration, reporting, and ledger evidence no longer depend on PowerShell-only business logic
   - `healthcheck` consumes the Rust validation boundary instead of shelling out to the legacy wrapper
+  - `validate-planning-structure` and `validate-audit-ledger` no longer depend on PowerShell business logic
+  - `validate-all` now mixes native and delegated execution explicitly instead of treating every Wave 2 check as a script shell-out
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Commit checkpoint:

@@ -62,6 +62,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-26 21:32] The bootstrap provider render path is now live in Rust too: `crates/commands/runtime` reads the projection catalog, selects bootstrap renderers by condition, and renders the managed GitHub, VS Code, Codex, and Claude surfaces without shelling out to `render-provider-surfaces.ps1`.
 - [2026-03-26 21:39] The bootstrap MCP apply path is now live in Rust too: `crates/commands/runtime` reads the canonical MCP runtime catalog, projects the Codex server subset, rewrites `mcp_servers` in `config.toml`, and creates timestamped backups without shelling out to `sync-codex-mcp-config.ps1`.
 - [2026-03-26 22:06] The first Wave 2 validation boundary is now live in Rust too: `crates/commands/validation` owns `validate-all` profile selection, delegated validation sequencing, JSON report generation, and hash-chained ledger repair/write, and `healthcheck` now uses that Rust surface instead of the PowerShell wrapper.
+- [2026-03-26 22:24] The first individual Wave 2 validation checks are now live in Rust too: `crates/commands/validation` owns `validate-planning-structure` and `validate-audit-ledger`, and `validate-all` dispatches those checks natively while other validation checks remain explicitly delegated.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -109,6 +110,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 24. [2026-03-26 21:32] The `bootstrap` consumer of `render-provider-surfaces` should move under Rust ownership before the direct maintenance form of that command; bootstrap is the critical path, and the remaining MCP generation path can stay separate until its dedicated slice lands.
 25. [2026-03-26 21:39] The `bootstrap` consumer of Codex MCP config apply should also move under Rust ownership before any broader MCP maintenance command cutover; the critical bootstrap path only needs catalog-driven Codex projection and backup semantics.
 26. [2026-03-26 22:06] `validate-all` orchestration should move under Rust ownership before the individual validation scripts, so runtime health flows can bind to a stable validation boundary while Wave 2 continues migrating each policy check independently.
+27. [2026-03-26 22:24] Once `validate-all` is Rust-owned, Wave 2 should cut over individual validation checks in small native slices, starting with repository-structure and evidence-chain validators that have low external dependency risk.
 
 ## Constraints
 
@@ -174,6 +176,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-26 21:32` — implemented the Rust-backed bootstrap provider render slice and removed the PowerShell dispatcher dependency from the bootstrap projection path.
 - Updated: `2026-03-26 21:39` — implemented the Rust-backed bootstrap MCP apply slice and removed the PowerShell Codex config rewrite dependency from the bootstrap path.
 - Updated: `2026-03-26 22:06` — implemented the Rust-backed `validate-all` orchestration slice in `crates/commands/validation` and switched `healthcheck` to that Rust validation boundary.
+- Updated: `2026-03-26 22:24` — implemented the first native per-check Wave 2 slice in `crates/commands/validation` for `validate-planning-structure` and `validate-audit-ledger`, and routed both through `validate-all`.
 
 ## Recommended Specialist Focus
 

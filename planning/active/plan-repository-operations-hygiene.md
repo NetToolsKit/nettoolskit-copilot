@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 22:06
+- LastUpdated: 2026-03-26 22:24
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -44,6 +44,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 21:32] `crates/commands/runtime` now carries an executable Rust replacement for bootstrap-owned provider surface rendering too, so `bootstrap` no longer depends on `render-provider-surfaces.ps1` in the runtime sync path.
 - [2026-03-26 21:39] `crates/commands/runtime` now carries an executable Rust replacement for bootstrap-owned MCP config application too, so `bootstrap` no longer depends on `sync-codex-mcp-config.ps1` to rewrite Codex `config.toml`.
 - [2026-03-26 22:06] `crates/commands/validation` now carries an executable Rust replacement for `validate-all` orchestration, so `healthcheck` no longer depends on the top-level PowerShell validation wrapper even though Wave 2 still delegates the individual validation checks.
+- [2026-03-26 22:24] `crates/commands/validation` now carries executable Rust replacements for `validate-planning-structure` and `validate-audit-ledger`, so the first individual Wave 2 checks also emit hygiene evidence without PowerShell wrappers.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -134,6 +135,7 @@ Status: `[ ]` Pending
 - [2026-03-26 21:32] The bootstrap provider render path now runs from Rust too, so runtime sync no longer shells out to the PowerShell dispatcher before projecting repository-managed assets ✓ [2026-03-26 21:32]
 - [2026-03-26 21:39] The bootstrap MCP apply path now runs from Rust too, so runtime sync no longer shells out to the PowerShell Codex config rewrite helper ✓ [2026-03-26 21:39]
 - [2026-03-26 22:06] The top-level validation evidence path now runs through Rust too: `healthcheck` calls the Rust `validate-all` orchestrator, which owns profile selection, report emission, and ledger repair/write while keeping per-check legacy execution explicit until the rest of Wave 2 lands ✓ [2026-03-26 22:06]
+- [2026-03-26 22:24] The first individual validation checks now run through Rust too: `validate-planning-structure` and `validate-audit-ledger` execute natively under `crates/commands/validation`, and `validate-all` routes them without shelling out to their legacy scripts ✓ [2026-03-26 22:24]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -149,6 +151,7 @@ Status: `[ ]` Pending
   - wrappers and hook entrypoints remain deterministic during partial migration
   - policy scripts do not drift away from the real Rust execution path
   - top-level runtime health and top-level validation orchestration now share Rust-owned execution boundaries
+  - the first Wave 2 per-check validation surfaces now emit evidence through Rust-owned execution paths too
 - Commit checkpoint:
   - `ci(rust): harden migration validation and wrapper governance`
 
