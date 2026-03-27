@@ -3,12 +3,13 @@
 use nettoolskit_validation::{
     invoke_validate_all, invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
-    invoke_validate_planning_structure, invoke_validate_readme_standards,
+    invoke_validate_instructions, invoke_validate_planning_structure,
+    invoke_validate_readme_standards,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, require_validation_surface_contract, ValidateAllRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
-    ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
+    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
     ValidateRoutingCoverageRequest, ValidateTemplateStandardsRequest,
     ValidateWorkspaceEfficiencyRequest,
 };
@@ -92,6 +93,20 @@ fn test_validate_instruction_architecture_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve instruction architecture workspace root"
+    );
+}
+
+#[test]
+fn test_validate_instructions_error_display_is_stable() {
+    let error = invoke_validate_instructions(&ValidateInstructionsRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateInstructionsRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve instruction validation workspace root"
     );
 }
 

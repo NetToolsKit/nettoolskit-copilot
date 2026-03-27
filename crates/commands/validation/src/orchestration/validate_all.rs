@@ -16,11 +16,13 @@ use crate::orchestration::profiles::{load_profiles_document, select_profile, Val
 use crate::{
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
-    invoke_validate_planning_structure, invoke_validate_readme_standards,
+    invoke_validate_instructions, invoke_validate_planning_structure,
+    invoke_validate_readme_standards,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
-    ValidateInstructionMetadataRequest, ValidatePlanningStructureRequest,
+    ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
+    ValidatePlanningStructureRequest,
     ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
     ValidateTemplateStandardsRequest, ValidateWorkspaceEfficiencyRequest,
 };
@@ -212,6 +214,7 @@ enum ValidationCheckExecutor {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeValidationCheck {
+    Instructions,
     PlanningStructure,
     AuditLedger,
     ReadmeStandards,
@@ -227,6 +230,9 @@ impl ValidationCheckDefinition {
     fn script_label(&self) -> &'static str {
         match self.executor {
             ValidationCheckExecutor::PowerShell(script) => script,
+            ValidationCheckExecutor::Native(NativeValidationCheck::Instructions) => {
+                "rust:nettoolskit-validation::validate-instructions"
+            }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
             }
@@ -468,7 +474,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
     for (name, script) in [
         (
             "validate-instructions",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-instructions.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::Instructions),
         ),
         (
             "validate-policy",
@@ -709,7 +715,8 @@ fn definition_supports_parameter(
                 .map(|document| document.contains(parameter_name))
                 .unwrap_or(false)
         }
-        ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
+        ValidationCheckExecutor::Native(NativeValidationCheck::Instructions)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
         | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
@@ -864,6 +871,21 @@ fn run_native_validation_check(
     let formatted_arguments = format_argument_list(&arguments);
 
     let (native_status, raw_exit_code, error) = match native_check {
+        NativeValidationCheck::Instructions => {
+            invoke_validate_instructions(&ValidateInstructionsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
         NativeValidationCheck::PlanningStructure => {
             invoke_validate_planning_structure(&ValidatePlanningStructureRequest {
                 repo_root: Some(repo_root.to_path_buf()),

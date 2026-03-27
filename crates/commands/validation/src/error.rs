@@ -122,6 +122,18 @@ pub enum ValidateInstructionArchitectureCommandError {
     },
 }
 
+/// Errors raised by top-level instruction validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateInstructionsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve instruction validation workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

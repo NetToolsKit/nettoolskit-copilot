@@ -22,10 +22,10 @@ pub use documentation::{
 pub use error::{
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
-    ValidateInstructionMetadataCommandError, ValidatePlanningStructureCommandError,
-    ValidateReadmeStandardsCommandError, ValidateRoutingCoverageCommandError,
-    ValidateTemplateStandardsCommandError, ValidateWorkspaceEfficiencyCommandError,
-    ValidationSurfaceError,
+    ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
+    ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
+    ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
+    ValidateWorkspaceEfficiencyCommandError, ValidationSurfaceError,
 };
 pub use evidence::{
     invoke_validate_audit_ledger, ValidateAuditLedgerRequest, ValidateAuditLedgerResult,
@@ -37,8 +37,10 @@ pub use governance::{
 };
 pub use instruction_graph::{
     invoke_validate_authoritative_source_policy, invoke_validate_instruction_architecture,
+    invoke_validate_instructions,
     ValidateAuthoritativeSourcePolicyRequest, ValidateAuthoritativeSourcePolicyResult,
     ValidateInstructionArchitectureRequest, ValidateInstructionArchitectureResult,
+    ValidateInstructionsRequest, ValidateInstructionsResult,
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
