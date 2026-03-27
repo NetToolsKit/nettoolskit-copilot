@@ -1,32 +1,44 @@
 # Planning Specs Workspace
 
-Versioned brainstorming and specification artifacts for non-trivial feature, behavior, workflow, and architecture work live here.
+> Versioned design intent for repository workstreams.
 
-## Purpose
+---
 
-- Separate design intent from implementation planning.
-- Keep approved design direction versioned before execution planning begins.
-- Preserve active and completed specs as operational history.
-- Prevent non-trivial work from jumping straight from intake to implementation planning without an explicit design checkpoint.
+## Introduction
 
-## Structure
+`planning/specs/` stores the active and completed specifications that define design intent before implementation planning begins.
 
-```text
-planning/
-├─ README.md
-├─ active/
-├─ completed/
-└─ specs/
-   ├─ README.md
-   ├─ active/
-   └─ completed/
-```
+---
 
-## Rules
+## Features
 
-- Create or update specs in `planning/specs/active/` for non-trivial feature, behavior, workflow, or architecture work.
-- Reuse an existing active spec for the same workstream instead of creating duplicates.
-- Move a spec to `planning/specs/completed/` only when the workstream is materially finished and the active plan is also ready to close.
-- `planning/specs/active` and `planning/specs/completed` are created on demand and are not kept alive with placeholder files.
-- Use stable slugged names such as `spec-<scope>.md`.
-- Keep the spec focused on intent, decisions, alternatives, risks, and acceptance criteria. Do not turn it into the task execution plan.
+- ✅ Active specs capture design intent before execution planning
+- ✅ Completed specs preserve architectural and workflow decisions
+- ✅ Spec files stay versioned and reusable across related workstreams
+- ✅ Spec artifacts remain separate from task execution plans
+
+---
+
+## Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Contents](#contents)
+- [References](#references)
+- [License](#license)
+
+---
+
+## References
+
+- [planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md)
+- [planning/specs/active/spec-readme-standards-repository-normalization.md](planning/specs/active/spec-readme-standards-repository-normalization.md)
+- [planning/specs/active/spec-repository-unification-and-rust-migration.md](planning/specs/active/spec-repository-unification-and-rust-migration.md)
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file at the repository root for details.
+
+---

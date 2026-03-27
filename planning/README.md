@@ -1,53 +1,50 @@
 # Planning Workspace
 
-Versioned planning artifacts for non-trivial work live here. This folder is part of the repository operating model, not disposable temporary state.
+> Versioned planning artifacts for repository workstreams.
 
-## Purpose
+---
 
-- Keep active plans visible and searchable.
-- Preserve completed plans as operational history.
-- Support versioned specifications before multi-step execution work.
-- Separate stable planning assets from local build and deployment artifacts under `./.build/` and `./.deployment/`.
+## Introduction
 
-## Structure
+`planning/` stores the active and completed plans that guide non-trivial repository work. It keeps execution planning versioned, discoverable, and separate from temporary runtime state.
 
-```text
-planning/
-├─ README.md
-├─ active/
-├─ completed/
-└─ specs/
-   ├─ README.md
-   ├─ active/
-   └─ completed/
-```
+---
 
-## Rules
+## Features
 
-- Create or update active plans in `planning/active/`.
-- Move a plan to `planning/completed/` only after implementation, validation, review, and closeout are materially complete.
-- Create or update versioned specs in `planning/specs/active/` when non-trivial work needs design decisions locked before planning.
-- Move specs to `planning/specs/completed/` together with their workstream when the associated plan is materially complete.
-- `planning/active`, `planning/completed`, `planning/specs/active`, and `planning/specs/completed` are created on demand and are not kept alive with placeholder files.
-- Reuse an existing active plan for the same workstream instead of creating duplicates.
-- Use stable slugged names such as `plan-<scope>.md` and `spec-<scope>.md` when creating new artifacts.
+- ✅ Active plans live in `planning/active/`
+- ✅ Completed plans preserve workstream history in `planning/completed/`
+- ✅ Active specs live in `planning/specs/active/`
+- ✅ Completed specs preserve design history in `planning/specs/completed/`
+- ✅ Planning artifacts stay separate from temporary build and runtime outputs
 
-## Current Active Plan
+---
 
-- `planning/active/plan-repository-operations-hygiene.md`
-- `planning/active/plan-repository-unification-and-rust-migration.md`
-- `planning/active/plan-readme-standards-repository-normalization.md`
+## Contents
 
-## Current Delivery Snapshot
+- [Introduction](#introduction)
+- [Features](#features)
+- [Contents](#contents)
+- [References](#references)
+- [License](#license)
 
-As of `2026-03-20`:
+---
 
-- phases `0` through `10` are delivered at the roadmap level
-- commercial hardening slices `10.1` through `10.6` are complete
-- canonical planning no longer lives under `.temp`
+## References
 
-## Completed Reference Plans
+- [planning/active/plan-readme-standards-repository-normalization.md](planning/active/plan-readme-standards-repository-normalization.md)
+- [planning/active/plan-repository-operations-hygiene.md](planning/active/plan-repository-operations-hygiene.md)
+- [planning/active/plan-repository-unification-and-rust-migration.md](planning/active/plan-repository-unification-and-rust-migration.md)
+- [planning/active/rust-script-parity-ledger.md](planning/active/rust-script-parity-ledger.md)
+- [planning/active/rust-script-transcription-ownership-matrix.md](planning/active/rust-script-transcription-ownership-matrix.md)
+- [planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md)
+- [planning/specs/active/spec-readme-standards-repository-normalization.md](planning/specs/active/spec-readme-standards-repository-normalization.md)
+- [planning/specs/active/spec-repository-unification-and-rust-migration.md](planning/specs/active/spec-repository-unification-and-rust-migration.md)
 
-- `planning/completed/enterprise-progress-tracker.md`
-- `planning/completed/enterprise-roadmap-2026-02-27.md`
-- `planning/completed/task-phase-10.0-commercial-platform-hardening.md`
+---
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file at the repository root for details.
+
+---

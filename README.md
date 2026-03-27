@@ -1,42 +1,24 @@
-# NetToolsKit CLI
+# NetToolsKit Workspace
 
-> Interactive command-line interface for .NET development with templates, manifests, and automation tools
-
-![Rust](https://img.shields.io/badge/Rust-2021_Edition-orange?logo=rust)
-![MSRV](https://img.shields.io/badge/MSRV-1.85.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-[![Build](https://img.shields.io/github/actions/workflow/status/ThiagoGuislotti/nettoolskit-cli/ci.yml?branch=main&label=build)](https://github.com/ThiagoGuislotti/nettoolskit-cli/actions/workflows/ci.yml)
-[![Test](https://img.shields.io/github/actions/workflow/status/ThiagoGuislotti/nettoolskit-cli/ci.yml?branch=main&label=test)](https://github.com/ThiagoGuislotti/nettoolskit-cli/actions/workflows/ci.yml)
-[![Security](https://img.shields.io/github/actions/workflow/status/ThiagoGuislotti/nettoolskit-cli/ci.yml?branch=main&label=security)](https://github.com/ThiagoGuislotti/nettoolskit-cli/actions/workflows/ci.yml)
+> Rust workspace, runtime scripts, and versioned projection assets for the NetToolsKit toolchain.
 
 ---
 
 ## Introduction
 
-NetToolsKit CLI solves the problem of fragmented .NET development workflows by providing a unified, interactive command-line interface for project scaffolding, template management, and development automation. The technical approach follows a modular Rust-based architecture inspired by GitHub Codex CLI, featuring an interactive command palette system and high-performance async operations.
+NetToolsKit is a multi-crate workspace that combines Rust command boundaries, repository-owned runtime scripts, and versioned definitions that project into provider and editor surfaces.
 
-Objectives:
-
-- Provide a fast, interactive CLI for common .NET development tasks
-- Standardize project setup via templates and manifest-driven configuration
-- Enable repeatable automation flows (without ad-hoc scripts per repo)
-- Keep the UX discoverable with a command palette and consistent navigation
+It is organized to keep implementation, orchestration, planning, and reference documentation separate while still making the full workspace easy to navigate.
 
 ---
 
 ## Features
 
--   ✅ Interactive terminal interface with `/` command palette activation
--   ✅ Real-time command filtering with intuitive arrow navigation
--   ✅ Modular workspace architecture with 9 specialized crates
--   ✅ High-performance async I/O with Tokio multi-thread runtime
--   ✅ Template scaffolding and project generation via Handlebars
--   ✅ Manifest-driven solution configuration and application
--   ✅ OpenTelemetry-inspired observability with timing and metrics
--   ✅ Ollama integration for AI-powered development assistance
--   ✅ Layered user configuration (`~/.ntk/config.toml`, env vars, defaults)
--   ✅ Graceful degradation: auto-detects color/unicode support, ASCII fallback
--   ✅ Cross-platform terminal handling (Windows Terminal, conhost, Unix)
+- ✅ Rust crates for CLI entry points, orchestration, commands, telemetry, runtime validation, and UI boundaries
+- ✅ Versioned projection model for `.github/`, `.codex/`, `.claude/`, and `.vscode/`
+- ✅ Deterministic planning, specification, and reference docs under `planning/`
+- ✅ Operational scripts for bootstrap, sync, validation, health, and maintenance flows
+- ✅ Workspace documentation that keeps crate and support surfaces discoverable
 
 ---
 
@@ -45,12 +27,6 @@ Objectives:
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
-  - [Architecture](#architecture)
-  - [Control Plane Model](#control-plane-model)
-  - [Crates](#crates)
-  - [Compatibility and Support](#compatibility-and-support)
-  - [Operations](#operations)
-  - [Planning](#planning)
 - [Build and Tests](#build-and-tests)
 - [Contributing](#contributing)
 - [Dependencies](#dependencies)
@@ -59,220 +35,49 @@ Objectives:
 
 ---
 
-### Architecture
-
-```mermaid
-graph TD
-    CLI["cli<br/>(ntk binary)"]
-    ORC["orchestrator"]
-    CMD["commands"]
-    UI["ui"]
-    CORE["core"]
-    OTEL["otel"]
-
-    CLI --> ORC
-    CLI --> UI
-    CLI --> CORE
-    ORC --> CMD
-    ORC --> UI
-    ORC --> OTEL
-    CMD --> CORE
-    CMD --> UI
-    CMD --> OTEL
-
-    subgraph "commands"
-        HELP["help"]
-        MANIFEST["manifest"]
-        TEMPLATING["templating"]
-    end
-
-    CMD --> HELP
-    CMD --> MANIFEST
-    CMD --> TEMPLATING
-
-    style CLI fill:#2d3748,stroke:#63b3ed,color:#fff
-    style ORC fill:#2d3748,stroke:#68d391,color:#fff
-    style CMD fill:#2d3748,stroke:#f6ad55,color:#fff
-    style UI fill:#2d3748,stroke:#fc8181,color:#fff
-    style CORE fill:#2d3748,stroke:#b794f4,color:#fff
-    style OTEL fill:#2d3748,stroke:#fbd38d,color:#fff
-```
-
----
-
-### Control Plane Model
-
-Formal control-plane, session, and operator contracts are documented in:
-
-- [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
-
-This document defines the current local-first runtime boundary and the target contract for future gateway/operator expansion.
-Local CLI `/task submit`, HTTP `/task/submit`, and ChatOps task commands now derive the same typed control-plane metadata, with normalized request, operator, session, and audit attribution across submit and non-submit ingress paths.
-
----
-
-### Crates
-
-This workspace is organized as a multi-crate Rust project. Each crate has its own README with scoped documentation.
-
-| Crate | Description | README |
-|-------|-------------|--------|
-| `cli` | Interactive entry point, event loop, and display | [crates/cli/README.md](crates/cli/README.md) |
-| `core` | Shared domain types, configuration, and utilities | [crates/core/README.md](crates/core/README.md) |
-| `ui` | Terminal UI primitives, capabilities, and rendering | [crates/ui/README.md](crates/ui/README.md) |
-| `otel` | Observability, timing, and telemetry metrics | [crates/otel/README.md](crates/otel/README.md) |
-| `orchestrator` | High-level command orchestration and execution | [crates/orchestrator/README.md](crates/orchestrator/README.md) |
-| `commands` | Command dispatch layer and feature crates | [crates/commands/README.md](crates/commands/README.md) |
-| `help` | Help discovery and display utilities | [crates/commands/help/README.md](crates/commands/help/README.md) |
-| `manifest` | Manifest parsing, validation, and execution | [crates/commands/manifest/README.md](crates/commands/manifest/README.md) |
-| `templating` | Template rendering and resolution via Handlebars | [crates/commands/templating/README.md](crates/commands/templating/README.md) |
-
----
-
-### Operations
-
-Operational runbook and incident procedures:
-
-- [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
-- [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
-- [Manual Release Verification Workflow (binaries + SBOM)](.github/workflows/release-verify.yml)
-- [TUI UX Guidelines](docs/ui/tui-ux-guidelines.md)
-
----
-
-### Planning
-
-Canonical planning documents now live in:
-
-- [Planning Index](planning/README.md)
-- [Current Active Work Plan](planning/active/plan-repository-operations-hygiene.md)
-
----
-
-### Compatibility and Support
-
-Official platform compatibility tiers and support commitments are defined in:
-
-- [Compatibility Matrix and Support Policy](COMPATIBILITY.md)
-
-This document also includes the official support lifecycle and EOL table by minor release.
-Release pipeline gates also validate lifecycle table semantics before publishing artifacts.
-
----
-
-### Governance and Security
-
-- [License](LICENSE)
-- [Security Policy](SECURITY.md)
-- [Code Ownership](.github/CODEOWNERS)
-
-Security reports should use the private disclosure path documented in `SECURITY.md`.
-
----
-
 ## Build and Tests
 
-This repository uses standard Cargo workflows for building, testing, formatting, linting, and documentation generation.
-
-Workspace build and validation artifacts are centralized through `.cargo/config.toml` and CI/runtime path conventions under:
-
-- `./.build/cargo-target`
-- `./.build/coverage`
-- `./.deployment/local/service-data`
-
-```bash
-# Build all crates
-cargo build --workspace
-
-# Run all tests
-cargo test --workspace
-
-# Run unit tests only
-cargo test --workspace -- --lib
-
-# Lint
-cargo clippy --workspace -- -D warnings
-
-# Format
-cargo fmt --all
-
-# Generate documentation
-cargo doc --workspace --no-deps
-```
+- `cargo build --workspace`
+- `cargo test --workspace`
+- `cargo fmt --all -- --check`
+- `cargo clippy --workspace -- -D warnings`
+- `pwsh -File .\scripts\validation\validate-readme-standards.ps1`
 
 ---
 
 ## Contributing
 
-We follow semantic versioning and conventional commits. Please ensure your contributions:
-
-1. **Follow Git Flow**: Create feature branches from `main`
-2. **Write Tests**: Maintain test coverage for new features (unit + integration)
-3. **Use Semantic Commits**: Follow conventional commit format (`feat:`, `fix:`, `docs:`, `refactor:`)
-4. **Update Documentation**: Keep README and inline docs current
-5. **Pass CI**: Ensure `cargo build`, `cargo test`, `cargo clippy`, and `cargo fmt` all pass
+- Keep README content in English.
+- Preserve the allowed root section order.
+- Update crate and support README links when workspace structure changes.
+- Run workspace validation before committing documentation updates.
 
 ---
 
 ## Dependencies
 
-### Runtime
-
-| Crate | Version | Purpose |
-|-------|---------|---------|
-| `tokio` | 1.34+ | Async runtime with multi-threading |
-| `clap` | 4.4+ | Command-line argument parsing |
-| `crossterm` | 0.28+ | Cross-platform terminal manipulation |
-| `serde` / `serde_json` | 1.0+ | Serialization framework |
-| `handlebars` | 6.2+ | Template engine |
-| `reqwest` | 0.11+ | HTTP client (Ollama integration) |
-| `owo-colors` | 3.5+ | Terminal color output |
-| `supports-color` | 2.1+ | Color capability detection |
-| `inquire` | 0.9+ | Interactive prompts |
-| `toml` | 0.8+ | Configuration file parsing |
-| `dirs` | 5.0+ | Platform-standard directories |
-| `tracing` | 0.1+ | Structured logging |
-
-### Development
-
-| Crate | Version | Purpose |
-|-------|---------|---------|
-| `insta` | 1.41+ | Snapshot testing |
-| `assert_cmd` | 2.0+ | CLI integration testing |
-| `criterion` | 0.5+ | Benchmarking |
-| `tempfile` | 3.10+ | Temporary file utilities |
-| `serial_test` | 3.2+ | Sequential test execution |
+- Rust toolchain and Cargo for workspace builds and tests.
+- PowerShell 7+ for repository scripts and validation entrypoints.
+- GitHub Copilot / Codex runtime assets when working on projected surfaces.
 
 ---
 
 ## References
 
-### Documentation
-
-- Crate documentation:
-  - [crates/cli/README.md](crates/cli/README.md)
-  - [crates/commands/README.md](crates/commands/README.md)
-  - [crates/commands/help/README.md](crates/commands/help/README.md)
-  - [crates/commands/manifest/README.md](crates/commands/manifest/README.md)
-  - [crates/commands/templating/README.md](crates/commands/templating/README.md)
-  - [crates/core/README.md](crates/core/README.md)
-  - [crates/orchestrator/README.md](crates/orchestrator/README.md)
-  - [crates/otel/README.md](crates/otel/README.md)
-  - [crates/ui/README.md](crates/ui/README.md)
-  - [COMPATIBILITY.md](COMPATIBILITY.md)
-  - [docs/operations/incident-response-playbook.md](docs/operations/incident-response-playbook.md)
-  - [docs/operations/release-artifact-verification.md](docs/operations/release-artifact-verification.md)
-  - [.github/workflows/release-verify.yml](.github/workflows/release-verify.yml)
-  - [docs/ui/tui-ux-guidelines.md](docs/ui/tui-ux-guidelines.md)
-
-### External References
-
-- [Rust Async Programming](https://rust-lang.github.io/async-book/)
-- [Clap CLI Framework](https://docs.rs/clap/latest/clap/)
-- [Tokio Async Runtime](https://tokio.rs/tokio/tutorial)
-- [Handlebars Template Engine](https://docs.rs/handlebars/latest/handlebars/)
-- [Crossterm Terminal Library](https://docs.rs/crossterm/latest/crossterm/)
-- [GitHub Codex CLI Design](https://github.com/github/copilot-cli) (inspiration)
+| Area | README |
+| --- | --- |
+| Workspace crate | [crates/cli/README.md](crates/cli/README.md) |
+| Workspace crate | [crates/core/README.md](crates/core/README.md) |
+| Workspace crate | [crates/ui/README.md](crates/ui/README.md) |
+| Workspace crate | [crates/otel/README.md](crates/otel/README.md) |
+| Workspace crate | [crates/orchestrator/README.md](crates/orchestrator/README.md) |
+| Command boundary | [crates/commands/README.md](crates/commands/README.md) |
+| Command package | [crates/commands/help/README.md](crates/commands/help/README.md) |
+| Command package | [crates/commands/manifest/README.md](crates/commands/manifest/README.md) |
+| Command package | [crates/commands/runtime/README.md](crates/commands/runtime/README.md) |
+| Command package | [crates/commands/templating/README.md](crates/commands/templating/README.md) |
+| Command package | [crates/commands/validation/README.md](crates/commands/validation/README.md) |
+| Workspace crate | [crates/task-worker/README.md](crates/task-worker/README.md) |
 
 ---
 
