@@ -148,6 +148,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 47. [2026-03-27 13:43] With `validate-release-governance` now live in `release/`, the remaining Wave 2 backlog is limited to `validate-powershell-standards` plus `validate-release-provenance`; provenance should reuse the new release helper layer instead of duplicating changelog and git-evidence parsing elsewhere.
 48. [2026-03-27 13:51] With `validate-release-provenance` now live in `release/`, the full release validation block is complete; the remaining Wave 2 backlog is limited to `validate-powershell-standards`, which should land as the explicit closeout point for the validation migration wave.
 49. [2026-03-27 14:25] With `validate-powershell-standards` now live in `standards/`, the full Wave 2 validation/policy/support block is complete; the next execution should start Task 7 with the runtime/git-hook foundation before porting the broader orchestration stage families.
+50. [2026-03-27 14:39] With `setup-global-git-aliases` now live in `runtime/hooks`, Task 7 has started; continue the hook-control-plane foundation with `invoke-pre-commit-eof-hygiene` and `setup-git-hooks` before opening the orchestration stage migration.
 
 ## Constraints
 
@@ -232,6 +233,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 13:43` — implemented the `validate-release-governance` Wave 2 release slice in `crates/commands/validation/release`, routed it through `validate-all`, and reduced the remaining backlog to PowerShell standards plus `validate-release-provenance`.
 - Updated: `2026-03-27 13:51` — implemented the `validate-release-provenance` Wave 2 release slice in `crates/commands/validation/release`, routed it through `validate-all`, and reduced the remaining backlog to `validate-powershell-standards`.
 - Updated: `2026-03-27 14:25` — implemented the `validate-powershell-standards` Wave 2 standards slice in `crates/commands/validation/standards`, routed it through `validate-all`, closed the full Wave 2 block, and set the next recommended slice to the runtime/git-hook foundation in Task 7.
+- Updated: `2026-03-27 14:39` — implemented the `setup-global-git-aliases` Task 7 hook slice in `crates/commands/runtime/hooks`, added isolated-config coverage in the runtime test suite, and moved the remaining hook backlog to `invoke-pre-commit-eof-hygiene` plus `setup-git-hooks`.
 
 ## Recommended Specialist Focus
 
