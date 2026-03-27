@@ -73,3 +73,27 @@ pub enum ValidateInstructionMetadataCommandError {
         source: AnyhowError,
     },
 }
+
+/// Errors raised by routing coverage validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateRoutingCoverageCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve routing coverage workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by template standards validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateTemplateStandardsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve template standards workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}

@@ -145,6 +145,58 @@ fn write_valid_instruction_metadata_fixtures(repo_root: &std::path::Path, broad_
     );
 }
 
+fn write_routing_catalog_and_fixtures(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/instruction-routing.catalog.yml"),
+        r#"version: 1
+routing:
+  - id: docs
+    include:
+      - path: instructions/readme.instructions.md
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/instructions/readme.instructions.md"),
+        "# readme",
+    );
+    write_file(
+        &repo_root.join("scripts/validation/fixtures/routing-golden-tests.json"),
+        r#"{
+  "cases": [
+    {
+      "id": "docs-route",
+      "expected_route_ids": ["docs"],
+      "expected_selected_paths": ["instructions/readme.instructions.md"]
+    }
+  ]
+}"#,
+    );
+}
+
+fn write_template_standards_fixture(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/governance/template-standards.baseline.json"),
+        r#"{
+  "version": 1,
+  "requiredFiles": [
+    ".github/templates/example.md"
+  ],
+  "templateRules": [
+    {
+      "path": ".github/templates/example.md",
+      "requiredPatterns": ["^# Example", "Validation"],
+      "forbiddenPatterns": ["Legacy"],
+      "requiredPathReferences": [".github/governance/template-standards.baseline.json"]
+    }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/templates/example.md"),
+        "# Example\n\nValidation content.\n",
+    );
+}
+
 #[test]
 fn test_invoke_validate_all_runs_selected_profile_and_writes_report_and_ledger() {
     let repo = TempDir::new().expect("temporary repository should be created");
@@ -305,4 +357,33 @@ fn test_invoke_validate_all_preserves_warning_status_for_native_checks() {
     assert_eq!(result.overall_status, ValidationCheckStatus::Warning);
     assert_eq!(result.checks[0].status, ValidationCheckStatus::Warning);
     assert_eq!(result.checks[0].exit_code, 0);
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_governance_checks() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(
+        repo.path(),
+        &["validate-routing-coverage", "validate-template-standards"],
+    );
+    write_routing_catalog_and_fixtures(repo.path());
+    write_template_standards_fixture(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 2);
+    assert_eq!(result.passed_checks, 2);
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.script == "rust:nettoolskit-validation::validate-routing-coverage"));
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.script == "rust:nettoolskit-validation::validate-template-standards"));
 }

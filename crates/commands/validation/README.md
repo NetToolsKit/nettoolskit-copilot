@@ -30,6 +30,8 @@ The current executable Rust coverage includes:
 - `validate-audit-ledger`
 - `validate-readme-standards`
 - `validate-instruction-metadata`
+- `validate-routing-coverage`
+- `validate-template-standards`
 
 ## Module Layout
 
@@ -37,6 +39,7 @@ The current executable Rust coverage includes:
 - `structure/` for repository and planning workspace layout checks
 - `evidence/` for ledger and parity evidence validation
 - `documentation/` for README and authoring metadata checks
+- `governance/` for routing, template, and repository-policy checks
 
 ## Public API
 
@@ -49,3 +52,5 @@ The current executable Rust coverage includes:
 - `invoke_validate_audit_ledger`
 - `invoke_validate_readme_standards`
 - `invoke_validate_instruction_metadata`
+- `invoke_validate_routing_coverage`
+- `invoke_validate_template_standards`

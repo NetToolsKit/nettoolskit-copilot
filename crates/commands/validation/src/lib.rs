@@ -4,6 +4,7 @@ pub mod contracts;
 pub mod documentation;
 pub mod evidence;
 pub mod error;
+pub mod governance;
 pub mod orchestration;
 pub mod structure;
 
@@ -14,7 +15,13 @@ pub use contracts::{
 pub use error::{
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateInstructionMetadataCommandError, ValidatePlanningStructureCommandError,
-    ValidateReadmeStandardsCommandError, ValidationSurfaceError,
+    ValidateReadmeStandardsCommandError, ValidateRoutingCoverageCommandError,
+    ValidateTemplateStandardsCommandError, ValidationSurfaceError,
+};
+pub use governance::{
+    invoke_validate_routing_coverage, invoke_validate_template_standards,
+    ValidateRoutingCoverageRequest, ValidateRoutingCoverageResult,
+    ValidateTemplateStandardsRequest, ValidateTemplateStandardsResult,
 };
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,

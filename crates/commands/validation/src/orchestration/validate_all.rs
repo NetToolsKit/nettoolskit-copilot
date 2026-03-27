@@ -16,8 +16,10 @@ use crate::orchestration::profiles::{load_profiles_document, select_profile, Val
 use crate::{
     invoke_validate_audit_ledger, invoke_validate_instruction_metadata,
     invoke_validate_planning_structure, invoke_validate_readme_standards,
+    invoke_validate_routing_coverage, invoke_validate_template_standards,
     ValidateAuditLedgerRequest, ValidateInstructionMetadataRequest,
     ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
+    ValidateRoutingCoverageRequest, ValidateTemplateStandardsRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
@@ -212,6 +214,8 @@ enum NativeValidationCheck {
     AuditLedger,
     ReadmeStandards,
     InstructionMetadata,
+    RoutingCoverage,
+    TemplateStandards,
 }
 
 impl ValidationCheckDefinition {
@@ -229,6 +233,12 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
                 "rust:nettoolskit-validation::validate-instruction-metadata"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage) => {
+                "rust:nettoolskit-validation::validate-routing-coverage"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
+                "rust:nettoolskit-validation::validate-template-standards"
             }
         }
     }
@@ -484,9 +494,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-routing-coverage",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-routing-coverage.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage),
         ),
         (
             "validate-authoritative-source-policy",
@@ -506,9 +514,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-template-standards",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-template-standards.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards),
         ),
         (
             "validate-workspace-efficiency",
@@ -692,7 +698,9 @@ fn definition_supports_parameter(
         ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
-        | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
+        | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
             parameter_name == "WarningOnly"
         }
     }
@@ -867,6 +875,48 @@ fn run_native_validation_check(
             &ValidateInstructionMetadataRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
+            },
+        )
+        .map(|result| {
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
+        })
+        .unwrap_or_else(|error| {
+            (
+                ValidationCheckStatus::Failed,
+                1,
+                Some(error.to_string()),
+            )
+        }),
+        NativeValidationCheck::RoutingCoverage => invoke_validate_routing_coverage(
+            &ValidateRoutingCoverageRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+                ..ValidateRoutingCoverageRequest::default()
+            },
+        )
+        .map(|result| {
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
+        })
+        .unwrap_or_else(|error| {
+            (
+                ValidationCheckStatus::Failed,
+                1,
+                Some(error.to_string()),
+            )
+        }),
+        NativeValidationCheck::TemplateStandards => invoke_validate_template_standards(
+            &ValidateTemplateStandardsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+                ..ValidateTemplateStandardsRequest::default()
             },
         )
         .map(|result| {

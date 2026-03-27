@@ -7,6 +7,11 @@ mod documentation {
 }
 mod error_tests;
 
+mod governance {
+    pub mod routing_coverage_tests;
+    pub mod template_standards_tests;
+}
+
 mod evidence {
     pub mod audit_ledger_tests;
 }

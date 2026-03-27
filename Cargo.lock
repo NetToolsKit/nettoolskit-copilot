@@ -2014,11 +2014,14 @@ version = "1.0.0"
 dependencies = [
  "anyhow",
  "nettoolskit-core",
+ "regex",
  "serde",
  "serde_json",
+ "serde_yaml",
  "sha2",
  "tempfile",
  "thiserror",
+ "walkdir",
 ]
 
 [[package]]
