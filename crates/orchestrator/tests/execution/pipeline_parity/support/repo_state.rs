@@ -3,12 +3,12 @@
 use std::fs;
 use std::path::PathBuf;
 
-pub(super) struct RepoStateGuard {
+pub(crate) struct RepoStateGuard {
     snapshots: Vec<FileSnapshot>,
 }
 
 impl RepoStateGuard {
-    pub(super) fn capture(paths: Vec<PathBuf>) -> Self {
+    pub(crate) fn capture(paths: Vec<PathBuf>) -> Self {
         let snapshots = paths.into_iter().map(FileSnapshot::capture).collect();
         Self { snapshots }
     }

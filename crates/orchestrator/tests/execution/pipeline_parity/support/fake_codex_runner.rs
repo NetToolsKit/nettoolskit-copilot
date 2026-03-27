@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub(super) fn create_fake_codex_runner(temp_root: &Path) -> PathBuf {
+pub(crate) fn create_fake_codex_runner(temp_root: &Path) -> PathBuf {
     let runner_path = temp_root.join("fake-codex-runner.ps1");
     let command_path = temp_root.join("fake-codex.cmd");
 
