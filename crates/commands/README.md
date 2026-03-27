@@ -1,20 +1,20 @@
 # nettoolskit-commands
 
-> Command collection and dispatcher for NetToolsKit CLI.
+> Command facade that re-exports the NetToolsKit command crates.
 
 ---
 
 ## Introduction
 
-nettoolskit-commands aggregates command subcrates used by the CLI and re-exports them for convenient consumption from other workspace crates.
+`nettoolskit-commands` provides a single dependency surface for the command crates used by the workspace. It keeps the `help`, `manifest`, `runtime`, and `validation` crates available through one import point.
 
 ---
 
 ## Features
 
--   ✅ Single import point for command subcrates
--   ✅ Re-exports command packages used by the CLI
--   ✅ Locks the migration-ready `runtime` and `validation` command boundaries
+- ✅ Re-exports the command crates used by the NetToolsKit workspace
+- ✅ Provides a stable facade for CLI and orchestration consumers
+- ✅ Keeps command boundary dependencies centralized
 
 ---
 
@@ -26,8 +26,9 @@ nettoolskit-commands aggregates command subcrates used by the CLI and re-exports
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Usage Examples](#usage-examples)
-  - [Example 1: Import command crates](#example-1-import-command-crates)
+  - [Example 1: Import the command facade](#example-1-import-the-command-facade)
 - [API Reference](#api-reference)
+  - [Reexports](#reexports)
 - [References](#references)
 - [License](#license)
 
@@ -35,7 +36,7 @@ nettoolskit-commands aggregates command subcrates used by the CLI and re-exports
 
 ## Installation
 
-Add as a workspace/path dependency:
+Add the package as a workspace path dependency:
 
 ```toml
 [dependencies]
@@ -46,8 +47,6 @@ nettoolskit-commands = { path = "../commands" }
 
 ## Quick Start
 
-Minimal usage in 3–5 lines:
-
 ```rust
 use nettoolskit_commands::{
     nettoolskit_help, nettoolskit_manifest, nettoolskit_runtime, nettoolskit_validation,
@@ -56,7 +55,7 @@ use nettoolskit_commands::{
 let _ = (
     nettoolskit_help::discover_manifests,
     nettoolskit_manifest::ManifestExecutor::new,
-    nettoolskit_runtime::runtime_surface_script_total,
+    nettoolskit_runtime::runtime_surface_contract,
     nettoolskit_validation::validation_surface_script_total,
 );
 ```
@@ -65,30 +64,34 @@ let _ = (
 
 ## Usage Examples
 
-### Example 1: Import command crates
+### Example 1: Import the command facade
 
 ```rust
 use nettoolskit_commands::{
     nettoolskit_help, nettoolskit_manifest, nettoolskit_runtime, nettoolskit_validation,
 };
 
-# #[tokio::main]
-# async fn main() {
-let manifests = nettoolskit_help::discover_manifests(None).await;
-println!("{}", manifests.len());
-
-let _executor = nettoolskit_manifest::ManifestExecutor::new();
-let runtime_total = nettoolskit_runtime::runtime_surface_script_total();
+let manifest_lookup = nettoolskit_manifest::get_action("check");
+let runtime_contract = nettoolskit_runtime::runtime_surface_contract("runtime-hooks");
 let validation_total = nettoolskit_validation::validation_surface_script_total();
-println!("{runtime_total} / {validation_total}");
-# }
+
+assert_eq!(manifest_lookup, Some(nettoolskit_manifest::ManifestAction::Check));
+assert!(runtime_contract.is_some());
+assert_eq!(validation_total, 41);
+
+let _ = nettoolskit_help::ManifestInfo {
+    path: std::path::PathBuf::from("sample/ntk-manifest.yml"),
+    project_name: "Sample".to_string(),
+    language: "rust".to_string(),
+    context_count: 2,
+};
 ```
 
 ---
 
 ## API Reference
 
-This crate re-exports the command subcrates:
+### Reexports
 
 - `nettoolskit_help`
 - `nettoolskit_manifest`
@@ -99,7 +102,10 @@ This crate re-exports the command subcrates:
 
 ## References
 
-- https://doc.rust-lang.org/cargo/reference/workspaces.html
+- [crates/commands/help/README.md](help/README.md)
+- [crates/commands/manifest/README.md](manifest/README.md)
+- [crates/commands/runtime/README.md](runtime/README.md)
+- [crates/commands/validation/README.md](validation/README.md)
 
 ---
 

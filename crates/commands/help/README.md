@@ -1,20 +1,20 @@
 # nettoolskit-help
 
-> Help and workspace discovery commands for NetToolsKit CLI.
+> Manifest discovery and terminal rendering helpers for NetToolsKit.
 
 ---
 
 ## Introduction
 
-nettoolskit-help provides discovery-oriented helpers used by the NetToolsKit CLI, such as locating and listing manifest files inside a workspace.
+`nettoolskit-help` provides the discovery helpers used by the CLI to locate manifest files in a workspace, turn them into structured metadata, and render the results for humans.
 
 ---
 
 ## Features
 
--   ✅ Discover manifest files in a workspace folder
--   ✅ Parse manifests (best-effort) and summarize their metadata
--   ✅ Render a user-friendly manifest list to the terminal
+- ✅ Discover manifest files from a workspace root
+- ✅ Parse manifest metadata into a compact `ManifestInfo` model
+- ✅ Render discovered manifests in a terminal-friendly format
 
 ---
 
@@ -26,11 +26,12 @@ nettoolskit-help provides discovery-oriented helpers used by the NetToolsKit CLI
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Usage Examples](#usage-examples)
-  - [Example 1: Discover manifests](#example-1-discover-manifests)
-  - [Example 2: Discover and display](#example-2-discover-and-display)
+  - [Example 1: Discover manifests from a workspace root](#example-1-discover-manifests-from-a-workspace-root)
+  - [Example 2: Display discovered manifests](#example-2-display-discovered-manifests)
 - [API Reference](#api-reference)
   - [Handlers](#handlers)
   - [Models](#models)
+  - [Data Shapes](#data-shapes)
 - [References](#references)
 - [License](#license)
 
@@ -38,18 +39,16 @@ nettoolskit-help provides discovery-oriented helpers used by the NetToolsKit CLI
 
 ## Installation
 
-Add as a workspace/path dependency:
+Add the package as a workspace path dependency:
 
 ```toml
 [dependencies]
-nettoolskit-help = { path = "../commands/help" }
+nettoolskit-help = { path = "../help" }
 ```
 
 ---
 
 ## Quick Start
-
-Minimal usage in 3–5 lines:
 
 ```rust
 use nettoolskit_help::discover_manifests;
@@ -65,7 +64,7 @@ println!("Found {} manifest(s)", manifests.len());
 
 ## Usage Examples
 
-### Example 1: Discover manifests
+### Example 1: Discover manifests from a workspace root
 
 ```rust
 use nettoolskit_help::discover_manifests;
@@ -73,8 +72,7 @@ use std::path::PathBuf;
 
 # #[tokio::main]
 # async fn main() {
-let root = Some(PathBuf::from("."));
-let manifests = discover_manifests(root).await;
+let manifests = discover_manifests(Some(PathBuf::from("."))).await;
 
 for manifest in &manifests {
     println!("{} -> {}", manifest.project_name, manifest.path.display());
@@ -82,10 +80,10 @@ for manifest in &manifests {
 # }
 ```
 
-### Example 2: Discover and display
+### Example 2: Display discovered manifests
 
 ```rust
-use nettoolskit_help::{discover_manifests, display_manifests};
+use nettoolskit_help::{display_manifests, discover_manifests};
 
 # #[tokio::main]
 # async fn main() {
@@ -100,30 +98,37 @@ display_manifests(&manifests);
 
 ### Handlers
 
-```rust
-pub async fn discover_manifests(root: Option<std::path::PathBuf>) -> Vec<ManifestInfo>;
+`discover_manifests(root: Option<PathBuf>) -> Vec<ManifestInfo>`
 
-pub fn display_manifests(manifests: &[ManifestInfo]);
-```
+Discovers manifest files under the provided root, parses them, and returns the successfully loaded manifest summaries.
+
+`display_manifests(manifests: &[ManifestInfo])`
+
+Writes a formatted manifest list to the terminal.
 
 ### Models
 
-```rust
-#[derive(Debug, Clone)]
-pub struct ManifestInfo {
-    pub path: std::path::PathBuf,
-    pub project_name: String,
-    pub language: String,
-    pub context_count: usize,
-}
-```
+`ManifestInfo`
+
+The public model returned by discovery.
+
+### Data Shapes
+
+| Field | Description | Example |
+| --- | --- | --- |
+| `path` | Filesystem path to the manifest file. | `./project.manifest.yaml` |
+| `project_name` | Project name extracted from the manifest metadata. | `NetToolsKit` |
+| `language` | Target language or framework reported by the manifest. | `rust` |
+| `context_count` | Number of contexts discovered in the manifest. | `3` |
 
 ---
 
 ## References
 
-- https://docs.rs/tokio
-- https://docs.rs/walkdir
+- [crates/commands/README.md](../README.md)
+- [crates/commands/manifest/README.md](../manifest/README.md)
+- [walkdir](https://docs.rs/walkdir)
+- [tokio](https://docs.rs/tokio)
 
 ---
 
