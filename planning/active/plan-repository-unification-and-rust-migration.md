@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 12:51
+- LastUpdated: 2026-03-27 13:28
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -73,7 +73,7 @@ The migration remains compatibility-first:
 - [2026-03-27 08:22] `crates/commands/validation` now executes Rust-backed `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, with direct external coverage for source-map contract enforcement, required global references, duplicated official-doc domains, and native dispatch through `validate-all`.
 - [2026-03-27 09:00] `crates/commands/validation` now executes Rust-backed `validate-instruction-architecture` under `instruction_graph`, with direct external coverage for manifest shape, required global references, deterministic routing hard-cap enforcement, ownership-marker warnings, skill canonical references, and native dispatch through `validate-all`.
 - [2026-03-27 12:50] `crates/commands/validation/security` now owns both `validate-security-baseline` and `validate-shared-script-checksums`, so the low-risk security policy block runs natively in Rust with direct manifest-drift, checksum, and secret-baseline coverage.
-- [2026-03-27 12:50] `crates/commands/validation/policy` now also owns `validate-compatibility-lifecycle-policy`, so COMPATIBILITY.md support-window enforcement runs natively in Rust beside the rest of the repository policy surfaces.
+- [2026-03-27 12:51] `crates/commands/validation/policy` now also owns `validate-compatibility-lifecycle-policy`, so COMPATIBILITY.md support-window enforcement runs natively in Rust beside the rest of the repository policy surfaces.
 - [2026-03-27 13:21] `crates/commands/validation/standards` now owns `validate-dotnet-standards`, so .NET template governance runs natively in Rust with direct required-template, placeholder, XML summary, and whitespace hygiene coverage through `validate-all`.
 - [2026-03-27 13:28] `crates/commands/validation/architecture` now owns `validate-architecture-boundaries`, so architecture baseline enforcement runs natively in Rust with direct wildcard matching, required-pattern, forbidden-pattern, allowed-exception, and severity-aware coverage through `validate-all`.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
