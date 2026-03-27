@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 14:39
+- LastUpdated: 2026-03-27 16:59
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -329,6 +329,7 @@ Status: `[~]` In Progress
 
 - [2026-03-26 16:20] Transcribe orchestration stages, git hooks, and PowerShell-based runtime tests into Rust-backed control-plane capabilities and parity coverage
 - [2026-03-27 14:39] Implemented Rust-backed `setup-global-git-aliases` in `crates/commands/runtime/hooks`, with direct external coverage for isolated global Git config install/uninstall flows and runtime-managed trim-script projection ✓ [2026-03-27 14:39]
+- [2026-03-27 16:59] Implemented Rust-backed `invoke-pre-commit-eof-hygiene` in `crates/commands/runtime/hooks`, with direct external coverage for local autofix/manual mode resolution, no-staged-file skip behavior, mixed-stage blocking, native trim/restage, and isolated git settings/catalog resolution ✓ [2026-03-27 16:59]
 - Target paths:
   - `scripts/orchestration/`
   - `scripts/runtime/hooks/`
@@ -346,6 +347,7 @@ Status: `[~]` In Progress
   - git hook setup and entrypoints have Rust-backed ownership
   - parity coverage replaces the current PowerShell-heavy test harness
   - runtime-managed global Git aliases no longer depend on PowerShell business logic, and hook/alias migration now has a dedicated `hooks/` boundary inside `crates/commands/runtime/`
+  - runtime-managed pre-commit EOF hygiene no longer depends on PowerShell business logic, and the shared local/global EOF mode resolution now lives in reusable Rust helpers for the remaining hook setup slice
 - Commit checkpoint:
   - `feat(rust): implement control-plane and parity transcription wave`
 
