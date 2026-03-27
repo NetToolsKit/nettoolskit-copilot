@@ -331,6 +331,7 @@ Status: `[~]` In Progress
 - [2026-03-27 14:39] Implemented Rust-backed `setup-global-git-aliases` in `crates/commands/runtime/hooks`, with direct external coverage for isolated global Git config install/uninstall flows and runtime-managed trim-script projection ✓ [2026-03-27 14:39]
 - [2026-03-27 16:59] Implemented Rust-backed `invoke-pre-commit-eof-hygiene` in `crates/commands/runtime/hooks`, with direct external coverage for local autofix/manual mode resolution, no-staged-file skip behavior, mixed-stage blocking, native trim/restage, and isolated git settings/catalog resolution ✓ [2026-03-27 16:59]
 - [2026-03-27 17:12] Implemented Rust-backed `setup-git-hooks` in `crates/commands/runtime/hooks`, with direct external coverage for local install/uninstall plus global EOF-selection persistence/removal; the remaining Task 7 backlog is now orchestration-stage ownership and parity harness replacement ✓ [2026-03-27 17:12]
+- [2026-03-27 17:22] Expanded Rust-backed `setup-git-hooks` to install and remove the managed global pre-commit hook path plus isolated `core.hooksPath --global` ownership, leaving Task 7 limited to orchestration-stage migration and parity harness replacement ✓ [2026-03-27 17:22]
 - Target paths:
   - `scripts/orchestration/`
   - `scripts/runtime/hooks/`
@@ -350,6 +351,7 @@ Status: `[~]` In Progress
   - runtime-managed global Git aliases no longer depend on PowerShell business logic, and hook/alias migration now has a dedicated `hooks/` boundary inside `crates/commands/runtime/`
   - runtime-managed pre-commit EOF hygiene no longer depends on PowerShell business logic, and the shared local/global EOF mode resolution now lives in reusable Rust helpers for the remaining hook setup slice
   - runtime-managed `setup-git-hooks` no longer depends on PowerShell business logic for local ownership and EOF selection persistence, and the remaining Task 7 backlog is limited to orchestration-stage migration plus parity-harness replacement
+  - runtime-managed `setup-git-hooks` now owns both local and managed-global `core.hooksPath` flows, including the global pre-commit wrapper installation and uninstall path
 - Commit checkpoint:
   - `feat(rust): implement control-plane and parity transcription wave`
 

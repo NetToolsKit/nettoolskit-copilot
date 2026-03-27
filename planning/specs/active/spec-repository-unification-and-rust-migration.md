@@ -151,6 +151,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 50. [2026-03-27 14:39] With `setup-global-git-aliases` now live in `runtime/hooks`, Task 7 has started; continue the hook-control-plane foundation with `invoke-pre-commit-eof-hygiene` and `setup-git-hooks` before opening the orchestration stage migration.
 51. [2026-03-27 16:59] With `invoke-pre-commit-eof-hygiene` now live in `runtime/hooks`, the staged-file hygiene flow and EOF mode resolution are native; the next Task 7 slice should focus on `setup-git-hooks` local ownership before expanding into orchestration stages.
 52. [2026-03-27 17:12] With `setup-git-hooks` now live in `runtime/hooks`, local hook ownership and local/global EOF selection persistence are native; the remaining Wave 3 backlog is now limited to orchestration-stage ownership and replacing the PowerShell-heavy runtime parity harness.
+53. [2026-03-27 17:22] With managed-global `setup-git-hooks` now live in `runtime/hooks`, global pre-commit wrapper installation and isolated `core.hooksPath --global` ownership are native as well; the remaining Wave 3 backlog is now strictly orchestration-stage ownership plus parity-harness migration.
 
 ## Constraints
 
@@ -238,6 +239,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 14:39` — implemented the `setup-global-git-aliases` Task 7 hook slice in `crates/commands/runtime/hooks`, added isolated-config coverage in the runtime test suite, and moved the remaining hook backlog to `invoke-pre-commit-eof-hygiene` plus `setup-git-hooks`.
 - Updated: `2026-03-27 16:59` — implemented the `invoke-pre-commit-eof-hygiene` Task 7 hook slice in `crates/commands/runtime/hooks`, added native staged trim/restage coverage in the runtime test suite, and reduced the remaining hook backlog to `setup-git-hooks`.
 - Updated: `2026-03-27 17:12` — implemented the `setup-git-hooks` Task 7 hook slice in `crates/commands/runtime/hooks`, added native local install/uninstall plus global EOF-selection coverage in the runtime test suite, and reduced the remaining Wave 3 backlog to orchestration-stage ownership plus parity-harness migration.
+- Updated: `2026-03-27 17:22` — expanded the `setup-git-hooks` Task 7 slice in `crates/commands/runtime/hooks` to own managed-global pre-commit wrapper installation and isolated `core.hooksPath --global` flows, and confirmed the remaining Wave 3 backlog is limited to orchestration-stage ownership plus parity-harness migration.
 
 ## Recommended Specialist Focus
 
