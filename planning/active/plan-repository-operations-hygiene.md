@@ -147,6 +147,7 @@ Status: `[ ]` Pending
 - [2026-03-27 08:22] The authoritative-source policy check now runs through Rust too: `validate-authoritative-source-policy` executes natively under `crates/commands/validation/instruction_graph`, and `validate-all` routes it without the PowerShell bridge while keeping instruction-system policy checks out of the crate root ✓ [2026-03-27 08:22]
 - [2026-03-27 09:00] The instruction-architecture ownership check now runs through Rust too: `validate-instruction-architecture` executes natively under `crates/commands/validation/instruction_graph`, and `validate-all` routes it without the PowerShell bridge while keeping instruction-system ownership/routing rules grouped with the rest of the instruction graph ✓ [2026-03-27 09:00]
 - [2026-03-27 09:31] The top-level instruction asset sweep now runs through Rust too: `validate-instructions` executes natively under `crates/commands/validation/instruction_graph`, and `validate-all` routes it without the PowerShell bridge while keeping required instruction assets, catalog references, authoring links, and skill metadata checks inside the same capability boundary ✓ [2026-03-27 09:31]
+- [2026-03-27 10:12] The analyzer warning baseline check now runs through Rust too: `validate-warning-baseline` executes natively under `crates/commands/validation/operational_hygiene`, and `validate-all` routes it without the PowerShell bridge while keeping warning-threshold governance, report emission, and analyzer replay logic out of the crate root ✓ [2026-03-27 10:12]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -169,6 +170,7 @@ Status: `[ ]` Pending
   - authoritative-source policy drift now emits Rust-native warning/failure status without relying on the legacy validator, and the validation crate keeps instruction-system policy isolated under `instruction_graph/`
   - instruction-architecture drift now emits Rust-native warning/failure status without relying on the legacy validator
   - the full instruction-graph hygiene block now runs through Rust-owned checks inside `instruction_graph/`, so the remaining Wave 2 hygiene backlog is limited to workspace/runtime, agent, and release-policy slices
+  - warning-baseline drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining hygiene backlog is reduced to runtime script execution parity plus shell-hook validation
 - Commit checkpoint:
   - `ci(rust): harden migration validation and wrapper governance`
 
