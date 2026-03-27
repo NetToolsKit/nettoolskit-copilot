@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 21:39
+- LastUpdated: 2026-03-26 22:06
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -65,6 +65,7 @@ The migration remains compatibility-first:
 - [2026-03-26 21:11] `crates/commands/runtime` now executes Rust-backed `doctor -SyncOnDrift` remediation too, reusing the Rust `bootstrap` path for runtime repair and re-auditing the mappings after sync.
 - [2026-03-26 21:32] `crates/commands/runtime` now executes Rust-backed provider surface rendering for the `bootstrap` consumer too, so bootstrap no longer shells out to `render-provider-surfaces.ps1` before synchronizing runtime assets.
 - [2026-03-26 21:39] `crates/commands/runtime` now executes Rust-backed MCP config application inside `bootstrap`, so the bootstrap path no longer shells out to `sync-codex-mcp-config.ps1` to rewrite Codex `config.toml`.
+- [2026-03-26 22:06] `crates/commands/validation` now executes Rust-backed `validate-all` orchestration for profile selection, delegated validation sequencing, JSON report generation, and hash-chained ledger repair/write; `crates/commands/runtime` `healthcheck` now calls this Rust validation surface instead of shelling out to `validate-all.ps1`.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -203,6 +204,7 @@ Status: `[~]` In Progress
 - [2026-03-26 21:11] Implemented Rust-backed `doctor -SyncOnDrift` remediation in `crates/commands/runtime`, with coverage for successful runtime repair and explicit remediation failure propagation ✓ [2026-03-26 21:11]
 - [2026-03-26 21:32] Implemented Rust-backed provider surface rendering for the `bootstrap` consumer in `crates/commands/runtime`, with coverage for GitHub, VS Code, Codex, and Claude projection gating during bootstrap-driven sync flows ✓ [2026-03-26 21:32]
 - [2026-03-26 21:39] Implemented Rust-backed MCP config application for `bootstrap` in `crates/commands/runtime`, with coverage for catalog-driven Codex server projection, TOML section replacement, and timestamped backup creation ✓ [2026-03-26 21:39]
+- [2026-03-26 22:06] Switched `healthcheck` to the Rust-backed `validate-all` orchestration path, removing the remaining direct dependency on `scripts/validation/validate-all.ps1` from the runtime health flow ✓ [2026-03-26 22:06]
 - Target paths:
   - `scripts/common/`
   - `scripts/runtime/`
@@ -221,18 +223,20 @@ Status: `[~]` In Progress
   - planning handoff export no longer depends on PowerShell business logic
   - bootstrap/doctor/healthcheck/install/self-heal now share a Rust-owned execution context foundation
   - `doctor` diagnosis and `-SyncOnDrift` remediation now run from Rust and reuse the Rust `bootstrap` repair path
-  - `healthcheck` orchestration/reporting now runs from Rust and `-SyncRuntime` now uses Rust `bootstrap`
+  - `healthcheck` orchestration/reporting and top-level validation dispatch now run from Rust, and `-SyncRuntime` now uses Rust `bootstrap`
   - bootstrap-owned provider surface rendering and MCP config application now run from Rust
   - `self-heal` orchestration/reporting now runs from Rust and reuses the Rust `bootstrap` plus `healthcheck` execution path
   - `apply-vscode-templates` now runs from Rust and no longer needs a PowerShell bridge inside `self-heal`
+  - the runtime health path no longer depends on `validate-all.ps1`; only the individual Wave 2 validation subchecks remain delegated
 - Commit checkpoint:
   - `feat(rust): implement shared helper and runtime transcription wave`
 
 ### Task 6: Implement Wave 2 Quality, Policy, And Support Surfaces
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - [2026-03-26 16:20] Transcribe validation, security, governance, maintenance, deploy, and documentation helper flows into Rust-native commands
+- [2026-03-26 22:06] Implemented Rust-backed `validate-all` orchestration in `crates/commands/validation`, with profile selection, delegated check execution, JSON report generation, hash-chained ledger repair/write, and targeted external tests ✓ [2026-03-26 22:06]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -247,7 +251,8 @@ Status: `[ ]` Pending
   - `cargo test`
   - targeted parity checks for `validate-*`, `Invoke-*`, `generate-http-from-openapi`, `set-branch-protection`, and documentation validation flows
 - Checkpoints:
-  - policy and audit workflows no longer depend on PowerShell-only business logic
+  - validation suite orchestration, reporting, and ledger evidence no longer depend on PowerShell-only business logic
+  - `healthcheck` consumes the Rust validation boundary instead of shelling out to the legacy wrapper
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Commit checkpoint:
