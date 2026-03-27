@@ -169,19 +169,16 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
     let mut details = Vec::new();
     let mut rows_checked = 0usize;
     let mut reference_date = None;
-    let mut hard_failure = false;
-
     if !compatibility_path.is_file() {
         failures.push(format!(
             "Compatibility file not found: {}",
             request
                 .compatibility_path
                 .as_ref()
-                    .map_or_else(|| DEFAULT_COMPATIBILITY_PATH.to_string(), |path| {
-                        path.to_string_lossy().to_string()
-                    })
+                .map_or_else(|| DEFAULT_COMPATIBILITY_PATH.to_string(), |path| {
+                    path.to_string_lossy().to_string()
+                })
         ));
-        hard_failure = true;
     } else {
         match fs::read_to_string(&compatibility_path) {
             Ok(content) => {
@@ -215,13 +212,12 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
                     "Could not read compatibility file {}: {error}",
                     to_repo_relative_path(&repo_root, &compatibility_path)
                 ));
-                hard_failure = true;
             }
         }
     }
 
     let status = derive_status(&warnings, &failures);
-    let exit_code = if hard_failure || !failures.is_empty() { 1 } else { 0 };
+    let exit_code = if failures.is_empty() { 0 } else { 1 };
 
     Ok(ValidateCompatibilityLifecyclePolicyResult {
         repo_root,
