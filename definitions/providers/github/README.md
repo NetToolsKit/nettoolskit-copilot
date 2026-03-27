@@ -1,38 +1,50 @@
 # GitHub Provider Definitions
 
-This tree is the authoritative source for repository-owned GitHub/Copilot
-provider-specific runtime surfaces that are rendered into `.github/`.
+> Authoritative GitHub/Copilot projection surfaces for the repository-owned `.github/` tree.
 
-## Authoritative Coverage
+---
 
-- `root/` -> managed root files rendered into `.github/`
-- `agents/` -> rendered into `.github/agents/`
-- `chatmodes/` -> rendered into `.github/chatmodes/`
-- `prompts/` -> provider-specific `*.prompt.md` entrypoints rendered into `.github/prompts/`
-- `hooks/` -> rendered into `.github/hooks/`
+## Introduction
 
-## Projection Rules
+`definitions/providers/github/` stores the repository-authored provider surfaces that are rendered into `.github/`.
 
-- Edit these files here when changing GitHub/Copilot provider-specific runtime
-  behavior.
-- Shared instructions and reusable templates are authored under
-  `definitions/shared/`, not here.
-- Shared POML prompt assets are authored under `definitions/shared/prompts/poml/`,
-  not under this provider tree.
-- GitHub-native repository/community assets stay authored directly in `.github/`
-  and are not projected from this provider tree:
-  - `.github/PULL_REQUEST_TEMPLATE.md`
-  - `.github/ISSUE_TEMPLATE/**`
-  - `.github/dependabot.yml`
-  - `.github/dependency-review-config.yml`
-- Regenerate the projected repo surface with:
+Shared instructions and reusable templates live under `definitions/shared/`. GitHub-native repository assets that are intentionally maintained in place stay in `.github/` and are not projected from this tree.
 
-```powershell
-pwsh -File .\scripts\runtime\render-github-instruction-surfaces.ps1 -RepoRoot .
-```
+---
 
-- `.github/` still keeps GitHub-native governance assets such as workflows,
-  policies, schemas, runbooks, governance catalogs, issue templates, PR
-  templates, and dependency automation config authored in place. Only the
-  provider-authored surfaces above are projected from
-  `definitions/providers/github/`.
+## Features
+
+- ✅ Authoritative source for GitHub/Copilot runtime surfaces
+- ✅ Separates managed root files, agents, chat modes, prompts, and hooks
+- ✅ Keeps shared instruction and prompt assets out of the provider-specific tree
+- ✅ Renders into `.github/` through a single repository-owned entrypoint
+
+---
+
+## Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Contents](#contents)
+- [References](#references)
+- [License](#license)
+
+---
+
+## References
+
+- `definitions/providers/github/root/`
+- `definitions/providers/github/agents/`
+- `definitions/providers/github/chatmodes/`
+- `definitions/providers/github/prompts/`
+- `definitions/providers/github/hooks/`
+- `definitions/shared/README.md`
+- `scripts/runtime/render-github-instruction-surfaces.ps1`
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file at the repository root for details.
+
+---
