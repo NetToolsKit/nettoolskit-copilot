@@ -1,4 +1,4 @@
-//! Shared fixtures for security baseline validation tests.
+//! Shared fixtures for security validation tests.
 
 use std::fs;
 use std::path::Path;
@@ -80,6 +80,81 @@ pub fn initialize_shared_checksums_repo(repo_root: &Path) {
             sha256_for_text("Write-Output 'b'\n")
         ),
     );
+}
+
+pub fn initialize_supply_chain_repo(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join(".codex"))
+        .expect("codex directory should be created for repository resolution");
+    write_repo_file(
+        repo_root,
+        ".github/governance/supply-chain.baseline.json",
+        r#"{
+  "version": 1,
+  "sbomOutputPath": ".temp/audit/sbom.latest.json",
+  "licenseEvidencePath": ".temp/audit/licenses.latest.json",
+  "requireLicenseEvidence": false,
+  "warnOnMissingLicenseEvidence": false,
+  "warnOnEmptyDependencySet": false,
+  "excludedPathGlobs": [
+    ".git/**",
+    ".temp/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/.vs/**"
+  ],
+  "blockedDependencyPatterns": [
+    "(?i)^event-stream$"
+  ],
+  "sensitiveDependencyPatterns": [
+    "(?i)^log4j(?:-.*)?$"
+  ]
+}"#,
+    );
+    write_repo_file(
+        repo_root,
+        "package.json",
+        r#"{
+  "dependencies": {
+    "chalk": "^5.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}"#,
+    );
+    write_repo_file(
+        repo_root,
+        "Cargo.toml",
+        r#"[package]
+name = "fixture"
+version = "0.1.0"
+
+[dependencies]
+serde = "1.0"
+"#,
+    );
+    write_repo_file(
+        repo_root,
+        "src/App/App.csproj",
+        r#"<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.0.1" />
+  </ItemGroup>
+</Project>"#,
+    );
+    write_repo_file(
+        repo_root,
+        "Directory.Packages.props",
+        r#"<Project>
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.0.0" />
+  </ItemGroup>
+</Project>"#,
+    );
+}
+
+pub fn write_supply_chain_baseline(repo_root: &Path, contents: &str) {
+    write_repo_file(repo_root, ".github/governance/supply-chain.baseline.json", contents);
 }
 
 pub fn write_repo_file(repo_root: &Path, relative_path: &str, contents: &str) {

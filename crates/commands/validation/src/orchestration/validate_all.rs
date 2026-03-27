@@ -23,6 +23,7 @@ use crate::{
     invoke_validate_policy,
     invoke_validate_security_baseline,
     invoke_validate_shared_script_checksums,
+    invoke_validate_supply_chain,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -40,6 +41,7 @@ use crate::{
     ValidatePolicyRequest,
     ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest,
+    ValidateSupplyChainRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -247,6 +249,7 @@ enum NativeValidationCheck {
     Policy,
     SecurityBaseline,
     SharedScriptChecksums,
+    SupplyChain,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -298,6 +301,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::SharedScriptChecksums) => {
                 "rust:nettoolskit-validation::validate-shared-script-checksums"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::SupplyChain) => {
+                "rust:nettoolskit-validation::validate-supply-chain"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -645,7 +651,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-supply-chain",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-supply-chain.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::SupplyChain),
         ),
         (
             "validate-release-governance",
@@ -806,6 +812,9 @@ fn definition_supports_parameter(
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::SharedScriptChecksums) => {
             matches!(parameter_name, "WarningOnly" | "ManifestPath" | "DetailedOutput")
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::SupplyChain) => {
+            matches!(parameter_name, "WarningOnly" | "BaselinePath")
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
             matches!(
@@ -1125,6 +1134,22 @@ fn run_native_validation_check(
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
                 detailed_output: bool_argument(&arguments, "DetailedOutput").unwrap_or(false),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::SupplyChain => {
+            invoke_validate_supply_chain(&ValidateSupplyChainRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                baseline_path: string_argument_path(&arguments, "BaselinePath"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
             })
             .map(|result| {
                 (

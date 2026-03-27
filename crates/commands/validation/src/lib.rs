@@ -49,6 +49,7 @@ pub use error::{
     ValidatePolicyCommandError,
     ValidateSecurityBaselineCommandError,
     ValidateSharedScriptChecksumsCommandError,
+    ValidateSupplyChainCommandError,
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
@@ -91,8 +92,10 @@ pub use policy::{
 };
 pub use security::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    invoke_validate_supply_chain,
     ValidateSecurityBaselineRequest, ValidateSecurityBaselineResult,
     ValidateSharedScriptChecksumsRequest, ValidateSharedScriptChecksumsResult,
+    ValidateSupplyChainRequest, ValidateSupplyChainResult,
 };
 pub use standards::{
     invoke_validate_dotnet_standards, ValidateDotnetStandardsRequest,

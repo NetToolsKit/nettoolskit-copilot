@@ -290,6 +290,18 @@ pub enum ValidateSharedScriptChecksumsCommandError {
     },
 }
 
+/// Errors raised by supply-chain validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateSupplyChainCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve supply chain workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {
