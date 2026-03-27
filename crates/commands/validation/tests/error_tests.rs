@@ -10,6 +10,7 @@ use nettoolskit_validation::{
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_policy,
+    invoke_validate_release_governance,
     invoke_validate_readme_standards,
     invoke_validate_runtime_script_tests,
     invoke_validate_security_baseline,
@@ -30,6 +31,7 @@ use nettoolskit_validation::{
     ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
     ValidatePolicyRequest,
+    ValidateReleaseGovernanceRequest,
     ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest,
@@ -397,5 +399,19 @@ fn test_validate_supply_chain_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve supply chain workspace root"
+    );
+}
+
+#[test]
+fn test_validate_release_governance_error_display_is_stable() {
+    let error = invoke_validate_release_governance(&ValidateReleaseGovernanceRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateReleaseGovernanceRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve release governance workspace root"
     );
 }

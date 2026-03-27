@@ -302,6 +302,18 @@ pub enum ValidateSupplyChainCommandError {
     },
 }
 
+/// Errors raised by release-governance validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateReleaseGovernanceCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve release governance workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

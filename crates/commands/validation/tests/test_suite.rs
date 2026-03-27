@@ -45,6 +45,10 @@ mod policy {
     pub mod policy_tests;
 }
 
+mod release {
+    pub mod release_governance_tests;
+}
+
 mod security {
     pub mod security_baseline_tests;
     pub mod shared_script_checksums_tests;

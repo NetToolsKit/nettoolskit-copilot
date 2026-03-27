@@ -24,6 +24,7 @@ use crate::{
     invoke_validate_security_baseline,
     invoke_validate_shared_script_checksums,
     invoke_validate_supply_chain,
+    invoke_validate_release_governance,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -42,6 +43,7 @@ use crate::{
     ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest,
+    ValidateReleaseGovernanceRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -250,6 +252,7 @@ enum NativeValidationCheck {
     SecurityBaseline,
     SharedScriptChecksums,
     SupplyChain,
+    ReleaseGovernance,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -304,6 +307,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::SupplyChain) => {
                 "rust:nettoolskit-validation::validate-supply-chain"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseGovernance) => {
+                "rust:nettoolskit-validation::validate-release-governance"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -655,9 +661,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-release-governance",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-release-governance.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseGovernance),
         ),
         (
             "validate-release-provenance",
@@ -815,6 +819,16 @@ fn definition_supports_parameter(
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::SupplyChain) => {
             matches!(parameter_name, "WarningOnly" | "BaselinePath")
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseGovernance) => {
+            matches!(
+                parameter_name,
+                "WarningOnly"
+                    | "ChangelogPath"
+                    | "CodeownersPath"
+                    | "GovernanceDocPath"
+                    | "BranchProtectionBaselinePath"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
             matches!(
@@ -1148,6 +1162,28 @@ fn run_native_validation_check(
             invoke_validate_supply_chain(&ValidateSupplyChainRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 baseline_path: string_argument_path(&arguments, "BaselinePath"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::ReleaseGovernance => {
+            invoke_validate_release_governance(&ValidateReleaseGovernanceRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                changelog_path: string_argument_path(&arguments, "ChangelogPath"),
+                codeowners_path: string_argument_path(&arguments, "CodeownersPath"),
+                governance_doc_path: string_argument_path(&arguments, "GovernanceDocPath"),
+                branch_protection_baseline_path: string_argument_path(
+                    &arguments,
+                    "BranchProtectionBaselinePath",
+                ),
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
             })

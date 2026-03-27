@@ -11,6 +11,7 @@ pub mod instruction_graph;
 pub mod orchestration;
 pub mod operational_hygiene;
 pub mod policy;
+pub mod release;
 pub mod security;
 pub mod standards;
 pub mod structure;
@@ -54,6 +55,7 @@ pub use error::{
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
     ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
+    ValidateReleaseGovernanceCommandError,
     ValidateRuntimeScriptTestsCommandError, ValidateShellHooksCommandError,
     ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
     ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
@@ -89,6 +91,10 @@ pub use policy::{
     invoke_validate_compatibility_lifecycle_policy, invoke_validate_policy,
     ValidateCompatibilityLifecyclePolicyRequest, ValidateCompatibilityLifecyclePolicyResult,
     ValidatePolicyRequest, ValidatePolicyResult,
+};
+pub use release::{
+    invoke_validate_release_governance, ValidateReleaseGovernanceRequest,
+    ValidateReleaseGovernanceResult,
 };
 pub use security::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
