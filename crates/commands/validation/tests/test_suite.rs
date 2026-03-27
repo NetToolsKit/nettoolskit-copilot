@@ -8,6 +8,7 @@ mod documentation {
 mod error_tests;
 mod instruction_graph {
     pub mod authoritative_source_policy_tests;
+    pub mod instruction_architecture_tests;
 }
 
 mod governance {
@@ -30,3 +31,5 @@ mod structure {
 mod workspace {
     pub mod workspace_efficiency_tests;
 }
+
+mod support;

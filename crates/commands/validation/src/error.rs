@@ -110,6 +110,18 @@ pub enum ValidateAuthoritativeSourcePolicyCommandError {
     },
 }
 
+/// Errors raised by instruction-architecture validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateInstructionArchitectureCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve instruction architecture workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

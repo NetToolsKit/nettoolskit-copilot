@@ -15,10 +15,11 @@ use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
-    invoke_validate_instruction_metadata, invoke_validate_planning_structure,
-    invoke_validate_readme_standards, invoke_validate_routing_coverage,
-    invoke_validate_template_standards, invoke_validate_workspace_efficiency,
-    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
+    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
+    invoke_validate_planning_structure, invoke_validate_readme_standards,
+    invoke_validate_routing_coverage, invoke_validate_template_standards,
+    invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
+    ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidatePlanningStructureRequest,
     ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
     ValidateTemplateStandardsRequest, ValidateWorkspaceEfficiencyRequest,
@@ -215,6 +216,7 @@ enum NativeValidationCheck {
     AuditLedger,
     ReadmeStandards,
     InstructionMetadata,
+    InstructionArchitecture,
     RoutingCoverage,
     TemplateStandards,
     AuthoritativeSourcePolicy,
@@ -236,6 +238,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
                 "rust:nettoolskit-validation::validate-instruction-metadata"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
+                "rust:nettoolskit-validation::validate-instruction-architecture"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage) => {
                 "rust:nettoolskit-validation::validate-routing-coverage"
@@ -513,9 +518,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-instruction-architecture",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-instruction-architecture.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture),
         ),
         (
             "validate-readme-standards",
@@ -711,9 +714,34 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
         | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
         | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
-        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards)
-        | ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
+        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
             parameter_name == "WarningOnly"
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
+            matches!(
+                parameter_name,
+                "WarningOnly"
+                    | "ManifestPath"
+                    | "AgentsPath"
+                    | "GlobalInstructionsPath"
+                    | "RoutingCatalogPath"
+                    | "RoutePromptPath"
+                    | "PromptRoot"
+                    | "TemplateRoot"
+                    | "SkillRoot"
+            )
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
+            matches!(
+                parameter_name,
+                "WarningOnly"
+                    | "SourceMapPath"
+                    | "InstructionPath"
+                    | "AgentsPath"
+                    | "GlobalInstructionsPath"
+                    | "RoutingCatalogPath"
+                    | "InstructionSearchRoot"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
             matches!(
@@ -884,6 +912,32 @@ fn run_native_validation_check(
             invoke_validate_instruction_metadata(&ValidateInstructionMetadataRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::InstructionArchitecture => {
+            invoke_validate_instruction_architecture(&ValidateInstructionArchitectureRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                manifest_path: string_argument_path(&arguments, "ManifestPath"),
+                agents_path: string_argument_path(&arguments, "AgentsPath"),
+                global_instructions_path: string_argument_path(
+                    &arguments,
+                    "GlobalInstructionsPath",
+                ),
+                routing_catalog_path: string_argument_path(&arguments, "RoutingCatalogPath"),
+                route_prompt_path: string_argument_path(&arguments, "RoutePromptPath"),
+                prompt_root: string_argument_path(&arguments, "PromptRoot"),
+                template_root: string_argument_path(&arguments, "TemplateRoot"),
+                skill_root: string_argument_path(&arguments, "SkillRoot"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
             })
             .map(|result| {
                 (
