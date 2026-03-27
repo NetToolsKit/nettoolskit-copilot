@@ -4,7 +4,8 @@ use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
-    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError, RuntimeSelfHealCommandError,
+    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
     RuntimeSetupGlobalGitAliasesCommandError,
 };
 use std::error::Error;
@@ -172,6 +173,25 @@ fn test_runtime_setup_global_git_aliases_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "git config failed"
+    );
+}
+
+#[test]
+fn test_runtime_pre_commit_eof_hygiene_error_display_is_stable() {
+    let error = RuntimePreCommitEofHygieneCommandError::InspectGitState {
+        source: anyhow!("git diff failed"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to inspect runtime pre-commit eof staged files"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "git diff failed"
     );
 }
 

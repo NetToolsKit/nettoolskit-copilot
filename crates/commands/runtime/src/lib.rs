@@ -33,7 +33,12 @@ pub use diagnostics::self_heal::{
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
-    RuntimeSelfHealCommandError, RuntimeSetupGlobalGitAliasesCommandError, RuntimeSurfaceError,
+    RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
+    RuntimeSetupGlobalGitAliasesCommandError, RuntimeSurfaceError,
+};
+pub use hooks::pre_commit_eof_hygiene::{
+    invoke_pre_commit_eof_hygiene, RuntimePreCommitEofHygieneRequest,
+    RuntimePreCommitEofHygieneResult, RuntimePreCommitEofHygieneStatus,
 };
 pub use hooks::setup_global_git_aliases::{
     invoke_setup_global_git_aliases, RuntimeSetupGlobalGitAliasesRequest,

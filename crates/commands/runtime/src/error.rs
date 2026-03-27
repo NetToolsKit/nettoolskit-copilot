@@ -259,6 +259,46 @@ pub enum RuntimeSetupGlobalGitAliasesCommandError {
     },
 }
 
+/// Errors raised by runtime pre-commit EOF hygiene commands.
+#[derive(Debug, Error)]
+pub enum RuntimePreCommitEofHygieneCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime pre-commit eof workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Effective EOF mode resolution failed.
+    #[error("failed to resolve runtime pre-commit eof mode")]
+    ResolveMode {
+        /// Underlying catalog or settings failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Staged file discovery or git status inspection failed.
+    #[error("failed to inspect runtime pre-commit eof staged files")]
+    InspectGitState {
+        /// Underlying git command failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// File normalization failed.
+    #[error("failed to normalize runtime pre-commit eof file contents")]
+    NormalizeFiles {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Restaging normalized files failed.
+    #[error("failed to restage runtime pre-commit eof files")]
+    RestageFiles {
+        /// Underlying git command failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime self-heal commands.
 #[derive(Debug, Error)]
 pub enum RuntimeSelfHealCommandError {
