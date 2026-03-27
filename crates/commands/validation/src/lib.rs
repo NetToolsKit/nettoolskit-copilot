@@ -1,17 +1,29 @@
 //! Validation command boundary contracts for the migration program.
 
 pub mod contracts;
+pub mod evidence;
 pub mod error;
 pub mod orchestration;
+pub mod structure;
 
 pub use contracts::{
     validation_surface_contract, validation_surface_script_total, MigrationWave,
     ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
 };
-pub use error::{ValidateAllCommandError, ValidationSurfaceError};
+pub use error::{
+    ValidateAllCommandError, ValidateAuditLedgerCommandError,
+    ValidatePlanningStructureCommandError, ValidationSurfaceError,
+};
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
     ValidationCheckStatus,
+};
+pub use evidence::{
+    invoke_validate_audit_ledger, ValidateAuditLedgerRequest, ValidateAuditLedgerResult,
+};
+pub use structure::{
+    invoke_validate_planning_structure, ValidatePlanningStructureRequest,
+    ValidatePlanningStructureResult,
 };
 
 /// Require a registered validation surface contract.

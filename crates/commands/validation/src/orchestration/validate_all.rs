@@ -13,6 +13,10 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
+use crate::{
+    invoke_validate_audit_ledger, invoke_validate_planning_structure, ValidateAuditLedgerRequest,
+    ValidatePlanningStructureRequest,
+};
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
 const DEFAULT_LEDGER_PATH: &str = ".temp/audit/validation-ledger.jsonl";
@@ -191,7 +195,33 @@ struct ValidationCommandArgument {
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct ValidationCheckDefinition {
     name: &'static str,
-    script: &'static str,
+    executor: ValidationCheckExecutor,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ValidationCheckExecutor {
+    PowerShell(&'static str),
+    Native(NativeValidationCheck),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum NativeValidationCheck {
+    PlanningStructure,
+    AuditLedger,
+}
+
+impl ValidationCheckDefinition {
+    fn script_label(&self) -> &'static str {
+        match self.executor {
+            ValidationCheckExecutor::PowerShell(script) => script,
+            ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
+                "rust:nettoolskit-validation::validate-planning-structure"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger) => {
+                "rust:nettoolskit-validation::validate-audit-ledger"
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -266,8 +296,7 @@ pub fn invoke_validate_all(
             apply_check_options(check_options, &mut check_arguments, &mut check_warning_only);
         }
 
-        let script_path = repo_root.join(definition.script);
-        if script_supports_parameter(&script_path, "WarningOnly") {
+        if definition_supports_parameter(definition, &repo_root, "WarningOnly") {
             check_arguments.insert(
                 "WarningOnly".to_string(),
                 ValidationCommandArgument {
@@ -401,110 +430,156 @@ fn resolve_check_order(selected_profile: Option<&ValidationProfile>) -> Vec<Stri
 fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition> {
     let mut catalog = HashMap::new();
     for (name, script) in [
-        ("validate-instructions", "scripts/validation/validate-instructions.ps1"),
-        ("validate-policy", "scripts/validation/validate-policy.ps1"),
+        (
+            "validate-instructions",
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-instructions.ps1"),
+        ),
+        (
+            "validate-policy",
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-policy.ps1"),
+        ),
         (
             "validate-security-baseline",
-            "scripts/validation/validate-security-baseline.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-security-baseline.ps1",
+            ),
         ),
         (
             "validate-shared-script-checksums",
-            "scripts/validation/validate-shared-script-checksums.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-shared-script-checksums.ps1",
+            ),
         ),
         (
             "validate-agent-orchestration",
-            "scripts/validation/validate-agent-orchestration.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-agent-orchestration.ps1",
+            ),
         ),
         (
             "validate-agent-skill-alignment",
-            "scripts/validation/validate-agent-skill-alignment.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-agent-skill-alignment.ps1",
+            ),
         ),
         (
             "validate-agent-permissions",
-            "scripts/validation/validate-agent-permissions.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-agent-permissions.ps1",
+            ),
         ),
         (
             "validate-planning-structure",
-            "scripts/validation/validate-planning-structure.ps1",
+            ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure),
         ),
         (
             "validate-routing-coverage",
-            "scripts/validation/validate-routing-coverage.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-routing-coverage.ps1",
+            ),
         ),
         (
             "validate-authoritative-source-policy",
-            "scripts/validation/validate-authoritative-source-policy.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-authoritative-source-policy.ps1",
+            ),
         ),
         (
             "validate-instruction-architecture",
-            "scripts/validation/validate-instruction-architecture.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-instruction-architecture.ps1",
+            ),
         ),
         (
             "validate-readme-standards",
-            "scripts/validation/validate-readme-standards.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-readme-standards.ps1",
+            ),
         ),
         (
             "validate-template-standards",
-            "scripts/validation/validate-template-standards.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-template-standards.ps1",
+            ),
         ),
         (
             "validate-workspace-efficiency",
-            "scripts/validation/validate-workspace-efficiency.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-workspace-efficiency.ps1",
+            ),
         ),
         (
             "validate-compatibility-lifecycle-policy",
-            "scripts/validation/validate-compatibility-lifecycle-policy.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-compatibility-lifecycle-policy.ps1",
+            ),
         ),
         (
             "validate-powershell-standards",
-            "scripts/validation/validate-powershell-standards.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-powershell-standards.ps1",
+            ),
         ),
         (
             "validate-agent-hooks",
-            "scripts/validation/validate-agent-hooks.ps1",
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-agent-hooks.ps1"),
         ),
         (
             "validate-shell-hooks",
-            "scripts/validation/validate-shell-hooks.ps1",
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-shell-hooks.ps1"),
         ),
         (
             "validate-runtime-script-tests",
-            "scripts/validation/validate-runtime-script-tests.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-runtime-script-tests.ps1",
+            ),
         ),
         (
             "validate-warning-baseline",
-            "scripts/validation/validate-warning-baseline.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-warning-baseline.ps1",
+            ),
         ),
         (
             "validate-dotnet-standards",
-            "scripts/validation/validate-dotnet-standards.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-dotnet-standards.ps1",
+            ),
         ),
         (
             "validate-architecture-boundaries",
-            "scripts/validation/validate-architecture-boundaries.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-architecture-boundaries.ps1",
+            ),
         ),
         (
             "validate-instruction-metadata",
-            "scripts/validation/validate-instruction-metadata.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-instruction-metadata.ps1",
+            ),
         ),
         (
             "validate-supply-chain",
-            "scripts/validation/validate-supply-chain.ps1",
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-supply-chain.ps1"),
         ),
         (
             "validate-release-governance",
-            "scripts/validation/validate-release-governance.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-release-governance.ps1",
+            ),
         ),
         (
             "validate-release-provenance",
-            "scripts/validation/validate-release-provenance.ps1",
+            ValidationCheckExecutor::PowerShell(
+                "scripts/validation/validate-release-provenance.ps1",
+            ),
         ),
         (
             "validate-audit-ledger",
-            "scripts/validation/validate-audit-ledger.ps1",
+            ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger),
         ),
     ] {
-        catalog.insert(name, ValidationCheckDefinition { name, script });
+        catalog.insert(name, ValidationCheckDefinition { name, executor: script });
     }
 
     catalog
@@ -599,10 +674,20 @@ fn option_to_command_argument(key: &str, value: &Value) -> Option<ValidationComm
     }
 }
 
-fn script_supports_parameter(script_path: &Path, parameter_name: &str) -> bool {
-    fs::read_to_string(script_path)
-        .map(|document| document.contains(parameter_name))
-        .unwrap_or(false)
+fn definition_supports_parameter(
+    definition: &ValidationCheckDefinition,
+    repo_root: &Path,
+    parameter_name: &str,
+) -> bool {
+    match definition.executor {
+        ValidationCheckExecutor::PowerShell(script_path) => fs::read_to_string(repo_root.join(script_path))
+            .map(|document| document.contains(parameter_name))
+            .unwrap_or(false),
+        ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger) => {
+            parameter_name == "WarningOnly"
+        }
+    }
 }
 
 fn run_validation_script(
@@ -611,14 +696,31 @@ fn run_validation_script(
     arguments: BTreeMap<String, ValidationCommandArgument>,
     treat_failure_as_warning: bool,
 ) -> ValidationCheckResult {
+    match definition.executor {
+        ValidationCheckExecutor::PowerShell(script) => {
+            run_powershell_validation_script(repo_root, definition.name, script, arguments, treat_failure_as_warning)
+        }
+        ValidationCheckExecutor::Native(native_check) => {
+            run_native_validation_check(repo_root, definition.name, definition.script_label(), native_check, arguments, treat_failure_as_warning)
+        }
+    }
+}
+
+fn run_powershell_validation_script(
+    repo_root: &Path,
+    name: &str,
+    script: &str,
+    arguments: BTreeMap<String, ValidationCommandArgument>,
+    treat_failure_as_warning: bool,
+) -> ValidationCheckResult {
     let started = Instant::now();
-    let script_path = repo_root.join(definition.script);
+    let script_path = repo_root.join(script);
     let formatted_arguments = format_argument_list(&arguments);
 
     if !script_path.is_file() {
         return build_check_result(
-            definition.name,
-            definition.script,
+            name,
+            script,
             formatted_arguments,
             treat_failure_as_warning,
             1,
@@ -658,8 +760,8 @@ fn run_validation_script(
             };
 
             build_check_result(
-                definition.name,
-                definition.script,
+                name,
+                script,
                 formatted_arguments,
                 treat_failure_as_warning,
                 exit_code,
@@ -668,8 +770,8 @@ fn run_validation_script(
             )
         }
         Err(error) => build_check_result(
-            definition.name,
-            definition.script,
+            name,
+            script,
             formatted_arguments,
             treat_failure_as_warning,
             1,
@@ -677,6 +779,58 @@ fn run_validation_script(
             started.elapsed().as_millis(),
         ),
     }
+}
+
+fn run_native_validation_check(
+    repo_root: &Path,
+    name: &str,
+    script_label: &str,
+    native_check: NativeValidationCheck,
+    arguments: BTreeMap<String, ValidationCommandArgument>,
+    treat_failure_as_warning: bool,
+) -> ValidationCheckResult {
+    let started = Instant::now();
+    let formatted_arguments = format_argument_list(&arguments);
+
+    let (raw_exit_code, error) = match native_check {
+        NativeValidationCheck::PlanningStructure => invoke_validate_planning_structure(
+            &ValidatePlanningStructureRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+            },
+        )
+        .map(|result| {
+            let message = (!result.failures.is_empty())
+                .then(|| result.failures.join(" | "))
+                .or_else(|| (!result.warnings.is_empty()).then(|| result.warnings.join(" | ")));
+            (result.exit_code, message)
+        })
+        .unwrap_or_else(|error| (1, Some(error.to_string()))),
+        NativeValidationCheck::AuditLedger => invoke_validate_audit_ledger(
+            &ValidateAuditLedgerRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+                ..ValidateAuditLedgerRequest::default()
+            },
+        )
+        .map(|result| {
+            let message = (!result.failures.is_empty())
+                .then(|| result.failures.join(" | "))
+                .or_else(|| (!result.warnings.is_empty()).then(|| result.warnings.join(" | ")));
+            (result.exit_code, message)
+        })
+        .unwrap_or_else(|error| (1, Some(error.to_string()))),
+    };
+
+    build_check_result(
+        name,
+        script_label,
+        formatted_arguments,
+        treat_failure_as_warning,
+        raw_exit_code,
+        error,
+        started.elapsed().as_millis(),
+    )
 }
 
 fn append_command_argument(command: &mut Command, argument: &ValidationCommandArgument) {
