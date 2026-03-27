@@ -5,8 +5,9 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::agent_orchestration::common::{
-    read_required_json_document, read_skill_frontmatter_map, resolve_repo_relative_path,
-    resolve_validation_repo_root, AgentManifest, EvalFixtures, PipelineManifest,
+    read_required_json_document, read_required_pipeline_manifest, read_skill_frontmatter_map,
+    resolve_repo_relative_path, resolve_validation_repo_root, AgentManifest, EvalFixtures,
+    PipelineManifest, PipelineStageMode,
 };
 use crate::error::ValidateAgentSkillAlignmentCommandError;
 use crate::operational_hygiene::common::derive_status;
@@ -82,9 +83,10 @@ pub struct ValidateAgentSkillAlignmentResult {
 pub fn invoke_validate_agent_skill_alignment(
     request: &ValidateAgentSkillAlignmentRequest,
 ) -> Result<ValidateAgentSkillAlignmentResult, ValidateAgentSkillAlignmentCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateAgentSkillAlignmentCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root =
+        resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
+            ValidateAgentSkillAlignmentCommandError::ResolveWorkspaceRoot { source }
+        })?;
     let agent_manifest_path = resolve_repo_relative_path(
         &repo_root,
         request.agent_manifest_path.as_deref(),
@@ -119,7 +121,7 @@ pub fn invoke_validate_agent_skill_alignment(
         &mut warnings,
         &mut failures,
     );
-    let pipeline_manifest = read_required_json_document::<PipelineManifest>(
+    let pipeline_manifest = read_required_pipeline_manifest(
         &pipeline_path,
         "pipeline manifest",
         false,
@@ -135,12 +137,16 @@ pub fn invoke_validate_agent_skill_alignment(
     );
 
     if !skills_root_path.is_dir() {
-        failures.push(format!("Skills root not found: {}", skills_root_path.display()));
+        failures.push(format!(
+            "Skills root not found: {}",
+            skills_root_path.display()
+        ));
     }
 
     if failures.is_empty() {
         let agent_manifest = agent_manifest.unwrap_or_default();
-        let pipeline_manifest = pipeline_manifest.unwrap_or_default();
+        let pipeline_manifest =
+            pipeline_manifest.expect("pipeline manifest should be present when failures are empty");
         let eval_fixture = eval_fixture.unwrap_or_default();
 
         agents_checked = agent_manifest.agents.len();
@@ -165,8 +171,13 @@ pub fn invoke_validate_agent_skill_alignment(
             &mut warnings,
             &mut failures,
         );
-        let pipeline_agent_set =
-            validate_pipeline_stages(&repo_root, &pipeline_manifest, &agent_map, &mut warnings, &mut failures);
+        let pipeline_agent_set = validate_pipeline_stages(
+            &repo_root,
+            &pipeline_manifest,
+            &agent_map,
+            &mut warnings,
+            &mut failures,
+        );
         validate_eval_required_agents(
             &eval_fixture,
             &agent_map,
@@ -353,7 +364,7 @@ fn validate_pipeline_stages(
             ));
         }
 
-        let expected_role = expected_role_for_stage(&stage.id, &stage.mode);
+        let expected_role = expected_role_for_stage(&stage.id, stage.mode);
         if let Some(expected_role) = expected_role {
             let actual_role = agent_map
                 .get(&stage.agent_id)
@@ -362,13 +373,18 @@ fn validate_pipeline_stages(
             if actual_role != expected_role {
                 failures.push(format!(
                     "Pipeline stage '{}' mode '{}' expects role '{}' but agent '{}' has role '{}'.",
-                    stage.id, stage.mode, expected_role, stage.agent_id, actual_role
+                    stage.id,
+                    stage.mode.as_str(),
+                    expected_role,
+                    stage.agent_id,
+                    actual_role
                 ));
             }
         } else {
             warnings.push(format!(
                 "Pipeline stage '{}' has non-standard mode '{}'.",
-                stage.id, stage.mode
+                stage.id,
+                stage.mode.as_str()
             ));
         }
     }
@@ -376,9 +392,8 @@ fn validate_pipeline_stages(
     pipeline_agent_set
 }
 
-fn expected_role_for_stage(stage_id: &str, mode: &str) -> Option<String> {
+fn expected_role_for_stage(stage_id: &str, mode: PipelineStageMode) -> Option<String> {
     let normalized_stage = stage_id.to_ascii_lowercase();
-    let normalized_mode = mode.to_ascii_lowercase();
     if normalized_stage == "route" {
         return Some("router".to_string());
     }
@@ -389,12 +404,11 @@ fn expected_role_for_stage(stage_id: &str, mode: &str) -> Option<String> {
         return Some("release".to_string());
     }
 
-    match normalized_mode.as_str() {
-        "plan" => Some("planner".to_string()),
-        "execute" => Some("executor".to_string()),
-        "validate" => Some("tester".to_string()),
-        "review" => Some("reviewer".to_string()),
-        _ => None,
+    match mode {
+        PipelineStageMode::Plan => Some("planner".to_string()),
+        PipelineStageMode::Execute => Some("executor".to_string()),
+        PipelineStageMode::Validate => Some("tester".to_string()),
+        PipelineStageMode::Review => Some("reviewer".to_string()),
     }
 }
 

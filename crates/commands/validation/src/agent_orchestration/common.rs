@@ -7,6 +7,10 @@ use std::path::{Path, PathBuf};
 
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_repository_root};
+use nettoolskit_orchestrator::load_pipeline_manifest;
+pub(crate) use nettoolskit_orchestrator::{
+    PipelineDispatchMode, PipelineManifest, PipelineStageMode,
+};
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde_json::Value;
@@ -93,80 +97,6 @@ pub(crate) struct PermissionMatrixAgent {
 
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct PipelineManifest {
-    #[serde(default)]
-    pub id: String,
-    #[serde(default)]
-    pub runtime: PipelineRuntime,
-    #[serde(default)]
-    pub stages: Vec<PipelineStage>,
-    #[serde(default)]
-    pub handoffs: Vec<PipelineHandoff>,
-    #[serde(default)]
-    pub completion_criteria: PipelineCompletionCriteria,
-}
-
-#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct PipelineRuntime {
-    #[serde(default)]
-    pub policy_catalog_path: String,
-    #[serde(default)]
-    pub model_routing_catalog_path: String,
-}
-
-#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct PipelineStage {
-    #[serde(default)]
-    pub id: String,
-    #[serde(default)]
-    pub agent_id: String,
-    #[serde(default)]
-    pub mode: String,
-    #[serde(default)]
-    pub execution: PipelineExecution,
-    #[serde(default)]
-    pub input_artifacts: Vec<String>,
-    #[serde(default)]
-    pub output_artifacts: Vec<String>,
-}
-
-#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct PipelineExecution {
-    #[serde(default)]
-    pub script_path: String,
-    #[serde(default)]
-    pub dispatch_mode: String,
-    #[serde(default)]
-    pub prompt_template_path: String,
-    #[serde(default)]
-    pub response_schema_path: String,
-}
-
-#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct PipelineHandoff {
-    #[serde(default)]
-    pub from_stage: String,
-    #[serde(default)]
-    pub to_stage: String,
-    #[serde(default)]
-    pub required_artifacts: Vec<String>,
-}
-
-#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct PipelineCompletionCriteria {
-    #[serde(default)]
-    pub required_stages: Vec<String>,
-    #[serde(default)]
-    pub required_artifacts: Vec<String>,
-}
-
-#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
 pub(crate) struct EvalFixtures {
     #[serde(default)]
     pub cases: Vec<EvalCase>,
@@ -232,7 +162,9 @@ pub(crate) struct RunArtifactSummary {
     pub stage_count: i64,
 }
 
-pub(crate) fn resolve_validation_repo_root(repo_root: Option<&Path>) -> Result<PathBuf, anyhow::Error> {
+pub(crate) fn resolve_validation_repo_root(
+    repo_root: Option<&Path>,
+) -> Result<PathBuf, anyhow::Error> {
     let current_dir = env::current_dir()?;
     resolve_repository_root(repo_root, None, &current_dir)
 }
@@ -264,6 +196,27 @@ pub(crate) fn read_required_json_document<T: DeserializeOwned>(
                 warnings,
                 failures,
                 format!("Invalid JSON structure in {label}: {error}"),
+            );
+            None
+        }
+    }
+}
+
+pub(crate) fn read_required_pipeline_manifest(
+    path: &Path,
+    label: &str,
+    warning_only: bool,
+    warnings: &mut Vec<String>,
+    failures: &mut Vec<String>,
+) -> Option<PipelineManifest> {
+    match load_pipeline_manifest(path) {
+        Ok(manifest) => Some(manifest),
+        Err(error) => {
+            push_required_finding(
+                warning_only,
+                warnings,
+                failures,
+                format!("Invalid {label}: {error}"),
             );
             None
         }
@@ -397,7 +350,10 @@ pub(crate) fn read_skill_frontmatter_map(
             warning_only,
             warnings,
             failures,
-            format!("Invalid SKILL.md frontmatter (too short): {}", path.display()),
+            format!(
+                "Invalid SKILL.md frontmatter (too short): {}",
+                path.display()
+            ),
         );
         return BTreeMap::new();
     }
@@ -407,7 +363,10 @@ pub(crate) fn read_skill_frontmatter_map(
             warning_only,
             warnings,
             failures,
-            format!("Missing SKILL.md frontmatter start marker: {}", path.display()),
+            format!(
+                "Missing SKILL.md frontmatter start marker: {}",
+                path.display()
+            ),
         );
         return BTreeMap::new();
     }
@@ -417,7 +376,10 @@ pub(crate) fn read_skill_frontmatter_map(
             warning_only,
             warnings,
             failures,
-            format!("Missing SKILL.md frontmatter end marker: {}", path.display()),
+            format!(
+                "Missing SKILL.md frontmatter end marker: {}",
+                path.display()
+            ),
         );
         return BTreeMap::new();
     };
@@ -429,7 +391,11 @@ pub(crate) fn read_skill_frontmatter_map(
             continue;
         };
 
-        let normalized = value.trim().trim_matches('"').trim_matches('\'').to_string();
+        let normalized = value
+            .trim()
+            .trim_matches('"')
+            .trim_matches('\'')
+            .to_string();
         map.insert(key.trim().to_string(), normalized);
     }
 

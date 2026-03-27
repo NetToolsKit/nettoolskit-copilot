@@ -4,9 +4,9 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 use crate::agent_orchestration::common::{
-    matches_any_glob, normalize_path, read_required_json_document, resolve_repo_relative_path,
-    resolve_validation_repo_root, AgentContract, AgentManifest, PermissionMatrix,
-    PermissionMatrixAgent, PipelineManifest,
+    matches_any_glob, normalize_path, read_required_json_document, read_required_pipeline_manifest,
+    resolve_repo_relative_path, resolve_validation_repo_root, AgentContract, AgentManifest,
+    PermissionMatrix, PermissionMatrixAgent, PipelineManifest,
 };
 use crate::error::ValidateAgentPermissionsCommandError;
 use crate::operational_hygiene::common::{derive_status, push_required_finding};
@@ -79,11 +79,13 @@ pub struct ValidateAgentPermissionsResult {
 pub fn invoke_validate_agent_permissions(
     request: &ValidateAgentPermissionsRequest,
 ) -> Result<ValidateAgentPermissionsResult, ValidateAgentPermissionsCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateAgentPermissionsCommandError::ResolveWorkspaceRoot { source }
-    })?;
-    let matrix_path =
-        resolve_repo_relative_path(&repo_root, request.matrix_path.as_deref(), DEFAULT_MATRIX_PATH);
+    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidateAgentPermissionsCommandError::ResolveWorkspaceRoot { source })?;
+    let matrix_path = resolve_repo_relative_path(
+        &repo_root,
+        request.matrix_path.as_deref(),
+        DEFAULT_MATRIX_PATH,
+    );
     let agent_manifest_path = resolve_repo_relative_path(
         &repo_root,
         request.agent_manifest_path.as_deref(),
@@ -114,7 +116,7 @@ pub fn invoke_validate_agent_permissions(
         &mut warnings,
         &mut failures,
     );
-    let pipeline = read_required_json_document::<PipelineManifest>(
+    let pipeline = read_required_pipeline_manifest(
         &pipeline_path,
         "pipeline manifest",
         request.warning_only,
@@ -271,14 +273,19 @@ fn test_agent_permission_contract(
                 warning_only,
                 warnings,
                 failures,
-                format!("Agent '{}' path not allowed by matrix: {manifest_path}", agent.id),
+                format!(
+                    "Agent '{}' path not allowed by matrix: {manifest_path}",
+                    agent.id
+                ),
             );
         }
     }
 
     for required_blocked_command in required_blocked_commands {
         let has_required_command = agent.blocked_commands.iter().any(|blocked_command| {
-            blocked_command.trim().eq_ignore_ascii_case(required_blocked_command.trim())
+            blocked_command
+                .trim()
+                .eq_ignore_ascii_case(required_blocked_command.trim())
         });
         if !has_required_command {
             push_required_finding(

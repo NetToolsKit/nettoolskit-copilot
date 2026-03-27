@@ -4,8 +4,9 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 use crate::agent_orchestration::common::{
-    read_required_json_document, read_required_json_value, resolve_repo_relative_path,
-    resolve_validation_repo_root, AgentManifest, EvalFixtures, HandoffTemplate, PipelineManifest,
+    read_required_json_document, read_required_json_value, read_required_pipeline_manifest,
+    resolve_repo_relative_path, resolve_validation_repo_root, AgentManifest, EvalFixtures,
+    HandoffTemplate, PipelineDispatchMode, PipelineManifest, PipelineStageMode,
     RunArtifactTemplate,
 };
 use crate::error::ValidateAgentOrchestrationCommandError;
@@ -18,7 +19,8 @@ const PIPELINE_PATH: &str = ".codex/orchestration/pipelines/default.pipeline.jso
 const PIPELINE_SCHEMA_PATH: &str = ".github/schemas/agent.pipeline.schema.json";
 const HANDOFF_TEMPLATE_PATH: &str = ".codex/orchestration/templates/handoff.template.json";
 const HANDOFF_TEMPLATE_SCHEMA_PATH: &str = ".github/schemas/agent.handoff.schema.json";
-const RUN_ARTIFACT_TEMPLATE_PATH: &str = ".codex/orchestration/templates/run-artifact.template.json";
+const RUN_ARTIFACT_TEMPLATE_PATH: &str =
+    ".codex/orchestration/templates/run-artifact.template.json";
 const RUN_ARTIFACT_TEMPLATE_SCHEMA_PATH: &str = ".github/schemas/agent.run-artifact.schema.json";
 const EVAL_FIXTURES_PATH: &str = ".codex/orchestration/evals/golden-tests.json";
 const EVAL_FIXTURES_SCHEMA_PATH: &str = ".github/schemas/agent.evals.schema.json";
@@ -122,9 +124,10 @@ pub struct ValidateAgentOrchestrationResult {
 pub fn invoke_validate_agent_orchestration(
     request: &ValidateAgentOrchestrationRequest,
 ) -> Result<ValidateAgentOrchestrationResult, ValidateAgentOrchestrationCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateAgentOrchestrationCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root =
+        resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
+            ValidateAgentOrchestrationCommandError::ResolveWorkspaceRoot { source }
+        })?;
 
     let mut warnings = Vec::new();
     let mut failures = Vec::new();
@@ -149,11 +152,18 @@ pub fn invoke_validate_agent_orchestration(
         "agents manifest",
         &mut failures,
     );
-    let pipeline_manifest = read_contract_document::<PipelineManifest>(
-        &repo_root,
-        PIPELINE_PATH,
+    let _pipeline_schema = read_required_json_value(
+        &repo_root.join(PIPELINE_SCHEMA_PATH),
         PIPELINE_SCHEMA_PATH,
+        false,
+        &mut warnings,
+        &mut failures,
+    );
+    let pipeline_manifest = read_required_pipeline_manifest(
+        &resolve_repo_relative_path(&repo_root, None, PIPELINE_PATH),
         "pipeline manifest",
+        false,
+        &mut warnings,
         &mut failures,
     );
     let handoff_template = read_contract_document::<HandoffTemplate>(
@@ -316,10 +326,8 @@ fn validate_agent_manifest_integrity(
             ));
         }
 
-        let skill_openai = repo_root.join(format!(
-            ".codex/skills/{}/agents/openai.yaml",
-            agent.skill
-        ));
+        let skill_openai =
+            repo_root.join(format!(".codex/skills/{}/agents/openai.yaml", agent.skill));
         if !skill_openai.is_file() {
             failures.push(format!(
                 "Agent {} references missing skill config: .codex/skills/{}/agents/openai.yaml",
@@ -365,9 +373,18 @@ fn validate_agent_manifest_integrity(
         }
     }
 
-    for required_role in ["planner", "router", "specialist", "reviewer", "release", "tester"] {
+    for required_role in [
+        "planner",
+        "router",
+        "specialist",
+        "reviewer",
+        "release",
+        "tester",
+    ] {
         if !roles.contains(required_role) {
-            failures.push(format!("Agent manifest missing required role: {required_role}"));
+            failures.push(format!(
+                "Agent manifest missing required role: {required_role}"
+            ));
         }
     }
 }
@@ -378,7 +395,11 @@ fn validate_pipeline_manifest_integrity(
     manifest: &AgentManifest,
     failures: &mut Vec<String>,
 ) {
-    let agent_ids: HashSet<String> = manifest.agents.iter().map(|agent| agent.id.clone()).collect();
+    let agent_ids: HashSet<String> = manifest
+        .agents
+        .iter()
+        .map(|agent| agent.id.clone())
+        .collect();
     let mut stage_ids = HashSet::new();
     let mut stage_outputs: HashMap<String, HashSet<String>> = HashMap::new();
     let stage_map: HashMap<String, _> = pipeline
@@ -411,28 +432,41 @@ fn validate_pipeline_manifest_integrity(
             ));
         }
 
-        if stage.execution.dispatch_mode == "codex-exec" {
-            if stage.execution.prompt_template_path.trim().is_empty() {
+        if matches!(
+            stage.execution.dispatch_mode,
+            Some(PipelineDispatchMode::CodexExec)
+        ) {
+            let prompt_template_path = stage.execution.prompt_template_path.as_deref();
+            if prompt_template_path.is_none_or(|path| path.trim().is_empty()) {
                 failures.push(format!(
                     "Pipeline stage {} dispatchMode codex-exec requires promptTemplatePath.",
                     stage.id
                 ));
-            } else if !repo_root.join(&stage.execution.prompt_template_path).is_file() {
+            } else if !repo_root
+                .join(prompt_template_path.expect("checked above"))
+                .is_file()
+            {
                 failures.push(format!(
                     "Pipeline stage {} prompt template not found: {}",
-                    stage.id, stage.execution.prompt_template_path
+                    stage.id,
+                    prompt_template_path.expect("checked above")
                 ));
             }
 
-            if stage.execution.response_schema_path.trim().is_empty() {
+            let response_schema_path = stage.execution.response_schema_path.as_deref();
+            if response_schema_path.is_none_or(|path| path.trim().is_empty()) {
                 failures.push(format!(
                     "Pipeline stage {} dispatchMode codex-exec requires responseSchemaPath.",
                     stage.id
                 ));
-            } else if !repo_root.join(&stage.execution.response_schema_path).is_file() {
+            } else if !repo_root
+                .join(response_schema_path.expect("checked above"))
+                .is_file()
+            {
                 failures.push(format!(
                     "Pipeline stage {} response schema not found: {}",
-                    stage.id, stage.execution.response_schema_path
+                    stage.id,
+                    response_schema_path.expect("checked above")
                 ));
             }
         }
@@ -444,21 +478,25 @@ fn validate_pipeline_manifest_integrity(
     }
 
     if let Some(first_stage) = pipeline.stages.first() {
-        if first_stage.mode != "plan" {
+        if first_stage.mode != PipelineStageMode::Plan {
             failures.push(format!(
                 "Pipeline first stage must be mode 'plan', found '{}'.",
-                first_stage.mode
+                first_stage.mode.as_str()
             ));
         }
-        if !first_stage.input_artifacts.iter().any(|artifact| artifact == "request") {
+        if !first_stage
+            .input_artifacts
+            .iter()
+            .any(|artifact| artifact == "request")
+        {
             failures.push("Pipeline first stage must consume 'request' artifact.".to_string());
         }
     }
     if let Some(last_stage) = pipeline.stages.last() {
-        if last_stage.mode != "review" {
+        if last_stage.mode != PipelineStageMode::Review {
             failures.push(format!(
                 "Pipeline last stage must be mode 'review', found '{}'.",
-                last_stage.mode
+                last_stage.mode.as_str()
             ));
         }
     }
@@ -472,7 +510,10 @@ fn validate_pipeline_manifest_integrity(
             continue;
         }
         if !stage_ids.contains(&handoff.to_stage) {
-            failures.push(format!("Handoff references unknown toStage: {}", handoff.to_stage));
+            failures.push(format!(
+                "Handoff references unknown toStage: {}",
+                handoff.to_stage
+            ));
             continue;
         }
 
@@ -489,7 +530,11 @@ fn validate_pipeline_manifest_integrity(
                 ));
             }
             if let Some(target_stage) = target_stage {
-                if !target_stage.input_artifacts.iter().any(|input| input == artifact) {
+                if !target_stage
+                    .input_artifacts
+                    .iter()
+                    .any(|input| input == artifact)
+                {
                     failures.push(format!(
                         "Handoff {}->{} requires artifact not consumed by target stage {}: {}",
                         handoff.from_stage, handoff.to_stage, handoff.to_stage, artifact
@@ -521,24 +566,23 @@ fn validate_pipeline_manifest_integrity(
         }
     }
 
-    if pipeline.runtime.policy_catalog_path.trim().is_empty()
-        && pipeline.runtime.model_routing_catalog_path.trim().is_empty()
-    {
+    let Some(runtime) = pipeline.runtime.as_ref() else {
         failures.push("Pipeline manifest must declare a runtime configuration object.".to_string());
         return;
-    }
+    };
 
     for (property_name, path) in [
-        ("policyCatalogPath", &pipeline.runtime.policy_catalog_path),
+        ("policyCatalogPath", runtime.policy_catalog_path.as_deref()),
         (
             "modelRoutingCatalogPath",
-            &pipeline.runtime.model_routing_catalog_path,
+            runtime.model_routing_catalog_path.as_deref(),
         ),
     ] {
-        if path.trim().is_empty() {
+        if path.is_none_or(|value| value.trim().is_empty()) {
             failures.push(format!("Pipeline runtime is missing {property_name}."));
             continue;
         }
+        let path = path.expect("checked above");
         if !repo_root.join(path).is_file() {
             failures.push(format!(
                 "Pipeline runtime catalog not found for {property_name}: {path}"
@@ -556,7 +600,11 @@ fn validate_handoff_template_integrity(
         failures.push("Handoff template must include at least one artifact entry.".to_string());
     }
 
-    let stage_ids: HashSet<String> = pipeline.stages.iter().map(|stage| stage.id.clone()).collect();
+    let stage_ids: HashSet<String> = pipeline
+        .stages
+        .iter()
+        .map(|stage| stage.id.clone())
+        .collect();
     if !stage_ids.contains(&handoff_template.from_stage) {
         failures.push(format!(
             "Handoff template references unknown fromStage: {}",
@@ -582,9 +630,16 @@ fn validate_run_artifact_template_integrity(
         return;
     }
 
-    let pipeline_stage_ids: HashSet<String> =
-        pipeline.stages.iter().map(|stage| stage.id.clone()).collect();
-    let agent_ids: HashSet<String> = manifest.agents.iter().map(|agent| agent.id.clone()).collect();
+    let pipeline_stage_ids: HashSet<String> = pipeline
+        .stages
+        .iter()
+        .map(|stage| stage.id.clone())
+        .collect();
+    let agent_ids: HashSet<String> = manifest
+        .agents
+        .iter()
+        .map(|agent| agent.id.clone())
+        .collect();
     for stage in &run_artifact_template.stages {
         if !pipeline_stage_ids.contains(&stage.stage_id) {
             failures.push(format!(
@@ -616,8 +671,16 @@ fn validate_eval_fixtures_integrity(
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) {
-    let agent_ids: HashSet<String> = manifest.agents.iter().map(|agent| agent.id.clone()).collect();
-    let pipeline_order: Vec<String> = pipeline.stages.iter().map(|stage| stage.id.clone()).collect();
+    let agent_ids: HashSet<String> = manifest
+        .agents
+        .iter()
+        .map(|agent| agent.id.clone())
+        .collect();
+    let pipeline_order: Vec<String> = pipeline
+        .stages
+        .iter()
+        .map(|stage| stage.id.clone())
+        .collect();
 
     for case in &eval_fixtures.cases {
         if case.expected_pipeline_id != pipeline.id {

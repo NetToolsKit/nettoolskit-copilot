@@ -17,6 +17,7 @@ path = "src/lib.rs"
 [dependencies]
 anyhow = { workspace = true }
 nettoolskit-core = { path = "../../core" }
+nettoolskit-orchestrator = { path = "../../orchestrator" }
 globset = { workspace = true }
 fancy-regex = { workspace = true }
 regex = { workspace = true }

@@ -335,6 +335,19 @@ pub enum PipelineStageMode {
     Review,
 }
 
+impl PipelineStageMode {
+    /// Return the schema string for the stage mode.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Plan => "plan",
+            Self::Execute => "execute",
+            Self::Validate => "validate",
+            Self::Review => "review",
+        }
+    }
+}
+
 /// Dispatch backend for an individual stage.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -343,6 +356,17 @@ pub enum PipelineDispatchMode {
     Scripted,
     /// Dispatch the stage through Codex exec.
     CodexExec,
+}
+
+impl PipelineDispatchMode {
+    /// Return the schema string for the dispatch mode.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Scripted => "scripted",
+            Self::CodexExec => "codex-exec",
+        }
+    }
 }
 
 /// Runtime execution backend for the whole pipeline.

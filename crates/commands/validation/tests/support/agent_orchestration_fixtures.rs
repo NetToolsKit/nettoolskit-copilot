@@ -53,15 +53,24 @@ pub fn initialize_agent_hooks_repo(repo_root: &Path) {
 }
 
 pub fn write_agent_hooks_bootstrap(repo_root: &Path, contents: &str) {
-    write_file(&repo_root.join(".github/hooks/super-agent.bootstrap.json"), contents);
+    write_file(
+        &repo_root.join(".github/hooks/super-agent.bootstrap.json"),
+        contents,
+    );
 }
 
 pub fn write_agent_hooks_selector(repo_root: &Path, contents: &str) {
-    write_file(&repo_root.join(".github/hooks/super-agent.selector.json"), contents);
+    write_file(
+        &repo_root.join(".github/hooks/super-agent.selector.json"),
+        contents,
+    );
 }
 
 pub fn write_agent_hooks_common_script(repo_root: &Path, contents: &str) {
-    write_file(&repo_root.join(".github/hooks/scripts/common.ps1"), contents);
+    write_file(
+        &repo_root.join(".github/hooks/scripts/common.ps1"),
+        contents,
+    );
 }
 
 pub fn write_agent_hooks_script(repo_root: &Path, file_name: &str, contents: &str) {
@@ -86,7 +95,9 @@ pub fn initialize_agent_contract_repo(repo_root: &Path) {
         "# Copilot Instructions\n",
     );
     write_file(
-        repo_root.join(".github/instruction-routing.catalog.yml").as_path(),
+        repo_root
+            .join(".github/instruction-routing.catalog.yml")
+            .as_path(),
         "version: 1\nroutes: []\n",
     );
     write_file(
@@ -187,7 +198,11 @@ pub fn remove_repo_path(repo_root: &Path, relative_path: &str) {
 }
 
 pub fn write_agents_manifest(repo_root: &Path, contents: &str) {
-    write_repo_file(repo_root, ".codex/orchestration/agents.manifest.json", contents);
+    write_repo_file(
+        repo_root,
+        ".codex/orchestration/agents.manifest.json",
+        contents,
+    );
 }
 
 pub fn write_permission_matrix(repo_root: &Path, contents: &str) {
@@ -207,11 +222,19 @@ pub fn write_pipeline_manifest(repo_root: &Path, contents: &str) {
 }
 
 pub fn write_eval_fixtures(repo_root: &Path, contents: &str) {
-    write_repo_file(repo_root, ".codex/orchestration/evals/golden-tests.json", contents);
+    write_repo_file(
+        repo_root,
+        ".codex/orchestration/evals/golden-tests.json",
+        contents,
+    );
 }
 
 pub fn write_handoff_template(repo_root: &Path, contents: &str) {
-    write_repo_file(repo_root, ".codex/orchestration/templates/handoff.template.json", contents);
+    write_repo_file(
+        repo_root,
+        ".codex/orchestration/templates/handoff.template.json",
+        contents,
+    );
 }
 
 pub fn write_run_artifact_template(repo_root: &Path, contents: &str) {
@@ -263,7 +286,11 @@ pub fn write_model_routing_catalog(repo_root: &Path, contents: &str) {
 }
 
 pub fn write_agent_skill_markdown(repo_root: &Path, skill_name: &str, contents: &str) {
-    write_repo_file(repo_root, &format!(".codex/skills/{skill_name}/SKILL.md"), contents);
+    write_repo_file(
+        repo_root,
+        &format!(".codex/skills/{skill_name}/SKILL.md"),
+        contents,
+    );
 }
 
 pub fn write_agent_skill_openai_yaml(repo_root: &Path, skill_name: &str, contents: &str) {
@@ -392,19 +419,21 @@ pub fn valid_permission_matrix_json() -> &'static str {
 pub fn valid_pipeline_manifest_json() -> &'static str {
     r#"{
   "id": "default-dev-flow",
+  "version": 1,
+  "description": "Validation fixture for agent orchestration.",
   "runtime": {
     "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
     "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
-    { "id": "intake", "agentId": "super-agent", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"] },
-    { "id": "spec", "agentId": "brainstormer", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/spec-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/spec-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-spec-result.schema.json" }, "inputArtifacts": ["request", "normalized-request", "intake-report"], "outputArtifacts": ["spec-summary", "active-spec"] },
-    { "id": "plan", "agentId": "planner", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/plan-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/planner-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json" }, "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec"], "outputArtifacts": ["task-plan", "task-plan-data", "context-pack", "active-plan"] },
-    { "id": "route", "agentId": "router", "mode": "execute", "execution": { "scriptPath": "scripts/orchestration/stages/route-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/router-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-route-result.schema.json" }, "inputArtifacts": ["task-plan-data", "context-pack", "active-plan"], "outputArtifacts": ["route-selection", "specialist-context-pack"] },
-    { "id": "implement", "agentId": "specialist", "mode": "execute", "execution": { "scriptPath": "scripts/orchestration/stages/implement-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/executor-task.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-implementation-result.schema.json" }, "inputArtifacts": ["task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"], "outputArtifacts": ["changeset", "implementation-log", "task-review-report"] },
-    { "id": "validate", "agentId": "tester", "mode": "validate", "execution": { "scriptPath": "scripts/orchestration/stages/validate-stage.ps1", "dispatchMode": "scripted" }, "inputArtifacts": ["changeset", "implementation-log", "task-review-report"], "outputArtifacts": ["validation-report"] },
-    { "id": "review", "agentId": "reviewer", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/review-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/reviewer-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json" }, "inputArtifacts": ["changeset", "validation-report", "task-review-report", "active-plan"], "outputArtifacts": ["review-report", "decision-log"] },
-    { "id": "closeout", "agentId": "release-engineer", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/closeout-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/closeout-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-closeout-result.schema.json" }, "inputArtifacts": ["changeset", "validation-report", "review-report", "decision-log", "active-plan"], "outputArtifacts": ["closeout-report", "release-summary", "completed-plan"] }
+    { "id": "intake", "agentId": "super-agent", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"], "onFailure": "retry-once" },
+    { "id": "spec", "agentId": "brainstormer", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/spec-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/spec-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-spec-result.schema.json" }, "inputArtifacts": ["request", "normalized-request", "intake-report"], "outputArtifacts": ["spec-summary", "active-spec"], "onFailure": "retry-once" },
+    { "id": "plan", "agentId": "planner", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/plan-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/planner-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json" }, "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec"], "outputArtifacts": ["task-plan", "task-plan-data", "context-pack", "active-plan"], "onFailure": "stop" },
+    { "id": "route", "agentId": "router", "mode": "execute", "execution": { "scriptPath": "scripts/orchestration/stages/route-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/router-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-route-result.schema.json" }, "inputArtifacts": ["task-plan-data", "context-pack", "active-plan"], "outputArtifacts": ["route-selection", "specialist-context-pack"], "onFailure": "retry-once" },
+    { "id": "implement", "agentId": "specialist", "mode": "execute", "execution": { "scriptPath": "scripts/orchestration/stages/implement-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/executor-task.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-implementation-result.schema.json" }, "inputArtifacts": ["task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"], "outputArtifacts": ["changeset", "implementation-log", "task-review-report"], "onFailure": "retry-once" },
+    { "id": "validate", "agentId": "tester", "mode": "validate", "execution": { "scriptPath": "scripts/orchestration/stages/validate-stage.ps1", "dispatchMode": "scripted" }, "inputArtifacts": ["changeset", "implementation-log", "task-review-report"], "outputArtifacts": ["validation-report"], "onFailure": "retry-once" },
+    { "id": "review", "agentId": "reviewer", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/review-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/reviewer-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json" }, "inputArtifacts": ["changeset", "validation-report", "task-review-report", "active-plan"], "outputArtifacts": ["review-report", "decision-log"], "onFailure": "stop" },
+    { "id": "closeout", "agentId": "release-engineer", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/closeout-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/closeout-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-closeout-result.schema.json" }, "inputArtifacts": ["changeset", "validation-report", "review-report", "decision-log", "active-plan"], "outputArtifacts": ["closeout-report", "release-summary", "completed-plan"], "onFailure": "stop" }
   ],
   "handoffs": [
     { "fromStage": "intake", "toStage": "spec", "requiredArtifacts": ["normalized-request", "intake-report"] },
