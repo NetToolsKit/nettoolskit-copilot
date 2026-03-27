@@ -1,6 +1,6 @@
 //! Tests for validation surface errors.
 
-use nettoolskit_validation::require_validation_surface_contract;
+use nettoolskit_validation::{invoke_validate_all, require_validation_surface_contract, ValidateAllRequest};
 
 #[test]
 fn test_validation_surface_error_mentions_missing_surface_id() {
@@ -11,4 +11,15 @@ fn test_validation_surface_error_mentions_missing_surface_id() {
         error.to_string(),
         "unknown validation surface contract: missing-validation"
     );
+}
+
+#[test]
+fn test_validate_all_error_display_is_stable() {
+    let error = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateAllRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(error.to_string(), "failed to resolve validation workspace root");
 }

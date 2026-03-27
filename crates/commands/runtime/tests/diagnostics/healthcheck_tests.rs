@@ -22,6 +22,13 @@ fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
     );
 }
 
+fn write_validation_profile_catalog(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/governance/validation-profiles.json"),
+        r#"{"version":1,"defaultProfile":"dev","profiles":[{"id":"dev","warningOnly":false,"checkOrder":["validate-policy"]}]}"#,
+    );
+}
+
 fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
@@ -30,6 +37,7 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join("scripts/validation"))
         .expect("validation directory should be created");
     write_runtime_install_profile_catalog(repo_root);
+    write_validation_profile_catalog(repo_root);
     initialize_minimal_provider_surface_projection(repo_root);
 }
 
@@ -38,8 +46,8 @@ fn test_invoke_runtime_healthcheck_writes_report_and_log_for_passed_run() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join("scripts/validation/validate-all.ps1"),
-        "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",
+        &repo.path().join("scripts/validation/validate-policy.ps1"),
+        "param([string]$RepoRoot)\nexit 0",
     );
 
     let result = invoke_runtime_healthcheck(&RuntimeHealthcheckRequest {
@@ -67,8 +75,8 @@ fn test_invoke_runtime_healthcheck_converts_runtime_drift_to_warning_when_config
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join("scripts/validation/validate-all.ps1"),
-        "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",
+        &repo.path().join("scripts/validation/validate-policy.ps1"),
+        "param([string]$RepoRoot)\nexit 0",
     );
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
 
@@ -100,8 +108,8 @@ fn test_invoke_runtime_healthcheck_fails_when_runtime_drift_warning_override_is_
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join("scripts/validation/validate-all.ps1"),
-        "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",
+        &repo.path().join("scripts/validation/validate-policy.ps1"),
+        "param([string]$RepoRoot)\nexit 0",
     );
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
 
@@ -133,8 +141,8 @@ fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
         "Write-Output 'query'",
     );
     write_file(
-        &repo.path().join("scripts/validation/validate-all.ps1"),
-        "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",
+        &repo.path().join("scripts/validation/validate-policy.ps1"),
+        "param([string]$RepoRoot)\nexit 0",
     );
 
     let result = invoke_runtime_healthcheck(&RuntimeHealthcheckRequest {

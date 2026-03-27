@@ -22,6 +22,13 @@ fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
     );
 }
 
+fn write_validation_profile_catalog(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/governance/validation-profiles.json"),
+        r#"{"version":1,"defaultProfile":"dev","profiles":[{"id":"dev","warningOnly":false,"checkOrder":["validate-policy"]}]}"#,
+    );
+}
+
 fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
@@ -31,10 +38,11 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join("scripts/validation"))
         .expect("validation directory should be created");
     write_runtime_install_profile_catalog(repo_root);
+    write_validation_profile_catalog(repo_root);
     initialize_minimal_provider_surface_projection(repo_root);
     write_file(
-        &repo_root.join("scripts/validation/validate-all.ps1"),
-        "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",
+        &repo_root.join("scripts/validation/validate-policy.ps1"),
+        "param([string]$RepoRoot)\nexit 0",
     );
 }
 

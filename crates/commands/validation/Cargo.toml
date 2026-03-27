@@ -15,7 +15,15 @@ name = "nettoolskit_validation"
 path = "src/lib.rs"
 
 [dependencies]
+anyhow = { workspace = true }
+nettoolskit-core = { path = "../../core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

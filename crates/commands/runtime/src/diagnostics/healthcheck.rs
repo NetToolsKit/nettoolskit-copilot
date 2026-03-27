@@ -3,12 +3,14 @@
 use anyhow::Context;
 use nettoolskit_core::path_utils::repository::resolve_full_path;
 use nettoolskit_core::runtime_execution::resolve_runtime_execution_context;
+use nettoolskit_validation::{
+    invoke_validate_all, ValidateAllRequest, ValidationCheckStatus as ValidateAllStatus,
+};
 use serde_json::json;
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use crate::{
@@ -252,14 +254,10 @@ pub fn invoke_runtime_healthcheck(
             value: Some(request.warning_only.to_string()),
         },
     ];
-    checks.push(run_external_script_check(
-        "validate-all",
-        &context
-            .resolved_repo_root
-            .join("scripts/validation/validate-all.ps1"),
-        "scripts/validation/validate-all.ps1",
+    checks.push(run_validation_check(
+        request,
+        &context.resolved_repo_root,
         &validate_arguments,
-        request.warning_only,
         &log_path,
     ));
 
@@ -511,83 +509,64 @@ fn run_bootstrap_check(
     result
 }
 
-fn run_external_script_check(
-    name: &str,
-    script_path: &Path,
-    relative_script_path: &str,
+fn run_validation_check(
+    request: &RuntimeHealthcheckRequest,
+    repo_root: &Path,
     arguments: &[CommandArgument],
-    treat_failure_as_warning: bool,
     log_path: &Path,
 ) -> RuntimeHealthcheckCheckResult {
     let started_at = current_timestamp_string().unwrap_or_else(|_| "0".to_string());
     let started = Instant::now();
     let formatted_arguments = format_argument_list(arguments);
+    let result = match invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo_root.to_path_buf()),
+        validation_profile: Some(request.validation_profile.clone()),
+        warning_only: request.warning_only,
+        ..ValidateAllRequest::default()
+    }) {
+        Ok(validation_result) => {
+            let (status, exit_code) = match validation_result.overall_status {
+                ValidateAllStatus::Passed => (RuntimeHealthcheckStatus::Passed, 0),
+                ValidateAllStatus::Warning => (RuntimeHealthcheckStatus::Warning, 0),
+                ValidateAllStatus::Failed => (RuntimeHealthcheckStatus::Failed, validation_result.exit_code),
+            };
 
-    let result = if !script_path.is_file() {
-        build_check_result(
-            name,
-            relative_script_path,
+            RuntimeHealthcheckCheckResult {
+                name: "validate-all".to_string(),
+                script: "rust:nettoolskit-validation::validate-all".to_string(),
+                arguments: formatted_arguments,
+                status,
+                exit_code,
+                duration_ms: started.elapsed().as_millis(),
+                started_at,
+                finished_at: current_timestamp_string().unwrap_or_else(|_| "0".to_string()),
+                error: validation_result
+                    .suite_warning_messages
+                    .iter()
+                    .find(|message| message.starts_with("Could not"))
+                    .cloned(),
+            }
+        }
+        Err(error) if request.warning_only => build_check_result(
+            "validate-all",
+            "rust:nettoolskit-validation::validate-all",
             formatted_arguments,
-            treat_failure_as_warning,
+            true,
             1,
-            Some(format!("script not found: {}", script_path.display())),
+            Some(error.to_string()),
             started_at,
             started.elapsed().as_millis(),
-        )
-    } else {
-        let mut command = Command::new("pwsh");
-        command
-            .arg("-NoLogo")
-            .arg("-NoProfile")
-            .arg("-ExecutionPolicy")
-            .arg("Bypass")
-            .arg("-File")
-            .arg(script_path);
-        for argument in arguments {
-            command.arg(format!("-{}", argument.name));
-            if let Some(value) = &argument.value {
-                command.arg(value);
-            }
-        }
-
-        match command.output() {
-            Ok(output) => {
-                let exit_code = output.status.code().unwrap_or(1);
-                let error_message = if output.status.success() {
-                    None
-                } else {
-                    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-                    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-                    if !stderr.is_empty() {
-                        Some(stderr)
-                    } else if !stdout.is_empty() {
-                        Some(stdout)
-                    } else {
-                        None
-                    }
-                };
-                build_check_result(
-                    name,
-                    relative_script_path,
-                    formatted_arguments,
-                    treat_failure_as_warning,
-                    exit_code,
-                    error_message,
-                    started_at,
-                    started.elapsed().as_millis(),
-                )
-            }
-            Err(error) => build_check_result(
-                name,
-                relative_script_path,
-                formatted_arguments,
-                treat_failure_as_warning,
-                1,
-                Some(error.to_string()),
-                started_at,
-                started.elapsed().as_millis(),
-            ),
-        }
+        ),
+        Err(error) => build_check_result(
+            "validate-all",
+            "rust:nettoolskit-validation::validate-all",
+            formatted_arguments,
+            false,
+            1,
+            Some(error.to_string()),
+            started_at,
+            started.elapsed().as_millis(),
+        ),
     };
 
     let _ = append_log_line(

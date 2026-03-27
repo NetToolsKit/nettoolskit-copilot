@@ -1954,6 +1954,7 @@ version = "1.0.0"
 dependencies = [
  "anyhow",
  "nettoolskit-core",
+ "nettoolskit-validation",
  "serde_json",
  "sha2",
  "tempfile",
@@ -2011,6 +2012,12 @@ dependencies = [
 name = "nettoolskit-validation"
 version = "1.0.0"
 dependencies = [
+ "anyhow",
+ "nettoolskit-core",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
  "thiserror",
 ]
 
