@@ -34,6 +34,19 @@ pub(crate) fn run_pwsh_file(script_path: &Path, repo_root: &Path, args: &[String
     command.output().expect("pwsh script should execute")
 }
 
+pub(crate) fn read_json(path: &Path) -> Value {
+    let content = fs::read_to_string(path).expect("json file should exist");
+    serde_json::from_str(&content).expect("json file should parse")
+}
+
+pub(crate) fn json_path<'a>(value: &'a Value, path: &[&str]) -> &'a Value {
+    path.iter().fold(value, |cursor, segment| {
+        cursor
+            .get(*segment)
+            .unwrap_or_else(|| panic!("missing JSON path {:?} in payload", path))
+    })
+}
+
 pub(crate) fn run_pwsh_command(command_text: &str, repo_root: &Path) -> Output {
     Command::new("pwsh")
         .current_dir(repo_root)
@@ -46,19 +59,6 @@ pub(crate) fn run_pwsh_command(command_text: &str, repo_root: &Path) -> Output {
         .arg(command_text)
         .output()
         .expect("pwsh command should execute")
-}
-
-pub(crate) fn read_json(path: &Path) -> Value {
-    let content = fs::read_to_string(path).expect("json file should exist");
-    serde_json::from_str(&content).expect("json file should parse")
-}
-
-pub(crate) fn json_path<'a>(value: &'a Value, path: &[&str]) -> &'a Value {
-    path.iter().fold(value, |cursor, segment| {
-        cursor
-            .get(*segment)
-            .unwrap_or_else(|| panic!("missing JSON path {:?} in payload", path))
-    })
 }
 
 pub(crate) fn quote_powershell_literal(value: &str) -> String {

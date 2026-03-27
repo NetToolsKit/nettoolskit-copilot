@@ -45,6 +45,7 @@ const IMPLEMENT_COMPLETED_SPEC_PATH: &str =
     "planning/specs/completed/spec-implement-enterprise-orchestration-support.md";
 
 pub(crate) const APPROVAL_APPROVED_TRACE_ID: &str = "approval-approved-test";
+pub(crate) const RESUME_SOURCE_TRACE_ID: &str = "resume-source-test";
 
 pub(crate) struct ApprovalApprovedHarness {
     pub repo_root: PathBuf,
@@ -83,13 +84,31 @@ impl ApprovalApprovedHarness {
     }
 
     pub(crate) fn run_directory(&self) -> PathBuf {
-        self.pipeline_run_root.join(APPROVAL_APPROVED_TRACE_ID)
+        self.run_directory_for(APPROVAL_APPROVED_TRACE_ID)
+    }
+
+    pub(crate) fn run_directory_for(&self, trace_id: &str) -> PathBuf {
+        self.pipeline_run_root.join(trace_id)
     }
 
     pub(crate) fn run_pipeline(&self) {
-        let run_root = repo_relative_literal(&self.pipeline_run_root, &self.repo_root);
-        let dispatch_command = repo_relative_literal(&self.fake_codex_path, &self.repo_root);
-        let command_text = format!(
+        let output = self.run_pipeline_for(
+            APPROVAL_APPROVED_TRACE_ID,
+            "Implement enterprise orchestration support.",
+            None,
+            "orchestration smoke test",
+        );
+        assert_pwsh_success(&output, "approval-approved pipeline run should succeed");
+    }
+
+    pub(crate) fn run_pipeline_for(
+        &self,
+        trace_id: &str,
+        request_text: &str,
+        stop_after_stage_id: Option<&str>,
+        approval_justification: &str,
+    ) -> std::process::Output {
+        let mut command_text = format!(
             "& '.\\scripts\\runtime\\run-agent-pipeline.ps1' \
             -RepoRoot '.' \
             -RunRoot {} \
@@ -99,15 +118,52 @@ impl ApprovalApprovedHarness {
             -DispatchCommand {} \
             -ApprovedAgentIds @('specialist','release-engineer') \
             -ApprovedBy 'runtime-test' \
-            -ApprovalJustification 'orchestration smoke test' \
+            -ApprovalJustification {} \
             -WarningOnly:$false",
-            quote_powershell_literal(&run_root),
-            quote_powershell_literal(APPROVAL_APPROVED_TRACE_ID),
-            quote_powershell_literal("Implement enterprise orchestration support."),
-            quote_powershell_literal(&dispatch_command),
+            quote_powershell_literal(&repo_relative_literal(
+                &self.pipeline_run_root,
+                &self.repo_root
+            )),
+            quote_powershell_literal(trace_id),
+            quote_powershell_literal(request_text),
+            quote_powershell_literal(&repo_relative_literal(
+                &self.fake_codex_path,
+                &self.repo_root
+            )),
+            quote_powershell_literal(approval_justification),
         );
-        let output = run_pwsh_command(&command_text, &self.repo_root);
-        assert_pwsh_success(&output, "approval-approved pipeline run should succeed");
+        if let Some(stop_after_stage_id) = stop_after_stage_id {
+            command_text.push_str(&format!(
+                " -StopAfterStageId {}",
+                quote_powershell_literal(stop_after_stage_id)
+            ));
+        }
+        run_pwsh_command(&command_text, &self.repo_root)
+    }
+
+    pub(crate) fn resume_pipeline(
+        &self,
+        run_directory: &Path,
+        approval_justification: &str,
+    ) -> std::process::Output {
+        let command_text = format!(
+            "& '.\\scripts\\runtime\\resume-agent-pipeline.ps1' \
+            -RepoRoot '.' \
+            -RunDirectory {} \
+            -ExecutionBackend 'codex-exec' \
+            -DispatchCommand {} \
+            -ApprovedAgentIds @('specialist','release-engineer') \
+            -ApprovedBy 'runtime-test' \
+            -ApprovalJustification {} \
+            -WarningOnly:$false",
+            quote_powershell_literal(&repo_relative_literal(run_directory, &self.repo_root)),
+            quote_powershell_literal(&repo_relative_literal(
+                &self.fake_codex_path,
+                &self.repo_root
+            )),
+            quote_powershell_literal(approval_justification),
+        );
+        run_pwsh_command(&command_text, &self.repo_root)
     }
 
     pub(crate) fn replay_run(&self, output_path: &Path) {

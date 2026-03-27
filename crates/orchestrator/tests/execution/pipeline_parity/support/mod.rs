@@ -8,7 +8,9 @@ mod run_closeout_harness;
 mod validation_baseline;
 
 pub(super) use fake_codex_runner::create_fake_codex_runner;
-pub(super) use harness::{ApprovalApprovedHarness, APPROVAL_APPROVED_TRACE_ID};
+pub(super) use harness::{
+    ApprovalApprovedHarness, APPROVAL_APPROVED_TRACE_ID, RESUME_SOURCE_TRACE_ID,
+};
 pub(super) use process::{
     json_path, quote_powershell_literal, read_json, run_pwsh_command, run_pwsh_file,
 };
