@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 18:46
+- LastUpdated: 2026-03-27 18:58
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -78,6 +78,7 @@ The migration remains compatibility-first:
 - [2026-03-27 13:28] `crates/commands/validation/architecture` now owns `validate-architecture-boundaries`, so architecture baseline enforcement runs natively in Rust with direct wildcard matching, required-pattern, forbidden-pattern, allowed-exception, and severity-aware coverage through `validate-all`.
 - [2026-03-27 13:29] `crates/commands/validation/security` now also owns `validate-supply-chain`, so dependency inventory, blocked/sensitive package policy checks, SBOM export, and optional license-evidence enforcement now run natively in Rust through `validate-all`.
 - [2026-03-27 18:46] `crates/orchestrator` now owns typed public pipeline contract models plus manifest parsing/validation for stage order, handoff references, and completion criteria, so the remaining Wave 3 orchestration work can build on a stable Rust manifest boundary instead of ad hoc JSON/script parsing.
+- [2026-03-27 18:58] `crates/commands/validation/agent_orchestration` now consumes the typed `crates/orchestrator` pipeline contract too, eliminating the duplicate local manifest model and aligning permission/skill/orchestration validation on the same Rust-owned stage, dispatch, and runtime metadata boundary.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -334,6 +335,7 @@ Status: `[~]` In Progress
 - [2026-03-27 17:12] Implemented Rust-backed `setup-git-hooks` in `crates/commands/runtime/hooks`, with direct external coverage for local install/uninstall plus global EOF-selection persistence/removal; the remaining Task 7 backlog is now orchestration-stage ownership and parity harness replacement ✓ [2026-03-27 17:12]
 - [2026-03-27 17:22] Expanded Rust-backed `setup-git-hooks` to install and remove the managed global pre-commit hook path plus isolated `core.hooksPath --global` ownership, leaving Task 7 limited to orchestration-stage migration and parity harness replacement ✓ [2026-03-27 17:22]
 - [2026-03-27 18:46] Implemented typed public pipeline contract models in `crates/orchestrator`, with native manifest parsing/validation and external coverage for stage order, handoff producer/consumer integrity, and completion-stage references; the next Task 7 slice is now the native parity-harness golden path for `run/resume/replay/evaluate-agent-pipeline` ✓ [2026-03-27 18:46]
+- [2026-03-27 18:58] Reused the typed orchestrator pipeline contract inside `crates/commands/validation/agent_orchestration`, aligning permission, skill-alignment, and orchestration integrity checks on the same manifest parser before porting the first native parity-harness golden path ✓ [2026-03-27 18:58]
 - Target paths:
   - `scripts/orchestration/`
   - `scripts/runtime/hooks/`
@@ -355,6 +357,7 @@ Status: `[~]` In Progress
   - runtime-managed `setup-git-hooks` no longer depends on PowerShell business logic for local ownership and EOF selection persistence, and the remaining Task 7 backlog is limited to orchestration-stage migration plus parity-harness replacement
   - runtime-managed `setup-git-hooks` now owns both local and managed-global `core.hooksPath` flows, including the global pre-commit wrapper installation and uninstall path
   - `crates/orchestrator` now exposes a typed Rust pipeline manifest contract for stage definitions, dispatch metadata, handoffs, and completion criteria, so the remaining orchestration-stage migration no longer needs raw JSON/script coupling
+  - `crates/commands/validation/agent_orchestration` now reuses the same typed pipeline contract, so Task 7 no longer has competing Rust-side manifest models between orchestration and validation
   - the highest-value remaining Wave 3 slice is the native parity-harness golden path for `run/resume/replay/evaluate-agent-pipeline`; the hook-control-plane block is effectively complete
 - Commit checkpoint:
   - `feat(rust): implement control-plane and parity transcription wave`
