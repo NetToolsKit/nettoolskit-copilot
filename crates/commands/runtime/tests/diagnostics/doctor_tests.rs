@@ -1,5 +1,6 @@
 //! Tests for runtime doctor commands.
 
+use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
 use nettoolskit_runtime::{
     invoke_runtime_doctor, RuntimeDoctorCommandError, RuntimeDoctorRequest, RuntimeDoctorStatus,
 };
@@ -90,13 +91,6 @@ fn initialize_clean_codex_runtime(repo_root: &Path, runtime_root: &Path) {
     mirror_file(
         &repo_root.join(".codex/orchestration/flow.md"),
         &runtime_root.join("codex/shared-orchestration/flow.md"),
-    );
-}
-
-fn write_render_provider_surfaces_script(repo_root: &Path) {
-    write_file(
-        &repo_root.join("scripts/runtime/render-provider-surfaces.ps1"),
-        "param([string]$RepoRoot,[string]$ConsumerName,[string]$EnableCodexRuntime,[string]$EnableClaudeRuntime)\nWrite-Output 'rendered'",
     );
 }
 
@@ -246,7 +240,7 @@ fn test_invoke_runtime_doctor_syncs_missing_runtime_files_when_requested() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
-    write_render_provider_surfaces_script(repo.path());
+    initialize_minimal_provider_surface_projection(repo.path());
 
     let target_github_path = repo.path().join(".runtime/github");
     let result = invoke_runtime_doctor(&RuntimeDoctorRequest {
@@ -265,8 +259,9 @@ fn test_invoke_runtime_doctor_syncs_missing_runtime_files_when_requested() {
     assert!(result.sync_attempted);
     assert!(result.sync_resolved_drift);
     assert!(target_github_path.join("AGENTS.md").is_file());
-    assert!(target_github_path
-        .join("scripts/runtime/render-provider-surfaces.ps1")
+    assert!(repo
+        .path()
+        .join(".github/prompts/route-instructions.prompt.md")
         .is_file());
 }
 
@@ -284,7 +279,7 @@ fn test_invoke_runtime_doctor_returns_sync_error_when_remediation_fails() {
         sync_on_drift: true,
         ..RuntimeDoctorRequest::default()
     })
-    .expect_err("doctor remediation should fail without render script");
+    .expect_err("doctor remediation should fail without provider surface catalog");
 
     assert!(matches!(
         error,

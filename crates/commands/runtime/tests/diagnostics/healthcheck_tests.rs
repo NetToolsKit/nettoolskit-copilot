@@ -1,5 +1,6 @@
 //! Tests for runtime healthcheck commands.
 
+use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
 use nettoolskit_runtime::{
     invoke_runtime_healthcheck, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
 };
@@ -29,6 +30,7 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join("scripts/validation"))
         .expect("validation directory should be created");
     write_runtime_install_profile_catalog(repo_root);
+    initialize_minimal_provider_surface_projection(repo_root);
 }
 
 #[test]
@@ -129,10 +131,6 @@ fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
             .path()
             .join("scripts/runtime/query-local-context-index.ps1"),
         "Write-Output 'query'",
-    );
-    write_file(
-        &repo.path().join("scripts/runtime/render-provider-surfaces.ps1"),
-        "param([string]$RepoRoot,[string]$ConsumerName,[object]$EnableCodexRuntime,[object]$EnableClaudeRuntime)\nexit 0",
     );
     write_file(
         &repo.path().join("scripts/validation/validate-all.ps1"),

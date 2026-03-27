@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use walkdir::WalkDir;
 
-use crate::error::RuntimeBootstrapCommandError;
+use crate::{error::RuntimeBootstrapCommandError, sync::provider_surfaces::render_provider_surfaces_for_bootstrap};
 
 /// Request payload for `bootstrap`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -256,47 +256,12 @@ fn invoke_provider_surface_render(
     enable_codex_runtime: bool,
     enable_claude_runtime: bool,
 ) -> Result<()> {
-    let render_script_path = repo_root.join("scripts/runtime/render-provider-surfaces.ps1");
-    if !render_script_path.is_file() {
-        return Err(anyhow!(
-            "provider surface render dispatcher missing: {}",
-            render_script_path.display()
-        ));
-    }
-
-    let output = Command::new("pwsh")
-        .arg("-NoLogo")
-        .arg("-NoProfile")
-        .arg("-ExecutionPolicy")
-        .arg("Bypass")
-        .arg("-File")
-        .arg(&render_script_path)
-        .arg("-RepoRoot")
-        .arg(repo_root)
-        .arg("-ConsumerName")
-        .arg("bootstrap")
-        .arg("-EnableCodexRuntime")
-        .arg(enable_codex_runtime.to_string())
-        .arg("-EnableClaudeRuntime")
-        .arg(enable_claude_runtime.to_string())
-        .output()
-        .with_context(|| format!("failed to execute '{}'", render_script_path.display()))?;
-    if output.status.success() {
-        return Ok(());
-    }
-
-    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    Err(anyhow!(
-        "provider surface render dispatch failed before bootstrap sync. {}",
-        if !stderr.is_empty() {
-            stderr
-        } else if !stdout.is_empty() {
-            stdout
-        } else {
-            format!("exit code {}", output.status.code().unwrap_or(1))
-        }
-    ))
+    render_provider_surfaces_for_bootstrap(
+        repo_root,
+        enable_codex_runtime,
+        enable_claude_runtime,
+    )
+    .context("provider surface render dispatch failed before bootstrap sync")
 }
 
 fn invoke_mcp_config_apply(repo_root: &Path, codex_path: &Path, backup_config: bool) -> Result<()> {

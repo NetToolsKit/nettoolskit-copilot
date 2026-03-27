@@ -1,5 +1,6 @@
 //! Tests for runtime self-heal commands.
 
+use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
 use nettoolskit_runtime::{
     invoke_runtime_self_heal, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
 };
@@ -30,10 +31,7 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join("scripts/validation"))
         .expect("validation directory should be created");
     write_runtime_install_profile_catalog(repo_root);
-    write_file(
-        &repo_root.join("scripts/runtime/render-provider-surfaces.ps1"),
-        "param([string]$RepoRoot,[string]$ConsumerName,[object]$EnableCodexRuntime,[object]$EnableClaudeRuntime)\nexit 0",
-    );
+    initialize_minimal_provider_surface_projection(repo_root);
     write_file(
         &repo_root.join("scripts/validation/validate-all.ps1"),
         "param([string]$RepoRoot,[string]$ValidationProfile,[object]$WarningOnly)\nexit 0",

@@ -14,6 +14,7 @@ This crate locks the owned runtime surfaces before full implementation lands. It
 - runtime drift diagnosis, remediation, and hygiene checks
 - runtime healthcheck orchestration and report generation
 - runtime asset bootstrap synchronization
+- bootstrap-owned provider surface projection
 - runtime VS Code template application
 - runtime self-heal orchestration and repair reporting
 

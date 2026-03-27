@@ -1,5 +1,6 @@
 //! Tests for runtime bootstrap commands.
 
+use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
 use nettoolskit_runtime::{invoke_runtime_bootstrap, RuntimeBootstrapRequest};
 use std::fs;
 use tempfile::TempDir;
@@ -31,10 +32,7 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join("scripts/maintenance"))
         .expect("maintenance directory should be created");
     write_runtime_install_profile_catalog(repo_root);
-    write_file(
-        &repo_root.join("scripts/runtime/render-provider-surfaces.ps1"),
-        "param([string]$RepoRoot,[string]$ConsumerName,[object]$EnableCodexRuntime,[object]$EnableClaudeRuntime)\nSet-Content -NoNewline (Join-Path $RepoRoot '.temp/render-provider-surfaces.marker') \"$ConsumerName|$EnableCodexRuntime|$EnableClaudeRuntime\"\nexit 0",
-    );
+    initialize_minimal_provider_surface_projection(repo_root);
 }
 
 #[test]
@@ -71,6 +69,18 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
 
     assert!(result.github_runtime_enabled);
     assert!(!result.codex_runtime_enabled);
+    assert!(repo.path().join(".github/AGENTS.md").is_file());
+    assert!(repo
+        .path()
+        .join(".github/prompts/route-instructions.prompt.md")
+        .is_file());
+    assert!(repo.path().join(".vscode/profiles/profile-base.json").is_file());
+    assert!(repo
+        .path()
+        .join(".vscode/snippets/demo.tamplate.code-snippets")
+        .is_file());
+    assert!(!repo.path().join(".codex/scripts").exists());
+    assert!(!repo.path().join(".claude/settings.json").exists());
     assert!(target_github.join("AGENTS.md").is_file());
     assert!(target_github
         .join("scripts/runtime/query-local-context-index.ps1")
@@ -88,16 +98,7 @@ fn test_invoke_runtime_bootstrap_syncs_codex_runtime_assets_and_removes_duplicat
         &repo.path().join(".codex/skills/runtime-skill/SKILL.md"),
         "# runtime-skill",
     );
-    write_file(&repo.path().join(".codex/skills/README.md"), "# ignored");
     write_file(&repo.path().join(".codex/mcp/catalog.json"), "{}");
-    write_file(
-        &repo.path().join(".codex/scripts/root-tool.ps1"),
-        "Write-Output 'tool'",
-    );
-    write_file(
-        &repo.path().join(".codex/orchestration/flow.md"),
-        "# orchestration flow",
-    );
     write_file(&repo.path().join(".codex/README.md"), "# shared codex");
     write_file(
         &repo.path().join("scripts/common/common-bootstrap.ps1"),
@@ -131,11 +132,15 @@ fn test_invoke_runtime_bootstrap_syncs_codex_runtime_assets_and_removes_duplicat
 
     assert!(!result.github_runtime_enabled);
     assert!(result.codex_runtime_enabled);
+    assert!(repo.path().join(".github/AGENTS.md").is_file());
+    assert!(repo.path().join(".vscode/profiles/profile-base.json").is_file());
+    assert!(repo.path().join(".codex/scripts/root-tool.ps1").is_file());
+    assert!(repo.path().join(".codex/orchestration/flow.md").is_file());
+    assert!(repo.path().join(".codex/skills/runtime-skill/SKILL.md").is_file());
+    assert!(!repo.path().join(".claude/settings.json").exists());
     assert!(target_agents.join("runtime-skill/SKILL.md").is_file());
-    assert!(!target_agents.join("README.md").exists());
     assert!(!target_codex.join("skills/runtime-skill").exists());
-    assert!(!target_codex.join("skills/README.md").exists());
-    assert!(target_codex.join("shared-mcp/catalog.json").is_file());
+    assert!(target_codex.join("shared-mcp/README.md").is_file());
     assert!(target_codex.join("shared-scripts/root-tool.ps1").is_file());
     assert!(target_codex
         .join("shared-scripts/common/common-bootstrap.ps1")
@@ -148,6 +153,30 @@ fn test_invoke_runtime_bootstrap_syncs_codex_runtime_assets_and_removes_duplicat
         .is_file());
     assert!(target_codex.join("shared-orchestration/flow.md").is_file());
     assert!(target_codex.join("README.shared.md").is_file());
+}
+
+#[test]
+fn test_invoke_runtime_bootstrap_renders_claude_runtime_surface_when_profile_enables_claude() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path());
+    write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
+    write_file(&repo.path().join(".codex/README.md"), "# shared codex");
+
+    let result = invoke_runtime_bootstrap(&RuntimeBootstrapRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        target_github_path: Some(repo.path().join(".runtime/github")),
+        target_codex_path: Some(repo.path().join(".runtime/codex")),
+        target_agents_skills_path: Some(repo.path().join(".runtime/agents-skills")),
+        target_copilot_skills_path: Some(repo.path().join(".runtime/copilot-skills")),
+        runtime_profile: Some("all".to_string()),
+        ..RuntimeBootstrapRequest::default()
+    })
+    .expect("bootstrap should execute");
+
+    assert!(result.github_runtime_enabled);
+    assert!(result.codex_runtime_enabled);
+    assert!(result.claude_runtime_enabled);
+    assert!(repo.path().join(".claude/settings.json").is_file());
 }
 
 #[test]
