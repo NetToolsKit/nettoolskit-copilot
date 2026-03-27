@@ -146,6 +146,18 @@ pub enum ValidateWarningBaselineCommandError {
     },
 }
 
+/// Errors raised by runtime-script-tests validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateRuntimeScriptTestsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime script test workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

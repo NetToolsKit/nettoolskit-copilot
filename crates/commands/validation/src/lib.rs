@@ -25,6 +25,7 @@ pub use error::{
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
     ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
+    ValidateRuntimeScriptTestsCommandError,
     ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
     ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
     ValidationSurfaceError,
@@ -49,8 +50,9 @@ pub use orchestration::{
     ValidationCheckStatus,
 };
 pub use operational_hygiene::{
-    invoke_validate_warning_baseline, ValidateWarningBaselineRequest,
-    ValidateWarningBaselineResult,
+    invoke_validate_runtime_script_tests, invoke_validate_warning_baseline,
+    ValidateRuntimeScriptTestsRequest, ValidateRuntimeScriptTestsResult,
+    ValidateWarningBaselineRequest, ValidateWarningBaselineResult,
 };
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,

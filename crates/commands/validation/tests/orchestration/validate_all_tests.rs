@@ -8,7 +8,8 @@ use crate::support::instruction_graph_fixtures::{
     initialize_instruction_architecture_repo, initialize_validate_instructions_repo,
 };
 use crate::support::operational_hygiene_fixtures::{
-    initialize_warning_baseline_repo, write_warning_analyzer_report,
+    initialize_runtime_script_tests_repo, initialize_warning_baseline_repo,
+    write_runtime_test_script, write_warning_analyzer_report,
 };
 
 fn write_file(path: &std::path::Path, contents: &str) {
@@ -646,5 +647,31 @@ fn test_invoke_validate_all_runs_native_warning_baseline_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-warning-baseline"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_runtime_script_tests_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-runtime-script-tests"]);
+    initialize_runtime_script_tests_repo(repo.path());
+    write_runtime_test_script(
+        repo.path(),
+        "pass.tests.ps1",
+        "param([string]$RepoRoot)\nexit 0\n",
+    );
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-runtime-script-tests"
     );
 }

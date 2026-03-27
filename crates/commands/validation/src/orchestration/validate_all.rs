@@ -17,7 +17,7 @@ use crate::{
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
-    invoke_validate_readme_standards,
+    invoke_validate_readme_standards, invoke_validate_runtime_script_tests,
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
@@ -25,6 +25,7 @@ use crate::{
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
     ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
+    ValidateRuntimeScriptTestsRequest,
     ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
     ValidateWorkspaceEfficiencyRequest,
 };
@@ -225,6 +226,7 @@ enum NativeValidationCheck {
     RoutingCoverage,
     TemplateStandards,
     AuthoritativeSourcePolicy,
+    RuntimeScriptTests,
     WarningBaseline,
     WorkspaceEfficiency,
 }
@@ -259,6 +261,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
                 "rust:nettoolskit-validation::validate-authoritative-source-policy"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests) => {
+                "rust:nettoolskit-validation::validate-runtime-script-tests"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::WarningBaseline) => {
                 "rust:nettoolskit-validation::validate-warning-baseline"
@@ -566,9 +571,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-runtime-script-tests",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-runtime-script-tests.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests),
         ),
         (
             "validate-warning-baseline",
@@ -761,6 +764,9 @@ fn definition_supports_parameter(
                 parameter_name,
                 "WarningOnly" | "BaselinePath" | "AnalyzerReportPath" | "ReportPath"
             )
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests) => {
+            matches!(parameter_name, "WarningOnly" | "TestRoot" | "PowerShellPath")
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
             matches!(
@@ -1024,6 +1030,23 @@ fn run_native_validation_check(
                 ),
                 routing_catalog_path: string_argument_path(&arguments, "RoutingCatalogPath"),
                 instruction_search_root: string_argument_path(&arguments, "InstructionSearchRoot"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::RuntimeScriptTests => {
+            invoke_validate_runtime_script_tests(&ValidateRuntimeScriptTestsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                test_root: string_argument_path(&arguments, "TestRoot"),
+                powershell_path: string_argument_path(&arguments, "PowerShellPath"),
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
             })

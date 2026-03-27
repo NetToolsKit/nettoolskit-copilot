@@ -26,6 +26,7 @@ mod orchestration {
 }
 
 mod operational_hygiene {
+    pub mod runtime_script_tests_tests;
     pub mod warning_baseline_tests;
 }
 

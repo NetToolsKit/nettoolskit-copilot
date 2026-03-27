@@ -34,6 +34,7 @@ The current executable Rust coverage includes:
 - `validate-readme-standards`
 - `validate-instruction-metadata`
 - `validate-routing-coverage`
+- `validate-runtime-script-tests`
 - `validate-template-standards`
 - `validate-warning-baseline`
 - `validate-workspace-efficiency`
@@ -64,6 +65,7 @@ The current executable Rust coverage includes:
 - `invoke_validate_readme_standards`
 - `invoke_validate_instruction_metadata`
 - `invoke_validate_routing_coverage`
+- `invoke_validate_runtime_script_tests`
 - `invoke_validate_template_standards`
 - `invoke_validate_warning_baseline`
 - `invoke_validate_workspace_efficiency`

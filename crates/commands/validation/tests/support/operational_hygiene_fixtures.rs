@@ -44,3 +44,16 @@ pub fn write_warning_analyzer_report(report_path: &Path, records: &[(&str, &str)
         .join(",");
     write_file(report_path, &format!("[{document}]"));
 }
+
+pub fn initialize_runtime_script_tests_repo(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join(".github"))
+        .expect("github directory should be created for repository resolution");
+    fs::create_dir_all(repo_root.join(".codex"))
+        .expect("codex directory should be created for repository resolution");
+    fs::create_dir_all(repo_root.join("scripts/tests/runtime"))
+        .expect("runtime test directory should be created");
+}
+
+pub fn write_runtime_test_script(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(&repo_root.join("scripts/tests/runtime").join(file_name), contents);
+}

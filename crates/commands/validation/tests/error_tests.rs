@@ -5,13 +5,15 @@ use nettoolskit_validation::{
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_readme_standards,
+    invoke_validate_runtime_script_tests,
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, require_validation_surface_contract, ValidateAllRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
     ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
-    ValidateRoutingCoverageRequest, ValidateTemplateStandardsRequest,
+    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
+    ValidateTemplateStandardsRequest,
     ValidateWarningBaselineRequest,
     ValidateWorkspaceEfficiencyRequest,
 };
@@ -193,5 +195,19 @@ fn test_validate_warning_baseline_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve warning baseline workspace root"
+    );
+}
+
+#[test]
+fn test_validate_runtime_script_tests_error_display_is_stable() {
+    let error = invoke_validate_runtime_script_tests(&ValidateRuntimeScriptTestsRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateRuntimeScriptTestsRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve runtime script test workspace root"
     );
 }
