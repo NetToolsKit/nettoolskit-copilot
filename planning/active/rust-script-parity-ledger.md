@@ -1,14 +1,15 @@
 # Rust Script Parity Ledger
 
-Generated: 2026-03-26 17:18
+Generated: 2026-03-27 19:42
 
 ## Status
 
-- LastUpdated: 2026-03-26 17:18
+- LastUpdated: 2026-03-27 19:42
 - Objective: define the parity evidence model that every PowerShell migration slice must satisfy before wrapper cutover.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
-- Active Branch: `feature/rust-script-transcription-planning`
+- Active Branch: `feature/native-validation-policy`
+- Live parity harness: `approval-approved-test` and the staged `run-test` closeout success path are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
 
 ## Evidence Policy
 
@@ -34,7 +35,7 @@ Generated: 2026-03-26 17:18
 | `scripts/orchestration/**/*.ps1` | 10 | `crates/orchestrator` | staged execution tests, resume/replay assertions, dispatch integration checks | `owner existing, implementation pending` |
 | `scripts/git-hooks/*.ps1` | 3 | `crates/commands/runtime` | git hook install/check tests plus local hook bootstrap smoke | `boundary crate created` |
 | `scripts/tests/*.ps1` excluding runtime subfolder | 4 | `crate test suites + root parity harness` | Rust-native replacements for coverage/test-shape automation | `parity harness planning locked` |
-| `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `parity harness planning locked` |
+| `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `native parity harness in progress (approval-approved, run-test closeout)` |
 
 ## Acceptance Gate
 
