@@ -269,6 +269,7 @@ Status: `[~]` In Progress
 - [2026-03-27 13:21] Implemented Rust-backed `validate-dotnet-standards` in `crates/commands/validation/standards`, with direct external coverage for required .NET template presence, regex placeholder enforcement, XML summary warnings, whitespace hygiene, and native dispatch through `validate-all` ✓ [2026-03-27 13:21]
 - [2026-03-27 13:28] Implemented Rust-backed `validate-architecture-boundaries` in `crates/commands/validation/architecture`, with direct external coverage for baseline loading, wildcard file resolution, severity-aware required/forbidden pattern enforcement, unmatched-pattern warnings, and native dispatch through `validate-all` ✓ [2026-03-27 13:28]
 - [2026-03-27 13:29] Implemented Rust-backed `validate-supply-chain` in `crates/commands/validation/security`, with direct external coverage for manifest discovery, blocked dependency enforcement, invalid package warnings, required license evidence, SBOM export, and native dispatch through `validate-all` ✓ [2026-03-27 13:29]
+- [2026-03-27 13:43] Implemented Rust-backed `validate-release-governance` in `crates/commands/validation/release`, with direct external coverage for required governance files, changelog semantic/date ordering, CODEOWNERS rule quality, branch-protection baseline structure, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 13:43]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -310,10 +311,11 @@ Status: `[~]` In Progress
 - `validate-dotnet-standards` no longer depends on PowerShell business logic, and .NET template governance now lives in a dedicated `standards/` capability boundary with native dispatch through `validate-all`
 - `validate-architecture-boundaries` no longer depends on PowerShell business logic, and architecture baseline enforcement now lives in a dedicated `architecture/` capability boundary with native dispatch through `validate-all`
 - `validate-supply-chain` no longer depends on PowerShell business logic, and dependency inventory plus SBOM/license evidence enforcement now live beside the rest of the security policy surfaces inside `crates/commands/validation/security/`
+- `validate-release-governance` no longer depends on PowerShell business logic, and release-governance contracts now live in a dedicated `release/` capability boundary with native dispatch through `validate-all`
 - security gates retain or improve current severity handling
 - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-powershell-standards`, `validate-release-governance`, `validate-release-provenance`
+  - policy/security/release/domain checks: `validate-powershell-standards`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
