@@ -255,6 +255,7 @@ Status: `[~]` In Progress
 - [2026-03-27 10:46] Implemented Rust-backed `validate-shell-hooks` in `crates/commands/validation/operational_hygiene`, with direct external coverage for required-hook discovery, shell syntax checks, semantic guard enforcement, optional shellcheck warnings, injected tool paths, and native dispatch through `validate-all` ✓ [2026-03-27 10:46]
 - [2026-03-27 11:03] Implemented Rust-backed `validate-agent-hooks` in `crates/commands/validation/agent_orchestration`, with direct external coverage for Super Agent bootstrap/selector manifests, required hook scripts, hook helper contract markers, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 11:03]
 - [2026-03-27 11:24] Implemented Rust-backed `validate-agent-permissions` in `crates/commands/validation/agent_orchestration`, with direct external coverage for matrix/manifest/pipeline alignment, blocked command prefixes, allowed path globs, budget contracts, stage-script permission rules, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 11:24]
+- [2026-03-27 11:41] Implemented Rust-backed `validate-agent-skill-alignment` in `crates/commands/validation/agent_orchestration`, with direct external coverage for manifest/eval/pipeline integrity, skill folder contracts, SKILL frontmatter, mandatory instruction references, pipeline stage role alignment, and native dispatch through `validate-all` ✓ [2026-03-27 11:41]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -286,10 +287,11 @@ Status: `[~]` In Progress
   - the workspace/runtime hygiene validation block is now complete
   - `validate-agent-hooks` no longer depends on PowerShell business logic, and the agent-orchestration backlog now has a dedicated `agent_orchestration/` landing zone instead of expanding `operational_hygiene/` or the crate root
   - `validate-agent-permissions` no longer depends on PowerShell business logic, and the remaining agent-orchestration backlog is now limited to skill-alignment plus orchestration integrity
+  - `validate-agent-skill-alignment` no longer depends on PowerShell business logic, and the agent-orchestration backlog is now reduced to the final structural orchestration sweep
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - agent policy and orchestration: `validate-agent-orchestration`, `validate-agent-skill-alignment`
+  - agent policy and orchestration: `validate-agent-orchestration`
   - policy/security/release/domain checks: `validate-policy`, `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
