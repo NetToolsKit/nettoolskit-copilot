@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 21:11
+- LastUpdated: 2026-03-26 21:32
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -41,6 +41,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 20:47] `crates/commands/runtime` now carries an executable Rust replacement for `apply-vscode-templates`, removing the last PowerShell bridge still embedded in the `self-heal` path.
 - [2026-03-26 20:53] `crates/commands/runtime` no longer keeps all migrated surfaces flat in one folder; the crate now uses responsibility-based submodules with mirrored tests, which reduces future maintenance risk as Wave 1 grows.
 - [2026-03-26 21:11] `crates/commands/runtime` now carries an executable Rust replacement for `doctor -SyncOnDrift`, so runtime drift remediation no longer depends on the legacy PowerShell wrapper when repair is requested.
+- [2026-03-26 21:32] `crates/commands/runtime` now carries an executable Rust replacement for bootstrap-owned provider surface rendering too, so `bootstrap` no longer depends on `render-provider-surfaces.ps1` in the runtime sync path.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -128,6 +129,7 @@ Status: `[ ]` Pending
 - [2026-03-26 20:47] The VS Code workspace template apply path now runs from Rust too, so `self-heal` no longer delegates any repair step to PowerShell in the Wave 1 runtime surface ✓ [2026-03-26 20:47]
 - [2026-03-26 20:53] The runtime crate/test tree is now grouped by capability (`sync`, `diagnostics`, `continuity`) instead of accumulating new flat files at the root, preserving the repository Rust organization rule as the migration expands ✓ [2026-03-26 20:53]
 - [2026-03-26 21:11] The runtime doctor remediation path (`doctor -SyncOnDrift`) now runs from Rust too, reusing the Rust bootstrap implementation and preserving explicit failure propagation when remediation cannot complete ✓ [2026-03-26 21:11]
+- [2026-03-26 21:32] The bootstrap provider render path now runs from Rust too, so runtime sync no longer shells out to the PowerShell dispatcher before projecting repository-managed assets ✓ [2026-03-26 21:32]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -153,6 +155,7 @@ Status: `[~]` In Progress
 - [2026-03-26 20:33] Migrated `self-heal` orchestration into `crates/commands/runtime`, preserving JSON/log evidence and repair sequencing while keeping the optional VS Code template bridge explicit ✓ [2026-03-26 20:33]
 - [2026-03-26 20:47] Migrated `apply-vscode-templates` into `crates/commands/runtime`, removing the last self-heal-internal bridge and keeping workspace template projection under typed Rust ownership ✓ [2026-03-26 20:47]
 - [2026-03-26 21:11] Migrated `doctor -SyncOnDrift` remediation into `crates/commands/runtime`, so direct runtime repair and audit re-checks no longer need the PowerShell wrapper path ✓ [2026-03-26 21:11]
+- [2026-03-26 21:32] Migrated the bootstrap provider render dispatcher into `crates/commands/runtime`, so repository projection and runtime sync now share the same Rust-owned execution path for the bootstrap consumer ✓ [2026-03-26 21:32]
 - Target paths:
   - `.build/`
   - `.deployment/`
