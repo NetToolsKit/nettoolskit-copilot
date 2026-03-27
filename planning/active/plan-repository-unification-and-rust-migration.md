@@ -258,6 +258,7 @@ Status: `[~]` In Progress
 - [2026-03-27 11:41] Implemented Rust-backed `validate-agent-skill-alignment` in `crates/commands/validation/agent_orchestration`, with direct external coverage for manifest/eval/pipeline integrity, skill folder contracts, SKILL frontmatter, mandatory instruction references, pipeline stage role alignment, and native dispatch through `validate-all` ✓ [2026-03-27 11:41]
 - [2026-03-27 12:02] Implemented Rust-backed `validate-agent-orchestration` in `crates/commands/validation/agent_orchestration`, with direct external coverage for required orchestration assets, manifest/pipeline/handoff/run-artifact integrity, eval order drift warnings, runtime catalog references, and native dispatch through `validate-all` ✓ [2026-03-27 12:02]
 - [2026-03-27 12:37] Implemented Rust-backed `validate-policy` in `crates/commands/validation/policy`, with direct external coverage for repository policy files, required files/directories, forbidden files, git hook requirements, unknown-key warnings, invalid JSON failures, and native dispatch through `validate-all` ✓ [2026-03-27 12:37]
+- [2026-03-27] Implemented Rust-backed `validate-security-baseline` in `crates/commands/validation/security`, with direct external coverage for required files/directories, forbidden path globs, secret-like content patterns, allowlisted content regexes, and native dispatch through `validate-all` ✓
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -293,10 +294,11 @@ Status: `[~]` In Progress
   - `validate-agent-orchestration` no longer depends on PowerShell business logic, and the full agent policy plus orchestration validation block now converges inside `crates/commands/validation/agent_orchestration/`
   - the agent policy and orchestration validation block is now complete
   - `validate-policy` no longer depends on PowerShell business logic, and repository policy contract enforcement now lives in a dedicated `policy/` capability boundary with native dispatch through `validate-all`
+  - `validate-security-baseline` no longer depends on PowerShell business logic, and security baseline enforcement now lives in a dedicated `security/` capability boundary with native dispatch through `validate-all`
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
+  - policy/security/release/domain checks: `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 

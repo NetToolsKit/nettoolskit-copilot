@@ -230,6 +230,18 @@ pub enum ValidatePolicyCommandError {
     },
 }
 
+/// Errors raised by security baseline validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateSecurityBaselineCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve security baseline workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

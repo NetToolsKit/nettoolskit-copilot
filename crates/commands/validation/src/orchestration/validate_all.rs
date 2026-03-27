@@ -18,6 +18,7 @@ use crate::{
     invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment,
     invoke_validate_policy,
+    invoke_validate_security_baseline,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -30,6 +31,7 @@ use crate::{
     ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
     ValidatePolicyRequest,
+    ValidateSecurityBaselineRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -232,6 +234,7 @@ enum NativeValidationCheck {
     AgentPermissions,
     AgentSkillAlignment,
     Policy,
+    SecurityBaseline,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -268,6 +271,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => {
                 "rust:nettoolskit-validation::validate-policy"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::SecurityBaseline) => {
+                "rust:nettoolskit-validation::validate-security-baseline"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -527,9 +533,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-security-baseline",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-security-baseline.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::SecurityBaseline),
         ),
         (
             "validate-shared-script-checksums",
@@ -765,6 +769,9 @@ fn definition_supports_parameter(
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => false,
+        ValidationCheckExecutor::Native(NativeValidationCheck::SecurityBaseline) => {
+            matches!(parameter_name, "WarningOnly" | "BaselinePath")
+        }
         ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
             matches!(
                 parameter_name,
@@ -1003,6 +1010,22 @@ fn run_native_validation_check(
             invoke_validate_policy(&ValidatePolicyRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 ..ValidatePolicyRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::SecurityBaseline => {
+            invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                baseline_path: string_argument_path(&arguments, "BaselinePath"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
             })
             .map(|result| {
                 (

@@ -9,6 +9,7 @@ use nettoolskit_validation::{
     invoke_validate_policy,
     invoke_validate_readme_standards,
     invoke_validate_runtime_script_tests,
+    invoke_validate_security_baseline,
     invoke_validate_shell_hooks,
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
@@ -21,6 +22,7 @@ use nettoolskit_validation::{
     ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
     ValidatePolicyRequest,
+    ValidateSecurityBaselineRequest,
     ValidateShellHooksRequest,
     ValidateTemplateStandardsRequest,
     ValidateWarningBaselineRequest,
@@ -299,4 +301,18 @@ fn test_validate_policy_error_display_is_stable() {
     .expect_err("missing repository should fail");
 
     assert_eq!(error.to_string(), "failed to resolve policy workspace root");
+}
+
+#[test]
+fn test_validate_security_baseline_error_display_is_stable() {
+    let error = invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateSecurityBaselineRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve security baseline workspace root"
+    );
 }
