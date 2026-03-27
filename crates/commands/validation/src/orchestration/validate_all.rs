@@ -15,6 +15,7 @@ use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_permissions,
+    invoke_validate_agent_skill_alignment,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -24,6 +25,7 @@ use crate::{
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
     ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentSkillAlignmentRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -223,6 +225,7 @@ enum ValidationCheckExecutor {
 enum NativeValidationCheck {
     AgentHooks,
     AgentPermissions,
+    AgentSkillAlignment,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -250,6 +253,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentPermissions) => {
                 "rust:nettoolskit-validation::validate-agent-permissions"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentSkillAlignment) => {
+                "rust:nettoolskit-validation::validate-agent-skill-alignment"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -527,9 +533,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-agent-skill-alignment",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-agent-skill-alignment.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentSkillAlignment),
         ),
         (
             "validate-agent-permissions",
@@ -763,6 +767,12 @@ fn definition_supports_parameter(
                     | "SkillRoot"
             )
         }
+        ValidationCheckExecutor::Native(NativeValidationCheck::AgentSkillAlignment) => {
+            matches!(
+                parameter_name,
+                "AgentManifestPath" | "PipelinePath" | "EvalFixturePath" | "SkillsRootPath"
+            )
+        }
         ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
             matches!(
                 parameter_name,
@@ -937,6 +947,23 @@ fn run_native_validation_check(
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
                 ..ValidateAgentPermissionsRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::AgentSkillAlignment => {
+            invoke_validate_agent_skill_alignment(&ValidateAgentSkillAlignmentRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                agent_manifest_path: string_argument_path(&arguments, "AgentManifestPath"),
+                pipeline_path: string_argument_path(&arguments, "PipelinePath"),
+                eval_fixture_path: string_argument_path(&arguments, "EvalFixturePath"),
+                skills_root_path: string_argument_path(&arguments, "SkillsRootPath"),
             })
             .map(|result| {
                 (

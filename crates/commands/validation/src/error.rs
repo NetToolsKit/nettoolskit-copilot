@@ -194,6 +194,18 @@ pub enum ValidateAgentPermissionsCommandError {
     },
 }
 
+/// Errors raised by agent-skill-alignment validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateAgentSkillAlignmentCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve agent skill alignment workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

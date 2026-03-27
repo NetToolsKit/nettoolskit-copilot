@@ -18,8 +18,10 @@ pub use contracts::{
 };
 pub use agent_orchestration::{
     invoke_validate_agent_hooks, invoke_validate_agent_permissions,
+    invoke_validate_agent_skill_alignment,
     ValidateAgentHooksRequest, ValidateAgentHooksResult, ValidateAgentPermissionsRequest,
-    ValidateAgentPermissionsResult,
+    ValidateAgentPermissionsResult, ValidateAgentSkillAlignmentRequest,
+    ValidateAgentSkillAlignmentResult,
 };
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
@@ -28,6 +30,7 @@ pub use documentation::{
 };
 pub use error::{
     ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
+    ValidateAgentSkillAlignmentCommandError,
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,

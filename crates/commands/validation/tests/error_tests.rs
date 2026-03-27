@@ -1,7 +1,8 @@
 //! Tests for validation surface errors.
 
 use nettoolskit_validation::{
-    invoke_validate_agent_hooks, invoke_validate_agent_permissions, invoke_validate_all, invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
+    invoke_validate_agent_hooks, invoke_validate_agent_permissions,
+    invoke_validate_agent_skill_alignment, invoke_validate_all, invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_readme_standards,
@@ -15,6 +16,7 @@ use nettoolskit_validation::{
     ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
     ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
     ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentSkillAlignmentRequest,
     ValidateShellHooksRequest,
     ValidateTemplateStandardsRequest,
     ValidateWarningBaselineRequest,
@@ -254,5 +256,19 @@ fn test_validate_agent_permissions_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve agent permissions workspace root"
+    );
+}
+
+#[test]
+fn test_validate_agent_skill_alignment_error_display_is_stable() {
+    let error = invoke_validate_agent_skill_alignment(&ValidateAgentSkillAlignmentRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateAgentSkillAlignmentRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve agent skill alignment workspace root"
     );
 }

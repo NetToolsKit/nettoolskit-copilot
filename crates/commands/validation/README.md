@@ -28,6 +28,7 @@ The current executable Rust coverage includes:
 - `validate-all` orchestration with profile selection, delegated check sequencing, report generation, and hash-chained ledger write/repair
 - `validate-agent-hooks`
 - `validate-agent-permissions`
+- `validate-agent-skill-alignment`
 - `validate-authoritative-source-policy`
 - `validate-instruction-architecture`
 - `validate-instructions`
@@ -63,6 +64,7 @@ The current executable Rust coverage includes:
 - `invoke_validate_all`
 - `invoke_validate_agent_hooks`
 - `invoke_validate_agent_permissions`
+- `invoke_validate_agent_skill_alignment`
 - `invoke_validate_authoritative_source_policy`
 - `invoke_validate_instruction_architecture`
 - `invoke_validate_instructions`
