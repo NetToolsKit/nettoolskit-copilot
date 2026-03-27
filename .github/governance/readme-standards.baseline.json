@@ -2,7 +2,7 @@
   "version": 1,
   "global": {
     "requireFeaturesCheckmarks": true,
-    "requireCodeFences": true,
+    "requireCodeFences": false,
     "requireTocLinks": true,
     "requireHorizontalSeparators": true
   },
@@ -10,101 +10,352 @@
     {
       "path": "README.md",
       "requiredSections": [
+        "Introduction",
         "Features",
-        "Table of Contents|Contents",
-        "Installation",
-        "Quick Start",
-        "Usage Examples",
-        "API Reference",
+        "Contents",
+        "Build and Tests",
+        "Contributing",
         "Dependencies",
-        "References"
+        "References",
+        "License"
       ],
       "allowIntroductionPreamble": true
+    },
+    {
+      "path": "planning/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "planning/specs/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
     },
     {
       "path": "scripts/README.md",
       "requiredSections": [
         "Introduction",
         "Features",
-        "Contents|Table of Contents",
-        "Installation",
+        "Contents",
         "Quick Start",
-        "Usage Examples",
-        "API Reference",
         "Build and Tests",
-        "Contributing",
-        "Dependencies",
-        "References"
+        "References",
+        "License"
       ],
       "allowIntroductionPreamble": false
     },
     {
-      "path": ".codex/mcp/README.md",
+      "path": "definitions/README.md",
       "requiredSections": [
         "Introduction",
         "Features",
-        "Contents|Table of Contents",
-        "Installation",
-        "Quick Start",
-        "Usage Examples",
-        "API Reference",
-        "Build and Tests",
-        "Contributing",
-        "Dependencies",
-        "References"
+        "Contents",
+        "References",
+        "License"
       ],
       "allowIntroductionPreamble": false
     },
     {
-      "path": ".codex/scripts/README.md",
+      "path": "definitions/shared/README.md",
       "requiredSections": [
         "Introduction",
         "Features",
-        "Contents|Table of Contents",
-        "Installation",
-        "Quick Start",
-        "Usage Examples",
-        "API Reference",
-        "Build and Tests",
-        "Contributing",
-        "Dependencies",
-        "References"
+        "Contents",
+        "References",
+        "License"
       ],
       "allowIntroductionPreamble": false
     },
     {
-      "path": ".codex/orchestration/README.md",
+      "path": "definitions/shared/prompts/README.md",
       "requiredSections": [
         "Introduction",
         "Features",
-        "Contents|Table of Contents",
-        "Installation",
-        "Quick Start",
-        "Usage Examples",
-        "API Reference",
-        "Build and Tests",
-        "Contributing",
-        "Dependencies",
-        "References"
+        "Contents",
+        "References",
+        "License"
       ],
       "allowIntroductionPreamble": false
     },
     {
-      "path": ".codex/skills/README.md",
+      "path": "definitions/shared/prompts/poml/README.md",
       "requiredSections": [
         "Introduction",
         "Features",
-        "Contents|Table of Contents",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/github/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/vscode/profiles/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/vscode/workspace/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/codex/mcp/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/codex/orchestration/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/codex/scripts/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/providers/codex/skills/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "crates/cli/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
         "Installation",
         "Quick Start",
         "Usage Examples",
         "API Reference",
-        "Build and Tests",
-        "Contributing",
-        "Dependencies",
-        "References"
+        "References",
+        "License"
       ],
-      "allowIntroductionPreamble": false
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/core/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/ui/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/otel/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/orchestrator/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/task-worker/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/commands/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/commands/help/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/commands/manifest/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/commands/runtime/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/commands/templating/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
+    },
+    {
+      "path": "crates/commands/validation/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": true
     }
   ]
 }

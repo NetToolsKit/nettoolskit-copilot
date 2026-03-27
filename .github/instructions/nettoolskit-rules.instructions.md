@@ -24,9 +24,9 @@ Do not restate generic README rules here.
   - License
 - Do not include code examples in the root README.
 - Do not include Installation, Quick Start, Usage Examples, or API Reference in the root README.
-- The root `References` section must list every package README under `src/*`.
+- The root `References` section must list every package README under `crates/*` and `crates/commands/*`.
 
-## Package README Override (`src/*`)
+## Package README Override (`crates/*` and `crates/commands/*`)
 - Keep only these sections, in this order:
   - Introduction
   - Features
@@ -42,6 +42,17 @@ Do not restate generic README rules here.
 - `API Reference` must be grouped by logical areas when the public surface is broad.
 - When public enums exist, add a subsection per enum with a Markdown table of values and concise descriptions.
 - When examples introduce structured payloads, add a compact `Data Shapes` table with `Field`, `Description`, and `Example`.
+
+## Workspace/Reference README Override (`planning/**`, `scripts/README.md`, `definitions/**`)
+- Keep these sections, in this order:
+  - Introduction
+  - Features
+  - Contents
+  - References
+  - License
+- Add `Installation`, `Quick Start`, `Usage Examples`, or `Build and Tests` only when the README documents an operational surface that genuinely needs runnable commands.
+- Do not force package-installation or API-reference sections into workspace index/reference READMEs.
+- Keep these READMEs focused on navigation, purpose, canonical artifacts, and cross-references.
 
 ## Coverage Override
 - Each package README must cover at least 70% of the key public APIs or features intended for consumer usage.
@@ -69,9 +80,10 @@ Do not restate generic README rules here.
 - [ ] Root README uses only the allowed root sections and order
 - [ ] Root README does not include Installation, Quick Start, Usage Examples, or API Reference
 - [ ] Root README contains no code examples
-- [ ] Root `References` lists all package READMEs under `src/*`
+- [ ] Root `References` lists all package READMEs under `crates/*` and `crates/commands/*`
 - [ ] Package README uses only the allowed package sections and order
 - [ ] Package README omits `Build and Tests`, `Contributing`, and `Dependencies`
+- [ ] Workspace/reference README uses the allowed narrowed section set unless an operational section is genuinely needed
 - [ ] Package examples cover at least 70% of key public APIs or features
 - [ ] API Reference uses real signatures and real public surface names
 - [ ] `Contents` matches the real sections present in the file
