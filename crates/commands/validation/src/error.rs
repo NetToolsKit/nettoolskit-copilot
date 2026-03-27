@@ -158,6 +158,18 @@ pub enum ValidateRuntimeScriptTestsCommandError {
     },
 }
 
+/// Errors raised by shell-hooks validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateShellHooksCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve shell hooks workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

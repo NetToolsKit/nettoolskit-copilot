@@ -18,6 +18,7 @@ use crate::{
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_readme_standards, invoke_validate_runtime_script_tests,
+    invoke_validate_shell_hooks,
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
@@ -26,6 +27,7 @@ use crate::{
     ValidatePlanningStructureRequest,
     ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
     ValidateRuntimeScriptTestsRequest,
+    ValidateShellHooksRequest,
     ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
     ValidateWorkspaceEfficiencyRequest,
 };
@@ -227,6 +229,7 @@ enum NativeValidationCheck {
     TemplateStandards,
     AuthoritativeSourcePolicy,
     RuntimeScriptTests,
+    ShellHooks,
     WarningBaseline,
     WorkspaceEfficiency,
 }
@@ -264,6 +267,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests) => {
                 "rust:nettoolskit-validation::validate-runtime-script-tests"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::ShellHooks) => {
+                "rust:nettoolskit-validation::validate-shell-hooks"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::WarningBaseline) => {
                 "rust:nettoolskit-validation::validate-warning-baseline"
@@ -567,7 +573,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-shell-hooks",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-shell-hooks.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::ShellHooks),
         ),
         (
             "validate-runtime-script-tests",
@@ -767,6 +773,16 @@ fn definition_supports_parameter(
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests) => {
             matches!(parameter_name, "WarningOnly" | "TestRoot" | "PowerShellPath")
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::ShellHooks) => {
+            matches!(
+                parameter_name,
+                "WarningOnly"
+                    | "HookRoot"
+                    | "ShellPath"
+                    | "EnableShellcheck"
+                    | "ShellcheckPath"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
             matches!(
@@ -1047,6 +1063,25 @@ fn run_native_validation_check(
                 repo_root: Some(repo_root.to_path_buf()),
                 test_root: string_argument_path(&arguments, "TestRoot"),
                 powershell_path: string_argument_path(&arguments, "PowerShellPath"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::ShellHooks => {
+            invoke_validate_shell_hooks(&ValidateShellHooksRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                hook_root: string_argument_path(&arguments, "HookRoot"),
+                shell_path: string_argument_path(&arguments, "ShellPath"),
+                shellcheck_path: string_argument_path(&arguments, "ShellcheckPath"),
+                enable_shellcheck: bool_argument(&arguments, "EnableShellcheck").unwrap_or(false),
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
             })

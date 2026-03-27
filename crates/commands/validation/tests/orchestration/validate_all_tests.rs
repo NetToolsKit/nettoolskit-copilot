@@ -9,6 +9,7 @@ use crate::support::instruction_graph_fixtures::{
 };
 use crate::support::operational_hygiene_fixtures::{
     initialize_runtime_script_tests_repo, initialize_warning_baseline_repo,
+    initialize_shell_hooks_repo, write_fake_shell_command, write_hook_file,
     write_runtime_test_script, write_warning_analyzer_report,
 };
 
@@ -673,5 +674,52 @@ fn test_invoke_validate_all_runs_native_runtime_script_tests_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-runtime-script-tests"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_shell_hooks_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-shell-hooks"]);
+    initialize_shell_hooks_repo(repo.path());
+    for hook_name in ["pre-commit", "post-commit", "post-merge", "post-checkout"] {
+        write_hook_file(repo.path(), hook_name, "#!/bin/sh\necho ok\n");
+    }
+    let shell_path = write_fake_shell_command(repo.path());
+    write_file(
+        &repo.path().join(".github/governance/validation-profiles.json"),
+        &format!(
+            r#"{{
+  "version": 1,
+  "defaultProfile": "test",
+  "profiles": [
+    {{
+      "id": "test",
+      "warningOnly": false,
+      "checkOrder": ["validate-shell-hooks"],
+      "checkOptions": {{
+        "validate-shell-hooks": {{
+          "ShellPath": "{}"
+        }}
+      }}
+    }}
+  ]
+}}"#,
+            shell_path.display().to_string().replace('\\', "\\\\")
+        ),
+    );
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-shell-hooks"
     );
 }
