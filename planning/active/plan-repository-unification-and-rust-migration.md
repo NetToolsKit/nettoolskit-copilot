@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 12:50
+- LastUpdated: 2026-03-27 12:51
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -262,7 +262,7 @@ Status: `[~]` In Progress
 - [2026-03-27 12:37] Implemented Rust-backed `validate-policy` in `crates/commands/validation/policy`, with direct external coverage for repository policy files, required files/directories, forbidden files, git hook requirements, unknown-key warnings, invalid JSON failures, and native dispatch through `validate-all` ✓ [2026-03-27 12:37]
 - [2026-03-27] Implemented Rust-backed `validate-security-baseline` in `crates/commands/validation/security`, with direct external coverage for required files/directories, forbidden path globs, secret-like content patterns, allowlisted content regexes, and native dispatch through `validate-all` ✓
 - [2026-03-27 12:50] Implemented Rust-backed `validate-shared-script-checksums` in `crates/commands/validation/security`, with direct external coverage for manifest shape, missing manifest/source drift, SHA-256 mismatches, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 12:50]
-- [2026-03-27 12:50] Implemented Rust-backed `validate-compatibility-lifecycle-policy` in `crates/commands/validation/policy`, with direct external coverage for support-window section discovery, reference-date parsing, markdown lifecycle table ordering, EOL-plus-one enforcement, status alignment, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 12:50]
+- [2026-03-27 12:51] Implemented Rust-backed `validate-compatibility-lifecycle-policy` in `crates/commands/validation/policy`, with direct external coverage for support-window section discovery, reference-date parsing, markdown lifecycle table ordering, EOL-plus-one enforcement, status alignment, hard-fail missing-file semantics, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 12:51]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
