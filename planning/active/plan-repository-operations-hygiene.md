@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 23:06
+- LastUpdated: 2026-03-27 08:07
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -47,6 +47,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 22:24] `crates/commands/validation` now carries executable Rust replacements for `validate-planning-structure` and `validate-audit-ledger`, so the first individual Wave 2 checks also emit hygiene evidence without PowerShell wrappers.
 - [2026-03-26 22:44] `crates/commands/validation` now carries executable Rust replacements for `validate-readme-standards` and `validate-instruction-metadata`, and `validate-all` now preserves native warning outcomes so documentation/authorship drift cannot be hidden by the orchestration layer.
 - [2026-03-26 23:06] `crates/commands/validation` now carries executable Rust replacements for `validate-routing-coverage` and `validate-template-standards`, so routing-fixture drift and shared template contract drift now emit hygiene evidence without PowerShell wrappers too.
+- [2026-03-27 08:07] `crates/commands/validation` now carries an executable Rust replacement for `validate-workspace-efficiency` under a dedicated `workspace` module, so workspace/runtime hygiene evidence and VS Code workspace policy drift no longer rely on the PowerShell validator.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -140,6 +141,7 @@ Status: `[ ]` Pending
 - [2026-03-26 22:24] The first individual validation checks now run through Rust too: `validate-planning-structure` and `validate-audit-ledger` execute natively under `crates/commands/validation`, and `validate-all` routes them without shelling out to their legacy scripts ✓ [2026-03-26 22:24]
 - [2026-03-26 22:44] The first documentation/authoring validation checks now run through Rust too: `validate-readme-standards` and `validate-instruction-metadata` execute natively under `crates/commands/validation/documentation`, and `validate-all` now preserves native warning status instead of collapsing it into a pass ✓ [2026-03-26 22:44]
 - [2026-03-26 23:06] The first routing/template governance checks now run through Rust too: `validate-routing-coverage` and `validate-template-standards` execute natively under `crates/commands/validation/governance`, and `validate-all` now surfaces their outcomes without the PowerShell bridge ✓ [2026-03-26 23:06]
+- [2026-03-27 08:07] The workspace-efficiency hygiene check now runs through Rust too: `validate-workspace-efficiency` executes natively under `crates/commands/validation/workspace`, and `validate-all` routes it without the PowerShell bridge while keeping the validation crate grouped by responsibility ✓ [2026-03-27 08:07]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -158,6 +160,7 @@ Status: `[ ]` Pending
   - the first Wave 2 per-check validation surfaces now emit evidence through Rust-owned execution paths too
   - documentation/authorship drift checks now emit Rust-native warning/failure status without losing signal in the top-level orchestrator
   - routing and template governance drift now emit Rust-native warning/failure status without relying on legacy scripts
+  - workspace-efficiency drift now emits Rust-native warning/failure status without relying on the legacy validator, and the validation crate remains organized by capability boundaries as Wave 2 grows
 - Commit checkpoint:
   - `ci(rust): harden migration validation and wrapper governance`
 
