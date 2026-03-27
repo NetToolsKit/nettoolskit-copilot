@@ -270,6 +270,7 @@ Status: `[~]` In Progress
 - [2026-03-27 13:28] Implemented Rust-backed `validate-architecture-boundaries` in `crates/commands/validation/architecture`, with direct external coverage for baseline loading, wildcard file resolution, severity-aware required/forbidden pattern enforcement, unmatched-pattern warnings, and native dispatch through `validate-all` ✓ [2026-03-27 13:28]
 - [2026-03-27 13:29] Implemented Rust-backed `validate-supply-chain` in `crates/commands/validation/security`, with direct external coverage for manifest discovery, blocked dependency enforcement, invalid package warnings, required license evidence, SBOM export, and native dispatch through `validate-all` ✓ [2026-03-27 13:29]
 - [2026-03-27 13:43] Implemented Rust-backed `validate-release-governance` in `crates/commands/validation/release`, with direct external coverage for required governance files, changelog semantic/date ordering, CODEOWNERS rule quality, branch-protection baseline structure, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 13:43]
+- [2026-03-27 13:51] Implemented Rust-backed `validate-release-provenance` in `crates/commands/validation/release`, with direct external coverage for provenance baseline loading, `validate-all` coverage checks, required evidence files, git branch/HEAD/worktree traceability, audit-report enforcement, profile-driven `RequireAuditReport`, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 13:51]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -312,10 +313,11 @@ Status: `[~]` In Progress
 - `validate-architecture-boundaries` no longer depends on PowerShell business logic, and architecture baseline enforcement now lives in a dedicated `architecture/` capability boundary with native dispatch through `validate-all`
 - `validate-supply-chain` no longer depends on PowerShell business logic, and dependency inventory plus SBOM/license evidence enforcement now live beside the rest of the security policy surfaces inside `crates/commands/validation/security/`
 - `validate-release-governance` no longer depends on PowerShell business logic, and release-governance contracts now live in a dedicated `release/` capability boundary with native dispatch through `validate-all`
+- `validate-release-provenance` no longer depends on PowerShell business logic, and the full release evidence/traceability slice now lives beside `validate-release-governance` inside `crates/commands/validation/release/`
 - security gates retain or improve current severity handling
 - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-powershell-standards`, `validate-release-provenance`
+  - policy/security/release/domain checks: `validate-powershell-standards`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
