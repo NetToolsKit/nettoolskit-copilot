@@ -7,3 +7,4 @@ mod chatops_tests;
 mod executor_tests;
 mod processor_tests;
 mod repo_workflow_tests;
+mod stage_contract;
