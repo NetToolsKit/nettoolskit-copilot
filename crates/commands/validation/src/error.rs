@@ -242,6 +242,18 @@ pub enum ValidateSecurityBaselineCommandError {
     },
 }
 
+/// Errors raised by shared script checksum validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateSharedScriptChecksumsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve shared script checksum workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

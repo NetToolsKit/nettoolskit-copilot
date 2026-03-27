@@ -39,6 +39,7 @@ pub use error::{
     ValidateAgentOrchestrationCommandError,
     ValidatePolicyCommandError,
     ValidateSecurityBaselineCommandError,
+    ValidateSharedScriptChecksumsCommandError,
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
@@ -76,8 +77,9 @@ pub use operational_hygiene::{
 };
 pub use policy::{invoke_validate_policy, ValidatePolicyRequest, ValidatePolicyResult};
 pub use security::{
-    invoke_validate_security_baseline, ValidateSecurityBaselineRequest,
-    ValidateSecurityBaselineResult,
+    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    ValidateSecurityBaselineRequest, ValidateSecurityBaselineResult,
+    ValidateSharedScriptChecksumsRequest, ValidateSharedScriptChecksumsResult,
 };
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,

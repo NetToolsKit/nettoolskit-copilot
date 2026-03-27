@@ -73,6 +73,8 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-27 10:46] The final workspace/runtime hygiene slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-shell-hooks`, and `validate-all` dispatches it natively while preserving shell syntax, semantic guard, and optional shellcheck semantics from the legacy validator.
 - [2026-03-27 12:37] The repository policy slice is now live in Rust too: `crates/commands/validation/policy` owns `validate-policy`, and `validate-all` dispatches it natively while preserving required-file, required-directory, forbidden-file, git-hook, and git-config policy semantics from the legacy validator.
 - [2026-03-27] The security baseline slice is now live in Rust too: `crates/commands/validation/security` owns `validate-security-baseline`, and `validate-all` dispatches it natively while preserving required-file, required-directory, forbidden-path, and secret-pattern scanning semantics from the legacy validator.
+- [2026-03-27 12:50] The checksum-manifest security slice is now live in Rust too: `crates/commands/validation/security` owns `validate-shared-script-checksums`, and `validate-all` dispatches it natively while preserving manifest-shape enforcement, source-versus-manifest drift detection, SHA-256 mismatch reporting, and warning-only semantics from the legacy validator.
+- [2026-03-27 12:50] The shared checksum slice is now live in Rust too: `crates/commands/validation/security` owns `validate-shared-script-checksums`, and `validate-all` dispatches it natively while preserving manifest-shape validation, recursive PowerShell inventory comparison, SHA-256 drift detection, and warning-only conversion semantics from the legacy validator.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -135,6 +137,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 39. [2026-03-27 12:02] With `validate-agent-orchestration` now live, the full agent-policy and orchestration validation block is complete; the next Wave 2 execution should move entirely to release, supply-chain, architecture-boundary, and standards-policy surfaces.
 40. [2026-03-27 12:37] Once `validate-policy` lands, the remaining Wave 2 backlog should stay focused on the higher-coupling release, supply-chain, and standards-policy surfaces; repository policy enforcement should not drift back into the crate root or orchestration layer.
 41. [2026-03-27] Once `validate-security-baseline` lands, the next low-risk security slice should be `validate-shared-script-checksums`; keep that work in the same `security/` boundary before moving to the broader supply-chain and release provenance checks.
+42. [2026-03-27 12:50] With `validate-shared-script-checksums` now live, the remaining Wave 2 security and policy backlog should move to the higher-coupling standards, compatibility, supply-chain, and release-governance surfaces without reopening the low-risk security boundary.
 
 ## Constraints
 
@@ -211,6 +214,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 10:46` — implemented the `validate-shell-hooks` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and closed the full workspace/runtime hygiene validation block.
 - Updated: `2026-03-27 12:37` — implemented the `validate-policy` Wave 2 repository-policy slice in `crates/commands/validation/policy`, routed it through `validate-all`, and reduced the remaining backlog to release, supply-chain, compatibility, and standards-policy surfaces.
 - Updated: `2026-03-27` — implemented the `validate-security-baseline` Wave 2 security slice in `crates/commands/validation/security`, routed it through `validate-all`, and reduced the remaining backlog to checksums, compatibility, standards-policy, supply-chain, and release governance/provenance.
+- Updated: `2026-03-27 12:50` — implemented the `validate-shared-script-checksums` Wave 2 security slice in `crates/commands/validation/security`, routed it through `validate-all`, and reduced the remaining backlog to compatibility, standards-policy, supply-chain, and release governance/provenance.
 
 ## Recommended Specialist Focus
 

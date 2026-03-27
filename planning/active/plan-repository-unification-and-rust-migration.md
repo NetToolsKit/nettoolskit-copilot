@@ -4,10 +4,10 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 12:37
+- LastUpdated: 2026-03-27 12:50
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
-- Active Branch: `feature/rust-script-transcription-planning`
+- Active Branch: `feature/native-validation-policy`
 - Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
@@ -72,6 +72,7 @@ The migration remains compatibility-first:
 - [2026-03-27 08:07] `crates/commands/validation` now executes Rust-backed `validate-workspace-efficiency` under a dedicated `workspace` module, with direct external coverage for template workspaces, duplicate folders, redundant local settings, forbidden settings, heuristics, and native dispatch through `validate-all`.
 - [2026-03-27 08:22] `crates/commands/validation` now executes Rust-backed `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, with direct external coverage for source-map contract enforcement, required global references, duplicated official-doc domains, and native dispatch through `validate-all`.
 - [2026-03-27 09:00] `crates/commands/validation` now executes Rust-backed `validate-instruction-architecture` under `instruction_graph`, with direct external coverage for manifest shape, required global references, deterministic routing hard-cap enforcement, ownership-marker warnings, skill canonical references, and native dispatch through `validate-all`.
+- [2026-03-27 12:50] `crates/commands/validation/security` now owns both `validate-security-baseline` and `validate-shared-script-checksums`, so the low-risk security policy block runs natively in Rust with direct manifest-drift, checksum, and secret-baseline coverage.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -259,6 +260,7 @@ Status: `[~]` In Progress
 - [2026-03-27 12:02] Implemented Rust-backed `validate-agent-orchestration` in `crates/commands/validation/agent_orchestration`, with direct external coverage for required orchestration assets, manifest/pipeline/handoff/run-artifact integrity, eval order drift warnings, runtime catalog references, and native dispatch through `validate-all` ✓ [2026-03-27 12:02]
 - [2026-03-27 12:37] Implemented Rust-backed `validate-policy` in `crates/commands/validation/policy`, with direct external coverage for repository policy files, required files/directories, forbidden files, git hook requirements, unknown-key warnings, invalid JSON failures, and native dispatch through `validate-all` ✓ [2026-03-27 12:37]
 - [2026-03-27] Implemented Rust-backed `validate-security-baseline` in `crates/commands/validation/security`, with direct external coverage for required files/directories, forbidden path globs, secret-like content patterns, allowlisted content regexes, and native dispatch through `validate-all` ✓
+- [2026-03-27 12:50] Implemented Rust-backed `validate-shared-script-checksums` in `crates/commands/validation/security`, with direct external coverage for manifest shape, missing manifest/source drift, SHA-256 mismatches, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 12:50]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -295,10 +297,11 @@ Status: `[~]` In Progress
   - the agent policy and orchestration validation block is now complete
   - `validate-policy` no longer depends on PowerShell business logic, and repository policy contract enforcement now lives in a dedicated `policy/` capability boundary with native dispatch through `validate-all`
   - `validate-security-baseline` no longer depends on PowerShell business logic, and security baseline enforcement now lives in a dedicated `security/` capability boundary with native dispatch through `validate-all`
+  - `validate-shared-script-checksums` no longer depends on PowerShell business logic, and checksum manifest enforcement now lives beside the rest of the security policy surfaces inside `crates/commands/validation/security/`
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
+  - policy/security/release/domain checks: `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 

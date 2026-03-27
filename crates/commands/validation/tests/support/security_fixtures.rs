@@ -48,6 +48,40 @@ pub fn initialize_security_repo(repo_root: &Path) {
     write_repo_file(repo_root, "README.md", "# Repo\n");
 }
 
+pub fn initialize_shared_checksums_repo(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join(".codex"))
+        .expect("codex directory should be created for repository resolution");
+    write_repo_file(repo_root, "scripts/common/a.ps1", "Write-Output 'a'\n");
+    write_repo_file(repo_root, "scripts/security/b.ps1", "Write-Output 'b'\n");
+    write_repo_file(
+        repo_root,
+        ".github/governance/shared-script-checksums.manifest.json",
+        &format!(
+            r#"{{
+  "version": 1,
+  "sourceRepository": "https://example.invalid/repo",
+  "hashAlgorithm": "SHA256",
+  "includedRoots": [
+    "scripts/common",
+    "scripts/security"
+  ],
+  "entries": [
+    {{
+      "path": "scripts/common/a.ps1",
+      "sha256": "{}"
+    }},
+    {{
+      "path": "scripts/security/b.ps1",
+      "sha256": "{}"
+    }}
+  ]
+}}"#,
+            sha256_for_text("Write-Output 'a'\n"),
+            sha256_for_text("Write-Output 'b'\n")
+        ),
+    );
+}
+
 pub fn write_repo_file(repo_root: &Path, relative_path: &str, contents: &str) {
     write_file(&repo_root.join(relative_path), contents);
 }
@@ -59,4 +93,11 @@ pub fn remove_repo_path(repo_root: &Path, relative_path: &str) {
     } else if path.is_file() {
         fs::remove_file(&path).expect("file should be removed");
     }
+}
+
+fn sha256_for_text(contents: &str) -> String {
+    use sha2::{Digest, Sha256};
+
+    let digest = Sha256::digest(contents.as_bytes());
+    format!("{digest:x}")
 }

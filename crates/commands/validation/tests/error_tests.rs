@@ -10,6 +10,7 @@ use nettoolskit_validation::{
     invoke_validate_readme_standards,
     invoke_validate_runtime_script_tests,
     invoke_validate_security_baseline,
+    invoke_validate_shared_script_checksums,
     invoke_validate_shell_hooks,
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
@@ -23,6 +24,7 @@ use nettoolskit_validation::{
     ValidateAgentSkillAlignmentRequest,
     ValidatePolicyRequest,
     ValidateSecurityBaselineRequest,
+    ValidateSharedScriptChecksumsRequest,
     ValidateShellHooksRequest,
     ValidateTemplateStandardsRequest,
     ValidateWarningBaselineRequest,
@@ -314,5 +316,20 @@ fn test_validate_security_baseline_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve security baseline workspace root"
+    );
+}
+
+#[test]
+fn test_validate_shared_script_checksums_error_display_is_stable() {
+    let error =
+        invoke_validate_shared_script_checksums(&ValidateSharedScriptChecksumsRequest {
+            repo_root: Some(std::path::PathBuf::from("missing-repository")),
+            ..ValidateSharedScriptChecksumsRequest::default()
+        })
+        .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve shared script checksum workspace root"
     );
 }
