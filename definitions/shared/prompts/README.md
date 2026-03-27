@@ -1,15 +1,45 @@
 # Shared Prompt Assets
 
-`definitions/shared/prompts/` contains reusable prompt libraries that are not
-owned by one provider runtime.
+> Reusable prompt sources shared across repository surfaces.
 
-## Coverage
+---
 
-- `poml/` -> projected into `.github/prompts/poml/` as the shared POML prompt
-  library consumed by GitHub/Copilot prompt workflows and future tooling
+## Introduction
 
-## Rules
+`definitions/shared/prompts/` stores prompt assets that are authored once and
+projected into tracked prompt surfaces. It exists so shared prompt content stays
+canonical and does not drift between provider-specific folders.
 
-- Keep reusable prompt libraries here when they are not specific to one
-  provider/runtime.
-- Provider trees should only own provider-specific prompt entrypoints.
+---
+
+## Features
+
+- ✅ Shared prompt sources stay centralized in one authored location
+- ✅ POML content is projected into `.github/prompts/poml/`
+- ✅ Provider folders remain focused on provider-specific prompt entrypoints
+- ✅ The folder supports prompt reuse without duplicating source text
+
+---
+
+## Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [References](#references)
+- [License](#license)
+
+---
+
+## References
+
+- [Shared POML Library](poml/README.md)
+- [Shared Definitions](../README.md)
+- [Projected Prompt Surface](../../../.github/prompts/poml/)
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file at the repository root for details.
+
+---
