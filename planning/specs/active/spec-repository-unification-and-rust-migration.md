@@ -60,6 +60,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-26 20:53] The runtime crate has now been restructured by capability as well: `sync`, `diagnostics`, and `continuity` submodules replace the previous flat root layout, and the mirrored external test tree follows the same grouping.
 - [2026-03-26 21:11] The runtime doctor remediation path is now live in Rust too: `crates/commands/runtime` owns `doctor -SyncOnDrift` by chaining the Rust `bootstrap` implementation and re-auditing drift after the repair attempt.
 - [2026-03-26 21:32] The bootstrap provider render path is now live in Rust too: `crates/commands/runtime` reads the projection catalog, selects bootstrap renderers by condition, and renders the managed GitHub, VS Code, Codex, and Claude surfaces without shelling out to `render-provider-surfaces.ps1`.
+- [2026-03-26 21:39] The bootstrap MCP apply path is now live in Rust too: `crates/commands/runtime` reads the canonical MCP runtime catalog, projects the Codex server subset, rewrites `mcp_servers` in `config.toml`, and creates timestamped backups without shelling out to `sync-codex-mcp-config.ps1`.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -105,6 +106,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 22. [2026-03-26 20:53] As Wave 1 expands, `crates/commands/runtime` should group modules by responsibility instead of keeping every command file at `src/` root; the external test tree must mirror that folder structure exactly.
 23. [2026-03-26 21:11] `doctor` should call Rust `bootstrap` directly for `-SyncOnDrift` instead of shelling out to the PowerShell wrapper, and the result contract should expose whether remediation was attempted and whether it cleared drift.
 24. [2026-03-26 21:32] The `bootstrap` consumer of `render-provider-surfaces` should move under Rust ownership before the direct maintenance form of that command; bootstrap is the critical path, and the remaining MCP generation path can stay separate until its dedicated slice lands.
+25. [2026-03-26 21:39] The `bootstrap` consumer of Codex MCP config apply should also move under Rust ownership before any broader MCP maintenance command cutover; the critical bootstrap path only needs catalog-driven Codex projection and backup semantics.
 
 ## Constraints
 
@@ -168,6 +170,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-26 20:53` — reorganized the runtime crate and mirrored tests into `sync`, `diagnostics`, and `continuity` submodules so Wave 1 growth stays aligned with the repository Rust organization rules.
 - Updated: `2026-03-26 21:11` — implemented the Rust-backed `doctor -SyncOnDrift` remediation slice and removed the remaining PowerShell wrapper dependency from runtime drift repair.
 - Updated: `2026-03-26 21:32` — implemented the Rust-backed bootstrap provider render slice and removed the PowerShell dispatcher dependency from the bootstrap projection path.
+- Updated: `2026-03-26 21:39` — implemented the Rust-backed bootstrap MCP apply slice and removed the PowerShell Codex config rewrite dependency from the bootstrap path.
 
 ## Recommended Specialist Focus
 

@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 21:32
+- LastUpdated: 2026-03-26 21:39
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -64,6 +64,7 @@ The migration remains compatibility-first:
 - [2026-03-26 20:53] `crates/commands/runtime` is now organized into submodules by responsibility: `sync`, `diagnostics`, and `continuity`, with tests mirrored to the same folder structure instead of keeping every runtime surface flat at the crate root.
 - [2026-03-26 21:11] `crates/commands/runtime` now executes Rust-backed `doctor -SyncOnDrift` remediation too, reusing the Rust `bootstrap` path for runtime repair and re-auditing the mappings after sync.
 - [2026-03-26 21:32] `crates/commands/runtime` now executes Rust-backed provider surface rendering for the `bootstrap` consumer too, so bootstrap no longer shells out to `render-provider-surfaces.ps1` before synchronizing runtime assets.
+- [2026-03-26 21:39] `crates/commands/runtime` now executes Rust-backed MCP config application inside `bootstrap`, so the bootstrap path no longer shells out to `sync-codex-mcp-config.ps1` to rewrite Codex `config.toml`.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -201,6 +202,7 @@ Status: `[~]` In Progress
 - [2026-03-26 20:53] Reorganized `crates/commands/runtime` into `sync`, `diagnostics`, and `continuity` submodules and mirrored the external test tree to the same layout, reducing root-level sprawl without changing command contracts ✓ [2026-03-26 20:53]
 - [2026-03-26 21:11] Implemented Rust-backed `doctor -SyncOnDrift` remediation in `crates/commands/runtime`, with coverage for successful runtime repair and explicit remediation failure propagation ✓ [2026-03-26 21:11]
 - [2026-03-26 21:32] Implemented Rust-backed provider surface rendering for the `bootstrap` consumer in `crates/commands/runtime`, with coverage for GitHub, VS Code, Codex, and Claude projection gating during bootstrap-driven sync flows ✓ [2026-03-26 21:32]
+- [2026-03-26 21:39] Implemented Rust-backed MCP config application for `bootstrap` in `crates/commands/runtime`, with coverage for catalog-driven Codex server projection, TOML section replacement, and timestamped backup creation ✓ [2026-03-26 21:39]
 - Target paths:
   - `scripts/common/`
   - `scripts/runtime/`
@@ -220,7 +222,7 @@ Status: `[~]` In Progress
   - bootstrap/doctor/healthcheck/install/self-heal now share a Rust-owned execution context foundation
   - `doctor` diagnosis and `-SyncOnDrift` remediation now run from Rust and reuse the Rust `bootstrap` repair path
   - `healthcheck` orchestration/reporting now runs from Rust and `-SyncRuntime` now uses Rust `bootstrap`
-  - bootstrap-owned provider surface rendering now runs from Rust; MCP config application remains the last temporary delegated step inside the Rust bootstrap path
+  - bootstrap-owned provider surface rendering and MCP config application now run from Rust
   - `self-heal` orchestration/reporting now runs from Rust and reuses the Rust `bootstrap` plus `healthcheck` execution path
   - `apply-vscode-templates` now runs from Rust and no longer needs a PowerShell bridge inside `self-heal`
 - Commit checkpoint:
