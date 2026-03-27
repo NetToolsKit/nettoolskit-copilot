@@ -70,6 +70,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-27 09:00] The instruction ownership and routing-discipline slice is now live in Rust too: `crates/commands/validation/instruction_graph` owns `validate-instruction-architecture`, and `validate-all` dispatches it natively with direct coverage for manifest shape, ownership overlap, routing hard-cap enforcement, and canonical skill references.
 - [2026-03-27 10:12] The next workspace/runtime hygiene slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-warning-baseline`, and `validate-all` dispatches it natively while preserving warning-threshold governance, analyzer replay, and report emission semantics.
 - [2026-03-27 10:28] The runtime smoke-execution slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-runtime-script-tests`, and `validate-all` dispatches it natively while preserving PowerShell test harness execution semantics from the legacy validator.
+- [2026-03-27 10:46] The final workspace/runtime hygiene slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-shell-hooks`, and `validate-all` dispatches it natively while preserving shell syntax, semantic guard, and optional shellcheck semantics from the legacy validator.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -125,6 +126,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 32. [2026-03-27 09:31] Once `validate-instructions` lands, the instruction-system validation block is complete and Wave 2 should move to the remaining hygiene cluster (`validate-warning-baseline`, `validate-runtime-script-tests`, `validate-shell-hooks`) before expanding back into the higher-coupling agent and release-policy checks.
 33. [2026-03-27 10:12] After `validate-warning-baseline` lands, the remaining hygiene cluster should stay in the same capability family: `validate-runtime-script-tests` and `validate-shell-hooks` should join `operational_hygiene/` so runtime smoke checks and hook validation converge before the plan marks that hygiene block complete.
 34. [2026-03-27 10:28] After `validate-runtime-script-tests` lands, only `validate-shell-hooks` remains in the hygiene cluster, so closing that final slice should be treated as the explicit completion point for the entire workspace/runtime hygiene validation block.
+35. [2026-03-27 10:46] With `validate-shell-hooks` now live, the full workspace/runtime hygiene validation block is complete; the next Wave 2 execution should move to agent-orchestration and release/policy surfaces while keeping them grouped in similarly cohesive Rust module families.
 
 ## Constraints
 
@@ -198,6 +200,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 09:31` — implemented the `validate-instructions` Wave 2 instruction-graph slice in `crates/commands/validation/instruction_graph`, routed it through `validate-all`, and closed the full instruction-system validation block before moving to the remaining hygiene backlog.
 - Updated: `2026-03-27 10:12` — implemented the `validate-warning-baseline` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and reduced the remaining hygiene backlog to runtime script execution parity plus shell-hook validation.
 - Updated: `2026-03-27 10:28` — implemented the `validate-runtime-script-tests` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and reduced the remaining hygiene backlog to the final shell-hook validation slice.
+- Updated: `2026-03-27 10:46` — implemented the `validate-shell-hooks` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and closed the full workspace/runtime hygiene validation block.
 
 ## Recommended Specialist Focus
 
