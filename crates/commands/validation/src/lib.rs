@@ -55,7 +55,7 @@ pub use error::{
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
     ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
-    ValidateReleaseGovernanceCommandError,
+    ValidateReleaseGovernanceCommandError, ValidateReleaseProvenanceCommandError,
     ValidateRuntimeScriptTestsCommandError, ValidateShellHooksCommandError,
     ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
     ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
@@ -94,7 +94,8 @@ pub use policy::{
 };
 pub use release::{
     invoke_validate_release_governance, ValidateReleaseGovernanceRequest,
-    ValidateReleaseGovernanceResult,
+    ValidateReleaseGovernanceResult, invoke_validate_release_provenance,
+    ValidateReleaseProvenanceRequest, ValidateReleaseProvenanceResult,
 };
 pub use security::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,

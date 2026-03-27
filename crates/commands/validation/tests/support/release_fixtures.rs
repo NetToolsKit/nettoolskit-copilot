@@ -2,6 +2,7 @@
 
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 pub fn write_file(path: &Path, contents: &str) {
     if let Some(parent) = path.parent() {
@@ -90,4 +91,92 @@ Rollback.
   }
 }"#,
     );
+}
+
+pub fn initialize_release_provenance_repo(repo_root: &Path) {
+    initialize_release_governance_repo(repo_root);
+    write_repo_file(
+        repo_root,
+        ".github/governance/release-provenance.baseline.json",
+        r#"{
+  "version": 1,
+  "releaseBranch": "main",
+  "requireCleanWorktree": false,
+  "warnOnDirtyWorktree": false,
+  "requireAuditReport": false,
+  "warnOnMissingOptionalAuditReport": false,
+  "warnOnAuditCommitMismatch": true,
+  "changelogPath": "CHANGELOG.md",
+  "validateAllPath": "scripts/validation/validate-all.ps1",
+  "requiredValidationChecks": [
+    "validate-release-governance",
+    "validate-release-provenance"
+  ],
+  "requiredEvidenceFiles": [
+    "CHANGELOG.md",
+    "CODEOWNERS",
+    ".github/governance/release-governance.md",
+    ".github/governance/release-provenance.baseline.json"
+  ]
+}"#,
+    );
+    write_repo_file(
+        repo_root,
+        "scripts/validation/validate-all.ps1",
+        "$definitions = @(\n    @{ name = 'validate-release-governance' },\n    @{ name = 'validate-release-provenance' }\n)\n",
+    );
+}
+
+pub fn initialize_git_repository(repo_root: &Path) -> String {
+    run_git(repo_root, &["init", "-b", "main"]);
+    run_git(repo_root, &["config", "user.email", "fixtures@example.invalid"]);
+    run_git(repo_root, &["config", "user.name", "Fixture User"]);
+    run_git(repo_root, &["add", "."]);
+    run_git(repo_root, &["commit", "-m", "Initial release fixtures"]);
+
+    run_git_capture(repo_root, &["rev-parse", "HEAD"])
+}
+
+pub fn write_audit_report(
+    repo_root: &Path,
+    relative_path: &str,
+    commit: &str,
+    overall_status: &str,
+) {
+    write_repo_file(
+        repo_root,
+        relative_path,
+        &format!(
+            r#"{{
+  "generatedAt": "2026-03-27T13:43:00Z",
+  "summary": {{
+    "overallStatus": "{overall_status}"
+  }},
+  "git": {{
+    "commit": "{commit}"
+  }}
+}}"#
+        ),
+    );
+}
+
+fn run_git(repo_root: &Path, arguments: &[&str]) {
+    let status = Command::new("git")
+        .arg("-C")
+        .arg(repo_root)
+        .args(arguments)
+        .status()
+        .expect("git command should start");
+    assert!(status.success(), "git command should succeed: {:?}", arguments);
+}
+
+fn run_git_capture(repo_root: &Path, arguments: &[&str]) -> String {
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(repo_root)
+        .args(arguments)
+        .output()
+        .expect("git command should start");
+    assert!(output.status.success(), "git command should succeed: {:?}", arguments);
+    String::from_utf8_lossy(&output.stdout).trim().to_string()
 }

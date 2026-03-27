@@ -314,6 +314,18 @@ pub enum ValidateReleaseGovernanceCommandError {
     },
 }
 
+/// Errors raised by release-provenance validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateReleaseProvenanceCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve release provenance workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

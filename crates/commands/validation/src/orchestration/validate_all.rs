@@ -25,6 +25,7 @@ use crate::{
     invoke_validate_shared_script_checksums,
     invoke_validate_supply_chain,
     invoke_validate_release_governance,
+    invoke_validate_release_provenance,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -44,6 +45,7 @@ use crate::{
     ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest,
     ValidateReleaseGovernanceRequest,
+    ValidateReleaseProvenanceRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -253,6 +255,7 @@ enum NativeValidationCheck {
     SharedScriptChecksums,
     SupplyChain,
     ReleaseGovernance,
+    ReleaseProvenance,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -310,6 +313,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseGovernance) => {
                 "rust:nettoolskit-validation::validate-release-governance"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseProvenance) => {
+                "rust:nettoolskit-validation::validate-release-provenance"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -665,9 +671,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-release-provenance",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-release-provenance.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseProvenance),
         ),
         (
             "validate-audit-ledger",
@@ -828,6 +832,12 @@ fn definition_supports_parameter(
                     | "CodeownersPath"
                     | "GovernanceDocPath"
                     | "BranchProtectionBaselinePath"
+            )
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::ReleaseProvenance) => {
+            matches!(
+                parameter_name,
+                "WarningOnly" | "BaselinePath" | "AuditReportPath" | "RequireAuditReport"
             )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
@@ -1184,6 +1194,25 @@ fn run_native_validation_check(
                     &arguments,
                     "BranchProtectionBaselinePath",
                 ),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::ReleaseProvenance => {
+            invoke_validate_release_provenance(&ValidateReleaseProvenanceRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                baseline_path: string_argument_path(&arguments, "BaselinePath"),
+                audit_report_path: string_argument_path(&arguments, "AuditReportPath"),
+                require_audit_report: bool_argument(&arguments, "RequireAuditReport")
+                    .unwrap_or(false),
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
             })

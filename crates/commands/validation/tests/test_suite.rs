@@ -47,6 +47,7 @@ mod policy {
 
 mod release {
     pub mod release_governance_tests;
+    pub mod release_provenance_tests;
 }
 
 mod security {
