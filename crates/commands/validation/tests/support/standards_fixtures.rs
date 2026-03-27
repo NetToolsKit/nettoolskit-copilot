@@ -82,9 +82,54 @@ public class [ClassName]IntegrationTests
     );
 }
 
+pub fn initialize_powershell_standards_repo(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join(".codex"))
+        .expect("codex directory should be created for repository resolution");
+    fs::create_dir_all(repo_root.join(".github"))
+        .expect("github directory should be created for repository resolution");
+    write_powershell_script(
+        repo_root,
+        "scripts/runtime/install.ps1",
+        r#"<#
+.SYNOPSIS
+Installs runtime assets.
+
+.DESCRIPTION
+Ensures runtime assets are present.
+
+.PARAMETER RepoRoot
+Optional repository root.
+
+.EXAMPLE
+pwsh -File scripts/runtime/install.ps1
+
+.NOTES
+Version: 1.0
+#>
+
+param(
+    [string] $RepoRoot
+)
+
+$ErrorActionPreference = 'Stop'
+
+# Returns a sample value.
+function Get-ExampleValue {
+    param()
+
+    return 'ok'
+}
+"#,
+    );
+}
+
 pub fn write_dotnet_template_file(repo_root: &Path, file_name: &str, contents: &str) {
     write_file(
         &repo_root.join(".github/templates").join(file_name),
         contents,
     );
+}
+
+pub fn write_powershell_script(repo_root: &Path, relative_path: &str, contents: &str) {
+    write_file(&repo_root.join(relative_path), contents);
 }

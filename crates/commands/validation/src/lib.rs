@@ -47,6 +47,7 @@ pub use error::{
     ValidateArchitectureBoundariesCommandError,
     ValidateCompatibilityLifecyclePolicyCommandError,
     ValidateDotnetStandardsCommandError,
+    ValidatePowerShellStandardsCommandError,
     ValidatePolicyCommandError,
     ValidateSecurityBaselineCommandError,
     ValidateSharedScriptChecksumsCommandError,
@@ -105,8 +106,9 @@ pub use security::{
     ValidateSupplyChainRequest, ValidateSupplyChainResult,
 };
 pub use standards::{
-    invoke_validate_dotnet_standards, ValidateDotnetStandardsRequest,
-    ValidateDotnetStandardsResult,
+    invoke_validate_dotnet_standards, invoke_validate_powershell_standards,
+    ValidateDotnetStandardsRequest, ValidateDotnetStandardsResult,
+    ValidatePowerShellStandardsRequest, ValidatePowerShellStandardsResult,
 };
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,

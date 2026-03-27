@@ -1,3 +1,4 @@
 //! Standards validation test suite.
 
 pub mod dotnet_standards_tests;
+pub mod powershell_standards_tests;

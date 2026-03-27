@@ -58,6 +58,7 @@ mod security {
 
 mod standards {
     pub mod dotnet_standards_tests;
+    pub mod powershell_standards_tests;
 }
 
 mod structure {

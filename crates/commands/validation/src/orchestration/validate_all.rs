@@ -20,6 +20,7 @@ use crate::{
     invoke_validate_architecture_boundaries,
     invoke_validate_compatibility_lifecycle_policy,
     invoke_validate_dotnet_standards,
+    invoke_validate_powershell_standards,
     invoke_validate_policy,
     invoke_validate_security_baseline,
     invoke_validate_shared_script_checksums,
@@ -40,6 +41,7 @@ use crate::{
     ValidateArchitectureBoundariesRequest,
     ValidateCompatibilityLifecyclePolicyRequest,
     ValidateDotnetStandardsRequest,
+    ValidatePowerShellStandardsRequest,
     ValidatePolicyRequest,
     ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest,
@@ -237,7 +239,6 @@ struct ValidationCheckDefinition {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ValidationCheckExecutor {
-    PowerShell(&'static str),
     Native(NativeValidationCheck),
 }
 
@@ -250,6 +251,7 @@ enum NativeValidationCheck {
     ArchitectureBoundaries,
     CompatibilityLifecyclePolicy,
     DotnetStandards,
+    PowerShellStandards,
     Policy,
     SecurityBaseline,
     SharedScriptChecksums,
@@ -274,7 +276,6 @@ enum NativeValidationCheck {
 impl ValidationCheckDefinition {
     fn script_label(&self) -> &'static str {
         match self.executor {
-            ValidationCheckExecutor::PowerShell(script) => script,
             ValidationCheckExecutor::Native(NativeValidationCheck::Instructions) => {
                 "rust:nettoolskit-validation::validate-instructions"
             }
@@ -298,6 +299,9 @@ impl ValidationCheckDefinition {
             ) => "rust:nettoolskit-validation::validate-compatibility-lifecycle-policy",
             ValidationCheckExecutor::Native(NativeValidationCheck::DotnetStandards) => {
                 "rust:nettoolskit-validation::validate-dotnet-standards"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::PowerShellStandards) => {
+                "rust:nettoolskit-validation::validate-powershell-standards"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => {
                 "rust:nettoolskit-validation::validate-policy"
@@ -431,7 +435,7 @@ pub fn invoke_validate_all(
             apply_check_options(check_options, &mut check_arguments, &mut check_warning_only);
         }
 
-        if definition_supports_parameter(definition, &repo_root, "WarningOnly") {
+        if definition_supports_parameter(definition, "WarningOnly") {
             check_arguments.insert(
                 "WarningOnly".to_string(),
                 ValidationCommandArgument {
@@ -629,9 +633,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-powershell-standards",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-powershell-standards.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::PowerShellStandards),
         ),
         (
             "validate-agent-hooks",
@@ -781,15 +783,9 @@ fn option_to_command_argument(key: &str, value: &Value) -> Option<ValidationComm
 
 fn definition_supports_parameter(
     definition: &ValidationCheckDefinition,
-    repo_root: &Path,
     parameter_name: &str,
 ) -> bool {
     match definition.executor {
-        ValidationCheckExecutor::PowerShell(script_path) => {
-            fs::read_to_string(repo_root.join(script_path))
-                .map(|document| document.contains(parameter_name))
-                .unwrap_or(false)
-        }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AgentPermissions)
         | ValidationCheckExecutor::Native(NativeValidationCheck::Instructions)
@@ -813,6 +809,12 @@ fn definition_supports_parameter(
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::DotnetStandards) => {
             parameter_name == "TemplateDirectory"
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::PowerShellStandards) => {
+            matches!(
+                parameter_name,
+                "WarningOnly" | "ScriptsRoot" | "IncludeAllScripts" | "Strict" | "SkipScriptAnalyzer"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::SecurityBaseline) => {
@@ -907,13 +909,6 @@ fn run_validation_script(
     treat_failure_as_warning: bool,
 ) -> ValidationCheckResult {
     match definition.executor {
-        ValidationCheckExecutor::PowerShell(script) => run_powershell_validation_script(
-            repo_root,
-            definition.name,
-            script,
-            arguments,
-            treat_failure_as_warning,
-        ),
         ValidationCheckExecutor::Native(native_check) => run_native_validation_check(
             repo_root,
             definition.name,
@@ -921,81 +916,6 @@ fn run_validation_script(
             native_check,
             arguments,
             treat_failure_as_warning,
-        ),
-    }
-}
-
-fn run_powershell_validation_script(
-    repo_root: &Path,
-    name: &str,
-    script: &str,
-    arguments: BTreeMap<String, ValidationCommandArgument>,
-    treat_failure_as_warning: bool,
-) -> ValidationCheckResult {
-    let started = Instant::now();
-    let script_path = repo_root.join(script);
-    let formatted_arguments = format_argument_list(&arguments);
-
-    if !script_path.is_file() {
-        return build_check_result(
-            name,
-            script,
-            formatted_arguments,
-            treat_failure_as_warning,
-            1,
-            Some(format!("script not found: {}", script_path.display())),
-            started.elapsed().as_millis(),
-        );
-    }
-
-    let mut command = Command::new("pwsh");
-    command
-        .current_dir(repo_root)
-        .arg("-NoLogo")
-        .arg("-NoProfile")
-        .arg("-ExecutionPolicy")
-        .arg("Bypass")
-        .arg("-File")
-        .arg(&script_path);
-    for argument in arguments.values() {
-        append_command_argument(&mut command, argument);
-    }
-
-    match command.output() {
-        Ok(output) => {
-            let exit_code = output.status.code().unwrap_or(1);
-            let error_message = if output.status.success() {
-                None
-            } else {
-                let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-                let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-                if !stderr.is_empty() {
-                    Some(stderr)
-                } else if !stdout.is_empty() {
-                    Some(stdout)
-                } else {
-                    None
-                }
-            };
-
-            build_check_result(
-                name,
-                script,
-                formatted_arguments,
-                treat_failure_as_warning,
-                exit_code,
-                error_message,
-                started.elapsed().as_millis(),
-            )
-        }
-        Err(error) => build_check_result(
-            name,
-            script,
-            formatted_arguments,
-            treat_failure_as_warning,
-            1,
-            Some(error.to_string()),
-            started.elapsed().as_millis(),
         ),
     }
 }
@@ -1111,6 +1031,26 @@ fn run_native_validation_check(
             invoke_validate_dotnet_standards(&ValidateDotnetStandardsRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 template_directory: string_argument_path(&arguments, "TemplateDirectory"),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::PowerShellStandards => {
+            invoke_validate_powershell_standards(&ValidatePowerShellStandardsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                scripts_root: string_argument_path(&arguments, "ScriptsRoot"),
+                include_all_scripts: bool_argument(&arguments, "IncludeAllScripts").unwrap_or(false),
+                strict: bool_argument(&arguments, "Strict").unwrap_or(false),
+                skip_script_analyzer: bool_argument(&arguments, "SkipScriptAnalyzer")
+                    .unwrap_or(false),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
             })
             .map(|result| {
                 (
@@ -1498,19 +1438,6 @@ fn combine_native_messages(failures: &[String], warnings: &[String]) -> Option<S
     }
 }
 
-fn append_command_argument(command: &mut Command, argument: &ValidationCommandArgument) {
-    match (&argument.kind, &argument.value) {
-        (ValidationArgumentKind::String, ValidationArgumentValue::String(value)) => {
-            command.arg(format!("-{}", argument.name)).arg(value);
-        }
-        (ValidationArgumentKind::Bool, ValidationArgumentValue::Bool(value)) => {
-            let truthy = if *value { "$true" } else { "$false" };
-            command.arg(format!("-{}:{truthy}", argument.name));
-        }
-        _ => {}
-    }
-}
-
 fn format_argument_list(arguments: &BTreeMap<String, ValidationCommandArgument>) -> Vec<String> {
     arguments
         .values()
@@ -1519,34 +1446,6 @@ fn format_argument_list(arguments: &BTreeMap<String, ValidationCommandArgument>)
             ValidationArgumentValue::Bool(value) => format!("-{}={value}", argument.name),
         })
         .collect()
-}
-
-fn build_check_result(
-    name: &str,
-    script: &str,
-    arguments: Vec<String>,
-    treat_failure_as_warning: bool,
-    raw_exit_code: i32,
-    error: Option<String>,
-    duration_ms: u128,
-) -> ValidationCheckResult {
-    let (status, exit_code) = if raw_exit_code == 0 {
-        (ValidationCheckStatus::Passed, 0)
-    } else if treat_failure_as_warning {
-        (ValidationCheckStatus::Warning, 0)
-    } else {
-        (ValidationCheckStatus::Failed, raw_exit_code)
-    };
-
-    ValidationCheckResult {
-        name: name.to_string(),
-        script: script.to_string(),
-        arguments,
-        status,
-        exit_code,
-        duration_ms,
-        error,
-    }
 }
 
 fn build_native_check_result(

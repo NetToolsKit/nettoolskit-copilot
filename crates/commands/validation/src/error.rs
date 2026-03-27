@@ -254,6 +254,18 @@ pub enum ValidateDotnetStandardsCommandError {
     },
 }
 
+/// Errors raised by PowerShell standards validation commands.
+#[derive(Debug, Error)]
+pub enum ValidatePowerShellStandardsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve powershell standards workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by architecture boundary validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateArchitectureBoundariesCommandError {
