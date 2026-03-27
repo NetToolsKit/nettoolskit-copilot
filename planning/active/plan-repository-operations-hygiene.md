@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 08:22
+- LastUpdated: 2026-03-27 09:00
 - Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -49,6 +49,7 @@ Current hygiene priorities for the migration:
 - [2026-03-26 23:06] `crates/commands/validation` now carries executable Rust replacements for `validate-routing-coverage` and `validate-template-standards`, so routing-fixture drift and shared template contract drift now emit hygiene evidence without PowerShell wrappers too.
 - [2026-03-27 08:07] `crates/commands/validation` now carries an executable Rust replacement for `validate-workspace-efficiency` under a dedicated `workspace` module, so workspace/runtime hygiene evidence and VS Code workspace policy drift no longer rely on the PowerShell validator.
 - [2026-03-27 08:22] `crates/commands/validation` now carries an executable Rust replacement for `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, so centralized official-doc policy drift no longer relies on the PowerShell validator either.
+- [2026-03-27 09:00] `crates/commands/validation` now carries an executable Rust replacement for `validate-instruction-architecture` under the same `instruction_graph` module, so instruction ownership, deterministic routing budget, and canonical skill-reference drift no longer rely on the PowerShell validator either.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -144,6 +145,7 @@ Status: `[ ]` Pending
 - [2026-03-26 23:06] The first routing/template governance checks now run through Rust too: `validate-routing-coverage` and `validate-template-standards` execute natively under `crates/commands/validation/governance`, and `validate-all` now surfaces their outcomes without the PowerShell bridge ✓ [2026-03-26 23:06]
 - [2026-03-27 08:07] The workspace-efficiency hygiene check now runs through Rust too: `validate-workspace-efficiency` executes natively under `crates/commands/validation/workspace`, and `validate-all` routes it without the PowerShell bridge while keeping the validation crate grouped by responsibility ✓ [2026-03-27 08:07]
 - [2026-03-27 08:22] The authoritative-source policy check now runs through Rust too: `validate-authoritative-source-policy` executes natively under `crates/commands/validation/instruction_graph`, and `validate-all` routes it without the PowerShell bridge while keeping instruction-system policy checks out of the crate root ✓ [2026-03-27 08:22]
+- [2026-03-27 09:00] The instruction-architecture ownership check now runs through Rust too: `validate-instruction-architecture` executes natively under `crates/commands/validation/instruction_graph`, and `validate-all` routes it without the PowerShell bridge while keeping instruction-system ownership/routing rules grouped with the rest of the instruction graph ✓ [2026-03-27 09:00]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -164,6 +166,7 @@ Status: `[ ]` Pending
   - routing and template governance drift now emit Rust-native warning/failure status without relying on legacy scripts
   - workspace-efficiency drift now emits Rust-native warning/failure status without relying on the legacy validator, and the validation crate remains organized by capability boundaries as Wave 2 grows
   - authoritative-source policy drift now emits Rust-native warning/failure status without relying on the legacy validator, and the validation crate keeps instruction-system policy isolated under `instruction_graph/`
+  - instruction-architecture drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining instruction-graph backlog is reduced to the top-level `validate-instructions` sweep
 - Commit checkpoint:
   - `ci(rust): harden migration validation and wrapper governance`
 

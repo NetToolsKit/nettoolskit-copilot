@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 08:22
+- LastUpdated: 2026-03-27 09:00
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -71,6 +71,7 @@ The migration remains compatibility-first:
 - [2026-03-26 23:06] `crates/commands/validation` now executes Rust-backed `validate-routing-coverage` and `validate-template-standards` under a dedicated `governance` module, so route-fixture parity and shared template contracts now run natively in Rust too.
 - [2026-03-27 08:07] `crates/commands/validation` now executes Rust-backed `validate-workspace-efficiency` under a dedicated `workspace` module, with direct external coverage for template workspaces, duplicate folders, redundant local settings, forbidden settings, heuristics, and native dispatch through `validate-all`.
 - [2026-03-27 08:22] `crates/commands/validation` now executes Rust-backed `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, with direct external coverage for source-map contract enforcement, required global references, duplicated official-doc domains, and native dispatch through `validate-all`.
+- [2026-03-27 09:00] `crates/commands/validation` now executes Rust-backed `validate-instruction-architecture` under `instruction_graph`, with direct external coverage for manifest shape, required global references, deterministic routing hard-cap enforcement, ownership-marker warnings, skill canonical references, and native dispatch through `validate-all`.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -247,6 +248,7 @@ Status: `[~]` In Progress
 - [2026-03-26 23:06] Implemented Rust-backed `validate-routing-coverage` and `validate-template-standards` in `crates/commands/validation/governance`, with direct external coverage and native dispatch through `validate-all` for the first routing/template governance cutover slice ✓ [2026-03-26 23:06]
 - [2026-03-27 08:07] Implemented Rust-backed `validate-workspace-efficiency` in `crates/commands/validation/workspace`, with direct external coverage and native dispatch through `validate-all` for the workspace/runtime hygiene slice ✓ [2026-03-27 08:07]
 - [2026-03-27 08:22] Implemented Rust-backed `validate-authoritative-source-policy` in `crates/commands/validation/instruction_graph`, with direct external coverage and native dispatch through `validate-all` for the first instruction-graph policy slice ✓ [2026-03-27 08:22]
+- [2026-03-27 09:00] Implemented Rust-backed `validate-instruction-architecture` in `crates/commands/validation/instruction_graph`, with direct external coverage and native dispatch through `validate-all` for the instruction ownership, routing-discipline, and canonical-skill-reference slice ✓ [2026-03-27 09:00]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -270,11 +272,12 @@ Status: `[~]` In Progress
   - `validate-routing-coverage` and `validate-template-standards` no longer depend on PowerShell business logic
   - `validate-workspace-efficiency` no longer depends on PowerShell business logic, and the validation crate now keeps workspace-specific rules in a dedicated `workspace/` boundary instead of expanding the root module flatly
   - `validate-authoritative-source-policy` no longer depends on PowerShell business logic, and the validation crate now keeps instruction-system policy checks in a dedicated `instruction_graph/` boundary instead of mixing them into `governance/` or the crate root
+  - `validate-instruction-architecture` no longer depends on PowerShell business logic, and the instruction ownership plus routing-discipline slice now lives beside the authoritative-source policy checks inside `instruction_graph/`
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
   - workspace/runtime hygiene checks: `validate-warning-baseline`, `validate-runtime-script-tests`, `validate-shell-hooks`
-  - repository authoring and instruction graph: `validate-instructions`, `validate-instruction-architecture`
+  - repository authoring and instruction graph: `validate-instructions`
   - agent policy and orchestration: `validate-agent-orchestration`, `validate-agent-skill-alignment`, `validate-agent-permissions`, `validate-agent-hooks`
   - policy/security/release/domain checks: `validate-policy`, `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
