@@ -76,9 +76,9 @@ pub fn invoke_validate_instruction_metadata(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| ValidateInstructionMetadataCommandError::ResolveWorkspaceRoot {
-            source,
-        })?;
+        .map_err(
+            |source| ValidateInstructionMetadataCommandError::ResolveWorkspaceRoot { source },
+        )?;
 
     let mut warnings = Vec::new();
     let mut failures = Vec::new();
@@ -240,31 +240,13 @@ fn test_metadata_file(
     let metadata = parse_frontmatter_map(frontmatter_text);
     match kind {
         MetadataFileKind::Instruction => {
-            test_instruction_metadata(
-                &relative_path,
-                &metadata,
-                warning_only,
-                warnings,
-                failures,
-            );
+            test_instruction_metadata(&relative_path, &metadata, warning_only, warnings, failures);
         }
         MetadataFileKind::Prompt => {
-            test_prompt_metadata(
-                &relative_path,
-                &metadata,
-                warning_only,
-                warnings,
-                failures,
-            );
+            test_prompt_metadata(&relative_path, &metadata, warning_only, warnings, failures);
         }
         MetadataFileKind::ChatMode => {
-            test_chat_mode_metadata(
-                &relative_path,
-                &metadata,
-                warning_only,
-                warnings,
-                failures,
-            );
+            test_chat_mode_metadata(&relative_path, &metadata, warning_only, warnings, failures);
         }
     }
 }

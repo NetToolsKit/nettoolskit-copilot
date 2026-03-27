@@ -11,8 +11,7 @@ use sha2::{Digest, Sha256};
 use crate::{error::ValidateAuditLedgerCommandError, ValidationCheckStatus};
 
 const DEFAULT_LEDGER_PATH: &str = ".temp/audit/validation-ledger.jsonl";
-const ZERO_HASH: &str =
-    "0000000000000000000000000000000000000000000000000000000000000000";
+const ZERO_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
 /// Request payload for `validate-audit-ledger`.
 #[derive(Debug, Clone, PartialEq, Eq)]

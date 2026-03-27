@@ -8,6 +8,5 @@ pub use instruction_metadata::{
     ValidateInstructionMetadataResult,
 };
 pub use readme_standards::{
-    invoke_validate_readme_standards, ValidateReadmeStandardsRequest,
-    ValidateReadmeStandardsResult,
+    invoke_validate_readme_standards, ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
 };

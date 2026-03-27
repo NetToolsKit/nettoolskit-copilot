@@ -23,3 +23,7 @@ mod orchestration {
 mod structure {
     pub mod planning_structure_tests;
 }
+
+mod workspace {
+    pub mod workspace_efficiency_tests;
+}

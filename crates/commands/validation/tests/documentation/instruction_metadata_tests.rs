@@ -1,8 +1,7 @@
 //! Tests for `validate-instruction-metadata`.
 
 use nettoolskit_validation::{
-    invoke_validate_instruction_metadata, ValidateInstructionMetadataRequest,
-    ValidationCheckStatus,
+    invoke_validate_instruction_metadata, ValidateInstructionMetadataRequest, ValidationCheckStatus,
 };
 use std::fs;
 use tempfile::TempDir;
@@ -30,7 +29,9 @@ fn test_invoke_validate_instruction_metadata_passes_for_valid_authoring_assets()
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/instructions/example.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/example.instructions.md"),
         "---\napplyTo: \"**/*.{rs,md}\"\npriority: medium\n---\n\n# Example\n",
     );
     write_file(
@@ -62,7 +63,9 @@ fn test_invoke_validate_instruction_metadata_reports_invalid_required_fields() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/instructions/example.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/example.instructions.md"),
         "---\napplyTo: \"C:\\absolute\\path\"\npriority: urgent\n---\n\n# Example\n",
     );
     write_file(
@@ -105,7 +108,9 @@ fn test_invoke_validate_instruction_metadata_converts_required_findings_to_warni
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/instructions/example.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/example.instructions.md"),
         "---\napplyTo: \"**/*\"\npriority: urgent\n---\n\n# Example\n",
     );
     write_file(

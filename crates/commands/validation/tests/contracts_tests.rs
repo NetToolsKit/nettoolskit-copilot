@@ -26,8 +26,8 @@ fn test_validation_surface_contracts_have_unique_ids_and_roots() {
 
 #[test]
 fn test_validation_surface_lookup_returns_expected_security_contract() {
-    let contract = validation_surface_contract("security-commands")
-        .expect("security surface should exist");
+    let contract =
+        validation_surface_contract("security-commands").expect("security surface should exist");
 
     assert_eq!(contract.kind, ValidationSurfaceKind::SecurityCommands);
     assert_eq!(contract.legacy_root, "scripts/security");

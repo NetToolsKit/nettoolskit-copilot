@@ -2,42 +2,48 @@
 
 pub mod contracts;
 pub mod documentation;
-pub mod evidence;
 pub mod error;
+pub mod evidence;
 pub mod governance;
 pub mod orchestration;
 pub mod structure;
+pub mod workspace;
 
 pub use contracts::{
     validation_surface_contract, validation_surface_script_total, MigrationWave,
     ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
-};
-pub use error::{
-    ValidateAllCommandError, ValidateAuditLedgerCommandError,
-    ValidateInstructionMetadataCommandError, ValidatePlanningStructureCommandError,
-    ValidateReadmeStandardsCommandError, ValidateRoutingCoverageCommandError,
-    ValidateTemplateStandardsCommandError, ValidationSurfaceError,
-};
-pub use governance::{
-    invoke_validate_routing_coverage, invoke_validate_template_standards,
-    ValidateRoutingCoverageRequest, ValidateRoutingCoverageResult,
-    ValidateTemplateStandardsRequest, ValidateTemplateStandardsResult,
 };
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
     ValidateInstructionMetadataRequest, ValidateInstructionMetadataResult,
     ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
 };
-pub use orchestration::{
-    invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
-    ValidationCheckStatus,
+pub use error::{
+    ValidateAllCommandError, ValidateAuditLedgerCommandError,
+    ValidateInstructionMetadataCommandError, ValidatePlanningStructureCommandError,
+    ValidateReadmeStandardsCommandError, ValidateRoutingCoverageCommandError,
+    ValidateTemplateStandardsCommandError, ValidateWorkspaceEfficiencyCommandError,
+    ValidationSurfaceError,
 };
 pub use evidence::{
     invoke_validate_audit_ledger, ValidateAuditLedgerRequest, ValidateAuditLedgerResult,
 };
+pub use governance::{
+    invoke_validate_routing_coverage, invoke_validate_template_standards,
+    ValidateRoutingCoverageRequest, ValidateRoutingCoverageResult,
+    ValidateTemplateStandardsRequest, ValidateTemplateStandardsResult,
+};
+pub use orchestration::{
+    invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
+    ValidationCheckStatus,
+};
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,
     ValidatePlanningStructureResult,
+};
+pub use workspace::{
+    invoke_validate_workspace_efficiency, ValidateWorkspaceEfficiencyRequest,
+    ValidateWorkspaceEfficiencyResult,
 };
 
 /// Require a registered validation surface contract.

@@ -17,16 +17,16 @@ use crate::{
     invoke_validate_audit_ledger, invoke_validate_instruction_metadata,
     invoke_validate_planning_structure, invoke_validate_readme_standards,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
-    ValidateAuditLedgerRequest, ValidateInstructionMetadataRequest,
-    ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
-    ValidateRoutingCoverageRequest, ValidateTemplateStandardsRequest,
+    invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
+    ValidateInstructionMetadataRequest, ValidatePlanningStructureRequest,
+    ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
+    ValidateTemplateStandardsRequest, ValidateWorkspaceEfficiencyRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
 const DEFAULT_LEDGER_PATH: &str = ".temp/audit/validation-ledger.jsonl";
 const DEFAULT_OUTPUT_PATH: &str = ".temp/audit/validate-all.latest.json";
-const ZERO_LEDGER_HASH: &str =
-    "0000000000000000000000000000000000000000000000000000000000000000";
+const ZERO_LEDGER_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
 const DEFAULT_CHECK_ORDER: &[&str] = &[
     "validate-instructions",
@@ -216,6 +216,7 @@ enum NativeValidationCheck {
     InstructionMetadata,
     RoutingCoverage,
     TemplateStandards,
+    WorkspaceEfficiency,
 }
 
 impl ValidationCheckDefinition {
@@ -240,6 +241,9 @@ impl ValidationCheckDefinition {
             ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
                 "rust:nettoolskit-validation::validate-template-standards"
             }
+            ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
+                "rust:nettoolskit-validation::validate-workspace-efficiency"
+            }
         }
     }
 }
@@ -261,11 +265,10 @@ struct GitState {
 pub fn invoke_validate_all(
     request: &ValidateAllRequest,
 ) -> Result<ValidateAllResult, ValidateAllCommandError> {
-    let current_dir = env::current_dir().map_err(|source| {
-        ValidateAllCommandError::ResolveWorkspaceRoot {
+    let current_dir =
+        env::current_dir().map_err(|source| ValidateAllCommandError::ResolveWorkspaceRoot {
             source: source.into(),
-        }
-    })?;
+        })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
         .map_err(|source| ValidateAllCommandError::ResolveWorkspaceRoot { source })?;
     let output_path = resolve_output_path(&repo_root, request.output_path.as_deref());
@@ -280,7 +283,8 @@ pub fn invoke_validate_all(
         None
     };
 
-    let profiles_path = resolve_profiles_path(&repo_root, request.validation_profiles_path.as_deref());
+    let profiles_path =
+        resolve_profiles_path(&repo_root, request.validation_profiles_path.as_deref());
     let profiles_document = load_profiles_document(&profiles_path, &mut suite_warnings);
     let selected_profile = select_profile(
         profiles_document.as_ref(),
@@ -291,8 +295,10 @@ pub fn invoke_validate_all(
         .as_ref()
         .map(|profile| profile.id.clone())
         .unwrap_or_else(|| "custom".to_string());
-    let effective_warning_only =
-        request.warning_only || selected_profile.as_ref().is_some_and(|profile| profile.warning_only);
+    let effective_warning_only = request.warning_only
+        || selected_profile
+            .as_ref()
+            .is_some_and(|profile| profile.warning_only);
 
     let selected_check_order = resolve_check_order(selected_profile.as_ref());
     let check_option_map = selected_profile
@@ -518,9 +524,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-workspace-efficiency",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-workspace-efficiency.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency),
         ),
         (
             "validate-compatibility-lifecycle-policy",
@@ -550,15 +554,11 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-warning-baseline",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-warning-baseline.ps1",
-            ),
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-warning-baseline.ps1"),
         ),
         (
             "validate-dotnet-standards",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-dotnet-standards.ps1",
-            ),
+            ValidationCheckExecutor::PowerShell("scripts/validation/validate-dotnet-standards.ps1"),
         ),
         (
             "validate-architecture-boundaries",
@@ -591,7 +591,13 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
             ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger),
         ),
     ] {
-        catalog.insert(name, ValidationCheckDefinition { name, executor: script });
+        catalog.insert(
+            name,
+            ValidationCheckDefinition {
+                name,
+                executor: script,
+            },
+        );
     }
 
     catalog
@@ -692,9 +698,11 @@ fn definition_supports_parameter(
     parameter_name: &str,
 ) -> bool {
     match definition.executor {
-        ValidationCheckExecutor::PowerShell(script_path) => fs::read_to_string(repo_root.join(script_path))
-            .map(|document| document.contains(parameter_name))
-            .unwrap_or(false),
+        ValidationCheckExecutor::PowerShell(script_path) => {
+            fs::read_to_string(repo_root.join(script_path))
+                .map(|document| document.contains(parameter_name))
+                .unwrap_or(false)
+        }
         ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
@@ -702,6 +710,12 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
         | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
             parameter_name == "WarningOnly"
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
+            matches!(
+                parameter_name,
+                "WarningOnly" | "BaselinePath" | "SettingsTemplatePath" | "WorkspaceSearchRoot"
+            )
         }
     }
 }
@@ -713,12 +727,21 @@ fn run_validation_script(
     treat_failure_as_warning: bool,
 ) -> ValidationCheckResult {
     match definition.executor {
-        ValidationCheckExecutor::PowerShell(script) => {
-            run_powershell_validation_script(repo_root, definition.name, script, arguments, treat_failure_as_warning)
-        }
-        ValidationCheckExecutor::Native(native_check) => {
-            run_native_validation_check(repo_root, definition.name, definition.script_label(), native_check, arguments, treat_failure_as_warning)
-        }
+        ValidationCheckExecutor::PowerShell(script) => run_powershell_validation_script(
+            repo_root,
+            definition.name,
+            script,
+            arguments,
+            treat_failure_as_warning,
+        ),
+        ValidationCheckExecutor::Native(native_check) => run_native_validation_check(
+            repo_root,
+            definition.name,
+            definition.script_label(),
+            native_check,
+            arguments,
+            treat_failure_as_warning,
+        ),
     }
 }
 
@@ -809,130 +832,112 @@ fn run_native_validation_check(
     let formatted_arguments = format_argument_list(&arguments);
 
     let (native_status, raw_exit_code, error) = match native_check {
-        NativeValidationCheck::PlanningStructure => invoke_validate_planning_structure(
-            &ValidatePlanningStructureRequest {
+        NativeValidationCheck::PlanningStructure => {
+            invoke_validate_planning_structure(&ValidatePlanningStructureRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
-            },
-        )
-        .map(|result| {
-            (
-                result.status,
-                result.exit_code,
-                combine_native_messages(&result.failures, &result.warnings),
-            )
-        })
-        .unwrap_or_else(|error| {
-            (
-                ValidationCheckStatus::Failed,
-                1,
-                Some(error.to_string()),
-            )
-        }),
-        NativeValidationCheck::AuditLedger => invoke_validate_audit_ledger(
-            &ValidateAuditLedgerRequest {
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::AuditLedger => {
+            invoke_validate_audit_ledger(&ValidateAuditLedgerRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
                 ..ValidateAuditLedgerRequest::default()
-            },
-        )
-        .map(|result| {
-            (
-                result.status,
-                result.exit_code,
-                combine_native_messages(&result.failures, &result.warnings),
-            )
-        })
-        .unwrap_or_else(|error| {
-            (
-                ValidationCheckStatus::Failed,
-                1,
-                Some(error.to_string()),
-            )
-        }),
-        NativeValidationCheck::ReadmeStandards => invoke_validate_readme_standards(
-            &ValidateReadmeStandardsRequest {
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::ReadmeStandards => {
+            invoke_validate_readme_standards(&ValidateReadmeStandardsRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
                 ..ValidateReadmeStandardsRequest::default()
-            },
-        )
-        .map(|result| {
-            (
-                result.status,
-                result.exit_code,
-                combine_native_messages(&result.failures, &result.warnings),
-            )
-        })
-        .unwrap_or_else(|error| {
-            (
-                ValidationCheckStatus::Failed,
-                1,
-                Some(error.to_string()),
-            )
-        }),
-        NativeValidationCheck::InstructionMetadata => invoke_validate_instruction_metadata(
-            &ValidateInstructionMetadataRequest {
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::InstructionMetadata => {
+            invoke_validate_instruction_metadata(&ValidateInstructionMetadataRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
-            },
-        )
-        .map(|result| {
-            (
-                result.status,
-                result.exit_code,
-                combine_native_messages(&result.failures, &result.warnings),
-            )
-        })
-        .unwrap_or_else(|error| {
-            (
-                ValidationCheckStatus::Failed,
-                1,
-                Some(error.to_string()),
-            )
-        }),
-        NativeValidationCheck::RoutingCoverage => invoke_validate_routing_coverage(
-            &ValidateRoutingCoverageRequest {
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::RoutingCoverage => {
+            invoke_validate_routing_coverage(&ValidateRoutingCoverageRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
                 ..ValidateRoutingCoverageRequest::default()
-            },
-        )
-        .map(|result| {
-            (
-                result.status,
-                result.exit_code,
-                combine_native_messages(&result.failures, &result.warnings),
-            )
-        })
-        .unwrap_or_else(|error| {
-            (
-                ValidationCheckStatus::Failed,
-                1,
-                Some(error.to_string()),
-            )
-        }),
-        NativeValidationCheck::TemplateStandards => invoke_validate_template_standards(
-            &ValidateTemplateStandardsRequest {
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::TemplateStandards => {
+            invoke_validate_template_standards(&ValidateTemplateStandardsRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
                 ..ValidateTemplateStandardsRequest::default()
-            },
-        )
-        .map(|result| {
-            (
-                result.status,
-                result.exit_code,
-                combine_native_messages(&result.failures, &result.warnings),
-            )
-        })
-        .unwrap_or_else(|error| {
-            (
-                ValidationCheckStatus::Failed,
-                1,
-                Some(error.to_string()),
-            )
-        }),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::WorkspaceEfficiency => {
+            invoke_validate_workspace_efficiency(&ValidateWorkspaceEfficiencyRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                baseline_path: string_argument_path(&arguments, "BaselinePath"),
+                settings_template_path: string_argument_path(&arguments, "SettingsTemplatePath"),
+                workspace_search_root: string_argument_path(&arguments, "WorkspaceSearchRoot"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
     };
 
     build_native_check_result(
@@ -945,6 +950,30 @@ fn run_native_validation_check(
         error,
         started.elapsed().as_millis(),
     )
+}
+
+fn string_argument_path(
+    arguments: &BTreeMap<String, ValidationCommandArgument>,
+    name: &str,
+) -> Option<PathBuf> {
+    arguments
+        .get(name)
+        .and_then(|argument| match &argument.value {
+            ValidationArgumentValue::String(value) => Some(PathBuf::from(value)),
+            ValidationArgumentValue::Bool(_) => None,
+        })
+}
+
+fn bool_argument(
+    arguments: &BTreeMap<String, ValidationCommandArgument>,
+    name: &str,
+) -> Option<bool> {
+    arguments
+        .get(name)
+        .and_then(|argument| match argument.value {
+            ValidationArgumentValue::Bool(value) => Some(value),
+            ValidationArgumentValue::String(_) => None,
+        })
 }
 
 fn combine_native_messages(failures: &[String], warnings: &[String]) -> Option<String> {
@@ -1024,9 +1053,10 @@ fn build_native_check_result(
         ValidationCheckStatus::Failed if treat_failure_as_warning => {
             (ValidationCheckStatus::Warning, 0)
         }
-        ValidationCheckStatus::Failed => {
-            (ValidationCheckStatus::Failed, if raw_exit_code == 0 { 1 } else { raw_exit_code })
-        }
+        ValidationCheckStatus::Failed => (
+            ValidationCheckStatus::Failed,
+            if raw_exit_code == 0 { 1 } else { raw_exit_code },
+        ),
     };
 
     ValidationCheckResult {
@@ -1333,7 +1363,9 @@ fn get_git_state(repo_root: &Path) -> GitState {
         };
     }
 
-    let branch = String::from_utf8_lossy(&branch_output.stdout).trim().to_string();
+    let branch = String::from_utf8_lossy(&branch_output.stdout)
+        .trim()
+        .to_string();
     let commit_output = Command::new("git")
         .arg("-C")
         .arg(repo_root)

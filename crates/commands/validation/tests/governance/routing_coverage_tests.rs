@@ -33,11 +33,15 @@ routing:
 "#,
     );
     write_file(
-        &repo.path().join(".github/instructions/readme.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/readme.instructions.md"),
         "# readme",
     );
     write_file(
-        &repo.path().join("scripts/validation/fixtures/routing-golden-tests.json"),
+        &repo
+            .path()
+            .join("scripts/validation/fixtures/routing-golden-tests.json"),
         r#"{
   "cases": [
     {
@@ -79,15 +83,21 @@ routing:
 "#,
     );
     write_file(
-        &repo.path().join(".github/instructions/readme.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/readme.instructions.md"),
         "# readme",
     );
     write_file(
-        &repo.path().join(".github/instructions/rust.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/rust.instructions.md"),
         "# rust",
     );
     write_file(
-        &repo.path().join("scripts/validation/fixtures/routing-golden-tests.json"),
+        &repo
+            .path()
+            .join("scripts/validation/fixtures/routing-golden-tests.json"),
         r#"{
   "cases": [
     {
@@ -132,11 +142,15 @@ routing:
 "#,
     );
     write_file(
-        &repo.path().join(".github/instructions/readme.instructions.md"),
+        &repo
+            .path()
+            .join(".github/instructions/readme.instructions.md"),
         "# readme",
     );
     write_file(
-        &repo.path().join("scripts/validation/fixtures/routing-golden-tests.json"),
+        &repo
+            .path()
+            .join("scripts/validation/fixtures/routing-golden-tests.json"),
         r#"{
   "cases": [
     {

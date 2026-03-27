@@ -97,9 +97,7 @@ pub fn invoke_validate_template_standards(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| ValidateTemplateStandardsCommandError::ResolveWorkspaceRoot {
-            source,
-        })?;
+        .map_err(|source| ValidateTemplateStandardsCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
         None => repo_root.join(DEFAULT_BASELINE_PATH),
@@ -347,7 +345,10 @@ fn read_baseline_document(
                 warning_only,
                 warnings,
                 failures,
-                format!("Invalid JSON in template baseline {}: {error}", path.display()),
+                format!(
+                    "Invalid JSON in template baseline {}: {error}",
+                    path.display()
+                ),
             );
             None
         }

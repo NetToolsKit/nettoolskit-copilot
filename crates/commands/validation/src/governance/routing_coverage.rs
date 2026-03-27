@@ -110,9 +110,7 @@ pub fn invoke_validate_routing_coverage(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| ValidateRoutingCoverageCommandError::ResolveWorkspaceRoot {
-            source,
-        })?;
+        .map_err(|source| ValidateRoutingCoverageCommandError::ResolveWorkspaceRoot { source })?;
     let catalog_path = match request.catalog_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
         None => repo_root.join(DEFAULT_CATALOG_PATH),
@@ -274,7 +272,8 @@ pub fn invoke_validate_routing_coverage(
                         include_union.extend(include_paths.iter().cloned());
                     }
 
-                    if case.expected_route_ids.is_empty() && !case.expected_selected_paths.is_empty()
+                    if case.expected_route_ids.is_empty()
+                        && !case.expected_selected_paths.is_empty()
                     {
                         push_required_finding(
                             request.warning_only,

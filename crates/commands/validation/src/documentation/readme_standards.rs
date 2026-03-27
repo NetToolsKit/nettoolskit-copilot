@@ -97,9 +97,7 @@ pub fn invoke_validate_readme_standards(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| ValidateReadmeStandardsCommandError::ResolveWorkspaceRoot {
-            source,
-        })?;
+        .map_err(|source| ValidateReadmeStandardsCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
         None => repo_root.join(DEFAULT_BASELINE_PATH),
@@ -324,7 +322,10 @@ fn test_required_sections(
             continue;
         }
 
-        if !alternatives.iter().any(|candidate| heading_keys.contains(candidate)) {
+        if !alternatives
+            .iter()
+            .any(|candidate| heading_keys.contains(candidate))
+        {
             push_required_finding(
                 warning_only,
                 warnings,
@@ -347,10 +348,7 @@ fn test_introduction_preamble(
         return;
     }
 
-    let first_content_line = content
-        .lines()
-        .map(str::trim)
-        .find(|line| !line.is_empty());
+    let first_content_line = content.lines().map(str::trim).find(|line| !line.is_empty());
 
     let Some(first_content_line) = first_content_line else {
         push_required_finding(
@@ -397,9 +395,7 @@ fn test_global_formatting_rules(
             warning_only,
             warnings,
             failures,
-            format!(
-                "README must include at least one horizontal separator (---): {relative_path}"
-            ),
+            format!("README must include at least one horizontal separator (---): {relative_path}"),
         );
     }
 
@@ -423,9 +419,7 @@ fn test_global_formatting_rules(
                 warning_only,
                 warnings,
                 failures,
-                format!(
-                    "README must include Table of Contents/Contents section: {relative_path}"
-                ),
+                format!("README must include Table of Contents/Contents section: {relative_path}"),
             );
         } else if !toc_body
             .as_deref()
@@ -437,9 +431,7 @@ fn test_global_formatting_rules(
                 warning_only,
                 warnings,
                 failures,
-                format!(
-                    "Table of Contents must include markdown anchor links: {relative_path}"
-                ),
+                format!("Table of Contents must include markdown anchor links: {relative_path}"),
             );
         }
     }
@@ -456,7 +448,10 @@ fn heading_key_set(content: &str) -> BTreeSet<String> {
 
 fn parse_heading_title(line: &str) -> Option<&str> {
     let trimmed = line.trim();
-    let hash_count = trimmed.chars().take_while(|character| *character == '#').count();
+    let hash_count = trimmed
+        .chars()
+        .take_while(|character| *character == '#')
+        .count();
     if !(1..=6).contains(&hash_count) {
         return None;
     }
@@ -490,7 +485,10 @@ fn section_body(content: &str, heading_options: &[&str]) -> Option<String> {
             continue;
         };
         let heading = heading_to_key(rest.trim_end_matches('#').trim());
-        if !normalized_options.iter().any(|candidate| candidate == &heading) {
+        if !normalized_options
+            .iter()
+            .any(|candidate| candidate == &heading)
+        {
             continue;
         }
 
@@ -509,7 +507,10 @@ fn section_body(content: &str, heading_options: &[&str]) -> Option<String> {
 
 fn is_checkmark_bullet(line: &str) -> bool {
     let trimmed = line.trim_start();
-    let Some(rest) = trimmed.strip_prefix('-').or_else(|| trimmed.strip_prefix('*')) else {
+    let Some(rest) = trimmed
+        .strip_prefix('-')
+        .or_else(|| trimmed.strip_prefix('*'))
+    else {
         return false;
     };
 
@@ -518,7 +519,10 @@ fn is_checkmark_bullet(line: &str) -> bool {
 
 fn is_markdown_anchor_link(line: &str) -> bool {
     let trimmed = line.trim_start();
-    let Some(rest) = trimmed.strip_prefix('-').or_else(|| trimmed.strip_prefix('*')) else {
+    let Some(rest) = trimmed
+        .strip_prefix('-')
+        .or_else(|| trimmed.strip_prefix('*'))
+    else {
         return false;
     };
 

@@ -1,8 +1,6 @@
 //! Tests for validation `validate-all` orchestration.
 
-use nettoolskit_validation::{
-    invoke_validate_all, ValidateAllRequest, ValidationCheckStatus,
-};
+use nettoolskit_validation::{invoke_validate_all, ValidateAllRequest, ValidationCheckStatus};
 use std::fs;
 use tempfile::TempDir;
 
@@ -131,9 +129,7 @@ fn write_valid_instruction_metadata_fixtures(repo_root: &std::path::Path, broad_
     };
     write_file(
         &repo_root.join(".github/instructions/example.instructions.md"),
-        &format!(
-            "---\napplyTo: \"{instruction_apply_to}\"\npriority: medium\n---\n\n# Example\n"
-        ),
+        &format!("---\napplyTo: \"{instruction_apply_to}\"\npriority: medium\n---\n\n# Example\n"),
     );
     write_file(
         &repo_root.join(".github/prompts/example.prompt.md"),
@@ -195,6 +191,67 @@ fn write_template_standards_fixture(repo_root: &std::path::Path) {
         &repo_root.join(".github/templates/example.md"),
         "# Example\n\nValidation content.\n",
     );
+}
+
+fn write_workspace_efficiency_baseline(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+        r#"{
+  "version": 1,
+  "templateWorkspacePaths": [
+    ".vscode/base.code-workspace"
+  ],
+  "allowedWorkspaceOverrideSettings": [
+    "chat.agent.maxRequests"
+  ],
+  "requiredSettings": {
+    "git.autofetch": false,
+    "files.exclude": {
+      "requiredKeys": [
+        "**/.git"
+      ]
+    }
+  },
+  "forbiddenSettings": {
+    "git.openRepositoryInParentFolders": [
+      "always"
+    ]
+  },
+  "recommendedSettings": {
+    "extensions.autoUpdate": false
+  },
+  "recommendedNumericUpperBounds": {
+    "chat.agent.maxRequests": 100
+  },
+  "heuristics": {
+    "maxFolderCountWarning": 4,
+    "warnWhenMultipleProductFolders": true,
+    "warnWhenSupportFoldersMixedWithProductFolders": true,
+    "supportFolderPatterns": [
+      "(?i)(?:^|[\\\\/])\\\\.github$",
+      "(?i)(?:^|[\\\\/])\\\\.codex$"
+    ]
+  }
+}"#,
+    );
+}
+
+fn write_workspace_settings_template(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".vscode/settings.tamplate.jsonc"),
+        r#"{
+  // global template
+  "git.autofetch": false,
+  "extensions.autoUpdate": false,
+  "files.exclude": {
+    "**/.git": true
+  }
+}"#,
+    );
+}
+
+fn write_workspace_fixture(repo_root: &std::path::Path, relative_path: &str, contents: &str) {
+    write_file(&repo_root.join(relative_path), contents);
 }
 
 #[test]
@@ -386,4 +443,39 @@ fn test_invoke_validate_all_runs_native_governance_checks() {
         .checks
         .iter()
         .any(|check| check.script == "rust:nettoolskit-validation::validate-template-standards"));
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_workspace_efficiency_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-workspace-efficiency"]);
+    write_workspace_efficiency_baseline(repo.path());
+    write_workspace_settings_template(repo.path());
+    write_workspace_fixture(
+        repo.path(),
+        "workspace.code-workspace",
+        r#"{
+  "folders": [
+    { "path": "App" }
+  ],
+  "settings": {
+    "chat.agent.maxRequests": 80
+  }
+}"#,
+    );
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(result.checks[0].status, ValidationCheckStatus::Passed);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-workspace-efficiency"
+    );
 }

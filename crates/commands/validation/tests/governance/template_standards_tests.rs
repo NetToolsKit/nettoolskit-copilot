@@ -70,7 +70,9 @@ fn test_invoke_validate_template_standards_reports_missing_patterns_and_referenc
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/governance/template-standards.baseline.json"),
+        &repo
+            .path()
+            .join(".github/governance/template-standards.baseline.json"),
         r#"{
   "version": 1,
   "requiredFiles": [
