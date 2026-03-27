@@ -66,6 +66,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-26 22:44] The documentation/authoring validation slice is now live in Rust too: `crates/commands/validation/documentation` owns `validate-readme-standards` and `validate-instruction-metadata`, and `validate-all` preserves native warning status so repository authoring drift remains visible at the suite layer.
 - [2026-03-26 23:06] The routing/template governance validation slice is now live in Rust too: `crates/commands/validation/governance` owns `validate-routing-coverage` and `validate-template-standards`, so static route-fixture parity and template contract drift now run through Rust-owned validation paths.
 - [2026-03-27 08:07] The workspace/runtime hygiene validation slice is now live in Rust too: `crates/commands/validation/workspace` owns `validate-workspace-efficiency`, and `validate-all` dispatches it natively while preserving the validation crate's capability-based module layout.
+- [2026-03-27 08:22] The first instruction-graph policy slice is now live in Rust too: `crates/commands/validation/instruction_graph` owns `validate-authoritative-source-policy`, and `validate-all` dispatches it natively while keeping instruction-system policy separate from generic governance checks.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -117,6 +118,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 28. [2026-03-26 22:44] Native validation slices must preserve warning semantics end-to-end in `validate-all`; the orchestration layer should not treat Rust-side warnings as passes just because the exit code is zero.
 29. [2026-03-26 23:06] After the repository-structure, documentation, and governance slices land, the remaining Wave 2 sequence should prioritize workspace-efficiency and instruction-graph validation before the higher-coupling agent/security/release checks.
 30. [2026-03-27 08:07] Once `validate-workspace-efficiency` lands, the next Wave 2 slices should stay capability-grouped as well: instruction-graph checks should form their own authoring/policy boundary instead of expanding `governance/` or the crate root ad hoc.
+31. [2026-03-27 08:22] With `instruction_graph/` now opened by `validate-authoritative-source-policy`, the next slices in that boundary should be `validate-instruction-architecture` and then `validate-instructions`, so the entire instruction system converges inside one cohesive Rust module tree.
 
 ## Constraints
 
@@ -186,6 +188,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-26 22:44` — implemented the documentation/authoring Wave 2 slice in `crates/commands/validation/documentation` for `validate-readme-standards` and `validate-instruction-metadata`, and fixed `validate-all` to preserve native warning status.
 - Updated: `2026-03-26 23:06` — implemented the routing/template governance Wave 2 slice in `crates/commands/validation/governance` for `validate-routing-coverage` and `validate-template-standards`.
 - Updated: `2026-03-27 08:07` — implemented the workspace-efficiency Wave 2 slice in `crates/commands/validation/workspace`, routed it through `validate-all`, and kept validation growth aligned to capability-specific submodules.
+- Updated: `2026-03-27 08:22` — implemented the authoritative-source-policy Wave 2 slice in `crates/commands/validation/instruction_graph`, routed it through `validate-all`, and opened the dedicated instruction-system policy boundary for the remaining instruction-graph validators.
 
 ## Recommended Specialist Focus
 
