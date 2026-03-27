@@ -150,6 +150,7 @@ Status: `[ ]` Pending
 - [2026-03-27 10:12] The analyzer warning baseline check now runs through Rust too: `validate-warning-baseline` executes natively under `crates/commands/validation/operational_hygiene`, and `validate-all` routes it without the PowerShell bridge while keeping warning-threshold governance, report emission, and analyzer replay logic out of the crate root ✓ [2026-03-27 10:12]
 - [2026-03-27 10:28] The runtime script smoke suite now runs through Rust too: `validate-runtime-script-tests` executes natively under `crates/commands/validation/operational_hygiene`, and `validate-all` routes it without the PowerShell bridge while keeping PowerShell test execution parity inside the same hygiene boundary ✓ [2026-03-27 10:28]
 - [2026-03-27 10:46] The shell hook validation suite now runs through Rust too: `validate-shell-hooks` executes natively under `crates/commands/validation/operational_hygiene`, and `validate-all` routes it without the PowerShell bridge while keeping syntax, semantic guard, and optional shellcheck logic inside the same hygiene boundary ✓ [2026-03-27 10:46]
+- [2026-03-27 11:03] The Super Agent hook contract now runs through Rust too: `validate-agent-hooks` executes natively under `crates/commands/validation/agent_orchestration`, and `validate-all` routes it without the PowerShell bridge while keeping bootstrap/selector manifests, required hook scripts, and hook-helper contract markers inside a dedicated agent boundary ✓ [2026-03-27 11:03]
 - Target paths:
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
@@ -175,6 +176,7 @@ Status: `[ ]` Pending
   - warning-baseline drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining hygiene backlog is reduced to runtime script execution parity plus shell-hook validation
   - runtime script smoke execution now emits Rust-native warning/failure status without relying on the legacy validator, and only the shell-hook check remains before the hygiene block can be marked complete
   - shell-hook drift now emits Rust-native warning/failure status without relying on the legacy validator, and the full workspace/runtime hygiene validation block is now complete
+  - agent-hook drift now emits Rust-native warning/failure status without relying on the legacy validator, and the remaining agent backlog is reduced to orchestration, skill-alignment, and permissions slices
 - Commit checkpoint:
   - `ci(rust): harden migration validation and wrapper governance`
 
