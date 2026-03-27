@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-26 22:44
+- LastUpdated: 2026-03-26 23:06
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -68,6 +68,7 @@ The migration remains compatibility-first:
 - [2026-03-26 22:06] `crates/commands/validation` now executes Rust-backed `validate-all` orchestration for profile selection, delegated validation sequencing, JSON report generation, and hash-chained ledger repair/write; `crates/commands/runtime` `healthcheck` now calls this Rust validation surface instead of shelling out to `validate-all.ps1`.
 - [2026-03-26 22:24] `crates/commands/validation` now executes Rust-backed `validate-planning-structure` and `validate-audit-ledger` checks too, and `validate-all` dispatches those checks natively while the remaining Wave 2 checks stay explicitly delegated.
 - [2026-03-26 22:44] `crates/commands/validation` now executes Rust-backed `validate-readme-standards` and `validate-instruction-metadata` too, under a dedicated `documentation` module; `validate-all` now preserves native warning status instead of flattening Rust-side warnings into silent passes.
+- [2026-03-26 23:06] `crates/commands/validation` now executes Rust-backed `validate-routing-coverage` and `validate-template-standards` under a dedicated `governance` module, so route-fixture parity and shared template contracts now run natively in Rust too.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -241,6 +242,7 @@ Status: `[~]` In Progress
 - [2026-03-26 22:06] Implemented Rust-backed `validate-all` orchestration in `crates/commands/validation`, with profile selection, delegated check execution, JSON report generation, hash-chained ledger repair/write, and targeted external tests ✓ [2026-03-26 22:06]
 - [2026-03-26 22:24] Implemented Rust-backed `validate-planning-structure` and `validate-audit-ledger` in `crates/commands/validation`, with direct external coverage and native dispatch through `validate-all` for the first per-check Wave 2 cutover ✓ [2026-03-26 22:24]
 - [2026-03-26 22:44] Implemented Rust-backed `validate-readme-standards` and `validate-instruction-metadata` in `crates/commands/validation/documentation`, with direct external coverage and native dispatch through `validate-all` for the first documentation/authoring cutover slice ✓ [2026-03-26 22:44]
+- [2026-03-26 23:06] Implemented Rust-backed `validate-routing-coverage` and `validate-template-standards` in `crates/commands/validation/governance`, with direct external coverage and native dispatch through `validate-all` for the first routing/template governance cutover slice ✓ [2026-03-26 23:06]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -261,8 +263,14 @@ Status: `[~]` In Progress
   - `validate-all` now mixes native and delegated execution explicitly instead of treating every Wave 2 check as a script shell-out
   - `validate-readme-standards` and `validate-instruction-metadata` no longer depend on PowerShell business logic
   - native validation warnings now remain visible to `validate-all` instead of being flattened into passed checks
+  - `validate-routing-coverage` and `validate-template-standards` no longer depend on PowerShell business logic
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
+- Remaining Task 6 backlog is now explicitly grouped as:
+  - workspace/runtime hygiene checks: `validate-workspace-efficiency`, `validate-warning-baseline`, `validate-runtime-script-tests`, `validate-shell-hooks`
+  - repository authoring and instruction graph: `validate-instructions`, `validate-instruction-architecture`, `validate-authoritative-source-policy`
+  - agent policy and orchestration: `validate-agent-orchestration`, `validate-agent-skill-alignment`, `validate-agent-permissions`, `validate-agent-hooks`
+  - policy/security/release/domain checks: `validate-policy`, `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
