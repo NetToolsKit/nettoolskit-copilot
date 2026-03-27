@@ -78,6 +78,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-27 13:21] The .NET standards slice is now live in Rust too: `crates/commands/validation/standards` owns `validate-dotnet-standards`, and `validate-all` dispatches it natively while preserving required template presence, placeholder regex enforcement, XML summary warnings, and whitespace hygiene semantics from the legacy validator.
 - [2026-03-27 13:28] The architecture boundaries slice is now live in Rust too: `crates/commands/validation/architecture` owns `validate-architecture-boundaries`, and `validate-all` dispatches it natively while preserving baseline loading, wildcard file resolution, severity-aware required/forbidden pattern enforcement, and unmatched-pattern warning semantics from the legacy validator.
 - [2026-03-27 13:29] The supply-chain slice is now live in Rust too: `crates/commands/validation/security` owns `validate-supply-chain`, and `validate-all` dispatches it natively while preserving manifest discovery, blocked and sensitive dependency pattern handling, optional license-evidence checks, and SBOM export semantics from the legacy validator.
+- [2026-03-27 18:46] The first orchestration control-plane contract is now live in Rust too: `crates/orchestrator` owns typed pipeline manifest models plus native parsing/validation for stage order, handoff producer/consumer integrity, and completion-stage references, so the remaining Wave 3 work can target stable Rust contracts instead of raw pipeline JSON or PowerShell-only schema assumptions.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -152,6 +153,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 51. [2026-03-27 16:59] With `invoke-pre-commit-eof-hygiene` now live in `runtime/hooks`, the staged-file hygiene flow and EOF mode resolution are native; the next Task 7 slice should focus on `setup-git-hooks` local ownership before expanding into orchestration stages.
 52. [2026-03-27 17:12] With `setup-git-hooks` now live in `runtime/hooks`, local hook ownership and local/global EOF selection persistence are native; the remaining Wave 3 backlog is now limited to orchestration-stage ownership and replacing the PowerShell-heavy runtime parity harness.
 53. [2026-03-27 17:22] With managed-global `setup-git-hooks` now live in `runtime/hooks`, global pre-commit wrapper installation and isolated `core.hooksPath --global` ownership are native as well; the remaining Wave 3 backlog is now strictly orchestration-stage ownership plus parity-harness migration.
+54. [2026-03-27 18:46] With typed pipeline manifest contracts now live in `crates/orchestrator/models`, the next Wave 3 slice should move to the native parity-harness golden path for `run/resume/replay/evaluate-agent-pipeline`; that work can now share one Rust-owned stage/handoff contract instead of duplicating manifest parsing in validation or runtime wrappers.
 
 ## Constraints
 
@@ -240,6 +242,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 16:59` — implemented the `invoke-pre-commit-eof-hygiene` Task 7 hook slice in `crates/commands/runtime/hooks`, added native staged trim/restage coverage in the runtime test suite, and reduced the remaining hook backlog to `setup-git-hooks`.
 - Updated: `2026-03-27 17:12` — implemented the `setup-git-hooks` Task 7 hook slice in `crates/commands/runtime/hooks`, added native local install/uninstall plus global EOF-selection coverage in the runtime test suite, and reduced the remaining Wave 3 backlog to orchestration-stage ownership plus parity-harness migration.
 - Updated: `2026-03-27 17:22` — expanded the `setup-git-hooks` Task 7 slice in `crates/commands/runtime/hooks` to own managed-global pre-commit wrapper installation and isolated `core.hooksPath --global` flows, and confirmed the remaining Wave 3 backlog is limited to orchestration-stage ownership plus parity-harness migration.
+- Updated: `2026-03-27 18:46` — implemented typed pipeline manifest contracts in `crates/orchestrator/models`, added native parsing/validation plus external stage-contract coverage, and set the next recommended Wave 3 slice to the native parity-harness golden path for `run/resume/replay/evaluate-agent-pipeline`.
 
 ## Recommended Specialist Focus
 
