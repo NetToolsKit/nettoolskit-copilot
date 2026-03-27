@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 13:29
+- LastUpdated: 2026-03-27 14:25
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -199,7 +199,7 @@ Status: `[x]` Completed
 
 ### Task 5: Implement Wave 1 Foundation For Shared Helpers And Runtime Surfaces
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Transcribe shared helper logic plus runtime/render/sync/index flows behind stable wrappers
 - [2026-03-26 18:47] Ported repository path resolution, runtime location catalog resolution, and local context index build/search primitives into `crates/core` ✓ [2026-03-26 18:47]
@@ -271,6 +271,7 @@ Status: `[~]` In Progress
 - [2026-03-27 13:29] Implemented Rust-backed `validate-supply-chain` in `crates/commands/validation/security`, with direct external coverage for manifest discovery, blocked dependency enforcement, invalid package warnings, required license evidence, SBOM export, and native dispatch through `validate-all` ✓ [2026-03-27 13:29]
 - [2026-03-27 13:43] Implemented Rust-backed `validate-release-governance` in `crates/commands/validation/release`, with direct external coverage for required governance files, changelog semantic/date ordering, CODEOWNERS rule quality, branch-protection baseline structure, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 13:43]
 - [2026-03-27 13:51] Implemented Rust-backed `validate-release-provenance` in `crates/commands/validation/release`, with direct external coverage for provenance baseline loading, `validate-all` coverage checks, required evidence files, git branch/HEAD/worktree traceability, audit-report enforcement, profile-driven `RequireAuditReport`, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 13:51]
+- [2026-03-27 14:25] Implemented Rust-backed `validate-powershell-standards` in `crates/commands/validation/standards`, with direct external coverage for script discovery, comment-based help, parameter help coverage, strict style escalation, optional PSScriptAnalyzer replay, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 14:25]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -314,10 +315,11 @@ Status: `[~]` In Progress
 - `validate-supply-chain` no longer depends on PowerShell business logic, and dependency inventory plus SBOM/license evidence enforcement now live beside the rest of the security policy surfaces inside `crates/commands/validation/security/`
 - `validate-release-governance` no longer depends on PowerShell business logic, and release-governance contracts now live in a dedicated `release/` capability boundary with native dispatch through `validate-all`
 - `validate-release-provenance` no longer depends on PowerShell business logic, and the full release evidence/traceability slice now lives beside `validate-release-governance` inside `crates/commands/validation/release/`
+- `validate-powershell-standards` no longer depends on PowerShell business logic, and PowerShell script quality rules now live beside the rest of the language standards surfaces inside `crates/commands/validation/standards/`
+- the full Wave 2 quality, policy, and support transcription block is now complete
 - security gates retain or improve current severity handling
 - maintenance and deploy helpers remain deterministic and operator-safe
-- Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-powershell-standards`
+- Next recommended slice moves to Task 7 with the runtime/git hook foundation before the broader orchestration stage migration
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
