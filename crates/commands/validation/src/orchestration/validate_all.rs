@@ -14,7 +14,7 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
-    invoke_validate_agent_hooks,
+    invoke_validate_agent_hooks, invoke_validate_agent_permissions,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -23,7 +23,7 @@ use crate::{
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
-    ValidateAgentHooksRequest,
+    ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -222,6 +222,7 @@ enum ValidationCheckExecutor {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeValidationCheck {
     AgentHooks,
+    AgentPermissions,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -246,6 +247,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks) => {
                 "rust:nettoolskit-validation::validate-agent-hooks"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentPermissions) => {
+                "rust:nettoolskit-validation::validate-agent-permissions"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -529,9 +533,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-agent-permissions",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-agent-permissions.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentPermissions),
         ),
         (
             "validate-planning-structure",
@@ -737,6 +739,7 @@ fn definition_supports_parameter(
                 .unwrap_or(false)
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::AgentPermissions)
         | ValidationCheckExecutor::Native(NativeValidationCheck::Instructions)
         | ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
@@ -918,6 +921,22 @@ fn run_native_validation_check(
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
                 ..ValidateAgentHooksRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::AgentPermissions => {
+            invoke_validate_agent_permissions(&ValidateAgentPermissionsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+                ..ValidateAgentPermissionsRequest::default()
             })
             .map(|result| {
                 (

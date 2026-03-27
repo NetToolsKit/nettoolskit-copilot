@@ -17,7 +17,9 @@ pub use contracts::{
     ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
 };
 pub use agent_orchestration::{
-    invoke_validate_agent_hooks, ValidateAgentHooksRequest, ValidateAgentHooksResult,
+    invoke_validate_agent_hooks, invoke_validate_agent_permissions,
+    ValidateAgentHooksRequest, ValidateAgentHooksResult, ValidateAgentPermissionsRequest,
+    ValidateAgentPermissionsResult,
 };
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
@@ -25,7 +27,8 @@ pub use documentation::{
     ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
 };
 pub use error::{
-    ValidateAgentHooksCommandError, ValidateAllCommandError, ValidateAuditLedgerCommandError,
+    ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
+    ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
     ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,

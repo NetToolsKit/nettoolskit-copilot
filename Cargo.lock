@@ -2013,6 +2013,7 @@ name = "nettoolskit-validation"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "globset",
  "nettoolskit-core",
  "regex",
  "serde",
