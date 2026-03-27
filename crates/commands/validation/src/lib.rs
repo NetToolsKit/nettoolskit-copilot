@@ -2,6 +2,7 @@
 
 pub mod contracts;
 pub mod agent_orchestration;
+pub mod architecture;
 pub mod documentation;
 pub mod error;
 pub mod evidence;
@@ -11,6 +12,7 @@ pub mod orchestration;
 pub mod operational_hygiene;
 pub mod policy;
 pub mod security;
+pub mod standards;
 pub mod structure;
 pub mod workspace;
 
@@ -28,6 +30,10 @@ pub use agent_orchestration::{
     ValidateAgentSkillAlignmentRequest,
     ValidateAgentSkillAlignmentResult,
 };
+pub use architecture::{
+    invoke_validate_architecture_boundaries, ValidateArchitectureBoundariesRequest,
+    ValidateArchitectureBoundariesResult,
+};
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
     ValidateInstructionMetadataRequest, ValidateInstructionMetadataResult,
@@ -37,7 +43,9 @@ pub use error::{
     ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
     ValidateAgentSkillAlignmentCommandError,
     ValidateAgentOrchestrationCommandError,
+    ValidateArchitectureBoundariesCommandError,
     ValidateCompatibilityLifecyclePolicyCommandError,
+    ValidateDotnetStandardsCommandError,
     ValidatePolicyCommandError,
     ValidateSecurityBaselineCommandError,
     ValidateSharedScriptChecksumsCommandError,
@@ -85,6 +93,10 @@ pub use security::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     ValidateSecurityBaselineRequest, ValidateSecurityBaselineResult,
     ValidateSharedScriptChecksumsRequest, ValidateSharedScriptChecksumsResult,
+};
+pub use standards::{
+    invoke_validate_dotnet_standards, ValidateDotnetStandardsRequest,
+    ValidateDotnetStandardsResult,
 };
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,

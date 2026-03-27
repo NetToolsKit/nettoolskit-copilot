@@ -17,7 +17,9 @@ use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment,
+    invoke_validate_architecture_boundaries,
     invoke_validate_compatibility_lifecycle_policy,
+    invoke_validate_dotnet_standards,
     invoke_validate_policy,
     invoke_validate_security_baseline,
     invoke_validate_shared_script_checksums,
@@ -32,7 +34,9 @@ use crate::{
     ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
     ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
+    ValidateArchitectureBoundariesRequest,
     ValidateCompatibilityLifecyclePolicyRequest,
+    ValidateDotnetStandardsRequest,
     ValidatePolicyRequest,
     ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest,
@@ -237,7 +241,9 @@ enum NativeValidationCheck {
     AgentOrchestration,
     AgentPermissions,
     AgentSkillAlignment,
+    ArchitectureBoundaries,
     CompatibilityLifecyclePolicy,
+    DotnetStandards,
     Policy,
     SecurityBaseline,
     SharedScriptChecksums,
@@ -275,9 +281,15 @@ impl ValidationCheckDefinition {
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentSkillAlignment) => {
                 "rust:nettoolskit-validation::validate-agent-skill-alignment"
             }
+            ValidationCheckExecutor::Native(NativeValidationCheck::ArchitectureBoundaries) => {
+                "rust:nettoolskit-validation::validate-architecture-boundaries"
+            }
             ValidationCheckExecutor::Native(
                 NativeValidationCheck::CompatibilityLifecyclePolicy,
             ) => "rust:nettoolskit-validation::validate-compatibility-lifecycle-policy",
+            ValidationCheckExecutor::Native(NativeValidationCheck::DotnetStandards) => {
+                "rust:nettoolskit-validation::validate-dotnet-standards"
+            }
             ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => {
                 "rust:nettoolskit-validation::validate-policy"
             }
@@ -621,13 +633,11 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-dotnet-standards",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-dotnet-standards.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::DotnetStandards),
         ),
         (
             "validate-architecture-boundaries",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-architecture-boundaries.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::ArchitectureBoundaries),
         ),
         (
             "validate-instruction-metadata",
@@ -778,11 +788,17 @@ fn definition_supports_parameter(
             parameter_name == "WarningOnly"
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => false,
+        ValidationCheckExecutor::Native(NativeValidationCheck::ArchitectureBoundaries) => {
+            parameter_name == "BaselinePath"
+        }
         ValidationCheckExecutor::Native(NativeValidationCheck::CompatibilityLifecyclePolicy) => {
             matches!(
                 parameter_name,
                 "WarningOnly" | "CompatibilityPath" | "DetailedOutput"
             )
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::DotnetStandards) => {
+            parameter_name == "TemplateDirectory"
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::SecurityBaseline) => {
@@ -1025,6 +1041,20 @@ fn run_native_validation_check(
             })
             .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
         }
+        NativeValidationCheck::ArchitectureBoundaries => {
+            invoke_validate_architecture_boundaries(&ValidateArchitectureBoundariesRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                baseline_path: string_argument_path(&arguments, "BaselinePath"),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
         NativeValidationCheck::CompatibilityLifecyclePolicy => {
             invoke_validate_compatibility_lifecycle_policy(
                 &ValidateCompatibilityLifecyclePolicyRequest {
@@ -1035,6 +1065,20 @@ fn run_native_validation_check(
                     detailed_output: bool_argument(&arguments, "DetailedOutput").unwrap_or(false),
                 },
             )
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::DotnetStandards => {
+            invoke_validate_dotnet_standards(&ValidateDotnetStandardsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                template_directory: string_argument_path(&arguments, "TemplateDirectory"),
+            })
             .map(|result| {
                 (
                     result.status,

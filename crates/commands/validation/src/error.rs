@@ -242,6 +242,30 @@ pub enum ValidateCompatibilityLifecyclePolicyCommandError {
     },
 }
 
+/// Errors raised by .NET template standards validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateDotnetStandardsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve dotnet standards workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by architecture boundary validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateArchitectureBoundariesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve architecture boundaries workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by security baseline validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateSecurityBaselineCommandError {

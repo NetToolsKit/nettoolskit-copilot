@@ -5,6 +5,9 @@ mod documentation {
     pub mod instruction_metadata_tests;
     pub mod readme_standards_tests;
 }
+mod architecture {
+    pub mod architecture_boundaries_tests;
+}
 mod agent_orchestration {
     pub mod agent_orchestration_tests;
     pub mod agent_hooks_tests;
@@ -45,6 +48,10 @@ mod policy {
 mod security {
     pub mod security_baseline_tests;
     pub mod shared_script_checksums_tests;
+}
+
+mod standards {
+    pub mod dotnet_standards_tests;
 }
 
 mod structure {

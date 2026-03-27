@@ -7,6 +7,7 @@ use tempfile::TempDir;
 use crate::support::agent_orchestration_fixtures::{
     initialize_agent_contract_repo, initialize_agent_hooks_repo,
 };
+use crate::support::architecture_fixtures::initialize_architecture_boundaries_repo;
 use crate::support::instruction_graph_fixtures::{
     initialize_instruction_architecture_repo, initialize_validate_instructions_repo,
 };
@@ -20,6 +21,7 @@ use crate::support::policy_fixtures::{
 };
 use crate::support::security_fixtures::initialize_security_repo;
 use crate::support::security_fixtures::initialize_shared_checksums_repo;
+use crate::support::standards_fixtures::initialize_dotnet_standards_repo;
 
 fn write_file(path: &std::path::Path, contents: &str) {
     if let Some(parent) = path.parent() {
@@ -614,6 +616,48 @@ fn test_invoke_validate_all_runs_native_compatibility_lifecycle_policy_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-compatibility-lifecycle-policy"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_dotnet_standards_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-dotnet-standards"]);
+    initialize_dotnet_standards_repo(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-dotnet-standards"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_architecture_boundaries_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-architecture-boundaries"]);
+    initialize_architecture_boundaries_repo(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-architecture-boundaries"
     );
 }
 
