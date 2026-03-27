@@ -251,6 +251,7 @@ Status: `[~]` In Progress
 - [2026-03-27 09:00] Implemented Rust-backed `validate-instruction-architecture` in `crates/commands/validation/instruction_graph`, with direct external coverage and native dispatch through `validate-all` for the instruction ownership, routing-discipline, and canonical-skill-reference slice ✓ [2026-03-27 09:00]
 - [2026-03-27 09:31] Implemented Rust-backed `validate-instructions` in `crates/commands/validation/instruction_graph`, with direct external coverage for required instruction assets, routing catalog references, JSON/JSONC contracts, markdown links, skill metadata, workspace-template parity, snippet references, and native dispatch through `validate-all` ✓ [2026-03-27 09:31]
 - [2026-03-27 10:12] Implemented Rust-backed `validate-warning-baseline` in `crates/commands/validation/operational_hygiene`, with direct external coverage for threshold enforcement, unknown-rule warnings, analyzer-report replay, report emission, and native dispatch through `validate-all` ✓ [2026-03-27 10:12]
+- [2026-03-27 10:28] Implemented Rust-backed `validate-runtime-script-tests` in `crates/commands/validation/operational_hygiene`, with direct external coverage for runtime test discovery, PowerShell execution parity, failing-test propagation, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 10:28]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -277,10 +278,11 @@ Status: `[~]` In Progress
   - `validate-instruction-architecture` no longer depends on PowerShell business logic, and the instruction ownership plus routing-discipline slice now lives beside the authoritative-source policy checks inside `instruction_graph/`
   - `validate-instructions` no longer depends on PowerShell business logic, and the entire instruction-system validation block now converges inside `crates/commands/validation/instruction_graph/`
   - `validate-warning-baseline` no longer depends on PowerShell business logic, and the remaining hygiene validators now have a dedicated `operational_hygiene/` landing zone instead of spilling into `workspace/` or the crate root
+  - `validate-runtime-script-tests` no longer depends on the legacy validation wrapper, and runtime smoke execution now lives beside warning-baseline governance inside `crates/commands/validation/operational_hygiene/`
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - workspace/runtime hygiene checks: `validate-runtime-script-tests`, `validate-shell-hooks`
+  - workspace/runtime hygiene checks: `validate-shell-hooks`
   - agent policy and orchestration: `validate-agent-orchestration`, `validate-agent-skill-alignment`, `validate-agent-permissions`, `validate-agent-hooks`
   - policy/security/release/domain checks: `validate-policy`, `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
