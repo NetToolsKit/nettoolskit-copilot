@@ -220,6 +220,45 @@ pub enum RuntimeApplyVscodeTemplatesCommandError {
     },
 }
 
+/// Errors raised by runtime global Git alias commands.
+#[derive(Debug, Error)]
+pub enum RuntimeSetupGlobalGitAliasesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime global git alias workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target Codex runtime path resolution failed.
+    #[error("failed to resolve runtime global git alias codex path")]
+    ResolveTargetCodexPath {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Required runtime-synced trim script was missing.
+    #[error("runtime global git alias trim script not found: {trim_script_path}")]
+    TrimScriptNotFound {
+        /// Resolved trim script path expected by the command.
+        trim_script_path: String,
+    },
+    /// The isolated global Git config path could not be prepared.
+    #[error("failed to prepare runtime global git alias config path")]
+    PrepareGitConfigPath {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Git alias configuration failed.
+    #[error("failed to configure runtime global git aliases")]
+    ConfigureAliases {
+        /// Underlying command failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime self-heal commands.
 #[derive(Debug, Error)]
 pub enum RuntimeSelfHealCommandError {

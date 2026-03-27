@@ -4,6 +4,7 @@ pub mod continuity;
 pub mod contracts;
 pub mod diagnostics;
 pub mod error;
+pub mod hooks;
 pub mod sync;
 
 pub use continuity::local_context::{
@@ -32,7 +33,11 @@ pub use diagnostics::self_heal::{
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
-    RuntimeSelfHealCommandError, RuntimeSurfaceError,
+    RuntimeSelfHealCommandError, RuntimeSetupGlobalGitAliasesCommandError, RuntimeSurfaceError,
+};
+pub use hooks::setup_global_git_aliases::{
+    invoke_setup_global_git_aliases, RuntimeSetupGlobalGitAliasesRequest,
+    RuntimeSetupGlobalGitAliasesResult,
 };
 pub use sync::apply_vscode_templates::{
     invoke_apply_vscode_templates, RuntimeApplyVscodeTemplateFileResult,

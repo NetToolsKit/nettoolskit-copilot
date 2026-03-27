@@ -5,6 +5,7 @@ use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
     RuntimeDoctorCommandError, RuntimeHealthcheckCommandError, RuntimeSelfHealCommandError,
+    RuntimeSetupGlobalGitAliasesCommandError,
 };
 use std::error::Error;
 
@@ -152,6 +153,25 @@ fn test_runtime_apply_vscode_templates_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "missing template"
+    );
+}
+
+#[test]
+fn test_runtime_setup_global_git_aliases_error_display_is_stable() {
+    let error = RuntimeSetupGlobalGitAliasesCommandError::ConfigureAliases {
+        source: anyhow!("git config failed"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to configure runtime global git aliases"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "git config failed"
     );
 }
 
