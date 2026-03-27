@@ -1,6 +1,8 @@
 //! Tests for runtime bootstrap commands.
 
-use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
+use crate::sync::provider_surface_test_support::{
+    initialize_minimal_mcp_runtime_catalog, initialize_minimal_provider_surface_projection,
+};
 use nettoolskit_runtime::{invoke_runtime_bootstrap, RuntimeBootstrapRequest};
 use std::fs;
 use tempfile::TempDir;
@@ -217,20 +219,13 @@ fn test_invoke_runtime_bootstrap_mirror_mode_removes_extra_files() {
 fn test_invoke_runtime_bootstrap_applies_mcp_config_when_requested() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
-    write_file(&repo.path().join(".codex/mcp/catalog.json"), "{}");
-    write_file(
-        &repo.path().join("scripts/runtime/sync-codex-mcp-config.ps1"),
-        "param([string]$CatalogPath,[string]$TargetConfigPath,[switch]$CreateBackup)\nSet-Content -NoNewline -LiteralPath $TargetConfigPath 'applied=true'\nif ($CreateBackup) { Set-Content -NoNewline -LiteralPath ($TargetConfigPath + '.bak') 'backup=true' }\nexit 0",
-    );
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/mcp-runtime.catalog.json"),
-        "{}",
-    );
+    initialize_minimal_mcp_runtime_catalog(repo.path());
 
     let target_codex = repo.path().join(".runtime/codex");
-    write_file(&target_codex.join("config.toml"), "original=true");
+    write_file(
+        &target_codex.join("config.toml"),
+        "model = \"gpt-5\"\n\n[tools]\nsearch = true",
+    );
 
     let result = invoke_runtime_bootstrap(&RuntimeBootstrapRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -245,6 +240,18 @@ fn test_invoke_runtime_bootstrap_applies_mcp_config_when_requested() {
     assert!(result.mcp_config_applied);
     let updated = fs::read_to_string(target_codex.join("config.toml"))
         .expect("updated config should be readable");
-    assert_eq!(updated, "applied=true");
-    assert!(target_codex.join("config.toml.bak").is_file());
+    assert!(updated.contains("model = \"gpt-5\""));
+    assert!(updated.contains("[tools]"));
+    assert!(updated.contains("[mcp_servers.microsoftdocs]"));
+    assert!(updated.contains("url = \"https://learn.microsoft.com/api/mcp\""));
+    assert!(updated.contains("[mcp_servers.playwright]"));
+    assert!(updated.contains("command = \"npx\""));
+    assert!(!updated.contains("vscode-only"));
+    let backup_files = fs::read_dir(&target_codex)
+        .expect("target codex directory should be readable")
+        .filter_map(Result::ok)
+        .map(|entry| entry.file_name().to_string_lossy().to_string())
+        .filter(|file_name| file_name.starts_with("config.toml.bak."))
+        .collect::<Vec<_>>();
+    assert_eq!(backup_files.len(), 1);
 }

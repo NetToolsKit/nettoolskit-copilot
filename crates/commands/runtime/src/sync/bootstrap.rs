@@ -6,10 +6,15 @@ use std::collections::BTreeSet;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use walkdir::WalkDir;
 
-use crate::{error::RuntimeBootstrapCommandError, sync::provider_surfaces::render_provider_surfaces_for_bootstrap};
+use crate::{
+    error::RuntimeBootstrapCommandError,
+    sync::{
+        mcp_config::apply_mcp_runtime_catalog_to_codex_config,
+        provider_surfaces::render_provider_surfaces_for_bootstrap,
+    },
+};
 
 /// Request payload for `bootstrap`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -265,64 +270,8 @@ fn invoke_provider_surface_render(
 }
 
 fn invoke_mcp_config_apply(repo_root: &Path, codex_path: &Path, backup_config: bool) -> Result<()> {
-    let sync_script = repo_root.join("scripts/runtime/sync-codex-mcp-config.ps1");
-    let catalog_path = repo_root.join(".github/governance/mcp-runtime.catalog.json");
-    let target_config = codex_path.join("config.toml");
-
-    if !sync_script.is_file() {
-        return Err(anyhow!(
-            "MCP sync script missing: {}",
-            sync_script.display()
-        ));
-    }
-    if !catalog_path.is_file() {
-        return Err(anyhow!(
-            "MCP runtime catalog missing: {}",
-            catalog_path.display()
-        ));
-    }
-    if !target_config.is_file() {
-        return Err(anyhow!(
-            "target Codex config missing: {}",
-            target_config.display()
-        ));
-    }
-
-    let mut command = Command::new("pwsh");
-    command
-        .arg("-NoLogo")
-        .arg("-NoProfile")
-        .arg("-ExecutionPolicy")
-        .arg("Bypass")
-        .arg("-File")
-        .arg(&sync_script)
-        .arg("-CatalogPath")
-        .arg(&catalog_path)
-        .arg("-TargetConfigPath")
-        .arg(&target_config);
-    if backup_config {
-        command.arg("-CreateBackup");
-    }
-
-    let output = command
-        .output()
-        .with_context(|| format!("failed to execute '{}'", sync_script.display()))?;
-    if output.status.success() {
-        return Ok(());
-    }
-
-    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    Err(anyhow!(
-        "MCP config apply failed. {}",
-        if !stderr.is_empty() {
-            stderr
-        } else if !stdout.is_empty() {
-            stdout
-        } else {
-            format!("exit code {}", output.status.code().unwrap_or(1))
-        }
-    ))
+    apply_mcp_runtime_catalog_to_codex_config(repo_root, codex_path, backup_config)
+        .context("MCP config apply failed")
 }
 
 fn sync_agents_skills(

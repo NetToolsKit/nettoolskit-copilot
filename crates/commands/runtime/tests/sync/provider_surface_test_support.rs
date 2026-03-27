@@ -119,3 +119,11 @@ pub fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
         "# review-code-engineer",
     );
 }
+
+/// Initialize a minimal canonical MCP runtime catalog for Codex config tests.
+pub fn initialize_minimal_mcp_runtime_catalog(repo_root: &Path) {
+    write_file(
+        &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+        r#"{"version":1,"inputs":[],"servers":[{"id":"microsoftdocs/mcp","codexName":"microsoftdocs","targets":{"vscode":{"include":true,"enabledByDefault":true},"codex":{"include":true}},"definition":{"type":"http","url":"https://learn.microsoft.com/api/mcp","gallery":"https://example.invalid/gallery","version":"1.0.0"}},{"id":"microsoft/playwright-mcp","codexName":"playwright","targets":{"codex":{"include":true}},"definition":{"type":"stdio","command":"npx","args":["@playwright/mcp@latest"]}},{"id":"vscode-only/example","targets":{"vscode":{"include":true,"enabledByDefault":false}},"definition":{"type":"http","url":"https://example.invalid/vscode-only"}}]}"#,
+    );
+}
