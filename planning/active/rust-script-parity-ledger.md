@@ -1,15 +1,15 @@
 # Rust Script Parity Ledger
 
-Generated: 2026-03-27 19:52
+Generated: 2026-03-27 20:01
 
 ## Status
 
-- LastUpdated: 2026-03-27 19:52
+- LastUpdated: 2026-03-27 20:01
 - Objective: define the parity evidence model that every PowerShell migration slice must satisfy before wrapper cutover.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Active Branch: `feature/native-validation-policy`
-- Live parity harness: `approval-approved-test`, the staged `run-test` closeout success path, and `evaluate-agent-pipeline` are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
+- Live parity harness: `approval-approved-test`, the staged `run-test` closeout success path, `evaluate-agent-pipeline`, and `resume-agent-pipeline` are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
 
 ## Evidence Policy
 
@@ -32,10 +32,10 @@ Generated: 2026-03-27 19:52
 | `scripts/governance/*.ps1` | 2 | `crates/commands/validation` | governance contract tests plus safe no-op / denied-path assertions | `boundary crate created` |
 | `scripts/doc/*.ps1` | 1 | `crates/commands/validation` | documentation validation tests against fixture docs | `boundary crate created` |
 | `scripts/deploy/*.ps1` | 1 | `crates/commands/validation` | deploy preflight tests and protected execution-path assertions | `boundary crate created` |
-| `scripts/orchestration/**/*.ps1` | 10 | `crates/orchestrator` | staged execution tests, resume/replay assertions, dispatch integration checks | `owner existing, implementation pending` |
+| `scripts/orchestration/**/*.ps1` | 10 | `crates/orchestrator` | staged execution tests, resume/replay assertions, dispatch integration checks | `wave 3 control-plane parity proven` |
 | `scripts/git-hooks/*.ps1` | 3 | `crates/commands/runtime` | git hook install/check tests plus local hook bootstrap smoke | `boundary crate created` |
 | `scripts/tests/*.ps1` excluding runtime subfolder | 4 | `crate test suites + root parity harness` | Rust-native replacements for coverage/test-shape automation | `parity harness planning locked` |
-| `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `native parity harness in progress (approval-approved, run-test closeout, evaluate)` |
+| `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `wave 3 parity baseline proven (approval-approved, run-test closeout, evaluate, resume)` |
 
 ## Acceptance Gate
 

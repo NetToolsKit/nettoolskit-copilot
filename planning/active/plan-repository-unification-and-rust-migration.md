@@ -246,7 +246,7 @@ Status: `[x]` Completed
 
 ### Task 6: Implement Wave 2 Quality, Policy, And Support Surfaces
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Transcribe validation, security, governance, maintenance, deploy, and documentation helper flows into Rust-native commands
 - [2026-03-26 22:06] Implemented Rust-backed `validate-all` orchestration in `crates/commands/validation`, with profile selection, delegated check execution, JSON report generation, hash-chained ledger repair/write, and targeted external tests ✓ [2026-03-26 22:06]
@@ -339,6 +339,7 @@ Status: `[~]` In Progress
 - [2026-03-27 19:25] Implemented the native `approval-approved-test` parity harness in `crates/orchestrator/tests/execution/pipeline_parity`, with deterministic fake Codex dispatch, temporary validation-green repository fixtures, replay verification, and repo-state restoration around the real PowerShell runtime; the next Task 7 slice is now the staged `run-test` closeout success path before broader `resume` and `evaluate-agent-pipeline` parity coverage ✓ [2026-03-27 19:25]
 - [2026-03-27 19:42] Implemented the staged `run-test` closeout success parity harness in `crates/orchestrator/tests/execution/pipeline_parity`, covering the real PowerShell stage chain from `intake` through `closeout`, idempotent `spec/plan` replays, README/CHANGELOG mutation evidence, and plan/spec move-with-timestamp preservation; the remaining Task 7 parity backlog is now limited to `resume-agent-pipeline` and `evaluate-agent-pipeline` ✓ [2026-03-27 19:42]
 - [2026-03-27 19:52] Implemented the native `evaluate-agent-pipeline` parity coverage in `crates/orchestrator/tests/execution/pipeline_parity`, verifying the repository-owned eval fixture scorecard against the real PowerShell entrypoint without Codex dispatch or repo mutation; the remaining Task 7 parity backlog is now limited to `resume-agent-pipeline` ✓ [2026-03-27 19:52]
+- [2026-03-27 20:01] Implemented the native `resume-agent-pipeline` parity harness in `crates/orchestrator/tests/execution/pipeline_parity`, verifying partial-run checkpoint capture at `validate`, resumed execution from `review`, and final success metadata on the real PowerShell resume entrypoint; Task 7 is now complete and the next migration slice moves to Task 8 wrapper cutover sequencing ✓ [2026-03-27 20:01]
 - Target paths:
   - `scripts/orchestration/`
   - `scripts/runtime/hooks/`
@@ -362,7 +363,7 @@ Status: `[~]` In Progress
   - `crates/orchestrator` now exposes a typed Rust pipeline manifest contract for stage definitions, dispatch metadata, handoffs, and completion criteria, so the remaining orchestration-stage migration no longer needs raw JSON/script coupling
   - `crates/commands/validation/agent_orchestration` now reuses the same typed pipeline contract, so Task 7 no longer has competing Rust-side manifest models between orchestration and validation
   - the first native parity harness golden path now covers `run-agent-pipeline` plus `replay-agent-run` through the `approval-approved-test` success flow, using deterministic fake Codex dispatch and temporary validation-green fixtures instead of the legacy PowerShell-only smoke suite
-  - the remaining Wave 3 parity backlog is now limited to native coverage for `resume-agent-pipeline`; the hook-control-plane block is complete and the `approval-approved`, staged `run-test` closeout, and `evaluate-agent-pipeline` paths are already covered
+  - the Wave 3 control-plane and parity-harness block is now complete: the hook-control-plane migration is native, and the `approval-approved`, staged `run-test` closeout, `evaluate-agent-pipeline`, and `resume-agent-pipeline` paths are all covered by the Rust-owned parity harness
 - Commit checkpoint:
   - `feat(rust): implement control-plane and parity transcription wave`
 
