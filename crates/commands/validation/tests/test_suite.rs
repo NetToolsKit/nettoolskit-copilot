@@ -38,6 +38,7 @@ mod operational_hygiene {
 }
 
 mod policy {
+    pub mod compatibility_lifecycle_policy_tests;
     pub mod policy_tests;
 }
 

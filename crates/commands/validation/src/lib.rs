@@ -37,6 +37,7 @@ pub use error::{
     ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
     ValidateAgentSkillAlignmentCommandError,
     ValidateAgentOrchestrationCommandError,
+    ValidateCompatibilityLifecyclePolicyCommandError,
     ValidatePolicyCommandError,
     ValidateSecurityBaselineCommandError,
     ValidateSharedScriptChecksumsCommandError,
@@ -75,7 +76,11 @@ pub use operational_hygiene::{
     ValidateShellHooksRequest, ValidateShellHooksResult, ValidateWarningBaselineRequest,
     ValidateWarningBaselineResult,
 };
-pub use policy::{invoke_validate_policy, ValidatePolicyRequest, ValidatePolicyResult};
+pub use policy::{
+    invoke_validate_compatibility_lifecycle_policy, invoke_validate_policy,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateCompatibilityLifecyclePolicyResult,
+    ValidatePolicyRequest, ValidatePolicyResult,
+};
 pub use security::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     ValidateSecurityBaselineRequest, ValidateSecurityBaselineResult,

@@ -4,6 +4,7 @@ use nettoolskit_validation::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment, invoke_validate_all,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
+    invoke_validate_compatibility_lifecycle_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_policy,
@@ -16,6 +17,7 @@ use nettoolskit_validation::{
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, require_validation_surface_contract, ValidateAllRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
+    ValidateCompatibilityLifecyclePolicyRequest,
     ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
     ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
     ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
@@ -180,6 +182,22 @@ fn test_validate_template_standards_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve template standards workspace root"
+    );
+}
+
+#[test]
+fn test_validate_compatibility_lifecycle_policy_error_display_is_stable() {
+    let error = invoke_validate_compatibility_lifecycle_policy(
+        &ValidateCompatibilityLifecyclePolicyRequest {
+            repo_root: Some(std::path::PathBuf::from("missing-repository")),
+            ..ValidateCompatibilityLifecyclePolicyRequest::default()
+        },
+    )
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve compatibility lifecycle policy workspace root"
     );
 }
 

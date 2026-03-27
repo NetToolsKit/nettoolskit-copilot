@@ -17,6 +17,7 @@ use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment,
+    invoke_validate_compatibility_lifecycle_policy,
     invoke_validate_policy,
     invoke_validate_security_baseline,
     invoke_validate_shared_script_checksums,
@@ -31,6 +32,7 @@ use crate::{
     ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
     ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
+    ValidateCompatibilityLifecyclePolicyRequest,
     ValidatePolicyRequest,
     ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest,
@@ -235,6 +237,7 @@ enum NativeValidationCheck {
     AgentOrchestration,
     AgentPermissions,
     AgentSkillAlignment,
+    CompatibilityLifecyclePolicy,
     Policy,
     SecurityBaseline,
     SharedScriptChecksums,
@@ -272,6 +275,9 @@ impl ValidationCheckDefinition {
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentSkillAlignment) => {
                 "rust:nettoolskit-validation::validate-agent-skill-alignment"
             }
+            ValidationCheckExecutor::Native(
+                NativeValidationCheck::CompatibilityLifecyclePolicy,
+            ) => "rust:nettoolskit-validation::validate-compatibility-lifecycle-policy",
             ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => {
                 "rust:nettoolskit-validation::validate-policy"
             }
@@ -587,8 +593,8 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-compatibility-lifecycle-policy",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-compatibility-lifecycle-policy.ps1",
+            ValidationCheckExecutor::Native(
+                NativeValidationCheck::CompatibilityLifecyclePolicy,
             ),
         ),
         (
@@ -772,6 +778,12 @@ fn definition_supports_parameter(
             parameter_name == "WarningOnly"
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => false,
+        ValidationCheckExecutor::Native(NativeValidationCheck::CompatibilityLifecyclePolicy) => {
+            matches!(
+                parameter_name,
+                "WarningOnly" | "CompatibilityPath" | "DetailedOutput"
+            )
+        }
         ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::SecurityBaseline) => {
             matches!(parameter_name, "WarningOnly" | "BaselinePath")
@@ -1004,6 +1016,25 @@ fn run_native_validation_check(
                 eval_fixture_path: string_argument_path(&arguments, "EvalFixturePath"),
                 skills_root_path: string_argument_path(&arguments, "SkillsRootPath"),
             })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::CompatibilityLifecyclePolicy => {
+            invoke_validate_compatibility_lifecycle_policy(
+                &ValidateCompatibilityLifecyclePolicyRequest {
+                    repo_root: Some(repo_root.to_path_buf()),
+                    compatibility_path: string_argument_path(&arguments, "CompatibilityPath"),
+                    warning_only: bool_argument(&arguments, "WarningOnly")
+                        .unwrap_or(treat_failure_as_warning),
+                    detailed_output: bool_argument(&arguments, "DetailedOutput").unwrap_or(false),
+                },
+            )
             .map(|result| {
                 (
                     result.status,

@@ -31,6 +31,21 @@ pub fn initialize_policy_repo(repo_root: &Path) {
     );
 }
 
+pub fn initialize_compatibility_lifecycle_repo(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join(".codex"))
+        .expect("codex directory should be created for repository resolution");
+    fs::create_dir_all(repo_root.join(".github"))
+        .expect("github directory should be created for repository resolution");
+    write_compatibility_file(
+        repo_root,
+        "COMPATIBILITY.md",
+        "January 15, 2025",
+        &[
+            "| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 2, 2025 | Active |",
+        ],
+    );
+}
+
 pub fn write_repo_file(repo_root: &Path, relative_path: &str, contents: &str) {
     write_file(&repo_root.join(relative_path), contents);
 }
@@ -50,4 +65,28 @@ pub fn write_policy_file(repo_root: &Path, file_name: &str, contents: &str) {
         &format!(".github/policies/{file_name}"),
         contents,
     );
+}
+
+pub fn write_compatibility_file(
+    repo_root: &Path,
+    relative_path: &str,
+    reference_date: &str,
+    rows: &[&str],
+) {
+    let mut lines = vec![
+        "# Compatibility".to_string(),
+        String::new(),
+        "## Support Lifecycle and EOL".to_string(),
+        format!(
+            "Reference date for status labels in this table: **{reference_date}**."
+        ),
+        String::new(),
+        "| Minor | GA date | Active support until | Maintenance support until | EOL date | Status |"
+            .to_string(),
+        "| --- | --- | --- | --- | --- | --- |".to_string(),
+    ];
+    lines.extend(rows.iter().map(|row| (*row).to_string()));
+    lines.push(String::new());
+
+    write_repo_file(repo_root, relative_path, &lines.join("\n"));
 }

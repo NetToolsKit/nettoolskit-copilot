@@ -15,7 +15,9 @@ use crate::support::operational_hygiene_fixtures::{
     initialize_shell_hooks_repo, write_fake_shell_command, write_hook_file,
     write_runtime_test_script, write_warning_analyzer_report,
 };
-use crate::support::policy_fixtures::initialize_policy_repo;
+use crate::support::policy_fixtures::{
+    initialize_compatibility_lifecycle_repo, initialize_policy_repo,
+};
 use crate::support::security_fixtures::initialize_security_repo;
 use crate::support::security_fixtures::initialize_shared_checksums_repo;
 
@@ -591,6 +593,27 @@ fn test_invoke_validate_all_runs_native_security_baseline_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-security-baseline"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_compatibility_lifecycle_policy_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-compatibility-lifecycle-policy"]);
+    initialize_compatibility_lifecycle_repo(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-compatibility-lifecycle-policy"
     );
 }
 
