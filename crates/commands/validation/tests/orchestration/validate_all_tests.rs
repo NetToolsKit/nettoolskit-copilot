@@ -4,6 +4,7 @@ use nettoolskit_validation::{invoke_validate_all, ValidateAllRequest, Validation
 use std::fs;
 use tempfile::TempDir;
 
+use crate::support::agent_orchestration_fixtures::initialize_agent_hooks_repo;
 use crate::support::instruction_graph_fixtures::{
     initialize_instruction_architecture_repo, initialize_validate_instructions_repo,
 };
@@ -721,5 +722,26 @@ fn test_invoke_validate_all_runs_native_shell_hooks_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-shell-hooks"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_agent_hooks_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-agent-hooks"]);
+    initialize_agent_hooks_repo(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-agent-hooks"
     );
 }

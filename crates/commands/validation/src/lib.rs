@@ -1,6 +1,7 @@
 //! Validation command boundary contracts for the migration program.
 
 pub mod contracts;
+pub mod agent_orchestration;
 pub mod documentation;
 pub mod error;
 pub mod evidence;
@@ -15,13 +16,16 @@ pub use contracts::{
     validation_surface_contract, validation_surface_script_total, MigrationWave,
     ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
 };
+pub use agent_orchestration::{
+    invoke_validate_agent_hooks, ValidateAgentHooksRequest, ValidateAgentHooksResult,
+};
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
     ValidateInstructionMetadataRequest, ValidateInstructionMetadataResult,
     ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
 };
 pub use error::{
-    ValidateAllCommandError, ValidateAuditLedgerCommandError,
+    ValidateAgentHooksCommandError, ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
     ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,

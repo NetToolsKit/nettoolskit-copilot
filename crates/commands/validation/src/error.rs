@@ -170,6 +170,18 @@ pub enum ValidateShellHooksCommandError {
     },
 }
 
+/// Errors raised by agent-hooks validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateAgentHooksCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve agent hooks workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

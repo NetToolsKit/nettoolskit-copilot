@@ -26,6 +26,7 @@ The current contract covers `41` legacy PowerShell scripts:
 The current executable Rust coverage includes:
 
 - `validate-all` orchestration with profile selection, delegated check sequencing, report generation, and hash-chained ledger write/repair
+- `validate-agent-hooks`
 - `validate-authoritative-source-policy`
 - `validate-instruction-architecture`
 - `validate-instructions`
@@ -43,6 +44,7 @@ The current executable Rust coverage includes:
 ## Module Layout
 
 - `orchestration/` for top-level validation suite orchestration
+- `agent_orchestration/` for agent runtime manifests, hook assets, and orchestration contracts
 - `instruction_graph/` for centralized instruction-system policy and graph validation
 - `structure/` for repository and planning workspace layout checks
 - `evidence/` for ledger and parity evidence validation
@@ -58,6 +60,7 @@ The current executable Rust coverage includes:
 - `require_validation_surface_contract`
 - `validation_surface_script_total`
 - `invoke_validate_all`
+- `invoke_validate_agent_hooks`
 - `invoke_validate_authoritative_source_policy`
 - `invoke_validate_instruction_architecture`
 - `invoke_validate_instructions`

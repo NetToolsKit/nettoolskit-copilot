@@ -14,6 +14,7 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
+    invoke_validate_agent_hooks,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -22,6 +23,7 @@ use crate::{
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
+    ValidateAgentHooksRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -219,6 +221,7 @@ enum ValidationCheckExecutor {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeValidationCheck {
+    AgentHooks,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -240,6 +243,9 @@ impl ValidationCheckDefinition {
             ValidationCheckExecutor::PowerShell(script) => script,
             ValidationCheckExecutor::Native(NativeValidationCheck::Instructions) => {
                 "rust:nettoolskit-validation::validate-instructions"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks) => {
+                "rust:nettoolskit-validation::validate-agent-hooks"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -569,7 +575,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-agent-hooks",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-agent-hooks.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks),
         ),
         (
             "validate-shell-hooks",
@@ -730,7 +736,8 @@ fn definition_supports_parameter(
                 .map(|document| document.contains(parameter_name))
                 .unwrap_or(false)
         }
-        ValidationCheckExecutor::Native(NativeValidationCheck::Instructions)
+        ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::Instructions)
         | ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
@@ -905,6 +912,22 @@ fn run_native_validation_check(
     let formatted_arguments = format_argument_list(&arguments);
 
     let (native_status, raw_exit_code, error) = match native_check {
+        NativeValidationCheck::AgentHooks => {
+            invoke_validate_agent_hooks(&ValidateAgentHooksRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+                ..ValidateAgentHooksRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
         NativeValidationCheck::Instructions => {
             invoke_validate_instructions(&ValidateInstructionsRequest {
                 repo_root: Some(repo_root.to_path_buf()),

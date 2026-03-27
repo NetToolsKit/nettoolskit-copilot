@@ -1,6 +1,6 @@
 //! Operational hygiene validation commands.
 
-mod common;
+pub(crate) mod common;
 mod runtime_script_tests;
 mod shell_hooks;
 mod warning_baseline;

@@ -5,6 +5,9 @@ mod documentation {
     pub mod instruction_metadata_tests;
     pub mod readme_standards_tests;
 }
+mod agent_orchestration {
+    pub mod agent_hooks_tests;
+}
 mod error_tests;
 mod instruction_graph {
     pub mod authoritative_source_policy_tests;
