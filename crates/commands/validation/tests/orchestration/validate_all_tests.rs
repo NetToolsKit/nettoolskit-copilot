@@ -36,6 +36,115 @@ fn initialize_repo_layout(repo_root: &std::path::Path, check_order: &[&str]) {
     write_validation_profile_catalog(repo_root, check_order);
 }
 
+fn write_default_readme_baseline(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join(".github/governance/readme-standards.baseline.json"),
+        r#"{
+  "version": 1,
+  "global": {
+    "requireFeaturesCheckmarks": true,
+    "requireCodeFences": true,
+    "requireTocLinks": true,
+    "requireHorizontalSeparators": true
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "requiredSections": [
+        "Features",
+        "Contents|Table of Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Dependencies",
+        "References"
+      ],
+      "allowIntroductionPreamble": true
+    }
+  ]
+}"#,
+    );
+}
+
+fn write_valid_readme(repo_root: &std::path::Path) {
+    write_file(
+        &repo_root.join("README.md"),
+        r#"# Example
+
+Intro paragraph.
+
+---
+
+## Features
+
+- ✅ Deterministic validation
+
+---
+
+## Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Examples](#usage-examples)
+- [API Reference](#api-reference)
+- [Dependencies](#dependencies)
+- [References](#references)
+
+---
+
+## Installation
+
+```sh
+cargo test
+```
+
+## Quick Start
+
+Run the validation flow.
+
+## Usage Examples
+
+Use the generated report.
+
+## API Reference
+
+Documented in the repo.
+
+## Dependencies
+
+- Rust
+
+## References
+
+- [README](#example)
+"#,
+    );
+}
+
+fn write_valid_instruction_metadata_fixtures(repo_root: &std::path::Path, broad_apply_to: bool) {
+    let instruction_apply_to = if broad_apply_to {
+        "**/*"
+    } else {
+        "**/*.{rs,md}"
+    };
+    write_file(
+        &repo_root.join(".github/instructions/example.instructions.md"),
+        &format!(
+            "---\napplyTo: \"{instruction_apply_to}\"\npriority: medium\n---\n\n# Example\n"
+        ),
+    );
+    write_file(
+        &repo_root.join(".github/prompts/example.prompt.md"),
+        "---\ndescription: Example prompt\nmode: ask\ntools: ['codebase']\n---\n\n# Example\n",
+    );
+    write_file(
+        &repo_root.join(".github/chatmodes/example.chatmode.md"),
+        "---\ndescription: Example chat mode\ntools: ['codebase']\n---\n\n# Example\n",
+    );
+}
+
 #[test]
 fn test_invoke_validate_all_runs_selected_profile_and_writes_report_and_ledger() {
     let repo = TempDir::new().expect("temporary repository should be created");
@@ -147,4 +256,53 @@ fn test_invoke_validate_all_runs_native_planning_and_ledger_checks() {
         .checks
         .iter()
         .any(|check| check.script == "rust:nettoolskit-validation::validate-audit-ledger"));
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_documentation_checks() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(
+        repo.path(),
+        &["validate-readme-standards", "validate-instruction-metadata"],
+    );
+    write_default_readme_baseline(repo.path());
+    write_valid_readme(repo.path());
+    write_valid_instruction_metadata_fixtures(repo.path(), false);
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 2);
+    assert_eq!(result.passed_checks, 2);
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.script == "rust:nettoolskit-validation::validate-readme-standards"));
+    assert!(result.checks.iter().any(|check| {
+        check.script == "rust:nettoolskit-validation::validate-instruction-metadata"
+    }));
+}
+
+#[test]
+fn test_invoke_validate_all_preserves_warning_status_for_native_checks() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-instruction-metadata"]);
+    write_valid_instruction_metadata_fixtures(repo.path(), true);
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.warning_checks, 1);
+    assert_eq!(result.overall_status, ValidationCheckStatus::Warning);
+    assert_eq!(result.checks[0].status, ValidationCheckStatus::Warning);
+    assert_eq!(result.checks[0].exit_code, 0);
 }

@@ -14,8 +14,10 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
-    invoke_validate_audit_ledger, invoke_validate_planning_structure, ValidateAuditLedgerRequest,
-    ValidatePlanningStructureRequest,
+    invoke_validate_audit_ledger, invoke_validate_instruction_metadata,
+    invoke_validate_planning_structure, invoke_validate_readme_standards,
+    ValidateAuditLedgerRequest, ValidateInstructionMetadataRequest,
+    ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
@@ -208,6 +210,8 @@ enum ValidationCheckExecutor {
 enum NativeValidationCheck {
     PlanningStructure,
     AuditLedger,
+    ReadmeStandards,
+    InstructionMetadata,
 }
 
 impl ValidationCheckDefinition {
@@ -219,6 +223,12 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger) => {
                 "rust:nettoolskit-validation::validate-audit-ledger"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards) => {
+                "rust:nettoolskit-validation::validate-readme-standards"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
+                "rust:nettoolskit-validation::validate-instruction-metadata"
             }
         }
     }
@@ -492,9 +502,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-readme-standards",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-readme-standards.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards),
         ),
         (
             "validate-template-standards",
@@ -554,9 +562,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-instruction-metadata",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-instruction-metadata.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata),
         ),
         (
             "validate-supply-chain",
@@ -684,7 +690,9 @@ fn definition_supports_parameter(
             .map(|document| document.contains(parameter_name))
             .unwrap_or(false),
         ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
-        | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger) => {
+        | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
             parameter_name == "WarningOnly"
         }
     }
@@ -792,7 +800,7 @@ fn run_native_validation_check(
     let started = Instant::now();
     let formatted_arguments = format_argument_list(&arguments);
 
-    let (raw_exit_code, error) = match native_check {
+    let (native_status, raw_exit_code, error) = match native_check {
         NativeValidationCheck::PlanningStructure => invoke_validate_planning_structure(
             &ValidatePlanningStructureRequest {
                 repo_root: Some(repo_root.to_path_buf()),
@@ -800,12 +808,19 @@ fn run_native_validation_check(
             },
         )
         .map(|result| {
-            let message = (!result.failures.is_empty())
-                .then(|| result.failures.join(" | "))
-                .or_else(|| (!result.warnings.is_empty()).then(|| result.warnings.join(" | ")));
-            (result.exit_code, message)
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
         })
-        .unwrap_or_else(|error| (1, Some(error.to_string()))),
+        .unwrap_or_else(|error| {
+            (
+                ValidationCheckStatus::Failed,
+                1,
+                Some(error.to_string()),
+            )
+        }),
         NativeValidationCheck::AuditLedger => invoke_validate_audit_ledger(
             &ValidateAuditLedgerRequest {
                 repo_root: Some(repo_root.to_path_buf()),
@@ -814,23 +829,82 @@ fn run_native_validation_check(
             },
         )
         .map(|result| {
-            let message = (!result.failures.is_empty())
-                .then(|| result.failures.join(" | "))
-                .or_else(|| (!result.warnings.is_empty()).then(|| result.warnings.join(" | ")));
-            (result.exit_code, message)
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
         })
-        .unwrap_or_else(|error| (1, Some(error.to_string()))),
+        .unwrap_or_else(|error| {
+            (
+                ValidationCheckStatus::Failed,
+                1,
+                Some(error.to_string()),
+            )
+        }),
+        NativeValidationCheck::ReadmeStandards => invoke_validate_readme_standards(
+            &ValidateReadmeStandardsRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+                ..ValidateReadmeStandardsRequest::default()
+            },
+        )
+        .map(|result| {
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
+        })
+        .unwrap_or_else(|error| {
+            (
+                ValidationCheckStatus::Failed,
+                1,
+                Some(error.to_string()),
+            )
+        }),
+        NativeValidationCheck::InstructionMetadata => invoke_validate_instruction_metadata(
+            &ValidateInstructionMetadataRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+            },
+        )
+        .map(|result| {
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
+        })
+        .unwrap_or_else(|error| {
+            (
+                ValidationCheckStatus::Failed,
+                1,
+                Some(error.to_string()),
+            )
+        }),
     };
 
-    build_check_result(
+    build_native_check_result(
         name,
         script_label,
         formatted_arguments,
+        native_status,
         treat_failure_as_warning,
         raw_exit_code,
         error,
         started.elapsed().as_millis(),
     )
+}
+
+fn combine_native_messages(failures: &[String], warnings: &[String]) -> Option<String> {
+    if !failures.is_empty() {
+        Some(failures.join(" | "))
+    } else if !warnings.is_empty() {
+        Some(warnings.join(" | "))
+    } else {
+        None
+    }
 }
 
 fn append_command_argument(command: &mut Command, argument: &ValidationCommandArgument) {
@@ -871,6 +945,38 @@ fn build_check_result(
         (ValidationCheckStatus::Warning, 0)
     } else {
         (ValidationCheckStatus::Failed, raw_exit_code)
+    };
+
+    ValidationCheckResult {
+        name: name.to_string(),
+        script: script.to_string(),
+        arguments,
+        status,
+        exit_code,
+        duration_ms,
+        error,
+    }
+}
+
+fn build_native_check_result(
+    name: &str,
+    script: &str,
+    arguments: Vec<String>,
+    native_status: ValidationCheckStatus,
+    treat_failure_as_warning: bool,
+    raw_exit_code: i32,
+    error: Option<String>,
+    duration_ms: u128,
+) -> ValidationCheckResult {
+    let (status, exit_code) = match native_status {
+        ValidationCheckStatus::Passed => (ValidationCheckStatus::Passed, 0),
+        ValidationCheckStatus::Warning => (ValidationCheckStatus::Warning, 0),
+        ValidationCheckStatus::Failed if treat_failure_as_warning => {
+            (ValidationCheckStatus::Warning, 0)
+        }
+        ValidationCheckStatus::Failed => {
+            (ValidationCheckStatus::Failed, if raw_exit_code == 0 { 1 } else { raw_exit_code })
+        }
     };
 
     ValidationCheckResult {

@@ -1,9 +1,11 @@
 //! Tests for validation surface errors.
 
 use nettoolskit_validation::{
-    invoke_validate_all, invoke_validate_audit_ledger, invoke_validate_planning_structure,
-    require_validation_surface_contract, ValidateAllRequest, ValidateAuditLedgerRequest,
-    ValidatePlanningStructureRequest,
+    invoke_validate_all, invoke_validate_audit_ledger,
+    invoke_validate_instruction_metadata, invoke_validate_planning_structure,
+    invoke_validate_readme_standards, require_validation_surface_contract,
+    ValidateAllRequest, ValidateAuditLedgerRequest, ValidateInstructionMetadataRequest,
+    ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
 };
 
 #[test]
@@ -51,4 +53,32 @@ fn test_validate_audit_ledger_error_display_is_stable() {
     .expect_err("missing repository should fail");
 
     assert_eq!(error.to_string(), "failed to resolve audit ledger workspace root");
+}
+
+#[test]
+fn test_validate_readme_standards_error_display_is_stable() {
+    let error = invoke_validate_readme_standards(&ValidateReadmeStandardsRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateReadmeStandardsRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve readme standards workspace root"
+    );
+}
+
+#[test]
+fn test_validate_instruction_metadata_error_display_is_stable() {
+    let error = invoke_validate_instruction_metadata(&ValidateInstructionMetadataRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateInstructionMetadataRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve instruction metadata workspace root"
+    );
 }

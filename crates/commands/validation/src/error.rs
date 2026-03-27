@@ -49,3 +49,27 @@ pub enum ValidateAuditLedgerCommandError {
         source: AnyhowError,
     },
 }
+
+/// Errors raised by README standards validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateReadmeStandardsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve readme standards workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by instruction metadata validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateInstructionMetadataCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve instruction metadata workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}

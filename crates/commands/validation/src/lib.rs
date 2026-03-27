@@ -1,6 +1,7 @@
 //! Validation command boundary contracts for the migration program.
 
 pub mod contracts;
+pub mod documentation;
 pub mod evidence;
 pub mod error;
 pub mod orchestration;
@@ -12,7 +13,13 @@ pub use contracts::{
 };
 pub use error::{
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
-    ValidatePlanningStructureCommandError, ValidationSurfaceError,
+    ValidateInstructionMetadataCommandError, ValidatePlanningStructureCommandError,
+    ValidateReadmeStandardsCommandError, ValidationSurfaceError,
+};
+pub use documentation::{
+    invoke_validate_instruction_metadata, invoke_validate_readme_standards,
+    ValidateInstructionMetadataRequest, ValidateInstructionMetadataResult,
+    ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
