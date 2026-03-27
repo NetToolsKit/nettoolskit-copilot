@@ -120,6 +120,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 29. [2026-03-26 23:06] After the repository-structure, documentation, and governance slices land, the remaining Wave 2 sequence should prioritize workspace-efficiency and instruction-graph validation before the higher-coupling agent/security/release checks.
 30. [2026-03-27 08:07] Once `validate-workspace-efficiency` lands, the next Wave 2 slices should stay capability-grouped as well: instruction-graph checks should form their own authoring/policy boundary instead of expanding `governance/` or the crate root ad hoc.
 31. [2026-03-27 09:00] With `instruction_graph/` now owning both `validate-authoritative-source-policy` and `validate-instruction-architecture`, the next slice in that boundary should be `validate-instructions`, so the entire instruction system converges inside one cohesive Rust module tree before the plan marks that block complete.
+32. [2026-03-27 09:31] Once `validate-instructions` lands, the instruction-system validation block is complete and Wave 2 should move to the remaining hygiene cluster (`validate-warning-baseline`, `validate-runtime-script-tests`, `validate-shell-hooks`) before expanding back into the higher-coupling agent and release-policy checks.
 
 ## Constraints
 
@@ -190,6 +191,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-26 23:06` — implemented the routing/template governance Wave 2 slice in `crates/commands/validation/governance` for `validate-routing-coverage` and `validate-template-standards`.
 - Updated: `2026-03-27 08:07` — implemented the workspace-efficiency Wave 2 slice in `crates/commands/validation/workspace`, routed it through `validate-all`, and kept validation growth aligned to capability-specific submodules.
 - Updated: `2026-03-27 09:00` — implemented the authoritative-source-policy and instruction-architecture Wave 2 instruction-graph slices in `crates/commands/validation/instruction_graph`, routed both through `validate-all`, and reduced the remaining instruction-system backlog to `validate-instructions`.
+- Updated: `2026-03-27 09:31` — implemented the `validate-instructions` Wave 2 instruction-graph slice in `crates/commands/validation/instruction_graph`, routed it through `validate-all`, and closed the full instruction-system validation block before moving to the remaining hygiene backlog.
 
 ## Recommended Specialist Focus
 

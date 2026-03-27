@@ -249,6 +249,7 @@ Status: `[~]` In Progress
 - [2026-03-27 08:07] Implemented Rust-backed `validate-workspace-efficiency` in `crates/commands/validation/workspace`, with direct external coverage and native dispatch through `validate-all` for the workspace/runtime hygiene slice ✓ [2026-03-27 08:07]
 - [2026-03-27 08:22] Implemented Rust-backed `validate-authoritative-source-policy` in `crates/commands/validation/instruction_graph`, with direct external coverage and native dispatch through `validate-all` for the first instruction-graph policy slice ✓ [2026-03-27 08:22]
 - [2026-03-27 09:00] Implemented Rust-backed `validate-instruction-architecture` in `crates/commands/validation/instruction_graph`, with direct external coverage and native dispatch through `validate-all` for the instruction ownership, routing-discipline, and canonical-skill-reference slice ✓ [2026-03-27 09:00]
+- [2026-03-27 09:31] Implemented Rust-backed `validate-instructions` in `crates/commands/validation/instruction_graph`, with direct external coverage for required instruction assets, routing catalog references, JSON/JSONC contracts, markdown links, skill metadata, workspace-template parity, snippet references, and native dispatch through `validate-all` ✓ [2026-03-27 09:31]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -273,11 +274,11 @@ Status: `[~]` In Progress
   - `validate-workspace-efficiency` no longer depends on PowerShell business logic, and the validation crate now keeps workspace-specific rules in a dedicated `workspace/` boundary instead of expanding the root module flatly
   - `validate-authoritative-source-policy` no longer depends on PowerShell business logic, and the validation crate now keeps instruction-system policy checks in a dedicated `instruction_graph/` boundary instead of mixing them into `governance/` or the crate root
   - `validate-instruction-architecture` no longer depends on PowerShell business logic, and the instruction ownership plus routing-discipline slice now lives beside the authoritative-source policy checks inside `instruction_graph/`
+  - `validate-instructions` no longer depends on PowerShell business logic, and the entire instruction-system validation block now converges inside `crates/commands/validation/instruction_graph/`
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
   - workspace/runtime hygiene checks: `validate-warning-baseline`, `validate-runtime-script-tests`, `validate-shell-hooks`
-  - repository authoring and instruction graph: `validate-instructions`
   - agent policy and orchestration: `validate-agent-orchestration`, `validate-agent-skill-alignment`, `validate-agent-permissions`, `validate-agent-hooks`
   - policy/security/release/domain checks: `validate-policy`, `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
