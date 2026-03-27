@@ -25,6 +25,10 @@ mod orchestration {
     pub mod validate_all_tests;
 }
 
+mod operational_hygiene {
+    pub mod warning_baseline_tests;
+}
+
 mod structure {
     pub mod planning_structure_tests;
 }

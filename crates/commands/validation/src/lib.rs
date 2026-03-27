@@ -7,6 +7,7 @@ pub mod evidence;
 pub mod governance;
 pub mod instruction_graph;
 pub mod orchestration;
+pub mod operational_hygiene;
 pub mod structure;
 pub mod workspace;
 
@@ -25,7 +26,8 @@ pub use error::{
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
     ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
     ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
-    ValidateWorkspaceEfficiencyCommandError, ValidationSurfaceError,
+    ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
+    ValidationSurfaceError,
 };
 pub use evidence::{
     invoke_validate_audit_ledger, ValidateAuditLedgerRequest, ValidateAuditLedgerResult,
@@ -45,6 +47,10 @@ pub use instruction_graph::{
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
     ValidationCheckStatus,
+};
+pub use operational_hygiene::{
+    invoke_validate_warning_baseline, ValidateWarningBaselineRequest,
+    ValidateWarningBaselineResult,
 };
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,

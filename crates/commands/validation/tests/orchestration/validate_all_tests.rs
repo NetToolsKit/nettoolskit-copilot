@@ -7,6 +7,9 @@ use tempfile::TempDir;
 use crate::support::instruction_graph_fixtures::{
     initialize_instruction_architecture_repo, initialize_validate_instructions_repo,
 };
+use crate::support::operational_hygiene_fixtures::{
+    initialize_warning_baseline_repo, write_warning_analyzer_report,
+};
 
 fn write_file(path: &std::path::Path, contents: &str) {
     if let Some(parent) = path.parent() {
@@ -598,5 +601,50 @@ fn test_invoke_validate_all_runs_native_instruction_validation_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-instructions"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_warning_baseline_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-warning-baseline"]);
+    initialize_warning_baseline_repo(repo.path());
+    let analyzer_report_path = repo.path().join(".temp/audit/analyzer-warning-report.json");
+    write_warning_analyzer_report(
+        &analyzer_report_path,
+        &[("PSAvoidUsingWriteHost", "scripts/example.ps1")],
+    );
+    write_file(
+        &repo.path().join(".github/governance/validation-profiles.json"),
+        r#"{
+  "version": 1,
+  "defaultProfile": "test",
+  "profiles": [
+    {
+      "id": "test",
+      "warningOnly": false,
+      "checkOrder": ["validate-warning-baseline"],
+      "checkOptions": {
+        "validate-warning-baseline": {
+          "AnalyzerReportPath": ".temp/audit/analyzer-warning-report.json"
+        }
+      }
+    }
+  ]
+}"#,
+    );
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-warning-baseline"
     );
 }

@@ -5,12 +5,14 @@ use nettoolskit_validation::{
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_readme_standards,
+    invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, require_validation_surface_contract, ValidateAllRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
     ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
     ValidateRoutingCoverageRequest, ValidateTemplateStandardsRequest,
+    ValidateWarningBaselineRequest,
     ValidateWorkspaceEfficiencyRequest,
 };
 
@@ -177,5 +179,19 @@ fn test_validate_workspace_efficiency_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve workspace efficiency workspace root"
+    );
+}
+
+#[test]
+fn test_validate_warning_baseline_error_display_is_stable() {
+    let error = invoke_validate_warning_baseline(&ValidateWarningBaselineRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateWarningBaselineRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve warning baseline workspace root"
     );
 }

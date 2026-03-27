@@ -18,13 +18,15 @@ use crate::{
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
     invoke_validate_readme_standards,
+    invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
     ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
-    ValidateTemplateStandardsRequest, ValidateWorkspaceEfficiencyRequest,
+    ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
+    ValidateWorkspaceEfficiencyRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
@@ -223,6 +225,7 @@ enum NativeValidationCheck {
     RoutingCoverage,
     TemplateStandards,
     AuthoritativeSourcePolicy,
+    WarningBaseline,
     WorkspaceEfficiency,
 }
 
@@ -256,6 +259,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AuthoritativeSourcePolicy) => {
                 "rust:nettoolskit-validation::validate-authoritative-source-policy"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::WarningBaseline) => {
+                "rust:nettoolskit-validation::validate-warning-baseline"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
                 "rust:nettoolskit-validation::validate-workspace-efficiency"
@@ -566,7 +572,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-warning-baseline",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-warning-baseline.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::WarningBaseline),
         ),
         (
             "validate-dotnet-standards",
@@ -748,6 +754,12 @@ fn definition_supports_parameter(
                     | "GlobalInstructionsPath"
                     | "RoutingCatalogPath"
                     | "InstructionSearchRoot"
+            )
+        }
+        ValidationCheckExecutor::Native(NativeValidationCheck::WarningBaseline) => {
+            matches!(
+                parameter_name,
+                "WarningOnly" | "BaselinePath" | "AnalyzerReportPath" | "ReportPath"
             )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
@@ -1012,6 +1024,24 @@ fn run_native_validation_check(
                 ),
                 routing_catalog_path: string_argument_path(&arguments, "RoutingCatalogPath"),
                 instruction_search_root: string_argument_path(&arguments, "InstructionSearchRoot"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::WarningBaseline => {
+            invoke_validate_warning_baseline(&ValidateWarningBaselineRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                baseline_path: string_argument_path(&arguments, "BaselinePath"),
+                analyzer_report_path: string_argument_path(&arguments, "AnalyzerReportPath"),
+                report_path: string_argument_path(&arguments, "ReportPath"),
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
             })

@@ -35,6 +35,7 @@ The current executable Rust coverage includes:
 - `validate-instruction-metadata`
 - `validate-routing-coverage`
 - `validate-template-standards`
+- `validate-warning-baseline`
 - `validate-workspace-efficiency`
 
 ## Module Layout
@@ -45,6 +46,7 @@ The current executable Rust coverage includes:
 - `evidence/` for ledger and parity evidence validation
 - `documentation/` for README and authoring metadata checks
 - `governance/` for routing, template, and repository-policy checks
+- `operational_hygiene/` for analyzer baselines, runtime test wrappers, and hook hygiene
 - `workspace/` for VS Code workspace and local authoring footprint efficiency checks
 
 ## Public API
@@ -63,4 +65,5 @@ The current executable Rust coverage includes:
 - `invoke_validate_instruction_metadata`
 - `invoke_validate_routing_coverage`
 - `invoke_validate_template_standards`
+- `invoke_validate_warning_baseline`
 - `invoke_validate_workspace_efficiency`
