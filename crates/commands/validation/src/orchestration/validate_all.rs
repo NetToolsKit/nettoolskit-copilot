@@ -14,7 +14,8 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
-    invoke_validate_agent_hooks, invoke_validate_agent_permissions,
+    invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
+    invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
@@ -24,7 +25,8 @@ use crate::{
     invoke_validate_warning_baseline,
     invoke_validate_routing_coverage, invoke_validate_template_standards,
     invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
-    ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
+    ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
@@ -224,6 +226,7 @@ enum ValidationCheckExecutor {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeValidationCheck {
     AgentHooks,
+    AgentOrchestration,
     AgentPermissions,
     AgentSkillAlignment,
     Instructions,
@@ -250,6 +253,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentHooks) => {
                 "rust:nettoolskit-validation::validate-agent-hooks"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => {
+                "rust:nettoolskit-validation::validate-agent-orchestration"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentPermissions) => {
                 "rust:nettoolskit-validation::validate-agent-permissions"
@@ -527,9 +533,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-agent-orchestration",
-            ValidationCheckExecutor::PowerShell(
-                "scripts/validation/validate-agent-orchestration.ps1",
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration),
         ),
         (
             "validate-agent-skill-alignment",
@@ -753,6 +757,7 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
             parameter_name == "WarningOnly"
         }
+        ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
             matches!(
                 parameter_name,
@@ -931,6 +936,19 @@ fn run_native_validation_check(
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
                 ..ValidateAgentHooksRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::AgentOrchestration => {
+            invoke_validate_agent_orchestration(&ValidateAgentOrchestrationRequest {
+                repo_root: Some(repo_root.to_path_buf()),
             })
             .map(|result| {
                 (

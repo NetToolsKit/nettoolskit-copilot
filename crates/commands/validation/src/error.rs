@@ -206,6 +206,18 @@ pub enum ValidateAgentSkillAlignmentCommandError {
     },
 }
 
+/// Errors raised by agent-orchestration validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateAgentOrchestrationCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve agent orchestration workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

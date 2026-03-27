@@ -17,10 +17,13 @@ pub use contracts::{
     ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
 };
 pub use agent_orchestration::{
-    invoke_validate_agent_hooks, invoke_validate_agent_permissions,
+    invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
+    invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment,
-    ValidateAgentHooksRequest, ValidateAgentHooksResult, ValidateAgentPermissionsRequest,
-    ValidateAgentPermissionsResult, ValidateAgentSkillAlignmentRequest,
+    ValidateAgentHooksRequest, ValidateAgentHooksResult,
+    ValidateAgentOrchestrationRequest, ValidateAgentOrchestrationResult,
+    ValidateAgentPermissionsRequest, ValidateAgentPermissionsResult,
+    ValidateAgentSkillAlignmentRequest,
     ValidateAgentSkillAlignmentResult,
 };
 pub use documentation::{
@@ -31,6 +34,7 @@ pub use documentation::{
 pub use error::{
     ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
     ValidateAgentSkillAlignmentCommandError,
+    ValidateAgentOrchestrationCommandError,
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
