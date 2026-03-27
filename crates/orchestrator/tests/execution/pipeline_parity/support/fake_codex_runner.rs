@@ -187,6 +187,10 @@ end {
     elseif ($allInput -match '# Super Agent Intake Stage Contract') {
         $normalizedRequest = 'Implement enterprise orchestration support.'
         $workstreamSlug = 'implement-enterprise-orchestration-support'
+        if ($allInput -match 'Implement closeout smoke orchestration support\.') {
+            $normalizedRequest = 'Implement closeout smoke orchestration support.'
+            $workstreamSlug = 'implement-closeout-smoke-orchestration-support'
+        }
 
         $payload = [ordered]@{
             stage = 'super-agent-intake'

@@ -19,6 +19,30 @@ const APPROVAL_APPROVED_COMPLETED_SPEC_PATH: &str =
     "planning/specs/completed/spec-approval-approved-test-implement-enterprise-orchestration-support.md";
 const CLOSEOUT_SMOKE_README_PATH: &str = ".temp/agent-orchestration-engine-smoke/README.md";
 const CLOSEOUT_SMOKE_CHANGELOG_PATH: &str = ".temp/agent-orchestration-engine-smoke/CHANGELOG.md";
+const RESUME_SOURCE_ACTIVE_PLAN_PATH: &str =
+    "planning/active/plan-resume-source-test-implement-closeout-smoke-orchestration-support.md";
+const RESUME_SOURCE_ACTIVE_SPEC_PATH: &str =
+    "planning/specs/active/spec-resume-source-test-implement-enterprise-orchestration-support.md";
+const RESUME_SOURCE_COMPLETED_PLAN_PATH: &str =
+    "planning/completed/plan-resume-source-test-implement-closeout-smoke-orchestration-support.md";
+const RESUME_SOURCE_COMPLETED_SPEC_PATH: &str =
+    "planning/specs/completed/spec-resume-source-test-implement-enterprise-orchestration-support.md";
+const RUN_TEST_ACTIVE_PLAN_PATH: &str =
+    "planning/active/plan-run-test-implement-closeout-smoke-orchestration-support.md";
+const RUN_TEST_ACTIVE_SPEC_PATH: &str =
+    "planning/specs/active/spec-run-test-implement-enterprise-orchestration-support.md";
+const RUN_TEST_COMPLETED_PLAN_PATH: &str =
+    "planning/completed/plan-run-test-implement-closeout-smoke-orchestration-support.md";
+const RUN_TEST_COMPLETED_SPEC_PATH: &str =
+    "planning/specs/completed/spec-run-test-implement-enterprise-orchestration-support.md";
+const IMPLEMENT_ACTIVE_PLAN_PATH: &str =
+    "planning/active/plan-implement-closeout-smoke-orchestration-support.md";
+const IMPLEMENT_ACTIVE_SPEC_PATH: &str =
+    "planning/specs/active/spec-implement-enterprise-orchestration-support.md";
+const IMPLEMENT_COMPLETED_PLAN_PATH: &str =
+    "planning/completed/plan-implement-closeout-smoke-orchestration-support.md";
+const IMPLEMENT_COMPLETED_SPEC_PATH: &str =
+    "planning/specs/completed/spec-implement-enterprise-orchestration-support.md";
 
 pub(crate) const APPROVAL_APPROVED_TRACE_ID: &str = "approval-approved-test";
 
@@ -160,6 +184,18 @@ fn repo_artifact_paths(repo_root: &Path) -> Vec<PathBuf> {
         repo_root.join(APPROVAL_APPROVED_COMPLETED_SPEC_PATH),
         repo_root.join(CLOSEOUT_SMOKE_README_PATH),
         repo_root.join(CLOSEOUT_SMOKE_CHANGELOG_PATH),
+        repo_root.join(RESUME_SOURCE_ACTIVE_PLAN_PATH),
+        repo_root.join(RESUME_SOURCE_ACTIVE_SPEC_PATH),
+        repo_root.join(RESUME_SOURCE_COMPLETED_PLAN_PATH),
+        repo_root.join(RESUME_SOURCE_COMPLETED_SPEC_PATH),
+        repo_root.join(RUN_TEST_ACTIVE_PLAN_PATH),
+        repo_root.join(RUN_TEST_ACTIVE_SPEC_PATH),
+        repo_root.join(RUN_TEST_COMPLETED_PLAN_PATH),
+        repo_root.join(RUN_TEST_COMPLETED_SPEC_PATH),
+        repo_root.join(IMPLEMENT_ACTIVE_PLAN_PATH),
+        repo_root.join(IMPLEMENT_ACTIVE_SPEC_PATH),
+        repo_root.join(IMPLEMENT_COMPLETED_PLAN_PATH),
+        repo_root.join(IMPLEMENT_COMPLETED_SPEC_PATH),
     ];
     paths.extend(repo_validation_paths(repo_root));
     paths
