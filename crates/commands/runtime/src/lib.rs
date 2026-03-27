@@ -34,11 +34,15 @@ pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
-    RuntimeSetupGlobalGitAliasesCommandError, RuntimeSurfaceError,
+    RuntimeSetupGitHooksCommandError, RuntimeSetupGlobalGitAliasesCommandError,
+    RuntimeSurfaceError,
 };
 pub use hooks::pre_commit_eof_hygiene::{
     invoke_pre_commit_eof_hygiene, RuntimePreCommitEofHygieneRequest,
     RuntimePreCommitEofHygieneResult, RuntimePreCommitEofHygieneStatus,
+};
+pub use hooks::setup_git_hooks::{
+    invoke_setup_git_hooks, RuntimeSetupGitHooksRequest, RuntimeSetupGitHooksResult,
 };
 pub use hooks::setup_global_git_aliases::{
     invoke_setup_global_git_aliases, RuntimeSetupGlobalGitAliasesRequest,

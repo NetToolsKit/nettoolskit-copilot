@@ -259,6 +259,39 @@ pub enum RuntimeSetupGlobalGitAliasesCommandError {
     },
 }
 
+/// Errors raised by runtime Git hook setup commands.
+#[derive(Debug, Error)]
+pub enum RuntimeSetupGitHooksCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime git hook setup workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// EOF mode or scope resolution failed.
+    #[error("failed to resolve runtime git hook setup mode")]
+    ResolveMode {
+        /// Underlying catalog or settings failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Git hook configuration failed.
+    #[error("failed to configure runtime git hooks")]
+    ConfigureHooks {
+        /// Underlying git command failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// EOF settings persistence failed.
+    #[error("failed to persist runtime git hook settings")]
+    PersistSettings {
+        /// Underlying filesystem or serialization failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime pre-commit EOF hygiene commands.
 #[derive(Debug, Error)]
 pub enum RuntimePreCommitEofHygieneCommandError {

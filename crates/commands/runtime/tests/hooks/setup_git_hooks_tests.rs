@@ -1,8 +1,6 @@
-//! Tests for the planned runtime Git hook setup contract.
-//!
-//! These fixtures document the expected observable side effects for the future
-//! native `invoke_setup_git_hooks` command surface.
+//! Tests for runtime Git hook setup.
 
+use nettoolskit_runtime::{invoke_setup_git_hooks, RuntimeSetupGitHooksRequest};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -46,6 +44,19 @@ fn initialize_hook_catalog(repo_root: &Path) {
     );
 }
 
+fn initialize_local_hook_tree(repo_root: &Path) {
+    write_file(&repo_root.join(".githooks/pre-commit"), "#!/usr/bin/env sh");
+    write_file(
+        &repo_root.join(".githooks/post-commit"),
+        "#!/usr/bin/env sh",
+    );
+    write_file(&repo_root.join(".githooks/post-merge"), "#!/usr/bin/env sh");
+    write_file(
+        &repo_root.join(".githooks/post-checkout"),
+        "#!/usr/bin/env sh",
+    );
+}
+
 fn local_settings_path(repo_root: &Path) -> PathBuf {
     let output = Command::new("git")
         .arg("-C")
@@ -77,7 +88,11 @@ fn read_local_hooks_path(repo_root: &Path) -> Option<String> {
     }
 
     let value = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    if value.is_empty() { None } else { Some(value) }
+    if value.is_empty() {
+        None
+    } else {
+        Some(value)
+    }
 }
 
 fn write_local_eof_settings(repo_root: &Path, selected_mode: &str) {
@@ -89,19 +104,11 @@ fn write_local_eof_settings(repo_root: &Path, selected_mode: &str) {
     );
 }
 
-fn write_global_eof_settings(global_settings_path: &Path, selected_mode: &str) {
-    write_file(
-        global_settings_path,
-        &format!(
-            r#"{{"schemaVersion":1,"selectedMode":"{selected_mode}","selectedScope":"global","updatedAt":"2026-03-27T00:00:00.0000000Z","catalogPath":"catalog.json"}}"#
-        ),
-    );
-}
-
 fn new_repo() -> TempDir {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_git_repo(repo.path());
     initialize_hook_catalog(repo.path());
+    initialize_local_hook_tree(repo.path());
     repo
 }
 
@@ -111,17 +118,23 @@ fn test_invoke_setup_git_hooks_local_install_sets_hooks_path_and_local_eof_setti
     let repo = new_repo();
 
     // Act
-    let output = Command::new("git")
-        .arg("-C")
-        .arg(repo.path())
-        .args(["config", "--local", "core.hooksPath", ".githooks"])
-        .output()
-        .expect("git config should execute");
-    assert!(output.status.success(), "git config should succeed");
-
-    write_local_eof_settings(repo.path(), "autofix");
+    let result = invoke_setup_git_hooks(&RuntimeSetupGitHooksRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        eof_hygiene_mode: Some("autofix".to_string()),
+        ..RuntimeSetupGitHooksRequest::default()
+    })
+    .expect("setup git hooks should execute");
 
     // Assert
+    assert_eq!(
+        result.repo_root,
+        fs::canonicalize(repo.path()).expect("repo root should canonicalize")
+    );
+    assert_eq!(result.scope_name, "local-repo");
+    assert_eq!(result.mode_name.as_deref(), Some("autofix"));
+    assert!(!result.uninstall);
+    assert!(result.selection_persisted);
+    assert_eq!(result.hooks_path.as_deref(), Some(".githooks"));
     assert_eq!(
         read_local_hooks_path(repo.path()),
         Some(".githooks".to_string())
@@ -138,27 +151,27 @@ fn test_invoke_setup_git_hooks_local_install_sets_hooks_path_and_local_eof_setti
 fn test_invoke_setup_git_hooks_local_uninstall_removes_hooks_path_and_local_settings() {
     // Arrange
     let repo = new_repo();
-
-    let output = Command::new("git")
-        .arg("-C")
-        .arg(repo.path())
-        .args(["config", "--local", "core.hooksPath", ".githooks"])
-        .output()
-        .expect("git config should execute");
-    assert!(output.status.success(), "git config should succeed");
-    write_local_eof_settings(repo.path(), "autofix");
+    invoke_setup_git_hooks(&RuntimeSetupGitHooksRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        eof_hygiene_mode: Some("autofix".to_string()),
+        ..RuntimeSetupGitHooksRequest::default()
+    })
+    .expect("setup git hooks install should execute");
 
     // Act
-    let output = Command::new("git")
-        .arg("-C")
-        .arg(repo.path())
-        .args(["config", "--local", "--unset", "core.hooksPath"])
-        .output()
-        .expect("git config should execute");
-    assert!(output.status.success(), "git config unset should succeed");
-    fs::remove_file(local_settings_path(repo.path())).expect("local settings should be removed");
+    let result = invoke_setup_git_hooks(&RuntimeSetupGitHooksRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        uninstall: true,
+        ..RuntimeSetupGitHooksRequest::default()
+    })
+    .expect("setup git hooks uninstall should execute");
 
     // Assert
+    assert_eq!(result.scope_name, "local-repo");
+    assert!(result.uninstall);
+    assert_eq!(result.mode_name, None);
+    assert!(!result.selection_persisted);
+    assert_eq!(result.hooks_path, None);
     assert_eq!(read_local_hooks_path(repo.path()), None);
     assert!(!local_settings_path(repo.path()).exists());
 }
@@ -167,17 +180,39 @@ fn test_invoke_setup_git_hooks_local_uninstall_removes_hooks_path_and_local_sett
 fn test_invoke_setup_git_hooks_global_scope_writes_global_settings_without_local_hooks_path() {
     // Arrange
     let repo = new_repo();
-    let global_settings_path = repo.path().join("isolated-global/git-hook-eof-settings.json");
+    let global_settings_path = repo
+        .path()
+        .join("isolated-global/git-hook-eof-settings.json");
+    write_local_eof_settings(repo.path(), "manual");
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(repo.path())
+        .args(["config", "--local", "core.hooksPath", ".githooks"])
+        .output()
+        .expect("git config should execute");
+    assert!(output.status.success(), "git config should succeed");
 
     // Act
-    write_global_eof_settings(&global_settings_path, "autofix");
+    let result = invoke_setup_git_hooks(&RuntimeSetupGitHooksRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        eof_hygiene_mode: Some("autofix".to_string()),
+        eof_hygiene_scope: Some("global".to_string()),
+        global_settings_path: Some(global_settings_path.clone()),
+        ..RuntimeSetupGitHooksRequest::default()
+    })
+    .expect("setup git hooks should execute");
 
     // Assert
+    assert_eq!(result.scope_name, "global");
+    assert_eq!(result.mode_name.as_deref(), Some("autofix"));
+    assert!(result.selection_persisted);
+    assert_eq!(result.hooks_path, None);
     assert!(global_settings_path.is_file());
     assert_eq!(read_local_hooks_path(repo.path()), None);
+    assert!(!local_settings_path(repo.path()).exists());
 
-    let settings = fs::read_to_string(global_settings_path)
-        .expect("global settings should be readable");
+    let settings =
+        fs::read_to_string(global_settings_path).expect("global settings should be readable");
     assert!(settings.contains(r#""selectedMode":"autofix""#));
     assert!(settings.contains(r#""selectedScope":"global""#));
 }
@@ -186,13 +221,32 @@ fn test_invoke_setup_git_hooks_global_scope_writes_global_settings_without_local
 fn test_invoke_setup_git_hooks_global_uninstall_removes_global_settings_without_local_hooks_path() {
     // Arrange
     let repo = new_repo();
-    let global_settings_path = repo.path().join("isolated-global/git-hook-eof-settings.json");
-    write_global_eof_settings(&global_settings_path, "autofix");
+    let global_settings_path = repo
+        .path()
+        .join("isolated-global/git-hook-eof-settings.json");
+    invoke_setup_git_hooks(&RuntimeSetupGitHooksRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        eof_hygiene_mode: Some("autofix".to_string()),
+        eof_hygiene_scope: Some("global".to_string()),
+        global_settings_path: Some(global_settings_path.clone()),
+        ..RuntimeSetupGitHooksRequest::default()
+    })
+    .expect("setup git hooks global install should execute");
 
     // Act
-    fs::remove_file(&global_settings_path).expect("global settings should be removed");
+    let result = invoke_setup_git_hooks(&RuntimeSetupGitHooksRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        eof_hygiene_scope: Some("global".to_string()),
+        uninstall: true,
+        global_settings_path: Some(global_settings_path.clone()),
+        ..RuntimeSetupGitHooksRequest::default()
+    })
+    .expect("setup git hooks global uninstall should execute");
 
     // Assert
+    assert_eq!(result.scope_name, "global");
+    assert!(result.uninstall);
+    assert_eq!(result.hooks_path, None);
     assert!(!global_settings_path.exists());
     assert_eq!(read_local_hooks_path(repo.path()), None);
 }

@@ -6,7 +6,7 @@ use nettoolskit_runtime::{
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
     RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
-    RuntimeSetupGlobalGitAliasesCommandError,
+    RuntimeSetupGitHooksCommandError, RuntimeSetupGlobalGitAliasesCommandError,
 };
 use std::error::Error;
 
@@ -173,6 +173,25 @@ fn test_runtime_setup_global_git_aliases_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "git config failed"
+    );
+}
+
+#[test]
+fn test_runtime_setup_git_hooks_error_display_is_stable() {
+    let error = RuntimeSetupGitHooksCommandError::PersistSettings {
+        source: anyhow!("write failed"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to persist runtime git hook settings"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "write failed"
     );
 }
 
