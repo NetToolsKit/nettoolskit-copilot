@@ -106,6 +106,13 @@ pub enum RuntimeDoctorCommandError {
         #[source]
         source: AnyhowError,
     },
+    /// Drift remediation sync failed.
+    #[error("failed to synchronize runtime doctor drift remediation")]
+    SynchronizeRuntime {
+        /// Underlying runtime bootstrap failure.
+        #[source]
+        source: AnyhowError,
+    },
 }
 
 /// Errors raised by runtime bootstrap commands.

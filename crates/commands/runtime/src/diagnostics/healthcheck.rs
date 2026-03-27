@@ -388,6 +388,7 @@ fn run_doctor_check(
         runtime_profile: request.runtime_profile.clone(),
         fallback_runtime_profile: request.fallback_runtime_profile.clone(),
         strict_extras: request.strict_extras,
+        sync_on_drift: false,
     });
 
     let (status, exit_code, error) = match doctor_result {

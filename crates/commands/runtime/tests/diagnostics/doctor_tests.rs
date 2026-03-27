@@ -1,10 +1,14 @@
 //! Tests for runtime doctor commands.
 
-use nettoolskit_runtime::{invoke_runtime_doctor, RuntimeDoctorRequest, RuntimeDoctorStatus};
+use nettoolskit_runtime::{
+    invoke_runtime_doctor, RuntimeDoctorCommandError, RuntimeDoctorRequest, RuntimeDoctorStatus,
+};
+use std::error::Error;
 use std::fs;
+use std::path::Path;
 use tempfile::TempDir;
 
-fn write_file(path: &std::path::Path, contents: &str) {
+fn write_file(path: &Path, contents: &str) {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).expect("parent directory should be created");
     }
@@ -12,26 +16,26 @@ fn write_file(path: &std::path::Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
-fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
+fn write_runtime_install_profile_catalog(repo_root: &Path) {
     write_file(
         &repo_root.join(".github/governance/runtime-install-profiles.json"),
         r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}},"github":{"description":"github profile","install":{"bootstrap":true,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":true},"runtime":{"github":true,"codex":false,"claude":false}},"codex":{"description":"codex profile","install":{"bootstrap":true,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":true},"runtime":{"github":false,"codex":true,"claude":false}},"all":{"description":"all profile","install":{"bootstrap":true,"globalVscodeSettings":true,"globalVscodeSnippets":true,"localGitHooks":true,"globalGitAliases":true,"healthcheck":true},"runtime":{"github":true,"codex":true,"claude":true}}}}"#,
     );
 }
 
-fn initialize_repo_layout(repo_root: &std::path::Path) {
+fn initialize_repo_layout(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
     fs::create_dir_all(repo_root.join("scripts")).expect("scripts directory should be created");
     write_runtime_install_profile_catalog(repo_root);
 }
 
-fn mirror_file(source: &std::path::Path, destination: &std::path::Path) {
+fn mirror_file(source: &Path, destination: &Path) {
     let contents = fs::read_to_string(source).expect("source file should be readable");
     write_file(destination, &contents);
 }
 
-fn initialize_clean_codex_runtime(repo_root: &std::path::Path, runtime_root: &std::path::Path) {
+fn initialize_clean_codex_runtime(repo_root: &Path, runtime_root: &Path) {
     write_file(
         &repo_root.join(".codex/skills/runtime-skill/SKILL.md"),
         "# runtime-skill",
@@ -86,6 +90,13 @@ fn initialize_clean_codex_runtime(repo_root: &std::path::Path, runtime_root: &st
     mirror_file(
         &repo_root.join(".codex/orchestration/flow.md"),
         &runtime_root.join("codex/shared-orchestration/flow.md"),
+    );
+}
+
+fn write_render_provider_surfaces_script(repo_root: &Path) {
+    write_file(
+        &repo_root.join("scripts/runtime/render-provider-surfaces.ps1"),
+        "param([string]$RepoRoot,[string]$ConsumerName,[string]$EnableCodexRuntime,[string]$EnableClaudeRuntime)\nWrite-Output 'rendered'",
     );
 }
 
@@ -228,6 +239,68 @@ fn test_invoke_runtime_doctor_reports_codex_skill_duplicates() {
         vec!["runtime-skill".to_string()]
     );
     assert!(!duplicate_report.is_healthy);
+}
+
+#[test]
+fn test_invoke_runtime_doctor_syncs_missing_runtime_files_when_requested() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path());
+    write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
+    write_render_provider_surfaces_script(repo.path());
+
+    let target_github_path = repo.path().join(".runtime/github");
+    let result = invoke_runtime_doctor(&RuntimeDoctorRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        target_github_path: Some(target_github_path.clone()),
+        target_copilot_skills_path: Some(repo.path().join(".runtime/copilot-skills")),
+        runtime_profile: Some("github".to_string()),
+        sync_on_drift: true,
+        ..RuntimeDoctorRequest::default()
+    })
+    .expect("doctor should execute");
+
+    assert!(!result.has_drift);
+    assert!(!result.has_extras);
+    assert_eq!(result.status, RuntimeDoctorStatus::Clean);
+    assert!(result.sync_attempted);
+    assert!(result.sync_resolved_drift);
+    assert!(target_github_path.join("AGENTS.md").is_file());
+    assert!(target_github_path
+        .join("scripts/runtime/render-provider-surfaces.ps1")
+        .is_file());
+}
+
+#[test]
+fn test_invoke_runtime_doctor_returns_sync_error_when_remediation_fails() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path());
+    write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
+
+    let error = invoke_runtime_doctor(&RuntimeDoctorRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        target_github_path: Some(repo.path().join(".runtime/github")),
+        target_copilot_skills_path: Some(repo.path().join(".runtime/copilot-skills")),
+        runtime_profile: Some("github".to_string()),
+        sync_on_drift: true,
+        ..RuntimeDoctorRequest::default()
+    })
+    .expect_err("doctor remediation should fail without render script");
+
+    assert!(matches!(
+        error,
+        RuntimeDoctorCommandError::SynchronizeRuntime { .. }
+    ));
+    assert_eq!(
+        error.to_string(),
+        "failed to synchronize runtime doctor drift remediation"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "failed to render runtime bootstrap provider surfaces"
+    );
 }
 
 #[test]

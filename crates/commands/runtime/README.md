@@ -11,7 +11,7 @@ This crate locks the owned runtime surfaces before full implementation lands. It
 - maintenance operator flows
 - git hook install and hygiene flows
 - local context index update and query commands
-- runtime drift diagnosis and hygiene checks
+- runtime drift diagnosis, remediation, and hygiene checks
 - runtime healthcheck orchestration and report generation
 - runtime asset bootstrap synchronization
 - runtime VS Code template application

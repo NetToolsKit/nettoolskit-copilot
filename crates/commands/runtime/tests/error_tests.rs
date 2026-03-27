@@ -80,6 +80,25 @@ fn test_runtime_doctor_error_display_is_stable() {
 }
 
 #[test]
+fn test_runtime_doctor_sync_error_display_is_stable() {
+    let error = RuntimeDoctorCommandError::SynchronizeRuntime {
+        source: anyhow!("bootstrap failure"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to synchronize runtime doctor drift remediation"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "bootstrap failure"
+    );
+}
+
+#[test]
 fn test_runtime_bootstrap_error_display_is_stable() {
     let error = RuntimeBootstrapCommandError::SyncAssets {
         source: anyhow!("copy failure"),

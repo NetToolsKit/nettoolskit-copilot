@@ -11,7 +11,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-use crate::error::RuntimeDoctorCommandError;
+use crate::{error::RuntimeDoctorCommandError, invoke_runtime_bootstrap, RuntimeBootstrapRequest};
 
 /// Request payload for `doctor`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -35,6 +35,8 @@ pub struct RuntimeDoctorRequest {
     pub fallback_runtime_profile: Option<String>,
     /// Treat extra runtime files as drift failures.
     pub strict_extras: bool,
+    /// Run runtime synchronization when drift is detected, then re-check.
+    pub sync_on_drift: bool,
 }
 
 /// Drift status summary for a `doctor` invocation.
@@ -88,6 +90,10 @@ pub struct RuntimeDoctorResult {
     pub has_extras: bool,
     /// Overall drift status.
     pub status: RuntimeDoctorStatus,
+    /// Whether drift remediation sync was attempted.
+    pub sync_attempted: bool,
+    /// Whether remediation sync cleared all drift findings on the second pass.
+    pub sync_resolved_drift: bool,
     /// Number of mappings audited for the active runtime profile.
     pub mappings_checked: usize,
 }
@@ -130,8 +136,53 @@ pub fn invoke_runtime_doctor(
     )
     .map_err(|source| RuntimeDoctorCommandError::ResolveExecutionContext { source })?;
 
-    let reports = invoke_doctor(&context, request.strict_extras)
+    let mut reports = invoke_doctor(&context, request.strict_extras)
         .map_err(|source| RuntimeDoctorCommandError::BuildReport { source })?;
+    let (mut has_drift, mut has_extras, mut status) = summarize_doctor_reports(&reports);
+    let mut sync_attempted = false;
+    let mut sync_resolved_drift = false;
+
+    if has_drift && request.sync_on_drift {
+        sync_attempted = true;
+        invoke_runtime_bootstrap(&RuntimeBootstrapRequest {
+            repo_root: Some(context.resolved_repo_root.clone()),
+            target_github_path: Some(context.targets.github_runtime_root.clone()),
+            target_codex_path: Some(context.targets.codex_runtime_root.clone()),
+            target_agents_skills_path: Some(context.targets.agents_skills_root.clone()),
+            target_copilot_skills_path: Some(context.targets.copilot_skills_root.clone()),
+            runtime_profile: Some(context.runtime_profile.name.clone()),
+            fallback_runtime_profile: request.fallback_runtime_profile.clone(),
+            mirror: false,
+            apply_mcp_config: false,
+            backup_config: false,
+        })
+        .map_err(|source| RuntimeDoctorCommandError::SynchronizeRuntime {
+            source: source.into(),
+        })?;
+
+        reports = invoke_doctor(&context, request.strict_extras)
+            .map_err(|source| RuntimeDoctorCommandError::BuildReport { source })?;
+        (has_drift, has_extras, status) = summarize_doctor_reports(&reports);
+        sync_resolved_drift = !has_drift;
+    }
+
+    Ok(RuntimeDoctorResult {
+        repo_root: context.resolved_repo_root,
+        runtime_profile_name: context.runtime_profile.name,
+        runtime_profile_catalog_path: context.runtime_profile.catalog_path,
+        mappings_checked: reports.len(),
+        reports,
+        has_drift,
+        has_extras,
+        status,
+        sync_attempted,
+        sync_resolved_drift,
+    })
+}
+
+fn summarize_doctor_reports(
+    reports: &[RuntimeDoctorMappingReport],
+) -> (bool, bool, RuntimeDoctorStatus) {
     let has_drift = reports.iter().any(|report| !report.is_healthy);
     let has_extras = reports
         .iter()
@@ -144,16 +195,7 @@ pub fn invoke_runtime_doctor(
         RuntimeDoctorStatus::Clean
     };
 
-    Ok(RuntimeDoctorResult {
-        repo_root: context.resolved_repo_root,
-        runtime_profile_name: context.runtime_profile.name,
-        runtime_profile_catalog_path: context.runtime_profile.catalog_path,
-        mappings_checked: reports.len(),
-        reports,
-        has_drift,
-        has_extras,
-        status,
-    })
+    (has_drift, has_extras, status)
 }
 
 fn invoke_doctor(
