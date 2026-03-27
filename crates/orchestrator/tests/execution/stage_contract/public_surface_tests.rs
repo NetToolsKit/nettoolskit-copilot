@@ -1,5 +1,8 @@
 use nettoolskit_core::CommandEntry;
-use nettoolskit_orchestrator::{process_command, process_text, ExitStatus, MainAction};
+use nettoolskit_orchestrator::{
+    default_pipeline_manifest_path, process_command, process_text, ExitStatus, MainAction,
+    PipelineDispatchMode, PipelineStageMode,
+};
 
 #[test]
 fn stage_contract_public_symbols_remain_available() {
@@ -8,6 +11,15 @@ fn stage_contract_public_symbols_remain_available() {
 
     assert_eq!(action.slash_static(), "/help");
     assert_eq!(i32::from(status), 0);
+    assert_eq!(
+        default_pipeline_manifest_path(),
+        ".codex/orchestration/pipelines/default.pipeline.json"
+    );
+    assert_eq!(PipelineStageMode::Plan, PipelineStageMode::Plan);
+    assert_eq!(
+        PipelineDispatchMode::CodexExec,
+        PipelineDispatchMode::CodexExec
+    );
 }
 
 #[tokio::test]

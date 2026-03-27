@@ -4,4 +4,5 @@
 //! The nested structure mirrors the execution test tree and keeps the
 //! public orchestrator boundary easy to extend later.
 
+mod pipeline_manifest_tests;
 mod public_surface_tests;

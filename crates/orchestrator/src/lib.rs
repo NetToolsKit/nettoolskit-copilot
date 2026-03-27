@@ -57,4 +57,11 @@ pub use execution::{
         NTK_REPO_WORKFLOW_ENABLED_ENV,
     },
 };
-pub use models::{get_main_action, ExitStatus, MainAction};
+pub use models::{
+    default_pipeline_manifest_path, get_main_action, load_default_pipeline_manifest,
+    load_pipeline_manifest, parse_pipeline_manifest, ExitStatus, HandoffArtifactReason, MainAction,
+    PipelineCompletionCriteria, PipelineContractError, PipelineDispatchMode,
+    PipelineExecutionBackend, PipelineExecutionSpec, PipelineFailurePolicy, PipelineHandoff,
+    PipelineManifest, PipelineRuntime, PipelineStage, PipelineStageMode,
+    DEFAULT_PIPELINE_MANIFEST_PATH,
+};
