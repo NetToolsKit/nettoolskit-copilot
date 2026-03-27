@@ -71,6 +71,7 @@ Partial migration by script family is no longer enough for the desired end state
 - [2026-03-27 10:12] The next workspace/runtime hygiene slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-warning-baseline`, and `validate-all` dispatches it natively while preserving warning-threshold governance, analyzer replay, and report emission semantics.
 - [2026-03-27 10:28] The runtime smoke-execution slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-runtime-script-tests`, and `validate-all` dispatches it natively while preserving PowerShell test harness execution semantics from the legacy validator.
 - [2026-03-27 10:46] The final workspace/runtime hygiene slice is now live in Rust too: `crates/commands/validation/operational_hygiene` owns `validate-shell-hooks`, and `validate-all` dispatches it natively while preserving shell syntax, semantic guard, and optional shellcheck semantics from the legacy validator.
+- [2026-03-27 12:37] The repository policy slice is now live in Rust too: `crates/commands/validation/policy` owns `validate-policy`, and `validate-all` dispatches it natively while preserving required-file, required-directory, forbidden-file, git-hook, and git-config policy semantics from the legacy validator.
 - [2026-03-26 16:48] Immediate structural gaps that should be closed before broad transcription:
   - new migration code should not be added directly into the already oversized `processor.rs`, `chatops*.rs`, `cli/main.rs`, or `cli/lib.rs` files
 - [2026-03-26 17:11] The missing external test surfaces for `crates/commands` and `crates/task-worker` have now been implemented, so the next structural pressure points are command-family implementation and oversized control-plane files.
@@ -131,6 +132,7 @@ The parity evidence policy is tracked in `planning/active/rust-script-parity-led
 37. [2026-03-27 11:24] Once `validate-agent-permissions` lands, the remaining agent-policy execution should stay on the same typed fixtures and shared models; `validate-agent-skill-alignment` should reuse the manifest/pipeline/eval graph next, and `validate-agent-orchestration` should close the block as the final structural integrity sweep.
 38. [2026-03-27 11:41] Once `validate-agent-skill-alignment` lands, only `validate-agent-orchestration` remains in the agent block; that last slice should be treated as the explicit completion point for all agent-policy and orchestration validation work in Wave 2.
 39. [2026-03-27 12:02] With `validate-agent-orchestration` now live, the full agent-policy and orchestration validation block is complete; the next Wave 2 execution should move entirely to release, supply-chain, architecture-boundary, and standards-policy surfaces.
+40. [2026-03-27 12:37] Once `validate-policy` lands, the remaining Wave 2 backlog should stay focused on the higher-coupling release, supply-chain, and standards-policy surfaces; repository policy enforcement should not drift back into the crate root or orchestration layer.
 
 ## Constraints
 
@@ -205,6 +207,7 @@ Rejected. Validation and test harnesses are part of the executable control plane
 - Updated: `2026-03-27 10:12` — implemented the `validate-warning-baseline` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and reduced the remaining hygiene backlog to runtime script execution parity plus shell-hook validation.
 - Updated: `2026-03-27 10:28` — implemented the `validate-runtime-script-tests` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and reduced the remaining hygiene backlog to the final shell-hook validation slice.
 - Updated: `2026-03-27 10:46` — implemented the `validate-shell-hooks` Wave 2 hygiene slice in `crates/commands/validation/operational_hygiene`, routed it through `validate-all`, and closed the full workspace/runtime hygiene validation block.
+- Updated: `2026-03-27 12:37` — implemented the `validate-policy` Wave 2 repository-policy slice in `crates/commands/validation/policy`, routed it through `validate-all`, and reduced the remaining backlog to release, supply-chain, compatibility, and standards-policy surfaces.
 
 ## Recommended Specialist Focus
 

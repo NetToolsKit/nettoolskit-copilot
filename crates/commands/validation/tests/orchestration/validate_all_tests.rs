@@ -15,6 +15,7 @@ use crate::support::operational_hygiene_fixtures::{
     initialize_shell_hooks_repo, write_fake_shell_command, write_hook_file,
     write_runtime_test_script, write_warning_analyzer_report,
 };
+use crate::support::policy_fixtures::initialize_policy_repo;
 
 fn write_file(path: &std::path::Path, contents: &str) {
     if let Some(parent) = path.parent() {
@@ -324,10 +325,7 @@ fn write_workspace_fixture(repo_root: &std::path::Path, relative_path: &str, con
 fn test_invoke_validate_all_runs_selected_profile_and_writes_report_and_ledger() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path(), &["validate-policy"]);
-    write_file(
-        &repo.path().join("scripts/validation/validate-policy.ps1"),
-        "param([string]$RepoRoot)\nexit 0",
-    );
+    initialize_policy_repo(repo.path());
 
     let result = invoke_validate_all(&ValidateAllRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -341,6 +339,10 @@ fn test_invoke_validate_all_runs_selected_profile_and_writes_report_and_ledger()
     assert_eq!(result.passed_checks, 1);
     assert_eq!(result.overall_status, ValidationCheckStatus::Passed);
     assert_eq!(result.exit_code, 0);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-policy"
+    );
     assert!(result.output_path.is_file());
     assert!(result
         .ledger_path
@@ -366,21 +368,23 @@ fn test_invoke_validate_all_converts_missing_script_to_warning_when_warning_only
     assert_eq!(result.warning_checks, 1);
     assert_eq!(result.overall_status, ValidationCheckStatus::Warning);
     assert_eq!(result.exit_code, 0);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-policy"
+    );
     assert!(result.checks[0]
         .error
         .as_deref()
-        .expect("missing script error should be present")
-        .contains("script not found"));
+        .expect("policy warning should be present")
+        .contains("Policy directory not found"));
 }
 
 #[test]
 fn test_invoke_validate_all_archives_broken_ledger_and_enforces_failure() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path(), &["validate-policy"]);
-    write_file(
-        &repo.path().join("scripts/validation/validate-policy.ps1"),
-        "param([string]$RepoRoot)\nexit 1",
-    );
+    initialize_policy_repo(repo.path());
+    fs::remove_file(repo.path().join("README.md")).expect("required file should be removed");
     write_file(
         &repo.path().join(".temp/audit/validation-ledger.jsonl"),
         "not-json",

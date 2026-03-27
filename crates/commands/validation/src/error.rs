@@ -218,6 +218,18 @@ pub enum ValidateAgentOrchestrationCommandError {
     },
 }
 
+/// Errors raised by policy validation commands.
+#[derive(Debug, Error)]
+pub enum ValidatePolicyCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve policy workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by workspace-efficiency validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateWorkspaceEfficiencyCommandError {

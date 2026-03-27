@@ -37,6 +37,10 @@ mod operational_hygiene {
     pub mod warning_baseline_tests;
 }
 
+mod policy {
+    pub mod policy_tests;
+}
+
 mod structure {
     pub mod planning_structure_tests;
 }

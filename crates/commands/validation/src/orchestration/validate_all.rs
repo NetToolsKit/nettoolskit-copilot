@@ -17,6 +17,7 @@ use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment,
+    invoke_validate_policy,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
@@ -28,6 +29,7 @@ use crate::{
     ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
     ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
+    ValidatePolicyRequest,
     ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
     ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
     ValidatePlanningStructureRequest,
@@ -229,6 +231,7 @@ enum NativeValidationCheck {
     AgentOrchestration,
     AgentPermissions,
     AgentSkillAlignment,
+    Policy,
     Instructions,
     PlanningStructure,
     AuditLedger,
@@ -262,6 +265,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::AgentSkillAlignment) => {
                 "rust:nettoolskit-validation::validate-agent-skill-alignment"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => {
+                "rust:nettoolskit-validation::validate-policy"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure) => {
                 "rust:nettoolskit-validation::validate-planning-structure"
@@ -517,7 +523,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-policy",
-            ValidationCheckExecutor::PowerShell("scripts/validation/validate-policy.ps1"),
+            ValidationCheckExecutor::Native(NativeValidationCheck::Policy),
         ),
         (
             "validate-security-baseline",
@@ -758,6 +764,7 @@ fn definition_supports_parameter(
             parameter_name == "WarningOnly"
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => false,
+        ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::InstructionArchitecture) => {
             matches!(
                 parameter_name,
@@ -982,6 +989,20 @@ fn run_native_validation_check(
                 pipeline_path: string_argument_path(&arguments, "PipelinePath"),
                 eval_fixture_path: string_argument_path(&arguments, "EvalFixturePath"),
                 skills_root_path: string_argument_path(&arguments, "SkillsRootPath"),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::Policy => {
+            invoke_validate_policy(&ValidatePolicyRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                ..ValidatePolicyRequest::default()
             })
             .map(|result| {
                 (

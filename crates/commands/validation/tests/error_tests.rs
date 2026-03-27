@@ -6,6 +6,7 @@ use nettoolskit_validation::{
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
     invoke_validate_instructions, invoke_validate_planning_structure,
+    invoke_validate_policy,
     invoke_validate_readme_standards,
     invoke_validate_runtime_script_tests,
     invoke_validate_shell_hooks,
@@ -19,6 +20,7 @@ use nettoolskit_validation::{
     ValidateAgentOrchestrationRequest,
     ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest,
+    ValidatePolicyRequest,
     ValidateShellHooksRequest,
     ValidateTemplateStandardsRequest,
     ValidateWarningBaselineRequest,
@@ -286,4 +288,15 @@ fn test_validate_agent_orchestration_error_display_is_stable() {
         error.to_string(),
         "failed to resolve agent orchestration workspace root"
     );
+}
+
+#[test]
+fn test_validate_policy_error_display_is_stable() {
+    let error = invoke_validate_policy(&ValidatePolicyRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidatePolicyRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(error.to_string(), "failed to resolve policy workspace root");
 }

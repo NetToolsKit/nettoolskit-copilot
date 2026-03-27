@@ -9,6 +9,7 @@ pub mod governance;
 pub mod instruction_graph;
 pub mod orchestration;
 pub mod operational_hygiene;
+pub mod policy;
 pub mod structure;
 pub mod workspace;
 
@@ -35,6 +36,7 @@ pub use error::{
     ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
     ValidateAgentSkillAlignmentCommandError,
     ValidateAgentOrchestrationCommandError,
+    ValidatePolicyCommandError,
     ValidateAllCommandError, ValidateAuditLedgerCommandError,
     ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
@@ -70,6 +72,7 @@ pub use operational_hygiene::{
     ValidateShellHooksRequest, ValidateShellHooksResult, ValidateWarningBaselineRequest,
     ValidateWarningBaselineResult,
 };
+pub use policy::{invoke_validate_policy, ValidatePolicyRequest, ValidatePolicyResult};
 pub use structure::{
     invoke_validate_planning_structure, ValidatePlanningStructureRequest,
     ValidatePlanningStructureResult,

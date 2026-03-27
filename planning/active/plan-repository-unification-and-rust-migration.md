@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 09:00
+- LastUpdated: 2026-03-27 12:37
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/rust-script-transcription-planning`
@@ -257,6 +257,7 @@ Status: `[~]` In Progress
 - [2026-03-27 11:24] Implemented Rust-backed `validate-agent-permissions` in `crates/commands/validation/agent_orchestration`, with direct external coverage for matrix/manifest/pipeline alignment, blocked command prefixes, allowed path globs, budget contracts, stage-script permission rules, warning-only conversion, and native dispatch through `validate-all` ✓ [2026-03-27 11:24]
 - [2026-03-27 11:41] Implemented Rust-backed `validate-agent-skill-alignment` in `crates/commands/validation/agent_orchestration`, with direct external coverage for manifest/eval/pipeline integrity, skill folder contracts, SKILL frontmatter, mandatory instruction references, pipeline stage role alignment, and native dispatch through `validate-all` ✓ [2026-03-27 11:41]
 - [2026-03-27 12:02] Implemented Rust-backed `validate-agent-orchestration` in `crates/commands/validation/agent_orchestration`, with direct external coverage for required orchestration assets, manifest/pipeline/handoff/run-artifact integrity, eval order drift warnings, runtime catalog references, and native dispatch through `validate-all` ✓ [2026-03-27 12:02]
+- [2026-03-27 12:37] Implemented Rust-backed `validate-policy` in `crates/commands/validation/policy`, with direct external coverage for repository policy files, required files/directories, forbidden files, git hook requirements, unknown-key warnings, invalid JSON failures, and native dispatch through `validate-all` ✓ [2026-03-27 12:37]
 - Target paths:
   - `scripts/validation/`
   - `scripts/security/`
@@ -291,10 +292,11 @@ Status: `[~]` In Progress
   - `validate-agent-skill-alignment` no longer depends on PowerShell business logic, and the agent-orchestration backlog is now reduced to the final structural orchestration sweep
   - `validate-agent-orchestration` no longer depends on PowerShell business logic, and the full agent policy plus orchestration validation block now converges inside `crates/commands/validation/agent_orchestration/`
   - the agent policy and orchestration validation block is now complete
+  - `validate-policy` no longer depends on PowerShell business logic, and repository policy contract enforcement now lives in a dedicated `policy/` capability boundary with native dispatch through `validate-all`
   - security gates retain or improve current severity handling
   - maintenance and deploy helpers remain deterministic and operator-safe
 - Remaining Task 6 backlog is now explicitly grouped as:
-  - policy/security/release/domain checks: `validate-policy`, `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
+  - policy/security/release/domain checks: `validate-security-baseline`, `validate-shared-script-checksums`, `validate-compatibility-lifecycle-policy`, `validate-powershell-standards`, `validate-dotnet-standards`, `validate-architecture-boundaries`, `validate-supply-chain`, `validate-release-governance`, `validate-release-provenance`
 - Commit checkpoint:
   - `feat(rust): implement quality and policy transcription wave`
 
