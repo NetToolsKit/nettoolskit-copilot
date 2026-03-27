@@ -169,6 +169,7 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
     let mut details = Vec::new();
     let mut rows_checked = 0usize;
     let mut reference_date = None;
+    let mut hard_failure = false;
 
     if !compatibility_path.is_file() {
         failures.push(format!(
@@ -176,10 +177,11 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
             request
                 .compatibility_path
                 .as_ref()
-                .map_or_else(|| DEFAULT_COMPATIBILITY_PATH.to_string(), |path| {
-                    path.to_string_lossy().to_string()
-                })
+                    .map_or_else(|| DEFAULT_COMPATIBILITY_PATH.to_string(), |path| {
+                        path.to_string_lossy().to_string()
+                    })
         ));
+        hard_failure = true;
     } else {
         match fs::read_to_string(&compatibility_path) {
             Ok(content) => {
@@ -213,12 +215,13 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
                     "Could not read compatibility file {}: {error}",
                     to_repo_relative_path(&repo_root, &compatibility_path)
                 ));
+                hard_failure = true;
             }
         }
     }
 
     let status = derive_status(&warnings, &failures);
-    let exit_code = if failures.is_empty() { 0 } else { 1 };
+    let exit_code = if hard_failure || !failures.is_empty() { 1 } else { 0 };
 
     Ok(ValidateCompatibilityLifecyclePolicyResult {
         repo_root,
@@ -638,19 +641,19 @@ fn push_detail(enabled: bool, details: &mut Vec<String>, message: String) {
 }
 
 fn parse_month(value: &str) -> Option<u8> {
-    match value {
-        "January" => Some(1),
-        "February" => Some(2),
-        "March" => Some(3),
-        "April" => Some(4),
-        "May" => Some(5),
-        "June" => Some(6),
-        "July" => Some(7),
-        "August" => Some(8),
-        "September" => Some(9),
-        "October" => Some(10),
-        "November" => Some(11),
-        "December" => Some(12),
+    match value.to_ascii_lowercase().as_str() {
+        "january" => Some(1),
+        "february" => Some(2),
+        "march" => Some(3),
+        "april" => Some(4),
+        "may" => Some(5),
+        "june" => Some(6),
+        "july" => Some(7),
+        "august" => Some(8),
+        "september" => Some(9),
+        "october" => Some(10),
+        "november" => Some(11),
+        "december" => Some(12),
         _ => None,
     }
 }
