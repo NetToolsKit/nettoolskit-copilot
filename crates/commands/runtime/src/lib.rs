@@ -5,6 +5,7 @@ pub mod contracts;
 pub mod diagnostics;
 pub mod error;
 pub mod hooks;
+pub mod maintenance;
 pub mod sync;
 
 pub use continuity::local_context::{
@@ -32,10 +33,11 @@ pub use diagnostics::self_heal::{
 };
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
-    RuntimeBootstrapCommandError, RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimeBootstrapCommandError, RuntimeCleanBuildArtifactsCommandError,
+    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
     RuntimeSetupGitHooksCommandError, RuntimeSetupGlobalGitAliasesCommandError,
-    RuntimeSurfaceError,
+    RuntimeSurfaceError, RuntimeTrimTrailingBlankLinesCommandError,
 };
 pub use hooks::pre_commit_eof_hygiene::{
     invoke_pre_commit_eof_hygiene, RuntimePreCommitEofHygieneRequest,
@@ -47,6 +49,14 @@ pub use hooks::setup_git_hooks::{
 pub use hooks::setup_global_git_aliases::{
     invoke_setup_global_git_aliases, RuntimeSetupGlobalGitAliasesRequest,
     RuntimeSetupGlobalGitAliasesResult,
+};
+pub use maintenance::clean_build_artifacts::{
+    invoke_clean_build_artifacts, RuntimeCleanBuildArtifactsRequest,
+    RuntimeCleanBuildArtifactsResult, RuntimeCleanBuildArtifactsStatus,
+};
+pub use maintenance::trim_trailing_blank_lines::{
+    invoke_trim_trailing_blank_lines, RuntimeTrimTrailingBlankLinesRequest,
+    RuntimeTrimTrailingBlankLinesResult, RuntimeTrimTrailingBlankLinesStatus,
 };
 pub use sync::apply_vscode_templates::{
     invoke_apply_vscode_templates, RuntimeApplyVscodeTemplateFileResult,

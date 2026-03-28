@@ -188,6 +188,38 @@ pub enum RuntimeHealthcheckCommandError {
     },
 }
 
+/// Errors raised by runtime clean-build-artifacts commands.
+#[derive(Debug, Error)]
+pub enum RuntimeCleanBuildArtifactsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime clean-build workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target path resolution failed.
+    #[error("failed to resolve runtime clean-build target path")]
+    ResolveTargetPath {
+        /// Resolved target path expected by the command.
+        target_path: String,
+    },
+    /// Artifact discovery failed.
+    #[error("failed to discover runtime build artifacts")]
+    DiscoverArtifacts {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Artifact removal failed.
+    #[error("failed to remove runtime build artifacts")]
+    RemoveArtifacts {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime VS Code template apply commands.
 #[derive(Debug, Error)]
 pub enum RuntimeApplyVscodeTemplatesCommandError {
@@ -327,6 +359,38 @@ pub enum RuntimePreCommitEofHygieneCommandError {
     #[error("failed to restage runtime pre-commit eof files")]
     RestageFiles {
         /// Underlying git command failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by runtime trim-trailing-blank-lines commands.
+#[derive(Debug, Error)]
+pub enum RuntimeTrimTrailingBlankLinesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime trim-trailing-blank-lines workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target path resolution failed.
+    #[error("failed to resolve runtime trim-trailing-blank-lines target path")]
+    ResolveTargetPath {
+        /// Resolved target path expected by the command.
+        target_path: String,
+    },
+    /// File discovery failed.
+    #[error("failed to discover runtime trim-trailing-blank-lines files")]
+    DiscoverFiles {
+        /// Underlying filesystem or git failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// File normalization failed.
+    #[error("failed to normalize runtime trim-trailing-blank-lines file contents")]
+    NormalizeFiles {
+        /// Underlying filesystem failure.
         #[source]
         source: AnyhowError,
     },
