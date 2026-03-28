@@ -39,6 +39,13 @@ The audit target is split across two independent but related questions:
   - `planning/specs/README.md`
 - Content parity is not fully aligned: `14` of `201` compared files currently differ by hash.
 - The highest-risk drift is concentrated in governance baselines and operator-facing README/index surfaces rather than in the core instruction files.
+- The repository no longer depends on `C:\Users\tguis\copilot-instructions` to recover missing planning, Codex, or authored VS Code operational guidance because those surfaces were merged locally.
+- Remaining hash drift is now intentional and bounded to:
+  - `.github/governance/readme-standards.baseline.json`
+  - `.github/governance/validation-profiles.json`
+  - `.vscode/README.md`
+  - `.vscode/profiles/README.md`
+  - the four prompt-template POML files reported in the original audit
 
 ### Script Retirement Readiness
 
@@ -144,11 +151,12 @@ Rejected. That would leave the repository carrying unnecessary compatibility deb
 5. Every deletion candidate is blocked from removal until local consumers are migrated or removed.
 6. The resulting plan can drive safe execution without reopening the completed migration design bundle.
 7. The workstream can distinguish immediate retirement candidates from parity-proven-but-still-blocked domains without deleting `scripts/` in bulk.
+8. The workstream can finish with bounded intentional drift instead of forcing byte-for-byte equality with the external repository when local specialization is correct.
 
 ## Planning Readiness
 
-- `ready-for-plan`
-- Updated: `2026-03-28 15:42` — structural instruction parity is intact, content drift is bounded, and the retirement problem is now clearly reducible to consumer migration plus retained-wrapper policy.
+- `workstream-complete`
+- Updated: `2026-03-28 20:02` — the drift is fully classified, the first safe script-retirement slice is executed, and the remaining backlog is now explicit future consumer-migration work rather than ambiguity inside this audit.
 
 ## Recommended Specialist Focus
 

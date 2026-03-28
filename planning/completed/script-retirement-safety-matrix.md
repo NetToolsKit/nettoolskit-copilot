@@ -4,7 +4,7 @@ Generated: 2026-03-28 18:05
 
 ## Status
 
-- LastUpdated: 2026-03-28 18:05
+- LastUpdated: 2026-03-28 20:02
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
 - Live Inventory After Executed Slice: `143`
@@ -62,3 +62,4 @@ Generated: 2026-03-28 18:05
 - `114` previously broad `Rust-default now` leaves were narrowed to `4` immediate deletion candidates for the first patch because this audit requires concrete local-consumer proof before removal.
 - The first execution slice retired those `4` leaves and reduced the live local `scripts/**/*.ps1` estate from `147` to `143`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
+- The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.

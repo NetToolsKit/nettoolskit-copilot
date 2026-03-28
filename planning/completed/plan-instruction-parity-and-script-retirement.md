@@ -4,11 +4,11 @@ Generated: 2026-03-28 15:42
 
 ## Status
 
-- LastUpdated: 2026-03-28 15:42
+- LastUpdated: 2026-03-28 20:02
 - Objective: reconcile high-risk instruction drift against `C:\Users\tguis\copilot-instructions` and determine the exact local `scripts/**/*.ps1` retirement scope that is safe after the completed Rust migration.
 - Normalized Request: compare the repository instruction system against `C:\Users\tguis\copilot-instructions`, verify whether the local `scripts/` tree is fully covered by Rust, and plan the safe path to retire local PowerShell scripts without losing repository instructions or runtime contracts.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
-- Spec Path: `planning/specs/active/spec-instruction-parity-and-script-retirement-readiness.md`
+- Spec Path: `planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md`
 - Inputs:
   - `C:\Users\tguis\copilot-instructions`
   - `planning/completed/plan-repository-unification-and-rust-migration.md`
@@ -19,8 +19,9 @@ Generated: 2026-03-28 15:42
   - `planning/completed/rust-script-transcription-ownership-matrix.md`
 - Current Audit Snapshot:
   - structural instruction parity is intact across the requested authority surfaces
-  - content drift exists in `14` of `201` compared instruction/runtime-authority files
-  - the local `147`-script estate is still not safe to delete as a whole because many `.ps1` paths remain live consumers in code, docs, tests, and governance surfaces
+  - the repository no longer depends on the external repo to recover missing planning, Codex, or authored VS Code operational guidance
+  - remaining hash drift is now bounded to intentional local specialization: README baseline policy, validation profile extensions, generated local `.vscode/*` helper surfaces, and the 4 POML templates that only showed non-semantic drift
+  - the live local script estate is now `143`, and the repository still is not safe to delete as a whole because `33` wrappers are retained by policy and `110` leaves or domains still require consumer migration evidence
 - Worktree Isolation: not required for the planning slice; a dedicated semantic branch is already active
 
 ## Scope Summary
@@ -141,7 +142,7 @@ Status: `[x]` Completed
 
 ### Task 4: Reconcile High-Risk Instruction Drift
 
-Status: `[2026-03-28 18:05 IN PROGRESS]`
+Status: `[x]` Completed
 
 - Reconcile the high-risk drift files from Task 1.
 - For each drifted file, decide one outcome:
@@ -168,10 +169,21 @@ Status: `[2026-03-28 18:05 IN PROGRESS]`
   - intentional local specialization is documented and bounded
 - Commit checkpoint:
   - `docs(runtime): reconcile instruction parity drift`
+- ✓ [2026-03-28 19:47] Merged the planning workspace indexes, tracked Codex README surfaces, and the authoritative VS Code README sources with the missing upstream operational guidance.
+- ✓ [2026-03-28 19:47] Tightened `readme-standards.baseline.json` for tracked projected Codex readmes while preserving the local expanded baseline model and avoiding enforcement on untracked `.vscode/*` helper projections.
+- ✓ [2026-03-28 19:47] Accepted the remaining drift as intentional local specialization for:
+  - `.github/governance/readme-standards.baseline.json`
+  - `.github/governance/validation-profiles.json`
+  - `.vscode/README.md`
+  - `.vscode/profiles/README.md`
+  - `.github/prompts/poml/styles/enterprise.poml`
+  - `.github/prompts/poml/templates/changelog-entry.poml`
+  - `.github/prompts/poml/templates/instruction-audit.poml`
+  - `.github/prompts/poml/templates/unit-test-generator.poml`
 
 ### Task 5: Execute Staged Script Retirement
 
-Status: `[2026-03-28 18:05 IN PROGRESS]`
+Status: `[x]` Completed
 
 - Retire only the script leaves or domains that pass both gates:
   - Rust/default ownership and parity are already proven
@@ -211,6 +223,7 @@ Status: `[2026-03-28 18:05 IN PROGRESS]`
   - `scripts/maintenance/fix-region-spacing.ps1`
   - `scripts/maintenance/clean-build-artifacts.ps1`
 - ✓ [2026-03-28 18:22] Repointed artifact-layout guidance to the native `clean-build-artifacts` runtime surface instead of the deleted wrapper path.
+- ✓ [2026-03-28 20:02] Closed the current retirement slice with no additional immediate queue. Any further deletion now requires a new domain-level consumer sweep workstream.
 
 ## Validation Checklist
 
@@ -241,3 +254,9 @@ Status: `[2026-03-28 18:05 IN PROGRESS]`
 - Keep commit messages in English and slice-oriented.
 - Do not delete local scripts in bulk.
 - Do not treat the external repo as retireable until the high-risk drift list is reconciled or explicitly accepted.
+
+## Completion Summary
+
+- Instruction parity was preserved structurally and reconciled operationally without blindly overwriting repository-specific governance or prompt assets.
+- The first safe retirement slice deleted `4` local scripts and reduced the live PowerShell estate from `147` to `143`.
+- The remaining `139` scripts are now explicitly split between `33` retained wrappers and `110` consumer-blocked leaves or domains, which is sufficient to close this audit workstream without reopening the completed migration program.
