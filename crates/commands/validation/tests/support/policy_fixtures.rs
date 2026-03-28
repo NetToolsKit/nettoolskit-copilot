@@ -15,7 +15,11 @@ pub fn initialize_policy_repo(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex"))
         .expect("codex directory should be created for repository resolution");
     write_repo_file(repo_root, "README.md", "# Repo\n");
-    write_repo_file(repo_root, "scripts/runtime/install.ps1", "Write-Output 'install'\n");
+    write_repo_file(
+        repo_root,
+        "scripts/runtime/install.ps1",
+        "Write-Output 'install'\n",
+    );
     write_repo_file(repo_root, ".githooks/pre-commit", "#!/bin/sh\n");
     write_repo_file(repo_root, ".githooks/post-commit", "#!/bin/sh\n");
     write_policy_file(
@@ -40,9 +44,7 @@ pub fn initialize_compatibility_lifecycle_repo(repo_root: &Path) {
         repo_root,
         "COMPATIBILITY.md",
         "January 15, 2025",
-        &[
-            "| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 2, 2025 | Active |",
-        ],
+        &["| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 2, 2025 | Active |"],
     );
 }
 

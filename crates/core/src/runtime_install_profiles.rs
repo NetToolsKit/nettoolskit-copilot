@@ -135,14 +135,19 @@ pub fn read_runtime_install_profile_catalog(
     resolved_repo_root: &Path,
 ) -> Result<RuntimeInstallProfileCatalogInfo> {
     let catalog_path = runtime_install_profile_catalog_path(resolved_repo_root);
-    let payload = fs::read_to_string(&catalog_path)
-        .with_context(|| format!("missing runtime install profile catalog '{}'", catalog_path.display()))?;
-    let catalog = serde_json::from_str::<RuntimeInstallProfileCatalog>(&payload).with_context(|| {
+    let payload = fs::read_to_string(&catalog_path).with_context(|| {
         format!(
-            "invalid runtime install profile catalog '{}'",
+            "missing runtime install profile catalog '{}'",
             catalog_path.display()
         )
     })?;
+    let catalog =
+        serde_json::from_str::<RuntimeInstallProfileCatalog>(&payload).with_context(|| {
+            format!(
+                "invalid runtime install profile catalog '{}'",
+                catalog_path.display()
+            )
+        })?;
 
     if catalog.default_profile.trim().is_empty() {
         return Err(anyhow!(

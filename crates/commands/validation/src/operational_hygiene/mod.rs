@@ -9,8 +9,9 @@ pub use runtime_script_tests::{
     invoke_validate_runtime_script_tests, ValidateRuntimeScriptTestsRequest,
     ValidateRuntimeScriptTestsResult,
 };
-pub use shell_hooks::{invoke_validate_shell_hooks, ValidateShellHooksRequest, ValidateShellHooksResult};
+pub use shell_hooks::{
+    invoke_validate_shell_hooks, ValidateShellHooksRequest, ValidateShellHooksResult,
+};
 pub use warning_baseline::{
-    invoke_validate_warning_baseline, ValidateWarningBaselineRequest,
-    ValidateWarningBaselineResult,
+    invoke_validate_warning_baseline, ValidateWarningBaselineRequest, ValidateWarningBaselineResult,
 };

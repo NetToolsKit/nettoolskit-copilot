@@ -44,7 +44,8 @@ fn test_invoke_validate_shared_script_checksums_reports_missing_manifest_entry()
     assert!(result
         .failures
         .iter()
-        .any(|message| message.contains("File exists but is missing in manifest: scripts/common/c.ps1")));
+        .any(|message| message
+            .contains("File exists but is missing in manifest: scripts/common/c.ps1")));
 }
 
 #[test]
@@ -61,17 +62,20 @@ fn test_invoke_validate_shared_script_checksums_reports_missing_source_file() {
     .expect("shared script checksum validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(result
-        .failures
-        .iter()
-        .any(|message| message.contains("Manifest references missing file: scripts/security/b.ps1")));
+    assert!(result.failures.iter().any(
+        |message| message.contains("Manifest references missing file: scripts/security/b.ps1")
+    ));
 }
 
 #[test]
 fn test_invoke_validate_shared_script_checksums_reports_checksum_mismatch() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_shared_checksums_repo(repo.path());
-    write_repo_file(repo.path(), "scripts/common/a.ps1", "Write-Output 'changed'\n");
+    write_repo_file(
+        repo.path(),
+        "scripts/common/a.ps1",
+        "Write-Output 'changed'\n",
+    );
 
     let result = invoke_validate_shared_script_checksums(&ValidateSharedScriptChecksumsRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -82,7 +86,10 @@ fn test_invoke_validate_shared_script_checksums_reports_checksum_mismatch() {
     .expect("shared script checksum validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert_eq!(result.hash_mismatches, vec!["scripts/common/a.ps1".to_string()]);
+    assert_eq!(
+        result.hash_mismatches,
+        vec!["scripts/common/a.ps1".to_string()]
+    );
     assert_eq!(result.mismatch_details.len(), 1);
 }
 

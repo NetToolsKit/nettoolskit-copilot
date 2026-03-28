@@ -53,10 +53,8 @@ fn test_invoke_validate_supply_chain_reports_blocked_dependency() {
     .expect("supply chain validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(result
-        .failures
-        .iter()
-        .any(|message| message.contains("Blocked dependency detected: event-stream (npm) in package.json")));
+    assert!(result.failures.iter().any(|message| message
+        .contains("Blocked dependency detected: event-stream (npm) in package.json")));
 }
 
 #[test]
@@ -108,7 +106,9 @@ fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence()
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
     assert!(result.failures.iter().any(|message| {
-        message.contains("License evidence file is required but missing: .temp/audit/licenses.latest.json")
+        message.contains(
+            "License evidence file is required but missing: .temp/audit/licenses.latest.json",
+        )
     }));
 }
 
@@ -135,8 +135,6 @@ fn test_invoke_validate_supply_chain_converts_required_findings_to_warnings() {
 
     assert_eq!(result.status, ValidationCheckStatus::Warning);
     assert!(result.failures.is_empty());
-    assert!(result
-        .warnings
-        .iter()
-        .any(|message| message.contains("Blocked dependency detected: event-stream (npm) in package.json")));
+    assert!(result.warnings.iter().any(|message| message
+        .contains("Blocked dependency detected: event-stream (npm) in package.json")));
 }

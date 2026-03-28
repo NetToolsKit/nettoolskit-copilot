@@ -1,8 +1,6 @@
 //! Tests for task worker error and public result surfaces.
 
-use nettoolskit_task_worker::{
-    TaskWorkerResult, TaskWorkerResultStatus, TaskWorkerSubmitError,
-};
+use nettoolskit_task_worker::{TaskWorkerResult, TaskWorkerResultStatus, TaskWorkerSubmitError};
 
 #[test]
 fn test_task_worker_submit_error_display_variants() {

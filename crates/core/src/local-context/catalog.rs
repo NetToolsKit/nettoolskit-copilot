@@ -81,14 +81,14 @@ pub fn read_local_context_index_catalog(
     catalog_path: Option<&Path>,
 ) -> Result<LocalContextIndexCatalogInfo> {
     let catalog_path = resolve_local_context_index_catalog_path(repo_root, catalog_path);
-    let payload = fs::read_to_string(&catalog_path)
-        .with_context(|| format!("failed to read local context catalog '{}'", catalog_path.display()))?;
-    let catalog = serde_json::from_str::<LocalContextIndexCatalog>(&payload).with_context(|| {
+    let payload = fs::read_to_string(&catalog_path).with_context(|| {
         format!(
-            "invalid local context catalog '{}'",
+            "failed to read local context catalog '{}'",
             catalog_path.display()
         )
     })?;
+    let catalog = serde_json::from_str::<LocalContextIndexCatalog>(&payload)
+        .with_context(|| format!("invalid local context catalog '{}'", catalog_path.display()))?;
 
     Ok(LocalContextIndexCatalogInfo {
         path: catalog_path,
@@ -119,11 +119,15 @@ pub fn local_context_index_path_included(
     relative_path: &str,
     catalog: &LocalContextIndexCatalog,
 ) -> Result<bool> {
-    let normalized_relative_path = relative_path.replace('\\', "/").trim_start_matches("./").to_string();
+    let normalized_relative_path = relative_path
+        .replace('\\', "/")
+        .trim_start_matches("./")
+        .to_string();
     let include_set = compile_globset(&catalog.include_globs)?;
     let exclude_set = compile_globset(&catalog.exclude_globs)?;
 
-    Ok(include_set.is_match(&normalized_relative_path) && !exclude_set.is_match(&normalized_relative_path))
+    Ok(include_set.is_match(&normalized_relative_path)
+        && !exclude_set.is_match(&normalized_relative_path))
 }
 
 /// Enumerate repository files admitted into the local context index.
@@ -142,9 +146,8 @@ pub fn local_context_index_file_candidates(
     let mut candidates = Vec::new();
 
     for entry in WalkDir::new(repo_root).follow_links(false) {
-        let entry = entry.with_context(|| {
-            format!("failed to traverse repository '{}'", repo_root.display())
-        })?;
+        let entry = entry
+            .with_context(|| format!("failed to traverse repository '{}'", repo_root.display()))?;
 
         if !entry.file_type().is_file() {
             continue;
@@ -167,9 +170,9 @@ pub fn local_context_index_file_candidates(
             continue;
         }
 
-        let metadata = entry.metadata().with_context(|| {
-            format!("failed to inspect '{}'", entry.path().display())
-        })?;
+        let metadata = entry
+            .metadata()
+            .with_context(|| format!("failed to inspect '{}'", entry.path().display()))?;
         if metadata.len() > max_file_size_bytes {
             continue;
         }
@@ -184,9 +187,10 @@ pub fn local_context_index_file_candidates(
 fn compile_globset(patterns: &[String]) -> Result<GlobSet> {
     let mut builder = GlobSetBuilder::new();
     for pattern in patterns {
-        builder.add(Glob::new(pattern).with_context(|| {
-            format!("invalid local context glob pattern '{pattern}'")
-        })?);
+        builder.add(
+            Glob::new(pattern)
+                .with_context(|| format!("invalid local context glob pattern '{pattern}'"))?,
+        );
     }
 
     builder

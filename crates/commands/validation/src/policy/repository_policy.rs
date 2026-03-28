@@ -70,9 +70,8 @@ pub struct ValidatePolicyResult {
 pub fn invoke_validate_policy(
     request: &ValidatePolicyRequest,
 ) -> Result<ValidatePolicyResult, ValidatePolicyCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidatePolicyCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidatePolicyCommandError::ResolveWorkspaceRoot { source })?;
     let policy_directory = resolve_repo_relative_path(
         &repo_root,
         request.policy_directory.as_deref(),
@@ -82,15 +81,15 @@ pub fn invoke_validate_policy(
     let mut warnings = Vec::new();
     let mut failures = Vec::new();
     let mut policies_checked = 0usize;
-    let policy_directory_label = request
-        .policy_directory
-        .as_ref()
-        .map_or_else(|| DEFAULT_POLICY_DIRECTORY.to_string(), |path| {
-            path.to_string_lossy().to_string()
-        });
+    let policy_directory_label = request.policy_directory.as_ref().map_or_else(
+        || DEFAULT_POLICY_DIRECTORY.to_string(),
+        |path| path.to_string_lossy().to_string(),
+    );
 
     if !policy_directory.is_dir() {
-        failures.push(format!("Policy directory not found: {policy_directory_label}"));
+        failures.push(format!(
+            "Policy directory not found: {policy_directory_label}"
+        ));
     } else {
         let mut policy_files = fs::read_dir(&policy_directory)
             .map(|entries| {
@@ -104,13 +103,18 @@ pub fn invoke_validate_policy(
         policy_files.sort();
 
         if policy_files.is_empty() {
-            failures.push(format!("No policy files found in: {policy_directory_label}"));
+            failures.push(format!(
+                "No policy files found in: {policy_directory_label}"
+            ));
         } else {
             policies_checked = policy_files.len();
             for policy_file in policy_files {
                 let relative_path = policy_file
                     .strip_prefix(&repo_root)
-                    .map_or_else(|_| policy_file.display().to_string(), |path| path.display().to_string())
+                    .map_or_else(
+                        |_| policy_file.display().to_string(),
+                        |path| path.display().to_string(),
+                    )
                     .replace('\\', "/");
                 let Some(policy_value) = read_required_json_value(
                     &policy_file,
@@ -166,9 +170,10 @@ fn validate_policy_contract(
         .filter(|value| !value.trim().is_empty())
         .map(ToOwned::to_owned)
         .unwrap_or_else(|| {
-            std::path::Path::new(policy_path)
-                .file_stem()
-                .map_or_else(|| "unnamed-policy".to_string(), |stem| stem.to_string_lossy().to_string())
+            std::path::Path::new(policy_path).file_stem().map_or_else(
+                || "unnamed-policy".to_string(),
+                |stem| stem.to_string_lossy().to_string(),
+            )
         });
 
     for key in policy_object.keys() {
@@ -213,7 +218,10 @@ fn validate_policy_contract(
         }
     }
 
-    if let Some(required_git_config) = policy_object.get("requiredGitConfig").and_then(Value::as_object) {
+    if let Some(required_git_config) = policy_object
+        .get("requiredGitConfig")
+        .and_then(Value::as_object)
+    {
         if Command::new("git").arg("--version").output().is_err() {
             warnings.push(format!(
                 "Git command not found; skipping requiredGitConfig checks (policy: {})",
@@ -235,7 +243,8 @@ fn validate_policy_contract(
                     .output();
                 match output {
                     Ok(output) if output.status.success() => {
-                        let current_value = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                        let current_value =
+                            String::from_utf8_lossy(&output.stdout).trim().to_string();
                         if current_value.is_empty() {
                             failures.push(format!(
                                 "Missing required git config '{}' (policy: {})",

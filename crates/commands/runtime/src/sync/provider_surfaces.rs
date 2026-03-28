@@ -20,11 +20,8 @@ pub(crate) fn render_provider_surfaces_for_bootstrap(
     enable_codex_runtime: bool,
     enable_claude_runtime: bool,
 ) -> Result<()> {
-    let renderer_ids = select_bootstrap_renderer_ids(
-        repo_root,
-        enable_codex_runtime,
-        enable_claude_runtime,
-    )?;
+    let renderer_ids =
+        select_bootstrap_renderer_ids(repo_root, enable_codex_runtime, enable_claude_runtime)?;
 
     for renderer_id in renderer_ids {
         match renderer_id.as_str() {
@@ -58,8 +55,12 @@ fn select_bootstrap_renderer_ids(
         .join("provider-surface-projection.catalog.json");
     let catalog_document = fs::read_to_string(&catalog_path)
         .with_context(|| format!("failed to read '{}'", catalog_path.display()))?;
-    let catalog: Value = serde_json::from_str(&catalog_document)
-        .with_context(|| format!("invalid provider surface projection catalog '{}'", catalog_path.display()))?;
+    let catalog: Value = serde_json::from_str(&catalog_document).with_context(|| {
+        format!(
+            "invalid provider surface projection catalog '{}'",
+            catalog_path.display()
+        )
+    })?;
     let renderers = catalog
         .get("renderers")
         .and_then(Value::as_array)
@@ -67,10 +68,9 @@ fn select_bootstrap_renderer_ids(
 
     let mut selected = Vec::new();
     for renderer in renderers {
-        let renderer_id = renderer
-            .get("id")
-            .and_then(Value::as_str)
-            .ok_or_else(|| anyhow!("provider surface projection catalog renderer is missing 'id'"))?;
+        let renderer_id = renderer.get("id").and_then(Value::as_str).ok_or_else(|| {
+            anyhow!("provider surface projection catalog renderer is missing 'id'")
+        })?;
         let bootstrap_consumer = renderer
             .get("consumers")
             .and_then(|consumers| consumers.get("bootstrap"));
@@ -89,11 +89,7 @@ fn select_bootstrap_renderer_ids(
             .get("condition")
             .and_then(Value::as_str)
             .unwrap_or("always");
-        if !bootstrap_condition_is_enabled(
-            condition,
-            enable_codex_runtime,
-            enable_claude_runtime,
-        ) {
+        if !bootstrap_condition_is_enabled(condition, enable_codex_runtime, enable_claude_runtime) {
             continue;
         }
 
@@ -123,7 +119,10 @@ fn bootstrap_condition_is_enabled(
 }
 
 fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
-    let source_root = repo_root.join("definitions").join("providers").join("github");
+    let source_root = repo_root
+        .join("definitions")
+        .join("providers")
+        .join("github");
     let shared_root = repo_root.join("definitions").join("shared");
     let output_root = repo_root.join(".github");
     let root_source = source_root.join("root");
@@ -134,7 +133,10 @@ fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
         .with_context(|| format!("failed to enumerate '{}'", root_source.display()))?
     {
         let entry = entry.with_context(|| {
-            format!("failed to enumerate entry under '{}'", root_source.display())
+            format!(
+                "failed to enumerate entry under '{}'",
+                root_source.display()
+            )
         })?;
         let entry_path = entry.path();
         if entry_path.is_file() {
@@ -145,7 +147,10 @@ fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
     let directory_specs = [
         (source_root.join("agents"), output_root.join("agents")),
         (source_root.join("chatmodes"), output_root.join("chatmodes")),
-        (shared_root.join("instructions"), output_root.join("instructions")),
+        (
+            shared_root.join("instructions"),
+            output_root.join("instructions"),
+        ),
         (source_root.join("hooks"), output_root.join("hooks")),
         (shared_root.join("templates"), output_root.join("templates")),
     ];
@@ -226,7 +231,11 @@ fn render_vscode_workspace_surfaces(repo_root: &Path) -> Result<()> {
         .join("vscode")
         .join("workspace");
     let output_root = repo_root.join(".vscode");
-    let managed_root_files = ["README.md", "base.code-workspace", "settings.tamplate.jsonc"];
+    let managed_root_files = [
+        "README.md",
+        "base.code-workspace",
+        "settings.tamplate.jsonc",
+    ];
     for file_name in managed_root_files {
         copy_file(&source_root.join(file_name), &output_root.join(file_name))?;
     }
@@ -235,7 +244,10 @@ fn render_vscode_workspace_surfaces(repo_root: &Path) -> Result<()> {
 }
 
 fn render_codex_compatibility_surfaces(repo_root: &Path) -> Result<()> {
-    let source_root = repo_root.join("definitions").join("providers").join("codex");
+    let source_root = repo_root
+        .join("definitions")
+        .join("providers")
+        .join("codex");
     let mcp_source_root = source_root.join("mcp");
     let mcp_output_root = repo_root.join(".codex").join("mcp");
     let managed_mcp_files = [
@@ -244,7 +256,10 @@ fn render_codex_compatibility_surfaces(repo_root: &Path) -> Result<()> {
         "vscode.mcp.template.json",
     ];
 
-    mirror_directory_contents(&source_root.join("scripts"), &repo_root.join(".codex").join("scripts"))?;
+    mirror_directory_contents(
+        &source_root.join("scripts"),
+        &repo_root.join(".codex").join("scripts"),
+    )?;
     ensure_directory_present(&mcp_source_root, "Codex MCP source root")?;
     ensure_directory_present(&mcp_output_root, "Codex MCP output root")?;
     for file_name in managed_mcp_files {
@@ -300,8 +315,7 @@ fn mirror_directory_contents(source_path: &Path, destination_path: &Path) -> Res
     clear_directory_contents(destination_path)?;
 
     for entry in WalkDir::new(source_path).min_depth(1) {
-        let entry = entry
-            .with_context(|| format!("failed to walk '{}'", source_path.display()))?;
+        let entry = entry.with_context(|| format!("failed to walk '{}'", source_path.display()))?;
         let relative_path = entry.path().strip_prefix(source_path).with_context(|| {
             format!(
                 "failed to compute relative path from '{}' to '{}'",
@@ -324,7 +338,10 @@ fn mirror_directory_contents(source_path: &Path, destination_path: &Path) -> Res
 
 fn copy_file(source_path: &Path, destination_path: &Path) -> Result<()> {
     if !source_path.is_file() {
-        return Err(anyhow!("missing managed source file: {}", source_path.display()));
+        return Err(anyhow!(
+            "missing managed source file: {}",
+            source_path.display()
+        ));
     }
 
     if let Some(parent) = destination_path.parent() {
@@ -343,11 +360,11 @@ fn copy_file(source_path: &Path, destination_path: &Path) -> Result<()> {
 
 fn clear_directory_contents(path: &Path) -> Result<()> {
     ensure_directory_present(path, "provider surface destination directory")?;
-    for entry in fs::read_dir(path)
-        .with_context(|| format!("failed to enumerate '{}'", path.display()))?
+    for entry in
+        fs::read_dir(path).with_context(|| format!("failed to enumerate '{}'", path.display()))?
     {
-        let entry =
-            entry.with_context(|| format!("failed to enumerate entry under '{}'", path.display()))?;
+        let entry = entry
+            .with_context(|| format!("failed to enumerate entry under '{}'", path.display()))?;
         let entry_path = entry.path();
         if entry_path.is_dir() {
             fs::remove_dir_all(&entry_path)
@@ -364,13 +381,9 @@ fn clear_directory_contents(path: &Path) -> Result<()> {
 
 fn ensure_directory_present(path: &Path, label: &str) -> Result<()> {
     if path.exists() && !path.is_dir() {
-        return Err(anyhow!(
-            "{label} is not a directory: {}",
-            path.display()
-        ));
+        return Err(anyhow!("{label} is not a directory: {}", path.display()));
     }
 
-    fs::create_dir_all(path)
-        .with_context(|| format!("failed to create '{}'", path.display()))?;
+    fs::create_dir_all(path).with_context(|| format!("failed to create '{}'", path.display()))?;
     Ok(())
 }

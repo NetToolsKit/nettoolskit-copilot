@@ -16,8 +16,12 @@ pub fn resolve_executable(
         return path.is_file().then(|| path.to_path_buf());
     }
 
-    find_executable_on_path(path_candidates)
-        .or_else(|| windows_candidates.iter().map(PathBuf::from).find(|path| path.is_file()))
+    find_executable_on_path(path_candidates).or_else(|| {
+        windows_candidates
+            .iter()
+            .map(PathBuf::from)
+            .find(|path| path.is_file())
+    })
 }
 
 fn find_executable_on_path(candidates: &[&str]) -> Option<PathBuf> {

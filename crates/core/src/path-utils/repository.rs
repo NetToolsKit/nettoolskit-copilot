@@ -26,7 +26,10 @@ pub fn resolve_repository_root(
     let mut candidates = Vec::new();
 
     if let Some(requested_root) = requested_root {
-        candidates.push(require_existing_directory(requested_root, "requested repository root")?);
+        candidates.push(require_existing_directory(
+            requested_root,
+            "requested repository root",
+        )?);
     }
 
     if let Some(script_root) = script_root {
@@ -41,7 +44,10 @@ pub fn resolve_repository_root(
         }
     }
 
-    candidates.push(require_existing_directory(current_dir, "current directory")?);
+    candidates.push(require_existing_directory(
+        current_dir,
+        "current directory",
+    )?);
 
     for candidate in unique_paths(candidates) {
         let mut current = Some(candidate.as_path());
@@ -52,7 +58,10 @@ pub fn resolve_repository_root(
 
             if has_repository_layout(path) {
                 return fs::canonicalize(path).with_context(|| {
-                    format!("failed to canonicalize repository root '{}'", path.display())
+                    format!(
+                        "failed to canonicalize repository root '{}'",
+                        path.display()
+                    )
                 });
             }
 

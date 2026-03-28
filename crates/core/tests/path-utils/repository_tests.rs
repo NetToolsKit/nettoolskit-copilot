@@ -23,7 +23,12 @@ fn test_resolve_repository_root_detects_layout_from_script_root() {
     )
     .expect("repository root should be detected");
 
-    assert_eq!(resolved, repo.path().canonicalize().expect("repo should canonicalize"));
+    assert_eq!(
+        resolved,
+        repo.path()
+            .canonicalize()
+            .expect("repo should canonicalize")
+    );
 }
 
 #[test]
@@ -47,13 +52,17 @@ fn test_resolve_solution_or_layout_root_detects_src_and_github_layout() {
     let repo = TempDir::new().expect("temporary repository should be created");
     fs::create_dir_all(repo.path().join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo.path().join("src")).expect("src directory should be created");
-    fs::create_dir_all(repo.path().join("tools/deep"))
-        .expect("nested directory should be created");
+    fs::create_dir_all(repo.path().join("tools/deep")).expect("nested directory should be created");
 
     let resolved = resolve_solution_or_layout_root(None, &repo.path().join("tools/deep"))
         .expect("layout root should be detected");
 
-    assert_eq!(resolved, repo.path().canonicalize().expect("repo should canonicalize"));
+    assert_eq!(
+        resolved,
+        repo.path()
+            .canonicalize()
+            .expect("repo should canonicalize")
+    );
 }
 
 #[test]
@@ -63,7 +72,12 @@ fn test_resolve_explicit_or_git_root_returns_explicit_path_when_provided() {
     let resolved = resolve_explicit_or_git_root(Some(repo.path()), Path::new("."))
         .expect("explicit path should be accepted");
 
-    assert_eq!(resolved, repo.path().canonicalize().expect("repo should canonicalize"));
+    assert_eq!(
+        resolved,
+        repo.path()
+            .canonicalize()
+            .expect("repo should canonicalize")
+    );
 }
 
 #[test]
@@ -74,8 +88,8 @@ fn test_convert_to_relative_repo_path_normalizes_separators() {
         .expect("planning directory should be created");
     fs::write(&nested_path, "content").expect("plan file should be written");
 
-    let relative_path =
-        convert_to_relative_repo_path(repo.path(), &nested_path).expect("path should become relative");
+    let relative_path = convert_to_relative_repo_path(repo.path(), &nested_path)
+        .expect("path should become relative");
 
     assert_eq!(relative_path, "planning/active/plan.md");
 }

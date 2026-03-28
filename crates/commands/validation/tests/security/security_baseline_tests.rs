@@ -69,7 +69,11 @@ fn test_invoke_validate_security_baseline_reports_forbidden_path() {
 fn test_invoke_validate_security_baseline_emits_warning_for_warning_rule() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_security_repo(repo.path());
-    write_repo_file(repo.path(), "docs/notes.md", "password = \"supersecret1\"\n");
+    write_repo_file(
+        repo.path(),
+        "docs/notes.md",
+        "password = \"supersecret1\"\n",
+    );
 
     let result = invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -90,7 +94,11 @@ fn test_invoke_validate_security_baseline_emits_warning_for_warning_rule() {
 fn test_invoke_validate_security_baseline_honors_allowed_content_patterns() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_security_repo(repo.path());
-    write_repo_file(repo.path(), "docs/notes.md", "password = \"example-password\"\n");
+    write_repo_file(
+        repo.path(),
+        "docs/notes.md",
+        "password = \"example-password\"\n",
+    );
 
     let result = invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
         repo_root: Some(repo.path().to_path_buf()),

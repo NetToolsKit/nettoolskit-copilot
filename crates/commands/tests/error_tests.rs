@@ -1,6 +1,8 @@
 //! Tests for error surfaces reachable through the command aggregator.
 
-use nettoolskit_commands::{nettoolskit_manifest::ManifestError, nettoolskit_runtime, nettoolskit_validation};
+use nettoolskit_commands::{
+    nettoolskit_manifest::ManifestError, nettoolskit_runtime, nettoolskit_validation,
+};
 use std::io;
 use std::path::PathBuf;
 
@@ -30,7 +32,9 @@ fn test_manifest_error_io_backed_variants_render_expected_context() {
 
     assert!(read_error.to_string().contains("failed to read manifest"));
     assert!(read_error.to_string().contains("ntk-manifest.yml"));
-    assert!(solution_error.to_string().contains("solution root not found"));
+    assert!(solution_error
+        .to_string()
+        .contains("solution root not found"));
 }
 
 #[test]

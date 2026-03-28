@@ -205,8 +205,12 @@ pub fn build_local_context_index(
         }
 
         rebuilt_file_count += 1;
-        let chunks = build_local_context_chunks_for_file(repo_root, &file_path, &catalog_info.catalog)?;
-        let chunk_ids = chunks.iter().map(|chunk| chunk.id.clone()).collect::<Vec<_>>();
+        let chunks =
+            build_local_context_chunks_for_file(repo_root, &file_path, &catalog_info.catalog)?;
+        let chunk_ids = chunks
+            .iter()
+            .map(|chunk| chunk.id.clone())
+            .collect::<Vec<_>>();
         let metadata = fs::metadata(&file_path)
             .with_context(|| format!("failed to inspect '{}'", file_path.display()))?;
         let title = derive_local_context_title(&file_path, &relative_path)?;
@@ -216,7 +220,10 @@ pub fn build_local_context_index(
             path: relative_path,
             hash,
             last_write_time_utc: format_system_time(metadata.modified().with_context(|| {
-                format!("failed to read modification time for '{}'", file_path.display())
+                format!(
+                    "failed to read modification time for '{}'",
+                    file_path.display()
+                )
             })?)?,
             size_bytes: metadata.len(),
             title,
@@ -293,8 +300,12 @@ pub fn write_local_context_index_document(
     index_root: &Path,
     document: &LocalContextIndexDocument,
 ) -> Result<PathBuf> {
-    fs::create_dir_all(index_root)
-        .with_context(|| format!("failed to create index directory '{}'", index_root.display()))?;
+    fs::create_dir_all(index_root).with_context(|| {
+        format!(
+            "failed to create index directory '{}'",
+            index_root.display()
+        )
+    })?;
     let index_path = index_root.join("index.json");
     let payload = serde_json::to_string_pretty(document)
         .context("failed to serialize local context index document")?;
@@ -435,7 +446,10 @@ fn flush_text_chunk(
 
 fn markdown_heading(line: &str) -> Option<String> {
     let trimmed = line.trim();
-    let hashes = trimmed.chars().take_while(|character| *character == '#').count();
+    let hashes = trimmed
+        .chars()
+        .take_while(|character| *character == '#')
+        .count();
     if !(1..=6).contains(&hashes) {
         return None;
     }
@@ -484,8 +498,8 @@ fn derive_local_context_title(file_path: &Path, relative_path: &str) -> Result<S
 }
 
 fn compute_sha256_hex(path: &Path) -> Result<String> {
-    let bytes =
-        fs::read(path).with_context(|| format!("failed to read '{}' for hashing", path.display()))?;
+    let bytes = fs::read(path)
+        .with_context(|| format!("failed to read '{}' for hashing", path.display()))?;
     let mut hasher = Sha256::new();
     hasher.update(bytes);
     Ok(format!("{:x}", hasher.finalize()))

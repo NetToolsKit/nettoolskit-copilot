@@ -261,12 +261,8 @@ fn invoke_provider_surface_render(
     enable_codex_runtime: bool,
     enable_claude_runtime: bool,
 ) -> Result<()> {
-    render_provider_surfaces_for_bootstrap(
-        repo_root,
-        enable_codex_runtime,
-        enable_claude_runtime,
-    )
-    .context("provider surface render dispatch failed before bootstrap sync")
+    render_provider_surfaces_for_bootstrap(repo_root, enable_codex_runtime, enable_claude_runtime)
+        .context("provider surface render dispatch failed before bootstrap sync")
 }
 
 fn invoke_mcp_config_apply(repo_root: &Path, codex_path: &Path, backup_config: bool) -> Result<()> {

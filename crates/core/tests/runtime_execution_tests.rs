@@ -1,8 +1,7 @@
 //! Tests for runtime execution context helpers.
 
 use nettoolskit_core::runtime_execution::{
-    resolve_runtime_execution_context, resolved_runtime_target_arguments,
-    runtime_target_arguments,
+    resolve_runtime_execution_context, resolved_runtime_target_arguments, runtime_target_arguments,
 };
 use std::fs;
 use std::path::Path;
@@ -45,7 +44,12 @@ fn test_resolve_runtime_execution_context_builds_sources_and_targets() {
     )
     .expect("execution context should resolve");
 
-    assert_eq!(context.resolved_repo_root, repo.path().canonicalize().expect("repo should canonicalize"));
+    assert_eq!(
+        context.resolved_repo_root,
+        repo.path()
+            .canonicalize()
+            .expect("repo should canonicalize")
+    );
     assert_eq!(context.runtime_profile.name, "github");
     assert!(context.runtime_profile.enable_github_runtime);
     assert_eq!(
@@ -88,7 +92,14 @@ fn test_runtime_target_arguments_include_optional_fields() {
 
     let arguments = runtime_target_arguments(&context, true, true);
 
-    assert_eq!(arguments.repo_root, Some(repo.path().canonicalize().expect("repo should canonicalize")));
+    assert_eq!(
+        arguments.repo_root,
+        Some(
+            repo.path()
+                .canonicalize()
+                .expect("repo should canonicalize")
+        )
+    );
     assert_eq!(arguments.runtime_profile.as_deref(), Some("github"));
     assert_eq!(
         normalize_path(&arguments.target_codex_path),
@@ -116,12 +127,8 @@ fn test_resolved_runtime_target_arguments_resolve_relative_paths_against_repo_ro
     )
     .expect("execution context should resolve");
 
-    let arguments = resolved_runtime_target_arguments(
-        &context,
-        &repo.path().join("subdir"),
-        true,
-        true,
-    );
+    let arguments =
+        resolved_runtime_target_arguments(&context, &repo.path().join("subdir"), true, true);
 
     assert_eq!(arguments.repo_root, Some(repo.path().join("subdir")));
     assert_eq!(

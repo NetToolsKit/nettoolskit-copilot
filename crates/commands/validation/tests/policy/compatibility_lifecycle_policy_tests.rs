@@ -1,8 +1,8 @@
 //! Tests for policy::compatibility_lifecycle_policy module.
 
 use nettoolskit_validation::{
-    invoke_validate_compatibility_lifecycle_policy,
-    ValidateCompatibilityLifecyclePolicyRequest, ValidationCheckStatus,
+    invoke_validate_compatibility_lifecycle_policy, ValidateCompatibilityLifecyclePolicyRequest,
+    ValidationCheckStatus,
 };
 use tempfile::TempDir;
 
@@ -37,9 +37,7 @@ fn test_invoke_validate_compatibility_lifecycle_policy_accepts_case_insensitive_
         repo.path(),
         "COMPATIBILITY.md",
         "january 15, 2025",
-        &[
-            "| 1.2 | january 1, 2024 | february 1, 2025 | march 1, 2025 | march 2, 2025 | Active |",
-        ],
+        &["| 1.2 | january 1, 2024 | february 1, 2025 | march 1, 2025 | march 2, 2025 | Active |"],
     );
 
     let result = invoke_validate_compatibility_lifecycle_policy(
@@ -63,9 +61,7 @@ fn test_invoke_validate_compatibility_lifecycle_policy_reports_invalid_eol_date(
         repo.path(),
         "COMPATIBILITY.md",
         "January 15, 2025",
-        &[
-            "| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 3, 2025 | Active |",
-        ],
+        &["| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 3, 2025 | Active |"],
     );
 
     let result = invoke_validate_compatibility_lifecycle_policy(
@@ -92,9 +88,7 @@ fn test_invoke_validate_compatibility_lifecycle_policy_reports_status_mismatch()
         repo.path(),
         "COMPATIBILITY.md",
         "April 10, 2025",
-        &[
-            "| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 2, 2025 | Active |",
-        ],
+        &["| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 2, 2025 | Active |"],
     );
 
     let result = invoke_validate_compatibility_lifecycle_policy(
@@ -108,7 +102,9 @@ fn test_invoke_validate_compatibility_lifecycle_policy_reports_status_mismatch()
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
     assert!(result.failures.iter().any(|message| {
-        message.contains("Status 'Active' does not match reference date (2025-04-10). Expected 'Unsupported'.")
+        message.contains(
+            "Status 'Active' does not match reference date (2025-04-10). Expected 'Unsupported'.",
+        )
     }));
 }
 

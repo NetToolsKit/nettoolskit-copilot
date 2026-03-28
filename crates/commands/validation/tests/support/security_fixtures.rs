@@ -44,7 +44,11 @@ pub fn initialize_security_repo(repo_root: &Path) {
   ]
 }"#,
     );
-    write_repo_file(repo_root, "scripts/validation/validate-agent-hooks.ps1", "Write-Output 'ok'\n");
+    write_repo_file(
+        repo_root,
+        "scripts/validation/validate-agent-hooks.ps1",
+        "Write-Output 'ok'\n",
+    );
     write_repo_file(repo_root, "README.md", "# Repo\n");
 }
 
@@ -154,7 +158,11 @@ serde = "1.0"
 }
 
 pub fn write_supply_chain_baseline(repo_root: &Path, contents: &str) {
-    write_repo_file(repo_root, ".github/governance/supply-chain.baseline.json", contents);
+    write_repo_file(
+        repo_root,
+        ".github/governance/supply-chain.baseline.json",
+        contents,
+    );
 }
 
 pub fn write_repo_file(repo_root: &Path, relative_path: &str, contents: &str) {

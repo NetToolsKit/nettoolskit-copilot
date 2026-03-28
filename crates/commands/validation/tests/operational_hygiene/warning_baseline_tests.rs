@@ -66,7 +66,7 @@ fn test_invoke_validate_warning_baseline_reports_threshold_overage() {
     }));
     assert!(result.failures.iter().any(|message| {
         message.contains(
-            "Analyzer warning count for 'PSAvoidUsingWriteHost' (3) exceeds threshold (2)."
+            "Analyzer warning count for 'PSAvoidUsingWriteHost' (3) exceeds threshold (2).",
         )
     }));
 }

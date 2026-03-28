@@ -19,7 +19,10 @@ fn sample_catalog() -> LocalContextIndexCatalog {
             max_lines: 4,
         },
         query_defaults: LocalContextIndexQueryDefaults { top: 5 },
-        include_globs: vec!["planning/**/*.md".to_string(), "scripts/**/*.ps1".to_string()],
+        include_globs: vec![
+            "planning/**/*.md".to_string(),
+            "scripts/**/*.ps1".to_string(),
+        ],
         exclude_globs: vec![".temp/**".to_string()],
     }
 }
@@ -59,17 +62,20 @@ fn test_build_local_context_index_reuses_unchanged_files() {
     .expect("catalog file should be written");
     fs::create_dir_all(repo.path().join("planning/active"))
         .expect("planning directory should be created");
-    fs::write(repo.path().join("planning/active/plan.md"), "# Intro\nalpha beta gamma")
-        .expect("plan file should be written");
+    fs::write(
+        repo.path().join("planning/active/plan.md"),
+        "# Intro\nalpha beta gamma",
+    )
+    .expect("plan file should be written");
 
     let catalog_info = LocalContextIndexCatalogInfo {
         path: catalog_path,
         catalog,
     };
-    let first_report =
-        build_local_context_index(repo.path(), &catalog_info, None, false).expect("first build should succeed");
-    let second_report =
-        build_local_context_index(repo.path(), &catalog_info, None, false).expect("second build should succeed");
+    let first_report = build_local_context_index(repo.path(), &catalog_info, None, false)
+        .expect("first build should succeed");
+    let second_report = build_local_context_index(repo.path(), &catalog_info, None, false)
+        .expect("second build should succeed");
 
     assert_eq!(first_report.indexed_file_count, 1);
     assert_eq!(first_report.rebuilt_file_count, 1);
@@ -77,7 +83,10 @@ fn test_build_local_context_index_reuses_unchanged_files() {
     assert_eq!(second_report.indexed_file_count, 1);
     assert_eq!(second_report.rebuilt_file_count, 0);
     assert_eq!(second_report.reused_file_count, 1);
-    assert_eq!(second_report.document.chunk_count, second_report.document.chunks.len());
+    assert_eq!(
+        second_report.document.chunk_count,
+        second_report.document.chunks.len()
+    );
 }
 
 #[test]

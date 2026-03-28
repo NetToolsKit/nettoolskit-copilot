@@ -1,8 +1,7 @@
 //! Tests for PowerShell standards validation.
 
 use nettoolskit_validation::{
-    invoke_validate_powershell_standards, ValidatePowerShellStandardsRequest,
-    ValidationCheckStatus,
+    invoke_validate_powershell_standards, ValidatePowerShellStandardsRequest, ValidationCheckStatus,
 };
 use tempfile::TempDir;
 
@@ -44,12 +43,10 @@ fn test_invoke_validate_powershell_standards_reports_missing_help_block() {
     })
     .expect("powershell standards should execute");
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("Missing comment-based help block"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|failure| failure.contains("Missing comment-based help block")));
 }
 
 #[test]
@@ -97,12 +94,10 @@ function CustomThing {
     })
     .expect("powershell standards should execute");
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("Verb-Noun format"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|failure| failure.contains("Verb-Noun format")));
 }
 
 #[test]
@@ -124,10 +119,8 @@ fn test_invoke_validate_powershell_standards_converts_required_findings_to_warni
     .expect("powershell standards should execute");
     assert_eq!(result.status, ValidationCheckStatus::Warning);
     assert!(result.failures.is_empty());
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("Missing comment-based help block"))
-    );
+    assert!(result
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("Missing comment-based help block")));
 }

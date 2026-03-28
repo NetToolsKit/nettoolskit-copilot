@@ -78,22 +78,30 @@ pub fn resolve_user_home_path() -> Result<PathBuf> {
 /// Join path segments using the current platform separator rules.
 #[must_use]
 pub fn join_path_segments(base_path: &Path, segments: &[&str]) -> PathBuf {
-    segments.iter().fold(base_path.to_path_buf(), |current, segment| {
-        if segment.trim().is_empty() {
-            current
-        } else {
-            current.join(segment)
-        }
-    })
+    segments
+        .iter()
+        .fold(base_path.to_path_buf(), |current, segment| {
+            if segment.trim().is_empty() {
+                current
+            } else {
+                current.join(segment)
+            }
+        })
 }
 
 /// Return the built-in runtime location catalog.
 #[must_use]
 pub fn built_in_runtime_location_catalog() -> RuntimeLocationCatalog {
     let mut paths = BTreeMap::new();
-    paths.insert("githubRuntimeRoot".to_string(), "${HOME}/.github".to_string());
+    paths.insert(
+        "githubRuntimeRoot".to_string(),
+        "${HOME}/.github".to_string(),
+    );
     paths.insert("codexRuntimeRoot".to_string(), "${HOME}/.codex".to_string());
-    paths.insert("agentsSkillsRoot".to_string(), "${HOME}/.agents/skills".to_string());
+    paths.insert(
+        "agentsSkillsRoot".to_string(),
+        "${HOME}/.agents/skills".to_string(),
+    );
     paths.insert(
         "copilotSkillsRoot".to_string(),
         "${HOME}/.copilot/skills".to_string(),
@@ -102,7 +110,10 @@ pub fn built_in_runtime_location_catalog() -> RuntimeLocationCatalog {
         "codexGitHooksRoot".to_string(),
         "${HOME}/.codex/git-hooks".to_string(),
     );
-    paths.insert("claudeRuntimeRoot".to_string(), "${HOME}/.claude".to_string());
+    paths.insert(
+        "claudeRuntimeRoot".to_string(),
+        "${HOME}/.claude".to_string(),
+    );
 
     RuntimeLocationCatalog {
         schema_version: 1,
@@ -148,12 +159,18 @@ pub fn resolve_runtime_location_settings_path(
     environment_override: Option<&str>,
     home_path: &Path,
 ) -> PathBuf {
-    if let Some(environment_override) = environment_override.filter(|value| !value.trim().is_empty())
+    if let Some(environment_override) =
+        environment_override.filter(|value| !value.trim().is_empty())
     {
         return resolve_full_path(home_path, Path::new(environment_override));
     }
 
-    let relative_path = if catalog.settings.user_override_relative_path.trim().is_empty() {
+    let relative_path = if catalog
+        .settings
+        .user_override_relative_path
+        .trim()
+        .is_empty()
+    {
         ".codex/runtime-location-settings.json"
     } else {
         catalog.settings.user_override_relative_path.as_str()

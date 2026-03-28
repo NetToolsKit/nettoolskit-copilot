@@ -109,7 +109,9 @@ fn test_invoke_validate_agent_permissions_converts_failures_to_warnings() {
     initialize_agent_contract_repo(repo.path());
     write_permission_matrix(
         repo.path(),
-        valid_permission_matrix_json().replace("\"role\": \"planner\"", "\"role\": \"router\"").as_str(),
+        valid_permission_matrix_json()
+            .replace("\"role\": \"planner\"", "\"role\": \"router\"")
+            .as_str(),
     );
 
     let result = invoke_validate_agent_permissions(&ValidateAgentPermissionsRequest {

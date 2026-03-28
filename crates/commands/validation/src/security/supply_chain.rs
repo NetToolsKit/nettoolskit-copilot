@@ -117,9 +117,8 @@ struct SupplyChainPackage {
 pub fn invoke_validate_supply_chain(
     request: &ValidateSupplyChainRequest,
 ) -> Result<ValidateSupplyChainResult, ValidateSupplyChainCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateSupplyChainCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidateSupplyChainCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = resolve_repo_relative_path(
         &repo_root,
         request.baseline_path.as_deref(),
@@ -253,7 +252,8 @@ pub fn invoke_validate_supply_chain(
                         baseline.license_evidence_path
                     ),
                 );
-            } else if !resolved_license_path.is_file() && baseline.warn_on_missing_license_evidence {
+            } else if !resolved_license_path.is_file() && baseline.warn_on_missing_license_evidence
+            {
                 warnings.push(format!(
                     "License evidence file not found (optional): {}",
                     baseline.license_evidence_path
@@ -460,8 +460,8 @@ fn parse_cargo_manifest(manifest_path: &Path, relative_path: &str) -> Vec<Supply
         return Vec::new();
     };
 
-    let dependency_pattern =
-        Regex::new(r#"^(?P<name>[A-Za-z0-9_.-]+)\s*=\s*(?P<value>.+)$"#).expect("regex should compile");
+    let dependency_pattern = Regex::new(r#"^(?P<name>[A-Za-z0-9_.-]+)\s*=\s*(?P<value>.+)$"#)
+        .expect("regex should compile");
     let mut packages = Vec::new();
     let mut inside_dependencies = false;
 
@@ -485,8 +485,15 @@ fn parse_cargo_manifest(manifest_path: &Path, relative_path: &str) -> Vec<Supply
             continue;
         };
 
-        let name = captures.name("name").expect("name capture should exist").as_str();
-        let raw_value = captures.name("value").expect("value capture should exist").as_str().trim();
+        let name = captures
+            .name("name")
+            .expect("name capture should exist")
+            .as_str();
+        let raw_value = captures
+            .name("value")
+            .expect("value capture should exist")
+            .as_str()
+            .trim();
         let version = if raw_value.starts_with('{') {
             "table".to_string()
         } else {
@@ -527,7 +534,10 @@ fn parse_dotnet_manifest(
     };
 
     let mut packages = Vec::new();
-    for node in xml.descendants().filter(|node| node.has_tag_name("PackageReference")) {
+    for node in xml
+        .descendants()
+        .filter(|node| node.has_tag_name("PackageReference"))
+    {
         let name = node
             .attribute("Include")
             .or_else(|| node.attribute("Update"))
@@ -577,7 +587,10 @@ fn write_sbom_report(
                 warning_only,
                 warnings,
                 failures,
-                format!("Could not create SBOM output directory {}: {error}", parent.display()),
+                format!(
+                    "Could not create SBOM output directory {}: {error}",
+                    parent.display()
+                ),
             );
             return;
         }
@@ -598,7 +611,10 @@ fn write_sbom_report(
                     warning_only,
                     warnings,
                     failures,
-                    format!("Could not write SBOM report {}: {error}", output_path.display()),
+                    format!(
+                        "Could not write SBOM report {}: {error}",
+                        output_path.display()
+                    ),
                 );
             }
         }
@@ -615,7 +631,11 @@ fn resolve_output_path(repo_root: &Path, configured_path: &str) -> PathBuf {
     if configured_path.trim().is_empty() {
         repo_root.join(DEFAULT_SBOM_PATH)
     } else {
-        resolve_repo_relative_path(repo_root, Some(Path::new(configured_path)), DEFAULT_SBOM_PATH)
+        resolve_repo_relative_path(
+            repo_root,
+            Some(Path::new(configured_path)),
+            DEFAULT_SBOM_PATH,
+        )
     }
 }
 

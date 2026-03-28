@@ -48,7 +48,12 @@ pub fn search_local_context_index_document(
                 return None;
             }
 
-            let score = local_context_chunk_score(query_text, &chunk_path, chunk.heading.as_deref(), &chunk.search_text);
+            let score = local_context_chunk_score(
+                query_text,
+                &chunk_path,
+                chunk.heading.as_deref(),
+                &chunk.search_text,
+            );
             (score > 0).then(|| LocalContextSearchHit {
                 id: chunk.id.clone(),
                 path: chunk_path,

@@ -6,7 +6,7 @@ use nettoolskit_validation::{
 use tempfile::TempDir;
 
 use crate::support::release_fixtures::{
-    initialize_release_provenance_repo, initialize_git_repository, write_audit_report,
+    initialize_git_repository, initialize_release_provenance_repo, write_audit_report,
     write_repo_file,
 };
 
@@ -49,12 +49,10 @@ fn test_invoke_validate_release_provenance_reports_missing_required_check() {
     .expect("release provenance should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("Required check missing from validate-all"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|failure| failure.contains("Required check missing from validate-all")));
 }
 
 #[test]
@@ -72,12 +70,10 @@ fn test_invoke_validate_release_provenance_fails_when_required_audit_report_is_m
     .expect("release provenance should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("Required audit report not found"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|failure| failure.contains("Required audit report not found")));
 }
 
 #[test]
@@ -120,12 +116,10 @@ fn test_invoke_validate_release_provenance_reports_dirty_worktree_when_required_
     .expect("release provenance should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("requires clean state"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|failure| failure.contains("requires clean state")));
 }
 
 #[test]
@@ -144,10 +138,8 @@ fn test_invoke_validate_release_provenance_warns_for_audit_commit_mismatch() {
 
     assert_eq!(result.status, ValidationCheckStatus::Warning);
     assert_ne!(head_commit, "ffffffff");
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("Audit report commit differs from HEAD"))
-    );
+    assert!(result
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("Audit report commit differs from HEAD")));
 }

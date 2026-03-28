@@ -1,15 +1,15 @@
 //! Validation command boundary contracts for the migration program.
 
-pub mod contracts;
 pub mod agent_orchestration;
 pub mod architecture;
+pub mod contracts;
 pub mod documentation;
 pub mod error;
 pub mod evidence;
 pub mod governance;
 pub mod instruction_graph;
-pub mod orchestration;
 pub mod operational_hygiene;
+pub mod orchestration;
 pub mod policy;
 pub mod release;
 pub mod security;
@@ -17,23 +17,21 @@ pub mod standards;
 pub mod structure;
 pub mod workspace;
 
-pub use contracts::{
-    validation_surface_contract, validation_surface_script_total, MigrationWave,
-    ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
-};
 pub use agent_orchestration::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
-    invoke_validate_agent_permissions,
-    invoke_validate_agent_skill_alignment,
-    ValidateAgentHooksRequest, ValidateAgentHooksResult,
-    ValidateAgentOrchestrationRequest, ValidateAgentOrchestrationResult,
-    ValidateAgentPermissionsRequest, ValidateAgentPermissionsResult,
-    ValidateAgentSkillAlignmentRequest,
+    invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment,
+    ValidateAgentHooksRequest, ValidateAgentHooksResult, ValidateAgentOrchestrationRequest,
+    ValidateAgentOrchestrationResult, ValidateAgentPermissionsRequest,
+    ValidateAgentPermissionsResult, ValidateAgentSkillAlignmentRequest,
     ValidateAgentSkillAlignmentResult,
 };
 pub use architecture::{
     invoke_validate_architecture_boundaries, ValidateArchitectureBoundariesRequest,
     ValidateArchitectureBoundariesResult,
+};
+pub use contracts::{
+    validation_surface_contract, validation_surface_script_total, MigrationWave,
+    ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
 };
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
@@ -41,24 +39,19 @@ pub use documentation::{
     ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
 };
 pub use error::{
-    ValidateAgentHooksCommandError, ValidateAgentPermissionsCommandError,
-    ValidateAgentSkillAlignmentCommandError,
-    ValidateAgentOrchestrationCommandError,
-    ValidateArchitectureBoundariesCommandError,
-    ValidateCompatibilityLifecyclePolicyCommandError,
-    ValidateDotnetStandardsCommandError,
-    ValidatePowerShellStandardsCommandError,
-    ValidatePolicyCommandError,
-    ValidateSecurityBaselineCommandError,
-    ValidateSharedScriptChecksumsCommandError,
-    ValidateSupplyChainCommandError,
-    ValidateAllCommandError, ValidateAuditLedgerCommandError,
-    ValidateAuthoritativeSourcePolicyCommandError, ValidateInstructionArchitectureCommandError,
-    ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
-    ValidatePlanningStructureCommandError, ValidateReadmeStandardsCommandError,
-    ValidateReleaseGovernanceCommandError, ValidateReleaseProvenanceCommandError,
-    ValidateRuntimeScriptTestsCommandError, ValidateShellHooksCommandError,
-    ValidateRoutingCoverageCommandError, ValidateTemplateStandardsCommandError,
+    ValidateAgentHooksCommandError, ValidateAgentOrchestrationCommandError,
+    ValidateAgentPermissionsCommandError, ValidateAgentSkillAlignmentCommandError,
+    ValidateAllCommandError, ValidateArchitectureBoundariesCommandError,
+    ValidateAuditLedgerCommandError, ValidateAuthoritativeSourcePolicyCommandError,
+    ValidateCompatibilityLifecyclePolicyCommandError, ValidateDotnetStandardsCommandError,
+    ValidateInstructionArchitectureCommandError, ValidateInstructionMetadataCommandError,
+    ValidateInstructionsCommandError, ValidatePlanningStructureCommandError,
+    ValidatePolicyCommandError, ValidatePowerShellStandardsCommandError,
+    ValidateReadmeStandardsCommandError, ValidateReleaseGovernanceCommandError,
+    ValidateReleaseProvenanceCommandError, ValidateRoutingCoverageCommandError,
+    ValidateRuntimeScriptTestsCommandError, ValidateSecurityBaselineCommandError,
+    ValidateSharedScriptChecksumsCommandError, ValidateShellHooksCommandError,
+    ValidateSupplyChainCommandError, ValidateTemplateStandardsCommandError,
     ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
     ValidationSurfaceError,
 };
@@ -72,21 +65,19 @@ pub use governance::{
 };
 pub use instruction_graph::{
     invoke_validate_authoritative_source_policy, invoke_validate_instruction_architecture,
-    invoke_validate_instructions,
-    ValidateAuthoritativeSourcePolicyRequest, ValidateAuthoritativeSourcePolicyResult,
-    ValidateInstructionArchitectureRequest, ValidateInstructionArchitectureResult,
-    ValidateInstructionsRequest, ValidateInstructionsResult,
+    invoke_validate_instructions, ValidateAuthoritativeSourcePolicyRequest,
+    ValidateAuthoritativeSourcePolicyResult, ValidateInstructionArchitectureRequest,
+    ValidateInstructionArchitectureResult, ValidateInstructionsRequest, ValidateInstructionsResult,
+};
+pub use operational_hygiene::{
+    invoke_validate_runtime_script_tests, invoke_validate_shell_hooks,
+    invoke_validate_warning_baseline, ValidateRuntimeScriptTestsRequest,
+    ValidateRuntimeScriptTestsResult, ValidateShellHooksRequest, ValidateShellHooksResult,
+    ValidateWarningBaselineRequest, ValidateWarningBaselineResult,
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
     ValidationCheckStatus,
-};
-pub use operational_hygiene::{
-    invoke_validate_runtime_script_tests, invoke_validate_shell_hooks,
-    invoke_validate_warning_baseline,
-    ValidateRuntimeScriptTestsRequest, ValidateRuntimeScriptTestsResult,
-    ValidateShellHooksRequest, ValidateShellHooksResult, ValidateWarningBaselineRequest,
-    ValidateWarningBaselineResult,
 };
 pub use policy::{
     invoke_validate_compatibility_lifecycle_policy, invoke_validate_policy,
@@ -94,14 +85,13 @@ pub use policy::{
     ValidatePolicyRequest, ValidatePolicyResult,
 };
 pub use release::{
-    invoke_validate_release_governance, ValidateReleaseGovernanceRequest,
-    ValidateReleaseGovernanceResult, invoke_validate_release_provenance,
+    invoke_validate_release_governance, invoke_validate_release_provenance,
+    ValidateReleaseGovernanceRequest, ValidateReleaseGovernanceResult,
     ValidateReleaseProvenanceRequest, ValidateReleaseProvenanceResult,
 };
 pub use security::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
-    invoke_validate_supply_chain,
-    ValidateSecurityBaselineRequest, ValidateSecurityBaselineResult,
+    invoke_validate_supply_chain, ValidateSecurityBaselineRequest, ValidateSecurityBaselineResult,
     ValidateSharedScriptChecksumsRequest, ValidateSharedScriptChecksumsResult,
     ValidateSupplyChainRequest, ValidateSupplyChainResult,
 };

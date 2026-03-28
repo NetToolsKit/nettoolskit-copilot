@@ -76,7 +76,10 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
         .path()
         .join(".github/prompts/route-instructions.prompt.md")
         .is_file());
-    assert!(repo.path().join(".vscode/profiles/profile-base.json").is_file());
+    assert!(repo
+        .path()
+        .join(".vscode/profiles/profile-base.json")
+        .is_file());
     assert!(repo
         .path()
         .join(".vscode/snippets/demo.tamplate.code-snippets")
@@ -135,10 +138,16 @@ fn test_invoke_runtime_bootstrap_syncs_codex_runtime_assets_and_removes_duplicat
     assert!(!result.github_runtime_enabled);
     assert!(result.codex_runtime_enabled);
     assert!(repo.path().join(".github/AGENTS.md").is_file());
-    assert!(repo.path().join(".vscode/profiles/profile-base.json").is_file());
+    assert!(repo
+        .path()
+        .join(".vscode/profiles/profile-base.json")
+        .is_file());
     assert!(repo.path().join(".codex/scripts/root-tool.ps1").is_file());
     assert!(repo.path().join(".codex/orchestration/flow.md").is_file());
-    assert!(repo.path().join(".codex/skills/runtime-skill/SKILL.md").is_file());
+    assert!(repo
+        .path()
+        .join(".codex/skills/runtime-skill/SKILL.md")
+        .is_file());
     assert!(!repo.path().join(".claude/settings.json").exists());
     assert!(target_agents.join("runtime-skill/SKILL.md").is_file());
     assert!(!target_codex.join("skills/runtime-skill").exists());

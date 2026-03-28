@@ -132,10 +132,8 @@ pub fn invoke_pre_commit_eof_hygiene(
         });
     }
 
-    let trimmed_file_count =
-        normalize_staged_files(&staged_files).map_err(|source| {
-            RuntimePreCommitEofHygieneCommandError::NormalizeFiles { source }
-        })?;
+    let trimmed_file_count = normalize_staged_files(&staged_files)
+        .map_err(|source| RuntimePreCommitEofHygieneCommandError::NormalizeFiles { source })?;
     restage_files(&repo_root, &staged_files)
         .map_err(|source| RuntimePreCommitEofHygieneCommandError::RestageFiles { source })?;
 
@@ -154,7 +152,16 @@ pub fn invoke_pre_commit_eof_hygiene(
 }
 
 fn enumerate_staged_files(repo_root: &Path) -> anyhow::Result<Vec<PathBuf>> {
-    let output = run_git(repo_root, &["diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"])?;
+    let output = run_git(
+        repo_root,
+        &[
+            "diff",
+            "--cached",
+            "--name-only",
+            "--diff-filter=ACMR",
+            "-z",
+        ],
+    )?;
     let raw = String::from_utf8_lossy(&output.stdout);
     let mut staged_files = raw
         .split('\0')
@@ -167,7 +174,10 @@ fn enumerate_staged_files(repo_root: &Path) -> anyhow::Result<Vec<PathBuf>> {
     Ok(staged_files)
 }
 
-fn find_mixed_stage_files(repo_root: &Path, staged_files: &[PathBuf]) -> anyhow::Result<Vec<String>> {
+fn find_mixed_stage_files(
+    repo_root: &Path,
+    staged_files: &[PathBuf],
+) -> anyhow::Result<Vec<String>> {
     let mut blocked_files = Vec::new();
     for staged_file in staged_files {
         let relative_path = to_repo_relative_path(repo_root, staged_file);

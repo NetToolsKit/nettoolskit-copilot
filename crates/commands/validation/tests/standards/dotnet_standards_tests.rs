@@ -28,8 +28,11 @@ fn test_invoke_validate_dotnet_standards_passes_for_valid_templates() {
 fn test_invoke_validate_dotnet_standards_reports_missing_required_template() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_dotnet_standards_repo(repo.path());
-    std::fs::remove_file(repo.path().join(".github/templates/dotnet-class-template.cs"))
-        .expect("required template should be removed");
+    std::fs::remove_file(
+        repo.path()
+            .join(".github/templates/dotnet-class-template.cs"),
+    )
+    .expect("required template should be removed");
 
     let result = invoke_validate_dotnet_standards(&ValidateDotnetStandardsRequest {
         repo_root: Some(repo.path().to_path_buf()),

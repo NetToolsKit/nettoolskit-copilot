@@ -47,9 +47,10 @@ fn test_invoke_validate_agent_hooks_reports_missing_bootstrap_event() {
     .expect("agent hook validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(result.failures.iter().any(|message| {
-        message.contains("Hook event 'SubagentStart' is missing")
-    }));
+    assert!(result
+        .failures
+        .iter()
+        .any(|message| { message.contains("Hook event 'SubagentStart' is missing") }));
 }
 
 #[test]

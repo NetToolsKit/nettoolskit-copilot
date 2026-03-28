@@ -49,5 +49,8 @@ fn test_runtime_surface_lookup_works_via_commands_surface() {
 
 #[test]
 fn test_validation_surface_total_matches_locked_scope() {
-    assert_eq!(nettoolskit_validation::validation_surface_script_total(), 41);
+    assert_eq!(
+        nettoolskit_validation::validation_surface_script_total(),
+        41
+    );
 }

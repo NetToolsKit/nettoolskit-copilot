@@ -1,11 +1,14 @@
 //! Agent orchestration validation commands.
 
-pub(crate) mod common;
+mod agent_hooks;
 mod agent_orchestration;
 mod agent_permissions;
 mod agent_skill_alignment;
-mod agent_hooks;
+pub(crate) mod common;
 
+pub use agent_hooks::{
+    invoke_validate_agent_hooks, ValidateAgentHooksRequest, ValidateAgentHooksResult,
+};
 pub use agent_orchestration::{
     invoke_validate_agent_orchestration, ValidateAgentOrchestrationRequest,
     ValidateAgentOrchestrationResult,
@@ -17,7 +20,4 @@ pub use agent_permissions::{
 pub use agent_skill_alignment::{
     invoke_validate_agent_skill_alignment, ValidateAgentSkillAlignmentRequest,
     ValidateAgentSkillAlignmentResult,
-};
-pub use agent_hooks::{
-    invoke_validate_agent_hooks, ValidateAgentHooksRequest, ValidateAgentHooksResult,
 };

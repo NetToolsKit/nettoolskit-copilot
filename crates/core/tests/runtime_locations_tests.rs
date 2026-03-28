@@ -74,8 +74,14 @@ fn test_resolve_configured_runtime_location_honors_precedence() {
 #[test]
 fn test_effective_runtime_locations_resolve_all_named_paths() {
     let mut paths = BTreeMap::new();
-    paths.insert("githubRuntimeRoot".to_string(), "${HOME}/runtime/github".to_string());
-    paths.insert("codexRuntimeRoot".to_string(), "${HOME}/runtime/codex".to_string());
+    paths.insert(
+        "githubRuntimeRoot".to_string(),
+        "${HOME}/runtime/github".to_string(),
+    );
+    paths.insert(
+        "codexRuntimeRoot".to_string(),
+        "${HOME}/runtime/codex".to_string(),
+    );
     paths.insert(
         "agentsSkillsRoot".to_string(),
         "${HOME}/runtime/agents/skills".to_string(),
@@ -88,7 +94,10 @@ fn test_effective_runtime_locations_resolve_all_named_paths() {
         "codexGitHooksRoot".to_string(),
         "${HOME}/runtime/codex/git-hooks".to_string(),
     );
-    paths.insert("claudeRuntimeRoot".to_string(), "${HOME}/runtime/claude".to_string());
+    paths.insert(
+        "claudeRuntimeRoot".to_string(),
+        "${HOME}/runtime/claude".to_string(),
+    );
     let mut catalog = built_in_runtime_location_catalog();
     catalog.paths = paths;
 
@@ -98,8 +107,14 @@ fn test_effective_runtime_locations_resolve_all_named_paths() {
         Path::new("C:/Users/tester"),
     );
 
-    assert_eq!(locations.github_runtime_root, Path::new("C:/Users/tester/runtime/github"));
-    assert_eq!(locations.codex_runtime_root, Path::new("C:/Users/tester/runtime/codex"));
+    assert_eq!(
+        locations.github_runtime_root,
+        Path::new("C:/Users/tester/runtime/github")
+    );
+    assert_eq!(
+        locations.codex_runtime_root,
+        Path::new("C:/Users/tester/runtime/codex")
+    );
     assert_eq!(
         locations.agents_skills_root,
         Path::new("C:/Users/tester/runtime/agents/skills")

@@ -32,5 +32,8 @@ pub fn initialize_architecture_boundaries_repo(repo_root: &Path) {
   ]
 }"#,
     );
-    write_file(&repo_root.join("src/sample.rs"), "pub struct SampleBoundary;\n");
+    write_file(
+        &repo_root.join("src/sample.rs"),
+        "pub struct SampleBoundary;\n",
+    );
 }

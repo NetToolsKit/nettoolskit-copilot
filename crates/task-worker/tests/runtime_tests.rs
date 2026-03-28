@@ -96,8 +96,7 @@ impl TaskWorkerCallbacks<MockTask> for MockCallbacks {
             .unwrap_or_else(|poisoned| poisoned.into_inner())
             .push(format!(
                 "finished:{}:{:?}:{attempt}/{max_attempts}",
-                task.id,
-                result.status
+                task.id, result.status
             ));
     }
 

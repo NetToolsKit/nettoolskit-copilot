@@ -15,47 +15,30 @@ use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
-    invoke_validate_agent_permissions,
-    invoke_validate_agent_skill_alignment,
-    invoke_validate_architecture_boundaries,
-    invoke_validate_compatibility_lifecycle_policy,
-    invoke_validate_dotnet_standards,
-    invoke_validate_powershell_standards,
-    invoke_validate_policy,
-    invoke_validate_security_baseline,
-    invoke_validate_shared_script_checksums,
-    invoke_validate_supply_chain,
-    invoke_validate_release_governance,
-    invoke_validate_release_provenance,
-    invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
-    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
-    invoke_validate_instructions, invoke_validate_planning_structure,
-    invoke_validate_readme_standards, invoke_validate_runtime_script_tests,
-    invoke_validate_shell_hooks,
-    invoke_validate_warning_baseline,
-    invoke_validate_routing_coverage, invoke_validate_template_standards,
-    invoke_validate_workspace_efficiency, ValidateAuditLedgerRequest,
-    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
-    ValidateAgentPermissionsRequest,
-    ValidateAgentSkillAlignmentRequest,
-    ValidateArchitectureBoundariesRequest,
-    ValidateCompatibilityLifecyclePolicyRequest,
-    ValidateDotnetStandardsRequest,
-    ValidatePowerShellStandardsRequest,
-    ValidatePolicyRequest,
-    ValidateSecurityBaselineRequest,
-    ValidateSharedScriptChecksumsRequest,
-    ValidateSupplyChainRequest,
-    ValidateReleaseGovernanceRequest,
-    ValidateReleaseProvenanceRequest,
-    ValidateAuthoritativeSourcePolicyRequest, ValidateInstructionArchitectureRequest,
-    ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
-    ValidatePlanningStructureRequest,
-    ValidateReadmeStandardsRequest, ValidateRoutingCoverageRequest,
-    ValidateRuntimeScriptTestsRequest,
-    ValidateShellHooksRequest,
-    ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
-    ValidateWorkspaceEfficiencyRequest,
+    invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment,
+    invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
+    invoke_validate_authoritative_source_policy, invoke_validate_compatibility_lifecycle_policy,
+    invoke_validate_dotnet_standards, invoke_validate_instruction_architecture,
+    invoke_validate_instruction_metadata, invoke_validate_instructions,
+    invoke_validate_planning_structure, invoke_validate_policy,
+    invoke_validate_powershell_standards, invoke_validate_readme_standards,
+    invoke_validate_release_governance, invoke_validate_release_provenance,
+    invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
+    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
+    invoke_validate_warning_baseline, invoke_validate_workspace_efficiency,
+    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
+    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
+    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
+    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidatePolicyRequest,
+    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
+    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
+    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
+    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
+    ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
+    ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
@@ -627,9 +610,7 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
         ),
         (
             "validate-compatibility-lifecycle-policy",
-            ValidationCheckExecutor::Native(
-                NativeValidationCheck::CompatibilityLifecyclePolicy,
-            ),
+            ValidationCheckExecutor::Native(NativeValidationCheck::CompatibilityLifecyclePolicy),
         ),
         (
             "validate-powershell-standards",
@@ -813,7 +794,11 @@ fn definition_supports_parameter(
         ValidationCheckExecutor::Native(NativeValidationCheck::PowerShellStandards) => {
             matches!(
                 parameter_name,
-                "WarningOnly" | "ScriptsRoot" | "IncludeAllScripts" | "Strict" | "SkipScriptAnalyzer"
+                "WarningOnly"
+                    | "ScriptsRoot"
+                    | "IncludeAllScripts"
+                    | "Strict"
+                    | "SkipScriptAnalyzer"
             )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::Policy) => false,
@@ -821,7 +806,10 @@ fn definition_supports_parameter(
             matches!(parameter_name, "WarningOnly" | "BaselinePath")
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::SharedScriptChecksums) => {
-            matches!(parameter_name, "WarningOnly" | "ManifestPath" | "DetailedOutput")
+            matches!(
+                parameter_name,
+                "WarningOnly" | "ManifestPath" | "DetailedOutput"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::SupplyChain) => {
             matches!(parameter_name, "WarningOnly" | "BaselinePath")
@@ -881,16 +869,15 @@ fn definition_supports_parameter(
             )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests) => {
-            matches!(parameter_name, "WarningOnly" | "TestRoot" | "PowerShellPath")
+            matches!(
+                parameter_name,
+                "WarningOnly" | "TestRoot" | "PowerShellPath"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::ShellHooks) => {
             matches!(
                 parameter_name,
-                "WarningOnly"
-                    | "HookRoot"
-                    | "ShellPath"
-                    | "EnableShellcheck"
-                    | "ShellcheckPath"
+                "WarningOnly" | "HookRoot" | "ShellPath" | "EnableShellcheck" | "ShellcheckPath"
             )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::WorkspaceEfficiency) => {
@@ -1045,7 +1032,8 @@ fn run_native_validation_check(
             invoke_validate_powershell_standards(&ValidatePowerShellStandardsRequest {
                 repo_root: Some(repo_root.to_path_buf()),
                 scripts_root: string_argument_path(&arguments, "ScriptsRoot"),
-                include_all_scripts: bool_argument(&arguments, "IncludeAllScripts").unwrap_or(false),
+                include_all_scripts: bool_argument(&arguments, "IncludeAllScripts")
+                    .unwrap_or(false),
                 strict: bool_argument(&arguments, "Strict").unwrap_or(false),
                 skip_script_analyzer: bool_argument(&arguments, "SkipScriptAnalyzer")
                     .unwrap_or(false),
@@ -1061,20 +1049,18 @@ fn run_native_validation_check(
             })
             .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
         }
-        NativeValidationCheck::Policy => {
-            invoke_validate_policy(&ValidatePolicyRequest {
-                repo_root: Some(repo_root.to_path_buf()),
-                ..ValidatePolicyRequest::default()
-            })
-            .map(|result| {
-                (
-                    result.status,
-                    result.exit_code,
-                    combine_native_messages(&result.failures, &result.warnings),
-                )
-            })
-            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
-        }
+        NativeValidationCheck::Policy => invoke_validate_policy(&ValidatePolicyRequest {
+            repo_root: Some(repo_root.to_path_buf()),
+            ..ValidatePolicyRequest::default()
+        })
+        .map(|result| {
+            (
+                result.status,
+                result.exit_code,
+                combine_native_messages(&result.failures, &result.warnings),
+            )
+        })
+        .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string()))),
         NativeValidationCheck::SecurityBaseline => {
             invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
                 repo_root: Some(repo_root.to_path_buf()),

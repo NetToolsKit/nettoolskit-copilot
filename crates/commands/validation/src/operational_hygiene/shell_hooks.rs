@@ -16,8 +16,10 @@ use crate::ValidationCheckStatus;
 
 const DEFAULT_HOOK_ROOT: &str = ".githooks";
 const REQUIRED_HOOKS: &[&str] = &["pre-commit", "post-commit", "post-merge", "post-checkout"];
-const WINDOWS_SH_CANDIDATES: &[&str] =
-    &["C:\\Program Files\\Git\\usr\\bin\\sh.exe", "C:\\Program Files\\Git\\bin\\sh.exe"];
+const WINDOWS_SH_CANDIDATES: &[&str] = &[
+    "C:\\Program Files\\Git\\usr\\bin\\sh.exe",
+    "C:\\Program Files\\Git\\bin\\sh.exe",
+];
 
 /// Request payload for `validate-shell-hooks`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -107,8 +109,7 @@ pub fn invoke_validate_shell_hooks(
     let invalid_warning_only_pattern =
         Regex::new(r"(?im)-WarningOnly\s+(true|false)\b").expect("regex should compile");
     let invalid_shell_expansion_pattern =
-        Regex::new(r"(?im)(^|[ \t])-WarningOnly:\\\$(true|false)\b")
-            .expect("regex should compile");
+        Regex::new(r"(?im)(^|[ \t])-WarningOnly:\\\$(true|false)\b").expect("regex should compile");
 
     let mut warnings = Vec::new();
     let mut failures = Vec::new();
@@ -165,11 +166,7 @@ pub fn invoke_validate_shell_hooks(
         );
 
         if request.enable_shellcheck {
-            run_shellcheck(
-                shellcheck_path.as_deref(),
-                &hook_path,
-                &mut warnings,
-            );
+            run_shellcheck(shellcheck_path.as_deref(), &hook_path, &mut warnings);
         }
     }
 

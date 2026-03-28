@@ -8,7 +8,9 @@ use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use walkdir::WalkDir;
 
-use crate::agent_orchestration::common::{resolve_repo_relative_path, resolve_validation_repo_root};
+use crate::agent_orchestration::common::{
+    resolve_repo_relative_path, resolve_validation_repo_root,
+};
 use crate::error::ValidateSharedScriptChecksumsCommandError;
 use crate::operational_hygiene::common::{derive_status, push_required_finding};
 use crate::ValidationCheckStatus;
@@ -104,9 +106,10 @@ struct ManifestEntry {
 pub fn invoke_validate_shared_script_checksums(
     request: &ValidateSharedScriptChecksumsRequest,
 ) -> Result<ValidateSharedScriptChecksumsResult, ValidateSharedScriptChecksumsCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateSharedScriptChecksumsCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root =
+        resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
+            ValidateSharedScriptChecksumsCommandError::ResolveWorkspaceRoot { source }
+        })?;
     let manifest_path = resolve_repo_relative_path(
         &repo_root,
         request.manifest_path.as_deref(),
@@ -372,7 +375,10 @@ fn build_current_entry_map(
             .filter_map(Result::ok)
             .filter(|entry| entry.file_type().is_file())
             .map(|entry| entry.into_path())
-            .filter(|path| path.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("ps1")))
+            .filter(|path| {
+                path.extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("ps1"))
+            })
             .collect::<Vec<_>>();
         paths.sort();
 

@@ -134,8 +134,12 @@ pub fn invoke_validate_instructions(
     let mut warnings = Vec::new();
     let mut failures = Vec::new();
 
-    let required_files_checked =
-        test_required_files(&repo_root, request.warning_only, &mut warnings, &mut failures);
+    let required_files_checked = test_required_files(
+        &repo_root,
+        request.warning_only,
+        &mut warnings,
+        &mut failures,
+    );
     let catalog_paths_checked = test_catalog_paths(
         &repo_root,
         request.warning_only,
@@ -286,7 +290,10 @@ fn test_catalog_paths(
         let absolute_path = if Path::new(&entry).is_absolute() {
             PathBuf::from(&entry)
         } else {
-            resolve_full_path(catalog_path.parent().unwrap_or(repo_root), Path::new(&entry))
+            resolve_full_path(
+                catalog_path.parent().unwrap_or(repo_root),
+                Path::new(&entry),
+            )
         };
         if !absolute_path.exists() {
             push_required_finding(
@@ -320,8 +327,14 @@ fn test_json_assets(
             .filter(|entry| entry.file_type().is_file())
         {
             let path = entry.into_path();
-            let file_name = path.file_name().and_then(|value| value.to_str()).unwrap_or_default();
-            let extension = path.extension().and_then(|value| value.to_str()).unwrap_or_default();
+            let file_name = path
+                .file_name()
+                .and_then(|value| value.to_str())
+                .unwrap_or_default();
+            let extension = path
+                .extension()
+                .and_then(|value| value.to_str())
+                .unwrap_or_default();
             let is_json_like = matches!(extension, "json" | "jsonc")
                 || file_name.ends_with(".code-workspace")
                 || file_name.ends_with(".code-snippets");
@@ -334,8 +347,7 @@ fn test_json_assets(
     let mut documents = BTreeMap::new();
     for path in &paths {
         let label = to_repo_relative_path(repo_root, path);
-        let Some(document) =
-            read_json_like_file(path, &label, warning_only, warnings, failures)
+        let Some(document) = read_json_like_file(path, &label, warning_only, warnings, failures)
         else {
             continue;
         };
@@ -364,7 +376,10 @@ fn read_json_like_file(
         return None;
     };
 
-    let file_name = path.file_name().and_then(|value| value.to_str()).unwrap_or_default();
+    let file_name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or_default();
     let normalized = if path.extension().and_then(|value| value.to_str()) == Some("jsonc")
         || file_name.ends_with(".code-workspace")
         || file_name.ends_with(".code-snippets")
@@ -577,7 +592,9 @@ fn collect_markdown_files(repo_root: &Path, warnings: &mut Vec<String>) -> BTree
         if absolute_path.is_file() {
             files.insert(absolute_path);
         } else {
-            warnings.push(format!("Skipping missing markdown file in set: {relative_path}"));
+            warnings.push(format!(
+                "Skipping missing markdown file in set: {relative_path}"
+            ));
         }
     }
 
@@ -618,7 +635,8 @@ fn test_markdown_links(
             }
 
             checked_links += 1;
-            let Some(resolved_target) = resolve_markdown_target(file_path, &target, repo_root) else {
+            let Some(resolved_target) = resolve_markdown_target(file_path, &target, repo_root)
+            else {
                 push_required_finding(
                     warning_only,
                     warnings,
@@ -657,10 +675,17 @@ fn markdown_link_targets(path: &Path) -> Vec<String> {
     Regex::new(r"\[[^\]]+\]\(([^)]+)\)")
         .expect("markdown link regex should compile")
         .captures_iter(&content)
-        .filter_map(|captures| captures.get(1).map(|target| target.as_str().trim().to_string()))
+        .filter_map(|captures| {
+            captures
+                .get(1)
+                .map(|target| target.as_str().trim().to_string())
+        })
         .map(|target| {
             if target.starts_with('<') && target.ends_with('>') {
-                target.trim_start_matches('<').trim_end_matches('>').to_string()
+                target
+                    .trim_start_matches('<')
+                    .trim_end_matches('>')
+                    .to_string()
             } else {
                 target
             }
@@ -693,7 +718,11 @@ fn is_link_target_validatable(target: &str) -> bool {
             .is_match(value)
 }
 
-fn resolve_markdown_target(source_file_path: &Path, target: &str, repo_root: &Path) -> Option<PathBuf> {
+fn resolve_markdown_target(
+    source_file_path: &Path,
+    target: &str,
+    repo_root: &Path,
+) -> Option<PathBuf> {
     let path_part = target
         .split('#')
         .next()
@@ -989,8 +1018,10 @@ fn test_workspace_template_compatibility(
     }
 
     for (setting_name, expected_value) in &required_settings {
-        if matches!(setting_name.as_str(), "files.exclude" | "files.watcherExclude" | "search.exclude")
-        {
+        if matches!(
+            setting_name.as_str(),
+            "files.exclude" | "files.watcherExclude" | "search.exclude"
+        ) {
             continue;
         }
         if allowed_overrides.contains(setting_name) {
@@ -1091,7 +1122,8 @@ fn test_vscode_settings_references(
                 continue;
             }
 
-            let Some(resolved_path) = user_profile_reference_to_repo_path(repo_root, location) else {
+            let Some(resolved_path) = user_profile_reference_to_repo_path(repo_root, location)
+            else {
                 continue;
             };
             if !resolved_path.exists() {
@@ -1115,14 +1147,12 @@ fn test_vscode_settings_references(
         };
 
         for entry in entries {
-            let file_reference = entry
-                .as_str()
-                .map(str::to_string)
-                .or_else(|| {
-                    entry.get("file")
-                        .and_then(Value::as_str)
-                        .map(str::to_string)
-                });
+            let file_reference = entry.as_str().map(str::to_string).or_else(|| {
+                entry
+                    .get("file")
+                    .and_then(Value::as_str)
+                    .map(str::to_string)
+            });
             let Some(file_reference) = file_reference else {
                 continue;
             };

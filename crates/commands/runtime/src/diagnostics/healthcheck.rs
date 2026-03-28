@@ -528,7 +528,10 @@ fn run_validation_check(
             let (status, exit_code) = match validation_result.overall_status {
                 ValidateAllStatus::Passed => (RuntimeHealthcheckStatus::Passed, 0),
                 ValidateAllStatus::Warning => (RuntimeHealthcheckStatus::Warning, 0),
-                ValidateAllStatus::Failed => (RuntimeHealthcheckStatus::Failed, validation_result.exit_code),
+                ValidateAllStatus::Failed => (
+                    RuntimeHealthcheckStatus::Failed,
+                    validation_result.exit_code,
+                ),
             };
 
             RuntimeHealthcheckCheckResult {

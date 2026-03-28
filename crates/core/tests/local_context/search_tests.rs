@@ -36,12 +36,7 @@ fn sample_document() -> LocalContextIndexDocument {
 
 #[test]
 fn test_search_local_context_index_document_prefers_path_and_heading_matches() {
-    let hits = search_local_context_index_document(
-        "rust migration",
-        &sample_document(),
-        5,
-        &[],
-    );
+    let hits = search_local_context_index_document("rust migration", &sample_document(), 5, &[]);
 
     assert_eq!(hits.len(), 1);
     assert_eq!(hits[0].path, "planning/active/plan.md");
@@ -62,12 +57,7 @@ fn test_search_local_context_index_document_honors_excluded_paths() {
 
 #[test]
 fn test_search_local_context_index_document_limits_results() {
-    let hits = search_local_context_index_document(
-        "context",
-        &sample_document(),
-        1,
-        &[],
-    );
+    let hits = search_local_context_index_document("context", &sample_document(), 1, &[]);
 
     assert_eq!(hits.len(), 1);
 }

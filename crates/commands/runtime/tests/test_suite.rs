@@ -2,7 +2,7 @@
 
 mod continuity;
 mod contracts_tests;
-mod hooks;
 mod diagnostics;
 mod error_tests;
+mod hooks;
 mod sync;

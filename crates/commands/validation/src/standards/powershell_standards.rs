@@ -19,16 +19,92 @@ use crate::ValidationCheckStatus;
 
 const DEFAULT_SCRIPTS_ROOT: &str = "scripts";
 const FALLBACK_APPROVED_VERBS: &[&str] = &[
-    "Add", "Approve", "Assert", "Backup", "Block", "Clear", "Close", "Compare", "Complete",
-    "Compress", "Confirm", "Connect", "Convert", "Copy", "Debug", "Deny", "Disable",
-    "Disconnect", "Dismount", "Edit", "Enable", "Enter", "Exit", "Expand", "Export", "Find",
-    "Format", "Get", "Grant", "Group", "Hide", "Import", "Initialize", "Install", "Invoke",
-    "Join", "Lock", "Measure", "Merge", "Move", "New", "Open", "Optimize", "Out", "Ping",
-    "Pop", "Protect", "Publish", "Push", "Read", "Register", "Remove", "Rename", "Repair",
-    "Reset", "Resolve", "Restart", "Restore", "Resume", "Revoke", "Save", "Search", "Select",
-    "Send", "Set", "Show", "Skip", "Split", "Start", "Step", "Stop", "Submit", "Suspend",
-    "Switch", "Sync", "Test", "Trace", "Undo", "Unlock", "Unpublish", "Unregister", "Update",
-    "Use", "Wait", "Watch", "Write",
+    "Add",
+    "Approve",
+    "Assert",
+    "Backup",
+    "Block",
+    "Clear",
+    "Close",
+    "Compare",
+    "Complete",
+    "Compress",
+    "Confirm",
+    "Connect",
+    "Convert",
+    "Copy",
+    "Debug",
+    "Deny",
+    "Disable",
+    "Disconnect",
+    "Dismount",
+    "Edit",
+    "Enable",
+    "Enter",
+    "Exit",
+    "Expand",
+    "Export",
+    "Find",
+    "Format",
+    "Get",
+    "Grant",
+    "Group",
+    "Hide",
+    "Import",
+    "Initialize",
+    "Install",
+    "Invoke",
+    "Join",
+    "Lock",
+    "Measure",
+    "Merge",
+    "Move",
+    "New",
+    "Open",
+    "Optimize",
+    "Out",
+    "Ping",
+    "Pop",
+    "Protect",
+    "Publish",
+    "Push",
+    "Read",
+    "Register",
+    "Remove",
+    "Rename",
+    "Repair",
+    "Reset",
+    "Resolve",
+    "Restart",
+    "Restore",
+    "Resume",
+    "Revoke",
+    "Save",
+    "Search",
+    "Select",
+    "Send",
+    "Set",
+    "Show",
+    "Skip",
+    "Split",
+    "Start",
+    "Step",
+    "Stop",
+    "Submit",
+    "Suspend",
+    "Switch",
+    "Sync",
+    "Test",
+    "Trace",
+    "Undo",
+    "Unlock",
+    "Unpublish",
+    "Unregister",
+    "Update",
+    "Use",
+    "Wait",
+    "Watch",
+    "Write",
 ];
 
 /// Request payload for `validate-powershell-standards`.
@@ -107,9 +183,10 @@ struct ScriptAnalyzerFinding {
 pub fn invoke_validate_powershell_standards(
     request: &ValidatePowerShellStandardsRequest,
 ) -> Result<ValidatePowerShellStandardsResult, ValidatePowerShellStandardsCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidatePowerShellStandardsCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root =
+        resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
+            ValidatePowerShellStandardsCommandError::ResolveWorkspaceRoot { source }
+        })?;
     let scripts_root = resolve_repo_relative_path(
         &repo_root,
         request.scripts_root.as_deref(),
@@ -206,7 +283,10 @@ fn collect_target_script_paths(
         .filter_map(Result::ok)
         .filter(|entry| entry.file_type().is_file())
         .map(walkdir::DirEntry::into_path)
-        .filter(|path| path.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("ps1")))
+        .filter(|path| {
+            path.extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("ps1"))
+        })
         .collect::<Vec<_>>();
     script_paths.sort();
     script_paths.dedup();
@@ -314,7 +394,10 @@ fn validate_script_file(
         }
     };
 
-    let lines = raw_content.lines().map(ToOwned::to_owned).collect::<Vec<_>>();
+    let lines = raw_content
+        .lines()
+        .map(ToOwned::to_owned)
+        .collect::<Vec<_>>();
     let script_parameters = extract_script_parameter_names(&raw_content);
     let has_help_block = has_comment_based_help_block(&raw_content);
     if !has_help_block {
@@ -354,12 +437,11 @@ fn validate_script_file(
         );
     }
 
-    if raw_content
-        .lines()
-        .any(|line| Regex::new(r"(?i)^\s*\[[^\]]*SuppressMessage(?:Attribute)?")
+    if raw_content.lines().any(|line| {
+        Regex::new(r"(?i)^\s*\[[^\]]*SuppressMessage(?:Attribute)?")
             .expect("suppress regex should compile")
-            .is_match(line))
-    {
+            .is_match(line)
+    }) {
         push_required_finding(
             warning_only,
             warnings,
@@ -427,9 +509,7 @@ fn validate_help_sections(
                 warning_only,
                 warnings,
                 failures,
-                format!(
-                    "Script help is missing .PARAMETER {parameter_name}: {relative_path}"
-                ),
+                format!("Script help is missing .PARAMETER {parameter_name}: {relative_path}"),
             );
         }
     }
@@ -456,10 +536,9 @@ fn extract_script_parameter_names(raw_content: &str) -> Vec<String> {
         return Vec::new();
     };
 
-    let parameter_regex = Regex::new(
-        r"(?m)(?:^|[,(])\s*(?:\[[^\]]+\]\s*)*\$(?P<name>[A-Za-z_][A-Za-z0-9_]*)",
-    )
-    .expect("script parameter regex should compile");
+    let parameter_regex =
+        Regex::new(r"(?m)(?:^|[,(])\s*(?:\[[^\]]+\]\s*)*\$(?P<name>[A-Za-z_][A-Za-z0-9_]*)")
+            .expect("script parameter regex should compile");
     parameter_regex
         .captures_iter(&param_block)
         .filter_map(|captures| captures.name("name").map(|name| name.as_str().to_string()))
@@ -468,8 +547,8 @@ fn extract_script_parameter_names(raw_content: &str) -> Vec<String> {
 
 fn extract_top_level_param_block(raw_content: &str) -> Option<String> {
     let normalized = raw_content.trim_start_matches('\u{feff}');
-    let param_regex =
-        Regex::new(r"(?is)^\s*(?:<#.*?#>\s*)?param\s*\(").expect("top-level param regex should compile");
+    let param_regex = Regex::new(r"(?is)^\s*(?:<#.*?#>\s*)?param\s*\(")
+        .expect("top-level param regex should compile");
     let captures = param_regex.find(normalized)?;
     let mut depth = 1i32;
     let mut in_single_quote = false;
@@ -498,12 +577,15 @@ fn extract_top_level_param_block(raw_content: &str) -> Option<String> {
 fn collect_function_declarations(lines: &[String]) -> Vec<(String, usize)> {
     let function_regex = Regex::new(r"^\s*function\s+(?P<name>[A-Za-z][A-Za-z0-9-]*)\b")
         .expect("function regex should compile");
-    lines.iter()
+    lines
+        .iter()
         .enumerate()
         .filter_map(|(index, line)| {
-            function_regex
-                .captures(line)
-                .and_then(|captures| captures.name("name").map(|name| (name.as_str().to_string(), index + 1)))
+            function_regex.captures(line).and_then(|captures| {
+                captures
+                    .name("name")
+                    .map(|name| (name.as_str().to_string(), index + 1))
+            })
         })
         .collect()
 }
@@ -735,7 +817,11 @@ fn load_approved_verbs() -> HashSet<String> {
     }
 
     if approved_verbs.is_empty() {
-        approved_verbs.extend(FALLBACK_APPROVED_VERBS.iter().map(|verb| (*verb).to_string()));
+        approved_verbs.extend(
+            FALLBACK_APPROVED_VERBS
+                .iter()
+                .map(|verb| (*verb).to_string()),
+        );
     }
     approved_verbs
 }

@@ -36,9 +36,7 @@ pub fn write_warning_analyzer_report(report_path: &Path, records: &[(&str, &str)
     let document = records
         .iter()
         .map(|(rule_name, script_path)| {
-            format!(
-                "{{\"RuleName\":\"{rule_name}\",\"ScriptPath\":\"{script_path}\"}}"
-            )
+            format!("{{\"RuleName\":\"{rule_name}\",\"ScriptPath\":\"{script_path}\"}}")
         })
         .collect::<Vec<_>>()
         .join(",");
@@ -55,7 +53,10 @@ pub fn initialize_runtime_script_tests_repo(repo_root: &Path) {
 }
 
 pub fn write_runtime_test_script(repo_root: &Path, file_name: &str, contents: &str) {
-    write_file(&repo_root.join("scripts/tests/runtime").join(file_name), contents);
+    write_file(
+        &repo_root.join("scripts/tests/runtime").join(file_name),
+        contents,
+    );
 }
 
 pub fn initialize_shell_hooks_repo(repo_root: &Path) {
@@ -63,8 +64,7 @@ pub fn initialize_shell_hooks_repo(repo_root: &Path) {
         .expect("github directory should be created for repository resolution");
     fs::create_dir_all(repo_root.join(".codex"))
         .expect("codex directory should be created for repository resolution");
-    fs::create_dir_all(repo_root.join(".githooks"))
-        .expect("hook directory should be created");
+    fs::create_dir_all(repo_root.join(".githooks")).expect("hook directory should be created");
 }
 
 pub fn write_hook_file(repo_root: &Path, file_name: &str, contents: &str) {

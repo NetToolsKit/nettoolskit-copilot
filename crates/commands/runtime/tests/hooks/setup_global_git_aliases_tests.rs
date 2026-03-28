@@ -1,8 +1,6 @@
 //! Tests for runtime global Git alias setup.
 
-use nettoolskit_runtime::{
-    invoke_setup_global_git_aliases, RuntimeSetupGlobalGitAliasesRequest,
-};
+use nettoolskit_runtime::{invoke_setup_global_git_aliases, RuntimeSetupGlobalGitAliasesRequest};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -30,7 +28,12 @@ fn initialize_runtime_alias_repo(repo_root: &Path, target_codex_path: &Path) {
 fn read_global_alias(config_path: &Path, alias_name: &str) -> Option<String> {
     let output = Command::new("git")
         .env("GIT_CONFIG_GLOBAL", config_path)
-        .args(["config", "--global", "--get", &format!("alias.{alias_name}")])
+        .args([
+            "config",
+            "--global",
+            "--get",
+            &format!("alias.{alias_name}"),
+        ])
         .output()
         .expect("git config should execute");
 
@@ -39,7 +42,11 @@ fn read_global_alias(config_path: &Path, alias_name: &str) -> Option<String> {
     }
 
     let value = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    if value.is_empty() { None } else { Some(value) }
+    if value.is_empty() {
+        None
+    } else {
+        Some(value)
+    }
 }
 
 #[test]

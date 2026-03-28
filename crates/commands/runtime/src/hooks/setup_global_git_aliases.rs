@@ -78,8 +78,10 @@ pub fn invoke_setup_global_git_aliases(
     if request.uninstall {
         let mut removed_aliases = Vec::new();
         for alias_name in managed_aliases.keys() {
-            if let Some(removed_alias) = uninstall_alias(alias_name, git_config_global_path.as_deref())
-                .map_err(|source| RuntimeSetupGlobalGitAliasesCommandError::ConfigureAliases { source })?
+            if let Some(removed_alias) =
+                uninstall_alias(alias_name, git_config_global_path.as_deref()).map_err(
+                    |source| RuntimeSetupGlobalGitAliasesCommandError::ConfigureAliases { source },
+                )?
             {
                 removed_aliases.push(removed_alias);
             }
@@ -103,8 +105,10 @@ pub fn invoke_setup_global_git_aliases(
 
     let mut configured_aliases = BTreeMap::new();
     for alias_name in managed_aliases.keys() {
-        if let Some(value) = read_alias(alias_name, git_config_global_path.as_deref())
-            .map_err(|source| RuntimeSetupGlobalGitAliasesCommandError::ConfigureAliases { source })?
+        if let Some(value) =
+            read_alias(alias_name, git_config_global_path.as_deref()).map_err(|source| {
+                RuntimeSetupGlobalGitAliasesCommandError::ConfigureAliases { source }
+            })?
         {
             configured_aliases.insert(alias_name.clone(), value);
         }
@@ -120,7 +124,10 @@ pub fn invoke_setup_global_git_aliases(
     })
 }
 
-fn resolve_target_codex_path(repo_root: &Path, requested_path: Option<&Path>) -> anyhow::Result<PathBuf> {
+fn resolve_target_codex_path(
+    repo_root: &Path,
+    requested_path: Option<&Path>,
+) -> anyhow::Result<PathBuf> {
     match requested_path {
         Some(path) => Ok(resolve_full_path(repo_root, path)),
         None => Ok(resolve_codex_runtime_path()),
@@ -149,9 +156,11 @@ fn build_managed_alias_map(
 ) -> Result<BTreeMap<String, String>, RuntimeSetupGlobalGitAliasesCommandError> {
     let trim_script_path = target_codex_path.join(TRIM_SCRIPT_RELATIVE_PATH);
     if !trim_script_path.is_file() {
-        return Err(RuntimeSetupGlobalGitAliasesCommandError::TrimScriptNotFound {
-            trim_script_path: trim_script_path.display().to_string(),
-        });
+        return Err(
+            RuntimeSetupGlobalGitAliasesCommandError::TrimScriptNotFound {
+                trim_script_path: trim_script_path.display().to_string(),
+            },
+        );
     }
 
     let mut aliases = BTreeMap::new();
@@ -169,7 +178,11 @@ fn normalize_shell_path(path: &Path) -> String {
     path.to_string_lossy().replace('\\', "/")
 }
 
-fn set_alias(alias_name: &str, alias_command: &str, config_path: Option<&Path>) -> anyhow::Result<()> {
+fn set_alias(
+    alias_name: &str,
+    alias_command: &str,
+    config_path: Option<&Path>,
+) -> anyhow::Result<()> {
     run_git_config_command(
         config_path,
         &[format!("alias.{alias_name}"), alias_command.to_string()],

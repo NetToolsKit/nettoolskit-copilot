@@ -5,7 +5,9 @@ use std::path::PathBuf;
 
 use regex::Regex;
 
-use crate::agent_orchestration::common::{resolve_repo_relative_path, resolve_validation_repo_root};
+use crate::agent_orchestration::common::{
+    resolve_repo_relative_path, resolve_validation_repo_root,
+};
 use crate::error::ValidateDotnetStandardsCommandError;
 use crate::operational_hygiene::common::derive_status;
 use crate::ValidationCheckStatus;
@@ -14,7 +16,10 @@ const DEFAULT_TEMPLATE_DIRECTORY: &str = ".github/templates";
 const REQUIRED_TEMPLATE_RULES: &[(&str, &[&str])] = &[
     (
         ".github/templates/dotnet-class-template.cs",
-        &[r"public\s+class\s+\[ClassName\]", r"namespace\s+\[Namespace\]"],
+        &[
+            r"public\s+class\s+\[ClassName\]",
+            r"namespace\s+\[Namespace\]",
+        ],
     ),
     (
         ".github/templates/dotnet-interface-template.cs",
@@ -79,9 +84,8 @@ pub struct ValidateDotnetStandardsResult {
 pub fn invoke_validate_dotnet_standards(
     request: &ValidateDotnetStandardsRequest,
 ) -> Result<ValidateDotnetStandardsResult, ValidateDotnetStandardsCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateDotnetStandardsCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidateDotnetStandardsCommandError::ResolveWorkspaceRoot { source })?;
     let template_directory = resolve_repo_relative_path(
         &repo_root,
         request.template_directory.as_deref(),
@@ -95,12 +99,10 @@ pub fn invoke_validate_dotnet_standards(
     if !template_directory.is_dir() {
         failures.push(format!(
             "Template directory not found: {}",
-            request
-                .template_directory
-                .as_ref()
-                .map_or_else(|| DEFAULT_TEMPLATE_DIRECTORY.to_string(), |path| {
-                    path.to_string_lossy().to_string()
-                })
+            request.template_directory.as_ref().map_or_else(
+                || DEFAULT_TEMPLATE_DIRECTORY.to_string(),
+                |path| { path.to_string_lossy().to_string() }
+            )
         ));
     } else {
         validate_required_templates(&repo_root, &mut warnings, &mut failures);
@@ -179,7 +181,8 @@ fn validate_required_templates(
         };
 
         for required_pattern in *required_patterns {
-            let regex = Regex::new(required_pattern).expect("required template regex should compile");
+            let regex =
+                Regex::new(required_pattern).expect("required template regex should compile");
             if !regex.is_match(&document) {
                 failures.push(format!(
                     "Template missing required pattern '{required_pattern}': {relative_path}"
@@ -211,11 +214,7 @@ fn validate_template_conventions(
     }
 }
 
-fn validate_template_whitespace(
-    relative_path: &str,
-    document: &str,
-    failures: &mut Vec<String>,
-) {
+fn validate_template_whitespace(relative_path: &str, document: &str, failures: &mut Vec<String>) {
     for (index, raw_line) in document.split('\n').enumerate() {
         let line = raw_line.trim_end_matches('\r');
         let line_number = index + 1;

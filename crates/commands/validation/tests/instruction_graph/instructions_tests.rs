@@ -6,7 +6,9 @@ use nettoolskit_validation::{
 use std::fs;
 use tempfile::TempDir;
 
-use crate::support::instruction_graph_fixtures::{initialize_validate_instructions_repo, write_file};
+use crate::support::instruction_graph_fixtures::{
+    initialize_validate_instructions_repo, write_file,
+};
 
 #[test]
 fn test_invoke_validate_instructions_passes_for_valid_assets() {
@@ -154,7 +156,9 @@ fn test_invoke_validate_instructions_reports_broken_snippet_reference() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validate_instructions_repo(repo.path());
     write_file(
-        &repo.path().join(".vscode/snippets/copilot.tamplate.code-snippets"),
+        &repo
+            .path()
+            .join(".vscode/snippets/copilot.tamplate.code-snippets"),
         r#"{
   "Broken": {
     "prefix": "copilot",

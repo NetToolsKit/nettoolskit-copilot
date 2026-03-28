@@ -111,11 +111,8 @@ pub fn resolve_runtime_execution_context(
     current_dir: &Path,
 ) -> Result<RuntimeExecutionContext> {
     let resolved_repo_root = resolve_repository_root(requested_repo_root, None, current_dir)?;
-    let runtime_profile = resolve_runtime_install_profile(
-        &resolved_repo_root,
-        profile_name,
-        fallback_profile_name,
-    )?;
+    let runtime_profile =
+        resolve_runtime_install_profile(&resolved_repo_root, profile_name, fallback_profile_name)?;
     let effective_runtime_locations = effective_runtime_locations(
         &built_in_runtime_location_catalog(),
         &RuntimeLocationOverrides::default(),
@@ -198,8 +195,14 @@ pub fn resolved_runtime_target_arguments(
 ) -> RuntimeTargetArguments {
     RuntimeTargetArguments {
         repo_root: include_repo_root.then(|| resolved_repo_root.to_path_buf()),
-        target_github_path: resolve_full_path(resolved_repo_root, &context.targets.github_runtime_root),
-        target_codex_path: resolve_full_path(resolved_repo_root, &context.targets.codex_runtime_root),
+        target_github_path: resolve_full_path(
+            resolved_repo_root,
+            &context.targets.github_runtime_root,
+        ),
+        target_codex_path: resolve_full_path(
+            resolved_repo_root,
+            &context.targets.codex_runtime_root,
+        ),
         target_agents_skills_path: resolve_full_path(
             resolved_repo_root,
             &context.targets.agents_skills_root,

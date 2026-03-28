@@ -81,7 +81,8 @@ pub fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
         "{}",
     );
     write_file(
-        &repo_root.join("definitions/providers/vscode/workspace/snippets/demo.tamplate.code-snippets"),
+        &repo_root
+            .join("definitions/providers/vscode/workspace/snippets/demo.tamplate.code-snippets"),
         "{}",
     );
 

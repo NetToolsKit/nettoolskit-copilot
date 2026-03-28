@@ -293,9 +293,7 @@ fn validate_selector_document(
                 warning_only,
                 warnings,
                 failures,
-                format!(
-                    ".github/hooks/super-agent.selector.json must define {path}."
-                ),
+                format!(".github/hooks/super-agent.selector.json must define {path}."),
             );
         }
     }
@@ -322,37 +320,35 @@ fn validate_common_hook_contract(
         return;
     };
 
-    let canonical_content = if common_script_content.contains("Resolve-ProjectedRuntimeHookScriptPath")
-    {
-        let canonical_path = repo_root.join("scripts/runtime/hooks/common.ps1");
-        if !canonical_path.is_file() {
-            push_required_finding(
-                warning_only,
-                warnings,
-                failures,
-                "Canonical runtime hook helper missing: scripts/runtime/hooks/common.ps1."
-                    .to_string(),
-            );
-            return;
-        }
-
-        match fs::read_to_string(canonical_path) {
-            Ok(content) => content,
-            Err(error) => {
+    let canonical_content =
+        if common_script_content.contains("Resolve-ProjectedRuntimeHookScriptPath") {
+            let canonical_path = repo_root.join("scripts/runtime/hooks/common.ps1");
+            if !canonical_path.is_file() {
                 push_required_finding(
                     warning_only,
                     warnings,
                     failures,
-                    format!(
-                        "Could not read canonical runtime hook helper: {error}"
-                    ),
+                    "Canonical runtime hook helper missing: scripts/runtime/hooks/common.ps1."
+                        .to_string(),
                 );
                 return;
             }
-        }
-    } else {
-        common_script_content
-    };
+
+            match fs::read_to_string(canonical_path) {
+                Ok(content) => content,
+                Err(error) => {
+                    push_required_finding(
+                        warning_only,
+                        warnings,
+                        failures,
+                        format!("Could not read canonical runtime hook helper: {error}"),
+                    );
+                    return;
+                }
+            }
+        } else {
+            common_script_content
+        };
 
     for required_marker in [
         "workspace-adapter",

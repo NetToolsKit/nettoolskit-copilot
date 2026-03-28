@@ -129,7 +129,10 @@ pub fn initialize_release_provenance_repo(repo_root: &Path) {
 
 pub fn initialize_git_repository(repo_root: &Path) -> String {
     run_git(repo_root, &["init", "-b", "main"]);
-    run_git(repo_root, &["config", "user.email", "fixtures@example.invalid"]);
+    run_git(
+        repo_root,
+        &["config", "user.email", "fixtures@example.invalid"],
+    );
     run_git(repo_root, &["config", "user.name", "Fixture User"]);
     run_git(repo_root, &["add", "."]);
     run_git(repo_root, &["commit", "-m", "Initial release fixtures"]);
@@ -167,7 +170,11 @@ fn run_git(repo_root: &Path, arguments: &[&str]) {
         .args(arguments)
         .status()
         .expect("git command should start");
-    assert!(status.success(), "git command should succeed: {:?}", arguments);
+    assert!(
+        status.success(),
+        "git command should succeed: {:?}",
+        arguments
+    );
 }
 
 fn run_git_capture(repo_root: &Path, arguments: &[&str]) -> String {
@@ -177,6 +184,10 @@ fn run_git_capture(repo_root: &Path, arguments: &[&str]) -> String {
         .args(arguments)
         .output()
         .expect("git command should start");
-    assert!(output.status.success(), "git command should succeed: {:?}", arguments);
+    assert!(
+        output.status.success(),
+        "git command should succeed: {:?}",
+        arguments
+    );
     String::from_utf8_lossy(&output.stdout).trim().to_string()
 }

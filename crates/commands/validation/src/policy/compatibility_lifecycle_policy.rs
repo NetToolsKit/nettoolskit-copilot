@@ -153,11 +153,10 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
     ValidateCompatibilityLifecyclePolicyResult,
     ValidateCompatibilityLifecyclePolicyCommandError,
 > {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(
-        |source| ValidateCompatibilityLifecyclePolicyCommandError::ResolveWorkspaceRoot {
-            source,
-        },
-    )?;
+    let repo_root =
+        resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
+            ValidateCompatibilityLifecyclePolicyCommandError::ResolveWorkspaceRoot { source }
+        })?;
     let compatibility_path = resolve_repo_relative_path(
         &repo_root,
         request.compatibility_path.as_deref(),
@@ -172,12 +171,10 @@ pub fn invoke_validate_compatibility_lifecycle_policy(
     if !compatibility_path.is_file() {
         failures.push(format!(
             "Compatibility file not found: {}",
-            request
-                .compatibility_path
-                .as_ref()
-                .map_or_else(|| DEFAULT_COMPATIBILITY_PATH.to_string(), |path| {
-                    path.to_string_lossy().to_string()
-                })
+            request.compatibility_path.as_ref().map_or_else(
+                || DEFAULT_COMPATIBILITY_PATH.to_string(),
+                |path| { path.to_string_lossy().to_string() }
+            )
         ));
     } else {
         match fs::read_to_string(&compatibility_path) {
@@ -280,9 +277,7 @@ fn parse_reference_date(
             warning_only,
             warnings,
             failures,
-            format!(
-                "Reference date is not in 'Month Day, Year' format: {date_text}"
-            ),
+            format!("Reference date is not in 'Month Day, Year' format: {date_text}"),
         );
         return None;
     };
@@ -310,7 +305,10 @@ fn validate_lifecycle_table(
         return 0;
     };
 
-    let Some(separator_row) = lines.get(header_index + 1).and_then(|line| parse_table_row(line)) else {
+    let Some(separator_row) = lines
+        .get(header_index + 1)
+        .and_then(|line| parse_table_row(line))
+    else {
         push_required_finding(
             warning_only,
             warnings,
@@ -422,9 +420,7 @@ fn validate_row(
                 warning_only,
                 warnings,
                 failures,
-                format!(
-                    "Row {row_index}: All date columns must be N/A when legacy row uses N/A."
-                ),
+                format!("Row {row_index}: All date columns must be N/A when legacy row uses N/A."),
             );
         }
         if status_text != LifecycleStatus::Unsupported.as_str() {
@@ -443,7 +439,14 @@ fn validate_row(
         return;
     }
 
-    let Some(ga_date) = parse_row_date(row_index, "GA date", ga_text, warning_only, warnings, failures) else {
+    let Some(ga_date) = parse_row_date(
+        row_index,
+        "GA date",
+        ga_text,
+        warning_only,
+        warnings,
+        failures,
+    ) else {
         return;
     };
     let Some(active_date) = parse_row_date(
@@ -466,7 +469,14 @@ fn validate_row(
     ) else {
         return;
     };
-    let Some(eol_date) = parse_row_date(row_index, "EOL date", eol_text, warning_only, warnings, failures) else {
+    let Some(eol_date) = parse_row_date(
+        row_index,
+        "EOL date",
+        eol_text,
+        warning_only,
+        warnings,
+        failures,
+    ) else {
         return;
     };
 
@@ -618,7 +628,10 @@ fn section_body(content: &str, heading: &str) -> Option<String> {
 }
 
 fn is_heading(line: &str) -> bool {
-    let hash_count = line.chars().take_while(|character| *character == '#').count();
+    let hash_count = line
+        .chars()
+        .take_while(|character| *character == '#')
+        .count();
     hash_count > 0
         && line
             .chars()

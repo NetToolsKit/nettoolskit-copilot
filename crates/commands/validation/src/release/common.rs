@@ -30,7 +30,9 @@ pub(crate) struct GitCommandResult {
     pub(crate) output_lines: Vec<String>,
 }
 
-pub(crate) fn resolve_release_repo_root(repo_root: Option<&Path>) -> Result<PathBuf, anyhow::Error> {
+pub(crate) fn resolve_release_repo_root(
+    repo_root: Option<&Path>,
+) -> Result<PathBuf, anyhow::Error> {
     resolve_validation_repo_root(repo_root)
 }
 
@@ -142,9 +144,8 @@ fn civil_from_days(days_since_unix_epoch: i64) -> (u32, u32, u32) {
         (shifted_days - 146_096) / 146_097
     };
     let day_of_era = shifted_days - era * 146_097;
-    let year_of_era = (day_of_era - day_of_era / 1_460 + day_of_era / 36_524
-        - day_of_era / 146_096)
-        / 365;
+    let year_of_era =
+        (day_of_era - day_of_era / 1_460 + day_of_era / 36_524 - day_of_era / 146_096) / 365;
     let mut year = year_of_era + era * 400;
     let day_of_year = day_of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100);
     let month_prime = (5 * day_of_year + 2) / 153;

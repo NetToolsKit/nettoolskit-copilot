@@ -73,7 +73,8 @@ fn test_invoke_validate_shell_hooks_reports_semantic_guard_failures() {
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
     assert!(result.failures.iter().any(|message| {
-        message.contains("Hook uses unsupported boolean argument form for PowerShell bool parameters")
+        message
+            .contains("Hook uses unsupported boolean argument form for PowerShell bool parameters")
     }));
 }
 

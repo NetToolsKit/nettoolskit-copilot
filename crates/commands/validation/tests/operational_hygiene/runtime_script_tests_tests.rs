@@ -1,8 +1,7 @@
 //! Tests for operational_hygiene::runtime_script_tests module.
 
 use nettoolskit_validation::{
-    invoke_validate_runtime_script_tests, ValidateRuntimeScriptTestsRequest,
-    ValidationCheckStatus,
+    invoke_validate_runtime_script_tests, ValidateRuntimeScriptTestsRequest, ValidationCheckStatus,
 };
 use tempfile::TempDir;
 
@@ -100,8 +99,7 @@ fn test_invoke_validate_runtime_script_tests_reports_missing_test_root() {
     let repo = TempDir::new().expect("temporary repository should be created");
     std::fs::create_dir_all(repo.path().join(".github"))
         .expect("github directory should be created");
-    std::fs::create_dir_all(repo.path().join(".codex"))
-        .expect("codex directory should be created");
+    std::fs::create_dir_all(repo.path().join(".codex")).expect("codex directory should be created");
 
     let result = invoke_validate_runtime_script_tests(&ValidateRuntimeScriptTestsRequest {
         repo_root: Some(repo.path().to_path_buf()),

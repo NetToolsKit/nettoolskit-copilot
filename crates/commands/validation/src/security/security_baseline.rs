@@ -119,9 +119,8 @@ enum ContentRuleSeverity {
 pub fn invoke_validate_security_baseline(
     request: &ValidateSecurityBaselineRequest,
 ) -> Result<ValidateSecurityBaselineResult, ValidateSecurityBaselineCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateSecurityBaselineCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidateSecurityBaselineCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = resolve_repo_relative_path(
         &repo_root,
         request.baseline_path.as_deref(),
@@ -198,7 +197,8 @@ pub fn invoke_validate_security_baseline(
         );
 
         if forbidden_rules.is_empty() {
-            warnings.push("No forbiddenContentPatterns configured in security baseline.".to_string());
+            warnings
+                .push("No forbiddenContentPatterns configured in security baseline.".to_string());
         } else {
             validate_forbidden_content(
                 &scan_files,
@@ -338,7 +338,9 @@ fn collect_repository_files(
                 relative_path: to_repo_relative_path(repo_root, &path),
                 extension: path
                     .extension()
-                    .map(|extension| format!(".{}", extension.to_string_lossy().to_ascii_lowercase()))
+                    .map(|extension| {
+                        format!(".{}", extension.to_string_lossy().to_ascii_lowercase())
+                    })
                     .unwrap_or_default(),
                 full_path: path,
             }
@@ -369,7 +371,10 @@ fn validate_forbidden_paths(
                 warning_only,
                 warnings,
                 failures,
-                format!("Forbidden sensitive file path found: {}", entry.relative_path),
+                format!(
+                    "Forbidden sensitive file path found: {}",
+                    entry.relative_path
+                ),
             );
         }
     }
@@ -514,7 +519,11 @@ fn validate_forbidden_content(
                 continue;
             }
 
-            let line_number = content[..mat.start()].chars().filter(|character| *character == '\n').count() + 1;
+            let line_number = content[..mat.start()]
+                .chars()
+                .filter(|character| *character == '\n')
+                .count()
+                + 1;
             let message = format!(
                 "{}:{} matched '{}' -> {}",
                 entry.relative_path,
@@ -524,12 +533,9 @@ fn validate_forbidden_content(
             );
             match rule.severity {
                 ContentRuleSeverity::Warning => warnings.push(message),
-                ContentRuleSeverity::Failure => push_required_finding(
-                    warning_only,
-                    warnings,
-                    failures,
-                    message,
-                ),
+                ContentRuleSeverity::Failure => {
+                    push_required_finding(warning_only, warnings, failures, message)
+                }
             }
         }
     }

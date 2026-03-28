@@ -1,6 +1,8 @@
 //! Tests for policy::repository_policy module.
 
-use nettoolskit_validation::{invoke_validate_policy, ValidatePolicyRequest, ValidationCheckStatus};
+use nettoolskit_validation::{
+    invoke_validate_policy, ValidatePolicyRequest, ValidationCheckStatus,
+};
 use tempfile::TempDir;
 
 use crate::support::policy_fixtures::{

@@ -12,8 +12,8 @@ use crate::support::instruction_graph_fixtures::{
     initialize_instruction_architecture_repo, initialize_validate_instructions_repo,
 };
 use crate::support::operational_hygiene_fixtures::{
-    initialize_runtime_script_tests_repo, initialize_warning_baseline_repo,
-    initialize_shell_hooks_repo, write_fake_shell_command, write_hook_file,
+    initialize_runtime_script_tests_repo, initialize_shell_hooks_repo,
+    initialize_warning_baseline_repo, write_fake_shell_command, write_hook_file,
     write_runtime_test_script, write_warning_analyzer_report,
 };
 use crate::support::policy_fixtures::{
@@ -736,7 +736,12 @@ fn test_invoke_validate_all_runs_native_release_provenance_check() {
     initialize_repo_layout(repo.path(), &["validate-release-provenance"]);
     initialize_release_provenance_repo(repo.path());
     let head_commit = initialize_git_repository(repo.path());
-    write_audit_report(repo.path(), ".temp/audit-report.json", &head_commit, "passed");
+    write_audit_report(
+        repo.path(),
+        ".temp/audit-report.json",
+        &head_commit,
+        "passed",
+    );
 
     let result = invoke_validate_all(&ValidateAllRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -760,7 +765,9 @@ fn test_invoke_validate_all_applies_release_provenance_profile_options() {
     initialize_release_provenance_repo(repo.path());
     initialize_git_repository(repo.path());
     write_file(
-        &repo.path().join(".github/governance/validation-profiles.json"),
+        &repo
+            .path()
+            .join(".github/governance/validation-profiles.json"),
         r#"{
   "version": 1,
   "defaultProfile": "release",
@@ -794,13 +801,11 @@ fn test_invoke_validate_all_applies_release_provenance_profile_options() {
         "rust:nettoolskit-validation::validate-release-provenance"
     );
     assert_eq!(result.checks[0].status, ValidationCheckStatus::Warning);
-    assert!(
-        result.checks[0]
-            .error
-            .as_deref()
-            .unwrap_or_default()
-            .contains("Required audit report not found")
-    );
+    assert!(result.checks[0]
+        .error
+        .as_deref()
+        .unwrap_or_default()
+        .contains("Required audit report not found"));
 }
 
 #[test]
@@ -878,7 +883,9 @@ fn test_invoke_validate_all_runs_native_warning_baseline_check() {
         &[("PSAvoidUsingWriteHost", "scripts/example.ps1")],
     );
     write_file(
-        &repo.path().join(".github/governance/validation-profiles.json"),
+        &repo
+            .path()
+            .join(".github/governance/validation-profiles.json"),
         r#"{
   "version": 1,
   "defaultProfile": "test",
@@ -948,7 +955,9 @@ fn test_invoke_validate_all_runs_native_shell_hooks_check() {
     }
     let shell_path = write_fake_shell_command(repo.path());
     write_file(
-        &repo.path().join(".github/governance/validation-profiles.json"),
+        &repo
+            .path()
+            .join(".github/governance/validation-profiles.json"),
         &format!(
             r#"{{
   "version": 1,

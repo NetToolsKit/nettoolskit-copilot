@@ -116,11 +116,13 @@ struct RequiredPullRequestReviews {
 pub fn invoke_validate_release_governance(
     request: &ValidateReleaseGovernanceRequest,
 ) -> Result<ValidateReleaseGovernanceResult, ValidateReleaseGovernanceCommandError> {
-    let repo_root = resolve_release_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateReleaseGovernanceCommandError::ResolveWorkspaceRoot { source }
-    })?;
-    let changelog_path =
-        resolve_release_path(&repo_root, request.changelog_path.as_deref(), DEFAULT_CHANGELOG_PATH);
+    let repo_root = resolve_release_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidateReleaseGovernanceCommandError::ResolveWorkspaceRoot { source })?;
+    let changelog_path = resolve_release_path(
+        &repo_root,
+        request.changelog_path.as_deref(),
+        DEFAULT_CHANGELOG_PATH,
+    );
     let codeowners_path = resolve_release_path(
         &repo_root,
         request.codeowners_path.as_deref(),
@@ -277,7 +279,8 @@ fn validate_changelog(
                 failures,
                 format!(
                     "CHANGELOG date order invalid: {} appears after newer entry {}.",
-                    entries[index].date_token, entries[index - 1].date_token
+                    entries[index].date_token,
+                    entries[index - 1].date_token
                 ),
             );
             break;
@@ -325,7 +328,10 @@ fn validate_codeowners(
 
     let catch_all_regex =
         Regex::new(r"^\*\s+@").expect("release governance CODEOWNERS regex should compile");
-    if !active_lines.iter().any(|line| catch_all_regex.is_match(line)) {
+    if !active_lines
+        .iter()
+        .any(|line| catch_all_regex.is_match(line))
+    {
         push_required_finding(
             warning_only,
             warnings,
@@ -480,8 +486,9 @@ fn validate_branch_protection_baseline(
     }
 
     if !protection.enforce_admins {
-        warnings
-            .push("Branch protection baseline has enforce_admins=false (recommended true).".to_string());
+        warnings.push(
+            "Branch protection baseline has enforce_admins=false (recommended true).".to_string(),
+        );
     }
 
     let Some(reviews) = protection.required_pull_request_reviews else {

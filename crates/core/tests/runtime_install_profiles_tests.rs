@@ -25,7 +25,8 @@ fn test_runtime_install_profile_catalog_path_points_to_governance_file() {
 
     assert_eq!(
         path,
-        repo.path().join(".github/governance/runtime-install-profiles.json")
+        repo.path()
+            .join(".github/governance/runtime-install-profiles.json")
     );
 }
 
@@ -65,5 +66,7 @@ fn test_resolve_runtime_install_profile_rejects_unknown_profile() {
     let error = resolve_runtime_install_profile(repo.path(), Some("missing"), None)
         .expect_err("unknown profile should fail");
 
-    assert!(error.to_string().contains("unknown runtime profile 'missing'"));
+    assert!(error
+        .to_string()
+        .contains("unknown runtime profile 'missing'"));
 }

@@ -45,12 +45,9 @@ fn test_invoke_validate_release_governance_reports_missing_codeowners_rule() {
     .expect("release governance should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("CODEOWNERS missing required ownership rule for 'scripts/'"))
-    );
+    assert!(result.failures.iter().any(
+        |failure| failure.contains("CODEOWNERS missing required ownership rule for 'scripts/'")
+    ));
 }
 
 #[test]
@@ -71,12 +68,10 @@ fn test_invoke_validate_release_governance_reports_invalid_changelog_order() {
     .expect("release governance should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|failure| failure.contains("CHANGELOG date order invalid"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|failure| failure.contains("CHANGELOG date order invalid")));
 }
 
 #[test]
@@ -111,18 +106,14 @@ fn test_invoke_validate_release_governance_surfaces_branch_protection_warnings()
     .expect("release governance should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Warning);
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("strict=false"))
-    );
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("enforce_admins=false"))
-    );
+    assert!(result
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("strict=false")));
+    assert!(result
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("enforce_admins=false")));
 }
 
 #[test]
@@ -140,10 +131,8 @@ fn test_invoke_validate_release_governance_converts_failures_to_warnings() {
 
     assert_eq!(result.status, ValidationCheckStatus::Warning);
     assert!(result.failures.is_empty());
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("Required file not found"))
-    );
+    assert!(result
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("Required file not found")));
 }

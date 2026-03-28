@@ -3,46 +3,30 @@
 use nettoolskit_validation::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment, invoke_validate_all,
-    invoke_validate_architecture_boundaries,
-    invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
-    invoke_validate_compatibility_lifecycle_policy,
-    invoke_validate_dotnet_standards,
-    invoke_validate_powershell_standards,
-    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
-    invoke_validate_instructions, invoke_validate_planning_structure,
-    invoke_validate_policy,
-    invoke_validate_release_governance,
-    invoke_validate_release_provenance,
-    invoke_validate_readme_standards,
-    invoke_validate_runtime_script_tests,
-    invoke_validate_security_baseline,
-    invoke_validate_shared_script_checksums,
-    invoke_validate_supply_chain,
-    invoke_validate_shell_hooks,
-    invoke_validate_warning_baseline,
-    invoke_validate_routing_coverage, invoke_validate_template_standards,
-    invoke_validate_workspace_efficiency, require_validation_surface_contract, ValidateAllRequest,
+    invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
+    invoke_validate_authoritative_source_policy, invoke_validate_compatibility_lifecycle_policy,
+    invoke_validate_dotnet_standards, invoke_validate_instruction_architecture,
+    invoke_validate_instruction_metadata, invoke_validate_instructions,
+    invoke_validate_planning_structure, invoke_validate_policy,
+    invoke_validate_powershell_standards, invoke_validate_readme_standards,
+    invoke_validate_release_governance, invoke_validate_release_provenance,
+    invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
+    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
+    invoke_validate_warning_baseline, invoke_validate_workspace_efficiency,
+    require_validation_surface_contract, ValidateAgentHooksRequest,
+    ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentSkillAlignmentRequest, ValidateAllRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
-    ValidateArchitectureBoundariesRequest,
-    ValidateCompatibilityLifecyclePolicyRequest,
-    ValidateDotnetStandardsRequest,
-    ValidatePowerShellStandardsRequest,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
     ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
-    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidateReadmeStandardsRequest,
+    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidatePolicyRequest,
+    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
+    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
     ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
-    ValidateAgentOrchestrationRequest,
-    ValidateAgentHooksRequest, ValidateAgentPermissionsRequest,
-    ValidateAgentSkillAlignmentRequest,
-    ValidatePolicyRequest,
-    ValidateReleaseGovernanceRequest,
-    ValidateReleaseProvenanceRequest,
-    ValidateSecurityBaselineRequest,
-    ValidateSharedScriptChecksumsRequest,
-    ValidateSupplyChainRequest,
-    ValidateShellHooksRequest,
-    ValidateTemplateStandardsRequest,
-    ValidateWarningBaselineRequest,
-    ValidateWorkspaceEfficiencyRequest,
+    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
+    ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
+    ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
 };
 
 #[test]
@@ -393,12 +377,11 @@ fn test_validate_security_baseline_error_display_is_stable() {
 
 #[test]
 fn test_validate_shared_script_checksums_error_display_is_stable() {
-    let error =
-        invoke_validate_shared_script_checksums(&ValidateSharedScriptChecksumsRequest {
-            repo_root: Some(std::path::PathBuf::from("missing-repository")),
-            ..ValidateSharedScriptChecksumsRequest::default()
-        })
-        .expect_err("missing repository should fail");
+    let error = invoke_validate_shared_script_checksums(&ValidateSharedScriptChecksumsRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateSharedScriptChecksumsRequest::default()
+    })
+    .expect_err("missing repository should fail");
 
     assert_eq!(
         error.to_string(),

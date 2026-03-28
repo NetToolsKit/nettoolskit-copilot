@@ -83,7 +83,9 @@ pub fn invoke_validate_runtime_script_tests(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| ValidateRuntimeScriptTestsCommandError::ResolveWorkspaceRoot { source })?;
+        .map_err(
+            |source| ValidateRuntimeScriptTestsCommandError::ResolveWorkspaceRoot { source },
+        )?;
     let test_root = match request.test_root.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
         None => repo_root.join(DEFAULT_TEST_ROOT),

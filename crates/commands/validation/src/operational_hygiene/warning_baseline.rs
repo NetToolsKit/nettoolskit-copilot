@@ -352,7 +352,9 @@ catch {
     let _ = fs::remove_file(&temp_script_path);
 
     let Ok(output) = output else {
-        warnings.push("PSScriptAnalyzer execution failed: could not launch PowerShell runtime.".to_string());
+        warnings.push(
+            "PSScriptAnalyzer execution failed: could not launch PowerShell runtime.".to_string(),
+        );
         return Vec::new();
     };
 
@@ -375,7 +377,8 @@ catch {
             normalize_warning_records(value, warnings)
         }
         3 => {
-            warnings.push("PSScriptAnalyzer not found; warning baseline check skipped.".to_string());
+            warnings
+                .push("PSScriptAnalyzer not found; warning baseline check skipped.".to_string());
             Vec::new()
         }
         _ => {
@@ -405,7 +408,10 @@ fn read_analyzer_warning_report(
             warning_only,
             warnings,
             failures,
-            format!("Analyzer warning report not found: {}", report_path.display()),
+            format!(
+                "Analyzer warning report not found: {}",
+                report_path.display()
+            ),
         );
         return Vec::new();
     }
@@ -445,7 +451,10 @@ fn read_analyzer_warning_report(
     normalize_warning_records(value, warnings)
 }
 
-fn normalize_warning_records(value: Value, warnings: &mut Vec<String>) -> Vec<AnalyzerWarningRecord> {
+fn normalize_warning_records(
+    value: Value,
+    warnings: &mut Vec<String>,
+) -> Vec<AnalyzerWarningRecord> {
     let records = match value {
         Value::Array(items) => items,
         Value::Object(_) => vec![value],
@@ -457,19 +466,23 @@ fn normalize_warning_records(value: Value, warnings: &mut Vec<String>) -> Vec<An
 
     records
         .into_iter()
-        .filter_map(|record| match serde_json::from_value::<AnalyzerWarningRecord>(record) {
-            Ok(record) if !record.rule_name.trim().is_empty() => Some(record),
-            Ok(_) => {
-                warnings.push("Analyzer warning report contained an entry without RuleName.".to_string());
-                None
-            }
-            Err(error) => {
-                warnings.push(format!(
-                    "Analyzer warning report entry could not be parsed: {error}"
-                ));
-                None
-            }
-        })
+        .filter_map(
+            |record| match serde_json::from_value::<AnalyzerWarningRecord>(record) {
+                Ok(record) if !record.rule_name.trim().is_empty() => Some(record),
+                Ok(_) => {
+                    warnings.push(
+                        "Analyzer warning report contained an entry without RuleName.".to_string(),
+                    );
+                    None
+                }
+                Err(error) => {
+                    warnings.push(format!(
+                        "Analyzer warning report entry could not be parsed: {error}"
+                    ));
+                    None
+                }
+            },
+        )
         .collect()
 }
 

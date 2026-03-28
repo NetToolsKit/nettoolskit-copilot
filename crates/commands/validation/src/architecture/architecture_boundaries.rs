@@ -110,9 +110,10 @@ impl RuleSeverity {
 pub fn invoke_validate_architecture_boundaries(
     request: &ValidateArchitectureBoundariesRequest,
 ) -> Result<ValidateArchitectureBoundariesResult, ValidateArchitectureBoundariesCommandError> {
-    let repo_root = resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateArchitectureBoundariesCommandError::ResolveWorkspaceRoot { source }
-    })?;
+    let repo_root =
+        resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
+            ValidateArchitectureBoundariesCommandError::ResolveWorkspaceRoot { source }
+        })?;
     let baseline_path = resolve_repo_relative_path(
         &repo_root,
         request.baseline_path.as_deref(),
@@ -126,12 +127,10 @@ pub fn invoke_validate_architecture_boundaries(
     let baseline = if !baseline_path.is_file() {
         failures.push(format!(
             "Baseline file not found: {}",
-            request
-                .baseline_path
-                .as_ref()
-                .map_or_else(|| DEFAULT_BASELINE_PATH.to_string(), |path| {
-                    path.to_string_lossy().to_string()
-                })
+            request.baseline_path.as_ref().map_or_else(
+                || DEFAULT_BASELINE_PATH.to_string(),
+                |path| { path.to_string_lossy().to_string() }
+            )
         ));
         None
     } else {
@@ -203,7 +202,12 @@ fn collect_repository_files(repo_root: &Path) -> Vec<RepositoryFile> {
         .into_iter()
         .filter_map(Result::ok)
         .filter(|entry| entry.file_type().is_file())
-        .filter(|entry| !entry.path().components().any(|component| component.as_os_str() == ".git"))
+        .filter(|entry| {
+            !entry
+                .path()
+                .components()
+                .any(|component| component.as_os_str() == ".git")
+        })
         .map(|entry| {
             let absolute_path = entry.into_path();
             let relative_path = to_repo_relative_path(repo_root, &absolute_path);
@@ -231,14 +235,19 @@ fn validate_rule(
         rule.id.trim().to_string()
     };
     let severity = RuleSeverity::from_text(&rule.severity);
-    let matched_files = resolve_rule_files(repo_root, repository_files, &rule_id, &rule.files, warnings);
+    let matched_files =
+        resolve_rule_files(repo_root, repository_files, &rule_id, &rule.files, warnings);
     if matched_files.is_empty() {
-        warnings.push(format!("Boundary rule '{rule_id}' has no files to evaluate."));
+        warnings.push(format!(
+            "Boundary rule '{rule_id}' has no files to evaluate."
+        ));
         return;
     }
 
-    let required_patterns = compile_patterns(&rule.required_patterns, &rule_id, "required", failures);
-    let forbidden_patterns = compile_patterns(&rule.forbidden_patterns, &rule_id, "forbidden", failures);
+    let required_patterns =
+        compile_patterns(&rule.required_patterns, &rule_id, "required", failures);
+    let forbidden_patterns =
+        compile_patterns(&rule.forbidden_patterns, &rule_id, "forbidden", failures);
     let allowed_patterns = compile_patterns(&rule.allowed_patterns, &rule_id, "allowed", failures);
 
     for file in matched_files {
@@ -327,7 +336,8 @@ fn resolve_rule_files(
             continue;
         }
 
-        let absolute_path = resolve_repo_relative_path(repo_root, Some(Path::new(&normalized)), &normalized);
+        let absolute_path =
+            resolve_repo_relative_path(repo_root, Some(Path::new(&normalized)), &normalized);
         if !absolute_path.is_file() {
             warnings.push(format!(
                 "Boundary rule '{rule_id}' references missing file: {pattern}"

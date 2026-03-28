@@ -110,11 +110,13 @@ struct ReleaseProvenanceBaseline {
 pub fn invoke_validate_release_provenance(
     request: &ValidateReleaseProvenanceRequest,
 ) -> Result<ValidateReleaseProvenanceResult, ValidateReleaseProvenanceCommandError> {
-    let repo_root = resolve_release_repo_root(request.repo_root.as_deref()).map_err(|source| {
-        ValidateReleaseProvenanceCommandError::ResolveWorkspaceRoot { source }
-    })?;
-    let baseline_path =
-        resolve_release_path(&repo_root, request.baseline_path.as_deref(), DEFAULT_BASELINE_PATH);
+    let repo_root = resolve_release_repo_root(request.repo_root.as_deref())
+        .map_err(|source| ValidateReleaseProvenanceCommandError::ResolveWorkspaceRoot { source })?;
+    let baseline_path = resolve_release_path(
+        &repo_root,
+        request.baseline_path.as_deref(),
+        DEFAULT_BASELINE_PATH,
+    );
     let audit_report_path = resolve_release_path(
         &repo_root,
         request.audit_report_path.as_deref(),
@@ -201,7 +203,8 @@ pub fn invoke_validate_release_provenance(
 
     let changelog_path = resolve_release_path(&repo_root, None, &baseline.changelog_path);
     let validate_all_path = resolve_release_path(&repo_root, None, &baseline.validate_all_path);
-    let effective_require_audit_report = baseline.require_audit_report || request.require_audit_report;
+    let effective_require_audit_report =
+        baseline.require_audit_report || request.require_audit_report;
 
     let latest_entry = validate_latest_changelog_entry(
         &repo_root,
@@ -238,7 +241,11 @@ pub fn invoke_validate_release_provenance(
     let mut current_branch = None;
     let mut head_commit = None;
     let mut is_dirty = None;
-    if std::process::Command::new("git").arg("--version").output().is_err() {
+    if std::process::Command::new("git")
+        .arg("--version")
+        .output()
+        .is_err()
+    {
         warnings.push("Git command not found; skipping git provenance checks.".to_string());
     } else {
         git_available = true;
@@ -466,7 +473,10 @@ fn validate_check_coverage(
     failures: &mut Vec<String>,
 ) {
     for required_check in required_checks {
-        if !defined_checks.iter().any(|defined| defined == required_check) {
+        if !defined_checks
+            .iter()
+            .any(|defined| defined == required_check)
+        {
             push_required_finding(
                 warning_only,
                 warnings,
@@ -506,11 +516,15 @@ fn validate_git_evidence_traceability(
     failures: &mut Vec<String>,
 ) {
     for evidence_file in evidence_files {
-        let tracked_result =
-            invoke_git_command(repo_root, &["ls-files", "--error-unmatch", "--", evidence_file]);
+        let tracked_result = invoke_git_command(
+            repo_root,
+            &["ls-files", "--error-unmatch", "--", evidence_file],
+        );
         if tracked_result.exit_code != 0 {
             let message = if allow_pending_changes {
-                format!("Evidence file is not tracked by git yet (pending changes): {evidence_file}")
+                format!(
+                    "Evidence file is not tracked by git yet (pending changes): {evidence_file}"
+                )
             } else {
                 format!("Evidence file is not tracked by git: {evidence_file}")
             };
@@ -522,11 +536,16 @@ fn validate_git_evidence_traceability(
             continue;
         }
 
-        let history_result = invoke_git_command(repo_root, &["log", "-1", "--format=%H", "--", evidence_file]);
+        let history_result = invoke_git_command(
+            repo_root,
+            &["log", "-1", "--format=%H", "--", evidence_file],
+        );
         let last_commit = history_result.output_lines.first().cloned();
         if history_result.exit_code != 0 || last_commit.as_deref().unwrap_or_default().is_empty() {
             let message = if allow_pending_changes {
-                format!("No committed history for evidence file yet (pending changes): {evidence_file}")
+                format!(
+                    "No committed history for evidence file yet (pending changes): {evidence_file}"
+                )
             } else {
                 format!("No git history found for evidence file: {evidence_file}")
             };
@@ -555,7 +574,10 @@ fn validate_audit_report_contract(
                 warning_only,
                 warnings,
                 failures,
-                format!("Required audit report not found: {}", audit_report_path.display()),
+                format!(
+                    "Required audit report not found: {}",
+                    audit_report_path.display()
+                ),
             );
         } else if warn_on_missing_optional_report {
             warnings.push(format!(
