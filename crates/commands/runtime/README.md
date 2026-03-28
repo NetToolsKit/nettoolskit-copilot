@@ -327,7 +327,7 @@ pub enum RuntimeSelfHealCommandError { ... }
 ## References
 
 - [crates/core/README.md](../core/README.md)
-- [planning/active/plan-repository-unification-and-rust-migration.md](../../../planning/active/plan-repository-unification-and-rust-migration.md)
+- [planning/completed/plan-repository-unification-and-rust-migration.md](../../../planning/completed/plan-repository-unification-and-rust-migration.md)
 - [scripts/README.md](../../../scripts/README.md)
 
 ---

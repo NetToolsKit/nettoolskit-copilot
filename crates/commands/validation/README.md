@@ -347,7 +347,7 @@ pub enum ValidateTestNamingCommandError { ResolveWorkspaceRoot { ... }, InvalidR
 
 ## References
 
-- [planning/active/plan-repository-unification-and-rust-migration.md](../../../planning/active/plan-repository-unification-and-rust-migration.md)
+- [planning/completed/plan-repository-unification-and-rust-migration.md](../../../planning/completed/plan-repository-unification-and-rust-migration.md)
 - [README standards baseline](../../../.github/governance/readme-standards.baseline.json)
 - [crates/commands/runtime/README.md](../runtime/README.md)
 

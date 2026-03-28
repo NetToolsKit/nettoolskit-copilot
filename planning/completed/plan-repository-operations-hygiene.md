@@ -7,14 +7,14 @@ Generated: 2026-03-26 16:20
 - LastUpdated: 2026-03-28 16:10
 - Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
-- Active Branch: `feature/native-validation-policy`
-- Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
-- Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
-- Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
-- Parity Ledger: `planning/active/rust-script-parity-ledger.md`
-- Cutover Map: `planning/active/rust-script-cutover-default-map.md`
-- Remaining Open Backlog: explicit retained wrapper policy only; no remaining hygiene execution backlog
-- Historical Role: hygiene record for the migration waves; this artifact now owns only the remaining non-functional closeout gates.
+- Archived From Branch: `feature/native-validation-policy`
+- Spec Path: `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
+- Supporting Architecture Spec: `planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md`
+- Ownership Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
+- Parity Ledger: `planning/completed/rust-script-parity-ledger.md`
+- Cutover Map: `planning/completed/rust-script-cutover-default-map.md`
+- Remaining Open Backlog: none; the retained-wrapper policy is now a completed operating-model decision recorded in the archived migration bundle.
+- Historical Role: archived hygiene record for the completed migration waves; this artifact no longer owns any active closeout execution.
 - Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
 
 ## Scope Summary
@@ -78,9 +78,9 @@ Status: `[x]` Completed
 - [2026-03-26 16:20] Updated the hygiene plan so it supports the full PowerShell-to-Rust transcription program instead of unrelated follow-up backlog ✓ [2026-03-26 16:20]
 - [2026-03-26 16:48] Recorded the current Rust hygiene baseline so formatting debt and test-structure gaps are explicit before migration expansion ✓ [2026-03-26 16:48]
 - Target paths:
-  - `planning/active/plan-repository-operations-hygiene.md`
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
-  - `planning/specs/active/spec-repository-unification-and-rust-migration.md`
+  - `planning/completed/plan-repository-operations-hygiene.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
+  - `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
 - Commands:
   - `git status --short --branch`
   - `rg --files scripts -g *.ps1`
@@ -124,10 +124,10 @@ Status: `[x]` Completed
 Status: `[x]` Completed
 
 - [2026-03-26 16:20] Create the canonical evidence model that proves each PowerShell script is covered by Rust parity before cutover
-- [2026-03-26 17:18] Captured the versioned parity ledger in `planning/active/rust-script-parity-ledger.md` and locked the required evidence model for every script domain ✓ [2026-03-26 17:18]
+- [2026-03-26 17:18] Captured the versioned parity ledger in `planning/completed/rust-script-parity-ledger.md` and locked the required evidence model for every script domain ✓ [2026-03-26 17:18]
 - Target paths:
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
-  - `planning/active/rust-script-parity-ledger.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
+  - `planning/completed/rust-script-parity-ledger.md`
   - `scripts/tests/`
   - `tests/`
   - `.github/workflows/`
@@ -240,7 +240,7 @@ Status: `[x]` Completed
 - `Propagate Typed Control-Plane Metadata To Outbound Notifications`
 - `Reuse Real Interactive CLI Session Identity For Local Task Submit`
 
-These items remain valid backlog, but they are intentionally deferred while the repository planning focus is the full PowerShell-to-Rust transcription program.
+These items remain historical follow-up notes, but they are not part of the completed Rust-migration closeout backlog and do not keep this workstream active.
 
 ## Validation Checklist
 

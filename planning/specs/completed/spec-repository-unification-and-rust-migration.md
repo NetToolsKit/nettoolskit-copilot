@@ -38,7 +38,7 @@ Partial migration by script family is no longer enough for the desired end state
 - Keep `definitions/`, `.github/`, `.codex/`, `.claude/`, `.vscode/`, and `planning/` as the authoritative non-executable surfaces; Rust replaces execution logic, not those source-of-truth assets.
 - Keep PowerShell entrypoints available as compatibility wrappers until the Rust implementation reaches proven parity and the default cutover is explicitly approved.
 - Align Rust execution with the existing workspace topology first: `crates/core`, `crates/commands/*`, `crates/orchestrator`, and `crates/cli`; add new crates only when current boundaries cannot safely absorb a capability.
-- Treat `.temp/arquitetura_enterprise_llm.md` as temporary source input and preserve its durable architectural direction in `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`, while this spec remains the canonical migration design artifact.
+- Treat `.temp/arquitetura_enterprise_llm.md` as temporary source input and preserve its durable architectural direction in `planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md`, while this spec serves as the canonical migration design artifact for the now-completed workstream.
 
 ## Current Rust Readiness Snapshot
 
@@ -96,8 +96,8 @@ Partial migration by script family is no longer enough for the desired end state
 | background worker and retry runtime | `crates/task-worker` |
 | command export hub | `crates/commands` |
 
-The canonical script-to-owner lock is tracked in `planning/active/rust-script-transcription-ownership-matrix.md`.
-The parity evidence policy is tracked in `planning/active/rust-script-parity-ledger.md`.
+The canonical script-to-owner lock is tracked in `planning/completed/rust-script-transcription-ownership-matrix.md`.
+The parity evidence policy is tracked in `planning/completed/rust-script-parity-ledger.md`.
 
 ## Key Decisions
 
@@ -207,10 +207,10 @@ Rejected. Validation and test harnesses are part of the executable control plane
 8. The current Rust baseline is explicitly assessed in the migration artifacts, including what already compiles/tests cleanly and what does not.
 9. The migration artifacts define a concrete Rust ownership target for every script domain before implementation waves begin.
 
-## Planning Readiness
+## Completion Status
 
-- `ready-for-plan`
-- Updated: `2026-03-26 16:48` — added the validated Rust baseline snapshot and concrete target ownership model.
+- `completed-and-archived`
+- Updated: `2026-03-28 17:35` — the migration design is now preserved as the completed source-of-truth spec for the archived Rust transcription workstream.
 - Updated: `2026-03-26 17:11` — implemented the first migration boundary crates and aligned the baseline test surfaces with the Rust testing contract.
 - Updated: `2026-03-26 18:47` — implemented the first executable Wave 1 replacement around the local context index flow and promoted its shared foundations into `crates/core`.
 - Updated: `2026-03-26 18:59` — implemented the Rust-backed planning summary export flow as the next executable Wave 1 compatibility target.

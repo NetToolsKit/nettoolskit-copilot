@@ -7,14 +7,14 @@ Generated: 2026-03-26 16:20
 - LastUpdated: 2026-03-28 16:10
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
-- Active Branch: `feature/native-validation-policy`
-- Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
-- Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
-- Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
-- Parity Ledger: `planning/active/rust-script-parity-ledger.md`
-- Cutover Map: `planning/active/rust-script-cutover-default-map.md`
-- Remaining Open Backlog: explicit retained wrapper policy only; no remaining execution backlog
-- Historical Role: implementation record for the completed migration waves; the remaining open delivery backlog is now owned by the closeout plan.
+- Archived From Branch: `feature/native-validation-policy`
+- Spec Path: `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
+- Supporting Architecture Spec: `planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md`
+- Ownership Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
+- Parity Ledger: `planning/completed/rust-script-parity-ledger.md`
+- Cutover Map: `planning/completed/rust-script-cutover-default-map.md`
+- Remaining Open Backlog: none; the retained-wrapper policy is now preserved as part of the completed closeout archive.
+- Historical Role: archived implementation record for the completed migration waves; follow-on operator policy is captured in the archived closeout bundle.
 - Worktree Isolation: not recommended for this planning-only checkpoint; a dedicated branch is active in the current checkout.
 
 ## Scope Summary
@@ -116,12 +116,12 @@ The migration remains compatibility-first:
 Status: `[x]` Completed
 
 - [2026-03-26 16:20] Rewrote the active spec and this plan around the full `147`-script migration scope ✓ [2026-03-26 16:20]
-- [2026-03-26 16:20] Captured `.temp/arquitetura_enterprise_llm.md` into a versioned architecture spec under `planning/specs/active/` and folded the relevant direction into the migration artifacts ✓ [2026-03-26 16:20]
+- [2026-03-26 16:20] Captured `.temp/arquitetura_enterprise_llm.md` into a versioned architecture spec under `planning/specs/completed/` and folded the relevant direction into the migration artifacts ✓ [2026-03-26 16:20]
 - [2026-03-26 16:48] Captured the current Rust baseline and target ownership model so migration tasks align to the real workspace rather than an abstract future state ✓ [2026-03-26 16:48]
 - Target paths:
-  - `planning/specs/active/spec-repository-unification-and-rust-migration.md`
-  - `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
+  - `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
+  - `planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
   - `.temp/arquitetura_enterprise_llm.md` (source input)
 - Commands:
   - `git status --short --branch`
@@ -140,11 +140,11 @@ Status: `[x]` Completed
 Status: `[x]` Completed
 
 - [2026-03-26 16:20] Build a canonical script-to-domain, script-to-owner, and script-to-wave matrix for all tracked `.ps1` files
-- [2026-03-26 17:05] Captured the canonical matrix in `planning/active/rust-script-transcription-ownership-matrix.md` and locked every tracked PowerShell script to a Rust owner boundary and wave ✓ [2026-03-26 17:05]
+- [2026-03-26 17:05] Captured the canonical matrix in `planning/completed/rust-script-transcription-ownership-matrix.md` and locked every tracked PowerShell script to a Rust owner boundary and wave ✓ [2026-03-26 17:05]
 - Target paths:
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
-  - `planning/active/plan-repository-operations-hygiene.md`
-  - `planning/active/rust-script-transcription-ownership-matrix.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
+  - `planning/completed/plan-repository-operations-hygiene.md`
+  - `planning/completed/rust-script-transcription-ownership-matrix.md`
   - `scripts/`
   - `Cargo.toml`
 - Commands:

@@ -7,12 +7,12 @@ Generated: 2026-03-28 10:23
 - LastUpdated: 2026-03-28 16:10
 - Objective: record the final operator-default decision for each major script domain after the completed migration waves.
 - Source Inputs:
-  - `planning/active/plan-rust-migration-closeout-and-cutover.md`
-  - `planning/active/rust-script-parity-ledger.md`
-  - `planning/active/rust-script-transcription-ownership-matrix.md`
-  - `planning/active/plan-repository-operations-hygiene.md`
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
-- Active Branch: `feature/native-validation-policy`
+  - `planning/completed/plan-rust-migration-closeout-and-cutover.md`
+  - `planning/completed/rust-script-parity-ledger.md`
+  - `planning/completed/rust-script-transcription-ownership-matrix.md`
+  - `planning/completed/plan-repository-operations-hygiene.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
+- Archived From Branch: `feature/native-validation-policy`
 - Decision Rule:
   - `Rust-default now` means the Rust surface is the canonical operating path and the PowerShell file remains only as a compatibility surface, if it remains at all.
   - `compatibility wrapper retained intentionally` means the PowerShell entrypoint stays in the repository by design, even though Rust owns the underlying behavior.

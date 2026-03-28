@@ -31,9 +31,9 @@
 
 ## References
 
-- [planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md)
-- [planning/specs/active/spec-readme-standards-repository-normalization.md](planning/specs/active/spec-readme-standards-repository-normalization.md)
-- [planning/specs/active/spec-repository-unification-and-rust-migration.md](planning/specs/active/spec-repository-unification-and-rust-migration.md)
+- [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
+- [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
+- [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
 
 ---
 

@@ -146,3 +146,8 @@ Observed outcome at closeout:
 - `cargo test -p nettoolskit-validation`: currently fails because of concurrent non-README changes already present in `crates/commands/validation`
 
 That final Rust test failure is a branch-local parallel code issue, not a README standards regression.
+
+## Completion Status
+
+- `completed-and-archived`
+- Updated: `2026-03-28 17:35` — the README normalization spec is closed and preserved as a completed documentation workstream record.

@@ -6,11 +6,11 @@ Generated: 2026-03-27 20:01
 
 - LastUpdated: 2026-03-28 16:10
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
-- Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
-- Supporting Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
-- Cutover Map: `planning/active/rust-script-cutover-default-map.md`
-- Active Branch: `feature/native-validation-policy`
-- Remaining Open Backlog: explicit retained wrapper policy only; no remaining execution backlog
+- Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
+- Supporting Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
+- Cutover Map: `planning/completed/rust-script-cutover-default-map.md`
+- Archived From Branch: `feature/native-validation-policy`
+- Remaining Open Backlog: none; retained-wrapper decisions are now part of the completed migration operating model.
 - Live parity harness: `approval-approved-test`, the staged `run-test` closeout success path, `evaluate-agent-pipeline`, and `resume-agent-pipeline` are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
 - Parity cleanup note: tracked repository artifacts now restore through Git-backed recovery, and projected POML assets are restored explicitly after parity runs so the worktree returns to a clean baseline deterministically.
 - Current closeout stance: the explicit cutover map now records which parity-proven domains are Rust-default now, intentionally wrapper-retained, or retained as legacy integration wrappers; the parity ledger still avoids promoting a domain to `cutover ready` by implication alone.

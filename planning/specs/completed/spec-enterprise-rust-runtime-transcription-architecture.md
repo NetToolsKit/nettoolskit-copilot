@@ -9,8 +9,8 @@ Preserve the architectural intent captured in `.temp/arquitetura_enterprise_llm.
 ## Source Material
 
 - Temporary reference: `.temp/arquitetura_enterprise_llm.md`
-- Primary workstream: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
-- Active execution plan: `planning/active/plan-repository-unification-and-rust-migration.md`
+- Primary workstream: `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
+- Completed execution plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
 
 ## Problem Statement
 
@@ -209,13 +209,13 @@ The existing `help`, `manifest`, and `templating` command crates should be treat
 
 1. The architecture captured in `.temp/arquitetura_enterprise_llm.md` is preserved in a versioned planning artifact.
 2. The versioned architecture aligns with the repository's Rust migration target rather than remaining generic.
-3. The active migration spec and plan can reference this artifact without depending on `.temp`.
+3. The completed migration records can reference this artifact without depending on `.temp`.
 4. The architecture explicitly keeps LLM reasoning as a planning aid and Rust as the execution substrate.
 5. The architecture keeps static repository surfaces authoritative and PowerShell wrappers temporary.
 6. The architecture documents the current Rust baseline honestly, including compile/test health, formatting debt, and test-structure gaps.
 7. The architecture defines a target ownership model that explains where full-script transcription should land before implementation starts.
 
-## Planning Readiness
+## Completion Status
 
-- `ready-for-plan`
-- Updated: `2026-03-26 16:48` — validated the current Rust baseline and refined the target ownership model for full script transcription.
+- `completed-and-archived`
+- Updated: `2026-03-28 17:35` — the architecture intent is preserved as historical design input for the completed Rust migration bundle.

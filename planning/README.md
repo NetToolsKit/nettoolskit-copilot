@@ -32,14 +32,16 @@
 
 ## References
 
-- [planning/active/plan-readme-standards-repository-normalization.md](planning/active/plan-readme-standards-repository-normalization.md)
-- [planning/active/plan-repository-operations-hygiene.md](planning/active/plan-repository-operations-hygiene.md)
-- [planning/active/plan-repository-unification-and-rust-migration.md](planning/active/plan-repository-unification-and-rust-migration.md)
-- [planning/active/rust-script-parity-ledger.md](planning/active/rust-script-parity-ledger.md)
-- [planning/active/rust-script-transcription-ownership-matrix.md](planning/active/rust-script-transcription-ownership-matrix.md)
-- [planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md)
-- [planning/specs/active/spec-readme-standards-repository-normalization.md](planning/specs/active/spec-readme-standards-repository-normalization.md)
-- [planning/specs/active/spec-repository-unification-and-rust-migration.md](planning/specs/active/spec-repository-unification-and-rust-migration.md)
+- [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
+- [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
+- [planning/completed/plan-repository-unification-and-rust-migration.md](planning/completed/plan-repository-unification-and-rust-migration.md)
+- [planning/completed/plan-rust-migration-closeout-and-cutover.md](planning/completed/plan-rust-migration-closeout-and-cutover.md)
+- [planning/completed/rust-script-cutover-default-map.md](planning/completed/rust-script-cutover-default-map.md)
+- [planning/completed/rust-script-parity-ledger.md](planning/completed/rust-script-parity-ledger.md)
+- [planning/completed/rust-script-transcription-ownership-matrix.md](planning/completed/rust-script-transcription-ownership-matrix.md)
+- [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
+- [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
+- [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
 
 ---
 

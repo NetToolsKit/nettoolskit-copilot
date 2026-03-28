@@ -6,14 +6,14 @@ Generated: 2026-03-28 08:28
 
 - LastUpdated: 2026-03-28 16:10
 - Objective: consolidate the remaining backlog after README normalization and Waves 1-3 so the repository can reach a clean, evidence-backed Rust-default cutover.
-- Active Branch: `feature/native-validation-policy`
+- Archived From Branch: `feature/native-validation-policy`
 - Inputs:
-  - `planning/active/plan-readme-standards-repository-normalization.md`
-  - `planning/active/plan-repository-operations-hygiene.md`
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
-  - `planning/active/rust-script-parity-ledger.md`
-  - `planning/active/rust-script-transcription-ownership-matrix.md`
-  - `planning/active/rust-script-cutover-default-map.md`
+  - `planning/completed/plan-readme-standards-repository-normalization.md`
+  - `planning/completed/plan-repository-operations-hygiene.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
+  - `planning/completed/rust-script-parity-ledger.md`
+  - `planning/completed/rust-script-transcription-ownership-matrix.md`
+  - `planning/completed/rust-script-cutover-default-map.md`
 - Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package now has explicit end-state decisions for the full PowerShell estate: workspace hygiene gates are green, deploy/doc/test-automation closeout is aligned, `PreToolUse` is native, and the remaining shell-owned surfaces are now recorded as approved retained wrapper exceptions instead of blocked migration debt.
 
 ## Review Summary
@@ -39,9 +39,9 @@ Generated: 2026-03-28 08:28
 ## Remaining Open Backlog
 
 - No remaining execution backlog inside the migration plan.
-- The only remaining shell-owned surfaces are explicit retained wrapper exceptions recorded in:
-  - `planning/active/rust-script-cutover-default-map.md`
-  - `planning/active/rust-script-parity-ledger.md`
+- The retained-wrapper policy is now part of the completed operating model recorded in:
+  - `planning/completed/rust-script-cutover-default-map.md`
+  - `planning/completed/rust-script-parity-ledger.md`
 
 ## Ordered Tasks
 
@@ -75,14 +75,14 @@ Status: `[x]` Completed
 - Refresh metadata drift in the ownership matrix and active plan references.
 - Mark historical wave plans as implementation records and this plan as the owner of the retained-wrapper policy state.
 - Target paths:
-  - `planning/active/plan-rust-migration-closeout-and-cutover.md`
-  - `planning/active/plan-repository-operations-hygiene.md`
-  - `planning/active/plan-repository-unification-and-rust-migration.md`
-  - `planning/active/rust-script-parity-ledger.md`
-  - `planning/active/rust-script-transcription-ownership-matrix.md`
+  - `planning/completed/plan-rust-migration-closeout-and-cutover.md`
+  - `planning/completed/plan-repository-operations-hygiene.md`
+  - `planning/completed/plan-repository-unification-and-rust-migration.md`
+  - `planning/completed/rust-script-parity-ledger.md`
+  - `planning/completed/rust-script-transcription-ownership-matrix.md`
 - Commands:
   - `git status --short --branch`
-  - `rg -n "^### Task|^Status:" planning/active/*.md`
+  - `rg -n "^### Task|^Status:" planning/completed/*.md`
   - `git diff --check`
 - Commit checkpoint:
   - `docs(planning): rebaseline rust migration closeout state`
@@ -106,7 +106,7 @@ Status: `[x]` Completed
   - `Cargo.lock`
   - `crates/`
   - `.github/workflows/`
-  - `planning/active/plan-repository-operations-hygiene.md`
+  - `planning/completed/plan-repository-operations-hygiene.md`
 - Commands:
   - `cargo fmt --all -- --check`
   - `cargo clippy --workspace --all-targets -- -D warnings`
@@ -143,7 +143,7 @@ Status: `[x]` Completed
   - `scripts/tests`
 - Require at least one operator smoke path per cutover-ready domain.
 - Target paths:
-  - `planning/active/rust-script-parity-ledger.md`
+  - `planning/completed/rust-script-parity-ledger.md`
   - `crates/commands/runtime/`
   - `crates/commands/validation/`
   - `crates/orchestrator/`
@@ -166,7 +166,7 @@ Status: `[x]` Completed
   - retired
 - [2026-03-28 09:32] Updated repository/runtime/validation docs so PowerShell entrypoints are described as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
 - [2026-03-28 09:32] Rebaselined CI and release workflows so Rust-owned release-governance and provenance checks are the canonical validated path ✓ [2026-03-28 09:32]
-- [2026-03-28 10:23] Recorded the final per-domain default map in `planning/active/rust-script-cutover-default-map.md`, explicitly separating Rust-default domains, compatibility wrappers retained intentionally, and still-blocked domains ✓ [2026-03-28 10:23]
+- [2026-03-28 10:23] Recorded the final per-domain default map in `planning/completed/rust-script-cutover-default-map.md`, explicitly separating Rust-default domains, compatibility wrappers retained intentionally, and still-blocked domains ✓ [2026-03-28 10:23]
 - Remaining work:
   - preserve compatibility-wrapper reasoning where intentionally retained
   - preserve legacy integration-wrapper reasoning where shell-owned exceptions remain deliberate
@@ -199,7 +199,7 @@ Status: `[x]` Completed
   - `scripts/`
   - `crates/cli/`
   - `.github/workflows/`
-  - `planning/active/`
+  - `planning/completed/`
 - Commands:
   - `cargo test --workspace`
   - final wrapper smoke suite
@@ -209,7 +209,7 @@ Status: `[x]` Completed
 
 ## Exit Criteria
 
-- one active plan owns the migration closeout history and explicit retained-wrapper policy
+- one archived plan owns the migration closeout history and explicit retained-wrapper policy
 - the parity ledger matches real implementation status by domain
 - the workspace is green on `fmt`, `clippy`, tests, and security audit
 - wrapper/default end state is explicit for the full PowerShell estate

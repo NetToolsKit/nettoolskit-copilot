@@ -17,7 +17,7 @@ Normalize every `README.md` in the repository to the repository-owned standard, 
 - `.github/instructions/readme.instructions.md`
 - `.github/templates/readme-template.md`
 - `.github/governance/readme-standards.baseline.json`
-- `planning/specs/active/spec-readme-standards-repository-normalization.md`
+- `planning/specs/completed/spec-readme-standards-repository-normalization.md`
 
 ## Decisions Locked
 

@@ -6,11 +6,11 @@ Generated: 2026-03-26 17:05
 
 - LastUpdated: 2026-03-28 16:10
 - Objective: freeze the canonical PowerShell inventory, Rust owner boundary, target surface, and migration wave for every tracked script under `scripts/**/*.ps1`.
-- Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
-- Source Spec: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
-- Cutover Map: `planning/active/rust-script-cutover-default-map.md`
-- Active Branch: `feature/native-validation-policy`
-- Remaining Open Backlog: explicit retained wrapper policy only; no remaining execution backlog
+- Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
+- Source Spec: `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
+- Cutover Map: `planning/completed/rust-script-cutover-default-map.md`
+- Archived From Branch: `feature/native-validation-policy`
+- Remaining Open Backlog: none; retained-wrapper decisions are now preserved in the completed cutover archive.
 - Artifact Role: canonical inventory and ownership map only; execution and cutover state are tracked in the parity ledger and closeout plan.
 - Closeout Note: the inventory and owner boundaries now reflect the final non-runtime test-automation split too: `refactor_tests_to_aaa` belongs to the validation boundary, while `apply-aaa-pattern` and `run-coverage` remain explicit retained wrapper exceptions tracked in the cutover map. The remaining shell-owned behavior is now recorded as approved retained exceptions rather than as open migration backlog.
 
