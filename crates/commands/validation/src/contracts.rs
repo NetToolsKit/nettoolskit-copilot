@@ -22,6 +22,8 @@ pub enum ValidationSurfaceKind {
     GovernanceCommands,
     /// Documentation validation commands.
     DocumentationCommands,
+    /// Non-runtime test automation validation commands.
+    TestAutomationCommands,
     /// Deploy preflight commands.
     DeployCommands,
 }
@@ -88,6 +90,13 @@ pub const VALIDATION_SURFACE_CONTRACTS: &[ValidationSurfaceContract] = &[
         "scripts/doc",
         1,
         ValidationSurfaceKind::DocumentationCommands,
+        MigrationWave::Wave2,
+    ),
+    ValidationSurfaceContract::new(
+        "test-automation-commands",
+        "scripts/tests/check-test-naming.ps1",
+        1,
+        ValidationSurfaceKind::TestAutomationCommands,
         MigrationWave::Wave2,
     ),
     ValidationSurfaceContract::new(

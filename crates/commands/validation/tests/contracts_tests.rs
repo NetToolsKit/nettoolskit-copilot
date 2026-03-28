@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 #[test]
 fn test_validation_surface_total_matches_locked_inventory() {
-    assert_eq!(validation_surface_script_total(), 41);
+    assert_eq!(validation_surface_script_total(), 42);
 }
 
 #[test]
@@ -44,6 +44,10 @@ fn test_validation_surface_category_counts_match_matrix() {
         .iter()
         .find(|contract| contract.kind == ValidationSurfaceKind::GovernanceCommands)
         .expect("governance surface should exist");
+    let test_automation_commands = VALIDATION_SURFACE_CONTRACTS
+        .iter()
+        .find(|contract| contract.kind == ValidationSurfaceKind::TestAutomationCommands)
+        .expect("test automation surface should exist");
     let deploy_commands = VALIDATION_SURFACE_CONTRACTS
         .iter()
         .find(|contract| contract.kind == ValidationSurfaceKind::DeployCommands)
@@ -51,5 +55,10 @@ fn test_validation_surface_category_counts_match_matrix() {
 
     assert_eq!(validation_commands.legacy_script_count, 31);
     assert_eq!(governance_commands.legacy_script_count, 2);
+    assert_eq!(test_automation_commands.legacy_script_count, 1);
+    assert_eq!(
+        test_automation_commands.legacy_root,
+        "scripts/tests/check-test-naming.ps1"
+    );
     assert_eq!(deploy_commands.legacy_script_count, 1);
 }
