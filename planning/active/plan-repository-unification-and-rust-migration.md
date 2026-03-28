@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:51
+- LastUpdated: 2026-03-28 11:22
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -42,7 +42,7 @@ The migration remains compatibility-first:
 | `scripts/deploy` | 1 | Wave 2 quality and policy |
 | `scripts/orchestration` | 10 | Wave 3 control plane |
 | `scripts/git-hooks` | 3 | Wave 3 control plane |
-| `scripts/tests` | 27 | Wave 3 control plane and parity |
+| `scripts/tests` | 27 | Wave 2 test automation plus Wave 3 control plane and parity |
 | Total | 147 | Full migration scope |
 
 ## Current Rust Baseline
@@ -102,9 +102,9 @@ The migration remains compatibility-first:
 | --- | --- | --- |
 | `scripts/common` | `crates/core` | Shared primitives only; no operator verb logic should remain duplicated elsewhere. |
 | `scripts/runtime`, `scripts/maintenance`, `scripts/git-hooks`, `scripts/runtime/hooks` | `crates/commands/runtime` plus `crates/cli` | Rust owns runtime verbs, bootstrap, render/sync, doctor, clean, recovery, local index, and hook install/check; PowerShell becomes wrapper-only. |
-| `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/doc`, `scripts/deploy` | `crates/commands/validation` | Rust owns standards validation, policy/security gates, governance checks, doc validation, and deploy preflight. |
+| `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/doc`, `scripts/deploy`, `scripts/tests/check-test-naming.ps1` | `crates/commands/validation` | Rust owns standards validation, policy/security gates, governance checks, doc validation, deploy preflight, and the test-naming policy surface. |
 | `scripts/orchestration` | `crates/orchestrator` | Orchestrator remains the staged control plane and event dispatch layer. |
-| `scripts/tests` and `tests/runtime` | Owning crate test suites plus root integration harnesses | Parity evidence moves into Rust test surfaces and stops depending on PowerShell harnesses. |
+| `scripts/tests` excluding `check-test-naming.ps1` and `tests/runtime` | Owning crate test suites plus root integration harnesses | Parity evidence moves into Rust test surfaces and stops depending on PowerShell harnesses. |
 | worker/retry runtime helpers | `crates/task-worker` | Keep background execution support narrow and reusable. |
 | top-level command exports | `crates/commands` | Aggregates migration subcrates once brought into test-contract compliance. |
 
@@ -385,12 +385,13 @@ Status: `[~]` In Progress
 - [2026-03-28 10:51] Implemented the native `validate-xml-documentation` command in `crates/commands/validation/documentation` and wired it through `validate-all`, so `scripts/doc` is no longer part of the blocked Task 8 tail ✓ [2026-03-28 10:51]
 - [2026-03-28 10:51] Implemented native `clean-build-artifacts` and `trim-trailing-blank-lines` under `crates/commands/runtime/maintenance`, so the maintenance cluster now has partial native ownership while the remaining maintenance scripts stay explicitly open ✓ [2026-03-28 10:51]
 - [2026-03-28 10:51] Closed the parity-fixture cleanup follow-up with Git-backed tracked-file restoration and explicit POML asset recovery, so Task 8 no longer carries artifact-isolation cleanup as open work ✓ [2026-03-28 10:51]
+- [2026-03-28 11:16] Implemented the native `validate-deploy-preflight` command in `crates/commands/validation/deploy` and wired it through `validate-all`, so `scripts/deploy` is now covered by an approved compatibility-wrapper-retained end state instead of remaining in the blocked tail ✓ [2026-03-28 11:16]
+- [2026-03-28 11:16] Implemented the native `validate-test-naming` command in `crates/commands/validation/operational_hygiene`, so `scripts/tests/check-test-naming.ps1` now belongs to the validation boundary and is no longer part of the generic non-runtime test automation tail ✓ [2026-03-28 11:16]
 - Remaining open work:
   - finish the still-blocked domain tail:
     - `scripts/runtime/hooks`
     - `scripts/maintenance`
-    - `scripts/deploy`
-    - `scripts/tests` excluding runtime
+    - `scripts/tests` excluding runtime and `check-test-naming`
 - Target paths:
   - `scripts/`
   - `README.md`

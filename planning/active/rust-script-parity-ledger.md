@@ -4,7 +4,7 @@ Generated: 2026-03-27 20:01
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:51
+- LastUpdated: 2026-03-28 11:22
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
@@ -40,10 +40,11 @@ Generated: 2026-03-27 20:01
 | `scripts/security/*.ps1` | 6 | `crates/commands/validation` | security gate tests, tool invocation contracts, failure-path assertions | `parity proven` | Native security policy coverage is recorded in the validation crate, and the cutover map now marks this domain Rust-default now. |
 | `scripts/governance/*.ps1` | 2 | `crates/commands/validation` | governance contract tests plus safe no-op / denied-path assertions | `parity proven` | Governance checks are implemented natively through the validation surface, and the cutover map now marks this domain Rust-default now. |
 | `scripts/doc/*.ps1` | 1 | `crates/commands/validation` | documentation validation tests against fixture docs | `parity proven` | `validate-xml-documentation` now exists natively in `crates/commands/validation/documentation`, is routed through `validate-all`, and the cutover map now marks this domain Rust-default now. |
-| `scripts/deploy/*.ps1` | 1 | `crates/commands/validation` | deploy preflight tests and protected execution-path assertions | `evidence gap remains` | Deploy-preflight ownership is locked, but explicit closeout evidence for the deploy domain is still missing. |
+| `scripts/deploy/*.ps1` | 1 | `crates/commands/validation` | deploy preflight tests and protected execution-path assertions | `parity proven` | `validate-deploy-preflight` now exists natively in `crates/commands/validation/deploy`, runs through `validate-all`, and the PowerShell deploy executor is intentionally retained as a compatibility wrapper. |
 | `scripts/orchestration/**/*.ps1` | 10 | `crates/orchestrator` | staged execution tests, resume/replay assertions, dispatch integration checks | `parity proven` | Wave 3 control-plane parity is implemented and recorded, and the cutover map now marks this domain Rust-default now. |
 | `scripts/git-hooks/*.ps1` | 3 | `crates/commands/runtime` | git hook install/check tests plus local hook bootstrap smoke | `parity proven` | Native git hook install and EOF hygiene coverage exists, but the hook surface remains a compatibility wrapper intentionally retained in the cutover map. |
-| `scripts/tests/*.ps1` excluding runtime subfolder | 4 | `crate test suites + root parity harness` | Rust-native replacements for coverage/test-shape automation | `evidence gap remains` | The runtime parity harness is real, but the non-runtime test automation scripts still lack explicit closeout evidence and remain blocked. |
+| `scripts/tests/check-test-naming.ps1` | 1 | `crates/commands/validation` | validation-fixture coverage plus `validate-all` profile routing | `parity proven` | `validate-test-naming` now exists natively in `crates/commands/validation/operational_hygiene`, is tracked in the validation surface contracts, and runs through repository validation profiles. |
+| `scripts/tests/*.ps1` excluding `check-test-naming.ps1` and runtime subfolder | 3 | `crate test suites + root parity harness` | Rust-native replacements for coverage/test-shape automation | `evidence gap remains` | The remaining tail is now limited to `apply-aaa-pattern`, `refactor_tests_to_aaa`, and `run-coverage`; explicit closeout evidence is still missing. |
 | `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `parity proven` | The native parity harness covers `approval-approved`, staged `run-test` closeout, `evaluate-agent-pipeline`, and `resume-agent-pipeline`; the wrapper surface is retained intentionally as a compatibility launch surface, and parity cleanup is now stable. |
 
 ## Acceptance Gate

@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:51
+- LastUpdated: 2026-03-28 11:22
 - Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/native-validation-policy`
@@ -63,8 +63,9 @@ Current hygiene priorities for the migration:
 - [2026-03-28 10:00] `cargo test --workspace` passed.
 - [2026-03-28 10:00] `Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed.
 - [2026-03-28 10:51] Full-workspace parity runs now restore tracked repository artifacts through Git-backed recovery and restore projected POML assets explicitly, so fixture isolation is no longer the main artifact-hygiene follow-up.
-- [2026-03-28 10:23] The final cutover/default map is now recorded, so the hygiene plan only needs to keep the fixture-isolation follow-up and blocked-domain tail explicit.
+- [2026-03-28 10:23] The final cutover/default map is now recorded, so the hygiene plan only needs to keep the blocked-domain tail explicit.
 - [2026-03-28 10:51] `crates/commands/validation` now owns the doc-only XML validation path natively, and `crates/commands/runtime/maintenance` now owns `clean-build-artifacts` plus `trim-trailing-blank-lines`, so the remaining hygiene risk is concentrated in the still-blocked domains rather than in already-migrated slices.
+- [2026-03-28 11:16] `crates/commands/validation` now also owns native deploy preflight and native `check-test-naming`, so the remaining hygiene risk is concentrated in runtime hooks, partially native maintenance mutators, and the three-script non-runtime test automation tail.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks

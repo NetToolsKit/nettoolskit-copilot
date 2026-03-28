@@ -4,7 +4,7 @@ Generated: 2026-03-28 08:28
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:51
+- LastUpdated: 2026-03-28 11:22
 - Objective: consolidate the remaining backlog after README normalization and Waves 1-3 so the repository can reach a clean, evidence-backed Rust-default cutover.
 - Active Branch: `feature/native-validation-policy`
 - Inputs:
@@ -14,20 +14,20 @@ Generated: 2026-03-28 08:28
   - `planning/active/rust-script-parity-ledger.md`
   - `planning/active/rust-script-transcription-ownership-matrix.md`
   - `planning/active/rust-script-cutover-default-map.md`
-- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, the doc-only validator is native, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now only the blocked-domain tail.
+- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, the doc-only validator is native, deploy preflight is native, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now only the blocked-domain tail for runtime hooks, maintenance, and three non-runtime test automation scripts.
 
 ## Review Summary
 
 ### Closed Workstreams
 
 - `plan-readme-standards-repository-normalization.md`: complete; no remaining delivery backlog beyond keeping the validator green.
-- `plan-repository-unification-and-rust-migration.md`: Tasks 1-6 are complete; Task 7 is implementation-complete in practice and now needs status normalization; Task 8 is narrowed to the blocked-domain tail and fixture isolation.
+- `plan-repository-unification-and-rust-migration.md`: Tasks 1-6 are complete; Task 7 is implementation-complete in practice and now needs status normalization; Task 8 is narrowed to the blocked-domain tail only.
 - `rust-script-transcription-ownership-matrix.md`: still valid as the canonical inventory/owner map; only metadata and closeout linkage are stale.
 
 ### Open Workstreams
 
 - `plan-repository-operations-hygiene.md`: now records a green `fmt` / `clippy` / `test` / audit baseline, mixed EOF policy alignment, and the parity-harness cleanup closeout.
-- `rust-script-parity-ledger.md`: evidence policy remains valid, and the closeout notes now need to stay aligned with the native doc validator, the partially native maintenance cluster, and the explicit distinction between `parity proven` and `cutover ready`.
+- `rust-script-parity-ledger.md`: evidence policy remains valid, and the closeout notes now need to stay aligned with the native doc validator, native deploy preflight, the partially native maintenance cluster, and the split ownership between `check-test-naming` and the remaining non-runtime test automation scripts.
 - `rust-script-cutover-default-map.md`: records the final per-domain default decision and now removes the doc domain from the blocked set.
 
 ## Backlog Size Assessment
@@ -42,8 +42,7 @@ Generated: 2026-03-28 08:28
 1. Blocked-domain tail:
    - `scripts/runtime/hooks`
    - `scripts/maintenance`
-   - `scripts/deploy`
-   - `scripts/tests` excluding runtime
+   - `scripts/tests` excluding runtime and `check-test-naming`
 
 ## Ordered Tasks
 
@@ -67,6 +66,9 @@ Status: `[x]` Completed
   - `scripts/doc` is no longer part of the blocked tail because `validate-xml-documentation` now exists natively in `crates/commands/validation` and runs through `validate-all`
   - `scripts/maintenance` now has partial native ownership through `clean-build-artifacts` and `trim-trailing-blank-lines`
   - parity fixture cleanup is no longer open because tracked artifact restoration now uses Git-backed recovery and the projected POML assets are restored deterministically ✓ [2026-03-28 10:51]
+- [2026-03-28 11:16] Rebaselined the closeout state after the latest validation slices:
+  - `scripts/deploy` is no longer blocked because deploy preflight now runs natively in `crates/commands/validation/deploy`, while the PowerShell deploy executor stays as an intentionally retained compatibility wrapper
+  - `scripts/tests/check-test-naming.ps1` now belongs to the validation boundary, so the non-runtime test automation tail is reduced to three remaining scripts ✓ [2026-03-28 11:16]
 - Refresh metadata drift in the ownership matrix and active plan references.
 - Mark historical wave plans as implementation records and this plan as the owner of the open backlog.
 - Target paths:
@@ -123,6 +125,7 @@ Status: `[x]` Completed
   - implemented domains stay recorded as `parity proven`
   - maintenance, runtime hook, doc, deploy, and non-runtime test automation remain explicitly tracked as evidence gaps until their end-state decision is recorded ✓ [2026-03-28 10:00]
 - [2026-03-28 10:51] Closed the doc-domain evidence gap in the ledger and cutover map, leaving only runtime hooks, maintenance, deploy, and non-runtime test automation in the blocked tail ✓ [2026-03-28 10:51]
+- [2026-03-28 11:16] Closed the deploy-domain evidence gap and split `check-test-naming` out of the generic non-runtime test bucket, leaving only runtime hooks, maintenance, and three non-runtime test automation scripts in the blocked tail ✓ [2026-03-28 11:16]
 - Ensure the parity ledger explicitly covers:
   - `scripts/common`
   - `scripts/runtime`
@@ -132,7 +135,6 @@ Status: `[x]` Completed
   - `scripts/security`
   - `scripts/governance`
   - `scripts/doc`
-  - `scripts/deploy`
   - `scripts/orchestration`
   - `scripts/git-hooks`
   - `scripts/tests`
@@ -185,7 +187,7 @@ Status: `[ ]` Pending
 - Switch default operator flows to Rust for domains that are explicitly marked `Rust-default now` in the cutover map, while preserving approved wrappers for intentionally retained domains.
 - Preserve only approved fallback wrappers, with the reason recorded in planning.
 - Archive or downgrade the old active wave plans once the closeout state is green and unambiguous.
-- [2026-03-28 10:51] The remaining backlog is now limited to the still-blocked domains only; the domains already marked Rust-default now or compatibility-wrapper-retained are not part of the remaining execution backlog, and parity fixture isolation is no longer open.
+- [2026-03-28 11:16] The remaining backlog is now limited to runtime hooks, maintenance, and the three-script non-runtime test automation tail; the domains already marked Rust-default now or compatibility-wrapper-retained are not part of the remaining execution backlog.
 - Target paths:
   - `scripts/`
   - `crates/cli/`

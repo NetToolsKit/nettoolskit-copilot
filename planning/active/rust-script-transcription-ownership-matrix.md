@@ -4,7 +4,7 @@ Generated: 2026-03-26 17:05
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:51
+- LastUpdated: 2026-03-28 11:22
 - Objective: freeze the canonical PowerShell inventory, Rust owner boundary, target surface, and migration wave for every tracked script under `scripts/**/*.ps1`.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Source Spec: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
@@ -12,7 +12,7 @@ Generated: 2026-03-26 17:05
 - Active Branch: `feature/native-validation-policy`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 - Artifact Role: canonical inventory and ownership map only; execution and cutover state are tracked in the parity ledger and closeout plan.
-- Closeout Note: the inventory and owner boundaries remain unchanged after the latest closeout slices; the remaining open work is only the blocked-domain tail, because the wrapper/default decisioning now lives in the cutover map and parity cleanup is no longer an open backlog item.
+- Closeout Note: the inventory and owner boundaries remain unchanged after the latest closeout slices; the remaining open work is only runtime hooks, partially native maintenance, and the three-script non-runtime test automation tail, because the wrapper/default decisioning now lives in the cutover map and parity cleanup is no longer an open backlog item.
 
 ## Owner Summary
 
@@ -22,9 +22,9 @@ Generated: 2026-03-26 17:05
 | `crates/commands/runtime + crates/cli` | 42 | operator-facing runtime commands and compatibility entrypoints |
 | `crates/commands/runtime + crates/orchestrator` | 4 | runtime hook contracts bound to orchestration lifecycle |
 | `crates/commands/runtime` | 8 | maintenance and git hook operator flows |
-| `crates/commands/validation` | 41 | validation, security, governance, doc, and deploy-preflight surfaces |
+| `crates/commands/validation` | 42 | validation, security, governance, doc, deploy-preflight, and test-naming policy surfaces |
 | `crates/orchestrator` | 10 | staged control-plane execution and dispatch |
-| `crate test suites + root parity harness` | 27 | parity and migration-proof test replacement surface |
+| `crate test suites + root parity harness` | 26 | parity and migration-proof test replacement surface |
 | Total | 147 | full script estate locked for migration |
 
 ## Canonical Matrix
@@ -42,7 +42,8 @@ Generated: 2026-03-26 17:05
 | `scripts/deploy/*.ps1` | 1 | `crates/commands/validation` | `Wave 2` | validation deploy preflight contracts |
 | `scripts/orchestration/**/*.ps1` | 10 | `crates/orchestrator` | `Wave 3` | orchestrator stage and engine contracts |
 | `scripts/git-hooks/*.ps1` | 3 | `crates/commands/runtime` | `Wave 3` | runtime git hook install and check contracts |
-| `scripts/tests/*.ps1` excluding `scripts/tests/runtime/*.ps1` | 4 | `crate test suites + root parity harness` | `Wave 3` | root parity harness |
+| `scripts/tests/check-test-naming.ps1` | 1 | `crates/commands/validation` | `Wave 2` | validation test automation contracts |
+| `scripts/tests/*.ps1` excluding `check-test-naming.ps1` and `scripts/tests/runtime/*.ps1` | 3 | `crate test suites + root parity harness` | `Wave 3` | root parity harness |
 | `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | `Wave 3` | runtime parity harness |
 
 ## Locked Inventory
@@ -113,11 +114,17 @@ Generated: 2026-03-26 17:05
 - Wave: `Wave 3`
 - Included scripts: `invoke-pre-commit-eof-hygiene`, `setup-git-hooks`, `setup-global-git-aliases`
 
-### `scripts/tests/*.ps1` excluding runtime subfolder
+### `scripts/tests/check-test-naming.ps1`
+
+- Rust owner: `crates/commands/validation`
+- Wave: `Wave 2`
+- Included scripts: `check-test-naming`
+
+### `scripts/tests/*.ps1` excluding `check-test-naming.ps1` and runtime subfolder
 
 - Rust owner: `crate test suites + root parity harness`
 - Wave: `Wave 3`
-- Included scripts: `apply-aaa-pattern`, `check-test-naming`, `refactor_tests_to_aaa`, `run-coverage`
+- Included scripts: `apply-aaa-pattern`, `refactor_tests_to_aaa`, `run-coverage`
 
 ### `scripts/tests/runtime/*.ps1`
 

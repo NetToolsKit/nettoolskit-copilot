@@ -4,7 +4,7 @@ Generated: 2026-03-28 10:23
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:51
+- LastUpdated: 2026-03-28 11:22
 - Objective: record the final operator-default decision for each major script domain after the completed migration waves.
 - Source Inputs:
   - `planning/active/plan-rust-migration-closeout-and-cutover.md`
@@ -30,10 +30,10 @@ Generated: 2026-03-28 10:23
 | `scripts/security` | `Rust-default now` | Security baseline, checksum, and supply-chain checks are Rust-owned through the validation crate. | Security gates default to Rust-owned execution. |
 | `scripts/governance` | `Rust-default now` | Routing, template, and repository governance checks are implemented natively in Rust. | Governance checks default to Rust-owned execution. |
 | `scripts/doc` | `Rust-default now` | The doc-only validation script now has an explicit native replacement in `crates/commands/validation/documentation`, and `validate-all` routes it without the PowerShell bridge. | Documentation validation defaults to Rust-owned execution. |
-| `scripts/deploy` | `still blocked` | Deploy preflight ownership is mapped, but the closeout evidence is still missing. | Deployment preflight remains a blocked slice. |
+| `scripts/deploy` | `compatibility wrapper retained intentionally` | Deploy preflight is now Rust-native through `crates/commands/validation/deploy`, while the PowerShell entrypoint remains the approved SSH/SCP operational executor by design. | The deploy wrapper stays intentionally for remote execution. |
 | `scripts/orchestration` | `Rust-default now` | Stage orchestration, resume/replay, and parity harness coverage are Rust-owned and complete. | Control-plane execution defaults to Rust. |
 | `scripts/git-hooks` | `compatibility wrapper retained intentionally` | The hook install/check logic is Rust-owned, but the hook entrypoints remain a deliberate compatibility surface for Git-integrated workflows. | Wrapper remains by design for local hook integration. |
-| `scripts/tests` excluding runtime | `still blocked` | Non-runtime test automation still lacks explicit Rust-native replacement evidence. | Coverage automation remains open. |
+| `scripts/tests` excluding runtime | `still blocked` | `check-test-naming` is now Rust-native, but the remaining non-runtime test automation scripts still lack explicit Rust-native replacement evidence. | The blocked tail is limited to three scripts. |
 | `scripts/tests/runtime` | `compatibility wrapper retained intentionally` | The native parity harness is real, and the PowerShell test entrypoints remain only as a compatibility launch surface for runtime/operator workflows. | Compatibility wrapper remains by design while the Rust harness stays canonical. |
 
 ## Remaining Closeout Backlog
@@ -41,7 +41,6 @@ Generated: 2026-03-28 10:23
 - finalize the blocked domains:
   - `scripts/runtime/hooks`
   - `scripts/maintenance`
-  - `scripts/deploy`
   - `scripts/tests` excluding runtime
 - keep the compatibility wrapper decisions explicit for:
   - `scripts/git-hooks`
