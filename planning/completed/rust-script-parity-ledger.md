@@ -1,10 +1,10 @@
 # Rust Script Parity Ledger
 
-Generated: 2026-03-27 20:01
+Generated: 2026-03-28 18:41
 
 ## Status
 
-- LastUpdated: 2026-03-28 17:18
+- LastUpdated: 2026-03-28 18:41
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
 - Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
@@ -36,8 +36,10 @@ Generated: 2026-03-27 20:01
 | --- | ---: | --- | --- | --- |
 | `scripts/common/*.ps1` | 15 | `crates/core` | unit tests for path/catalog/runtime helpers plus fixture-based parity assertions | `parity proven` | Shared helper foundations are implemented and covered, and the cutover map now marks this domain Rust-default now. |
 | `scripts/runtime/*.ps1` excluding hooks | 42 | `crates/commands/runtime + crates/cli` | command-contract tests, CLI smoke checks, wrapper delegation proof | `parity proven` | Wave 1 runtime surface is implemented in Rust, docs present PowerShell as a compatibility layer, and the cutover map now marks this domain Rust-default now. |
-| `scripts/runtime/hooks/*.ps1` | 4 | `crates/commands/runtime + crates/orchestrator` | hook contract tests, orchestration integration tests, local hook dispatch smoke | `retained wrapper exception` | `pre-tool-use` now has a native Rust hook boundary with dedicated tests, while `common`, `session-start`, and `subagent-start` are explicitly retained startup wrappers for the VS Code/Codex hook contract. |
-| `scripts/maintenance/*.ps1` | 5 | `crates/commands/runtime` | command tests plus filesystem fixture validation for mutation-heavy flows | `retained wrapper exception` | `clean-build-artifacts`, `trim-trailing-blank-lines`, `fix-region-spacing`, and `fix-version-ranges` now run natively with direct tests; `generate-http-from-openapi` is an explicit retained generator wrapper around the external OpenAPI reader toolchain. |
+| `scripts/runtime/hooks/common.ps1`, `scripts/runtime/hooks/session-start.ps1`, `scripts/runtime/hooks/subagent-start.ps1` | 3 | `crates/commands/runtime + crates/orchestrator` | hook contract tests, orchestration integration tests, local hook dispatch smoke | `retained wrapper exception` | These three startup wrappers remain the approved compatibility launch surfaces for the VS Code/Codex hook contract. |
+| `scripts/runtime/hooks/pre-tool-use.ps1` | 1 | `crates/commands/runtime + crates/cli` | native hook tests, CLI runtime smoke checks, projected wrapper dispatch proof | `retired locally` | The local leaf was removed after `.github/hooks/scripts/pre-tool-use.ps1` and the provider-authored wrapper moved to `ntk runtime pre-tool-use`. |
+| `scripts/maintenance/generate-http-from-openapi.ps1` | 1 | `crates/commands/runtime` | external tool wrapper contract plus protected execution-path assertions | `retained wrapper exception` | The generator remains an explicit retained wrapper around the external OpenAPI reader toolchain. |
+| `scripts/maintenance/clean-build-artifacts.ps1`, `scripts/maintenance/fix-region-spacing.ps1`, `scripts/maintenance/fix-version-ranges.ps1`, `scripts/maintenance/trim-trailing-blank-lines.ps1` | 4 | `crates/commands/runtime + crates/cli` | command tests plus filesystem fixture validation for mutation-heavy flows | `retired locally` | All four local maintenance leaves were removed after their live consumers moved to native runtime commands and the remaining operator entrypoints were narrowed to retained compatibility wrappers only where policy requires them. |
 | `scripts/validation/*.ps1` | 31 | `crates/commands/validation` | policy tests, fixture validation, severity-preservation assertions | `parity proven` | Wave 2 validation orchestration and per-check native surfaces are recorded as complete, and the cutover map now marks this domain Rust-default now. |
 | `scripts/security/*.ps1` | 6 | `crates/commands/validation` | security gate tests, tool invocation contracts, failure-path assertions | `parity proven` | Native security policy coverage is recorded in the validation crate, and the cutover map now marks this domain Rust-default now. |
 | `scripts/governance/*.ps1` | 2 | `crates/commands/validation` | governance contract tests plus safe no-op / denied-path assertions | `parity proven` | Governance checks are implemented natively through the validation surface, and the cutover map now marks this domain Rust-default now. |

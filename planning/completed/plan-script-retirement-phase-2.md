@@ -8,7 +8,7 @@ Generated: 2026-03-28 21:43
 - Objective: retire the next safe local PowerShell slice by deleting `scripts/tests/check-test-naming.ps1` and `scripts/tests/refactor_tests_to_aaa.ps1` after migrating the remaining local contract references to the native Rust validation surfaces.
 - Normalized Request: keep deleting local `scripts/**/*.ps1` where Rust already owns behavior, use `C:\Users\tguis\copilot-instructions` only as an upstream instruction/reference source, and preserve repository guidance while shrinking the local PowerShell estate.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
-- Spec Path: `planning/specs/active/spec-script-retirement-phase-2.md`
+- Spec Path: `planning/specs/completed/spec-script-retirement-phase-2.md`
 - Inputs:
   - `C:\Users\tguis\copilot-instructions`
   - `planning/completed/plan-instruction-parity-and-script-retirement.md`

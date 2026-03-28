@@ -1,6 +1,6 @@
 # Script Retirement Phase 3
 
-Generated: 2026-03-28 17:46
+Generated: 2026-03-28 18:41
 
 ## Objective
 
@@ -13,23 +13,29 @@ by replacing their live consumer contracts with Rust-native invocation boundarie
 
 ## Context
 
-Phase 2 retired the validation-owned test automation wrappers and reduced the live local PowerShell estate to `141`. The backlog is smaller now, but the next two leaves are not metadata-only deletions:
+Phase 2 retired the validation-owned test automation wrappers and reduced the live local PowerShell estate to `141`. Phase 3 then completed the hook/EOF consumer decoupling and reduced the live local PowerShell estate to `139`.
 
-- `pre-tool-use.ps1` still sits in the hook bootstrap/projection chain and in validation checks that encode the legacy path
-- `trim-trailing-blank-lines.ps1` still sits in git-hook installation, global alias setup, and runtime parity tests
+- `pre-tool-use.ps1` no longer owns behavior locally; wrapper/bootstrap surfaces now dispatch through `ntk runtime pre-tool-use`
+- `trim-trailing-blank-lines.ps1` no longer owns behavior locally; git-hook installation, global alias setup, and runtime parity tests now dispatch through `ntk runtime trim-trailing-blank-lines`
 
-This means the next phase is a consumer-decoupling design problem before it becomes a deletion problem.
+This means the phase is no longer a design-only problem. The consumer cutover completed and both local leaves were retired safely.
 
 ## Current Slice Summary
 
-- live local script inventory: `141`
-- blocked leaves in scope: `2`
+- live local script inventory: `139`
+- blocked leaves in scope: `0`
 - native Rust owners already exist:
   - `crates/commands/runtime/src/hooks/pre_tool_use.rs`
   - Rust-owned EOF hygiene and hook setup surfaces in `crates/commands/runtime/src/hooks/`
 - upstream comparison result:
   - `C:\Users\tguis\copilot-instructions` still carries both PowerShell files
   - the authoritative guidance lives in instruction docs, hook bootstrap JSON, and runtime/operator documentation, not in the local leaves themselves
+
+## Outcome
+
+1. `scripts/runtime/hooks/pre-tool-use.ps1` was retired locally after `.github/hooks/scripts/pre-tool-use.ps1` and the provider-authored wrapper moved to the native `ntk runtime pre-tool-use` contract.
+2. `scripts/maintenance/trim-trailing-blank-lines.ps1` was retired locally after `git trim-eof`, managed pre-commit EOF hygiene, and bootstrap runtime projection moved to the native `ntk runtime trim-trailing-blank-lines` contract.
+3. The remaining hook wrappers are explicit compatibility launch surfaces, not accidental owners of the retired behavior.
 
 ## Design Decisions
 
@@ -73,6 +79,7 @@ Rejected for now. Retention may be the final outcome, but only after the consume
 3. Consumers and tests are updated to the new contract.
 4. Each leaf ends the phase either deleted or explicitly reclassified as an intentional retained wrapper.
 5. The retirement matrix and parity ledger are updated to the final state.
+6. Phase 3 is ready to archive because both in-scope leaves are now `retired locally`.
 
 ## Planning Readiness
 

@@ -1,17 +1,17 @@
 # Script Retirement Safety Matrix
 
-Generated: 2026-03-28 18:05
+Generated: 2026-03-28 18:41
 
 ## Status
 
-- LastUpdated: 2026-03-28 17:18
+- LastUpdated: 2026-03-28 18:41
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
-- Live Inventory After Executed Slice: `141`
+- Live Inventory After Executed Slice: `139`
 - Current Classification Totals:
-  - `retired in this workstream`: `6`
+  - `retired in this workstream`: `8`
   - `retain wrapper intentionally`: `33`
-  - `retain until consumer migration completes`: `108`
+  - `retain until consumer migration completes`: `106`
 - Decision Rule:
   - `remove-now candidate` means Rust parity exists and no blocking local consumer remains after same-slice doc cleanup.
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
@@ -27,6 +27,8 @@ Generated: 2026-03-28 18:05
 | `scripts/maintenance/clean-build-artifacts.ps1` | 1 | `crates/commands/runtime` | Only blocker was the artifact-layout guidance that named the wrapper directly. | Updated `.github/instructions/artifact-layout.instructions.md` and `definitions/shared/instructions/artifact-layout.instructions.md`. | retired |
 | `scripts/tests/check-test-naming.ps1` | 1 | `crates/commands/validation` | The only live blockers were `crates/commands/validation/src/contracts.rs` and `crates/commands/validation/tests/contracts_tests.rs`; both were cleared in the same slice. | Removed the legacy validation surface contract entries and deleted the wrapper. | retired |
 | `scripts/tests/refactor_tests_to_aaa.ps1` | 1 | `crates/commands/validation` | The only live blockers were `crates/commands/validation/src/contracts.rs` and `crates/commands/validation/tests/contracts_tests.rs`; both were cleared in the same slice. | Removed the legacy validation surface contract entries and deleted the wrapper. | retired |
+| `scripts/runtime/hooks/pre-tool-use.ps1` | 1 | `crates/commands/runtime + crates/cli` | Live consumer ownership moved to `.github/hooks/scripts/pre-tool-use.ps1`, `definitions/providers/github/hooks/scripts/pre-tool-use.ps1`, and the native `ntk runtime pre-tool-use` entrypoint. Validation still locks wrapper names, not the deleted local leaf. | Added executable runtime hook entrypoints, repointed projected wrappers to the managed runtime binary, removed the local leaf, and rebaselined runtime and validation inventory tests. | retired |
+| `scripts/maintenance/trim-trailing-blank-lines.ps1` | 1 | `crates/commands/runtime + crates/cli` | Git hook EOF hygiene, `git trim-eof`, bootstrap runtime projection, and runtime parity tests now dispatch through the projected `ntk` binary and `ntk runtime trim-trailing-blank-lines`. | Added executable runtime maintenance entrypoints, repointed git-hook and alias launchers, removed the local leaf, and rebaselined runtime parity tests. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -49,14 +51,13 @@ Generated: 2026-03-28 18:05
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/runtime/hooks/pre-tool-use.ps1` | 1 | hook contract and validation fixtures still depend on the script name/path | `.github/hooks/super-agent.bootstrap.json`, `definitions/providers/github/hooks/super-agent.bootstrap.json`, `crates/commands/validation/src/agent_orchestration/agent_hooks.rs`, `crates/commands/validation/tests/support/agent_orchestration_fixtures.rs`, `crates/commands/validation/tests/agent_orchestration/agent_hooks_tests.rs` |
-| `scripts/maintenance/trim-trailing-blank-lines.ps1` | 1 | runtime hook setup and parity tests still depend on the script path | `scripts/git-hooks/*.ps1`, `crates/commands/runtime/src/hooks/setup_git_hooks.rs`, `crates/commands/runtime/src/hooks/setup_global_git_aliases.rs`, `crates/commands/runtime/tests/hooks/*.rs`, `scripts/tests/runtime/*trim-trailing-blank-lines*` |
 ## Current Immediate Queue
 
-- No additional leaf is promoted to `remove-now candidate` yet.
-- The next consumer sweep is explicitly narrowed to:
-  - `scripts/runtime/hooks/pre-tool-use.ps1`
-  - `scripts/maintenance/trim-trailing-blank-lines.ps1`
+- No single-file `remove-now candidate` remains after Phase 3.
+- The next consumer sweep should move to domain-level proof for:
+  - `scripts/common/*.ps1`
+  - `scripts/runtime/*.ps1` excluding the retained hook wrappers
+  - `scripts/validation/*.ps1`
 
 ## Notes
 
@@ -64,5 +65,6 @@ Generated: 2026-03-28 18:05
 - `114` previously broad `Rust-default now` leaves were narrowed to `4` immediate deletion candidates for the first patch because this audit requires concrete local-consumer proof before removal.
 - The first execution slice retired those `4` leaves and reduced the live local `scripts/**/*.ps1` estate from `147` to `143`.
 - The second execution slice retired the validation-owned test automation wrappers `check-test-naming` and `refactor_tests_to_aaa`, reducing the live local estate from `143` to `141`.
+- The third execution slice retired `pre-tool-use` and `trim-trailing-blank-lines`, reducing the live local estate from `141` to `139`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
 - The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.
