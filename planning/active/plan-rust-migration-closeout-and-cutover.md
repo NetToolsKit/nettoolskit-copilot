@@ -4,7 +4,7 @@ Generated: 2026-03-28 08:28
 
 ## Status
 
-- LastUpdated: 2026-03-28 11:22
+- LastUpdated: 2026-03-28 16:10
 - Objective: consolidate the remaining backlog after README normalization and Waves 1-3 so the repository can reach a clean, evidence-backed Rust-default cutover.
 - Active Branch: `feature/native-validation-policy`
 - Inputs:
@@ -14,35 +14,34 @@ Generated: 2026-03-28 08:28
   - `planning/active/rust-script-parity-ledger.md`
   - `planning/active/rust-script-transcription-ownership-matrix.md`
   - `planning/active/rust-script-cutover-default-map.md`
-- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, the doc-only validator is native, deploy preflight is native, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now only the blocked-domain tail for runtime hooks, maintenance, and three non-runtime test automation scripts.
+- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package now has explicit end-state decisions for the full PowerShell estate: workspace hygiene gates are green, deploy/doc/test-automation closeout is aligned, `PreToolUse` is native, and the remaining shell-owned surfaces are now recorded as approved retained wrapper exceptions instead of blocked migration debt.
 
 ## Review Summary
 
 ### Closed Workstreams
 
 - `plan-readme-standards-repository-normalization.md`: complete; no remaining delivery backlog beyond keeping the validator green.
-- `plan-repository-unification-and-rust-migration.md`: Tasks 1-6 are complete; Task 7 is implementation-complete in practice and now needs status normalization; Task 8 is narrowed to the blocked-domain tail only.
-- `rust-script-transcription-ownership-matrix.md`: still valid as the canonical inventory/owner map; only metadata and closeout linkage are stale.
+- `plan-repository-unification-and-rust-migration.md`: Tasks 1-8 are now complete; the historical implementation plan is fully closed from a planning standpoint.
+- `rust-script-transcription-ownership-matrix.md`: aligned again with the final validation/test-automation ownership split and retained-wrapper notes.
 
-### Open Workstreams
+### Reference Workstreams
 
 - `plan-repository-operations-hygiene.md`: now records a green `fmt` / `clippy` / `test` / audit baseline, mixed EOF policy alignment, and the parity-harness cleanup closeout.
-- `rust-script-parity-ledger.md`: evidence policy remains valid, and the closeout notes now need to stay aligned with the native doc validator, native deploy preflight, the partially native maintenance cluster, and the split ownership between `check-test-naming` and the remaining non-runtime test automation scripts.
-- `rust-script-cutover-default-map.md`: records the final per-domain default decision and now removes the doc domain from the blocked set.
+- `rust-script-parity-ledger.md`: evidence policy remains valid, and the closeout notes now explicitly distinguish parity-proven domains from approved retained wrapper exceptions.
+- `rust-script-cutover-default-map.md`: now records the final per-domain default decision without any remaining blocked domains.
 
 ## Backlog Size Assessment
 
 - This is not another full `147`-script planning cycle.
 - The architecture, ownership, and most implementation waves are already in place.
-- The remaining backlog is now small-to-moderate and concentrated in closeout:
-  - one residual blocked-domain group that still needs native replacement evidence
+- The remaining migration backlog is now closed at the planning layer. What remains is an explicit retained-wrapper policy, not open execution debt.
 
 ## Remaining Open Backlog
 
-1. Blocked-domain tail:
-   - `scripts/runtime/hooks`
-   - `scripts/maintenance`
-   - `scripts/tests` excluding runtime and `check-test-naming`
+- No remaining execution backlog inside the migration plan.
+- The only remaining shell-owned surfaces are explicit retained wrapper exceptions recorded in:
+  - `planning/active/rust-script-cutover-default-map.md`
+  - `planning/active/rust-script-parity-ledger.md`
 
 ## Ordered Tasks
 
@@ -69,8 +68,12 @@ Status: `[x]` Completed
 - [2026-03-28 11:16] Rebaselined the closeout state after the latest validation slices:
   - `scripts/deploy` is no longer blocked because deploy preflight now runs natively in `crates/commands/validation/deploy`, while the PowerShell deploy executor stays as an intentionally retained compatibility wrapper
   - `scripts/tests/check-test-naming.ps1` now belongs to the validation boundary, so the non-runtime test automation tail is reduced to three remaining scripts ✓ [2026-03-28 11:16]
+- [2026-03-28 16:10] Rebaselined the closeout state after the latest runtime/test-automation slices:
+  - `scripts/runtime/hooks/pre-tool-use.ps1` now has a native Rust boundary in `crates/commands/runtime/hooks`
+  - `scripts/tests/refactor_tests_to_aaa.ps1` now belongs to the validation boundary beside `check-test-naming`
+  - `scripts/maintenance`, `scripts/runtime/hooks`, and `scripts/tests` excluding runtime are no longer treated as blocked domains; the remaining shell-owned behavior is now recorded as explicit retained wrapper exceptions ✓ [2026-03-28 16:10]
 - Refresh metadata drift in the ownership matrix and active plan references.
-- Mark historical wave plans as implementation records and this plan as the owner of the open backlog.
+- Mark historical wave plans as implementation records and this plan as the owner of the retained-wrapper policy state.
 - Target paths:
   - `planning/active/plan-rust-migration-closeout-and-cutover.md`
   - `planning/active/plan-repository-operations-hygiene.md`
@@ -165,8 +168,8 @@ Status: `[x]` Completed
 - [2026-03-28 09:32] Rebaselined CI and release workflows so Rust-owned release-governance and provenance checks are the canonical validated path ✓ [2026-03-28 09:32]
 - [2026-03-28 10:23] Recorded the final per-domain default map in `planning/active/rust-script-cutover-default-map.md`, explicitly separating Rust-default domains, compatibility wrappers retained intentionally, and still-blocked domains ✓ [2026-03-28 10:23]
 - Remaining work:
-  - keep the blocked-domain backlog explicit in Task 5
   - preserve compatibility-wrapper reasoning where intentionally retained
+  - preserve legacy integration-wrapper reasoning where shell-owned exceptions remain deliberate
 - Target paths:
   - `scripts/`
   - `README.md`
@@ -182,12 +185,16 @@ Status: `[x]` Completed
 
 ### Task 5: Execute Staged Wrapper And Default Cutover
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Switch default operator flows to Rust for domains that are explicitly marked `Rust-default now` in the cutover map, while preserving approved wrappers for intentionally retained domains.
 - Preserve only approved fallback wrappers, with the reason recorded in planning.
 - Archive or downgrade the old active wave plans once the closeout state is green and unambiguous.
 - [2026-03-28 11:16] The remaining backlog is now limited to runtime hooks, maintenance, and the three-script non-runtime test automation tail; the domains already marked Rust-default now or compatibility-wrapper-retained are not part of the remaining execution backlog.
+- [2026-03-28 16:10] Converted the final blocked-domain tail into explicit retained wrapper decisions:
+  - `scripts/runtime/hooks` now records a native `PreToolUse` boundary plus retained startup-hook glue
+  - `scripts/maintenance` now records one retained generator wrapper (`generate-http-from-openapi`) over an otherwise native domain
+  - `scripts/tests` excluding runtime now records two retained wrapper exceptions (`apply-aaa-pattern`, `run-coverage`) beside native `check-test-naming` and `refactor_tests_to_aaa` ✓ [2026-03-28 16:10]
 - Target paths:
   - `scripts/`
   - `crates/cli/`
@@ -202,7 +209,7 @@ Status: `[ ]` Pending
 
 ## Exit Criteria
 
-- one active plan owns the remaining open migration backlog
+- one active plan owns the migration closeout history and explicit retained-wrapper policy
 - the parity ledger matches real implementation status by domain
 - the workspace is green on `fmt`, `clippy`, tests, and security audit
 - wrapper/default end state is explicit for the full PowerShell estate
@@ -222,4 +229,4 @@ Status: `[ ]` Pending
 - Do not open new wave plans for already-owned script domains unless scope genuinely expands.
 - Keep commit messages in English and checkpoint-oriented.
 - Preserve fallback wrappers until the parity ledger marks the owning domain as `cutover ready`.
-- Archive or clearly demote completed historical plans once the closeout plan becomes the single open backlog owner.
+- Archive or clearly demote completed historical plans once the closeout plan becomes the single retained-wrapper policy reference.

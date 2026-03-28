@@ -4,7 +4,7 @@ Generated: 2026-03-28 10:23
 
 ## Status
 
-- LastUpdated: 2026-03-28 11:22
+- LastUpdated: 2026-03-28 16:10
 - Objective: record the final operator-default decision for each major script domain after the completed migration waves.
 - Source Inputs:
   - `planning/active/plan-rust-migration-closeout-and-cutover.md`
@@ -16,7 +16,7 @@ Generated: 2026-03-28 10:23
 - Decision Rule:
   - `Rust-default now` means the Rust surface is the canonical operating path and the PowerShell file remains only as a compatibility surface, if it remains at all.
   - `compatibility wrapper retained intentionally` means the PowerShell entrypoint stays in the repository by design, even though Rust owns the underlying behavior.
-  - `still blocked` means the domain does not yet have enough closeout evidence for a final default decision.
+  - `legacy integration wrapper retained intentionally` means the PowerShell script remains shell-owned by design because it is editor/toolchain/external-runtime glue, and the closeout plan treats it as an explicit exception rather than as unresolved migration debt.
 
 ## Domain Decisions
 
@@ -24,8 +24,8 @@ Generated: 2026-03-28 10:23
 | --- | --- | --- | --- |
 | `scripts/common` | `Rust-default now` | Shared primitives, catalogs, and runtime helpers are owned by `crates/core`; no operator-facing fallback is required for the shared helper layer. | Canonical support primitives live in Rust. |
 | `scripts/runtime` excluding hooks | `Rust-default now` | Runtime verbs, sync, diagnostics, and continuity flows are implemented in Rust, and the docs/workflows already frame PowerShell as compatibility-only. | Default operator runtime path is Rust-backed. |
-| `scripts/runtime/hooks` | `still blocked` | Hook dispatch and local hook ownership still lack a final Rust-default closeout decision. | Mixed EOF/hook behavior is aligned, but wrapper cutover is not approved yet. |
-| `scripts/maintenance` | `still blocked` | The cluster has partial Rust coverage, but not a complete native replacement record. | Mutation-heavy helpers still need explicit closeout evidence. |
+| `scripts/runtime/hooks` | `legacy integration wrapper retained intentionally` | `pre-tool-use` now has a native Rust boundary, while `common`, `session-start`, and `subagent-start` remain approved shell-owned startup glue for the VS Code/Codex hook contract. | The domain is no longer treated as blocked migration debt; the retained startup hooks are now explicit exceptions. |
+| `scripts/maintenance` | `compatibility wrapper retained intentionally` | Four maintenance mutators are native in Rust, and only `generate-http-from-openapi` remains as an approved generator wrapper around the existing external OpenAPI reader toolchain. | The maintenance domain is closed with one explicit retained wrapper. |
 | `scripts/validation` | `Rust-default now` | Wave 2 is complete and `validate-all` plus the individual checks are Rust-owned. | Validation is the canonical quality gate surface. |
 | `scripts/security` | `Rust-default now` | Security baseline, checksum, and supply-chain checks are Rust-owned through the validation crate. | Security gates default to Rust-owned execution. |
 | `scripts/governance` | `Rust-default now` | Routing, template, and repository governance checks are implemented natively in Rust. | Governance checks default to Rust-owned execution. |
@@ -33,19 +33,20 @@ Generated: 2026-03-28 10:23
 | `scripts/deploy` | `compatibility wrapper retained intentionally` | Deploy preflight is now Rust-native through `crates/commands/validation/deploy`, while the PowerShell entrypoint remains the approved SSH/SCP operational executor by design. | The deploy wrapper stays intentionally for remote execution. |
 | `scripts/orchestration` | `Rust-default now` | Stage orchestration, resume/replay, and parity harness coverage are Rust-owned and complete. | Control-plane execution defaults to Rust. |
 | `scripts/git-hooks` | `compatibility wrapper retained intentionally` | The hook install/check logic is Rust-owned, but the hook entrypoints remain a deliberate compatibility surface for Git-integrated workflows. | Wrapper remains by design for local hook integration. |
-| `scripts/tests` excluding runtime | `still blocked` | `check-test-naming` is now Rust-native, but the remaining non-runtime test automation scripts still lack explicit Rust-native replacement evidence. | The blocked tail is limited to three scripts. |
+| `scripts/tests` excluding runtime | `legacy integration wrapper retained intentionally` | `check-test-naming` and `refactor_tests_to_aaa` are now Rust-native, while `apply-aaa-pattern` and `run-coverage` remain approved wrappers for frontend/.NET-specific workflows that are not being re-homed in Rust. | The non-runtime test domain is closed with two explicit retained wrappers. |
 | `scripts/tests/runtime` | `compatibility wrapper retained intentionally` | The native parity harness is real, and the PowerShell test entrypoints remain only as a compatibility launch surface for runtime/operator workflows. | Compatibility wrapper remains by design while the Rust harness stays canonical. |
 
-## Remaining Closeout Backlog
+## Explicit Retained Exceptions
 
-- finalize the blocked domains:
-  - `scripts/runtime/hooks`
-  - `scripts/maintenance`
-  - `scripts/tests` excluding runtime
 - keep the compatibility wrapper decisions explicit for:
+  - `scripts/deploy`
   - `scripts/git-hooks`
+  - `scripts/maintenance` (`generate-http-from-openapi`)
   - `scripts/tests/runtime`
+- keep the legacy integration wrapper decisions explicit for:
+  - `scripts/runtime/hooks`
+  - `scripts/tests` excluding runtime (`apply-aaa-pattern`, `run-coverage`)
 
 ## Operating Rule
 
-No domain should move from `still blocked` to a default state without a corresponding planning update in the closeout plan and a matching parity-ledger note.
+No retained-wrapper domain should change status without a corresponding planning update in the closeout plan and a matching parity-ledger note.

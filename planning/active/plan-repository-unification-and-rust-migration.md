@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 11:22
+- LastUpdated: 2026-03-28 16:10
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -13,7 +13,7 @@ Generated: 2026-03-26 16:20
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
 - Cutover Map: `planning/active/rust-script-cutover-default-map.md`
-- Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
+- Remaining Open Backlog: explicit retained wrapper policy only; no remaining execution backlog
 - Historical Role: implementation record for the completed migration waves; the remaining open delivery backlog is now owned by the closeout plan.
 - Worktree Isolation: not recommended for this planning-only checkpoint; a dedicated branch is active in the current checkout.
 
@@ -86,7 +86,8 @@ The migration remains compatibility-first:
 - [2026-03-28 09:32] Repository/runtime/validation docs and release workflows now frame PowerShell as the compatibility layer over Rust-owned command surfaces.
 - [2026-03-28 09:58] Mixed `.editorconfig` EOF rules are now honored consistently across runtime Rust hooks, PowerShell maintenance scripts, and VS Code hook normalization.
 - [2026-03-28 10:00] The workspace closeout baseline is green again: `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and the Rust vulnerability audit all pass.
-- [2026-03-28 10:23] The final cutover/default map now records which major script domains are Rust-default now, intentionally wrapper-retained, or still blocked, so Task 8 can focus only on the remaining blocked slices.
+- [2026-03-28 10:23] The final cutover/default map now records which major script domains are Rust-default now, intentionally wrapper-retained, or explicitly retained as legacy integration wrappers, so Task 8 can close with explicit end-state decisions instead of implicit debt.
+- [2026-03-28 16:10] `crates/commands/runtime/hooks` now owns a native `PreToolUse` boundary, and `crates/commands/validation/operational_hygiene` now owns native `refactor_tests_to_aaa`, so the remaining shell-owned scripts are explicit retained wrapper exceptions rather than open migration slices.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -104,7 +105,7 @@ The migration remains compatibility-first:
 | `scripts/runtime`, `scripts/maintenance`, `scripts/git-hooks`, `scripts/runtime/hooks` | `crates/commands/runtime` plus `crates/cli` | Rust owns runtime verbs, bootstrap, render/sync, doctor, clean, recovery, local index, and hook install/check; PowerShell becomes wrapper-only. |
 | `scripts/validation`, `scripts/security`, `scripts/governance`, `scripts/doc`, `scripts/deploy`, `scripts/tests/check-test-naming.ps1` | `crates/commands/validation` | Rust owns standards validation, policy/security gates, governance checks, doc validation, deploy preflight, and the test-naming policy surface. |
 | `scripts/orchestration` | `crates/orchestrator` | Orchestrator remains the staged control plane and event dispatch layer. |
-| `scripts/tests` excluding `check-test-naming.ps1` and `tests/runtime` | Owning crate test suites plus root integration harnesses | Parity evidence moves into Rust test surfaces and stops depending on PowerShell harnesses. |
+| `scripts/tests` excluding `check-test-naming.ps1` and `tests/runtime` | Owning crate test suites plus root integration harnesses, with validation owning `refactor_tests_to_aaa` | Parity evidence moves into Rust test surfaces and stops depending on PowerShell harnesses, except for the explicit retained wrappers recorded in the cutover map. |
 | worker/retry runtime helpers | `crates/task-worker` | Keep background execution support narrow and reusable. |
 | top-level command exports | `crates/commands` | Aggregates migration subcrates once brought into test-contract compliance. |
 
@@ -377,7 +378,7 @@ Status: `[x]` Completed
 
 ### Task 8: Cut Over Defaults And Retire Legacy PowerShell Execution Safely
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Switch default operator flows to Rust only after all migration waves reach parity and documentation is updated
 - [2026-03-28 09:32] Repository/runtime/validation docs now describe the PowerShell entrypoints as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
@@ -387,11 +388,7 @@ Status: `[~]` In Progress
 - [2026-03-28 10:51] Closed the parity-fixture cleanup follow-up with Git-backed tracked-file restoration and explicit POML asset recovery, so Task 8 no longer carries artifact-isolation cleanup as open work ✓ [2026-03-28 10:51]
 - [2026-03-28 11:16] Implemented the native `validate-deploy-preflight` command in `crates/commands/validation/deploy` and wired it through `validate-all`, so `scripts/deploy` is now covered by an approved compatibility-wrapper-retained end state instead of remaining in the blocked tail ✓ [2026-03-28 11:16]
 - [2026-03-28 11:16] Implemented the native `validate-test-naming` command in `crates/commands/validation/operational_hygiene`, so `scripts/tests/check-test-naming.ps1` now belongs to the validation boundary and is no longer part of the generic non-runtime test automation tail ✓ [2026-03-28 11:16]
-- Remaining open work:
-  - finish the still-blocked domain tail:
-    - `scripts/runtime/hooks`
-    - `scripts/maintenance`
-    - `scripts/tests` excluding runtime and `check-test-naming`
+- [2026-03-28 16:10] Implemented the native `PreToolUse` runtime hook boundary in `crates/commands/runtime/hooks`, completed the validation-side ownership record for `refactor_tests_to_aaa`, and closed Task 8 by converting the last shell-owned maintenance, runtime-hook, and non-runtime test-automation surfaces into explicit retained wrapper exceptions in the cutover map ✓ [2026-03-28 16:10]
 - Target paths:
   - `scripts/`
   - `README.md`

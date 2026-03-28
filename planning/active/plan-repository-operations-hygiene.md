@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 11:22
+- LastUpdated: 2026-03-28 16:10
 - Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/native-validation-policy`
@@ -13,7 +13,7 @@ Generated: 2026-03-26 16:20
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
 - Cutover Map: `planning/active/rust-script-cutover-default-map.md`
-- Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
+- Remaining Open Backlog: explicit retained wrapper policy only; no remaining hygiene execution backlog
 - Historical Role: hygiene record for the migration waves; this artifact now owns only the remaining non-functional closeout gates.
 - Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
 
@@ -63,9 +63,10 @@ Current hygiene priorities for the migration:
 - [2026-03-28 10:00] `cargo test --workspace` passed.
 - [2026-03-28 10:00] `Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed.
 - [2026-03-28 10:51] Full-workspace parity runs now restore tracked repository artifacts through Git-backed recovery and restore projected POML assets explicitly, so fixture isolation is no longer the main artifact-hygiene follow-up.
-- [2026-03-28 10:23] The final cutover/default map is now recorded, so the hygiene plan only needs to keep the blocked-domain tail explicit.
+- [2026-03-28 10:23] The final cutover/default map is now recorded, so the hygiene plan only needs to keep retained-wrapper decisions explicit.
 - [2026-03-28 10:51] `crates/commands/validation` now owns the doc-only XML validation path natively, and `crates/commands/runtime/maintenance` now owns `clean-build-artifacts` plus `trim-trailing-blank-lines`, so the remaining hygiene risk is concentrated in the still-blocked domains rather than in already-migrated slices.
 - [2026-03-28 11:16] `crates/commands/validation` now also owns native deploy preflight and native `check-test-naming`, so the remaining hygiene risk is concentrated in runtime hooks, partially native maintenance mutators, and the three-script non-runtime test automation tail.
+- [2026-03-28 16:10] `crates/commands/runtime` now also owns native `PreToolUse` hook normalization, `crates/commands/runtime/maintenance` owns four of the five maintenance scripts natively, and `crates/commands/validation` now owns native `refactor_tests_to_aaa`; the remaining shell-owned behavior is tracked as explicit retained wrapper exceptions rather than as hygiene backlog.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -207,7 +208,7 @@ Status: `[x]` Completed
 
 ### Task 5: Preserve Artifact Hygiene And Operator Recovery Paths During Transition
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Keep `.build/`, `.deployment/`, local runtime state, and recovery helpers stable while the execution engine changes underneath
 - [2026-03-26 20:33] Migrated `self-heal` orchestration into `crates/commands/runtime`, preserving JSON/log evidence and repair sequencing while keeping the optional VS Code template bridge explicit ✓ [2026-03-26 20:33]
@@ -216,6 +217,7 @@ Status: `[~]` In Progress
 - [2026-03-26 21:32] Migrated the bootstrap provider render dispatcher into `crates/commands/runtime`, so repository projection and runtime sync now share the same Rust-owned execution path for the bootstrap consumer ✓ [2026-03-26 21:32]
 - [2026-03-26 21:39] Migrated the bootstrap MCP config rewrite into `crates/commands/runtime`, so runtime sync now owns both the catalog-driven Codex config projection and backup behavior without the PowerShell helper ✓ [2026-03-26 21:39]
 - [2026-03-28 10:51] Runtime repair flows are no longer the dominant gap, and parity closeout now restores tracked/projection artifacts deterministically; the remaining hygiene backlog is the still-blocked domain tail rather than artifact cleanup noise.
+- [2026-03-28 16:10] Recorded the last shell-owned maintenance, runtime-hook, and non-runtime test-automation surfaces as explicit retained wrapper exceptions in the cutover map, so artifact hygiene no longer carries open migration backlog beyond keeping the workspace green ✓ [2026-03-28 16:10]
 - Target paths:
   - `.build/`
   - `.deployment/`
