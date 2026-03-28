@@ -220,6 +220,38 @@ pub enum RuntimeCleanBuildArtifactsCommandError {
     },
 }
 
+/// Errors raised by runtime fix-region-spacing commands.
+#[derive(Debug, Error)]
+pub enum RuntimeFixRegionSpacingCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime fix-region-spacing workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target path resolution failed.
+    #[error("failed to resolve runtime fix-region-spacing target path")]
+    ResolveTargetPath {
+        /// Resolved target path expected by the command.
+        target_path: String,
+    },
+    /// File discovery failed.
+    #[error("failed to discover runtime fix-region-spacing files")]
+    DiscoverFiles {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// File normalization failed.
+    #[error("failed to normalize runtime fix-region-spacing file contents")]
+    NormalizeFiles {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime VS Code template apply commands.
 #[derive(Debug, Error)]
 pub enum RuntimeApplyVscodeTemplatesCommandError {

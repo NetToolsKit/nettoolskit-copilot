@@ -34,7 +34,7 @@ pub use diagnostics::self_heal::{
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeCleanBuildArtifactsCommandError,
-    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimeDoctorCommandError, RuntimeFixRegionSpacingCommandError, RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
     RuntimeSetupGitHooksCommandError, RuntimeSetupGlobalGitAliasesCommandError,
     RuntimeSurfaceError, RuntimeTrimTrailingBlankLinesCommandError,
@@ -53,6 +53,10 @@ pub use hooks::setup_global_git_aliases::{
 pub use maintenance::clean_build_artifacts::{
     invoke_clean_build_artifacts, RuntimeCleanBuildArtifactsRequest,
     RuntimeCleanBuildArtifactsResult, RuntimeCleanBuildArtifactsStatus,
+};
+pub use maintenance::fix_region_spacing::{
+    invoke_fix_region_spacing, RuntimeFixRegionSpacingRequest, RuntimeFixRegionSpacingResult,
+    RuntimeFixRegionSpacingStatus,
 };
 pub use maintenance::trim_trailing_blank_lines::{
     invoke_trim_trailing_blank_lines, RuntimeTrimTrailingBlankLinesRequest,
