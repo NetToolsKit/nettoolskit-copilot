@@ -111,7 +111,10 @@ try {
         'root = true',
         '',
         '[*]',
-        'insert_final_newline = false'
+        'insert_final_newline = false',
+        '',
+        '[*.{rs,toml,lock}]',
+        'insert_final_newline = true'
     )
     Set-Content -LiteralPath (Join-Path $workspacePath '.github\governance\local-context-index.catalog.json') -Value @(
         '{',
@@ -205,9 +208,22 @@ try {
         }
     }
 
+    $preToolCreateRustPayload = [ordered]@{
+        cwd = $workspacePath
+        sessionId = 'session-123'
+        hookEventName = 'PreToolUse'
+        tool_name = 'createFile'
+        tool_use_id = 'tool-789'
+        tool_input = [ordered]@{
+            filePath = (Join-Path $workspacePath 'src/lib.rs')
+            content = "pub fn sample() {}`n"
+        }
+    }
+
     $sessionResult = Invoke-HookScript -ScriptPath $sessionStartScript -Payload $sessionPayload
     $preToolReplaceResult = Invoke-HookScript -ScriptPath $preToolUseScript -Payload $preToolReplacePayload
     $preToolCreateResult = Invoke-HookScript -ScriptPath $preToolUseScript -Payload $preToolCreatePayload
+    $preToolCreateRustResult = Invoke-HookScript -ScriptPath $preToolUseScript -Payload $preToolCreateRustPayload
     $subagentResult = Invoke-HookScript -ScriptPath $subagentStartScript -Payload $subagentPayload
 
     Assert-True ($sessionResult.hookSpecificOutput.hookEventName -eq 'SessionStart') 'SessionStart hook should return SessionStart payload.'
@@ -223,15 +239,17 @@ try {
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Local context refs:') 'SessionStart hook should include local context references when an index is available.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'README\.md') 'SessionStart hook should mention one indexed repository file in the local context references.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'resume from these artifacts first') 'SessionStart hook should tell the agent to resume from plan/spec after compaction.'
-    Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SessionStart hook should mention the repository EOF policy.'
+    Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SessionStart hook should mention the repository default EOF policy.'
+    Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'narrower \.editorconfig overrides may require a terminal newline') 'SessionStart hook should mention narrower EOF overrides when the workspace defines mixed rules.'
     Assert-True ([string] $sessionResult.hookSpecificOutput.additionalContext -match 'Keep non-versioned build outputs under \.build/ and deployment/runtime publish outputs under \.deployment/') 'SessionStart hook should mention the shared artifact layout policy.'
     Assert-True (Test-Path -LiteralPath $housekeepingRecordPath -PathType Leaf) 'SessionStart hook should dispatch housekeeping when the throttle window has expired.'
     Assert-True (Test-Path -LiteralPath $housekeepingStatePath -PathType Leaf) 'SessionStart hook should persist housekeeping state.'
 
     Assert-True ($preToolReplaceResult.hookSpecificOutput.hookEventName -eq 'PreToolUse') 'PreToolUse hook should return PreToolUse payload.'
-    Assert-True ([string] $preToolReplaceResult.hookSpecificOutput.additionalContext -match 'do not append a terminal newline') 'PreToolUse hook should remind the model about the EOF policy.'
+    Assert-True ([string] $preToolReplaceResult.hookSpecificOutput.additionalContext -match 'narrower \.editorconfig overrides may require a terminal newline') 'PreToolUse hook should mention mixed EOF rules when the workspace defines them.'
     Assert-True ([string] $preToolReplaceResult.hookSpecificOutput.updatedInput.newString -eq 'after') 'PreToolUse hook should strip a terminal newline from replaceString.newString.'
     Assert-True ([string] $preToolCreateResult.hookSpecificOutput.updatedInput.content -eq "line one`nline two") 'PreToolUse hook should strip a terminal newline from createFile.content.'
+    Assert-True ($null -eq $preToolCreateRustResult.hookSpecificOutput.PSObject.Properties['updatedInput']) 'PreToolUse hook must leave Rust createFile content untouched when insert_final_newline = true already matches the payload.'
 
     $firstRecord = Get-Content -Raw -LiteralPath $housekeepingRecordPath | ConvertFrom-Json -Depth 20
     Assert-True ([string] $firstRecord.workspacePath -eq $workspacePath) 'Housekeeping record should target the active workspace.'
@@ -245,7 +263,8 @@ try {
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Planning root: planning/active') 'SubagentStart hook should preserve workspace planning roots.'
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Continuity summary:') 'SubagentStart hook should propagate the continuity summary.'
     Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'Local context refs:') 'SubagentStart hook should propagate local context references when an index is available.'
-    Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SubagentStart hook should preserve workspace EOF guidance.'
+    Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'insert_final_newline = false') 'SubagentStart hook should preserve the repository default EOF guidance.'
+    Assert-True ([string] $subagentResult.hookSpecificOutput.additionalContext -match 'narrower \.editorconfig overrides may require a terminal newline') 'SubagentStart hook should mention narrower EOF overrides when the workspace defines mixed rules.'
     Assert-True (-not (Test-Path -LiteralPath $housekeepingRecordPath -PathType Leaf)) 'SubagentStart hook should not re-dispatch housekeeping inside the throttle window.'
 
     $stateFile = Get-Content -Raw -LiteralPath $housekeepingStatePath | ConvertFrom-Json -Depth 20
