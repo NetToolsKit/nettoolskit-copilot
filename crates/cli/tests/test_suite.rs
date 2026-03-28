@@ -19,3 +19,6 @@ mod error_tests;
 
 #[path = "runtime_commands_tests.rs"]
 mod runtime_commands_tests;
+
+#[path = "validation_commands_tests.rs"]
+mod validation_commands_tests;

@@ -1,17 +1,17 @@
 # Script Retirement Safety Matrix
 
-Generated: 2026-03-28 19:18
+Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-03-28 19:18
+- LastUpdated: 2026-03-28 19:39
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
-- Live Inventory After Executed Slice: `135`
+- Live Inventory After Executed Slice: `132`
 - Current Classification Totals:
-  - `retired in this workstream`: `12`
+  - `retired in this workstream`: `15`
   - `retain wrapper intentionally`: `33`
-  - `retain until consumer migration completes`: `102`
+  - `retain until consumer migration completes`: `99`
 - Decision Rule:
   - `remove-now candidate` means Rust parity exists and no blocking local consumer remains after same-slice doc cleanup.
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
@@ -30,6 +30,7 @@ Generated: 2026-03-28 19:18
 | `scripts/runtime/hooks/pre-tool-use.ps1` | 1 | `crates/commands/runtime + crates/cli` | Live consumer ownership moved to `.github/hooks/scripts/pre-tool-use.ps1`, `definitions/providers/github/hooks/scripts/pre-tool-use.ps1`, and the native `ntk runtime pre-tool-use` entrypoint. Validation still locks wrapper names, not the deleted local leaf. | Added executable runtime hook entrypoints, repointed projected wrappers to the managed runtime binary, removed the local leaf, and rebaselined runtime and validation inventory tests. | retired |
 | `scripts/maintenance/trim-trailing-blank-lines.ps1` | 1 | `crates/commands/runtime + crates/cli` | Git hook EOF hygiene, `git trim-eof`, bootstrap runtime projection, and runtime parity tests now dispatch through the projected `ntk` binary and `ntk runtime trim-trailing-blank-lines`. | Added executable runtime maintenance entrypoints, repointed git-hook and alias launchers, removed the local leaf, and rebaselined runtime parity tests. | retired |
 | `scripts/runtime/update-local-context-index.ps1`, `scripts/runtime/query-local-context-index.ps1`, `scripts/runtime/export-planning-summary.ps1`, `scripts/runtime/apply-vscode-templates.ps1` | 4 | `crates/commands/runtime + crates/cli` | The only remaining blockers were runtime housekeeping, self-heal, authored docs, validation inventory, and parity tests that still hardcoded the local leaf paths; all were cleared in the same slice. | Added native `ntk runtime` entrypoints, repointed runtime consumers/docs/tests to the executable contract, deleted the four local leaves, and archived Phase 4. | retired |
+| `scripts/validation/validate-routing-coverage.ps1`, `scripts/validation/validate-architecture-boundaries.ps1`, `scripts/validation/validate-audit-ledger.ps1` | 3 | `crates/commands/validation + crates/cli` | The remaining blockers were `validate-all.ps1`, validation inventories, and governance/release evidence that still treated the `.ps1` paths as canonical. | Added `ntk validation` entrypoints, repointed `validate-all.ps1` to the native boundary, removed the wrapper paths from policy/inventory surfaces, deleted the three leaves, and archived Phase 5. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -48,17 +49,17 @@ Generated: 2026-03-28 19:18
 | --- | ---: | --- | --- |
 | `scripts/common/*.ps1` | 15 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/runtime/*.ps1` excluding hooks | 38 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/validation/*.ps1` | 31 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
+| `scripts/validation/*.ps1` | 28 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 ## Current Immediate Queue
 
-- No single-file `remove-now candidate` remains after Phase 4.
+- No single-file `remove-now candidate` remains after Phase 5.
 - The next consumer sweep should move to domain-level proof for:
   - `scripts/common/*.ps1`
   - `scripts/runtime/*.ps1` excluding the retained hook wrappers and the Phase 4 retired continuity/template leaves
-  - `scripts/validation/*.ps1`
+  - `scripts/validation/*.ps1`, starting with the remaining suite-orchestrated and policy-heavy wrapper surfaces
 
 ## Notes
 
@@ -68,5 +69,6 @@ Generated: 2026-03-28 19:18
 - The second execution slice retired the validation-owned test automation wrappers `check-test-naming` and `refactor_tests_to_aaa`, reducing the live local estate from `143` to `141`.
 - The third execution slice retired `pre-tool-use` and `trim-trailing-blank-lines`, reducing the live local estate from `141` to `139`.
 - The fourth execution slice retired `update-local-context-index`, `query-local-context-index`, `export-planning-summary`, and `apply-vscode-templates`, reducing the live local estate from `139` to `135`.
+- The fifth execution slice retired `validate-routing-coverage`, `validate-architecture-boundaries`, and `validate-audit-ledger`, reducing the live local estate from `135` to `132`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
 - The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.

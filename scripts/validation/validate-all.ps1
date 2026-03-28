@@ -120,7 +120,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'validation-logging')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'validation-logging')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ValidationState -VerboseEnabled $script:IsVerboseEnabled
@@ -648,6 +648,117 @@ function Invoke-ValidationScript {
     }
 }
 
+function Convert-ValidationParameterNameToCliOption {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Name
+    )
+
+    $kebab = [regex]::Replace($Name, '([a-z0-9])([A-Z])', '$1-$2').ToLowerInvariant()
+    return "--$kebab"
+}
+
+function Convert-ValidationArgumentsToCliArguments {
+    param(
+        [hashtable] $Arguments,
+        [string[]] $ValueBooleanParameters = @()
+    )
+
+    $cliArguments = New-Object System.Collections.Generic.List[string]
+    if ($null -eq $Arguments) {
+        return @()
+    }
+
+    foreach ($entry in ($Arguments.GetEnumerator() | Sort-Object -Property Name)) {
+        $optionName = Convert-ValidationParameterNameToCliOption -Name ([string] $entry.Key)
+        $value = $entry.Value
+        if ($null -eq $value) {
+            continue
+        }
+
+        if ($value -is [bool]) {
+            if ($ValueBooleanParameters -contains [string] $entry.Key) {
+                $cliArguments.Add($optionName)
+                $cliArguments.Add(([string] $value).ToLowerInvariant())
+            }
+            elseif ([bool] $value) {
+                $cliArguments.Add($optionName)
+            }
+
+            continue
+        }
+
+        $stringValue = [string] $value
+        if ([string]::IsNullOrWhiteSpace($stringValue)) {
+            continue
+        }
+
+        $cliArguments.Add($optionName)
+        $cliArguments.Add($stringValue)
+    }
+
+    return @($cliArguments)
+}
+
+function Invoke-NativeValidationCommand {
+    param(
+        [string] $Root,
+        [string] $Name,
+        [string] $SurfaceId,
+        [string[]] $CommandSegments,
+        [hashtable] $Arguments,
+        [string[]] $ValueBooleanParameters = @(),
+        [bool] $TreatFailureAsWarning
+    )
+
+    $startedAt = Get-Date
+    $status = 'failed'
+    $exitCode = 1
+    $errorMessage = $null
+
+    Write-StyledOutput ("[RUN] {0}" -f $Name)
+    try {
+        $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $Root -RuntimePreference github
+        $cliArguments = Convert-ValidationArgumentsToCliArguments -Arguments $Arguments -ValueBooleanParameters $ValueBooleanParameters
+        & $runtimeBinaryPath @CommandSegments @cliArguments | Out-Host
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+
+        if ($exitCode -eq 0) {
+            $status = 'passed'
+            Write-StyledOutput ("[OK] {0}" -f $Name)
+        }
+        elseif ($TreatFailureAsWarning) {
+            $status = 'warning'
+            $exitCode = 0
+            Write-StyledOutput ("[WARN] {0} (non-zero exit converted to warning)" -f $Name)
+        }
+        else {
+            Write-StyledOutput ("[FAIL] {0} (exit code {1})" -f $Name, $exitCode)
+        }
+    }
+    catch {
+        $errorMessage = $_.Exception.Message
+        if ($TreatFailureAsWarning) {
+            $status = 'warning'
+            $exitCode = 0
+            Write-StyledOutput ("[WARN] {0} (exception converted to warning: {1})" -f $Name, $errorMessage)
+        }
+        else {
+            Write-StyledOutput ("[FAIL] {0} (exception: {1})" -f $Name, $errorMessage)
+        }
+    }
+
+    $finishedAt = Get-Date
+    return [pscustomobject]@{
+        name = $Name
+        script = $SurfaceId
+        status = $status
+        exitCode = $exitCode
+        durationMs = [int] ($finishedAt - $startedAt).TotalMilliseconds
+        error = $errorMessage
+    }
+}
+
 # -------------------------------
 # Main execution
 # -------------------------------
@@ -713,7 +824,11 @@ $baseCheckDefinitions['validate-planning-structure'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-routing-coverage'] = [pscustomobject]@{
     name = 'validate-routing-coverage'
-    script = 'scripts/validation/validate-routing-coverage.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-routing-coverage'
+    command = @('validation', 'routing-coverage')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-authoritative-source-policy'] = [pscustomobject]@{
@@ -793,7 +908,9 @@ $baseCheckDefinitions['validate-dotnet-standards'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-architecture-boundaries'] = [pscustomobject]@{
     name = 'validate-architecture-boundaries'
-    script = 'scripts/validation/validate-architecture-boundaries.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-architecture-boundaries'
+    command = @('validation', 'architecture-boundaries')
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-instruction-metadata'] = [pscustomobject]@{
@@ -818,7 +935,11 @@ $baseCheckDefinitions['validate-release-provenance'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-audit-ledger'] = [pscustomobject]@{
     name = 'validate-audit-ledger'
-    script = 'scripts/validation/validate-audit-ledger.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-audit-ledger'
+    command = @('validation', 'audit-ledger')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 
@@ -888,17 +1009,47 @@ foreach ($checkName in $selectedCheckOrder) {
         $checkArguments[$optionKey] = $checkOptions[$optionKey]
     }
 
-    $resolvedScriptPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $definition.script
-    if (Test-ScriptSupportsParameter -ScriptPath $resolvedScriptPath -ParameterName 'WarningOnly') {
-        $checkArguments['WarningOnly'] = $checkWarningOnly
+    $runner = if ($definition.PSObject.Properties.Name -contains 'runner') {
+        [string] $definition.runner
+    }
+    else {
+        'script'
     }
 
-    $result = Invoke-ValidationScript `
-        -Root $resolvedRepoRoot `
-        -Name $definition.name `
-        -RelativeScriptPath $definition.script `
-        -Arguments $checkArguments `
-        -TreatFailureAsWarning:$checkWarningOnly
+    if ($runner -eq 'native') {
+        if (($definition.PSObject.Properties.Name -contains 'supportsWarningOnly') -and [bool] $definition.supportsWarningOnly) {
+            $checkArguments['WarningOnly'] = $checkWarningOnly
+        }
+
+        $warningOnlyArgumentNames = if ($definition.PSObject.Properties.Name -contains 'warningOnlyArgumentNames') {
+            @($definition.warningOnlyArgumentNames | ForEach-Object { [string] $_ })
+        }
+        else {
+            @()
+        }
+
+        $result = Invoke-NativeValidationCommand `
+            -Root $resolvedRepoRoot `
+            -Name $definition.name `
+            -SurfaceId ([string] $definition.surfaceId) `
+            -CommandSegments @($definition.command | ForEach-Object { [string] $_ }) `
+            -Arguments $checkArguments `
+            -ValueBooleanParameters $warningOnlyArgumentNames `
+            -TreatFailureAsWarning:$checkWarningOnly
+    }
+    else {
+        $resolvedScriptPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path $definition.script
+        if (Test-ScriptSupportsParameter -ScriptPath $resolvedScriptPath -ParameterName 'WarningOnly') {
+            $checkArguments['WarningOnly'] = $checkWarningOnly
+        }
+
+        $result = Invoke-ValidationScript `
+            -Root $resolvedRepoRoot `
+            -Name $definition.name `
+            -RelativeScriptPath $definition.script `
+            -Arguments $checkArguments `
+            -TreatFailureAsWarning:$checkWarningOnly
+    }
 
 $results.Add($result) | Out-Null
 }

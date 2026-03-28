@@ -52,7 +52,7 @@ These files are validated through the governance and provenance baselines so onb
    - `pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -WarningOnly:$false`
    - `pwsh -File .\scripts\validation\validate-release-governance.ps1`
    - `pwsh -File .\scripts\validation\validate-release-provenance.ps1`
-   - `pwsh -File .\scripts\validation\validate-audit-ledger.ps1`
+   - `ntk validation audit-ledger --warning-only false`
    - `pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release`
 2. Confirm branch protection drift is zero:
    - `pwsh -File .\scripts\governance\set-branch-protection.ps1`
