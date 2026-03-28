@@ -69,6 +69,24 @@ jobs:
       - name: Run tests
         run: cargo test --workspace
 
+  # ─── Release / Cutover Governance Gate ───────────────────────
+  cutover-governance:
+    name: Cutover Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: cutover-governance
+      - name: Release governance tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_release_governance_
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_release_provenance_
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_compatibility_lifecycle_policy_
+
   # ─── AI Safety/Resilience Gate ────────────────────────────────
   ai-gate:
     name: AI Gate

@@ -1,6 +1,6 @@
 # Release Artifact Verification Guide
 
-This runbook explains how to verify official `ntk` release artifacts after a tag is published.
+This runbook explains how to verify official `ntk` release artifacts after a tag is published from `ThiagoGuislotti/nettoolskit-copilot`.
 
 ## Purpose
 
@@ -33,10 +33,12 @@ This repository provides a manual GitHub Actions workflow for published release 
 It validates:
 
 - release tag format
+- release governance and provenance smoke through the Rust validation crate
 - artifact signature/certificate (`cosign verify-blob`) for binaries, checksums, and SBOMs
 - artifact checksum (`.sha256`)
 - SBOM metadata sanity (`CycloneDX` and `SPDX` format headers)
-- packaged binary smoke commands (`--version`, `--help`, `manifest --help`)
+- packaged binary smoke commands (`--version`, `--help`, `manifest --help`, `service --help`)
+- packaged service startup and `/health` smoke checks
 
 ## 1. Download assets for a release tag
 
@@ -44,7 +46,7 @@ Example for tag `v1.0.0`:
 
 ```bash
 TAG="v1.0.0"
-gh release download "$TAG" --repo ThiagoGuislotti/nettoolskit-cli --pattern "ntk-*"
+gh release download "$TAG" --repo ThiagoGuislotti/nettoolskit-copilot --pattern "ntk-*"
 ```
 
 ## 2. Verify checksum integrity
@@ -82,7 +84,7 @@ ASSET="ntk-1.0.0-x86_64-unknown-linux-gnu.tar.gz"
 cosign verify-blob \
   --certificate "${ASSET}.pem" \
   --signature "${ASSET}.sig" \
-  --certificate-identity-regexp "^https://github.com/ThiagoGuislotti/nettoolskit-cli/.github/workflows/release.yml@refs/tags/v[0-9]+\\.[0-9]+\\.[0-9]+.*$" \
+  --certificate-identity-regexp "^https://github.com/ThiagoGuislotti/nettoolskit-copilot/.github/workflows/release.yml@refs/tags/v[0-9]+\\.[0-9]+\\.[0-9]+.*$" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   "${ASSET}"
 ```
