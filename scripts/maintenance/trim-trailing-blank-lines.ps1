@@ -137,6 +137,143 @@ function Test-GitAvailable {
     return ($null -ne $gitCommand)
 }
 
+# Expands a single `{a,b}` EditorConfig brace pattern into flat patterns.
+function Expand-EditorConfigBracePattern {
+    param(
+        [string] $Pattern
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Pattern)) {
+        return @($Pattern)
+    }
+
+    $openIndex = $Pattern.IndexOf('{')
+    if ($openIndex -lt 0) {
+        return @($Pattern)
+    }
+
+    $closeIndex = $Pattern.IndexOf('}', $openIndex + 1)
+    if ($closeIndex -lt 0) {
+        return @($Pattern)
+    }
+
+    $prefix = $Pattern.Substring(0, $openIndex)
+    $suffix = $Pattern.Substring($closeIndex + 1)
+    $inner = $Pattern.Substring($openIndex + 1, $closeIndex - $openIndex - 1)
+    $expandedPatterns = New-Object System.Collections.Generic.List[string]
+
+    foreach ($part in ($inner -split ',')) {
+        $trimmedPart = [string] $part
+        $trimmedPart = $trimmedPart.Trim()
+        if (-not [string]::IsNullOrWhiteSpace($trimmedPart)) {
+            $expandedPatterns.Add(('{0}{1}{2}' -f $prefix, $trimmedPart, $suffix)) | Out-Null
+        }
+    }
+
+    if ($expandedPatterns.Count -eq 0) {
+        return @($Pattern)
+    }
+
+    return @($expandedPatterns)
+}
+
+# Converts a minimal EditorConfig glob pattern into a regex matcher.
+function Convert-EditorConfigGlobToRegex {
+    param(
+        [string] $Pattern
+    )
+
+    $normalizedPattern = ([string] $Pattern) -replace '\\', '/'
+    $escapedPattern = [Regex]::Escape($normalizedPattern)
+    $escapedPattern = $escapedPattern -replace '\\\*\\\*', '.*'
+    $escapedPattern = $escapedPattern -replace '\\\*', '[^/]*'
+    $escapedPattern = $escapedPattern -replace '\\\?', '[^/]'
+
+    return ('^{0}$' -f $escapedPattern)
+}
+
+# Returns true when an EditorConfig section pattern applies to the target file.
+function Test-EditorConfigPatternMatch {
+    param(
+        [string] $RelativePath,
+        [string] $FileName,
+        [string] $Pattern
+    )
+
+    $normalizedRelativePath = ([string] $RelativePath) -replace '\\', '/'
+    foreach ($expandedPattern in (Expand-EditorConfigBracePattern -Pattern $Pattern)) {
+        $normalizedPattern = ([string] $expandedPattern) -replace '\\', '/'
+        $candidate = if ($normalizedPattern.Contains('/')) {
+            $normalizedRelativePath
+        }
+        else {
+            $FileName
+        }
+
+        if ($candidate -match (Convert-EditorConfigGlobToRegex -Pattern $normalizedPattern)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+# Resolves the effective insert_final_newline policy for a file from the workspace .editorconfig.
+function Get-InsertFinalNewlinePolicyForFile {
+    param(
+        [string] $WorkspaceRoot,
+        [string] $FullPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($WorkspaceRoot) -or [string]::IsNullOrWhiteSpace($FullPath)) {
+        return $null
+    }
+
+    $editorConfigPath = Join-Path $WorkspaceRoot '.editorconfig'
+    if (-not (Test-Path -LiteralPath $editorConfigPath -PathType Leaf)) {
+        return $null
+    }
+
+    $relativePath = [System.IO.Path]::GetRelativePath($WorkspaceRoot, $FullPath) -replace '\\', '/'
+    $fileName = [System.IO.Path]::GetFileName($FullPath)
+    $currentPattern = $null
+    $effectivePolicy = $null
+
+    foreach ($line in (Get-Content -LiteralPath $editorConfigPath)) {
+        $trimmed = [string] $line
+        $trimmed = $trimmed.Trim()
+
+        if ([string]::IsNullOrWhiteSpace($trimmed)) {
+            continue
+        }
+
+        if ($trimmed.StartsWith('#') -or $trimmed.StartsWith(';')) {
+            continue
+        }
+
+        if ($trimmed.StartsWith('[') -and $trimmed.EndsWith(']')) {
+            $currentPattern = $trimmed.Substring(1, $trimmed.Length - 2).Trim()
+            continue
+        }
+
+        if ($trimmed -notmatch '^insert_final_newline\s*=\s*(true|false)$') {
+            continue
+        }
+
+        $policy = [System.Convert]::ToBoolean($Matches[1])
+        if ([string]::IsNullOrWhiteSpace($currentPattern)) {
+            $effectivePolicy = $policy
+            continue
+        }
+
+        if (Test-EditorConfigPatternMatch -RelativePath $relativePath -FileName $fileName -Pattern $currentPattern) {
+            $effectivePolicy = $policy
+        }
+    }
+
+    return $effectivePolicy
+}
+
 # Checks whether a path is located under any configured excluded directory.
 function Test-IsUnderExcludedDir ([string] $fullPath, [string[]] $excludeDirs, [string] $root) {
     $norm = [IO.Path]::GetFullPath($fullPath).TrimEnd('\', '/')
@@ -329,6 +466,7 @@ else {
 }
 
 $files = @($files)
+$workspaceRoot = Get-RepoRoot -startPath $root
 
 Start-ExecutionSession `
     -Name 'trim-trailing-blank-lines' `
@@ -376,6 +514,23 @@ foreach ($fullPath in $files) {
 
         $updated = $text -replace $trailNlPattern, ''
         $updated = $updated -replace $trailWsPattern, ''
+        $insertFinalNewline = Get-InsertFinalNewlinePolicyForFile -WorkspaceRoot $workspaceRoot -FullPath $fullPath
+        $preferredNewline = if ($text.Contains("`r`n")) {
+            "`r`n"
+        }
+        elseif ($text.Contains("`n")) {
+            "`n"
+        }
+        elseif ($text.Contains("`r")) {
+            "`r"
+        }
+        else {
+            "`n"
+        }
+
+        if ($insertFinalNewline -and -not [string]::IsNullOrEmpty($updated)) {
+            $updated = '{0}{1}' -f $updated, $preferredNewline
+        }
 
         if ($updated -ne $text) {
             if (-not $CheckOnly) {

@@ -18,6 +18,9 @@ pub mod features;
 /// User configuration with layered loading (file → env → defaults)
 pub mod config;
 
+/// Minimal `.editorconfig` policy resolution helpers.
+pub mod editorconfig;
+
 /// AI workspace-context collection and redaction utilities
 pub mod ai_context;
 

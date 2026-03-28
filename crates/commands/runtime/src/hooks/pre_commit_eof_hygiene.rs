@@ -1,6 +1,7 @@
 //! Runtime pre-commit EOF hygiene.
 
 use anyhow::{anyhow, Context};
+use nettoolskit_core::editorconfig::resolve_insert_final_newline_policy;
 use nettoolskit_core::path_utils::repository::resolve_repository_root;
 use std::env;
 use std::fs;
@@ -132,7 +133,7 @@ pub fn invoke_pre_commit_eof_hygiene(
         });
     }
 
-    let trimmed_file_count = normalize_staged_files(&staged_files)
+    let trimmed_file_count = normalize_staged_files(&repo_root, &staged_files)
         .map_err(|source| RuntimePreCommitEofHygieneCommandError::NormalizeFiles { source })?;
     restage_files(&repo_root, &staged_files)
         .map_err(|source| RuntimePreCommitEofHygieneCommandError::RestageFiles { source })?;
@@ -208,10 +209,10 @@ fn find_mixed_stage_files(
     Ok(blocked_files)
 }
 
-fn normalize_staged_files(staged_files: &[PathBuf]) -> anyhow::Result<usize> {
+fn normalize_staged_files(repo_root: &Path, staged_files: &[PathBuf]) -> anyhow::Result<usize> {
     let mut trimmed_file_count = 0usize;
     for staged_file in staged_files {
-        if normalize_text_file(staged_file)? {
+        if normalize_text_file(repo_root, staged_file)? {
             trimmed_file_count += 1;
         }
     }
@@ -219,7 +220,7 @@ fn normalize_staged_files(staged_files: &[PathBuf]) -> anyhow::Result<usize> {
     Ok(trimmed_file_count)
 }
 
-fn normalize_text_file(path: &Path) -> anyhow::Result<bool> {
+fn normalize_text_file(repo_root: &Path, path: &Path) -> anyhow::Result<bool> {
     let bytes = fs::read(path).with_context(|| format!("failed to read '{}'", path.display()))?;
     if bytes.contains(&0) {
         return Ok(false);
@@ -228,7 +229,9 @@ fn normalize_text_file(path: &Path) -> anyhow::Result<bool> {
     let Ok(document) = String::from_utf8(bytes) else {
         return Ok(false);
     };
-    let normalized = normalize_document(&document);
+    let keep_final_newline =
+        resolve_insert_final_newline_policy(repo_root, path)?.unwrap_or(false);
+    let normalized = normalize_document(&document, keep_final_newline);
     if normalized == document {
         return Ok(false);
     }
@@ -237,7 +240,7 @@ fn normalize_text_file(path: &Path) -> anyhow::Result<bool> {
     Ok(true)
 }
 
-fn normalize_document(document: &str) -> String {
+fn normalize_document(document: &str, keep_final_newline: bool) -> String {
     let mut lines = document
         .replace("\r\n", "\n")
         .replace('\r', "\n")
@@ -249,7 +252,12 @@ fn normalize_document(document: &str) -> String {
         lines.pop();
     }
 
-    lines.join("\n")
+    let normalized = lines.join("\n");
+    if keep_final_newline && !normalized.is_empty() {
+        format!("{normalized}\n")
+    } else {
+        normalized
+    }
 }
 
 fn restage_files(repo_root: &Path, staged_files: &[PathBuf]) -> anyhow::Result<()> {
@@ -299,8 +307,19 @@ mod tests {
 
     #[test]
     fn test_normalize_document_trims_whitespace_and_trailing_blank_lines() {
-        assert_eq!(normalize_document("hello  \nworld\t\n\n\n"), "hello\nworld");
-        assert_eq!(normalize_document("single line\n"), "single line");
-        assert_eq!(normalize_document(""), "");
+        assert_eq!(
+            normalize_document("hello  \nworld\t\n\n\n", false),
+            "hello\nworld"
+        );
+        assert_eq!(normalize_document("single line\n", false), "single line");
+        assert_eq!(normalize_document("", false), "");
+    }
+
+    #[test]
+    fn test_normalize_document_keeps_final_newline_when_requested() {
+        assert_eq!(
+            normalize_document("pub fn sample() {}\n\n", true),
+            "pub fn sample() {}\n"
+        );
     }
 }

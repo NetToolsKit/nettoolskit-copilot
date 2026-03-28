@@ -31,6 +31,10 @@ fn write_repo_baseline(repo_root: &Path) {
         .expect("governance directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
     write_file(
+        &repo_root.join(".editorconfig"),
+        "root = true\n\n[*]\ninsert_final_newline = false\n\n[*.{rs,toml,lock}]\ninsert_final_newline = true\n",
+    );
+    write_file(
         &repo_root.join(".github/governance/git-hook-eof-modes.json"),
         r#"{
   "schemaVersion": 1,
@@ -182,4 +186,27 @@ fn test_invoke_pre_commit_eof_hygiene_trims_and_restages_files() {
         "alpha"
     );
     assert_eq!(read_staged_blob(repo.path(), "notes.md"), "alpha");
+}
+
+#[test]
+fn test_invoke_pre_commit_eof_hygiene_keeps_rust_final_newline_when_editorconfig_requires_it() {
+    let repo = new_repo();
+    write_git_hook_selection(repo.path(), "autofix");
+    write_file(&repo.path().join("src/lib.rs"), "pub fn sample() {}  \n\n");
+    stage_file(repo.path(), "src/lib.rs");
+
+    let result = invoke_pre_commit_eof_hygiene(&RuntimePreCommitEofHygieneRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        ..RuntimePreCommitEofHygieneRequest::default()
+    })
+    .expect("pre-commit eof hygiene should execute");
+
+    assert_eq!(result.status, RuntimePreCommitEofHygieneStatus::Passed);
+    assert_eq!(result.exit_code, 0);
+    assert_eq!(result.trimmed_file_count, 1);
+    assert_eq!(
+        fs::read_to_string(repo.path().join("src/lib.rs")).expect("file should be readable"),
+        "pub fn sample() {}\n"
+    );
+    assert_eq!(read_staged_blob(repo.path(), "src/lib.rs"), "pub fn sample() {}\n");
 }
