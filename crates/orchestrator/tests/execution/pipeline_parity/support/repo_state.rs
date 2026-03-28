@@ -12,6 +12,7 @@ use std::time::{Duration, Instant};
 const LOCK_OWNER_FILE: &str = "owner.pid";
 
 pub(crate) struct RepoStateGuard {
+    repo_root: PathBuf,
     lock: RepoMutationLock,
     snapshots: Vec<FileSnapshot>,
 }
@@ -23,14 +24,18 @@ impl RepoStateGuard {
             .into_iter()
             .map(|path| FileSnapshot::capture(repo_root, path))
             .collect();
-        Self { lock, snapshots }
+        Self {
+            repo_root: repo_root.to_path_buf(),
+            lock,
+            snapshots,
+        }
     }
 }
 
 impl Drop for RepoStateGuard {
     fn drop(&mut self) {
         for snapshot in self.snapshots.iter().rev() {
-            snapshot.restore();
+            snapshot.restore(&self.repo_root);
         }
         self.lock.cleanup_empty_dirs();
     }
@@ -183,8 +188,12 @@ impl FileSnapshot {
         }
     }
 
-    fn restore(&self) {
+    fn restore(&self, repo_root: &Path) {
         if self.restore_to_head || self.existed {
+            if self.restore_to_head && restore_path_from_head(repo_root, &self.path) {
+                return;
+            }
+
             if let Some(parent) = self.path.parent() {
                 let _ = fs::create_dir_all(parent);
             }
@@ -210,5 +219,27 @@ fn read_head_blob(repo_root: &Path, path: &Path) -> Option<Vec<u8>> {
         Some(output.stdout)
     } else {
         None
+    }
+}
+
+fn restore_path_from_head(repo_root: &Path, path: &Path) -> bool {
+    let Some(relative_path) = path.strip_prefix(repo_root).ok() else {
+        return false;
+    };
+    let status = Command::new("git")
+        .arg("-C")
+        .arg(repo_root)
+        .arg("restore")
+        .arg("--source")
+        .arg("HEAD")
+        .arg("--worktree")
+        .arg("--staged")
+        .arg("--")
+        .arg(relative_path)
+        .status();
+
+    match status {
+        Ok(status) if status.success() => true,
+        _ => false,
     }
 }
