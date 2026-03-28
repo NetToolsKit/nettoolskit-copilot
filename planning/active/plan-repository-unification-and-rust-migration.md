@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 11:45
+- LastUpdated: 2026-03-28 10:00
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -81,6 +81,10 @@ The migration remains compatibility-first:
 - [2026-03-27 13:29] `crates/commands/validation/security` now also owns `validate-supply-chain`, so dependency inventory, blocked/sensitive package policy checks, SBOM export, and optional license-evidence enforcement now run natively in Rust through `validate-all`.
 - [2026-03-27 18:46] `crates/orchestrator` now owns typed public pipeline contract models plus manifest parsing/validation for stage order, handoff references, and completion criteria, so the remaining Wave 3 orchestration work can build on a stable Rust manifest boundary instead of ad hoc JSON/script parsing.
 - [2026-03-27 18:58] `crates/commands/validation/agent_orchestration` now consumes the typed `crates/orchestrator` pipeline contract too, eliminating the duplicate local manifest model and aligning permission/skill/orchestration validation on the same Rust-owned stage, dispatch, and runtime metadata boundary.
+- [2026-03-28 09:32] The staged `run-test` closeout parity path, `resume-agent-pipeline`, and `evaluate-agent-pipeline` are now stable enough to keep the full workspace test suite green again.
+- [2026-03-28 09:32] Repository/runtime/validation docs and release workflows now frame PowerShell as the compatibility layer over Rust-owned command surfaces.
+- [2026-03-28 09:58] Mixed `.editorconfig` EOF rules are now honored consistently across runtime Rust hooks, PowerShell maintenance scripts, and VS Code hook normalization.
+- [2026-03-28 10:00] The workspace closeout baseline is green again: `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and the Rust vulnerability audit all pass.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -371,9 +375,15 @@ Status: `[x]` Completed
 
 ### Task 8: Cut Over Defaults And Retire Legacy PowerShell Execution Safely
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - [2026-03-26 16:20] Switch default operator flows to Rust only after all migration waves reach parity and documentation is updated
+- [2026-03-28 09:32] Repository/runtime/validation docs now describe the PowerShell entrypoints as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
+- [2026-03-28 09:32] CI/release governance now validates the Rust-owned release-governance and provenance path by default ✓ [2026-03-28 09:32]
+- Remaining open work:
+  - record the approved wrapper/default map per domain
+  - explicitly promote any `parity proven` domain to `cutover ready` only after the closeout plan records the decision
+  - finish artifact-isolation cleanup for parity fixtures before claiming a fully quiet closeout baseline
 - Target paths:
   - `scripts/`
   - `README.md`

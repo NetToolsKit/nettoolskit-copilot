@@ -4,7 +4,7 @@ Generated: 2026-03-28 08:28
 
 ## Status
 
-- LastUpdated: 2026-03-28 08:28
+- LastUpdated: 2026-03-28 10:00
 - Objective: consolidate the remaining backlog after README normalization and Waves 1-3 so the repository can reach a clean, evidence-backed Rust-default cutover.
 - Active Branch: `feature/native-validation-policy`
 - Inputs:
@@ -13,7 +13,7 @@ Generated: 2026-03-28 08:28
   - `planning/active/plan-repository-unification-and-rust-migration.md`
   - `planning/active/rust-script-parity-ledger.md`
   - `planning/active/rust-script-transcription-ownership-matrix.md`
-- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the remaining work is now closeout-oriented: hygiene restoration, parity evidence rebasing, wrapper/default cutover, and final documentation/release alignment.
+- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now explicit cutover decisioning and final domain-status normalization.
 
 ## Review Summary
 
@@ -25,41 +25,39 @@ Generated: 2026-03-28 08:28
 
 ### Open Workstreams
 
-- `plan-repository-operations-hygiene.md`: still owns unresolved hygiene gates (`cargo fmt`, `clippy`, CI/wrapper governance, artifact closeout).
-- `rust-script-parity-ledger.md`: evidence policy remains valid, but multiple domain rows still show stale pre-closeout statuses such as `implementation pending`, `boundary crate created`, or `planning locked`.
+- `plan-repository-operations-hygiene.md`: now records a green `fmt` / `clippy` / `test` / audit baseline plus the remaining artifact-isolation follow-up for parity fixtures.
+- `rust-script-parity-ledger.md`: evidence policy remains valid, but the domain notes still need to reflect the stabilized parity harness, mixed EOF-policy handling, and the current distinction between `parity proven` and `cutover ready`.
 
 ## Backlog Size Assessment
 
 - This is not another full `147`-script planning cycle.
 - The architecture, ownership, and most implementation waves are already in place.
-- The remaining backlog is moderate but still material:
+- The remaining backlog is now small-to-moderate and concentrated in closeout:
   - one planning/evidence rebaseline
-  - one hygiene restoration block
-  - one domain cutover-readiness block
+  - one domain cutover-readiness normalization block
   - one staged wrapper/default cutover block
+  - one residual artifact-isolation follow-up for parity fixtures
 
 ## Remaining Open Backlog
 
 1. Planning drift:
-   - the parity ledger understates current implementation progress
-   - the ownership matrix still carries stale branch metadata
-   - the old active plans still describe open work in separate places
-2. Hygiene debt:
-   - `cargo fmt --all -- --check` is still a recorded failing gate
-   - `cargo clippy --workspace --all-targets -- -D warnings` is still an unclosed requirement in planning
-   - CI/workflow governance has not been rebaselined around the new Rust-owned defaults
-3. Cutover readiness debt:
+   - the parity ledger and linked plans still describe older failing-gate assumptions
+   - the ownership matrix metadata has not been refreshed after the latest closeout slices
+2. Cutover readiness debt:
    - wrapper end state is not normalized in one artifact
    - operator smoke evidence is not summarized by domain in one artifact
-   - docs and release-facing cutover guidance are not yet closed out
+   - no domain has been explicitly promoted from `parity proven` to `cutover ready`
+3. Staged default cutover debt:
+   - docs and workflows are Rust-first, but the final default-switch decision is not yet recorded per domain
+   - fallback-wrapper retention still needs one explicit approved map
 4. Artifact and recovery closeout:
-   - maintenance/recovery flows still need final evidence and operator-facing closeout criteria
+   - parity suites still generate temporary repository artifacts during full-workspace runs and require deterministic cleanup before the next commit
 
 ## Ordered Tasks
 
 ### Task 1: Rebaseline The Active Planning State Around Closeout
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - Refresh the parity ledger so every domain row reflects the current real state:
   - `parity proven`
@@ -67,11 +65,12 @@ Status: `[~]` In Progress
   - `wrapper retained intentionally`
   - `evidence gap remains`
 - [2026-03-28 08:28] Closeout review completed: README normalization is closed, the main migration plan is materially complete through Wave 3, and the remaining open backlog is now owned by this closeout plan ✓ [2026-03-28 08:28]
-- [2026-03-28 08:28] Baseline verification captured the active technical blockers for closeout:
-  - `cargo fmt --all -- --check` still fails broadly across the repository
-  - `cargo test --workspace` is blocked by the `run_test_closeout` parity path in `nettoolskit-orchestrator`
-  - `cargo clippy --workspace --all-targets -- -D warnings` is currently blocked in `nettoolskit-validation` and `nettoolskit-orchestrator`
-  - Rust vulnerability audit is currently passing ✓ [2026-03-28 08:28]
+- [2026-03-28 10:00] Rebaselined the closeout state around the current branch reality:
+  - `cargo fmt --all -- --check` now passes after persisting the workspace Rust EOF/format baseline
+  - `cargo clippy --workspace --all-targets -- -D warnings` now passes after the runtime/validation closeout fixes
+  - `cargo test --workspace` now passes after parity-harness stabilization and mixed EOF-policy alignment
+  - Rust vulnerability audit remains green
+  - runtime/docs/workflows now already describe PowerShell as the compatibility layer rather than the primary implementation path ✓ [2026-03-28 10:00]
 - Refresh metadata drift in the ownership matrix and active plan references.
 - Mark historical wave plans as implementation records and this plan as the owner of the open backlog.
 - Target paths:
@@ -89,15 +88,18 @@ Status: `[~]` In Progress
 
 ### Task 2: Restore A Fully Green Rust Hygiene Baseline
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
-- Close the remaining workspace hygiene gates before wrapper retirement:
-  - `cargo fmt --all -- --check`
-  - `cargo clippy --workspace --all-targets -- -D warnings`
-  - `cargo test --workspace`
-  - security audit gate
-- Resolve any residual test drift in `runtime`, `validation`, `core`, `commands`, and `task-worker` that prevents a trustworthy closeout baseline.
-- Rebaseline CI/workflow expectations so Rust-owned commands are the default validated path.
+- [2026-03-28 10:00] Restored the closeout hygiene baseline:
+  - `cargo fmt --all -- --check` passed
+  - `cargo clippy --workspace --all-targets -- -D warnings` passed
+  - `cargo test --workspace` passed
+  - `Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed ✓ [2026-03-28 10:00]
+- [2026-03-28 10:00] Mixed `.editorconfig` EOF rules are now honored consistently across:
+  - Rust runtime pre-commit hygiene
+  - PowerShell trim/maintenance flows
+  - VS Code hook normalization and related runtime tests ✓ [2026-03-28 10:00]
+- [2026-03-28 10:00] CI/release governance already validates the Rust-owned release-governance and provenance paths, so the remaining closeout work is no longer blocked by baseline hygiene gates ✓ [2026-03-28 10:00]
 - Target paths:
   - `Cargo.toml`
   - `Cargo.lock`
@@ -114,12 +116,16 @@ Status: `[ ]` Pending
 
 ### Task 3: Normalize Domain-Level Parity And Cutover Readiness
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - For each owned domain, record one explicit end state:
   - Rust parity proven and ready for default cutover
   - Rust parity proven but wrapper intentionally retained
   - evidence gap still open
+- [2026-03-28 10:00] Rebased the domain ledger around the current closeout truth:
+  - no domain is overstated as `cutover ready`
+  - implemented domains stay recorded as `parity proven`
+  - maintenance, runtime hook, doc, deploy, and non-runtime test automation remain explicitly tracked as evidence gaps until their end-state decision is recorded ✓ [2026-03-28 10:00]
 - Ensure the parity ledger explicitly covers:
   - `scripts/common`
   - `scripts/runtime`
@@ -149,15 +155,19 @@ Status: `[ ]` Pending
 
 ### Task 4: Prepare The Rust-Default Cutover Package
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - Define the wrapper end-state map for every PowerShell entrypoint:
   - Rust-default wrapper
   - compatibility wrapper kept intentionally
   - legacy script retained temporarily with explicit reason
   - retired
-- Update operator-facing docs and release-facing guidance for the new defaults.
-- Rebaseline CI and validation so Rust-owned entrypoints are the canonical path.
+- [2026-03-28 09:32] Updated repository/runtime/validation docs so PowerShell entrypoints are described as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
+- [2026-03-28 09:32] Rebaselined CI and release workflows so Rust-owned release-governance and provenance checks are the canonical validated path ✓ [2026-03-28 09:32]
+- Remaining work:
+  - record the approved wrapper end-state map in one artifact
+  - decide which `parity proven` domains are ready to become Rust-default
+  - keep fallback-wrapper reasoning explicit where cutover is intentionally deferred
 - Target paths:
   - `scripts/`
   - `README.md`
