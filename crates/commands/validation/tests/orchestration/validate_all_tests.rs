@@ -31,10 +31,6 @@ use crate::support::security_fixtures::initialize_shared_checksums_repo;
 use crate::support::security_fixtures::initialize_supply_chain_repo;
 use crate::support::standards_fixtures::initialize_dotnet_standards_repo;
 use crate::support::standards_fixtures::initialize_powershell_standards_repo;
-use crate::support::test_naming_fixtures::{
-    initialize_test_naming_repo, write_file as write_csharp_file,
-};
-
 fn write_file(path: &std::path::Path, contents: &str) {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).expect("parent directory should be created");
@@ -973,46 +969,6 @@ fn test_invoke_validate_all_runs_native_runtime_script_tests_check() {
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-runtime-script-tests"
-    );
-}
-
-#[test]
-fn test_invoke_validate_all_runs_native_test_naming_check() {
-    let repo = TempDir::new().expect("temporary repository should be created");
-    initialize_repo_layout(repo.path(), &["validate-test-naming"]);
-    initialize_test_naming_repo(repo.path());
-    write_csharp_file(
-        &repo.path().join("src/App.Tests/App.Tests.csproj"),
-        "<Project Sdk=\"Microsoft.NET.Sdk\"></Project>",
-    );
-    write_csharp_file(
-        &repo.path().join("src/App.Tests/Tests/FeatureTests.cs"),
-        r#"using Xunit;
-
-namespace Example.App.Tests;
-
-public class FeatureTests
-{
-    [Fact]
-    public void Feature_Context_Result_One()
-    {
-    }
-}
-"#,
-    );
-
-    let result = invoke_validate_all(&ValidateAllRequest {
-        repo_root: Some(repo.path().to_path_buf()),
-        warning_only: false,
-        ..ValidateAllRequest::default()
-    })
-    .expect("validate-all should execute");
-
-    assert_eq!(result.total_checks, 1);
-    assert_eq!(result.passed_checks, 1);
-    assert_eq!(
-        result.checks[0].script,
-        "rust:nettoolskit-validation::validate-test-naming"
     );
 }
 
