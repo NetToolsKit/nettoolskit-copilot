@@ -238,8 +238,5 @@ fn restore_path_from_head(repo_root: &Path, path: &Path) -> bool {
         .arg(relative_path)
         .status();
 
-    match status {
-        Ok(status) if status.success() => true,
-        _ => false,
-    }
+    matches!(status, Ok(status) if status.success())
 }
