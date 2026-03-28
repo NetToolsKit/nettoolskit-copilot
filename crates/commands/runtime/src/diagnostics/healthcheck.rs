@@ -159,6 +159,15 @@ struct CommandArgument {
     value: Option<String>,
 }
 
+#[derive(Debug)]
+struct HealthcheckStepContext {
+    name: &'static str,
+    script: &'static str,
+    arguments: Vec<String>,
+    started_at: String,
+    duration_ms: u128,
+}
+
 /// Run the runtime healthcheck flow.
 ///
 /// # Errors
@@ -551,24 +560,28 @@ fn run_validation_check(
             }
         }
         Err(error) if request.warning_only => build_check_result(
-            "validate-all",
-            "rust:nettoolskit-validation::validate-all",
-            formatted_arguments,
+            HealthcheckStepContext {
+                name: "validate-all",
+                script: "rust:nettoolskit-validation::validate-all",
+                arguments: formatted_arguments,
+                started_at,
+                duration_ms: started.elapsed().as_millis(),
+            },
             true,
             1,
             Some(error.to_string()),
-            started_at,
-            started.elapsed().as_millis(),
         ),
         Err(error) => build_check_result(
-            "validate-all",
-            "rust:nettoolskit-validation::validate-all",
-            formatted_arguments,
+            HealthcheckStepContext {
+                name: "validate-all",
+                script: "rust:nettoolskit-validation::validate-all",
+                arguments: formatted_arguments,
+                started_at,
+                duration_ms: started.elapsed().as_millis(),
+            },
             false,
             1,
             Some(error.to_string()),
-            started_at,
-            started.elapsed().as_millis(),
         ),
     };
 
@@ -585,14 +598,10 @@ fn run_validation_check(
 }
 
 fn build_check_result(
-    name: &str,
-    script: &str,
-    arguments: Vec<String>,
+    context: HealthcheckStepContext,
     treat_failure_as_warning: bool,
     exit_code: i32,
     error: Option<String>,
-    started_at: String,
-    duration_ms: u128,
 ) -> RuntimeHealthcheckCheckResult {
     let status = if exit_code == 0 {
         RuntimeHealthcheckStatus::Passed
@@ -603,13 +612,13 @@ fn build_check_result(
     };
 
     RuntimeHealthcheckCheckResult {
-        name: name.to_string(),
-        script: script.to_string(),
-        arguments,
+        name: context.name.to_string(),
+        script: context.script.to_string(),
+        arguments: context.arguments,
         status,
         exit_code,
-        duration_ms,
-        started_at,
+        duration_ms: context.duration_ms,
+        started_at: context.started_at,
         finished_at: current_timestamp_string().unwrap_or_else(|_| "0".to_string()),
         error,
     }

@@ -19,7 +19,7 @@ use crate::{
 };
 
 /// Request payload for `self-heal`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct RuntimeSelfHealRequest {
     /// Optional explicit repository root.
     pub repo_root: Option<PathBuf>,
@@ -49,27 +49,6 @@ pub struct RuntimeSelfHealRequest {
     pub output_path: Option<PathBuf>,
     /// Optional explicit plain-text log path.
     pub log_path: Option<PathBuf>,
-}
-
-impl Default for RuntimeSelfHealRequest {
-    fn default() -> Self {
-        Self {
-            repo_root: None,
-            target_github_path: None,
-            target_codex_path: None,
-            target_agents_skills_path: None,
-            target_copilot_skills_path: None,
-            runtime_profile: None,
-            fallback_runtime_profile: None,
-            mirror: false,
-            apply_mcp_config: false,
-            backup_config: false,
-            apply_vscode_templates: false,
-            strict_extras: false,
-            output_path: None,
-            log_path: None,
-        }
-    }
 }
 
 /// Self-heal status for individual steps and the final report.
