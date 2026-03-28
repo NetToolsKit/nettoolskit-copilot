@@ -6,6 +6,7 @@ use serde_json::{json, Map, Value};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashMap};
 use std::env;
+use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -1382,11 +1383,13 @@ fn run_native_validation_check(
         name,
         script_label,
         formatted_arguments,
-        native_status,
-        treat_failure_as_warning,
-        raw_exit_code,
-        error,
-        started.elapsed().as_millis(),
+        NativeCheckOutcome {
+            native_status,
+            treat_failure_as_warning,
+            raw_exit_code,
+            error,
+            duration_ms: started.elapsed().as_millis(),
+        },
     )
 }
 
@@ -1434,25 +1437,33 @@ fn format_argument_list(arguments: &BTreeMap<String, ValidationCommandArgument>)
         .collect()
 }
 
-fn build_native_check_result(
-    name: &str,
-    script: &str,
-    arguments: Vec<String>,
+struct NativeCheckOutcome {
     native_status: ValidationCheckStatus,
     treat_failure_as_warning: bool,
     raw_exit_code: i32,
     error: Option<String>,
     duration_ms: u128,
+}
+
+fn build_native_check_result(
+    name: &str,
+    script: &str,
+    arguments: Vec<String>,
+    outcome: NativeCheckOutcome,
 ) -> ValidationCheckResult {
-    let (status, exit_code) = match native_status {
+    let (status, exit_code) = match outcome.native_status {
         ValidationCheckStatus::Passed => (ValidationCheckStatus::Passed, 0),
         ValidationCheckStatus::Warning => (ValidationCheckStatus::Warning, 0),
-        ValidationCheckStatus::Failed if treat_failure_as_warning => {
+        ValidationCheckStatus::Failed if outcome.treat_failure_as_warning => {
             (ValidationCheckStatus::Warning, 0)
         }
         ValidationCheckStatus::Failed => (
             ValidationCheckStatus::Failed,
-            if raw_exit_code == 0 { 1 } else { raw_exit_code },
+            if outcome.raw_exit_code == 0 {
+                1
+            } else {
+                outcome.raw_exit_code
+            },
         ),
     };
 
@@ -1462,8 +1473,8 @@ fn build_native_check_result(
         arguments,
         status,
         exit_code,
-        duration_ms,
-        error,
+        duration_ms: outcome.duration_ms,
+        error: outcome.error,
     }
 }
 
@@ -1803,7 +1814,11 @@ fn sha256_hex(text: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(text.as_bytes());
     let digest = hasher.finalize();
-    digest.iter().map(|byte| format!("{byte:02x}")).collect()
+    let mut hex = String::with_capacity(digest.len() * 2);
+    for byte in digest {
+        let _ = write!(&mut hex, "{byte:02x}");
+    }
+    hex
 }
 
 fn current_timestamp_string() -> String {

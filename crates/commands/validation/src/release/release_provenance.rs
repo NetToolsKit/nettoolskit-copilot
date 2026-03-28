@@ -317,11 +317,13 @@ pub fn invoke_validate_release_provenance(
 
     validate_audit_report_contract(
         &audit_report_path,
-        effective_require_audit_report,
-        head_commit.as_deref(),
-        baseline.warn_on_missing_optional_audit_report,
-        baseline.warn_on_audit_commit_mismatch,
-        request.warning_only,
+        &AuditReportContractOptions {
+            is_required: effective_require_audit_report,
+            head_commit: head_commit.as_deref(),
+            warn_on_missing_optional_report: baseline.warn_on_missing_optional_audit_report,
+            warn_on_commit_mismatch: baseline.warn_on_audit_commit_mismatch,
+            warning_only: request.warning_only,
+        },
         &mut warnings,
         &mut failures,
     );
@@ -558,20 +560,25 @@ fn validate_git_evidence_traceability(
     }
 }
 
-fn validate_audit_report_contract(
-    audit_report_path: &Path,
+#[allow(clippy::too_many_arguments)]
+struct AuditReportContractOptions<'a> {
     is_required: bool,
-    head_commit: Option<&str>,
+    head_commit: Option<&'a str>,
     warn_on_missing_optional_report: bool,
     warn_on_commit_mismatch: bool,
     warning_only: bool,
+}
+
+fn validate_audit_report_contract(
+    audit_report_path: &Path,
+    options: &AuditReportContractOptions<'_>,
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) {
     if !audit_report_path.is_file() {
-        if is_required {
+        if options.is_required {
             push_required_finding(
-                warning_only,
+                options.warning_only,
                 warnings,
                 failures,
                 format!(
@@ -579,7 +586,7 @@ fn validate_audit_report_contract(
                     audit_report_path.display()
                 ),
             );
-        } else if warn_on_missing_optional_report {
+        } else if options.warn_on_missing_optional_report {
             warnings.push(format!(
                 "Audit report not found (optional): {}",
                 audit_report_path.display()
@@ -592,7 +599,7 @@ fn validate_audit_report_contract(
         Ok(document) => document,
         Err(error) => {
             push_required_finding(
-                warning_only,
+                options.warning_only,
                 warnings,
                 failures,
                 format!("Invalid JSON in audit report: {error}"),
@@ -605,7 +612,7 @@ fn validate_audit_report_contract(
         Ok(audit_report) => audit_report,
         Err(error) => {
             push_required_finding(
-                warning_only,
+                options.warning_only,
                 warnings,
                 failures,
                 format!("Invalid JSON in audit report: {error}"),
@@ -620,23 +627,23 @@ fn validate_audit_report_contract(
         .and_then(Value::as_str);
     match overall_status {
         None | Some("") => push_required_finding(
-            warning_only,
+            options.warning_only,
             warnings,
             failures,
             "Audit report summary.overallStatus is missing.".to_string(),
         ),
         Some("passed") => {}
         Some(status) => push_required_finding(
-            warning_only,
+            options.warning_only,
             warnings,
             failures,
             format!("Audit report overallStatus must be 'passed' but found '{status}'."),
         ),
     }
 
-    if warn_on_commit_mismatch {
+    if options.warn_on_commit_mismatch {
         if let (Some(head_commit), Some(audit_commit)) = (
-            head_commit,
+            options.head_commit,
             audit_report
                 .get("git")
                 .and_then(|git| git.get("commit"))

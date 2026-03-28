@@ -67,9 +67,7 @@ pub(crate) fn select_profile(
     requested_profile_id: Option<&str>,
     suite_warnings: &mut Vec<String>,
 ) -> Option<ValidationProfile> {
-    let Some(document) = document else {
-        return None;
-    };
+    let document = document?;
 
     let selected_profile_id = requested_profile_id
         .filter(|value| !value.trim().is_empty())

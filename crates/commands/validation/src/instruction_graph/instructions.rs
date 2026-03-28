@@ -769,6 +769,8 @@ fn test_skill_definitions(
         .map(|entry| entry.path())
         .filter(|path| path.is_dir())
         .collect::<Vec<_>>();
+    let skill_name_regex =
+        Regex::new(r"^[a-z0-9-]{1,64}$").expect("skill-name regex should compile");
 
     for directory in skill_directories {
         let folder_name = directory
@@ -822,8 +824,6 @@ fn test_skill_definitions(
         }
 
         if let Some(skill_name) = frontmatter.get("name") {
-            let skill_name_regex =
-                Regex::new(r"^[a-z0-9-]{1,64}$").expect("skill-name regex should compile");
             if !skill_name_regex.is_match(skill_name) {
                 push_required_finding(
                     warning_only,

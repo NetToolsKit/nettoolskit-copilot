@@ -25,21 +25,12 @@ const ALLOWED_KEYS: &[&str] = &[
 ];
 
 /// Request payload for `validate-policy`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ValidatePolicyRequest {
     /// Optional explicit repository root.
     pub repo_root: Option<PathBuf>,
     /// Optional explicit policy directory.
     pub policy_directory: Option<PathBuf>,
-}
-
-impl Default for ValidatePolicyRequest {
-    fn default() -> Self {
-        Self {
-            repo_root: None,
-            policy_directory: None,
-        }
-    }
 }
 
 /// Result payload for `validate-policy`.

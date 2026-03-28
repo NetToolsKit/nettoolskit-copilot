@@ -39,21 +39,12 @@ const REQUIRED_TEMPLATE_RULES: &[(&str, &[&str])] = &[
 ];
 
 /// Request payload for `validate-dotnet-standards`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ValidateDotnetStandardsRequest {
     /// Optional explicit repository root.
     pub repo_root: Option<PathBuf>,
     /// Optional explicit template directory.
     pub template_directory: Option<PathBuf>,
-}
-
-impl Default for ValidateDotnetStandardsRequest {
-    fn default() -> Self {
-        Self {
-            repo_root: None,
-            template_directory: None,
-        }
-    }
 }
 
 /// Result payload for `validate-dotnet-standards`.

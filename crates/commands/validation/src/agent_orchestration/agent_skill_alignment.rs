@@ -19,7 +19,7 @@ const DEFAULT_EVAL_FIXTURE_PATH: &str = ".codex/orchestration/evals/golden-tests
 const DEFAULT_SKILLS_ROOT_PATH: &str = ".codex/skills";
 
 /// Request payload for `validate-agent-skill-alignment`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ValidateAgentSkillAlignmentRequest {
     /// Optional explicit repository root.
     pub repo_root: Option<PathBuf>,
@@ -31,18 +31,6 @@ pub struct ValidateAgentSkillAlignmentRequest {
     pub eval_fixture_path: Option<PathBuf>,
     /// Optional explicit skills root path.
     pub skills_root_path: Option<PathBuf>,
-}
-
-impl Default for ValidateAgentSkillAlignmentRequest {
-    fn default() -> Self {
-        Self {
-            repo_root: None,
-            agent_manifest_path: None,
-            pipeline_path: None,
-            eval_fixture_path: None,
-            skills_root_path: None,
-        }
-    }
 }
 
 /// Result payload for `validate-agent-skill-alignment`.

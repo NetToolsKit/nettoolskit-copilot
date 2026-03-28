@@ -557,8 +557,8 @@ fn matches_globset(relative_path: &str, globset: Option<&GlobSet>) -> bool {
         .unwrap_or(false)
 }
 
-fn build_fancy_regex(pattern: &str) -> Result<FancyRegex, fancy_regex::Error> {
-    FancyRegex::new(&format!("(?m){pattern}"))
+fn build_fancy_regex(pattern: &str) -> Result<FancyRegex, Box<fancy_regex::Error>> {
+    FancyRegex::new(&format!("(?m){pattern}")).map_err(Box::new)
 }
 
 fn to_repo_relative_path(repo_root: &Path, path: &Path) -> String {

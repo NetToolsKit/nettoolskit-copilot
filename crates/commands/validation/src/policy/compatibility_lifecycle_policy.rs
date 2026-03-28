@@ -368,6 +368,7 @@ fn validate_lifecycle_table(
     row_count
 }
 
+#[allow(clippy::too_many_arguments)]
 fn validate_row(
     row_index: usize,
     row: &[String],

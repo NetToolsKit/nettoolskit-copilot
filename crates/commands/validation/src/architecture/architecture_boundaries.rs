@@ -18,21 +18,12 @@ use crate::ValidationCheckStatus;
 const DEFAULT_BASELINE_PATH: &str = ".github/governance/architecture-boundaries.baseline.json";
 
 /// Request payload for `validate-architecture-boundaries`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ValidateArchitectureBoundariesRequest {
     /// Optional explicit repository root.
     pub repo_root: Option<PathBuf>,
     /// Optional explicit baseline path.
     pub baseline_path: Option<PathBuf>,
-}
-
-impl Default for ValidateArchitectureBoundariesRequest {
-    fn default() -> Self {
-        Self {
-            repo_root: None,
-            baseline_path: None,
-        }
-    }
 }
 
 /// Result payload for `validate-architecture-boundaries`.

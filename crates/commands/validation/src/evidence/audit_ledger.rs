@@ -1,6 +1,7 @@
 //! Audit ledger hash-chain validation.
 
 use std::env;
+use std::fmt::Write as _;
 use std::fs;
 use std::path::PathBuf;
 
@@ -217,5 +218,9 @@ fn sha256_hex(text: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(text.as_bytes());
     let digest = hasher.finalize();
-    digest.iter().map(|byte| format!("{byte:02x}")).collect()
+    let mut hex = String::with_capacity(digest.len() * 2);
+    for byte in digest {
+        let _ = write!(&mut hex, "{byte:02x}");
+    }
+    hex
 }
