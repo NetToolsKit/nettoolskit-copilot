@@ -799,7 +799,11 @@ $baseCheckDefinitions['validate-security-baseline'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-shared-script-checksums'] = [pscustomobject]@{
     name = 'validate-shared-script-checksums'
-    script = 'scripts/validation/validate-shared-script-checksums.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-shared-script-checksums'
+    command = @('validation', 'shared-script-checksums')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-agent-orchestration'] = [pscustomobject]@{
@@ -874,7 +878,11 @@ if ($SkipPSScriptAnalyzer) {
 }
 $baseCheckDefinitions['validate-powershell-standards'] = [pscustomobject]@{
     name = 'validate-powershell-standards'
-    script = 'scripts/validation/validate-powershell-standards.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-powershell-standards'
+    command = @('validation', 'powershell-standards')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = $powershellArgs
 }
 
@@ -898,7 +906,11 @@ $baseCheckDefinitions['validate-runtime-script-tests'] = [pscustomobject]@{
 
 $baseCheckDefinitions['validate-warning-baseline'] = [pscustomobject]@{
     name = 'validate-warning-baseline'
-    script = 'scripts/validation/validate-warning-baseline.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-warning-baseline'
+    command = @('validation', 'warning-baseline')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-dotnet-standards'] = [pscustomobject]@{

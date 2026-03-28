@@ -4,14 +4,14 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-03-28 19:39
+- LastUpdated: 2026-03-28 20:30
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
-- Live Inventory After Executed Slice: `132`
+- Live Inventory After Executed Slice: `129`
 - Current Classification Totals:
-  - `retired in this workstream`: `15`
+  - `retired in this workstream`: `18`
   - `retain wrapper intentionally`: `33`
-  - `retain until consumer migration completes`: `99`
+  - `retain until consumer migration completes`: `96`
 - Decision Rule:
   - `remove-now candidate` means Rust parity exists and no blocking local consumer remains after same-slice doc cleanup.
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
@@ -31,6 +31,7 @@ Generated: 2026-03-28 19:39
 | `scripts/maintenance/trim-trailing-blank-lines.ps1` | 1 | `crates/commands/runtime + crates/cli` | Git hook EOF hygiene, `git trim-eof`, bootstrap runtime projection, and runtime parity tests now dispatch through the projected `ntk` binary and `ntk runtime trim-trailing-blank-lines`. | Added executable runtime maintenance entrypoints, repointed git-hook and alias launchers, removed the local leaf, and rebaselined runtime parity tests. | retired |
 | `scripts/runtime/update-local-context-index.ps1`, `scripts/runtime/query-local-context-index.ps1`, `scripts/runtime/export-planning-summary.ps1`, `scripts/runtime/apply-vscode-templates.ps1` | 4 | `crates/commands/runtime + crates/cli` | The only remaining blockers were runtime housekeeping, self-heal, authored docs, validation inventory, and parity tests that still hardcoded the local leaf paths; all were cleared in the same slice. | Added native `ntk runtime` entrypoints, repointed runtime consumers/docs/tests to the executable contract, deleted the four local leaves, and archived Phase 4. | retired |
 | `scripts/validation/validate-routing-coverage.ps1`, `scripts/validation/validate-architecture-boundaries.ps1`, `scripts/validation/validate-audit-ledger.ps1` | 3 | `crates/commands/validation + crates/cli` | The remaining blockers were `validate-all.ps1`, validation inventories, and governance/release evidence that still treated the `.ps1` paths as canonical. | Added `ntk validation` entrypoints, repointed `validate-all.ps1` to the native boundary, removed the wrapper paths from policy/inventory surfaces, deleted the three leaves, and archived Phase 5. | retired |
+| `scripts/validation/validate-powershell-standards.ps1`, `scripts/validation/validate-shared-script-checksums.ps1`, `scripts/validation/validate-warning-baseline.ps1` | 3 | `crates/commands/validation + crates/cli` | The remaining blockers were the missing `ntk validation` executable boundary plus `validate-all.ps1`, validation inventories, and governance/release evidence that still encoded the local wrapper paths. | Added `ntk validation` entrypoints, repointed `validate-all.ps1` to the native boundary, removed the wrapper paths from policy/inventory/release guidance, deleted the three leaves, and archived Phase 6. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -55,7 +56,7 @@ Generated: 2026-03-28 19:39
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 ## Current Immediate Queue
 
-- No single-file `remove-now candidate` remains after Phase 5.
+- No single-file `remove-now candidate` remains after Phase 6.
 - The next consumer sweep should move to domain-level proof for:
   - `scripts/common/*.ps1`
   - `scripts/runtime/*.ps1` excluding the retained hook wrappers and the Phase 4 retired continuity/template leaves
@@ -70,5 +71,6 @@ Generated: 2026-03-28 19:39
 - The third execution slice retired `pre-tool-use` and `trim-trailing-blank-lines`, reducing the live local estate from `141` to `139`.
 - The fourth execution slice retired `update-local-context-index`, `query-local-context-index`, `export-planning-summary`, and `apply-vscode-templates`, reducing the live local estate from `139` to `135`.
 - The fifth execution slice retired `validate-routing-coverage`, `validate-architecture-boundaries`, and `validate-audit-ledger`, reducing the live local estate from `135` to `132`.
+- The sixth execution slice retired `validate-powershell-standards`, `validate-shared-script-checksums`, and `validate-warning-baseline`, reducing the live local estate from `132` to `129`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
 - The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.

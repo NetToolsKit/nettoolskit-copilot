@@ -4,7 +4,7 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-03-28 19:39
+- LastUpdated: 2026-03-28 20:30
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
 - Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
@@ -51,6 +51,7 @@ Generated: 2026-03-28 19:39
 | `scripts/tests/check-test-naming.ps1` | 1 | `crates/commands/validation` | validation-fixture coverage plus `validate-all` profile routing | `retired locally` | `validate-test-naming` remains native in `crates/commands/validation/operational_hygiene`, and the local PowerShell wrapper was removed after the validation surface contracts stopped locking the `.ps1` path. |
 | `scripts/tests/refactor_tests_to_aaa.ps1` | 1 | `crates/commands/validation` | direct command tests plus validation-surface contract coverage | `retired locally` | `refactor_tests_to_aaa` remains native in `crates/commands/validation/operational_hygiene`, and the local PowerShell wrapper was removed after the validation surface contracts stopped locking the `.ps1` path. |
 | `scripts/validation/validate-routing-coverage.ps1`, `scripts/validation/validate-architecture-boundaries.ps1`, `scripts/validation/validate-audit-ledger.ps1` | 3 | `crates/commands/validation + crates/cli` | native validation command tests, validation crate tests, and targeted `validate-all` profile proof | `retired locally` | The three low-fanout validation leaves were removed after `ntk validation` became the executable contract and `validate-all.ps1` plus policy/inventory surfaces stopped requiring the local wrapper paths. |
+| `scripts/validation/validate-powershell-standards.ps1`, `scripts/validation/validate-shared-script-checksums.ps1`, `scripts/validation/validate-warning-baseline.ps1` | 3 | `crates/commands/validation + crates/cli` | native validation command tests, validation crate tests, and targeted `validate-all` phase-6 profile proof | `retired locally` | The three policy-heavy validation wrappers were removed after `ntk validation` exposed the executable contract and `validate-all.ps1`, validation inventory, and governance/release evidence stopped requiring the local wrapper paths. |
 | `scripts/tests/*.ps1` excluding `check-test-naming.ps1`, `refactor_tests_to_aaa.ps1`, and runtime subfolder | 2 | `crate test suites + root parity harness` | Rust-native replacements for coverage/test-shape automation | `retained wrapper exception` | The remaining two scripts, `apply-aaa-pattern` and `run-coverage`, are explicit retained wrapper exceptions in the cutover map rather than unresolved migration slices. |
 | `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `parity proven` | The native parity harness covers `approval-approved`, staged `run-test` closeout, `evaluate-agent-pipeline`, and `resume-agent-pipeline`; the wrapper surface is retained intentionally as a compatibility launch surface, and parity cleanup is now stable. |
 
