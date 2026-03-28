@@ -3,6 +3,7 @@
 pub mod agent_orchestration;
 pub mod architecture;
 pub mod contracts;
+pub mod deploy;
 pub mod documentation;
 pub mod error;
 pub mod evidence;
@@ -33,6 +34,9 @@ pub use contracts::{
     validation_surface_contract, validation_surface_script_total, MigrationWave,
     ValidationSurfaceContract, ValidationSurfaceKind, VALIDATION_SURFACE_CONTRACTS,
 };
+pub use deploy::{
+    invoke_validate_deploy_preflight, ValidateDeployPreflightRequest, ValidateDeployPreflightResult,
+};
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
     invoke_validate_xml_documentation, ValidateInstructionMetadataRequest,
@@ -44,18 +48,18 @@ pub use error::{
     ValidateAgentPermissionsCommandError, ValidateAgentSkillAlignmentCommandError,
     ValidateAllCommandError, ValidateArchitectureBoundariesCommandError,
     ValidateAuditLedgerCommandError, ValidateAuthoritativeSourcePolicyCommandError,
-    ValidateCompatibilityLifecyclePolicyCommandError, ValidateDotnetStandardsCommandError,
-    ValidateInstructionArchitectureCommandError, ValidateInstructionMetadataCommandError,
-    ValidateInstructionsCommandError, ValidatePlanningStructureCommandError,
-    ValidatePolicyCommandError, ValidatePowerShellStandardsCommandError,
-    ValidateReadmeStandardsCommandError, ValidateReleaseGovernanceCommandError,
-    ValidateReleaseProvenanceCommandError, ValidateRoutingCoverageCommandError,
-    ValidateRuntimeScriptTestsCommandError, ValidateSecurityBaselineCommandError,
-    ValidateSharedScriptChecksumsCommandError, ValidateShellHooksCommandError,
-    ValidateSupplyChainCommandError, ValidateTemplateStandardsCommandError,
-    ValidateTestNamingCommandError, ValidateWarningBaselineCommandError,
-    ValidateWorkspaceEfficiencyCommandError, ValidateXmlDocumentationCommandError,
-    ValidationSurfaceError,
+    ValidateCompatibilityLifecyclePolicyCommandError, ValidateDeployPreflightCommandError,
+    ValidateDotnetStandardsCommandError, ValidateInstructionArchitectureCommandError,
+    ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
+    ValidatePlanningStructureCommandError, ValidatePolicyCommandError,
+    ValidatePowerShellStandardsCommandError, ValidateReadmeStandardsCommandError,
+    ValidateReleaseGovernanceCommandError, ValidateReleaseProvenanceCommandError,
+    ValidateRoutingCoverageCommandError, ValidateRuntimeScriptTestsCommandError,
+    ValidateSecurityBaselineCommandError, ValidateSharedScriptChecksumsCommandError,
+    ValidateShellHooksCommandError, ValidateSupplyChainCommandError,
+    ValidateTemplateStandardsCommandError, ValidateTestNamingCommandError,
+    ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
+    ValidateXmlDocumentationCommandError, ValidationSurfaceError,
 };
 pub use evidence::{
     invoke_validate_audit_ledger, ValidateAuditLedgerRequest, ValidateAuditLedgerResult,

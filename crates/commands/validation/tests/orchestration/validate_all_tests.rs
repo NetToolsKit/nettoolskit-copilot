@@ -8,6 +8,9 @@ use crate::support::agent_orchestration_fixtures::{
     initialize_agent_contract_repo, initialize_agent_hooks_repo,
 };
 use crate::support::architecture_fixtures::initialize_architecture_boundaries_repo;
+use crate::support::deploy_fixtures::{
+    initialize_deploy_preflight_repo, write_valid_deploy_layout,
+};
 use crate::support::instruction_graph_fixtures::{
     initialize_instruction_architecture_repo, initialize_validate_instructions_repo,
 };
@@ -1010,6 +1013,28 @@ public class FeatureTests
     assert_eq!(
         result.checks[0].script,
         "rust:nettoolskit-validation::validate-test-naming"
+    );
+}
+
+#[test]
+fn test_invoke_validate_all_runs_native_deploy_preflight_check() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path(), &["validate-deploy-preflight"]);
+    initialize_deploy_preflight_repo(repo.path());
+    write_valid_deploy_layout(repo.path());
+
+    let result = invoke_validate_all(&ValidateAllRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateAllRequest::default()
+    })
+    .expect("validate-all should execute");
+
+    assert_eq!(result.total_checks, 1);
+    assert_eq!(result.passed_checks, 1);
+    assert_eq!(
+        result.checks[0].script,
+        "rust:nettoolskit-validation::validate-deploy-preflight"
     );
 }
 

@@ -74,6 +74,18 @@ pub enum ValidateXmlDocumentationCommandError {
     },
 }
 
+/// Errors raised by deploy preflight validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateDeployPreflightCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve deploy preflight workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by instruction metadata validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateInstructionMetadataCommandError {

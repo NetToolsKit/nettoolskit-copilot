@@ -286,6 +286,7 @@ pub fn invoke_validate_template_standards(
 ```rust
 pub struct ValidateRuntimeScriptTestsRequest { ... }
 pub struct ValidateTestNamingRequest { ... }
+pub struct ValidateDeployPreflightRequest { ... }
 pub struct ValidateShellHooksRequest { ... }
 pub struct ValidateWarningBaselineRequest { ... }
 
@@ -295,6 +296,9 @@ pub fn invoke_validate_runtime_script_tests(
 pub fn invoke_validate_test_naming(
     request: &ValidateTestNamingRequest,
 ) -> Result<ValidateTestNamingResult, ValidateTestNamingCommandError>;
+pub fn invoke_validate_deploy_preflight(
+    request: &ValidateDeployPreflightRequest,
+) -> Result<ValidateDeployPreflightResult, ValidateDeployPreflightCommandError>;
 pub fn invoke_validate_shell_hooks(
     request: &ValidateShellHooksRequest,
 ) -> Result<ValidateShellHooksResult, ValidateShellHooksCommandError>;
@@ -330,6 +334,7 @@ pub fn invoke_validate_workspace_efficiency(
 pub enum ValidationSurfaceError { UnknownSurface { surface_id: String } }
 pub enum ValidateAllCommandError { ResolveWorkspaceRoot { ... } }
 pub enum ValidateReadmeStandardsCommandError { ResolveWorkspaceRoot { ... } }
+pub enum ValidateDeployPreflightCommandError { ResolveWorkspaceRoot { ... } }
 pub enum ValidateTestNamingCommandError { ResolveWorkspaceRoot { ... }, InvalidRequiredUnderscores { ... } }
 ```
 

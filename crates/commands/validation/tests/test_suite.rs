@@ -1,6 +1,9 @@
 //! Validation command contract test suite entry point.
 
 mod contracts_tests;
+mod deploy {
+    pub mod deploy_preflight_tests;
+}
 mod documentation {
     pub mod instruction_metadata_tests;
     pub mod readme_standards_tests;

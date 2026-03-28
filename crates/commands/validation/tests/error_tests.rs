@@ -5,9 +5,9 @@ use nettoolskit_validation::{
     invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment, invoke_validate_all,
     invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
     invoke_validate_authoritative_source_policy, invoke_validate_compatibility_lifecycle_policy,
-    invoke_validate_dotnet_standards, invoke_validate_instruction_architecture,
-    invoke_validate_instruction_metadata, invoke_validate_instructions,
-    invoke_validate_planning_structure, invoke_validate_policy,
+    invoke_validate_deploy_preflight, invoke_validate_dotnet_standards,
+    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
+    invoke_validate_instructions, invoke_validate_planning_structure, invoke_validate_policy,
     invoke_validate_powershell_standards, invoke_validate_readme_standards,
     invoke_validate_release_governance, invoke_validate_release_provenance,
     invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
@@ -18,15 +18,16 @@ use nettoolskit_validation::{
     ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateAllRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
-    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
-    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
-    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidatePolicyRequest,
-    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
-    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
-    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
-    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
-    ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
-    ValidateTestNamingRequest, ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateDeployPreflightRequest,
+    ValidateDotnetStandardsRequest, ValidateInstructionArchitectureRequest,
+    ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
+    ValidatePlanningStructureRequest, ValidatePolicyRequest, ValidatePowerShellStandardsRequest,
+    ValidateReadmeStandardsRequest, ValidateReleaseGovernanceRequest,
+    ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
+    ValidateRuntimeScriptTestsRequest, ValidateSecurityBaselineRequest,
+    ValidateSharedScriptChecksumsRequest, ValidateShellHooksRequest, ValidateSupplyChainRequest,
+    ValidateTemplateStandardsRequest, ValidateTestNamingRequest, ValidateWarningBaselineRequest,
+    ValidateWorkspaceEfficiencyRequest,
 };
 
 #[test]
@@ -292,6 +293,20 @@ fn test_validate_test_naming_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve test naming workspace root"
+    );
+}
+
+#[test]
+fn test_validate_deploy_preflight_error_display_is_stable() {
+    let error = invoke_validate_deploy_preflight(&ValidateDeployPreflightRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateDeployPreflightRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve deploy preflight workspace root"
     );
 }
 

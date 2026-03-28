@@ -19,9 +19,9 @@ use crate::{
     invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment,
     invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
     invoke_validate_authoritative_source_policy, invoke_validate_compatibility_lifecycle_policy,
-    invoke_validate_dotnet_standards, invoke_validate_instruction_architecture,
-    invoke_validate_instruction_metadata, invoke_validate_instructions,
-    invoke_validate_planning_structure, invoke_validate_policy,
+    invoke_validate_deploy_preflight, invoke_validate_dotnet_standards,
+    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
+    invoke_validate_instructions, invoke_validate_planning_structure, invoke_validate_policy,
     invoke_validate_powershell_standards, invoke_validate_readme_standards,
     invoke_validate_release_governance, invoke_validate_release_provenance,
     invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
@@ -32,16 +32,16 @@ use crate::{
     ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
-    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
-    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
-    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidatePolicyRequest,
-    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
-    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
-    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
-    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
-    ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
-    ValidateTestNamingRequest, ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
-    ValidateXmlDocumentationRequest,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateDeployPreflightRequest,
+    ValidateDotnetStandardsRequest, ValidateInstructionArchitectureRequest,
+    ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
+    ValidatePlanningStructureRequest, ValidatePolicyRequest, ValidatePowerShellStandardsRequest,
+    ValidateReadmeStandardsRequest, ValidateReleaseGovernanceRequest,
+    ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
+    ValidateRuntimeScriptTestsRequest, ValidateSecurityBaselineRequest,
+    ValidateSharedScriptChecksumsRequest, ValidateShellHooksRequest, ValidateSupplyChainRequest,
+    ValidateTemplateStandardsRequest, ValidateTestNamingRequest, ValidateWarningBaselineRequest,
+    ValidateWorkspaceEfficiencyRequest, ValidateXmlDocumentationRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
@@ -63,6 +63,7 @@ const DEFAULT_CHECK_ORDER: &[&str] = &[
     "validate-instruction-architecture",
     "validate-readme-standards",
     "validate-xml-documentation",
+    "validate-deploy-preflight",
     "validate-template-standards",
     "validate-workspace-efficiency",
     "validate-compatibility-lifecycle-policy",
@@ -251,6 +252,7 @@ enum NativeValidationCheck {
     AuditLedger,
     ReadmeStandards,
     XmlDocumentation,
+    DeployPreflight,
     InstructionMetadata,
     InstructionArchitecture,
     RoutingCoverage,
@@ -322,6 +324,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::XmlDocumentation) => {
                 "rust:nettoolskit-validation::validate-xml-documentation"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::DeployPreflight) => {
+                "rust:nettoolskit-validation::validate-deploy-preflight"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
                 "rust:nettoolskit-validation::validate-instruction-metadata"
@@ -618,6 +623,10 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
             ValidationCheckExecutor::Native(NativeValidationCheck::XmlDocumentation),
         ),
         (
+            "validate-deploy-preflight",
+            ValidationCheckExecutor::Native(NativeValidationCheck::DeployPreflight),
+        ),
+        (
             "validate-template-standards",
             ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards),
         ),
@@ -795,11 +804,23 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
         | ValidationCheckExecutor::Native(NativeValidationCheck::XmlDocumentation)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::DeployPreflight)
         | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
         | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
         | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards)
         | ValidationCheckExecutor::Native(NativeValidationCheck::TestNaming) => {
-            parameter_name == "WarningOnly"
+            matches!(
+                parameter_name,
+                "WarningOnly"
+                    | "ProjectRoot"
+                    | "DockerfilePath"
+                    | "ImageName"
+                    | "ImageTag"
+                    | "ApiPort"
+                    | "ApiPortHttps"
+                    | "SeqPort"
+                    | "RequireEnvFile"
+            )
         }
         ValidationCheckExecutor::Native(NativeValidationCheck::AgentOrchestration) => false,
         ValidationCheckExecutor::Native(NativeValidationCheck::ArchitectureBoundaries) => {
@@ -1248,6 +1269,29 @@ fn run_native_validation_check(
             })
             .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
         }
+        NativeValidationCheck::DeployPreflight => {
+            invoke_validate_deploy_preflight(&ValidateDeployPreflightRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                project_root: string_argument_path(&arguments, "ProjectRoot"),
+                dockerfile_path: string_argument_path(&arguments, "DockerfilePath"),
+                image_name: string_argument(&arguments, "ImageName"),
+                image_tag: string_argument(&arguments, "ImageTag"),
+                api_port: u16_argument(&arguments, "ApiPort"),
+                api_port_https: u16_argument(&arguments, "ApiPortHttps"),
+                seq_port: u16_argument(&arguments, "SeqPort"),
+                require_env_file: bool_argument(&arguments, "RequireEnvFile").unwrap_or(false),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
         NativeValidationCheck::InstructionMetadata => {
             invoke_validate_instruction_metadata(&ValidateInstructionMetadataRequest {
                 repo_root: Some(repo_root.to_path_buf()),
@@ -1459,6 +1503,18 @@ fn string_argument_path(
         })
 }
 
+fn string_argument(
+    arguments: &BTreeMap<String, ValidationCommandArgument>,
+    name: &str,
+) -> Option<String> {
+    arguments
+        .get(name)
+        .and_then(|argument| match &argument.value {
+            ValidationArgumentValue::String(value) => Some(value.clone()),
+            ValidationArgumentValue::Bool(_) => None,
+        })
+}
+
 fn bool_argument(
     arguments: &BTreeMap<String, ValidationCommandArgument>,
     name: &str,
@@ -1469,6 +1525,13 @@ fn bool_argument(
             ValidationArgumentValue::Bool(value) => Some(value),
             ValidationArgumentValue::String(_) => None,
         })
+}
+
+fn u16_argument(
+    arguments: &BTreeMap<String, ValidationCommandArgument>,
+    name: &str,
+) -> Option<u16> {
+    string_argument(arguments, name).and_then(|value| value.parse::<u16>().ok())
 }
 
 fn combine_native_messages(failures: &[String], warnings: &[String]) -> Option<String> {
