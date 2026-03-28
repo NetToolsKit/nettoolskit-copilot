@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:00
+- LastUpdated: 2026-03-28 10:23
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -12,6 +12,7 @@ Generated: 2026-03-26 16:20
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
+- Cutover Map: `planning/active/rust-script-cutover-default-map.md`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 - Historical Role: implementation record for the completed migration waves; the remaining open delivery backlog is now owned by the closeout plan.
 - Worktree Isolation: not recommended for this planning-only checkpoint; a dedicated branch is active in the current checkout.
@@ -85,6 +86,7 @@ The migration remains compatibility-first:
 - [2026-03-28 09:32] Repository/runtime/validation docs and release workflows now frame PowerShell as the compatibility layer over Rust-owned command surfaces.
 - [2026-03-28 09:58] Mixed `.editorconfig` EOF rules are now honored consistently across runtime Rust hooks, PowerShell maintenance scripts, and VS Code hook normalization.
 - [2026-03-28 10:00] The workspace closeout baseline is green again: `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and the Rust vulnerability audit all pass.
+- [2026-03-28 10:23] The final cutover/default map now records which major script domains are Rust-default now, intentionally wrapper-retained, or still blocked, so Task 8 can focus only on the remaining blocked slices.
 - [2026-03-26 16:48] Immediate migration blockers in the Rust layout:
   - oversized files should not become default landing zones for ported scripts:
     - `crates/orchestrator/src/execution/processor.rs` (`8151` lines)
@@ -381,8 +383,12 @@ Status: `[~]` In Progress
 - [2026-03-28 09:32] Repository/runtime/validation docs now describe the PowerShell entrypoints as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
 - [2026-03-28 09:32] CI/release governance now validates the Rust-owned release-governance and provenance path by default ✓ [2026-03-28 09:32]
 - Remaining open work:
-  - record the approved wrapper/default map per domain
-  - explicitly promote any `parity proven` domain to `cutover ready` only after the closeout plan records the decision
+  - finish the still-blocked domain tail:
+    - `scripts/runtime/hooks`
+    - `scripts/maintenance`
+    - `scripts/doc`
+    - `scripts/deploy`
+    - `scripts/tests` excluding runtime
   - finish artifact-isolation cleanup for parity fixtures before claiming a fully quiet closeout baseline
 - Target paths:
   - `scripts/`

@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:00
+- LastUpdated: 2026-03-28 10:23
 - Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/native-validation-policy`
@@ -12,6 +12,7 @@ Generated: 2026-03-26 16:20
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
+- Cutover Map: `planning/active/rust-script-cutover-default-map.md`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 - Historical Role: hygiene record for the migration waves; this artifact now owns only the remaining non-functional closeout gates.
 - Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
@@ -62,6 +63,7 @@ Current hygiene priorities for the migration:
 - [2026-03-28 10:00] `cargo test --workspace` passed.
 - [2026-03-28 10:00] `Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed.
 - [2026-03-28 10:00] Full-workspace parity runs still project temporary approval/readme/workflow artifacts into the repo during some fixture paths; cleanup is deterministic, but fixture isolation remains the main artifact-hygiene follow-up.
+- [2026-03-28 10:23] The final cutover/default map is now recorded, so the hygiene plan only needs to keep the fixture-isolation follow-up and blocked-domain tail explicit.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks

@@ -4,7 +4,7 @@ Generated: 2026-03-28 08:28
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:00
+- LastUpdated: 2026-03-28 10:23
 - Objective: consolidate the remaining backlog after README normalization and Waves 1-3 so the repository can reach a clean, evidence-backed Rust-default cutover.
 - Active Branch: `feature/native-validation-policy`
 - Inputs:
@@ -13,44 +13,40 @@ Generated: 2026-03-28 08:28
   - `planning/active/plan-repository-unification-and-rust-migration.md`
   - `planning/active/rust-script-parity-ledger.md`
   - `planning/active/rust-script-transcription-ownership-matrix.md`
-- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now explicit cutover decisioning and final domain-status normalization.
+  - `planning/active/rust-script-cutover-default-map.md`
+- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now the blocked-domain tail plus parity fixture isolation.
 
 ## Review Summary
 
 ### Closed Workstreams
 
 - `plan-readme-standards-repository-normalization.md`: complete; no remaining delivery backlog beyond keeping the validator green.
-- `plan-repository-unification-and-rust-migration.md`: Tasks 1-6 are complete; Task 7 is implementation-complete in practice and now needs status normalization; Task 8 remains the primary open delivery item.
+- `plan-repository-unification-and-rust-migration.md`: Tasks 1-6 are complete; Task 7 is implementation-complete in practice and now needs status normalization; Task 8 is narrowed to the blocked-domain tail and fixture isolation.
 - `rust-script-transcription-ownership-matrix.md`: still valid as the canonical inventory/owner map; only metadata and closeout linkage are stale.
 
 ### Open Workstreams
 
 - `plan-repository-operations-hygiene.md`: now records a green `fmt` / `clippy` / `test` / audit baseline plus the remaining artifact-isolation follow-up for parity fixtures.
 - `rust-script-parity-ledger.md`: evidence policy remains valid, but the domain notes still need to reflect the stabilized parity harness, mixed EOF-policy handling, and the current distinction between `parity proven` and `cutover ready`.
+- `rust-script-cutover-default-map.md`: new closeout artifact that records the final per-domain default decision and isolates the remaining blocked slices from the domains that are already Rust-default.
 
 ## Backlog Size Assessment
 
 - This is not another full `147`-script planning cycle.
 - The architecture, ownership, and most implementation waves are already in place.
 - The remaining backlog is now small-to-moderate and concentrated in closeout:
-  - one planning/evidence rebaseline
-  - one domain cutover-readiness normalization block
-  - one staged wrapper/default cutover block
+  - one residual blocked-domain group that still needs native replacement evidence
   - one residual artifact-isolation follow-up for parity fixtures
 
 ## Remaining Open Backlog
 
-1. Planning drift:
-   - the parity ledger and linked plans still describe older failing-gate assumptions
-   - the ownership matrix metadata has not been refreshed after the latest closeout slices
-2. Cutover readiness debt:
-   - wrapper end state is not normalized in one artifact
-   - operator smoke evidence is not summarized by domain in one artifact
-   - no domain has been explicitly promoted from `parity proven` to `cutover ready`
-3. Staged default cutover debt:
-   - docs and workflows are Rust-first, but the final default-switch decision is not yet recorded per domain
-   - fallback-wrapper retention still needs one explicit approved map
-4. Artifact and recovery closeout:
+1. Blocked-domain tail:
+   - `scripts/runtime/hooks`
+   - `scripts/maintenance`
+   - `scripts/doc`
+   - `scripts/deploy`
+   - `scripts/tests` excluding runtime
+2. Artifact and recovery closeout:
    - parity suites still generate temporary repository artifacts during full-workspace runs and require deterministic cleanup before the next commit
 
 ## Ordered Tasks
@@ -155,7 +151,7 @@ Status: `[x]` Completed
 
 ### Task 4: Prepare The Rust-Default Cutover Package
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - Define the wrapper end-state map for every PowerShell entrypoint:
   - Rust-default wrapper
@@ -164,10 +160,10 @@ Status: `[~]` In Progress
   - retired
 - [2026-03-28 09:32] Updated repository/runtime/validation docs so PowerShell entrypoints are described as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
 - [2026-03-28 09:32] Rebaselined CI and release workflows so Rust-owned release-governance and provenance checks are the canonical validated path ✓ [2026-03-28 09:32]
+- [2026-03-28 10:23] Recorded the final per-domain default map in `planning/active/rust-script-cutover-default-map.md`, explicitly separating Rust-default domains, compatibility wrappers retained intentionally, and still-blocked domains ✓ [2026-03-28 10:23]
 - Remaining work:
-  - record the approved wrapper end-state map in one artifact
-  - decide which `parity proven` domains are ready to become Rust-default
-  - keep fallback-wrapper reasoning explicit where cutover is intentionally deferred
+  - keep the blocked-domain backlog explicit in Task 5
+  - preserve compatibility-wrapper reasoning where intentionally retained
 - Target paths:
   - `scripts/`
   - `README.md`
@@ -185,9 +181,10 @@ Status: `[~]` In Progress
 
 Status: `[ ]` Pending
 
-- Switch default operator flows to Rust for domains that are explicitly marked `cutover ready`.
+- Switch default operator flows to Rust for domains that are explicitly marked `Rust-default now` in the cutover map, while preserving approved wrappers for intentionally retained domains.
 - Preserve only approved fallback wrappers, with the reason recorded in planning.
 - Archive or downgrade the old active wave plans once the closeout state is green and unambiguous.
+- [2026-03-28 10:23] The remaining backlog is now limited to the still-blocked domains and parity fixture isolation; the domains already marked Rust-default now or compatibility-wrapper-retained are not part of the remaining execution backlog.
 - Target paths:
   - `scripts/`
   - `crates/cli/`
