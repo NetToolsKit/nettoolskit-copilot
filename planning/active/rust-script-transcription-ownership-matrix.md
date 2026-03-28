@@ -8,7 +8,7 @@ Generated: 2026-03-26 17:05
 - Objective: freeze the canonical PowerShell inventory, Rust owner boundary, target surface, and migration wave for every tracked script under `scripts/**/*.ps1`.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Source Spec: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
-- Active Branch: `feature/rust-script-transcription-planning`
+- Active Branch: `feature/native-validation-policy`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 
 ## Owner Summary

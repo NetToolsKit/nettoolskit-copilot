@@ -59,13 +59,19 @@ Generated: 2026-03-28 08:28
 
 ### Task 1: Rebaseline The Active Planning State Around Closeout
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - Refresh the parity ledger so every domain row reflects the current real state:
   - `parity proven`
   - `cutover ready`
   - `wrapper retained intentionally`
   - `evidence gap remains`
+- [2026-03-28 08:28] Closeout review completed: README normalization is closed, the main migration plan is materially complete through Wave 3, and the remaining open backlog is now owned by this closeout plan ✓ [2026-03-28 08:28]
+- [2026-03-28 08:28] Baseline verification captured the active technical blockers for closeout:
+  - `cargo fmt --all -- --check` still fails broadly across the repository
+  - `cargo test --workspace` is blocked by the `run_test_closeout` parity path in `nettoolskit-orchestrator`
+  - `cargo clippy --workspace --all-targets -- -D warnings` is currently blocked in `nettoolskit-validation` and `nettoolskit-orchestrator`
+  - Rust vulnerability audit is currently passing ✓ [2026-03-28 08:28]
 - Refresh metadata drift in the ownership matrix and active plan references.
 - Mark historical wave plans as implementation records and this plan as the owner of the open backlog.
 - Target paths:

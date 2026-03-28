@@ -4,10 +4,10 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 09:00
-- Objective: keep repository hygiene, policy enforcement, and parity guardrails ready for the full PowerShell-to-Rust script transcription program.
+- LastUpdated: 2026-03-28 08:28
+- Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
-- Active Branch: `feature/rust-script-transcription-planning`
+- Active Branch: `feature/native-validation-policy`
 - Spec Path: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
@@ -25,6 +25,7 @@ Current hygiene priorities for the migration:
 - define parity evidence and audit visibility for all `147` PowerShell scripts
 - harden CI and validation expectations so Rust-backed replacements become the default quality gate
 - preserve wrapper safety, hook integrity, and artifact hygiene during the transition
+- rebaseline the remaining hygiene work around closeout rather than around earlier migration waves
 
 ## Current Rust Hygiene Snapshot
 
@@ -51,6 +52,10 @@ Current hygiene priorities for the migration:
 - [2026-03-27 08:07] `crates/commands/validation` now carries an executable Rust replacement for `validate-workspace-efficiency` under a dedicated `workspace` module, so workspace/runtime hygiene evidence and VS Code workspace policy drift no longer rely on the PowerShell validator.
 - [2026-03-27 08:22] `crates/commands/validation` now carries an executable Rust replacement for `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, so centralized official-doc policy drift no longer relies on the PowerShell validator either.
 - [2026-03-27 09:00] `crates/commands/validation` now carries an executable Rust replacement for `validate-instruction-architecture` under the same `instruction_graph` module, so instruction ownership, deterministic routing budget, and canonical skill-reference drift no longer rely on the PowerShell validator either.
+- [2026-03-28 08:28] `cargo fmt --all -- --check` still fails broadly, so formatting/newline drift remains an explicit closeout blocker.
+- [2026-03-28 08:28] `cargo test --workspace` is currently blocked by the `nettoolskit-orchestrator` `run_test_closeout` parity path on Windows file locking, so the parity harness is implemented but not yet green at workspace level.
+- [2026-03-28 08:28] `cargo clippy --workspace --all-targets -- -D warnings` is currently blocked in `nettoolskit-validation` and `nettoolskit-orchestrator`, so the hygiene baseline is not yet ready for cutover claims.
+- [2026-03-28 08:28] `Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed, so the Rust dependency gate is currently not the blocking hygiene item.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks

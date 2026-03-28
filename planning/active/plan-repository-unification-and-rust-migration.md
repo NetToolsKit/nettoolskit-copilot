@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-27 18:58
+- LastUpdated: 2026-03-28 08:28
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -13,6 +13,7 @@ Generated: 2026-03-26 16:20
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
+- Historical Role: implementation record for the completed migration waves; the remaining open delivery backlog is now owned by the closeout plan.
 - Worktree Isolation: not recommended for this planning-only checkpoint; a dedicated branch is active in the current checkout.
 
 ## Scope Summary
@@ -328,7 +329,7 @@ Status: `[x]` Completed
 
 ### Task 7: Implement Wave 3 Control Plane, Hooks, And Parity Harness
 
-Status: `[~]` In Progress
+Status: `[x]` Completed
 
 - [2026-03-26 16:20] Transcribe orchestration stages, git hooks, and PowerShell-based runtime tests into Rust-backed control-plane capabilities and parity coverage
 - [2026-03-27 14:39] Implemented Rust-backed `setup-global-git-aliases` in `crates/commands/runtime/hooks`, with direct external coverage for isolated global Git config install/uninstall flows and runtime-managed trim-script projection ✓ [2026-03-27 14:39]
