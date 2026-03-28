@@ -241,7 +241,9 @@ try {
 
         $rustAutofixRun = Invoke-PowerShellScript -ScriptPath $runnerScriptPath -Arguments @('-RepoRoot', $autofixRepoRoot)
         Assert-Equal -Actual $rustAutofixRun.ExitCode -Expected 0 -Message 'Autofix mode must allow safe Rust staged-file trimming.'
-        Assert-Equal -Actual ([System.IO.File]::ReadAllText($rustAutofixFile)) -Expected "pub fn sample() {}`n" -Message 'Autofix mode must keep one final newline for Rust files when .editorconfig requires it.'
+        $rustAutofixText = [System.IO.File]::ReadAllText($rustAutofixFile)
+        Assert-Equal -Actual ($rustAutofixText -replace "`r`n", "`n") -Expected "pub fn sample() {}`n" -Message 'Autofix mode must keep one final newline for Rust files when .editorconfig requires it.'
+        Assert-True -Condition $rustAutofixText.EndsWith("`n") -Message 'Autofix mode must leave the Rust file with a terminal newline.'
         $rustWorkingTreeHash = (& git -C $autofixRepoRoot hash-object lib.rs).Trim()
         $rustIndexHash = (& git -C $autofixRepoRoot rev-parse :lib.rs).Trim()
         Assert-Equal -Actual $rustIndexHash -Expected $rustWorkingTreeHash -Message 'Autofix mode must re-stage the Rust file with the required final newline.'
