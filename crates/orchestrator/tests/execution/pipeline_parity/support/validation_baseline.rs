@@ -7,6 +7,7 @@ const SHARED_POML_README_PATH: &str = "definitions/shared/prompts/poml/README.md
 const SCRIPTS_README_PATH: &str = "scripts/README.md";
 const CODEOWNERS_PATH: &str = "CODEOWNERS";
 const CHANGELOG_PATH: &str = "CHANGELOG.md";
+const CONTRIBUTING_PATH: &str = "CONTRIBUTING.md";
 const PR_TEMPLATE_PATH: &str = ".github/PULL_REQUEST_TEMPLATE.md";
 const ISSUE_TEMPLATE_CONFIG_PATH: &str = ".github/ISSUE_TEMPLATE/config.yml";
 const ISSUE_TEMPLATE_BUG_PATH: &str = ".github/ISSUE_TEMPLATE/bug-instructions.yml";
@@ -31,6 +32,7 @@ pub(crate) fn repo_validation_paths(repo_root: &Path) -> Vec<PathBuf> {
         SCRIPTS_README_PATH,
         CODEOWNERS_PATH,
         CHANGELOG_PATH,
+        CONTRIBUTING_PATH,
         PR_TEMPLATE_PATH,
         ISSUE_TEMPLATE_CONFIG_PATH,
         ISSUE_TEMPLATE_BUG_PATH,
@@ -58,21 +60,22 @@ pub(crate) fn repo_validation_paths(repo_root: &Path) -> Vec<PathBuf> {
 }
 
 pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
-    ensure_file_exists(repo_root, SHARED_POML_README_PATH, poml_readme_contents());
-    mirror_directory_if_missing(
+    write_fixture_file(repo_root, SHARED_POML_README_PATH, poml_readme_contents());
+    mirror_directory(
         &repo_root.join("definitions/shared/prompts/poml"),
         &repo_root.join(".github/prompts/poml"),
     );
-    ensure_file_exists(repo_root, SCRIPTS_README_PATH, scripts_readme_contents());
-    ensure_file_exists(repo_root, CODEOWNERS_PATH, codeowners_contents());
-    ensure_file_exists(repo_root, CHANGELOG_PATH, changelog_contents());
-    ensure_file_exists(repo_root, PR_TEMPLATE_PATH, pr_template_contents());
-    ensure_file_exists(
+    write_fixture_file(repo_root, SCRIPTS_README_PATH, scripts_readme_contents());
+    write_fixture_file(repo_root, CODEOWNERS_PATH, codeowners_contents());
+    write_fixture_file(repo_root, CHANGELOG_PATH, changelog_contents());
+    write_fixture_file(repo_root, CONTRIBUTING_PATH, contributing_contents());
+    write_fixture_file(repo_root, PR_TEMPLATE_PATH, pr_template_contents());
+    write_fixture_file(
         repo_root,
         ISSUE_TEMPLATE_CONFIG_PATH,
         issue_template_config_contents(),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         ISSUE_TEMPLATE_BUG_PATH,
         issue_template_contents(
@@ -80,7 +83,7 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Report a repository instruction or workflow bug.",
         ),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         ISSUE_TEMPLATE_SKILL_PATH,
         issue_template_contents(
@@ -88,7 +91,7 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Request a new skill for the repository agent system.",
         ),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         ISSUE_TEMPLATE_RUNTIME_PATH,
         issue_template_contents(
@@ -96,7 +99,7 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Report a runtime sync or projection issue.",
         ),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         ISSUE_TEMPLATE_VALIDATION_PATH,
         issue_template_contents(
@@ -104,44 +107,44 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Report a missing or incorrect validation rule.",
         ),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         VALIDATE_AGENT_SYSTEM_WORKFLOW_PATH,
         workflow_contents("Validate Agent System"),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         VALIDATE_RELEASE_GOVERNANCE_WORKFLOW_PATH,
         workflow_contents("Validate Release Governance"),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         DEPENDENCY_RISK_WORKFLOW_PATH,
         workflow_contents("Dependency Risk Observability"),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         ENTERPRISE_TRENDS_WORKFLOW_PATH,
         workflow_contents("Enterprise Trends Dashboard"),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         SBOM_ATTESTATION_WORKFLOW_PATH,
         workflow_contents("SBOM Attestation Observability"),
     );
-    ensure_file_exists(
+    write_fixture_file(
         repo_root,
         SECURITY_STATIC_WORKFLOW_PATH,
         workflow_contents("Security Static Observability"),
     );
-    ensure_file_exists(repo_root, PRE_COMMIT_HOOK_PATH, hook_contents("pre-commit"));
-    ensure_file_exists(
+    write_fixture_file(repo_root, PRE_COMMIT_HOOK_PATH, hook_contents("pre-commit"));
+    write_fixture_file(
         repo_root,
         POST_COMMIT_HOOK_PATH,
         hook_contents("post-commit"),
     );
-    ensure_file_exists(repo_root, POST_MERGE_HOOK_PATH, hook_contents("post-merge"));
-    ensure_file_exists(
+    write_fixture_file(repo_root, POST_MERGE_HOOK_PATH, hook_contents("post-merge"));
+    write_fixture_file(
         repo_root,
         POST_CHECKOUT_HOOK_PATH,
         hook_contents("post-checkout"),
@@ -149,7 +152,12 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
 }
 
 pub(crate) fn cleanup_validation_green_baseline(repo_root: &Path) {
-    for relative_dir in [".githooks", ".github/ISSUE_TEMPLATE"] {
+    for relative_dir in [
+        ".githooks",
+        ".github/ISSUE_TEMPLATE",
+        "planning/specs/completed",
+        "planning/completed",
+    ] {
         let dir_path = repo_root.join(relative_dir);
         let is_empty = dir_path
             .read_dir()
@@ -161,11 +169,8 @@ pub(crate) fn cleanup_validation_green_baseline(repo_root: &Path) {
     }
 }
 
-fn ensure_file_exists(repo_root: &Path, relative_path: &str, contents: impl AsRef<[u8]>) {
+fn write_fixture_file(repo_root: &Path, relative_path: &str, contents: impl AsRef<[u8]>) {
     let absolute_path = repo_root.join(relative_path);
-    if absolute_path.exists() {
-        return;
-    }
     if let Some(parent) = absolute_path.parent() {
         let _ = fs::create_dir_all(parent);
     }
@@ -197,11 +202,10 @@ fn collect_directory_files(root: &Path) -> Vec<PathBuf> {
     files
 }
 
-fn mirror_directory_if_missing(source: &Path, destination: &Path) {
+fn mirror_directory(source: &Path, destination: &Path) {
     if destination.exists() {
-        return;
+        let _ = fs::remove_dir_all(destination);
     }
-
     fs::create_dir_all(destination).expect("destination directory should be created");
     copy_directory_contents(source, destination);
 }
@@ -330,6 +334,17 @@ fn pr_template_contents() -> &'static str {
 ## Validation
 
 - Describe the validation performed.
+"
+}
+
+fn contributing_contents() -> &'static str {
+    "# Contributing
+
+## Workflow
+
+- Create focused changes and validate them locally before pushing.
+- Keep planning, implementation, review, and closeout evidence aligned.
+- Use semantic English commit messages.
 "
 }
 

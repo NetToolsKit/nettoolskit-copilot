@@ -58,11 +58,16 @@ end {
     }
 
     if ($allInput -match '# Specification Stage Contract') {
+        $workstreamSlug = 'implement-enterprise-orchestration-support'
+        if ($allInput -match 'Implement closeout smoke orchestration support\.') {
+            $workstreamSlug = 'implement-closeout-smoke-orchestration-support'
+        }
+
         $payload = [ordered]@{
             stage = 'brainstorm-spec'
             status = 'required'
             specRequired = $true
-            workstreamSlug = 'implement-enterprise-orchestration-support'
+            workstreamSlug = $workstreamSlug
             specSummary = 'A versioned design checkpoint is required before planning.'
             designDecisions = @(
                 'Keep a versioned spec separate from the execution plan.',

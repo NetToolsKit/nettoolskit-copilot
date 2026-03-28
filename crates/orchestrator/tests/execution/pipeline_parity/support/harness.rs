@@ -63,7 +63,7 @@ impl ApprovalApprovedHarness {
             .join("native-pipeline-parity")
             .join(unique_test_id());
         let pipeline_run_root = temp_root.join("pipeline-runs");
-        let repo_guard = RepoStateGuard::capture(repo_artifact_paths(&repo_root));
+        let repo_guard = RepoStateGuard::capture(&repo_root, repo_artifact_paths(&repo_root));
 
         fs::create_dir_all(&pipeline_run_root).expect("pipeline run root should be created");
         fs::create_dir_all(repo_root.join(".temp/agent-orchestration-engine-smoke"))

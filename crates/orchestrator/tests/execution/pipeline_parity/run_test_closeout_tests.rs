@@ -5,7 +5,10 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
-use super::support::{read_json, run_pwsh_file, RunTestCloseoutHarness, RUN_TEST_TRACE_ID};
+use super::support::{
+    read_json, run_pwsh_file, seed_validation_green_baseline, RunTestCloseoutHarness,
+    RUN_TEST_TRACE_ID,
+};
 
 #[test]
 #[serial]
@@ -402,6 +405,7 @@ fn run_test_staged_closeout_success_path_preserves_artifacts_and_moves_plan_file
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn run_codex_stage(
     harness: &RunTestCloseoutHarness,
     script_relative_path: &str,
@@ -465,6 +469,10 @@ fn run_scripted_stage(
     input_manifest_path: &Path,
     output_manifest_path: &Path,
 ) {
+    if stage_id == "validate" {
+        seed_validation_green_baseline(&harness.repo_root);
+    }
+
     let script_path = harness.repo_root.join(script_relative_path);
     let args = vec![
         "-RepoRoot".to_string(),
