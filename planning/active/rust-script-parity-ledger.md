@@ -9,6 +9,7 @@ Generated: 2026-03-27 20:01
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Active Branch: `feature/native-validation-policy`
+- Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 - Live parity harness: `approval-approved-test`, the staged `run-test` closeout success path, `evaluate-agent-pipeline`, and `resume-agent-pipeline` are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
 
 ## Evidence Policy

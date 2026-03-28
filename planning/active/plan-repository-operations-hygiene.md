@@ -12,6 +12,7 @@ Generated: 2026-03-26 16:20
 - Supporting Architecture Spec: `planning/specs/active/spec-enterprise-rust-runtime-transcription-architecture.md`
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
+- Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 - Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
 
 ## Scope Summary

@@ -9,6 +9,7 @@ Generated: 2026-03-26 17:05
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Source Spec: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
 - Active Branch: `feature/rust-script-transcription-planning`
+- Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 
 ## Owner Summary
 
