@@ -53,7 +53,8 @@ pub(crate) fn repo_validation_paths(repo_root: &Path) -> Vec<PathBuf> {
     .into_iter()
     .map(|relative_path| repo_root.join(relative_path))
     .collect();
-    paths.extend(collect_directory_files(
+    paths.extend(project_directory_files(
+        &repo_root.join("definitions/shared/prompts/poml"),
         &repo_root.join(".github/prompts/poml"),
     ));
     paths
@@ -155,6 +156,7 @@ pub(crate) fn cleanup_validation_green_baseline(repo_root: &Path) {
     for relative_dir in [
         ".githooks",
         ".github/ISSUE_TEMPLATE",
+        ".github/prompts/poml",
         "planning/specs/completed",
         "planning/completed",
     ] {
@@ -200,6 +202,17 @@ fn collect_directory_files(root: &Path) -> Vec<PathBuf> {
     }
 
     files
+}
+
+fn project_directory_files(source: &Path, destination: &Path) -> Vec<PathBuf> {
+    collect_directory_files(source)
+        .into_iter()
+        .filter_map(|path| {
+            path.strip_prefix(source)
+                .ok()
+                .map(|relative_path| destination.join(relative_path))
+        })
+        .collect()
 }
 
 fn mirror_directory(source: &Path, destination: &Path) {
