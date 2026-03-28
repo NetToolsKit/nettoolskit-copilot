@@ -1,6 +1,6 @@
 # Script Retirement Phase 4
 
-Generated: 2026-03-28 20:05
+Generated: 2026-03-28 19:18
 
 ## Objective
 
@@ -15,30 +15,34 @@ by replacing their live consumer contracts with native `ntk runtime` entrypoints
 
 ## Context
 
-Phase 3 retired the hook and EOF leaves and reduced the live local PowerShell estate to `139`. The next smallest concrete runtime leaves already have native Rust business logic, but their canonical shell contracts are still encoded in local consumers, tests, and authored guidance.
+Phase 3 retired the hook and EOF leaves and reduced the live local PowerShell estate to `139`. Phase 4 then completed the continuity/template consumer cutover and reduced the live local PowerShell estate to `135`.
 
-- `update-local-context-index.ps1` and `query-local-context-index.ps1` already map to `crates/commands/runtime/src/continuity/local_context.rs`
-- `export-planning-summary.ps1` already maps to `crates/commands/runtime/src/continuity/planning_summary.rs`
-- `apply-vscode-templates.ps1` already maps to `crates/commands/runtime/src/sync/apply_vscode_templates.rs`
+- `update-local-context-index.ps1` and `query-local-context-index.ps1` now execute through the native `ntk runtime` continuity surface backed by `crates/commands/runtime/src/continuity/local_context.rs`
+- `export-planning-summary.ps1` now executes through the native `ntk runtime` continuity surface backed by `crates/commands/runtime/src/continuity/planning_summary.rs`
+- `apply-vscode-templates.ps1` now executes through the native `ntk runtime` sync surface backed by `crates/commands/runtime/src/sync/apply_vscode_templates.rs`
 
-This makes Phase 4 a consumer-cutover and executable-boundary problem, not a missing-implementation problem.
+This means the phase is no longer a design-only problem. The consumer cutover completed and all four local leaves were retired safely.
 
 ## Current Slice Summary
 
-- live local script inventory: `139`
-- blocked leaves in scope: `4`
+- live local script inventory: `135`
+- blocked leaves in scope: `0`
 - native Rust owners already exist:
   - `crates/commands/runtime/src/continuity/local_context.rs`
   - `crates/commands/runtime/src/continuity/planning_summary.rs`
   - `crates/commands/runtime/src/sync/apply_vscode_templates.rs`
-- high-value live consumers:
-  - `scripts/runtime/invoke-super-agent-housekeeping.ps1`
-  - `scripts/runtime/self-heal.ps1`
-  - `definitions/shared/instructions/repository-operating-model.instructions.md`
-  - `definitions/shared/instructions/super-agent.instructions.md`
-  - `definitions/providers/vscode/workspace/README.md`
-  - `scripts/tests/runtime/runtime-scripts.tests.ps1`
-  - `scripts/tests/runtime/vscode-agent-hooks.tests.ps1`
+- consumer-cutover outcome:
+  - runtime housekeeping now dispatches through `ntk runtime update-local-context-index` and `ntk runtime export-planning-summary`
+  - self-heal and VS Code runtime guidance now dispatch through `ntk runtime apply-vscode-templates`
+  - authored guidance and parity tests now assert the native executable contract instead of the local `.ps1` path
+
+## Outcome
+
+1. `scripts/runtime/update-local-context-index.ps1` was retired locally after runtime housekeeping, authored docs, validation inventory, and parity tests moved to `ntk runtime update-local-context-index`.
+2. `scripts/runtime/query-local-context-index.ps1` was retired locally after continuity guidance and parity fixtures moved to `ntk runtime query-local-context-index`.
+3. `scripts/runtime/export-planning-summary.ps1` was retired locally after planning handoff flows, Claude runtime settings, and parity tests moved to `ntk runtime export-planning-summary`.
+4. `scripts/runtime/apply-vscode-templates.ps1` was retired locally after self-heal, VS Code guidance, and runtime/operator flows moved to `ntk runtime apply-vscode-templates`.
+5. The remaining runtime PowerShell wrappers are now either higher-level compatibility launch surfaces or still require a separate consumer-migration slice.
 
 ## Design Decisions
 
@@ -80,7 +84,7 @@ Rejected. The continuity trio and template application all depend on the same ki
 3. Runtime parity tests validate the native entrypoint instead of the leaf file.
 4. Each in-scope leaf ends the phase either deleted or explicitly reclassified as an intentional retained wrapper.
 5. The retirement matrix and parity ledger are updated to the final state.
-6. Phase 4 is ready to archive when no in-scope leaf remains in ambiguous blocked state.
+6. Phase 4 is ready to archive because all four in-scope leaves are now `retired locally`.
 
 ## Planning Readiness
 

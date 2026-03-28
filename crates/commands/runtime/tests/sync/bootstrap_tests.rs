@@ -33,6 +33,8 @@ fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
 fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
+    fs::create_dir_all(repo_root.join(".github/bin"))
+        .expect("github runtime bin directory should be created");
     fs::create_dir_all(repo_root.join("scripts/runtime"))
         .expect("runtime directory should be created");
     fs::create_dir_all(repo_root.join("scripts/common"))
@@ -41,6 +43,10 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
         .expect("security directory should be created");
     fs::create_dir_all(repo_root.join("scripts/maintenance"))
         .expect("maintenance directory should be created");
+    write_file(
+        &repo_root.join(".github/bin").join(runtime_binary_name()),
+        "binary",
+    );
     write_runtime_install_profile_catalog(repo_root);
     initialize_minimal_provider_surface_projection(repo_root);
 }

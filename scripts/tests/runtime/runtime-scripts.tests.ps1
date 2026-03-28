@@ -838,14 +838,15 @@ try {
         & $runtimeBinaryPath runtime update-local-context-index --repo-root $tempRoot | Out-Null
 
         $summary = & $runtimeBinaryPath runtime export-planning-summary --repo-root $tempRoot --print-only
+        $summaryText = ($summary | Out-String)
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'export-planning-summary smoke test failed.'
-        Assert-True ($summary -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
-        Assert-True ($summary -match 'finish cleanup regression safely') 'export-planning-summary did not include the concise current focus.'
-        Assert-True ($summary -match 'Example Spec') 'export-planning-summary did not include the active spec title.'
-        Assert-True ($summary -match 'Suggested Local References') 'export-planning-summary should include suggested indexed references when a local context index exists.'
-        Assert-True ($summary -match 'README\.md') 'export-planning-summary should reference indexed repository files outside the active plan/spec when available.'
-        Assert-True ($summary -notmatch 'Full plan content') 'export-planning-summary should stay concise instead of embedding full plan content.'
+        Assert-True ($summaryText -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
+        Assert-True ($summaryText -match 'finish cleanup regression safely') 'export-planning-summary did not include the concise current focus.'
+        Assert-True ($summaryText -match 'Example Spec') 'export-planning-summary did not include the active spec title.'
+        Assert-True ($summaryText -match 'Suggested Local References') 'export-planning-summary should include suggested indexed references when a local context index exists.'
+        Assert-True ($summaryText -match 'README\.md') 'export-planning-summary should reference indexed repository files outside the active plan/spec when available.'
+        Assert-True ($summaryText -notmatch 'Full plan content') 'export-planning-summary should stay concise instead of embedding full plan content.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -872,11 +873,12 @@ try {
         )
 
         $summary = & $runtimeBinaryPath runtime export-planning-summary --repo-root $tempRoot --print-only
+        $summaryText = ($summary | Out-String)
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'export-planning-summary .build fallback smoke test failed.'
-        Assert-True ($summary -match 'Global Runtime Plan') 'export-planning-summary should include the .build active plan title.'
-        Assert-True ($summary -match 'Global Runtime Spec') 'export-planning-summary should include the .build active spec title.'
-        Assert-True ($summary -match '\.build/super-agent/planning/active') 'export-planning-summary should describe the .build planning surface when no workspace planning exists.'
+        Assert-True ($summaryText -match 'Global Runtime Plan') 'export-planning-summary should include the .build active plan title.'
+        Assert-True ($summaryText -match 'Global Runtime Spec') 'export-planning-summary should include the .build active spec title.'
+        Assert-True ($summaryText -match '\.build/super-agent/planning/active') 'export-planning-summary should describe the .build planning surface when no workspace planning exists.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
