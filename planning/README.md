@@ -8,6 +8,8 @@
 
 `planning/` stores the active and completed plans that guide non-trivial repository work. It keeps execution planning versioned, discoverable, and separate from temporary runtime state.
 
+This folder is part of the repository operating model, not disposable scratch state. Active plans define the current execution surface, and completed plans preserve the operational history that future workstreams depend on.
+
 ---
 
 ## Features
@@ -17,6 +19,8 @@
 - ✅ Active specs live in `planning/specs/active/`
 - ✅ Completed specs preserve design history in `planning/specs/completed/`
 - ✅ Planning artifacts stay separate from temporary build and runtime outputs
+- ✅ Active and completed folders are created on demand instead of being kept alive with placeholders
+- ✅ Stable plan slugs and plan reuse prevent duplicate workstreams for the same scope
 
 ---
 
@@ -25,8 +29,37 @@
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
+- [Structure](#structure)
+- [Rules](#rules)
 - [References](#references)
 - [License](#license)
+
+---
+
+## Structure
+
+```text
+planning/
+├─ README.md
+├─ active/
+├─ completed/
+└─ specs/
+   ├─ README.md
+   ├─ active/
+   └─ completed/
+```
+
+---
+
+## Rules
+
+- Create or update active plans in `planning/active/`.
+- Move a plan to `planning/completed/` only after implementation, validation, review, and closeout are materially complete.
+- Create or update versioned specs in `planning/specs/active/` when non-trivial work needs design decisions locked before planning.
+- Move specs to `planning/specs/completed/` together with their workstream when the associated plan is materially complete.
+- Reuse an existing active plan for the same workstream instead of creating duplicates.
+- Use stable slugged names such as `plan-<scope>.md` when creating new plans.
+- Keep transient run outputs, smoke artifacts, and execution scratch data in `.temp/`, not under `planning/`.
 
 ---
 
@@ -45,6 +78,10 @@
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
+- [super-agent.instructions.md](../.github/instructions/super-agent.instructions.md)
+- [brainstorm-spec-workflow.instructions.md](../.github/instructions/brainstorm-spec-workflow.instructions.md)
+- [subagent-planning-workflow.instructions.md](../.github/instructions/subagent-planning-workflow.instructions.md)
+- [repository-operating-model.instructions.md](../.github/instructions/repository-operating-model.instructions.md)
 
 ---
 

@@ -14,11 +14,11 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 
 ## Features
 
-- Bootstrap and sync repository runtime surfaces from versioned assets through compatibility wrappers.
-- Render projected provider and editor surfaces from canonical definitions.
-- Validate README, instruction, policy, and workspace standards with the Rust validation boundary.
-- Run health, remediation, security, and maintenance wrappers when shell invocation is required.
-- Keep operational commands deterministic and script-driven.
+- ✅ Bootstrap and sync repository runtime surfaces from versioned assets through compatibility wrappers.
+- ✅ Render projected provider and editor surfaces from canonical definitions.
+- ✅ Validate README, instruction, policy, and workspace standards with the Rust validation boundary.
+- ✅ Run health, remediation, security, and maintenance wrappers when shell invocation is required.
+- ✅ Keep operational commands deterministic and script-driven.
 
 ---
 
