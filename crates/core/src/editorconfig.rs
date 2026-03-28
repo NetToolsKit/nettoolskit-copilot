@@ -82,13 +82,21 @@ fn parse_bool(value: &str) -> Option<bool> {
     }
 }
 
-fn editorconfig_pattern_matches(pattern: &str, relative_path: &str, file_name: &str) -> Result<bool> {
+fn editorconfig_pattern_matches(
+    pattern: &str,
+    relative_path: &str,
+    file_name: &str,
+) -> Result<bool> {
     for expanded_pattern in expand_brace_pattern(pattern) {
         let normalized_pattern = expanded_pattern.replace('\\', "/");
         let matches = if normalized_pattern.contains('/') {
-            compile_glob(&normalized_pattern)?.compile_matcher().is_match(relative_path)
+            compile_glob(&normalized_pattern)?
+                .compile_matcher()
+                .is_match(relative_path)
         } else {
-            compile_glob(&normalized_pattern)?.compile_matcher().is_match(file_name)
+            compile_glob(&normalized_pattern)?
+                .compile_matcher()
+                .is_match(file_name)
         };
 
         if matches {
@@ -140,15 +148,18 @@ mod tests {
         fs::create_dir_all(workspace.path().join("src")).expect("src directory should exist");
         fs::write(workspace.path().join("src/lib.rs"), "pub fn sample() {}\n")
             .expect("rust file should exist");
-        fs::write(workspace.path().join("README.md"), "# docs")
-            .expect("readme should exist");
+        fs::write(workspace.path().join("README.md"), "# docs").expect("readme should exist");
 
-        let rust_policy =
-            resolve_insert_final_newline_policy(workspace.path(), &workspace.path().join("src/lib.rs"))
-                .expect("policy resolution should succeed");
-        let readme_policy =
-            resolve_insert_final_newline_policy(workspace.path(), &workspace.path().join("README.md"))
-                .expect("policy resolution should succeed");
+        let rust_policy = resolve_insert_final_newline_policy(
+            workspace.path(),
+            &workspace.path().join("src/lib.rs"),
+        )
+        .expect("policy resolution should succeed");
+        let readme_policy = resolve_insert_final_newline_policy(
+            workspace.path(),
+            &workspace.path().join("README.md"),
+        )
+        .expect("policy resolution should succeed");
 
         assert_eq!(rust_policy, Some(true));
         assert_eq!(readme_policy, Some(false));
@@ -159,9 +170,11 @@ mod tests {
         let workspace = TempDir::new().expect("temp dir should exist");
         fs::write(workspace.path().join("notes.md"), "alpha").expect("file should exist");
 
-        let policy =
-            resolve_insert_final_newline_policy(workspace.path(), &workspace.path().join("notes.md"))
-                .expect("policy resolution should succeed");
+        let policy = resolve_insert_final_newline_policy(
+            workspace.path(),
+            &workspace.path().join("notes.md"),
+        )
+        .expect("policy resolution should succeed");
 
         assert_eq!(policy, None);
     }

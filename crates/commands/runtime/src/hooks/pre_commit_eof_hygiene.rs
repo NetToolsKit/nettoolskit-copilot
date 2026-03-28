@@ -229,8 +229,7 @@ fn normalize_text_file(repo_root: &Path, path: &Path) -> anyhow::Result<bool> {
     let Ok(document) = String::from_utf8(bytes) else {
         return Ok(false);
     };
-    let keep_final_newline =
-        resolve_insert_final_newline_policy(repo_root, path)?.unwrap_or(false);
+    let keep_final_newline = resolve_insert_final_newline_policy(repo_root, path)?.unwrap_or(false);
     let normalized = normalize_document(&document, keep_final_newline);
     if normalized == document {
         return Ok(false);

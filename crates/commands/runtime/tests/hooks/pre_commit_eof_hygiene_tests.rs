@@ -208,5 +208,8 @@ fn test_invoke_pre_commit_eof_hygiene_keeps_rust_final_newline_when_editorconfig
         fs::read_to_string(repo.path().join("src/lib.rs")).expect("file should be readable"),
         "pub fn sample() {}\n"
     );
-    assert_eq!(read_staged_blob(repo.path(), "src/lib.rs"), "pub fn sample() {}\n");
+    assert_eq!(
+        read_staged_blob(repo.path(), "src/lib.rs"),
+        "pub fn sample() {}\n"
+    );
 }
