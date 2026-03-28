@@ -1,12 +1,12 @@
 # nettoolskit-validation
 
-> Validation command boundary and Wave 2 execution surface for the PowerShell-to-Rust migration.
+> Rust validation command boundary and Wave 2 execution surface for the PowerShell-to-Rust migration.
 
 ---
 
 ## Introduction
 
-`nettoolskit-validation` owns the Rust surfaces that replace repository validation, security, governance, documentation, and deploy preflight scripts. It is the top-level validation boundary for the migration program and the place where `validate-all` coordinates the native checks.
+`nettoolskit-validation` owns the Rust surfaces that replace repository validation, security, governance, documentation, and deploy preflight scripts. It is the top-level validation boundary for the migration program and the place where `validate-all` coordinates the native checks. PowerShell entrypoints remain only as compatibility wrappers for shell-based execution.
 
 ---
 

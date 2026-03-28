@@ -1,12 +1,12 @@
 # NetToolsKit Workspace
 
-> Rust workspace, runtime scripts, and versioned projection assets for the NetToolsKit toolchain.
+> Rust workspace, compatibility wrappers, and versioned projection assets for the NetToolsKit toolchain.
 
 ---
 
 ## Introduction
 
-NetToolsKit is a multi-crate workspace that combines Rust command boundaries, repository-owned runtime scripts, and versioned definitions that project into provider and editor surfaces.
+NetToolsKit is a multi-crate workspace that combines Rust command boundaries, repository-owned compatibility wrappers, and versioned definitions that project into provider and editor surfaces.
 
 It is organized to keep implementation, orchestration, planning, and reference documentation separate while still making the full workspace easy to navigate.
 
@@ -17,7 +17,7 @@ It is organized to keep implementation, orchestration, planning, and reference d
 - ✅ Rust crates for CLI entry points, orchestration, commands, telemetry, runtime validation, and UI boundaries
 - ✅ Versioned projection model for `.github/`, `.codex/`, `.claude/`, and `.vscode/`
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
-- ✅ Operational scripts for bootstrap, sync, validation, health, and maintenance flows
+- ✅ Compatibility wrappers for bootstrap, sync, validation, health, and maintenance flows
 - ✅ Workspace documentation that keeps crate and support surfaces discoverable
 
 ---
@@ -41,7 +41,7 @@ It is organized to keep implementation, orchestration, planning, and reference d
 - `cargo test --workspace`
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace -- -D warnings`
-- `pwsh -File .\scripts\validation\validate-readme-standards.ps1`
+- `pwsh -File .\scripts\validation\validate-readme-standards.ps1` for the repository validation wrapper
 
 ---
 
@@ -57,7 +57,7 @@ It is organized to keep implementation, orchestration, planning, and reference d
 ## Dependencies
 
 - Rust toolchain and Cargo for workspace builds and tests.
-- PowerShell 7+ for repository scripts and validation entrypoints.
+- PowerShell 7+ for repository compatibility wrappers and validation entrypoints.
 - GitHub Copilot / Codex runtime assets when working on projected surfaces.
 
 ---

@@ -1,12 +1,12 @@
 # Scripts
 
-> Repository-owned operational entrypoints for bootstrap, projection, validation, health, and maintenance.
+> Repository-owned compatibility wrappers for bootstrap, projection, validation, health, and maintenance.
 
 ---
 
 ## Introduction
 
-`scripts/` is the supported execution layer for repository operations. It renders projected surfaces, applies runtime configuration, validates policy and docs, and keeps maintenance tasks deterministic.
+`scripts/` is the compatibility layer for repository operations. It renders projected surfaces, applies runtime configuration, validates policy and docs, and keeps maintenance tasks deterministic. The Rust crates own the primary implementation surfaces; these wrappers remain for shell-based entrypoints and fallback.
 
 Authoritative non-code assets live under `definitions/`. Provider and runtime folders such as `.github/`, `.codex/`, `.claude/`, and `.vscode/` are generated surfaces that these scripts render, sync, and validate.
 
@@ -14,11 +14,11 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 
 ## Features
 
-- ✅ Bootstrap and sync repository runtime surfaces from versioned assets
-- ✅ Render projected provider and editor surfaces from canonical definitions
-- ✅ Validate README, instruction, policy, and workspace standards
-- ✅ Run health, remediation, security, and maintenance entrypoints
-- ✅ Keep operational commands deterministic and script-driven
+- Bootstrap and sync repository runtime surfaces from versioned assets through compatibility wrappers.
+- Render projected provider and editor surfaces from canonical definitions.
+- Validate README, instruction, policy, and workspace standards with the Rust validation boundary.
+- Run health, remediation, security, and maintenance wrappers when shell invocation is required.
+- Keep operational commands deterministic and script-driven.
 
 ---
 
@@ -59,18 +59,17 @@ pwsh -File .\scripts\validation\validate-readme-standards.ps1
 
 ## References
 
-- [.github/AGENTS.md](.github/AGENTS.md)
-- [.github/copilot-instructions.md](.github/copilot-instructions.md)
-- [.github/instructions/readme.instructions.md](.github/instructions/readme.instructions.md)
-- [.github/instructions/nettoolskit-rules.instructions.md](.github/instructions/nettoolskit-rules.instructions.md)
-- [definitions/README.md](definitions/README.md)
-- [planning/README.md](planning/README.md)
-- [scripts/runtime/bootstrap.ps1](scripts/runtime/bootstrap.ps1)
-- [scripts/runtime/render-provider-surfaces.ps1](scripts/runtime/render-provider-surfaces.ps1)
-- [scripts/runtime/healthcheck.ps1](scripts/runtime/healthcheck.ps1)
-- [scripts/runtime/self-heal.ps1](scripts/runtime/self-heal.ps1)
-- [scripts/validation/validate-all.ps1](scripts/validation/validate-all.ps1)
-- [scripts/validation/validate-readme-standards.ps1](scripts/validation/validate-readme-standards.ps1)
+- [Repository README](../README.md)
+- [Planning README](../planning/README.md)
+- [Definitions README](../definitions/README.md)
+- [AGENTS](../.github/AGENTS.md)
+- [Copilot Instructions](../.github/copilot-instructions.md)
+- [Bootstrap](runtime/bootstrap.ps1)
+- [Render Provider Surfaces](runtime/render-provider-surfaces.ps1)
+- [Healthcheck](runtime/healthcheck.ps1)
+- [Self-Heal](runtime/self-heal.ps1)
+- [Validate All](validation/validate-all.ps1)
+- [Validate README Standards](validation/validate-readme-standards.ps1)
 
 ---
 

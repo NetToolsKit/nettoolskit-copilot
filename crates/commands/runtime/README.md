@@ -1,12 +1,12 @@
 # nettoolskit-runtime
 
-> Runtime command boundary for repository-managed assets, drift diagnosis, and repair flows.
+> Rust runtime command boundary for repository-managed assets, drift diagnosis, and repair flows.
 
 ---
 
 ## Introduction
 
-`nettoolskit-runtime` owns the Rust surfaces that replace the legacy runtime, maintenance, hook, and drift-management scripts. It keeps synchronization, inspection, and self-healing logic in one package so the migration can cut over in controlled slices.
+`nettoolskit-runtime` owns the Rust surfaces that replace the legacy runtime, maintenance, hook, and drift-management scripts. It keeps synchronization, inspection, and self-healing logic in one package so the migration can cut over in controlled slices. PowerShell wrappers are retained only where shell-based compatibility or local operator invocation is still required.
 
 ---
 

@@ -1,10 +1,14 @@
 <#
 .SYNOPSIS
-    Runs the complete validation suite for the instruction and agent system.
+    Compatibility wrapper that runs the complete validation suite for the instruction and agent system.
 
 .DESCRIPTION
     Executes repository validation scripts in deterministic order, supports
     governance profiles, and writes append-only hash-chained ledger evidence.
+
+    This is the PowerShell compatibility entrypoint for the Rust-owned
+    validation boundary. Prefer the Rust orchestration for implementation work
+    and use this wrapper when shell invocation is required.
 
     Included checks:
     - validate-instructions
@@ -74,17 +78,20 @@
     Shows detailed diagnostics.
 
 .EXAMPLE
+    # Compatibility wrapper invocation
     pwsh -File scripts/validation/validate-all.ps1
 
 .EXAMPLE
+    # Compatibility wrapper invocation with a named profile
     pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile release
 
 .EXAMPLE
+    # Compatibility wrapper invocation with warning-only disabled
     pwsh -File scripts/validation/validate-all.ps1 -WarningOnly:$false -ValidationProfile enforced
 
 .NOTES
     Version: 2.2
-    Requirements: PowerShell 7+.
+    Requirements: PowerShell 7+ for the compatibility wrapper.
 #>
 
 param(
