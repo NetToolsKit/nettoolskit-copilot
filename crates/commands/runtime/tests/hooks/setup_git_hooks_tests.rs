@@ -258,6 +258,10 @@ fn test_invoke_setup_git_hooks_global_scope_configures_managed_hooks_path() {
         Some(global_hooks_path.clone())
     );
     assert!(global_hooks_path.join("pre-commit").is_file());
+    let pre_commit_hook = fs::read_to_string(global_hooks_path.join("pre-commit"))
+        .expect("managed global pre-commit hook should be readable");
+    assert!(pre_commit_hook.contains("CODEX_GIT_HOOK_EOF_CATALOG_PATH"));
+    assert!(!pre_commit_hook.contains("CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH"));
 
     let settings =
         fs::read_to_string(global_settings_path).expect("global settings should be readable");

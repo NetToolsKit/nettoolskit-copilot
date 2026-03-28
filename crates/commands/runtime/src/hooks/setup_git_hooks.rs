@@ -291,7 +291,6 @@ fn install_managed_global_git_hooks(
         build_managed_global_pre_commit_hook_content(
             &support_paths.runner_path,
             &support_paths.catalog_path,
-            &support_paths.trim_script_path,
         ),
     )
     .with_context(|| format!("failed to write '{}'", pre_commit_path.display()))?;
@@ -377,19 +376,13 @@ fn resolve_global_hook_support_paths(
     Ok(GlobalHookSupportPaths {
         runner_path,
         catalog_path,
-        trim_script_path,
     })
 }
 
-fn build_managed_global_pre_commit_hook_content(
-    runner_path: &Path,
-    catalog_path: &Path,
-    trim_script_path: &Path,
-) -> String {
+fn build_managed_global_pre_commit_hook_content(runner_path: &Path, catalog_path: &Path) -> String {
     format!(
-        "#!/usr/bin/env sh\nset -eu\n\nREPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"\ncd \"$REPO_ROOT\"\n\nexport CODEX_GIT_HOOK_EOF_CATALOG_PATH='{}'\nexport CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH='{}'\n\nif command -v pwsh >/dev/null 2>&1; then\n  if ! pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\nif command -v powershell >/dev/null 2>&1; then\n  if ! powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\necho \"[pre-commit] Warning: PowerShell not found. EOF hygiene skipped.\" >&2\nexit 0\n",
+        "#!/usr/bin/env sh\nset -eu\n\nREPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"\ncd \"$REPO_ROOT\"\n\nexport CODEX_GIT_HOOK_EOF_CATALOG_PATH='{}'\n\nif command -v pwsh >/dev/null 2>&1; then\n  if ! pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\nif command -v powershell >/dev/null 2>&1; then\n  if ! powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\necho \"[pre-commit] Warning: PowerShell not found. EOF hygiene skipped.\" >&2\nexit 0\n",
         normalize_shell_path(catalog_path),
-        normalize_shell_path(trim_script_path),
         normalize_shell_path(runner_path),
         normalize_shell_path(runner_path)
     )
@@ -489,5 +482,4 @@ fn render_git_failure(output: Output) -> anyhow::Error {
 struct GlobalHookSupportPaths {
     runner_path: PathBuf,
     catalog_path: PathBuf,
-    trim_script_path: PathBuf,
 }

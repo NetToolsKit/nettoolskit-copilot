@@ -7,7 +7,8 @@
         - Removes trailing spaces/tabs at the end of the file.
         - Removes every blank line after the last line of content.
         - Applies the repository EOF policy:
-          - text files end on the last content character with no final newline
+          - the repository default keeps no final newline
+          - narrower `.editorconfig` overrides can require one terminal newline for specific file types
 
     When executed inside a Git repository, it prefers `git ls-files` to respect ignore rules.
     Otherwise it falls back to a filesystem scan starting from -Path (or the current directory)
@@ -55,7 +56,7 @@
     pwsh -File scripts/maintenance/trim-trailing-blank-lines.ps1 -GitChangedOnly
 
 .NOTES
-    Version: 1.4
+    Version: 1.5
     Requirements: PowerShell 7+, Git CLI (optional, for faster discovery).
 #>
 
