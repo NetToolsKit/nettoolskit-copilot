@@ -35,8 +35,9 @@ pub use contracts::{
 };
 pub use documentation::{
     invoke_validate_instruction_metadata, invoke_validate_readme_standards,
-    ValidateInstructionMetadataRequest, ValidateInstructionMetadataResult,
-    ValidateReadmeStandardsRequest, ValidateReadmeStandardsResult,
+    invoke_validate_xml_documentation, ValidateInstructionMetadataRequest,
+    ValidateInstructionMetadataResult, ValidateReadmeStandardsRequest,
+    ValidateReadmeStandardsResult, ValidateXmlDocumentationRequest, ValidateXmlDocumentationResult,
 };
 pub use error::{
     ValidateAgentHooksCommandError, ValidateAgentOrchestrationCommandError,
@@ -52,6 +53,7 @@ pub use error::{
     ValidateRuntimeScriptTestsCommandError, ValidateSecurityBaselineCommandError,
     ValidateSharedScriptChecksumsCommandError, ValidateShellHooksCommandError,
     ValidateSupplyChainCommandError, ValidateTemplateStandardsCommandError,
+    ValidateXmlDocumentationCommandError,
     ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
     ValidationSurfaceError,
 };

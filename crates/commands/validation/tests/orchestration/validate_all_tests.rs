@@ -166,6 +166,22 @@ fn write_valid_instruction_metadata_fixtures(repo_root: &std::path::Path, broad_
     );
 }
 
+fn write_xml_documentation_fixture(repo_root: &std::path::Path) {
+    write_file(&repo_root.join("src/App/App.csproj"), "<Project />");
+    write_file(
+        &repo_root.join("src/App/ExampleService.cs"),
+        r#"namespace Example.App;
+
+/// <summary>
+/// Example service.
+/// </summary>
+public class ExampleService
+{
+}
+"#,
+    );
+}
+
 fn write_routing_catalog_and_fixtures(repo_root: &std::path::Path) {
     write_file(
         &repo_root.join(".github/instruction-routing.catalog.yml"),
@@ -454,10 +470,15 @@ fn test_invoke_validate_all_runs_native_documentation_checks() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(
         repo.path(),
-        &["validate-readme-standards", "validate-instruction-metadata"],
+        &[
+            "validate-readme-standards",
+            "validate-xml-documentation",
+            "validate-instruction-metadata",
+        ],
     );
     write_default_readme_baseline(repo.path());
     write_valid_readme(repo.path());
+    write_xml_documentation_fixture(repo.path());
     write_valid_instruction_metadata_fixtures(repo.path(), false);
 
     let result = invoke_validate_all(&ValidateAllRequest {
@@ -467,12 +488,16 @@ fn test_invoke_validate_all_runs_native_documentation_checks() {
     })
     .expect("validate-all should execute");
 
-    assert_eq!(result.total_checks, 2);
-    assert_eq!(result.passed_checks, 2);
+    assert_eq!(result.total_checks, 3);
+    assert_eq!(result.passed_checks, 3);
     assert!(result
         .checks
         .iter()
         .any(|check| check.script == "rust:nettoolskit-validation::validate-readme-standards"));
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.script == "rust:nettoolskit-validation::validate-xml-documentation"));
     assert!(result.checks.iter().any(|check| {
         check.script == "rust:nettoolskit-validation::validate-instruction-metadata"
     }));

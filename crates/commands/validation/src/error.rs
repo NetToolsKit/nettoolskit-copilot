@@ -62,6 +62,18 @@ pub enum ValidateReadmeStandardsCommandError {
     },
 }
 
+/// Errors raised by XML documentation validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateXmlDocumentationCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve xml documentation workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by instruction metadata validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateInstructionMetadataCommandError {

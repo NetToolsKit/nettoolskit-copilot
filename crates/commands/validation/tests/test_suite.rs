@@ -4,6 +4,7 @@ mod contracts_tests;
 mod documentation {
     pub mod instruction_metadata_tests;
     pub mod readme_standards_tests;
+    pub mod xml_documentation_tests;
 }
 mod architecture {
     pub mod architecture_boundaries_tests;

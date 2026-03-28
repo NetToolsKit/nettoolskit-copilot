@@ -28,6 +28,7 @@ use crate::{
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
     invoke_validate_warning_baseline, invoke_validate_workspace_efficiency,
+    invoke_validate_xml_documentation,
     ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
@@ -40,6 +41,7 @@ use crate::{
     ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
     ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
     ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
+    ValidateXmlDocumentationRequest,
 };
 
 const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
@@ -60,6 +62,7 @@ const DEFAULT_CHECK_ORDER: &[&str] = &[
     "validate-authoritative-source-policy",
     "validate-instruction-architecture",
     "validate-readme-standards",
+    "validate-xml-documentation",
     "validate-template-standards",
     "validate-workspace-efficiency",
     "validate-compatibility-lifecycle-policy",
@@ -246,6 +249,7 @@ enum NativeValidationCheck {
     PlanningStructure,
     AuditLedger,
     ReadmeStandards,
+    XmlDocumentation,
     InstructionMetadata,
     InstructionArchitecture,
     RoutingCoverage,
@@ -313,6 +317,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards) => {
                 "rust:nettoolskit-validation::validate-readme-standards"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::XmlDocumentation) => {
+                "rust:nettoolskit-validation::validate-xml-documentation"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata) => {
                 "rust:nettoolskit-validation::validate-instruction-metadata"
@@ -602,6 +609,10 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
             ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards),
         ),
         (
+            "validate-xml-documentation",
+            ValidationCheckExecutor::Native(NativeValidationCheck::XmlDocumentation),
+        ),
+        (
             "validate-template-standards",
             ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards),
         ),
@@ -774,6 +785,7 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::PlanningStructure)
         | ValidationCheckExecutor::Native(NativeValidationCheck::AuditLedger)
         | ValidationCheckExecutor::Native(NativeValidationCheck::ReadmeStandards)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::XmlDocumentation)
         | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
         | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
         | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
@@ -1201,6 +1213,21 @@ fn run_native_validation_check(
                 repo_root: Some(repo_root.to_path_buf()),
                 warning_only: treat_failure_as_warning,
                 ..ValidateReadmeStandardsRequest::default()
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::XmlDocumentation => {
+            invoke_validate_xml_documentation(&ValidateXmlDocumentationRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                warning_only: treat_failure_as_warning,
+                ..ValidateXmlDocumentationRequest::default()
             })
             .map(|result| {
                 (
