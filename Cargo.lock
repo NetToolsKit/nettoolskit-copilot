@@ -1840,6 +1840,7 @@ dependencies = [
  "nettoolskit-core",
  "nettoolskit-orchestrator",
  "nettoolskit-otel",
+ "nettoolskit-runtime",
  "nettoolskit-ui",
  "owo-colors",
  "predicates",

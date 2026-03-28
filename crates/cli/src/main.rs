@@ -33,6 +33,10 @@ use tokio::net::TcpListener;
 use tower::{timeout::TimeoutLayer, ServiceBuilder};
 use tracing::{info, info_span};
 
+mod runtime_commands;
+
+use runtime_commands::{execute_runtime_command, RuntimeCommand};
+
 #[cfg(test)]
 use axum::body::Body;
 #[cfg(test)]
@@ -82,6 +86,13 @@ pub enum Commands {
         /// Optional manifest subcommand. If omitted, opens interactive submenu.
         #[clap(subcommand)]
         command: Option<ManifestCommand>,
+    },
+
+    /// Execute repository runtime hook and maintenance surfaces.
+    Runtime {
+        /// Runtime subcommand.
+        #[clap(subcommand)]
+        command: RuntimeCommand,
     },
 
     /// Generate shell completions for the specified shell
@@ -327,6 +338,7 @@ impl Commands {
                     process_command(&command_line).await
                 }
             },
+            Commands::Runtime { command } => execute_runtime_command(command),
             Commands::Completions { shell } => {
                 clap_complete::generate(shell, &mut Cli::command(), "ntk", &mut std::io::stdout());
                 ExitStatus::Success
