@@ -100,6 +100,13 @@ pub const VALIDATION_SURFACE_CONTRACTS: &[ValidationSurfaceContract] = &[
         MigrationWave::Wave2,
     ),
     ValidationSurfaceContract::new(
+        "test-refactor-commands",
+        "scripts/tests/refactor_tests_to_aaa.ps1",
+        1,
+        ValidationSurfaceKind::TestAutomationCommands,
+        MigrationWave::Wave2,
+    ),
+    ValidationSurfaceContract::new(
         "deploy-commands",
         "scripts/deploy",
         1,

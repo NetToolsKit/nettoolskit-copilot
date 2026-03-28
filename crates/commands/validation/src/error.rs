@@ -182,6 +182,38 @@ pub enum ValidateRuntimeScriptTestsCommandError {
     },
 }
 
+/// Errors raised by AAA refactor helper commands.
+#[derive(Debug, Error)]
+pub enum RefactorTestsToAaaCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve AAA refactor workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Requested test file path is invalid.
+    #[error("invalid AAA refactor test file path: {test_file}")]
+    ResolveTestFilePath {
+        /// Resolved test file path expected by the command.
+        test_file: String,
+    },
+    /// Test file loading failed.
+    #[error("failed to read AAA refactor test file")]
+    ReadTestFile {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Test file writing failed.
+    #[error("failed to write AAA refactor test file")]
+    WriteTestFile {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by test-naming validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateTestNamingCommandError {

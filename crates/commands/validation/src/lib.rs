@@ -44,10 +44,11 @@ pub use documentation::{
     ValidateReadmeStandardsResult, ValidateXmlDocumentationRequest, ValidateXmlDocumentationResult,
 };
 pub use error::{
-    ValidateAgentHooksCommandError, ValidateAgentOrchestrationCommandError,
-    ValidateAgentPermissionsCommandError, ValidateAgentSkillAlignmentCommandError,
-    ValidateAllCommandError, ValidateArchitectureBoundariesCommandError,
-    ValidateAuditLedgerCommandError, ValidateAuthoritativeSourcePolicyCommandError,
+    RefactorTestsToAaaCommandError, ValidateAgentHooksCommandError,
+    ValidateAgentOrchestrationCommandError, ValidateAgentPermissionsCommandError,
+    ValidateAgentSkillAlignmentCommandError, ValidateAllCommandError,
+    ValidateArchitectureBoundariesCommandError, ValidateAuditLedgerCommandError,
+    ValidateAuthoritativeSourcePolicyCommandError,
     ValidateCompatibilityLifecyclePolicyCommandError, ValidateDeployPreflightCommandError,
     ValidateDotnetStandardsCommandError, ValidateInstructionArchitectureCommandError,
     ValidateInstructionMetadataCommandError, ValidateInstructionsCommandError,
@@ -76,11 +77,12 @@ pub use instruction_graph::{
     ValidateInstructionArchitectureResult, ValidateInstructionsRequest, ValidateInstructionsResult,
 };
 pub use operational_hygiene::{
-    invoke_validate_runtime_script_tests, invoke_validate_shell_hooks, invoke_validate_test_naming,
-    invoke_validate_warning_baseline, ValidateRuntimeScriptTestsRequest,
-    ValidateRuntimeScriptTestsResult, ValidateShellHooksRequest, ValidateShellHooksResult,
-    ValidateTestNamingRequest, ValidateTestNamingResult, ValidateWarningBaselineRequest,
-    ValidateWarningBaselineResult,
+    invoke_refactor_tests_to_aaa, invoke_validate_runtime_script_tests,
+    invoke_validate_shell_hooks, invoke_validate_test_naming, invoke_validate_warning_baseline,
+    RefactorTestsToAaaRequest, RefactorTestsToAaaResult, RefactorTestsToAaaStatus,
+    ValidateRuntimeScriptTestsRequest, ValidateRuntimeScriptTestsResult, ValidateShellHooksRequest,
+    ValidateShellHooksResult, ValidateTestNamingRequest, ValidateTestNamingResult,
+    ValidateWarningBaselineRequest, ValidateWarningBaselineResult,
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,

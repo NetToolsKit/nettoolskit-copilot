@@ -1,7 +1,7 @@
 //! Tests for validation surface errors.
 
 use nettoolskit_validation::{
-    invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
+    invoke_refactor_tests_to_aaa, invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment, invoke_validate_all,
     invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
     invoke_validate_authoritative_source_policy, invoke_validate_compatibility_lifecycle_policy,
@@ -15,19 +15,19 @@ use nettoolskit_validation::{
     invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
     invoke_validate_test_naming, invoke_validate_warning_baseline,
     invoke_validate_workspace_efficiency, require_validation_surface_contract,
-    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
-    ValidateAgentSkillAlignmentRequest, ValidateAllRequest, ValidateArchitectureBoundariesRequest,
-    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
-    ValidateCompatibilityLifecyclePolicyRequest, ValidateDeployPreflightRequest,
-    ValidateDotnetStandardsRequest, ValidateInstructionArchitectureRequest,
-    ValidateInstructionMetadataRequest, ValidateInstructionsRequest,
-    ValidatePlanningStructureRequest, ValidatePolicyRequest, ValidatePowerShellStandardsRequest,
-    ValidateReadmeStandardsRequest, ValidateReleaseGovernanceRequest,
-    ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
-    ValidateRuntimeScriptTestsRequest, ValidateSecurityBaselineRequest,
-    ValidateSharedScriptChecksumsRequest, ValidateShellHooksRequest, ValidateSupplyChainRequest,
-    ValidateTemplateStandardsRequest, ValidateTestNamingRequest, ValidateWarningBaselineRequest,
-    ValidateWorkspaceEfficiencyRequest,
+    RefactorTestsToAaaRequest, ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
+    ValidateAgentPermissionsRequest, ValidateAgentSkillAlignmentRequest, ValidateAllRequest,
+    ValidateArchitectureBoundariesRequest, ValidateAuditLedgerRequest,
+    ValidateAuthoritativeSourcePolicyRequest, ValidateCompatibilityLifecyclePolicyRequest,
+    ValidateDeployPreflightRequest, ValidateDotnetStandardsRequest,
+    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
+    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidatePolicyRequest,
+    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
+    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
+    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
+    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
+    ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
+    ValidateTestNamingRequest, ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
 };
 
 #[test]
@@ -279,6 +279,21 @@ fn test_validate_runtime_script_tests_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve runtime script test workspace root"
+    );
+}
+
+#[test]
+fn test_refactor_tests_to_aaa_error_display_is_stable() {
+    let error = invoke_refactor_tests_to_aaa(&RefactorTestsToAaaRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        test_file: std::path::PathBuf::from("tests/example.rs"),
+        dry_run: true,
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve AAA refactor workspace root"
     );
 }
 

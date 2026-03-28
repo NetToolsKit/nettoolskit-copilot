@@ -27,9 +27,9 @@ use crate::{
     invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
-    invoke_validate_warning_baseline, invoke_validate_workspace_efficiency,
-    invoke_validate_xml_documentation, ValidateAgentHooksRequest,
-    ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    invoke_validate_test_naming, invoke_validate_warning_baseline,
+    invoke_validate_workspace_efficiency, invoke_validate_xml_documentation,
+    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateCompatibilityLifecyclePolicyRequest, ValidateDeployPreflightRequest,
@@ -40,7 +40,7 @@ use crate::{
     ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
     ValidateRuntimeScriptTestsRequest, ValidateSecurityBaselineRequest,
     ValidateSharedScriptChecksumsRequest, ValidateShellHooksRequest, ValidateSupplyChainRequest,
-    ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
+    ValidateTemplateStandardsRequest, ValidateTestNamingRequest, ValidateWarningBaselineRequest,
     ValidateWorkspaceEfficiencyRequest, ValidateXmlDocumentationRequest,
 };
 
@@ -71,6 +71,7 @@ const DEFAULT_CHECK_ORDER: &[&str] = &[
     "validate-agent-hooks",
     "validate-shell-hooks",
     "validate-runtime-script-tests",
+    "validate-test-naming",
     "validate-warning-baseline",
     "validate-dotnet-standards",
     "validate-architecture-boundaries",
@@ -258,6 +259,7 @@ enum NativeValidationCheck {
     TemplateStandards,
     AuthoritativeSourcePolicy,
     RuntimeScriptTests,
+    TestNaming,
     ShellHooks,
     WarningBaseline,
     WorkspaceEfficiency,
@@ -343,6 +345,9 @@ impl ValidationCheckDefinition {
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests) => {
                 "rust:nettoolskit-validation::validate-runtime-script-tests"
+            }
+            ValidationCheckExecutor::Native(NativeValidationCheck::TestNaming) => {
+                "rust:nettoolskit-validation::validate-test-naming"
             }
             ValidationCheckExecutor::Native(NativeValidationCheck::ShellHooks) => {
                 "rust:nettoolskit-validation::validate-shell-hooks"
@@ -650,6 +655,10 @@ fn validation_check_catalog() -> HashMap<&'static str, ValidationCheckDefinition
             ValidationCheckExecutor::Native(NativeValidationCheck::RuntimeScriptTests),
         ),
         (
+            "validate-test-naming",
+            ValidationCheckExecutor::Native(NativeValidationCheck::TestNaming),
+        ),
+        (
             "validate-warning-baseline",
             ValidationCheckExecutor::Native(NativeValidationCheck::WarningBaseline),
         ),
@@ -798,7 +807,8 @@ fn definition_supports_parameter(
         | ValidationCheckExecutor::Native(NativeValidationCheck::DeployPreflight)
         | ValidationCheckExecutor::Native(NativeValidationCheck::InstructionMetadata)
         | ValidationCheckExecutor::Native(NativeValidationCheck::RoutingCoverage)
-        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards) => {
+        | ValidationCheckExecutor::Native(NativeValidationCheck::TemplateStandards)
+        | ValidationCheckExecutor::Native(NativeValidationCheck::TestNaming) => {
             matches!(
                 parameter_name,
                 "WarningOnly"
@@ -1381,6 +1391,23 @@ fn run_native_validation_check(
                 repo_root: Some(repo_root.to_path_buf()),
                 test_root: string_argument_path(&arguments, "TestRoot"),
                 powershell_path: string_argument_path(&arguments, "PowerShellPath"),
+                warning_only: bool_argument(&arguments, "WarningOnly")
+                    .unwrap_or(treat_failure_as_warning),
+            })
+            .map(|result| {
+                (
+                    result.status,
+                    result.exit_code,
+                    combine_native_messages(&result.failures, &result.warnings),
+                )
+            })
+            .unwrap_or_else(|error| (ValidationCheckStatus::Failed, 1, Some(error.to_string())))
+        }
+        NativeValidationCheck::TestNaming => {
+            invoke_validate_test_naming(&ValidateTestNamingRequest {
+                repo_root: Some(repo_root.to_path_buf()),
+                projects: None,
+                required_underscores: 3,
                 warning_only: bool_argument(&arguments, "WarningOnly")
                     .unwrap_or(treat_failure_as_warning),
             })

@@ -12,7 +12,7 @@
 
 ## Features
 
-- ✅ Locked migration contracts for `42` legacy PowerShell scripts across validation, security, governance, documentation, test automation, and deploy surfaces
+- ✅ Locked migration contracts for `43` legacy PowerShell scripts across validation, security, governance, documentation, test automation, and deploy surfaces
 - ✅ Native `validate-all` orchestration with profile selection, report generation, and ledger writing
 - ✅ Direct Rust checks for agent orchestration, instructions, policies, README standards, routing, templates, and workspace hygiene
 - ✅ README standards enforcement backed by the executable repository baseline
@@ -285,11 +285,15 @@ pub fn invoke_validate_template_standards(
 
 ```rust
 pub struct ValidateRuntimeScriptTestsRequest { ... }
+pub struct RefactorTestsToAaaRequest { ... }
 pub struct ValidateTestNamingRequest { ... }
 pub struct ValidateDeployPreflightRequest { ... }
 pub struct ValidateShellHooksRequest { ... }
 pub struct ValidateWarningBaselineRequest { ... }
 
+pub fn invoke_refactor_tests_to_aaa(
+    request: &RefactorTestsToAaaRequest,
+) -> Result<RefactorTestsToAaaResult, RefactorTestsToAaaCommandError>;
 pub fn invoke_validate_runtime_script_tests(
     request: &ValidateRuntimeScriptTestsRequest,
 ) -> Result<ValidateRuntimeScriptTestsResult, ValidateRuntimeScriptTestsCommandError>;
@@ -335,6 +339,7 @@ pub enum ValidationSurfaceError { UnknownSurface { surface_id: String } }
 pub enum ValidateAllCommandError { ResolveWorkspaceRoot { ... } }
 pub enum ValidateReadmeStandardsCommandError { ResolveWorkspaceRoot { ... } }
 pub enum ValidateDeployPreflightCommandError { ResolveWorkspaceRoot { ... } }
+pub enum RefactorTestsToAaaCommandError { ResolveWorkspaceRoot { ... }, ResolveTestFilePath { ... }, ReadTestFile { ... }, WriteTestFile { ... } }
 pub enum ValidateTestNamingCommandError { ResolveWorkspaceRoot { ... }, InvalidRequiredUnderscores { ... } }
 ```
 
