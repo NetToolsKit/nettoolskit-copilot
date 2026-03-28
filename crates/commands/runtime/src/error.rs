@@ -428,6 +428,18 @@ pub enum RuntimePreCommitEofHygieneCommandError {
     },
 }
 
+/// Errors raised by runtime pre-tool-use hook commands.
+#[derive(Debug, Error)]
+pub enum RuntimePreToolUseCommandError {
+    /// Workspace EOF policy resolution failed.
+    #[error("failed to resolve runtime pre-tool-use workspace eof policy")]
+    ResolveWorkspacePolicy {
+        /// Underlying workspace policy failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime trim-trailing-blank-lines commands.
 #[derive(Debug, Error)]
 pub enum RuntimeTrimTrailingBlankLinesCommandError {

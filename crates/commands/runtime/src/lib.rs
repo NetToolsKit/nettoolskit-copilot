@@ -36,13 +36,17 @@ pub use error::{
     RuntimeBootstrapCommandError, RuntimeCleanBuildArtifactsCommandError,
     RuntimeDoctorCommandError, RuntimeFixRegionSpacingCommandError,
     RuntimeFixVersionRangesCommandError, RuntimeHealthcheckCommandError,
-    RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
-    RuntimeSetupGitHooksCommandError, RuntimeSetupGlobalGitAliasesCommandError,
-    RuntimeSurfaceError, RuntimeTrimTrailingBlankLinesCommandError,
+    RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
+    RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
+    RuntimeSetupGlobalGitAliasesCommandError, RuntimeSurfaceError,
+    RuntimeTrimTrailingBlankLinesCommandError,
 };
 pub use hooks::pre_commit_eof_hygiene::{
     invoke_pre_commit_eof_hygiene, RuntimePreCommitEofHygieneRequest,
     RuntimePreCommitEofHygieneResult, RuntimePreCommitEofHygieneStatus,
+};
+pub use hooks::pre_tool_use::{
+    invoke_pre_tool_use, RuntimePreToolUseRequest, RuntimePreToolUseResult,
 };
 pub use hooks::setup_git_hooks::{
     invoke_setup_git_hooks, RuntimeSetupGitHooksRequest, RuntimeSetupGitHooksResult,

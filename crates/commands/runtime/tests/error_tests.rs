@@ -5,8 +5,9 @@ use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
     RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
-    RuntimePreCommitEofHygieneCommandError, RuntimeSelfHealCommandError,
-    RuntimeSetupGitHooksCommandError, RuntimeSetupGlobalGitAliasesCommandError,
+    RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
+    RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
+    RuntimeSetupGlobalGitAliasesCommandError,
 };
 use std::error::Error;
 
@@ -211,6 +212,25 @@ fn test_runtime_pre_commit_eof_hygiene_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "git diff failed"
+    );
+}
+
+#[test]
+fn test_runtime_pre_tool_use_error_display_is_stable() {
+    let error = RuntimePreToolUseCommandError::ResolveWorkspacePolicy {
+        source: anyhow!("invalid .editorconfig"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve runtime pre-tool-use workspace eof policy"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "invalid .editorconfig"
     );
 }
 
