@@ -32,6 +32,7 @@
 
 ## References
 
+- [planning/active/plan-instruction-parity-and-script-retirement.md](planning/active/plan-instruction-parity-and-script-retirement.md)
 - [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
 - [planning/completed/plan-repository-unification-and-rust-migration.md](planning/completed/plan-repository-unification-and-rust-migration.md)
@@ -39,6 +40,7 @@
 - [planning/completed/rust-script-cutover-default-map.md](planning/completed/rust-script-cutover-default-map.md)
 - [planning/completed/rust-script-parity-ledger.md](planning/completed/rust-script-parity-ledger.md)
 - [planning/completed/rust-script-transcription-ownership-matrix.md](planning/completed/rust-script-transcription-ownership-matrix.md)
+- [planning/specs/active/spec-instruction-parity-and-script-retirement-readiness.md](planning/specs/active/spec-instruction-parity-and-script-retirement-readiness.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
