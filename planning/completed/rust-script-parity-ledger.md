@@ -4,7 +4,7 @@ Generated: 2026-03-27 20:01
 
 ## Status
 
-- LastUpdated: 2026-03-28 16:10
+- LastUpdated: 2026-03-28 17:18
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
 - Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
@@ -17,6 +17,7 @@ Generated: 2026-03-27 20:01
 - Closeout board semantics:
   - `parity proven`: native Rust behavior and deterministic evidence exist; the cutover map then decides whether the domain is Rust-default now or wrapper retained intentionally
   - `cutover ready`: parity is proven and the domain is ready to become Rust-default
+  - `retired locally`: parity was proven and the local compatibility wrapper was removed from this repository
   - `wrapper retained intentionally`: parity exists, but the legacy wrapper remains part of the approved operating model
   - `retained wrapper exception`: the remaining shell-owned behavior is explicitly retained by policy and is not treated as open migration debt
   - `evidence gap remains`: the owner boundary exists, but the recorded closeout evidence is still incomplete
@@ -44,8 +45,8 @@ Generated: 2026-03-27 20:01
 | `scripts/deploy/*.ps1` | 1 | `crates/commands/validation` | deploy preflight tests and protected execution-path assertions | `parity proven` | `validate-deploy-preflight` now exists natively in `crates/commands/validation/deploy`, runs through `validate-all`, and the PowerShell deploy executor is intentionally retained as a compatibility wrapper. |
 | `scripts/orchestration/**/*.ps1` | 10 | `crates/orchestrator` | staged execution tests, resume/replay assertions, dispatch integration checks | `parity proven` | Wave 3 control-plane parity is implemented and recorded, and the cutover map now marks this domain Rust-default now. |
 | `scripts/git-hooks/*.ps1` | 3 | `crates/commands/runtime` | git hook install/check tests plus local hook bootstrap smoke | `parity proven` | Native git hook install and EOF hygiene coverage exists, but the hook surface remains a compatibility wrapper intentionally retained in the cutover map. |
-| `scripts/tests/check-test-naming.ps1` | 1 | `crates/commands/validation` | validation-fixture coverage plus `validate-all` profile routing | `parity proven` | `validate-test-naming` now exists natively in `crates/commands/validation/operational_hygiene`, is tracked in the validation surface contracts, and runs through repository validation profiles. |
-| `scripts/tests/refactor_tests_to_aaa.ps1` | 1 | `crates/commands/validation` | direct command tests plus validation-surface contract coverage | `parity proven` | `refactor_tests_to_aaa` now exists natively in `crates/commands/validation/operational_hygiene`, has dedicated Rust tests, and is locked in the validation surface catalog. |
+| `scripts/tests/check-test-naming.ps1` | 1 | `crates/commands/validation` | validation-fixture coverage plus `validate-all` profile routing | `retired locally` | `validate-test-naming` remains native in `crates/commands/validation/operational_hygiene`, and the local PowerShell wrapper was removed after the validation surface contracts stopped locking the `.ps1` path. |
+| `scripts/tests/refactor_tests_to_aaa.ps1` | 1 | `crates/commands/validation` | direct command tests plus validation-surface contract coverage | `retired locally` | `refactor_tests_to_aaa` remains native in `crates/commands/validation/operational_hygiene`, and the local PowerShell wrapper was removed after the validation surface contracts stopped locking the `.ps1` path. |
 | `scripts/tests/*.ps1` excluding `check-test-naming.ps1`, `refactor_tests_to_aaa.ps1`, and runtime subfolder | 2 | `crate test suites + root parity harness` | Rust-native replacements for coverage/test-shape automation | `retained wrapper exception` | The remaining two scripts, `apply-aaa-pattern` and `run-coverage`, are explicit retained wrapper exceptions in the cutover map rather than unresolved migration slices. |
 | `scripts/tests/runtime/*.ps1` | 23 | `crate test suites + root parity harness` | root integration harness plus owning-crate assertions for each replaced runtime test | `parity proven` | The native parity harness covers `approval-approved`, staged `run-test` closeout, `evaluate-agent-pipeline`, and `resume-agent-pipeline`; the wrapper surface is retained intentionally as a compatibility launch surface, and parity cleanup is now stable. |
 

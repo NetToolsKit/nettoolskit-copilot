@@ -4,7 +4,7 @@ Generated: 2026-03-28 21:43
 
 ## Status
 
-- LastUpdated: 2026-03-28 21:43
+- LastUpdated: 2026-03-28 17:18
 - Objective: retire the next safe local PowerShell slice by deleting `scripts/tests/check-test-naming.ps1` and `scripts/tests/refactor_tests_to_aaa.ps1` after migrating the remaining local contract references to the native Rust validation surfaces.
 - Normalized Request: keep deleting local `scripts/**/*.ps1` where Rust already owns behavior, use `C:\Users\tguis\copilot-instructions` only as an upstream instruction/reference source, and preserve repository guidance while shrinking the local PowerShell estate.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
@@ -16,10 +16,11 @@ Generated: 2026-03-28 21:43
   - `planning/completed/rust-script-parity-ledger.md`
   - `planning/completed/rust-script-transcription-ownership-matrix.md`
 - Current Slice Snapshot:
-  - local `scripts/**/*.ps1` inventory is `143`
+  - local `scripts/**/*.ps1` inventory is `141`
   - Rust-native ownership already exists in `crates/commands/validation/src/operational_hygiene/test_naming.rs`
   - Rust-native ownership already exists in `crates/commands/validation/src/operational_hygiene/refactor_tests_to_aaa.rs`
-  - the remaining blockers are limited to validation surface contracts and their tests
+  - the live code/test blockers for the two target wrappers are cleared
+  - no non-archival local `.ps1` path reference remains after same-slice contract cleanup
 
 ## Scope Summary
 
@@ -39,7 +40,7 @@ The slice is complete only if:
 
 ### Task 1: Rebaseline The Live Removal Slice
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Confirm that the only live blockers for the two scripts are:
   - `crates/commands/validation/src/contracts.rs`
@@ -56,10 +57,12 @@ Status: `[ ]` Pending
 - Checkpoints:
   - the blocker list is still narrow and unchanged
   - no additional local contract unexpectedly depends on the two wrapper paths
+- ✓ [2026-03-28 17:18] Reconfirmed that the only live blockers were the validation surface contract catalog and its tests.
+- ✓ [2026-03-28 17:18] Reconfirmed against `C:\Users\tguis\copilot-instructions` that the two wrappers are implementation artifacts, not authoritative instruction sources.
 
 ### Task 2: Remove Legacy Contract References
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Narrow the validation surface contract catalog so it stops locking these two individual `.ps1` leaves as active local runtime obligations.
 - Keep the Rust-native validation ownership explicit without preserving deleted wrapper paths in the live contract table.
@@ -73,10 +76,11 @@ Status: `[ ]` Pending
   - no deleted path remains asserted in the live contract tests
 - Commit checkpoint:
   - `refactor(validation): retire legacy test automation wrapper contracts`
+- ✓ [2026-03-28 17:18] Removed the two legacy validation contract entries, deleted the `TestAutomationCommands` category from the live surface catalog, and rebaselined the locked total from `43` to `41`.
 
 ### Task 3: Delete The Two PowerShell Wrappers
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Delete:
   - `scripts/tests/check-test-naming.ps1`
@@ -94,10 +98,12 @@ Status: `[ ]` Pending
   - no non-archival local path reference remains
 - Commit checkpoint:
   - `refactor(validation): delete rust-covered test automation wrappers`
+- ✓ [2026-03-28 17:18] Deleted `scripts/tests/check-test-naming.ps1` and `scripts/tests/refactor_tests_to_aaa.ps1`.
+- ✓ [2026-03-28 17:18] Verified that only archived history plus this active phase still mention the deleted paths.
 
 ### Task 4: Update Retirement And Parity Artifacts
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Update the completed retirement matrix and supporting completed planning artifacts to reflect:
   - live inventory `143 -> 141`
@@ -116,10 +122,12 @@ Status: `[ ]` Pending
   - no retired script is still presented as blocked in the completed audit bundle
 - Commit checkpoint:
   - `docs(planning): record test automation wrapper retirement`
+- ✓ [2026-03-28 17:18] Rebaselined the completed retirement matrix to `141` live scripts with `6` retired in this workstream and `108` still blocked pending consumer migration.
+- ✓ [2026-03-28 17:18] Updated the completed audit bundle so the retired test automation wrappers are no longer presented as active blockers.
 
 ### Task 5: Validate And Decide The Next Slice
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Run focused validation for the validation crate and local retirement references.
 - Re-rank the next deletion slice using the updated backlog state.
@@ -133,6 +141,8 @@ Status: `[ ]` Pending
 - Checkpoints:
   - this phase is stable and ready to archive or continue
   - the next deletion slice is explicit instead of inferred
+- ✓ [2026-03-28 17:18] Validation is green for the targeted contract slice and the broader validation crate.
+- ✓ [2026-03-28 17:18] No new remove-now leaf is promoted yet; the next consumer sweep is now explicitly narrowed to `scripts/runtime/hooks/pre-tool-use.ps1` and `scripts/maintenance/trim-trailing-blank-lines.ps1`.
 
 ## Validation Checklist
 

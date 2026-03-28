@@ -4,7 +4,7 @@ Generated: 2026-03-28 15:42
 
 ## Status
 
-- LastUpdated: 2026-03-28 20:02
+- LastUpdated: 2026-03-28 17:18
 - Objective: reconcile high-risk instruction drift against `C:\Users\tguis\copilot-instructions` and determine the exact local `scripts/**/*.ps1` retirement scope that is safe after the completed Rust migration.
 - Normalized Request: compare the repository instruction system against `C:\Users\tguis\copilot-instructions`, verify whether the local `scripts/` tree is fully covered by Rust, and plan the safe path to retire local PowerShell scripts without losing repository instructions or runtime contracts.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
@@ -21,7 +21,7 @@ Generated: 2026-03-28 15:42
   - structural instruction parity is intact across the requested authority surfaces
   - the repository no longer depends on the external repo to recover missing planning, Codex, or authored VS Code operational guidance
   - remaining hash drift is now bounded to intentional local specialization: README baseline policy, validation profile extensions, generated local `.vscode/*` helper surfaces, and the 4 POML templates that only showed non-semantic drift
-  - the live local script estate is now `143`, and the repository still is not safe to delete as a whole because `33` wrappers are retained by policy and `110` leaves or domains still require consumer migration evidence
+  - the live local script estate is now `141`, and the repository still is not safe to delete as a whole because `33` wrappers are retained by policy and `108` leaves or domains still require consumer migration evidence
 - Worktree Isolation: not required for the planning slice; a dedicated semantic branch is already active
 
 ## Scope Summary
@@ -224,6 +224,10 @@ Status: `[x]` Completed
   - `scripts/maintenance/clean-build-artifacts.ps1`
 - ✓ [2026-03-28 18:22] Repointed artifact-layout guidance to the native `clean-build-artifacts` runtime surface instead of the deleted wrapper path.
 - ✓ [2026-03-28 20:02] Closed the current retirement slice with no additional immediate queue. Any further deletion now requires a new domain-level consumer sweep workstream.
+- ✓ [2026-03-28 17:18] Follow-up phase 2 retired the validation-owned test automation wrappers:
+  - `scripts/tests/check-test-naming.ps1`
+  - `scripts/tests/refactor_tests_to_aaa.ps1`
+- ✓ [2026-03-28 17:18] The follow-up slice cleared the last live blockers from `crates/commands/validation/src/contracts.rs` and `crates/commands/validation/tests/contracts_tests.rs`.
 
 ## Validation Checklist
 
@@ -258,5 +262,5 @@ Status: `[x]` Completed
 ## Completion Summary
 
 - Instruction parity was preserved structurally and reconciled operationally without blindly overwriting repository-specific governance or prompt assets.
-- The first safe retirement slice deleted `4` local scripts and reduced the live PowerShell estate from `147` to `143`.
-- The remaining `139` scripts are now explicitly split between `33` retained wrappers and `110` consumer-blocked leaves or domains, which is sufficient to close this audit workstream without reopening the completed migration program.
+- The first two safe retirement slices deleted `6` local scripts and reduced the live PowerShell estate from `147` to `141`.
+- The remaining live script estate is now explicitly split between `33` retained wrappers and `108` consumer-blocked leaves or domains, which is sufficient to close this audit workstream without reopening the completed migration program.

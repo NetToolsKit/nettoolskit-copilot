@@ -23,15 +23,16 @@ The completed retirement audit proved that the local repository should not delet
 
 ## Current Slice Summary
 
-- live local script inventory: `143`
+- live local script inventory: `141`
 - current removal target count: `2`
 - expected live inventory after the slice: `141`
-- current known blockers:
-  - `crates/commands/validation/src/contracts.rs`
-  - `crates/commands/validation/tests/contracts_tests.rs`
+- current known blockers: none in live code/tests; the contract cleanup and wrapper deletion are complete in this phase
 - current native Rust owners:
   - `crates/commands/validation/src/operational_hygiene/test_naming.rs`
   - `crates/commands/validation/src/operational_hygiene/refactor_tests_to_aaa.rs`
+- next smallest blocked leaves after this phase:
+  - `scripts/runtime/hooks/pre-tool-use.ps1`
+  - `scripts/maintenance/trim-trailing-blank-lines.ps1`
 
 ## Design Decisions
 
@@ -39,6 +40,7 @@ The completed retirement audit proved that the local repository should not delet
 2. Remove the two wrappers only after the contract catalog stops presenting their `.ps1` paths as live local obligations.
 3. Update the completed retirement bundle in the same slice so the repository history does not leave retired paths marked as still blocked.
 4. Preserve `C:\Users\tguis\copilot-instructions` as a reference source only; do not sync or mirror the upstream PowerShell scripts back into the local repo.
+5. Treat the deleted wrapper paths as retired local compatibility debt, not as missing instruction surfaces.
 
 ## Non-Goals
 
@@ -76,7 +78,7 @@ Rejected. The blocker surface is already minimal, and delaying would preserve de
 
 ## Planning Readiness
 
-- ready-for-implementation
+- implemented-validated
 
 ## Recommended Specialist Focus
 
