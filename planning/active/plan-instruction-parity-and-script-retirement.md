@@ -205,6 +205,12 @@ Status: `[2026-03-28 18:05 IN PROGRESS]`
   - `scripts/` shrinkage is reviewable and reversible by domain
 - Commit checkpoint:
   - `refactor(runtime): retire rust-covered powershell wrappers`
+- ✓ [2026-03-28 18:22] Retired the first safe four-leaf slice:
+  - `scripts/doc/validate-xml-documentation.ps1`
+  - `scripts/maintenance/fix-version-ranges.ps1`
+  - `scripts/maintenance/fix-region-spacing.ps1`
+  - `scripts/maintenance/clean-build-artifacts.ps1`
+- ✓ [2026-03-28 18:22] Repointed artifact-layout guidance to the native `clean-build-artifacts` runtime surface instead of the deleted wrapper path.
 
 ## Validation Checklist
 

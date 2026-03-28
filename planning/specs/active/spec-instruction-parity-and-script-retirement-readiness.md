@@ -61,6 +61,7 @@ The audit target is split across two independent but related questions:
   - `scripts/maintenance/fix-version-ranges.ps1`
   - `scripts/maintenance/fix-region-spacing.ps1`
   - `scripts/maintenance/clean-build-artifacts.ps1` after same-slice instruction cleanup
+- The first execution slice has now retired those `4` leaves, reducing the live local script estate from `147` to `143` without changing the retained-wrapper policy.
 - The rest of the estate is now split explicitly between:
   - `33` intentionally retained wrappers by policy
   - `110` leaves or tight domains that still require consumer migration evidence before removal

@@ -7,8 +7,9 @@ Generated: 2026-03-28 18:05
 - LastUpdated: 2026-03-28 18:05
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
+- Live Inventory After Executed Slice: `143`
 - Current Classification Totals:
-  - `remove-now candidate`: `4`
+  - `retired in this workstream`: `4`
   - `retain wrapper intentionally`: `33`
   - `retain until consumer migration completes`: `110`
 - Decision Rule:
@@ -16,14 +17,14 @@ Generated: 2026-03-28 18:05
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
   - `retain until consumer migration completes` means Rust parity exists, but local runtime, validation, doc, or test consumers still encode the `.ps1` path.
 
-## Remove-Now Candidates
+## Executed Retirement Slice
 
-| Scope | Count | Rust Owner | Local Consumer Evidence | Required Same-Slice Update | Decision |
+| Scope | Count | Rust Owner | Local Consumer Evidence | Same-Slice Update | Result |
 | --- | ---: | --- | --- | --- | --- |
-| `scripts/doc/validate-xml-documentation.ps1` | 1 | `crates/commands/validation` | No non-self local `.ps1` consumer remained; local references are already Rust-native through `validate-all` and validation profiles. | None | delete now |
-| `scripts/maintenance/fix-version-ranges.ps1` | 1 | `crates/commands/runtime` | No non-self local `.ps1` consumer remained; runtime ownership is native in `crates/commands/runtime/src/maintenance/fix_version_ranges.rs`. | None | delete now |
-| `scripts/maintenance/fix-region-spacing.ps1` | 1 | `crates/commands/runtime` | No non-self local `.ps1` consumer remained; runtime ownership is native in `crates/commands/runtime/src/maintenance/fix_region_spacing.rs`. | None | delete now |
-| `scripts/maintenance/clean-build-artifacts.ps1` | 1 | `crates/commands/runtime` | Only blocker is the artifact-layout guidance that still names the wrapper directly. | Update `.github/instructions/artifact-layout.instructions.md` and `definitions/shared/instructions/artifact-layout.instructions.md` in the same slice. | delete now after doc update |
+| `scripts/doc/validate-xml-documentation.ps1` | 1 | `crates/commands/validation` | No non-self local `.ps1` consumer remained; local references were already Rust-native through `validate-all` and validation profiles. | None | retired |
+| `scripts/maintenance/fix-version-ranges.ps1` | 1 | `crates/commands/runtime` | No non-self local `.ps1` consumer remained; runtime ownership was already native in `crates/commands/runtime/src/maintenance/fix_version_ranges.rs`. | None | retired |
+| `scripts/maintenance/fix-region-spacing.ps1` | 1 | `crates/commands/runtime` | No non-self local `.ps1` consumer remained; runtime ownership was already native in `crates/commands/runtime/src/maintenance/fix_region_spacing.rs`. | None | retired |
+| `scripts/maintenance/clean-build-artifacts.ps1` | 1 | `crates/commands/runtime` | Only blocker was the artifact-layout guidance that named the wrapper directly. | Updated `.github/instructions/artifact-layout.instructions.md` and `definitions/shared/instructions/artifact-layout.instructions.md`. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -51,15 +52,13 @@ Generated: 2026-03-28 18:05
 | `scripts/tests/check-test-naming.ps1` | 1 | validation surface contracts still lock the legacy path | `crates/commands/validation/src/contracts.rs`, `crates/commands/validation/tests/contracts_tests.rs` |
 | `scripts/tests/refactor_tests_to_aaa.ps1` | 1 | validation surface contracts still lock the legacy path | `crates/commands/validation/src/contracts.rs`, `crates/commands/validation/tests/contracts_tests.rs` |
 
-## First Safe Execution Slice
+## Current Immediate Queue
 
-1. Delete `scripts/doc/validate-xml-documentation.ps1`.
-2. Delete `scripts/maintenance/fix-version-ranges.ps1`.
-3. Delete `scripts/maintenance/fix-region-spacing.ps1`.
-4. Replace the artifact-layout instruction references to `scripts/maintenance/clean-build-artifacts.ps1` with the Rust-native runtime surface, then delete `scripts/maintenance/clean-build-artifacts.ps1`.
+- No additional leaf is promoted to `remove-now candidate` until the next consumer sweep proves zero blocking local references for another script or tight domain.
 
 ## Notes
 
 - The completed migration bundle proves Rust ownership for much more than the first four leaves, but this matrix intentionally separates parity evidence from deletion safety.
 - `114` previously broad `Rust-default now` leaves were narrowed to `4` immediate deletion candidates for the first patch because this audit requires concrete local-consumer proof before removal.
+- The first execution slice retired those `4` leaves and reduced the live local `scripts/**/*.ps1` estate from `147` to `143`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
