@@ -56,6 +56,14 @@ The audit target is split across two independent but related questions:
   - docs
   - policy/governance manifests
   - PowerShell wrappers themselves
+- The first consumer-backed safety matrix now narrows immediate retirement to `4` leaves:
+  - `scripts/doc/validate-xml-documentation.ps1`
+  - `scripts/maintenance/fix-version-ranges.ps1`
+  - `scripts/maintenance/fix-region-spacing.ps1`
+  - `scripts/maintenance/clean-build-artifacts.ps1` after same-slice instruction cleanup
+- The rest of the estate is now split explicitly between:
+  - `33` intentionally retained wrappers by policy
+  - `110` leaves or tight domains that still require consumer migration evidence before removal
 
 ## Key Findings To Preserve
 
@@ -83,6 +91,7 @@ The audit target is split across two independent but related questions:
    - `scripts/tests/apply-aaa-pattern.ps1`
    - `scripts/tests/run-coverage.ps1`
 6. Even the domains documented as `Rust-default now` still require consumer migration before local wrapper deletion is safe.
+7. `Rust-default now` and `remove-now candidate` are not equivalent states; deletion requires zero blocking local consumers, not just parity evidence.
 
 ## Design Decisions
 
@@ -133,6 +142,7 @@ Rejected. That would leave the repository carrying unnecessary compatibility deb
 4. Every retained-wrapper script is explicitly justified instead of being left as generic migration debt.
 5. Every deletion candidate is blocked from removal until local consumers are migrated or removed.
 6. The resulting plan can drive safe execution without reopening the completed migration design bundle.
+7. The workstream can distinguish immediate retirement candidates from parity-proven-but-still-blocked domains without deleting `scripts/` in bulk.
 
 ## Planning Readiness
 

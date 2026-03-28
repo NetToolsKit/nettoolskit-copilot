@@ -33,6 +33,7 @@
 ## References
 
 - [planning/active/plan-instruction-parity-and-script-retirement.md](planning/active/plan-instruction-parity-and-script-retirement.md)
+- [planning/active/script-retirement-safety-matrix.md](planning/active/script-retirement-safety-matrix.md)
 - [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
 - [planning/completed/plan-repository-unification-and-rust-migration.md](planning/completed/plan-repository-unification-and-rust-migration.md)

@@ -39,7 +39,7 @@ The expected outcome is not “delete `scripts/` immediately”. The expected ou
 
 ### Task 1: Freeze The Instruction Parity Baseline
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-28 15:42] Record the current comparison baseline between this repository and `C:\Users\tguis\copilot-instructions`.
 - Capture structural parity evidence for:
@@ -74,10 +74,11 @@ Status: `[ ]` Pending
   - the plan distinguishes absence from content specialization
 - Commit checkpoint:
   - `docs(planning): freeze instruction parity audit baseline`
+- ✓ [2026-03-28 18:05] Structural parity and the `14`-file content drift set were frozen. Drift classification now distinguishes `10` merge targets from `4` accepted local POML divergences.
 
 ### Task 2: Build The Script Retirement Safety Matrix
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-28 15:42] Convert the completed migration bundle into a deletion-readiness classification for the local `scripts/` tree.
 - Record one explicit state for every relevant script leaf or tight domain:
@@ -102,10 +103,11 @@ Status: `[ ]` Pending
   - every Rust-default domain is separated from true deletion readiness
 - Commit checkpoint:
   - `docs(planning): classify script retirement safety`
+- ✓ [2026-03-28 18:05] Added `planning/active/script-retirement-safety-matrix.md` with the live deletion-readiness split: `4` remove-now candidates, `33` intentionally retained wrappers, `110` blocked until consumer migration completes.
 
 ### Task 3: Audit Live Script Consumers And Deletion Blockers
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - [2026-03-28 15:42] Map every live local consumer of `.ps1` paths and group them by blocker class:
   - runtime code
@@ -135,10 +137,11 @@ Status: `[ ]` Pending
   - the next execution phase can migrate consumers instead of guessing
 - Commit checkpoint:
   - `docs(planning): freeze script deletion blockers`
+- ✓ [2026-03-28 18:05] The first blocker audit is explicit: `pre-tool-use`, `trim-trailing-blank-lines`, `check-test-naming`, and `refactor_tests_to_aaa` still have concrete local consumers/contracts, while the first safe removal slice is narrowed to four leaves.
 
 ### Task 4: Reconcile High-Risk Instruction Drift
 
-Status: `[ ]` Pending
+Status: `[2026-03-28 18:05 IN PROGRESS]`
 
 - Reconcile the high-risk drift files from Task 1.
 - For each drifted file, decide one outcome:
@@ -168,7 +171,7 @@ Status: `[ ]` Pending
 
 ### Task 5: Execute Staged Script Retirement
 
-Status: `[ ]` Pending
+Status: `[2026-03-28 18:05 IN PROGRESS]`
 
 - Retire only the script leaves or domains that pass both gates:
   - Rust/default ownership and parity are already proven
@@ -194,6 +197,8 @@ Status: `[ ]` Pending
   - `cargo test`
   - relevant validation commands
   - `git diff --check`
+- Supporting artifact:
+  - `planning/active/script-retirement-safety-matrix.md`
 - Checkpoints:
   - no deleted script path remains referenced locally
   - retained-wrapper policy stays explicit for every kept script
