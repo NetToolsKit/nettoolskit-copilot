@@ -58,21 +58,21 @@ pub(crate) fn repo_validation_paths(repo_root: &Path) -> Vec<PathBuf> {
 }
 
 pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
-    write_file(repo_root, SHARED_POML_README_PATH, poml_readme_contents());
-    mirror_directory(
+    ensure_file_exists(repo_root, SHARED_POML_README_PATH, poml_readme_contents());
+    mirror_directory_if_missing(
         &repo_root.join("definitions/shared/prompts/poml"),
         &repo_root.join(".github/prompts/poml"),
     );
-    write_file(repo_root, SCRIPTS_README_PATH, scripts_readme_contents());
-    write_file(repo_root, CODEOWNERS_PATH, codeowners_contents());
-    write_file(repo_root, CHANGELOG_PATH, changelog_contents());
-    write_file(repo_root, PR_TEMPLATE_PATH, pr_template_contents());
-    write_file(
+    ensure_file_exists(repo_root, SCRIPTS_README_PATH, scripts_readme_contents());
+    ensure_file_exists(repo_root, CODEOWNERS_PATH, codeowners_contents());
+    ensure_file_exists(repo_root, CHANGELOG_PATH, changelog_contents());
+    ensure_file_exists(repo_root, PR_TEMPLATE_PATH, pr_template_contents());
+    ensure_file_exists(
         repo_root,
         ISSUE_TEMPLATE_CONFIG_PATH,
         issue_template_config_contents(),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         ISSUE_TEMPLATE_BUG_PATH,
         issue_template_contents(
@@ -80,7 +80,7 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Report a repository instruction or workflow bug.",
         ),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         ISSUE_TEMPLATE_SKILL_PATH,
         issue_template_contents(
@@ -88,7 +88,7 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Request a new skill for the repository agent system.",
         ),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         ISSUE_TEMPLATE_RUNTIME_PATH,
         issue_template_contents(
@@ -96,7 +96,7 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Report a runtime sync or projection issue.",
         ),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         ISSUE_TEMPLATE_VALIDATION_PATH,
         issue_template_contents(
@@ -104,44 +104,44 @@ pub(crate) fn seed_validation_green_baseline(repo_root: &Path) {
             "Report a missing or incorrect validation rule.",
         ),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         VALIDATE_AGENT_SYSTEM_WORKFLOW_PATH,
         workflow_contents("Validate Agent System"),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         VALIDATE_RELEASE_GOVERNANCE_WORKFLOW_PATH,
         workflow_contents("Validate Release Governance"),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         DEPENDENCY_RISK_WORKFLOW_PATH,
         workflow_contents("Dependency Risk Observability"),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         ENTERPRISE_TRENDS_WORKFLOW_PATH,
         workflow_contents("Enterprise Trends Dashboard"),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         SBOM_ATTESTATION_WORKFLOW_PATH,
         workflow_contents("SBOM Attestation Observability"),
     );
-    write_file(
+    ensure_file_exists(
         repo_root,
         SECURITY_STATIC_WORKFLOW_PATH,
         workflow_contents("Security Static Observability"),
     );
-    write_file(repo_root, PRE_COMMIT_HOOK_PATH, hook_contents("pre-commit"));
-    write_file(
+    ensure_file_exists(repo_root, PRE_COMMIT_HOOK_PATH, hook_contents("pre-commit"));
+    ensure_file_exists(
         repo_root,
         POST_COMMIT_HOOK_PATH,
         hook_contents("post-commit"),
     );
-    write_file(repo_root, POST_MERGE_HOOK_PATH, hook_contents("post-merge"));
-    write_file(
+    ensure_file_exists(repo_root, POST_MERGE_HOOK_PATH, hook_contents("post-merge"));
+    ensure_file_exists(
         repo_root,
         POST_CHECKOUT_HOOK_PATH,
         hook_contents("post-checkout"),
@@ -161,8 +161,11 @@ pub(crate) fn cleanup_validation_green_baseline(repo_root: &Path) {
     }
 }
 
-fn write_file(repo_root: &Path, relative_path: &str, contents: impl AsRef<[u8]>) {
+fn ensure_file_exists(repo_root: &Path, relative_path: &str, contents: impl AsRef<[u8]>) {
     let absolute_path = repo_root.join(relative_path);
+    if absolute_path.exists() {
+        return;
+    }
     if let Some(parent) = absolute_path.parent() {
         let _ = fs::create_dir_all(parent);
     }
@@ -194,9 +197,9 @@ fn collect_directory_files(root: &Path) -> Vec<PathBuf> {
     files
 }
 
-fn mirror_directory(source: &Path, destination: &Path) {
+fn mirror_directory_if_missing(source: &Path, destination: &Path) {
     if destination.exists() {
-        let _ = fs::remove_dir_all(destination);
+        return;
     }
 
     fs::create_dir_all(destination).expect("destination directory should be created");
