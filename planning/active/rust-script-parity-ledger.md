@@ -4,7 +4,7 @@ Generated: 2026-03-27 20:01
 
 ## Status
 
-- LastUpdated: 2026-03-28 08:28
+- LastUpdated: 2026-03-28 11:45
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`

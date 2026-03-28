@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 08:28
+- LastUpdated: 2026-03-28 11:45
 - Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/native-validation-policy`
@@ -13,6 +13,7 @@ Generated: 2026-03-26 16:20
 - Ownership Matrix: `planning/active/rust-script-transcription-ownership-matrix.md`
 - Parity Ledger: `planning/active/rust-script-parity-ledger.md`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
+- Historical Role: hygiene record for the migration waves; this artifact now owns only the remaining non-functional closeout gates.
 - Worktree Isolation: not recommended for this planning-only update; a dedicated branch is active in the current checkout.
 
 ## Scope Summary
@@ -52,6 +53,10 @@ Current hygiene priorities for the migration:
 - [2026-03-27 08:07] `crates/commands/validation` now carries an executable Rust replacement for `validate-workspace-efficiency` under a dedicated `workspace` module, so workspace/runtime hygiene evidence and VS Code workspace policy drift no longer rely on the PowerShell validator.
 - [2026-03-27 08:22] `crates/commands/validation` now carries an executable Rust replacement for `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, so centralized official-doc policy drift no longer relies on the PowerShell validator either.
 - [2026-03-27 09:00] `crates/commands/validation` now carries an executable Rust replacement for `validate-instruction-architecture` under the same `instruction_graph` module, so instruction ownership, deterministic routing budget, and canonical skill-reference drift no longer rely on the PowerShell validator either.
+- [2026-03-28 11:38] `cargo fmt --all -- --check` still fails repository-wide; the current failure mode is broad Rust EOF/format baseline drift across existing files rather than one isolated migration slice.
+- [2026-03-28 11:39] `pwsh -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed.
+- [2026-03-28 11:40] `cargo test --workspace` currently fails only on the orchestrator parity closeout path, where a Windows file-lock collision prevents `run_test_staged_closeout_success_path_preserves_artifacts_and_moves_plan_files` from copying a projected file inside the temporary validation baseline.
+- [2026-03-28 11:41] `cargo clippy --workspace --all-targets -- -D warnings` currently fails in `nettoolskit-validation` and the orchestrator parity harness, so the remaining closeout code debt is now concrete and localized.
 - [2026-03-28 08:28] `cargo fmt --all -- --check` still fails broadly, so formatting/newline drift remains an explicit closeout blocker.
 - [2026-03-28 08:28] `cargo test --workspace` is currently blocked by the `nettoolskit-orchestrator` `run_test_closeout` parity path on Windows file locking, so the parity harness is implemented but not yet green at workspace level.
 - [2026-03-28 08:28] `cargo clippy --workspace --all-targets -- -D warnings` is currently blocked in `nettoolskit-validation` and `nettoolskit-orchestrator`, so the hygiene baseline is not yet ready for cutover claims.
@@ -81,7 +86,7 @@ Status: `[x]` Completed
 
 ### Task 2: Remove Blocking Dependency And Toolchain Debt Before Expansion
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - [2026-03-26 16:20] Clear the dependency, formatting, and test-contract debt that would make broad Rust expansion noisy or unsafe
 - [2026-03-26 17:05] Added the missing external test entry surfaces for `crates/commands` and `crates/task-worker`; formatting debt remains open, but the most immediate test-contract gap is now reduced ✓ [2026-03-26 17:05]
@@ -202,6 +207,7 @@ Status: `[~]` In Progress
 - [2026-03-26 21:11] Migrated `doctor -SyncOnDrift` remediation into `crates/commands/runtime`, so direct runtime repair and audit re-checks no longer need the PowerShell wrapper path ✓ [2026-03-26 21:11]
 - [2026-03-26 21:32] Migrated the bootstrap provider render dispatcher into `crates/commands/runtime`, so repository projection and runtime sync now share the same Rust-owned execution path for the bootstrap consumer ✓ [2026-03-26 21:32]
 - [2026-03-26 21:39] Migrated the bootstrap MCP config rewrite into `crates/commands/runtime`, so runtime sync now owns both the catalog-driven Codex config projection and backup behavior without the PowerShell helper ✓ [2026-03-26 21:39]
+- [2026-03-28 11:40] The main artifact/recovery closeout blocker is now the parity closeout test's Windows file-lock behavior during temporary validation baseline projection; runtime repair flows themselves are no longer the dominant gap.
 - Target paths:
   - `.build/`
   - `.deployment/`
