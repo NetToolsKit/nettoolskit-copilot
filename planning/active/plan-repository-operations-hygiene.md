@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:23
+- LastUpdated: 2026-03-28 10:51
 - Objective: keep repository hygiene, policy enforcement, and cutover guardrails green while the repository moves from migration implementation into Rust-default closeout.
 - Normalized Request: align the operations hygiene plan with the repository-wide decision to transcribe every tracked PowerShell script into Rust, using `.temp/arquitetura_enterprise_llm.md` only as architectural source input while preserving prior hygiene obligations that still matter to migration safety.
 - Active Branch: `feature/native-validation-policy`
@@ -55,15 +55,16 @@ Current hygiene priorities for the migration:
 - [2026-03-27 08:22] `crates/commands/validation` now carries an executable Rust replacement for `validate-authoritative-source-policy` under a dedicated `instruction_graph` module, so centralized official-doc policy drift no longer relies on the PowerShell validator either.
 - [2026-03-27 09:00] `crates/commands/validation` now carries an executable Rust replacement for `validate-instruction-architecture` under the same `instruction_graph` module, so instruction ownership, deterministic routing budget, and canonical skill-reference drift no longer rely on the PowerShell validator either.
 - [2026-03-28 09:32] Operator-facing docs and release workflows now describe PowerShell entrypoints as compatibility surfaces and validate the Rust-owned release-governance/provenance path by default.
-- [2026-03-28 09:35] The native orchestrator parity harness is now stable for the staged `run-test` closeout path plus `resume` / `evaluate-agent-pipeline`; the remaining non-functional gap is fixture cleanup, not missing parity coverage.
+- [2026-03-28 09:35] The native orchestrator parity harness is now stable for the staged `run-test` closeout path plus `resume` / `evaluate-agent-pipeline`, and the remaining work is domain closeout rather than missing parity coverage.
 - [2026-03-28 09:40] The remaining closeout clippy blockers were cleared in `runtime`, and follow-up closeout fixes already brought the full workspace back under `-D warnings`.
 - [2026-03-28 09:58] Runtime PowerShell hook helpers, maintenance trim logic, and VS Code hook normalization now honor mixed `.editorconfig` `insert_final_newline` rules instead of assuming a single repository-wide default.
 - [2026-03-28 10:00] `cargo fmt --all -- --check` passed after persisting the workspace Rust EOF/format baseline.
 - [2026-03-28 10:00] `cargo clippy --workspace --all-targets -- -D warnings` passed.
 - [2026-03-28 10:00] `cargo test --workspace` passed.
 - [2026-03-28 10:00] `Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` passed.
-- [2026-03-28 10:00] Full-workspace parity runs still project temporary approval/readme/workflow artifacts into the repo during some fixture paths; cleanup is deterministic, but fixture isolation remains the main artifact-hygiene follow-up.
+- [2026-03-28 10:51] Full-workspace parity runs now restore tracked repository artifacts through Git-backed recovery and restore projected POML assets explicitly, so fixture isolation is no longer the main artifact-hygiene follow-up.
 - [2026-03-28 10:23] The final cutover/default map is now recorded, so the hygiene plan only needs to keep the fixture-isolation follow-up and blocked-domain tail explicit.
+- [2026-03-28 10:51] `crates/commands/validation` now owns the doc-only XML validation path natively, and `crates/commands/runtime/maintenance` now owns `clean-build-artifacts` plus `trim-trailing-blank-lines`, so the remaining hygiene risk is concentrated in the still-blocked domains rather than in already-migrated slices.
 - [2026-03-26 16:48] Large files in `orchestrator` and `cli` are already past the comfort threshold for safe broad migration work and should be treated as hygiene risk, not as default extension points.
 
 ## Ordered Tasks
@@ -213,8 +214,7 @@ Status: `[~]` In Progress
 - [2026-03-26 21:11] Migrated `doctor -SyncOnDrift` remediation into `crates/commands/runtime`, so direct runtime repair and audit re-checks no longer need the PowerShell wrapper path ✓ [2026-03-26 21:11]
 - [2026-03-26 21:32] Migrated the bootstrap provider render dispatcher into `crates/commands/runtime`, so repository projection and runtime sync now share the same Rust-owned execution path for the bootstrap consumer ✓ [2026-03-26 21:32]
 - [2026-03-26 21:39] Migrated the bootstrap MCP config rewrite into `crates/commands/runtime`, so runtime sync now owns both the catalog-driven Codex config projection and backup behavior without the PowerShell helper ✓ [2026-03-26 21:39]
-- [2026-03-28 11:40] The main artifact/recovery closeout blocker is now the parity closeout test's Windows file-lock behavior during temporary validation baseline projection; runtime repair flows themselves are no longer the dominant gap.
-- [2026-03-28 10:00] The main remaining hygiene follow-up is fixture isolation: full-workspace parity suites still touch projected approval/readme/workflow artifacts inside the real repository before cleanup, which is recoverable but still noisier than the desired closeout baseline.
+- [2026-03-28 10:51] Runtime repair flows are no longer the dominant gap, and parity closeout now restores tracked/projection artifacts deterministically; the remaining hygiene backlog is the still-blocked domain tail rather than artifact cleanup noise.
 - Target paths:
   - `.build/`
   - `.deployment/`

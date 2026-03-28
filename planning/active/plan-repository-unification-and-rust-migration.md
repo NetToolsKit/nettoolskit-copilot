@@ -4,7 +4,7 @@ Generated: 2026-03-26 16:20
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:23
+- LastUpdated: 2026-03-28 10:51
 - Objective: convert the unified repository migration plan into a full `scripts/**/*.ps1` to Rust transcription roadmap while preserving current operator compatibility.
 - Normalized Request: resume planning on a dedicated branch, keep work isolated, use `.temp/arquitetura_enterprise_llm.md` as the architectural source input, and make the migration scope cover all existing PowerShell scripts.
 - Active Branch: `feature/native-validation-policy`
@@ -382,14 +382,15 @@ Status: `[~]` In Progress
 - [2026-03-26 16:20] Switch default operator flows to Rust only after all migration waves reach parity and documentation is updated
 - [2026-03-28 09:32] Repository/runtime/validation docs now describe the PowerShell entrypoints as compatibility wrappers over Rust-owned command surfaces ✓ [2026-03-28 09:32]
 - [2026-03-28 09:32] CI/release governance now validates the Rust-owned release-governance and provenance path by default ✓ [2026-03-28 09:32]
+- [2026-03-28 10:51] Implemented the native `validate-xml-documentation` command in `crates/commands/validation/documentation` and wired it through `validate-all`, so `scripts/doc` is no longer part of the blocked Task 8 tail ✓ [2026-03-28 10:51]
+- [2026-03-28 10:51] Implemented native `clean-build-artifacts` and `trim-trailing-blank-lines` under `crates/commands/runtime/maintenance`, so the maintenance cluster now has partial native ownership while the remaining maintenance scripts stay explicitly open ✓ [2026-03-28 10:51]
+- [2026-03-28 10:51] Closed the parity-fixture cleanup follow-up with Git-backed tracked-file restoration and explicit POML asset recovery, so Task 8 no longer carries artifact-isolation cleanup as open work ✓ [2026-03-28 10:51]
 - Remaining open work:
   - finish the still-blocked domain tail:
     - `scripts/runtime/hooks`
     - `scripts/maintenance`
-    - `scripts/doc`
     - `scripts/deploy`
     - `scripts/tests` excluding runtime
-  - finish artifact-isolation cleanup for parity fixtures before claiming a fully quiet closeout baseline
 - Target paths:
   - `scripts/`
   - `README.md`

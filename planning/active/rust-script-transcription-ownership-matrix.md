@@ -4,7 +4,7 @@ Generated: 2026-03-26 17:05
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:23
+- LastUpdated: 2026-03-28 10:51
 - Objective: freeze the canonical PowerShell inventory, Rust owner boundary, target surface, and migration wave for every tracked script under `scripts/**/*.ps1`.
 - Source Plan: `planning/active/plan-repository-unification-and-rust-migration.md`
 - Source Spec: `planning/specs/active/spec-repository-unification-and-rust-migration.md`
@@ -12,7 +12,7 @@ Generated: 2026-03-26 17:05
 - Active Branch: `feature/native-validation-policy`
 - Remaining Open Backlog: `planning/active/plan-rust-migration-closeout-and-cutover.md`
 - Artifact Role: canonical inventory and ownership map only; execution and cutover state are tracked in the parity ledger and closeout plan.
-- Closeout Note: the inventory and owner boundaries remain unchanged after the latest closeout slices; the remaining open work is only the blocked-domain tail and fixture cleanup, because the wrapper/default decisioning now lives in the cutover map.
+- Closeout Note: the inventory and owner boundaries remain unchanged after the latest closeout slices; the remaining open work is only the blocked-domain tail, because the wrapper/default decisioning now lives in the cutover map and parity cleanup is no longer an open backlog item.
 
 ## Owner Summary
 

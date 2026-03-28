@@ -4,7 +4,7 @@ Generated: 2026-03-28 08:28
 
 ## Status
 
-- LastUpdated: 2026-03-28 10:23
+- LastUpdated: 2026-03-28 10:51
 - Objective: consolidate the remaining backlog after README normalization and Waves 1-3 so the repository can reach a clean, evidence-backed Rust-default cutover.
 - Active Branch: `feature/native-validation-policy`
 - Inputs:
@@ -14,7 +14,7 @@ Generated: 2026-03-28 08:28
   - `planning/active/rust-script-parity-ledger.md`
   - `planning/active/rust-script-transcription-ownership-matrix.md`
   - `planning/active/rust-script-cutover-default-map.md`
-- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now the blocked-domain tail plus parity fixture isolation.
+- Review Conclusion: README normalization is complete, the migration implementation waves are effectively complete through Wave 3, and the closeout package is now materially advanced: workspace hygiene gates are green again, parity harness coverage is stable, the doc-only validator is native, and operator-facing docs/workflows already frame PowerShell as the compatibility surface. The remaining work is now only the blocked-domain tail.
 
 ## Review Summary
 
@@ -26,9 +26,9 @@ Generated: 2026-03-28 08:28
 
 ### Open Workstreams
 
-- `plan-repository-operations-hygiene.md`: now records a green `fmt` / `clippy` / `test` / audit baseline plus the remaining artifact-isolation follow-up for parity fixtures.
-- `rust-script-parity-ledger.md`: evidence policy remains valid, but the domain notes still need to reflect the stabilized parity harness, mixed EOF-policy handling, and the current distinction between `parity proven` and `cutover ready`.
-- `rust-script-cutover-default-map.md`: new closeout artifact that records the final per-domain default decision and isolates the remaining blocked slices from the domains that are already Rust-default.
+- `plan-repository-operations-hygiene.md`: now records a green `fmt` / `clippy` / `test` / audit baseline, mixed EOF policy alignment, and the parity-harness cleanup closeout.
+- `rust-script-parity-ledger.md`: evidence policy remains valid, and the closeout notes now need to stay aligned with the native doc validator, the partially native maintenance cluster, and the explicit distinction between `parity proven` and `cutover ready`.
+- `rust-script-cutover-default-map.md`: records the final per-domain default decision and now removes the doc domain from the blocked set.
 
 ## Backlog Size Assessment
 
@@ -36,18 +36,14 @@ Generated: 2026-03-28 08:28
 - The architecture, ownership, and most implementation waves are already in place.
 - The remaining backlog is now small-to-moderate and concentrated in closeout:
   - one residual blocked-domain group that still needs native replacement evidence
-  - one residual artifact-isolation follow-up for parity fixtures
 
 ## Remaining Open Backlog
 
 1. Blocked-domain tail:
    - `scripts/runtime/hooks`
    - `scripts/maintenance`
-   - `scripts/doc`
    - `scripts/deploy`
    - `scripts/tests` excluding runtime
-2. Artifact and recovery closeout:
-   - parity suites still generate temporary repository artifacts during full-workspace runs and require deterministic cleanup before the next commit
 
 ## Ordered Tasks
 
@@ -67,6 +63,10 @@ Status: `[x]` Completed
   - `cargo test --workspace` now passes after parity-harness stabilization and mixed EOF-policy alignment
   - Rust vulnerability audit remains green
   - runtime/docs/workflows now already describe PowerShell as the compatibility layer rather than the primary implementation path ✓ [2026-03-28 10:00]
+- [2026-03-28 10:51] Rebaselined the closeout state after the latest native slices:
+  - `scripts/doc` is no longer part of the blocked tail because `validate-xml-documentation` now exists natively in `crates/commands/validation` and runs through `validate-all`
+  - `scripts/maintenance` now has partial native ownership through `clean-build-artifacts` and `trim-trailing-blank-lines`
+  - parity fixture cleanup is no longer open because tracked artifact restoration now uses Git-backed recovery and the projected POML assets are restored deterministically ✓ [2026-03-28 10:51]
 - Refresh metadata drift in the ownership matrix and active plan references.
 - Mark historical wave plans as implementation records and this plan as the owner of the open backlog.
 - Target paths:
@@ -122,6 +122,7 @@ Status: `[x]` Completed
   - no domain is overstated as `cutover ready`
   - implemented domains stay recorded as `parity proven`
   - maintenance, runtime hook, doc, deploy, and non-runtime test automation remain explicitly tracked as evidence gaps until their end-state decision is recorded ✓ [2026-03-28 10:00]
+- [2026-03-28 10:51] Closed the doc-domain evidence gap in the ledger and cutover map, leaving only runtime hooks, maintenance, deploy, and non-runtime test automation in the blocked tail ✓ [2026-03-28 10:51]
 - Ensure the parity ledger explicitly covers:
   - `scripts/common`
   - `scripts/runtime`
@@ -184,7 +185,7 @@ Status: `[ ]` Pending
 - Switch default operator flows to Rust for domains that are explicitly marked `Rust-default now` in the cutover map, while preserving approved wrappers for intentionally retained domains.
 - Preserve only approved fallback wrappers, with the reason recorded in planning.
 - Archive or downgrade the old active wave plans once the closeout state is green and unambiguous.
-- [2026-03-28 10:23] The remaining backlog is now limited to the still-blocked domains and parity fixture isolation; the domains already marked Rust-default now or compatibility-wrapper-retained are not part of the remaining execution backlog.
+- [2026-03-28 10:51] The remaining backlog is now limited to the still-blocked domains only; the domains already marked Rust-default now or compatibility-wrapper-retained are not part of the remaining execution backlog, and parity fixture isolation is no longer open.
 - Target paths:
   - `scripts/`
   - `crates/cli/`
