@@ -825,7 +825,7 @@ Overall completion estimate: **Phases 0-10 completed; current work is follow-up 
 - Moved canonical planning documents from temporary local planning storage into tracked root-level `planning/active` and completed historical plans into `planning/completed`.
 - Removed `.temp` from any source-of-truth role and centralized local build/runtime artifacts under hidden root folders.
 - Updated service-mode Docker/runbook assets and AI context defaults to point to the new permanent planning location and `.deployment/local/service-data`.
-- Added workspace Cargo configuration to redirect build outputs into `.build/cargo-target`, preventing repo-local `target/` growth in the visible solution root.
+- Added workspace Cargo configuration to redirect build outputs into `.build/target`, preventing repo-local `target/` growth in the visible solution root.
 
 ---
 
