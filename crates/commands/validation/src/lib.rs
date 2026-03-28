@@ -53,8 +53,8 @@ pub use error::{
     ValidateRuntimeScriptTestsCommandError, ValidateSecurityBaselineCommandError,
     ValidateSharedScriptChecksumsCommandError, ValidateShellHooksCommandError,
     ValidateSupplyChainCommandError, ValidateTemplateStandardsCommandError,
-    ValidateXmlDocumentationCommandError,
-    ValidateWarningBaselineCommandError, ValidateWorkspaceEfficiencyCommandError,
+    ValidateTestNamingCommandError, ValidateWarningBaselineCommandError,
+    ValidateWorkspaceEfficiencyCommandError, ValidateXmlDocumentationCommandError,
     ValidationSurfaceError,
 };
 pub use evidence::{
@@ -72,10 +72,11 @@ pub use instruction_graph::{
     ValidateInstructionArchitectureResult, ValidateInstructionsRequest, ValidateInstructionsResult,
 };
 pub use operational_hygiene::{
-    invoke_validate_runtime_script_tests, invoke_validate_shell_hooks,
+    invoke_validate_runtime_script_tests, invoke_validate_shell_hooks, invoke_validate_test_naming,
     invoke_validate_warning_baseline, ValidateRuntimeScriptTestsRequest,
     ValidateRuntimeScriptTestsResult, ValidateShellHooksRequest, ValidateShellHooksResult,
-    ValidateWarningBaselineRequest, ValidateWarningBaselineResult,
+    ValidateTestNamingRequest, ValidateTestNamingResult, ValidateWarningBaselineRequest,
+    ValidateWarningBaselineResult,
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,

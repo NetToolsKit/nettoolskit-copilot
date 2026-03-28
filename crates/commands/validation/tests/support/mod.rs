@@ -8,3 +8,4 @@ pub mod policy_fixtures;
 pub mod release_fixtures;
 pub mod security_fixtures;
 pub mod standards_fixtures;
+pub mod test_naming_fixtures;

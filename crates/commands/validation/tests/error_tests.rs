@@ -13,9 +13,9 @@ use nettoolskit_validation::{
     invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
-    invoke_validate_warning_baseline, invoke_validate_workspace_efficiency,
-    require_validation_surface_contract, ValidateAgentHooksRequest,
-    ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    invoke_validate_test_naming, invoke_validate_warning_baseline,
+    invoke_validate_workspace_efficiency, require_validation_surface_contract,
+    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateAllRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
@@ -26,7 +26,7 @@ use nettoolskit_validation::{
     ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
     ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
     ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
-    ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
+    ValidateTestNamingRequest, ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest,
 };
 
 #[test]
@@ -278,6 +278,20 @@ fn test_validate_runtime_script_tests_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to resolve runtime script test workspace root"
+    );
+}
+
+#[test]
+fn test_validate_test_naming_error_display_is_stable() {
+    let error = invoke_validate_test_naming(&ValidateTestNamingRequest {
+        repo_root: Some(std::path::PathBuf::from("missing-repository")),
+        ..ValidateTestNamingRequest::default()
+    })
+    .expect_err("missing repository should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "failed to resolve test naming workspace root"
     );
 }
 

@@ -6,17 +6,17 @@
 
 ## Introduction
 
-`nettoolskit-validation` owns the Rust surfaces that replace repository validation, security, governance, documentation, and deploy preflight scripts. It is the top-level validation boundary for the migration program and the place where `validate-all` coordinates the native checks. PowerShell entrypoints remain only as compatibility wrappers for shell-based execution.
+`nettoolskit-validation` owns the Rust surfaces that replace repository validation, security, governance, documentation, non-runtime test automation, and deploy preflight scripts. It is the top-level validation boundary for the migration program and the place where `validate-all` coordinates the native checks. PowerShell entrypoints remain only as compatibility wrappers for shell-based execution.
 
 ---
 
 ## Features
 
-- ✅ Locked migration contracts for `41` legacy PowerShell scripts across validation, security, governance, documentation, and deploy surfaces
+- ✅ Locked migration contracts for `42` legacy PowerShell scripts across validation, security, governance, documentation, test automation, and deploy surfaces
 - ✅ Native `validate-all` orchestration with profile selection, report generation, and ledger writing
 - ✅ Direct Rust checks for agent orchestration, instructions, policies, README standards, routing, templates, and workspace hygiene
 - ✅ README standards enforcement backed by the executable repository baseline
-- ✅ Dedicated modules for evidence, policy, instruction graph, operational hygiene, documentation, and workspace validation
+- ✅ Dedicated modules for evidence, policy, instruction graph, operational hygiene, documentation, test automation, and workspace validation
 
 ---
 
@@ -285,12 +285,16 @@ pub fn invoke_validate_template_standards(
 
 ```rust
 pub struct ValidateRuntimeScriptTestsRequest { ... }
+pub struct ValidateTestNamingRequest { ... }
 pub struct ValidateShellHooksRequest { ... }
 pub struct ValidateWarningBaselineRequest { ... }
 
 pub fn invoke_validate_runtime_script_tests(
     request: &ValidateRuntimeScriptTestsRequest,
 ) -> Result<ValidateRuntimeScriptTestsResult, ValidateRuntimeScriptTestsCommandError>;
+pub fn invoke_validate_test_naming(
+    request: &ValidateTestNamingRequest,
+) -> Result<ValidateTestNamingResult, ValidateTestNamingCommandError>;
 pub fn invoke_validate_shell_hooks(
     request: &ValidateShellHooksRequest,
 ) -> Result<ValidateShellHooksResult, ValidateShellHooksCommandError>;
@@ -326,6 +330,7 @@ pub fn invoke_validate_workspace_efficiency(
 pub enum ValidationSurfaceError { UnknownSurface { surface_id: String } }
 pub enum ValidateAllCommandError { ResolveWorkspaceRoot { ... } }
 pub enum ValidateReadmeStandardsCommandError { ResolveWorkspaceRoot { ... } }
+pub enum ValidateTestNamingCommandError { ResolveWorkspaceRoot { ... }, InvalidRequiredUnderscores { ... } }
 ```
 
 ---

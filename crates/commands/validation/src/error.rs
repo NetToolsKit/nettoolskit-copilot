@@ -170,6 +170,24 @@ pub enum ValidateRuntimeScriptTestsCommandError {
     },
 }
 
+/// Errors raised by test-naming validation commands.
+#[derive(Debug, Error)]
+pub enum ValidateTestNamingCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve test naming workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// The required underscore threshold is invalid.
+    #[error("required underscores must be greater than or equal to 1: {required_underscores}")]
+    InvalidRequiredUnderscores {
+        /// Requested underscore threshold.
+        required_underscores: usize,
+    },
+}
+
 /// Errors raised by shell-hooks validation commands.
 #[derive(Debug, Error)]
 pub enum ValidateShellHooksCommandError {
