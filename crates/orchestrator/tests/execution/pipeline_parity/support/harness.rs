@@ -22,11 +22,11 @@ const CLOSEOUT_SMOKE_CHANGELOG_PATH: &str = ".temp/agent-orchestration-engine-sm
 const RESUME_SOURCE_ACTIVE_PLAN_PATH: &str =
     "planning/active/plan-resume-source-test-implement-closeout-smoke-orchestration-support.md";
 const RESUME_SOURCE_ACTIVE_SPEC_PATH: &str =
-    "planning/specs/active/spec-resume-source-test-implement-enterprise-orchestration-support.md";
+    "planning/specs/active/spec-resume-source-test-implement-closeout-smoke-orchestration-support.md";
 const RESUME_SOURCE_COMPLETED_PLAN_PATH: &str =
     "planning/completed/plan-resume-source-test-implement-closeout-smoke-orchestration-support.md";
 const RESUME_SOURCE_COMPLETED_SPEC_PATH: &str =
-    "planning/specs/completed/spec-resume-source-test-implement-enterprise-orchestration-support.md";
+    "planning/specs/completed/spec-resume-source-test-implement-closeout-smoke-orchestration-support.md";
 const RUN_TEST_ACTIVE_PLAN_PATH: &str =
     "planning/active/plan-run-test-implement-closeout-smoke-orchestration-support.md";
 const RUN_TEST_ACTIVE_SPEC_PATH: &str =
