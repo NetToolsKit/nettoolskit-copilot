@@ -289,3 +289,67 @@ function Invoke-ManagedRuntimeStep {
             -FailureMessagePrefix 'Step failed' `
             -ExceptionMessagePrefix 'Step exception')
 }
+
+# Invokes one native runtime binary command using the standardized self-heal
+# step contract.
+function Invoke-ManagedRuntimeBinaryStep {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Name,
+        [Parameter(Mandatory = $true)]
+        [string] $RuntimeBinaryPath,
+        [Parameter(Mandatory = $true)]
+        [string[]] $ArgumentList
+    )
+
+    $startedAt = Get-Date
+    $status = 'failed'
+    $exitCode = 1
+    $errorMessage = $null
+
+    if (-not (Test-Path -LiteralPath $RuntimeBinaryPath -PathType Leaf)) {
+        $errorMessage = "Runtime binary not found: $RuntimeBinaryPath"
+        Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_RUNTIME_BINARY_NOT_FOUND' -Message ("{0}: {1}" -f $Name, $errorMessage)
+    }
+    else {
+        Write-ExecutionLog -Level 'INFO' -Message ("Starting step: {0}" -f $Name)
+        try {
+            & $RuntimeBinaryPath @ArgumentList | Out-Host
+            $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
+            $exitCode = if ($null -eq $lastExitCodeVariable) { 0 } else { [int] $lastExitCodeVariable.Value }
+
+            if ($exitCode -eq 0) {
+                $status = 'passed'
+                Write-ExecutionLog -Level 'OK' -Message ("Step passed: {0}" -f $Name)
+            }
+            else {
+                Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_RUNTIME_STEP_FAILED' -Message ("Step failed: {0} (exit code {1})" -f $Name, $exitCode)
+            }
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+            Write-ExecutionLog -Level 'ERROR' -Code 'SELF_HEAL_RUNTIME_STEP_EXCEPTION' -Message ("Step exception: {0} :: {1}" -f $Name, $errorMessage)
+        }
+    }
+
+    $finishedAt = Get-Date
+    $durationMs = [int] ($finishedAt - $startedAt).TotalMilliseconds
+    $relativeBinaryPath = try {
+        [System.IO.Path]::GetRelativePath((Get-Location).Path, $RuntimeBinaryPath)
+    }
+    catch {
+        $RuntimeBinaryPath
+    }
+
+    return [pscustomobject]@{
+        name = $Name
+        script = $relativeBinaryPath
+        arguments = @($ArgumentList)
+        status = $status
+        exitCode = $exitCode
+        durationMs = $durationMs
+        startedAt = $startedAt.ToString('o')
+        finishedAt = $finishedAt.ToString('o')
+        error = $errorMessage
+    }
+}

@@ -74,8 +74,8 @@ priority: high
   - removes legacy starter/controller skill duplicates from both `~/.github/skills` and `~/.copilot/skills` so the shared `super-agent` starter stays canonical
   - syncs remaining `.codex` runtime assets into `~/.codex`
 - Local RAG/CAG continuity:
-  - `pwsh -File scripts/runtime/update-local-context-index.ps1 -RepoRoot .`
-  - `pwsh -File scripts/runtime/query-local-context-index.ps1 -RepoRoot . -QueryText "super agent clarification" -JsonOutput`
+  - `ntk runtime update-local-context-index --repo-root .`
+  - `ntk runtime query-local-context-index --repo-root . --query-text "super agent clarification" --json-output`
   - prefer this index for targeted continuity recall before rereading broad repository surfaces
 - Non-versioned artifact layout:
   - `.build/` for transient build and generated outputs

@@ -52,7 +52,7 @@ No installation is required beyond PowerShell 7+ and VS Code.
 ## Quick Start
 
 ```powershell
-pwsh -File .\scripts\runtime\apply-vscode-templates.ps1
+ntk runtime apply-vscode-templates
 pwsh -File .\scripts\runtime\sync-vscode-global-mcp.ps1 -CreateBackup
 ```
 
@@ -69,7 +69,7 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 ### Example 2: Apply active VS Code files from templates
 
 ```powershell
-pwsh -File .\scripts\runtime\apply-vscode-templates.ps1 -Force
+ntk runtime apply-vscode-templates --force
 ```
 
 ### Example 3: Synchronize canonical snippets into the global VS Code profile
@@ -110,7 +110,7 @@ pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath C:\Users
 
 ### Runtime Entry Points
 
-- `scripts/runtime/apply-vscode-templates.ps1`: applies templates into active `settings.json` and `mcp.json`
+- `ntk runtime apply-vscode-templates`: applies templates into active `settings.json` and `mcp.json`
 - `scripts/runtime/sync-vscode-global-settings.ps1`: renders `settings.tamplate.jsonc` into the global VS Code user profile
 - `scripts/runtime/sync-vscode-global-mcp.ps1`: renders the canonical MCP runtime catalog into the global VS Code user profile and refreshes `.vscode/mcp-vscode-global.json`
 - `scripts/runtime/sync-vscode-global-snippets.ps1`: synchronizes canonical snippets into the global VS Code user profile
@@ -159,7 +159,7 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 - `definitions/providers/vscode/workspace/snippets/codex-cli.tamplate.code-snippets`
 - `definitions/providers/vscode/workspace/snippets/copilot.tamplate.code-snippets`
 - `definitions/providers/vscode/profiles/README.md`
-- `scripts/runtime/apply-vscode-templates.ps1`
+- `ntk runtime apply-vscode-templates`
 - `scripts/runtime/render-vscode-workspace-surfaces.ps1`
 - `scripts/runtime/sync-vscode-global-mcp.ps1`
 - `scripts/runtime/sync-vscode-global-settings.ps1`

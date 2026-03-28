@@ -124,13 +124,6 @@ fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
-    write_file(
-        &repo
-            .path()
-            .join("scripts/runtime/query-local-context-index.ps1"),
-        "Write-Output 'query'",
-    );
-
     let result = invoke_runtime_healthcheck(&RuntimeHealthcheckRequest {
         repo_root: Some(repo.path().to_path_buf()),
         runtime_profile: Some("github".to_string()),

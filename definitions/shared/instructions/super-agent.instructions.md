@@ -117,9 +117,9 @@ Context resets, compactions, and session boundaries are normal. The primary resi
 - When resuming after a context reset, read the active plan first — the dates tell you what was completed, what is in progress, and what comes next.
 
 ### Handoff export (supplementary)
-- Use `scripts/runtime/export-planning-summary.ps1` to generate a snapshot of active plans, specs, and recent commits when a long session must be paused deliberately.
-- `pwsh -File scripts/runtime/export-planning-summary.ps1` — saves to `.temp/context-handoff-<timestamp>.md`
-- `pwsh -File scripts/runtime/export-planning-summary.ps1 -PrintOnly` — prints to console
+- Use `ntk runtime export-planning-summary` to generate a snapshot of active plans, specs, and recent commits when a long session must be paused deliberately.
+- `ntk runtime export-planning-summary` — saves to `.temp/context-handoff-<timestamp>.md`
+- `ntk runtime export-planning-summary --print-only` — prints to console
 
 ### Cleanup with automatic export
 - Copilot context cleanup: `pwsh -File scripts/runtime/clean-vscode-user-runtime.ps1 -ExportPlanningSummary -Apply`

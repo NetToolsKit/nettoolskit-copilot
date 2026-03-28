@@ -1107,8 +1107,6 @@ $requiredFiles = @(
     'scripts/runtime/hooks/session-start.ps1',
     'scripts/runtime/hooks/subagent-start.ps1',
     'scripts/common/provider-surface-catalog.ps1',
-    'scripts/runtime/update-local-context-index.ps1',
-    'scripts/runtime/query-local-context-index.ps1',
     'scripts/runtime/new-super-agent-worktree.ps1',
     'scripts/runtime/invoke-super-agent-brainstorm.ps1',
     'scripts/runtime/invoke-super-agent-plan.ps1',

@@ -42,9 +42,8 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
     )
     .expect("readme should be written");
     fs::write(
-        repo.path()
-            .join("scripts/runtime/query-local-context-index.ps1"),
-        "Query-LocalContextIndex -QueryText \"runtime rewrite\"",
+        repo.path().join("scripts/runtime/demo.ps1"),
+        "Write-Output 'runtime rewrite'",
     )
     .expect("runtime script should be written");
 
@@ -73,7 +72,7 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
         result.document.contains("`README.md`")
             || result
                 .document
-                .contains("`scripts/runtime/query-local-context-index.ps1`")
+                .contains("`scripts/runtime/demo.ps1`")
     );
     assert!(result.document.contains("## Resume Instructions"));
 }

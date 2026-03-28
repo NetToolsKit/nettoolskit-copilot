@@ -31,9 +31,8 @@ fn test_update_local_context_index_builds_index_and_query_returns_hits() {
     )
     .expect("plan file should be written");
     fs::write(
-        repo.path()
-            .join("scripts/runtime/query-local-context-index.ps1"),
-        "Query-LocalContextIndex -QueryText \"rust migration\"",
+        repo.path().join("scripts/runtime/demo.ps1"),
+        "Write-Output 'rust migration'",
     )
     .expect("script file should be written");
 

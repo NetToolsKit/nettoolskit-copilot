@@ -158,8 +158,8 @@ Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
 $steps = New-Object System.Collections.Generic.List[object]
 
 $bootstrapScript = Join-Path $resolvedRepoRoot 'scripts/runtime/bootstrap.ps1'
-$applyVscodeTemplatesScript = Join-Path $resolvedRepoRoot 'scripts/runtime/apply-vscode-templates.ps1'
 $healthcheckScript = Join-Path $resolvedRepoRoot 'scripts/runtime/healthcheck.ps1'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 $bootstrapArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
 if ($Mirror) {
@@ -178,7 +178,7 @@ if ($null -ne $bootstrapStep) {
 }
 
 if ($ApplyVscodeTemplates) {
-    $vscodeStep = @(Invoke-ManagedRuntimeStep -Name 'apply-vscode-templates' -ScriptPath $applyVscodeTemplatesScript -Arguments @{ RepoRoot = $resolvedRepoRoot; Force = $true }) | Select-Object -Last 1
+    $vscodeStep = @(Invoke-ManagedRuntimeBinaryStep -Name 'apply-vscode-templates' -RuntimeBinaryPath $runtimeBinaryPath -ArgumentList @('runtime', 'apply-vscode-templates', '--repo-root', $resolvedRepoRoot, '--force')) | Select-Object -Last 1
     if ($null -ne $vscodeStep) {
         $steps.Add($vscodeStep) | Out-Null
     }

@@ -34,6 +34,13 @@ fn initialize_runtime_repo_root(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex")).expect(".codex should be created");
 }
 
+fn write_local_context_catalog(repo_root: &Path) {
+    write_file(
+        &repo_root.join(".github/governance/local-context-index.catalog.json"),
+        r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":64,"chunking":{"maxChars":400,"maxLines":20},"queryDefaults":{"top":3},"includeGlobs":["README.md","planning/**/*.md","scripts/**/*.ps1",".github/**/*.md"],"excludeGlobs":[".temp/**"]}"#,
+    );
+}
+
 #[test]
 fn test_runtime_pre_tool_use_emits_hook_specific_output_json() {
     let workspace = TempDir::new().expect("temporary workspace should be created");
@@ -110,4 +117,115 @@ fn test_runtime_trim_trailing_blank_lines_supports_plain_git_repos_without_runti
         fs::read_to_string(repo.path().join("changed.cs")).expect("changed file should be readable"),
         "public sealed class Changed { }"
     );
+}
+
+#[test]
+fn test_runtime_update_local_context_index_builds_the_index_document() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_local_context_catalog(repo.path());
+    write_file(
+        &repo.path().join("README.md"),
+        "# Demo\n\nContinuity summary for the local context index.",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "update-local-context-index"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Local context index updated:"))
+        .stdout(predicate::str::contains("Files indexed:"));
+
+    assert!(repo.path().join(".temp/context-index/index.json").is_file());
+}
+
+#[test]
+fn test_runtime_query_local_context_index_supports_json_output() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_local_context_catalog(repo.path());
+    write_file(
+        &repo.path().join("README.md"),
+        "# Demo\n\nContinuity summary for the local context index.",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "update-local-context-index"])
+        .assert()
+        .success();
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "query-local-context-index",
+            "--query-text",
+            "continuity summary",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""resultCount":1"#))
+        .stdout(predicate::str::contains(r#""path":"README.md""#));
+}
+
+#[test]
+fn test_runtime_export_planning_summary_prints_active_plan_context() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_local_context_catalog(repo.path());
+    write_file(
+        &repo.path().join("planning/active/plan-wave4.md"),
+        "# Wave 4 Plan\n\n- Status: in progress\n- Current focus: retire continuity wrappers.\n",
+    );
+    write_file(
+        &repo.path().join("planning/specs/active/spec-wave4.md"),
+        "# Wave 4 Spec\n\nObjective: move continuity execution to ntk runtime.\n",
+    );
+    write_file(
+        &repo.path().join("README.md"),
+        "# Runtime Rewrite\n\nRetire continuity wrappers with native entrypoints.",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "update-local-context-index"])
+        .assert()
+        .success();
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "export-planning-summary", "--print-only"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("## Active Plans"))
+        .stdout(predicate::str::contains("Wave 4 Plan"))
+        .stdout(predicate::str::contains("## Resume Instructions"));
+}
+
+#[test]
+fn test_runtime_apply_vscode_templates_copies_workspace_templates() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_file(
+        &repo.path().join(".vscode/settings.tamplate.jsonc"),
+        "{\n  \"editor.tabSize\": 4\n}",
+    );
+    write_file(
+        &repo.path().join(".vscode/mcp.tamplate.jsonc"),
+        "{\n  \"servers\": []\n}",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "apply-vscode-templates"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("VS Code template apply summary"))
+        .stdout(predicate::str::contains("applied: 2"));
+
+    assert!(repo.path().join(".vscode/settings.json").is_file());
+    assert!(repo.path().join(".vscode/mcp.json").is_file());
 }

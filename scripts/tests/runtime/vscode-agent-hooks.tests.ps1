@@ -72,7 +72,6 @@ $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $sessionStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/session-start.ps1'
 $preToolUseScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/pre-tool-use.ps1'
 $subagentStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/subagent-start.ps1'
-$updateLocalContextIndexScript = Join-Path $resolvedRepoRoot 'scripts/runtime/update-local-context-index.ps1'
 $runtimeBinaryOverride = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 $workspacePath = New-TemporaryWorkspacePath
@@ -143,7 +142,7 @@ try {
     Set-Content -LiteralPath (Join-Path $workspacePath 'README.md') -Value (
         "# temp workspace`n`nThis workspace explains how to finish cleanup regression safely and recover continuity through a local context index."
     ) -NoNewline
-    & $updateLocalContextIndexScript -RepoRoot $workspacePath | Out-Null
+    & $runtimeBinaryOverride runtime update-local-context-index --repo-root $workspacePath | Out-Null
 
     [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath '.build\super-agent\planning\active') -Force)
     [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath '.build\super-agent\specs\active') -Force)

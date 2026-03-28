@@ -80,6 +80,7 @@ function Assert-ContainsAny {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $runtimeScriptRoot = Join-Path $resolvedRepoRoot 'scripts/runtime'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 $exitCode = 0
 
@@ -273,25 +274,6 @@ try {
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-claude-runtime-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-claude-runtime-surfaces missing OutputRoot parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'update-local-context-index missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'update-local-context-index missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'update-local-context-index missing OutputRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'ForceFullRebuild' -Message 'update-local-context-index missing ForceFullRebuild parameter.'
-    Assert-Contains -Collection $keys -Value 'DetailedOutput' -Message 'update-local-context-index missing DetailedOutput parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'query-local-context-index.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'query-local-context-index missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'QueryText' -Message 'query-local-context-index missing QueryText parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'query-local-context-index missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'query-local-context-index missing OutputRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'Top' -Message 'query-local-context-index missing Top parameter.'
-    Assert-Contains -Collection $keys -Value 'JsonOutput' -Message 'query-local-context-index missing JsonOutput parameter.'
-
     $scriptPath = Join-Path $runtimeScriptRoot 'run-agent-pipeline.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
@@ -327,13 +309,6 @@ try {
     $keys = @($command.Parameters.Keys)
     Assert-Contains -Collection $keys -Value 'EvalsPath' -Message 'evaluate-agent-pipeline missing EvalsPath parameter.'
     Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'evaluate-agent-pipeline missing OutputPath parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'export-planning-summary missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'export-planning-summary missing OutputPath parameter.'
-    Assert-Contains -Collection $keys -Value 'PrintOnly' -Message 'export-planning-summary missing PrintOnly parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'invoke-super-agent-housekeeping.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -701,8 +676,6 @@ try {
     $tempRepoRoot = Join-Path $tempRoot 'repo'
     $catalogRoot = Join-Path $tempRepoRoot '.github\governance'
     $scriptsRoot = Join-Path $tempRepoRoot 'scripts\runtime'
-    $updateIndexScriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
-    $queryIndexScriptPath = Join-Path $runtimeScriptRoot 'query-local-context-index.ps1'
     try {
         New-Item -ItemType Directory -Path $catalogRoot -Force | Out-Null
         New-Item -ItemType Directory -Path $scriptsRoot -Force | Out-Null
@@ -723,7 +696,7 @@ try {
         Set-Content -LiteralPath (Join-Path $tempRepoRoot '.github\AGENTS.md') -Value "# Demo Agents`n`nUse the Super Agent lifecycle." -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $scriptsRoot 'demo.ps1') -Value "Write-Output 'context compaction continuity'" -Encoding UTF8 -NoNewline
 
-        & $updateIndexScriptPath -RepoRoot $tempRepoRoot -DetailedOutput | Out-Null
+        & $runtimeBinaryPath runtime update-local-context-index --repo-root $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'update-local-context-index smoke test failed.'
 
@@ -732,7 +705,7 @@ try {
         $indexDocument = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json -Depth 100
         Assert-True (@($indexDocument.files).Count -gt 0) 'update-local-context-index should index at least one file.'
 
-        $queryJson = & $queryIndexScriptPath -RepoRoot $tempRepoRoot -QueryText 'context continuity' -JsonOutput
+        $queryJson = & $runtimeBinaryPath runtime query-local-context-index --repo-root $tempRepoRoot --query-text 'context continuity' --json-output
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'query-local-context-index smoke test failed.'
         $queryResult = $queryJson | ConvertFrom-Json -Depth 100
@@ -814,8 +787,6 @@ try {
     }
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
-    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
-    $updateIndexScriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
     try {
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github\governance') -Force | Out-Null
@@ -864,9 +835,9 @@ try {
             'This file documents cleanup regression handling and planning-anchored continuity recovery.'
         )
 
-        & $updateIndexScriptPath -RepoRoot $tempRoot | Out-Null
+        & $runtimeBinaryPath runtime update-local-context-index --repo-root $tempRoot | Out-Null
 
-        $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
+        $summary = & $runtimeBinaryPath runtime export-planning-summary --repo-root $tempRoot --print-only
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'export-planning-summary smoke test failed.'
         Assert-True ($summary -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
@@ -883,7 +854,6 @@ try {
     }
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
-    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
     try {
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.build\super-agent\planning\active') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.build\super-agent\specs\active') -Force | Out-Null
@@ -901,7 +871,7 @@ try {
             'Recover continuity in global-runtime mode.'
         )
 
-        $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
+        $summary = & $runtimeBinaryPath runtime export-planning-summary --repo-root $tempRoot --print-only
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'export-planning-summary .build fallback smoke test failed.'
         Assert-True ($summary -match 'Global Runtime Plan') 'export-planning-summary should include the .build active plan title.'
