@@ -252,6 +252,38 @@ pub enum RuntimeFixRegionSpacingCommandError {
     },
 }
 
+/// Errors raised by runtime fix-version-ranges commands.
+#[derive(Debug, Error)]
+pub enum RuntimeFixVersionRangesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime fix-version-ranges workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Project path resolution failed.
+    #[error("failed to resolve runtime fix-version-ranges project path")]
+    ResolveProjectPath {
+        /// Resolved project path expected by the command.
+        project_path: String,
+    },
+    /// Project discovery failed.
+    #[error("failed to discover runtime fix-version-ranges projects")]
+    DiscoverProjects {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Project normalization failed.
+    #[error("failed to normalize runtime fix-version-ranges project contents")]
+    NormalizeProjects {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime VS Code template apply commands.
 #[derive(Debug, Error)]
 pub enum RuntimeApplyVscodeTemplatesCommandError {
