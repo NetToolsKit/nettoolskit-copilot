@@ -1106,7 +1106,6 @@ $requiredFiles = @(
     'scripts/runtime/hooks/common.ps1',
     'scripts/runtime/hooks/session-start.ps1',
     'scripts/runtime/hooks/subagent-start.ps1',
-    'scripts/runtime/hooks/pre-tool-use.ps1',
     'scripts/common/provider-surface-catalog.ps1',
     'scripts/runtime/update-local-context-index.ps1',
     'scripts/runtime/query-local-context-index.ps1',

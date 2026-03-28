@@ -12,7 +12,7 @@ use std::process::Command;
 use crate::error::RuntimeSetupGlobalGitAliasesCommandError;
 
 const TRIM_ALIAS_NAME: &str = "trim-eof";
-const TRIM_SCRIPT_RELATIVE_PATH: &str = "shared-scripts/maintenance/trim-trailing-blank-lines.ps1";
+const RUNTIME_BINARY_DIRECTORY: &str = "bin";
 
 /// Request payload for `setup-global-git-aliases`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -49,7 +49,7 @@ pub struct RuntimeSetupGlobalGitAliasesResult {
 /// # Errors
 ///
 /// Returns [`RuntimeSetupGlobalGitAliasesCommandError`] when repository or
-/// runtime path resolution fails, when the runtime-synced trim script is
+/// runtime path resolution fails, when the runtime-synced `ntk` binary is
 /// missing, or when `git config --global` fails.
 pub fn invoke_setup_global_git_aliases(
     request: &RuntimeSetupGlobalGitAliasesRequest,
@@ -154,11 +154,11 @@ fn prepare_git_config_parent(config_path: Option<&Path>) -> anyhow::Result<()> {
 fn build_managed_alias_map(
     target_codex_path: &Path,
 ) -> Result<BTreeMap<String, String>, RuntimeSetupGlobalGitAliasesCommandError> {
-    let trim_script_path = target_codex_path.join(TRIM_SCRIPT_RELATIVE_PATH);
-    if !trim_script_path.is_file() {
+    let runtime_binary_path = runtime_binary_path(target_codex_path);
+    if !runtime_binary_path.is_file() {
         return Err(
             RuntimeSetupGlobalGitAliasesCommandError::TrimScriptNotFound {
-                trim_script_path: trim_script_path.display().to_string(),
+                trim_script_path: runtime_binary_path.display().to_string(),
             },
         );
     }
@@ -167,11 +167,21 @@ fn build_managed_alias_map(
     aliases.insert(
         TRIM_ALIAS_NAME.to_string(),
         format!(
-            "!pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -GitChangedOnly",
-            normalize_shell_path(&trim_script_path)
+            "!'{}' runtime trim-trailing-blank-lines --repo-root \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\" --git-changed-only",
+            normalize_shell_path(&runtime_binary_path)
         ),
     );
     Ok(aliases)
+}
+
+fn runtime_binary_path(runtime_root: &Path) -> PathBuf {
+    runtime_root
+        .join(RUNTIME_BINARY_DIRECTORY)
+        .join(runtime_binary_file_name())
+}
+
+fn runtime_binary_file_name() -> &'static str {
+    if cfg!(windows) { "ntk.exe" } else { "ntk" }
 }
 
 fn normalize_shell_path(path: &Path) -> String {

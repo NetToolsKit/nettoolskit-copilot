@@ -35,7 +35,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
     param(
@@ -212,7 +212,7 @@ try {
     Assert-Contains -Collection $keys -Value 'CreateBackup' -Message 'sync-codex-mcp-config missing CreateBackup parameter.'
     Assert-Contains -Collection $keys -Value 'DryRun' -Message 'sync-codex-mcp-config missing DryRun parameter.'
 
-    foreach ($hookScriptName in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1', 'pre-tool-use.ps1')) {
+    foreach ($hookScriptName in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1')) {
         $scriptPath = Join-Path $runtimeScriptRoot ('hooks\' + $hookScriptName)
         Assert-True (Test-Path -LiteralPath $scriptPath -PathType Leaf) ("Missing runtime hook script: {0}" -f $hookScriptName)
     }
@@ -779,7 +779,7 @@ try {
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodexSkills 'super-agent'))) 'bootstrap did not remove duplicate repo-managed super-agent from .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodexSkills '.system\SKILL.md') -PathType Leaf) 'bootstrap should preserve unmanaged/system skills in .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts') -PathType Container) 'bootstrap did not sync shared-scripts folder.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts\maintenance\trim-trailing-blank-lines.ps1') -PathType Leaf) 'bootstrap did not project maintenance trim script into shared-scripts.'
+        Assert-True (Test-Path -LiteralPath (Join-Path (Join-Path $targetCodex 'bin') (Get-RuntimeBinaryFileName)) -PathType Leaf) 'bootstrap did not project the managed ntk runtime binary into the Codex runtime.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -1030,7 +1030,7 @@ try {
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'bootstrap codex-profile smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetAgentsSkills 'super-agent\SKILL.md') -PathType Leaf) 'bootstrap codex profile must project picker-visible skills.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts\maintenance\trim-trailing-blank-lines.ps1') -PathType Leaf) 'bootstrap codex profile must project Codex shared scripts.'
+        Assert-True (Test-Path -LiteralPath (Join-Path (Join-Path $targetCodex 'bin') (Get-RuntimeBinaryFileName)) -PathType Leaf) 'bootstrap codex profile must project the managed ntk runtime binary.'
         Assert-True (-not (Test-Path -LiteralPath $targetGithub)) 'bootstrap codex profile must not project the GitHub runtime root.'
         Assert-True (-not (Test-Path -LiteralPath $targetCopilotSkills)) 'bootstrap codex profile must not project native Copilot skills.'
     }
