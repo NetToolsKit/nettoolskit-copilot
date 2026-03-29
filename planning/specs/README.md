@@ -51,7 +51,7 @@ planning/
 
 ## Active Specs
 
-- No active specs.
+- [planning/specs/active/spec-script-retirement-phase-14.md](planning/specs/active/spec-script-retirement-phase-14.md)
 
 ---
 
