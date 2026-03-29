@@ -4,10 +4,10 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 16:10
+- LastUpdated: 2026-03-29 17:19
 - Objective: plan the implementation of persisted weekly AI usage history and the migration from the current JSON-backed local context index to a SQLite-backed local RAG/CAG memory system.
 - Normalized Request: create a planning workstream for weekly limit-consumption history and create a planning workstream for a local SQLite-based RAG/CAG system similar in spirit to `context-mode`, while keeping the repository operating model and current local-context behavior intact.
-- Active Branch: `feature/instruction-runtime-retirement-audit`
+- Active Branch: `feature/ai-usage-history-ledger`
 - Spec Path: `planning/specs/active/spec-ai-usage-history-and-sqlite-local-memory.md`
 - Inputs:
   - `crates/orchestrator/src/execution/ai.rs`
@@ -40,11 +40,11 @@ The workstreams are linked by continuity and usage telemetry, but they intention
 
 ### Workstream U1 — Weekly AI Usage History
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 #### Task U1.1: Freeze Current AI Usage Capture Baseline
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Audit current usage capture in:
   - `crates/orchestrator/src/execution/ai.rs`
@@ -59,12 +59,16 @@ Status: `[ ]` Pending
 - Output:
   - implementation note in this plan
   - exact insertion points for ledger writes
+- Implementation note:
+  - cache-hit persistence is now attached to the existing cache-hit success branch beside `record_ai_usage_estimates(...)` and `persist_ai_session_exchange(...)`
+  - provider-success persistence is now attached to the existing `Ok(routed)` success branch after output validation and cache insert
+  - the current `AiProvider::stream()` contract still discards `AiResponse.usage`, so this first checkpoint records estimated usage only while keeping actual-usage columns ready for a follow-up stream contract upgrade
 - Checkpoint commit:
   - `docs(planning): freeze weekly ai usage capture baseline`
 
 #### Task U1.2: Define SQLite Usage Ledger Contract
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Create the canonical schema contract for the user-local store:
   - `usage_events`
@@ -88,12 +92,17 @@ Status: `[ ]` Pending
   - `actual_cost_usd` when derivable
   - `status`
 - Decide retention and pruning policy.
+- Delivered in this checkpoint:
+  - `usage_events` SQLite schema under the user-local data directory
+  - explicit columns for estimated and actual token/cost fields
+  - deterministic ISO-week indexing and repo-root filtering
+  - optional environment-configured weekly budget burn calculation
 - Checkpoint commit:
   - `docs(planning): define weekly ai usage ledger contract`
 
 #### Task U1.3: Add Native Recording Boundary
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Implement a native usage-recorder boundary in orchestrator code after provider completion and after cache-hit execution where relevant.
 - Record both:
@@ -104,12 +113,17 @@ Status: `[ ]` Pending
   - provider success with actual usage
   - provider success with estimated-only usage
   - repeated writes across same ISO week
+- Delivered in this checkpoint:
+  - local SQLite usage recorder in `crates/orchestrator/src/execution/ai_usage.rs`
+  - persistence on cache-hit and provider-success branches in `processor.rs`
+  - idempotent `INSERT OR IGNORE` event writes keyed by deterministic event ids
+  - tests for repeated writes, repo-root filtering, partial week validation, and budget projection
 - Checkpoint commit:
   - `feat(orchestrator): persist local ai usage events`
 
 #### Task U1.4: Add Weekly Reporting CLI Surface
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 - Add CLI command surfaces for:
   - `ntk ai usage weekly`
@@ -121,6 +135,12 @@ Status: `[ ]` Pending
   - budget burn percent when weekly budgets are configured
   - “remaining” budget estimate
 - Support both text and JSON output.
+- Delivered in this checkpoint:
+  - `ntk ai usage weekly`
+  - human-readable and JSON output modes
+  - provider/model breakdown plus configured weekly budget burn when env budgets are set
+- Remaining:
+  - `ntk ai usage summary`
 - Checkpoint commit:
   - `feat(cli): add weekly ai usage reporting commands`
 
@@ -253,6 +273,15 @@ Status: `[ ]` Pending
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - `pwsh -File .\\scripts\\security\\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
 - targeted parity tests comparing JSON and SQLite local-memory retrieval
+- Checkpoint validation executed for this slice:
+  - `cargo fmt --all -- --check` ✅
+  - `cargo test -p nettoolskit-orchestrator --test test_suite ai_usage --quiet` ✅
+  - `cargo test -p nettoolskit-cli --test test_suite ai_usage --quiet` ✅
+  - `cargo clippy -p nettoolskit-orchestrator --all-targets -- -D warnings` ✅
+  - `cargo check -p nettoolskit-cli` ✅
+  - `pwsh -NoProfile -File .\\scripts\\security\\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` ✅
+  - `cargo test -p nettoolskit-orchestrator --quiet` ⚠️ blocked by pre-existing unrelated failure in `execution::chatops::tests::execute_chatops_envelope_submit_records_control_plane_metadata`
+  - `cargo clippy -p nettoolskit-cli --all-targets -- -D warnings` ⚠️ blocked by a pre-existing `nettoolskit-validation` warning outside this slice
 
 ---
 

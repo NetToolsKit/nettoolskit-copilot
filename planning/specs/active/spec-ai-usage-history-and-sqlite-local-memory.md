@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 16:10
+- LastUpdated: 2026-03-29 17:19
 - Objective: define the design intent, boundaries, and rollout strategy for two related capabilities: persisted weekly AI usage history and a SQLite-backed local RAG/CAG memory system that supersedes the current JSON-only local context index.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-ai-usage-history-and-sqlite-local-memory.md`
@@ -121,6 +121,11 @@ The usage ledger must persist:
 This allows the weekly report to distinguish:
 - exact usage when the provider reports it
 - estimated usage when only local approximation is available
+
+Current implementation checkpoint:
+- the first delivered slice persists the full schema for estimated/actual fields
+- the active `AiProvider::stream()` pipeline still drops `AiResponse.usage`, so the orchestrator currently records estimated usage for cache-hit and provider-success paths
+- a later follow-up should upgrade the stream contract or completion handoff so actual provider usage can populate the existing nullable columns without changing the ledger schema
 
 ### 5. Weekly Budgets Are Configured Locally, Not Assumed from a Provider API
 
