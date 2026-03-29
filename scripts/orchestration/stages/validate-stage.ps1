@@ -217,7 +217,9 @@ function Test-IsDeferredValidationCommand {
 
     $normalized = ($CommandText ?? '').Trim().ToLowerInvariant()
     $deferredPatterns = @(
-        'scripts/validation/validate-runtime-script-tests.ps1',
+        'ntk validation agent-hooks',
+        'ntk validation shell-hooks',
+        'ntk validation runtime-script-tests',
         'scripts/validation/validate-all.ps1',
         'scripts/tests/runtime/agent-orchestration-engine.tests.ps1',
         'scripts/runtime/run-agent-pipeline.ps1',

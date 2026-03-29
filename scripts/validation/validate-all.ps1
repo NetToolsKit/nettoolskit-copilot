@@ -930,19 +930,31 @@ $baseCheckDefinitions['validate-powershell-standards'] = [pscustomobject]@{
 
 $baseCheckDefinitions['validate-agent-hooks'] = [pscustomobject]@{
     name = 'validate-agent-hooks'
-    script = 'scripts/validation/validate-agent-hooks.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-agent-hooks'
+    command = @('validation', 'agent-hooks')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 
 $baseCheckDefinitions['validate-shell-hooks'] = [pscustomobject]@{
     name = 'validate-shell-hooks'
-    script = 'scripts/validation/validate-shell-hooks.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-shell-hooks'
+    command = @('validation', 'shell-hooks')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 
 $baseCheckDefinitions['validate-runtime-script-tests'] = [pscustomobject]@{
     name = 'validate-runtime-script-tests'
-    script = 'scripts/validation/validate-runtime-script-tests.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-runtime-script-tests'
+    command = @('validation', 'runtime-script-tests')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 

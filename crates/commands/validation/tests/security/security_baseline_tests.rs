@@ -22,7 +22,7 @@ fn test_invoke_validate_security_baseline_passes_for_valid_assets() {
     .expect("security baseline validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Passed);
-    assert_eq!(result.files_scanned, 4);
+    assert_eq!(result.files_scanned, 3);
 }
 
 #[test]

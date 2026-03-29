@@ -26,8 +26,102 @@ fn initialize_validation_repo_root(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex")).expect(".codex should be created");
 }
 
+fn initialize_agent_hooks_validation_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    fs::create_dir_all(repo_root.join(".github/hooks/scripts"))
+        .expect("hook script directory should be created");
+    write_file(
+        &repo_root.join(".github/hooks/super-agent.bootstrap.json"),
+        r#"{
+  "hooks": {
+    "SessionStart": [{ "type": "command", "command": "pwsh -File session-start.ps1" }],
+    "PreToolUse": [{ "type": "command", "command": "pwsh -File pre-tool-use.ps1" }],
+    "SubagentStart": [{ "type": "command", "command": "pwsh -File subagent-start.ps1" }]
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/hooks/super-agent.selector.json"),
+        r#"{
+  "version": 1,
+  "defaultAgent": {
+    "skillName": "super-agent",
+    "displayName": "Super Agent"
+  },
+  "overrideSources": {
+    "environment": {
+      "skillVariable": "COPILOT_SUPER_AGENT_SKILL",
+      "displayVariable": "COPILOT_SUPER_AGENT_NAME"
+    },
+    "localOverrideFile": "super-agent.selector.local.json"
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/hooks/scripts/common.ps1"),
+        "workspace-adapter\nglobal-runtime\n.build/super-agent/planning/active\n.build/super-agent/specs/active\n",
+    );
+    write_file(
+        &repo_root.join(".github/hooks/scripts/session-start.ps1"),
+        "Write-Output 'session'\n",
+    );
+    write_file(
+        &repo_root.join(".github/hooks/scripts/pre-tool-use.ps1"),
+        "Write-Output 'pre'\n",
+    );
+    write_file(
+        &repo_root.join(".github/hooks/scripts/subagent-start.ps1"),
+        "Write-Output 'subagent'\n",
+    );
+}
+
+fn initialize_shell_hooks_validation_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    fs::create_dir_all(repo_root.join(".githooks")).expect("hook directory should be created");
+
+    for hook_name in ["pre-commit", "post-commit", "post-merge", "post-checkout"] {
+        write_file(
+            &repo_root.join(".githooks").join(hook_name),
+            "#!/bin/sh\necho ok\n",
+        );
+    }
+}
+
+fn write_fake_shell_command(repo_root: &Path) -> std::path::PathBuf {
+    let script_path = repo_root.join("tools/fake-sh.cmd");
+    write_file(
+        &script_path,
+        "@echo off\r\nset target=%2\r\nfindstr /c:\"syntax-error\" \"%target%\" >nul\r\nif %errorlevel%==0 (\r\n  echo syntax error near token\r\n  exit /b 1\r\n)\r\nexit /b 0\r\n",
+    );
+    script_path
+}
+
+fn write_fake_shellcheck_command(repo_root: &Path) -> std::path::PathBuf {
+    let script_path = repo_root.join("tools/fake-shellcheck.cmd");
+    write_file(
+        &script_path,
+        "@echo off\r\nset target=%3\r\nfindstr /c:\"shellcheck-warn\" \"%target%\" >nul\r\nif %errorlevel%==0 (\r\n  echo hook warning\r\n  exit /b 1\r\n)\r\nexit /b 0\r\n",
+    );
+    script_path
+}
+
+fn initialize_runtime_script_tests_validation_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    fs::create_dir_all(repo_root.join("scripts/tests/runtime"))
+        .expect("runtime test directory should be created");
+}
+
+fn write_runtime_test_script(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root.join("scripts/tests/runtime").join(file_name),
+        contents,
+    );
+}
+
 fn initialize_security_baseline_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
+    fs::create_dir_all(repo_root.join("scripts/validation"))
+        .expect("scripts/validation should be created");
     write_file(&repo_root.join("CODEOWNERS"), "* @example\n");
     write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
     write_file(
@@ -38,7 +132,7 @@ fn initialize_security_baseline_repo_root(repo_root: &Path) {
         &repo_root.join(".github/governance/security-baseline.json"),
         r#"{
   "version": 1,
-  "requiredFiles": ["CODEOWNERS", ".github/AGENTS.md"],
+  "requiredFiles": ["CODEOWNERS", ".github/AGENTS.md", "crates/commands/validation/src/agent_orchestration/agent_hooks.rs"],
   "requiredDirectories": [".github/governance", "scripts/validation"],
   "scanExtensions": [".md", ".ps1"],
   "excludedPathGlobs": [".temp/**"],
@@ -61,8 +155,8 @@ fn initialize_security_baseline_repo_root(repo_root: &Path) {
 }"#,
     );
     write_file(
-        &repo_root.join("scripts/validation/validate-agent-hooks.ps1"),
-        "Write-Output 'ok'\n",
+        &repo_root.join("crates/commands/validation/src/agent_orchestration/agent_hooks.rs"),
+        "// fixture\n",
     );
     write_file(&repo_root.join("README.md"), "# Repo\n");
 }
@@ -1531,7 +1625,7 @@ fn test_validation_security_baseline_reports_pass_for_valid_assets() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
-        .stdout(predicate::str::contains("Files scanned: 4"));
+        .stdout(predicate::str::contains("Files scanned: 3"));
 }
 
 #[test]
@@ -1735,6 +1829,74 @@ fn test_validation_agent_orchestration_reports_pass_for_valid_assets() {
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Agents checked: 8"))
         .stdout(predicate::str::contains("Stage checks: 8"));
+}
+
+#[test]
+fn test_validation_agent_hooks_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_agent_hooks_validation_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "agent-hooks", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Warning only: false"));
+}
+
+#[test]
+fn test_validation_shell_hooks_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_shell_hooks_validation_repo_root(repo.path());
+    let shell_path = write_fake_shell_command(repo.path());
+    let shellcheck_path = write_fake_shellcheck_command(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "shell-hooks",
+            "--shell-path",
+            shell_path.to_str().expect("shell path should be valid utf-8"),
+            "--shellcheck-path",
+            shellcheck_path
+                .to_str()
+                .expect("shellcheck path should be valid utf-8"),
+            "--enable-shellcheck",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Hook files checked: 4"));
+}
+
+#[test]
+fn test_validation_runtime_script_tests_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_script_tests_validation_repo_root(repo.path());
+    write_runtime_test_script(
+        repo.path(),
+        "one.tests.ps1",
+        "param([string] $RepoRoot)\nWrite-Output 'one'\n",
+    );
+    write_runtime_test_script(
+        repo.path(),
+        "two.tests.ps1",
+        "param([string] $RepoRoot)\nWrite-Output 'two'\n",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "runtime-script-tests", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Test scripts checked: 2"))
+        .stdout(predicate::str::contains("Passed tests: 2"))
+        .stdout(predicate::str::contains("Failed tests: 0"));
 }
 
 #[test]

@@ -27,9 +27,9 @@
     ".githooks/post-checkout",
     "crates/commands/validation/src/governance/template_standards.rs",
     "crates/commands/validation/src/workspace/workspace_efficiency.rs",
-    "scripts/validation/validate-agent-hooks.ps1",
-    "scripts/validation/validate-shell-hooks.ps1",
-    "scripts/validation/validate-runtime-script-tests.ps1",
+    "crates/commands/validation/src/agent_orchestration/agent_hooks.rs",
+    "crates/commands/validation/src/operational_hygiene/shell_hooks.rs",
+    "crates/commands/validation/src/operational_hygiene/runtime_script_tests.rs",
     "scripts/tests/runtime/runtime-scripts.tests.ps1",
     "scripts/tests/runtime/compatibility-lifecycle.tests.ps1",
     "scripts/tests/runtime/template-standards.tests.ps1"

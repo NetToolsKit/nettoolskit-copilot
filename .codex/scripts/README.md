@@ -127,7 +127,7 @@ pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 - `scripts/runtime/bootstrap.ps1`
 - `scripts/runtime/render-vscode-mcp-template.ps1`
 - `scripts/runtime/sync-codex-mcp-config.ps1`
-- `scripts/validation/validate-shell-hooks.ps1`
+- `ntk validation shell-hooks --repo-root .`
 
 ---
 

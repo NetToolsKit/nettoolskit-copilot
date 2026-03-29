@@ -49,7 +49,9 @@ These files are validated through the governance and provenance baselines so onb
    - `ntk validation supply-chain --warning-only false`
    - `ntk validation warning-baseline --warning-only false`
    - `ntk validation agent-orchestration`
-   - `pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -WarningOnly:$false`
+   - `ntk validation agent-hooks --repo-root . --warning-only false`
+   - `ntk validation shell-hooks --repo-root . --warning-only false`
+   - `ntk validation runtime-script-tests --repo-root . --warning-only false`
    - `ntk validation release-governance --warning-only false`
    - `ntk validation release-provenance --warning-only false`
    - `ntk validation audit-ledger --warning-only false`

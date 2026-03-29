@@ -3,7 +3,8 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
-    invoke_validate_agent_orchestration, invoke_validate_agent_permissions,
+    invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
+    invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment, invoke_validate_architecture_boundaries,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_compatibility_lifecycle_policy, invoke_validate_dotnet_standards,
@@ -11,11 +12,13 @@ use nettoolskit_validation::{
     invoke_validate_planning_structure, invoke_validate_policy,
     invoke_validate_powershell_standards, invoke_validate_readme_standards,
     invoke_validate_release_governance, invoke_validate_release_provenance,
-    invoke_validate_routing_coverage, invoke_validate_security_baseline,
-    invoke_validate_shared_script_checksums, invoke_validate_supply_chain,
+    invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
+    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    invoke_validate_shell_hooks, invoke_validate_supply_chain,
     invoke_validate_template_standards, invoke_validate_warning_baseline,
     invoke_validate_workspace_efficiency,
-    ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
+    ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
@@ -23,8 +26,9 @@ use nettoolskit_validation::{
     ValidatePlanningStructureRequest, ValidatePolicyRequest,
     ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
     ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
-    ValidateRoutingCoverageRequest, ValidateSecurityBaselineRequest,
-    ValidateSharedScriptChecksumsRequest, ValidateSupplyChainRequest,
+    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
+    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
+    ValidateShellHooksRequest, ValidateSupplyChainRequest,
     ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
     ValidateWorkspaceEfficiencyRequest, ValidationCheckStatus,
 };
@@ -42,6 +46,9 @@ pub enum ValidationCommand {
     /// Validate agent skill references against manifests, pipeline, and evals.
     #[command(name = "agent-skill-alignment")]
     AgentSkillAlignment(ValidationAgentSkillAlignmentArgs),
+    /// Validate repository-owned VS Code/Codex hook assets.
+    #[command(name = "agent-hooks")]
+    AgentHooks(ValidationAgentHooksArgs),
     /// Validate the audit ledger hash chain.
     AuditLedger(ValidationAuditLedgerArgs),
     /// Validate the centralized authoritative documentation policy and source map.
@@ -74,12 +81,18 @@ pub enum ValidationCommand {
     ReadmeStandards(ValidationReadmeStandardsArgs),
     /// Validate routing catalog coverage against golden fixtures.
     RoutingCoverage(ValidationRoutingCoverageArgs),
+    /// Validate runtime PowerShell smoke tests.
+    #[command(name = "runtime-script-tests")]
+    RuntimeScriptTests(ValidationRuntimeScriptTestsArgs),
     /// Validate repository security baseline contracts.
     #[command(name = "security-baseline")]
     SecurityBaseline(ValidationSecurityBaselineArgs),
     /// Validate shared script checksum manifest integrity.
     #[command(name = "shared-script-checksums")]
     SharedScriptChecksums(ValidationSharedScriptChecksumsArgs),
+    /// Validate shell hook syntax and semantic guards.
+    #[command(name = "shell-hooks")]
+    ShellHooks(ValidationShellHooksArgs),
     /// Validate local supply-chain baseline and export SBOM evidence.
     #[command(name = "supply-chain")]
     SupplyChain(ValidationSupplyChainArgs),
@@ -146,6 +159,20 @@ pub struct ValidationAgentSkillAlignmentArgs {
     /// Optional explicit skills root path.
     #[clap(long)]
     pub skills_root_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `validation agent-hooks`.
+#[derive(Debug, Args)]
+pub struct ValidationAgentHooksArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit hooks root path.
+    #[clap(long)]
+    pub hooks_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
 }
 
 /// CLI arguments for `validation audit-ledger`.
@@ -299,6 +326,23 @@ pub struct ValidationRoutingCoverageArgs {
     pub warning_only: bool,
 }
 
+/// CLI arguments for `validation runtime-script-tests`.
+#[derive(Debug, Args)]
+pub struct ValidationRuntimeScriptTestsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit runtime test root.
+    #[clap(long)]
+    pub test_root: Option<PathBuf>,
+    /// Optional explicit PowerShell runtime path.
+    #[clap(long)]
+    pub powershell_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// CLI arguments for `validation security-baseline`.
 #[derive(Debug, Args)]
 pub struct ValidationSecurityBaselineArgs {
@@ -387,6 +431,29 @@ pub struct ValidationSharedScriptChecksumsArgs {
     /// Include per-file mismatch details in the output.
     #[clap(long, action = ArgAction::SetTrue)]
     pub detailed_output: bool,
+}
+
+/// CLI arguments for `validation shell-hooks`.
+#[derive(Debug, Args)]
+pub struct ValidationShellHooksArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit shell hook root.
+    #[clap(long)]
+    pub hook_root: Option<PathBuf>,
+    /// Optional explicit shell runtime path.
+    #[clap(long)]
+    pub shell_path: Option<PathBuf>,
+    /// Optional explicit shellcheck path.
+    #[clap(long)]
+    pub shellcheck_path: Option<PathBuf>,
+    /// Run shellcheck when available.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub enable_shellcheck: bool,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
 }
 
 /// CLI arguments for `validation supply-chain`.
@@ -511,6 +578,7 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         ValidationCommand::AgentSkillAlignment(arguments) => {
             execute_agent_skill_alignment(arguments)
         }
+        ValidationCommand::AgentHooks(arguments) => execute_agent_hooks(arguments),
         ValidationCommand::AuditLedger(arguments) => execute_audit_ledger(arguments),
         ValidationCommand::AuthoritativeSourcePolicy(arguments) => {
             execute_authoritative_source_policy(arguments)
@@ -535,10 +603,14 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         }
         ValidationCommand::ReadmeStandards(arguments) => execute_readme_standards(arguments),
         ValidationCommand::RoutingCoverage(arguments) => execute_routing_coverage(arguments),
+        ValidationCommand::RuntimeScriptTests(arguments) => {
+            execute_runtime_script_tests(arguments)
+        }
         ValidationCommand::SecurityBaseline(arguments) => execute_security_baseline(arguments),
         ValidationCommand::SharedScriptChecksums(arguments) => {
             execute_shared_script_checksums(arguments)
         }
+        ValidationCommand::ShellHooks(arguments) => execute_shell_hooks(arguments),
         ValidationCommand::SupplyChain(arguments) => execute_supply_chain(arguments),
         ValidationCommand::TemplateStandards(arguments) => execute_template_standards(arguments),
         ValidationCommand::ReleaseGovernance(arguments) => execute_release_governance(arguments),
@@ -631,6 +703,28 @@ fn execute_agent_skill_alignment(arguments: ValidationAgentSkillAlignmentArgs) -
     println!("Agents checked: {}", result.agents_checked);
     println!("Stage checks: {}", result.stage_checks);
     println!("Eval case checks: {}", result.eval_case_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_agent_hooks(arguments: ValidationAgentHooksArgs) -> ExitStatus {
+    let result = match invoke_validate_agent_hooks(&ValidateAgentHooksRequest {
+        repo_root: arguments.repo_root,
+        hooks_root: arguments.hooks_root,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Hooks root: {}", result.hooks_root.display());
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 
@@ -945,6 +1039,36 @@ fn execute_routing_coverage(arguments: ValidationRoutingCoverageArgs) -> ExitSta
     exit_status_from_code(result.exit_code)
 }
 
+fn execute_runtime_script_tests(arguments: ValidationRuntimeScriptTestsArgs) -> ExitStatus {
+    let result = match invoke_validate_runtime_script_tests(&ValidateRuntimeScriptTestsRequest {
+        repo_root: arguments.repo_root,
+        test_root: arguments.test_root,
+        powershell_path: arguments.powershell_path,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Test root: {}", result.test_root.display());
+    if let Some(powershell_path) = result.powershell_path.as_ref() {
+        println!("PowerShell path: {}", powershell_path.display());
+    }
+    println!("Test scripts checked: {}", result.test_scripts_checked);
+    println!("Passed tests: {}", result.passed_tests);
+    println!("Failed tests: {}", result.failed_tests);
+    println!("Skipped tests: {}", result.skipped_tests);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
 fn execute_readme_standards(arguments: ValidationReadmeStandardsArgs) -> ExitStatus {
     let result = match invoke_validate_readme_standards(&ValidateReadmeStandardsRequest {
         repo_root: arguments.repo_root,
@@ -1041,6 +1165,38 @@ fn execute_shared_script_checksums(arguments: ValidationSharedScriptChecksumsArg
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
     print_messages("Mismatch details", &result.mismatch_details);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_shell_hooks(arguments: ValidationShellHooksArgs) -> ExitStatus {
+    let result = match invoke_validate_shell_hooks(&ValidateShellHooksRequest {
+        repo_root: arguments.repo_root,
+        hook_root: arguments.hook_root,
+        shell_path: arguments.shell_path,
+        shellcheck_path: arguments.shellcheck_path,
+        enable_shellcheck: arguments.enable_shellcheck,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Hook root: {}", result.hook_root.display());
+    if let Some(shell_path) = result.shell_path.as_ref() {
+        println!("Shell path: {}", shell_path.display());
+    }
+    if let Some(shellcheck_path) = result.shellcheck_path.as_ref() {
+        println!("Shellcheck path: {}", shellcheck_path.display());
+    }
+    println!("Hook files checked: {}", result.hook_files_checked);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
 
     exit_status_from_code(result.exit_code)
 }
