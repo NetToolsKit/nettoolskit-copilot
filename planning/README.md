@@ -82,6 +82,7 @@ planning/
 - [planning/completed/plan-script-retirement-phase-10.md](planning/completed/plan-script-retirement-phase-10.md)
 - [planning/completed/plan-script-retirement-phase-11.md](planning/completed/plan-script-retirement-phase-11.md)
 - [planning/completed/plan-script-retirement-phase-12.md](planning/completed/plan-script-retirement-phase-12.md)
+- [planning/completed/plan-script-retirement-phase-13.md](planning/completed/plan-script-retirement-phase-13.md)
 - [planning/completed/script-retirement-safety-matrix.md](planning/completed/script-retirement-safety-matrix.md)
 - [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
