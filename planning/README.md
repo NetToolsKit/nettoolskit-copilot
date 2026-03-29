@@ -52,7 +52,7 @@ planning/
 
 ## Active Workstreams
 
-- [planning/active/plan-script-retirement-phase-10.md](active/plan-script-retirement-phase-10.md) - retire the remaining low-fanout validation wrappers for compatibility lifecycle and dotnet standards
+- No active workstreams.
 
 ---
 
@@ -79,6 +79,7 @@ planning/
 - [planning/completed/plan-script-retirement-phase-7.md](planning/completed/plan-script-retirement-phase-7.md)
 - [planning/completed/plan-script-retirement-phase-8.md](planning/completed/plan-script-retirement-phase-8.md)
 - [planning/completed/plan-script-retirement-phase-9.md](planning/completed/plan-script-retirement-phase-9.md)
+- [planning/completed/plan-script-retirement-phase-10.md](planning/completed/plan-script-retirement-phase-10.md)
 - [planning/completed/script-retirement-safety-matrix.md](planning/completed/script-retirement-safety-matrix.md)
 - [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
@@ -90,7 +91,13 @@ planning/
 - [planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md](planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md)
 - [planning/specs/completed/spec-script-retirement-phase-2.md](planning/specs/completed/spec-script-retirement-phase-2.md)
 - [planning/specs/completed/spec-script-retirement-phase-3.md](planning/specs/completed/spec-script-retirement-phase-3.md)
+- [planning/specs/completed/spec-script-retirement-phase-4.md](planning/specs/completed/spec-script-retirement-phase-4.md)
+- [planning/specs/completed/spec-script-retirement-phase-5.md](planning/specs/completed/spec-script-retirement-phase-5.md)
+- [planning/specs/completed/spec-script-retirement-phase-6.md](planning/specs/completed/spec-script-retirement-phase-6.md)
+- [planning/specs/completed/spec-script-retirement-phase-7.md](planning/specs/completed/spec-script-retirement-phase-7.md)
+- [planning/specs/completed/spec-script-retirement-phase-8.md](planning/specs/completed/spec-script-retirement-phase-8.md)
 - [planning/specs/completed/spec-script-retirement-phase-9.md](planning/specs/completed/spec-script-retirement-phase-9.md)
+- [planning/specs/completed/spec-script-retirement-phase-10.md](planning/specs/completed/spec-script-retirement-phase-10.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)

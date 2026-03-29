@@ -51,7 +51,7 @@ planning/
 
 ## Active Specs
 
-- [planning/specs/active/spec-script-retirement-phase-10.md](active/spec-script-retirement-phase-10.md) - design intent for retiring the compatibility lifecycle and dotnet standards validation wrappers
+- No active specs.
 
 ---
 
@@ -77,6 +77,7 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-7.md](planning/specs/completed/spec-script-retirement-phase-7.md)
 - [planning/specs/completed/spec-script-retirement-phase-8.md](planning/specs/completed/spec-script-retirement-phase-8.md)
 - [planning/specs/completed/spec-script-retirement-phase-9.md](planning/specs/completed/spec-script-retirement-phase-9.md)
+- [planning/specs/completed/spec-script-retirement-phase-10.md](planning/specs/completed/spec-script-retirement-phase-10.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
