@@ -6,16 +6,18 @@ use nettoolskit_runtime::{
     export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
     invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_doctor,
     invoke_render_mcp_runtime_artifacts, invoke_render_vscode_mcp_template,
-    invoke_runtime_healthcheck, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
-    invoke_sync_codex_mcp_config, invoke_trim_trailing_blank_lines, query_local_context_index,
-    update_local_context_index, ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
+    invoke_runtime_healthcheck, invoke_runtime_self_heal, invoke_setup_git_hooks,
+    invoke_setup_global_git_aliases, invoke_sync_codex_mcp_config,
+    invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
+    ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
     RuntimeApplyVscodeTemplatesRequest, RuntimeDoctorRequest, RuntimeDoctorStatus,
     RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
     RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
     RuntimePreToolUseRequest, RuntimeRenderMcpRuntimeArtifactsRequest,
-    RuntimeRenderVscodeMcpTemplateRequest, RuntimeSetupGitHooksRequest,
-    RuntimeSetupGlobalGitAliasesRequest, RuntimeSyncCodexMcpConfigRequest,
-    RuntimeTrimTrailingBlankLinesRequest, UpdateLocalContextIndexRequest,
+    RuntimeRenderVscodeMcpTemplateRequest, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
+    RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
+    RuntimeSyncCodexMcpConfigRequest, RuntimeTrimTrailingBlankLinesRequest,
+    UpdateLocalContextIndexRequest,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -31,6 +33,8 @@ pub enum RuntimeCommand {
     Doctor(RuntimeDoctorArgs),
     /// Run the native runtime healthcheck workflow.
     Healthcheck(RuntimeHealthcheckArgs),
+    /// Run the native runtime self-heal workflow.
+    SelfHeal(RuntimeSelfHealArgs),
     /// Build or refresh the repository-owned local context index.
     UpdateLocalContextIndex(RuntimeUpdateLocalContextIndexArgs),
     /// Query the repository-owned local context index.
@@ -133,6 +137,50 @@ pub struct RuntimeHealthcheckArgs {
     #[clap(long, action = ArgAction::Set, default_value_t = true)]
     pub treat_runtime_drift_as_warning: bool,
     /// Optional explicit report output path.
+    #[clap(long)]
+    pub output_path: Option<PathBuf>,
+    /// Optional explicit plain-text log path.
+    #[clap(long)]
+    pub log_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `runtime self-heal`.
+#[derive(Debug, Args)]
+pub struct RuntimeSelfHealArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit GitHub runtime target path.
+    #[clap(long)]
+    pub target_github_path: Option<PathBuf>,
+    /// Optional explicit Codex runtime target path.
+    #[clap(long)]
+    pub target_codex_path: Option<PathBuf>,
+    /// Optional explicit picker-visible agent skills path.
+    #[clap(long)]
+    pub target_agents_skills_path: Option<PathBuf>,
+    /// Optional explicit Copilot native skills path.
+    #[clap(long)]
+    pub target_copilot_skills_path: Option<PathBuf>,
+    /// Optional explicit runtime profile name.
+    #[clap(long)]
+    pub runtime_profile: Option<String>,
+    /// Use mirror mode when bootstrap sync is enabled.
+    #[clap(long)]
+    pub mirror: bool,
+    /// Apply MCP config during bootstrap.
+    #[clap(long)]
+    pub apply_mcp_config: bool,
+    /// Create a timestamped MCP config backup when applying MCP config.
+    #[clap(long)]
+    pub backup_config: bool,
+    /// Apply tracked VS Code templates before the follow-up healthcheck.
+    #[clap(long)]
+    pub apply_vscode_templates: bool,
+    /// Treat extra runtime files as failures during the follow-up healthcheck.
+    #[clap(long)]
+    pub strict_extras: bool,
+    /// Optional explicit JSON report output path.
     #[clap(long)]
     pub output_path: Option<PathBuf>,
     /// Optional explicit plain-text log path.
@@ -390,6 +438,7 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         RuntimeCommand::PreToolUse => execute_pre_tool_use(),
         RuntimeCommand::Doctor(arguments) => execute_runtime_doctor(arguments),
         RuntimeCommand::Healthcheck(arguments) => execute_runtime_healthcheck(arguments),
+        RuntimeCommand::SelfHeal(arguments) => execute_runtime_self_heal(arguments),
         RuntimeCommand::UpdateLocalContextIndex(arguments) => {
             execute_update_local_context_index(arguments)
         }
@@ -555,6 +604,45 @@ fn execute_runtime_healthcheck(arguments: RuntimeHealthcheckArgs) -> ExitStatus 
     println!("Passed checks: {}", result.passed_checks);
     println!("Warning checks: {}", result.warning_checks);
     println!("Failed checks: {}", result.failed_checks);
+
+    if result.exit_code == 0 {
+        ExitStatus::Success
+    } else {
+        ExitStatus::Error
+    }
+}
+
+fn execute_runtime_self_heal(arguments: RuntimeSelfHealArgs) -> ExitStatus {
+    let result = match invoke_runtime_self_heal(&RuntimeSelfHealRequest {
+        repo_root: arguments.repo_root,
+        target_github_path: arguments.target_github_path,
+        target_codex_path: arguments.target_codex_path,
+        target_agents_skills_path: arguments.target_agents_skills_path,
+        target_copilot_skills_path: arguments.target_copilot_skills_path,
+        runtime_profile: arguments.runtime_profile,
+        mirror: arguments.mirror,
+        apply_mcp_config: arguments.apply_mcp_config,
+        backup_config: arguments.backup_config,
+        apply_vscode_templates: arguments.apply_vscode_templates,
+        strict_extras: arguments.strict_extras,
+        output_path: arguments.output_path,
+        log_path: arguments.log_path,
+        ..RuntimeSelfHealRequest::default()
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", self_heal_status_label(result.overall_status));
+    println!("Runtime profile: {}", result.runtime_profile_name);
+    println!("Output path: {}", result.output_path.display());
+    println!("Log path: {}", result.log_path.display());
+    println!("Total steps: {}", result.total_steps);
+    println!("Passed steps: {}", result.passed_steps);
+    println!("Failed steps: {}", result.failed_steps);
 
     if result.exit_code == 0 {
         ExitStatus::Success
@@ -966,5 +1054,12 @@ fn doctor_status_label(status: RuntimeDoctorStatus) -> &'static str {
         RuntimeDoctorStatus::Clean => "clean",
         RuntimeDoctorStatus::CleanWithExtras => "clean-with-extras",
         RuntimeDoctorStatus::Detected => "detected",
+    }
+}
+
+fn self_heal_status_label(status: RuntimeSelfHealStatus) -> &'static str {
+    match status {
+        RuntimeSelfHealStatus::Passed => "passed",
+        RuntimeSelfHealStatus::Failed => "failed",
     }
 }

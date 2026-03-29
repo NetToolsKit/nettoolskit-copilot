@@ -92,6 +92,114 @@ fn write_mcp_runtime_catalog(repo_root: &Path) {
     );
 }
 
+fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
+    write_file(
+        &repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
+        r#"{"version":1,"renderers":[{"id":"github-instruction-surfaces","consumers":{"bootstrap":{"enabled":true,"order":10,"condition":"always"}}},{"id":"vscode-profile-surfaces","consumers":{"bootstrap":{"enabled":true,"order":20,"condition":"always"}}},{"id":"vscode-workspace-surfaces","consumers":{"bootstrap":{"enabled":true,"order":30,"condition":"always"}}},{"id":"codex-compatibility-surfaces","consumers":{"bootstrap":{"enabled":true,"order":40,"condition":"codex"}}},{"id":"codex-skill-surfaces","consumers":{"bootstrap":{"enabled":true,"order":50,"condition":"codex"}}},{"id":"codex-orchestration-surfaces","consumers":{"bootstrap":{"enabled":true,"order":60,"condition":"codex"}}},{"id":"claude-runtime-surfaces","consumers":{"bootstrap":{"enabled":true,"order":70,"condition":"claude"}}},{"id":"claude-skill-surfaces","consumers":{"bootstrap":{"enabled":false,"order":80,"condition":"claude"}}}]}"#,
+    );
+
+    write_file(
+        &repo_root.join("definitions/providers/github/root/AGENTS.md"),
+        "# Managed agents",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/COMMANDS.md"),
+        "# Managed commands",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/copilot-instructions.md"),
+        "# Managed instructions",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/instruction-routing.catalog.yml"),
+        "version: 1",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/agents/super-agent.agent.md"),
+        "# Super Agent",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/chatmodes/demo.chatmode.md"),
+        "# Demo Chatmode",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/hooks/scripts/session-start.ps1"),
+        "Write-Output 'session-start'",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/prompts/route-instructions.prompt.md"),
+        "# Route Instructions",
+    );
+    write_file(
+        &repo_root.join("definitions/shared/instructions/super-agent.instructions.md"),
+        "# Shared instruction",
+    );
+    write_file(
+        &repo_root.join("definitions/shared/templates/readme-template.md"),
+        "# Readme Template",
+    );
+    write_file(
+        &repo_root.join("definitions/shared/prompts/poml/prompt-engineering-poml.md"),
+        "# Shared POML",
+    );
+
+    write_file(
+        &repo_root.join("definitions/providers/vscode/profiles/profile-base.json"),
+        "{}",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/vscode/workspace/README.md"),
+        "# VS Code Workspace",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/vscode/workspace/base.code-workspace"),
+        "{}",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/vscode/workspace/settings.tamplate.jsonc"),
+        "{}",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/vscode/workspace/snippets/demo.tamplate.code-snippets"),
+        "{}",
+    );
+
+    write_file(
+        &repo_root.join("definitions/providers/codex/scripts/root-tool.ps1"),
+        "Write-Output 'tool'",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/mcp/README.md"),
+        "# Codex MCP",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/mcp/codex.config.template.toml"),
+        "[mcp]",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/mcp/vscode.mcp.template.json"),
+        "{}",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/orchestration/flow.md"),
+        "# orchestration flow",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/skills/runtime-skill/SKILL.md"),
+        "# runtime-skill",
+    );
+
+    write_file(
+        &repo_root.join("definitions/providers/claude/runtime/settings.json"),
+        "{\"theme\":\"repo\"}",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/claude/skills/review-code-engineer/SKILL.md"),
+        "# review-code-engineer",
+    );
+}
+
 fn initialize_runtime_health_repo(repo_root: &Path) {
     initialize_runtime_repo_root(repo_root);
     fs::create_dir_all(repo_root.join("scripts/runtime"))
@@ -427,6 +535,35 @@ fn test_runtime_healthcheck_cli_writes_report_to_requested_output_path() {
 
     assert!(repo.path().join(".temp/audit-report.json").is_file());
     assert!(repo.path().join(".temp/logs/audit-report.log").is_file());
+}
+
+#[test]
+fn test_runtime_self_heal_cli_writes_report_to_requested_output_path() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_health_repo(repo.path());
+    initialize_minimal_provider_surface_projection(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "self-heal",
+            "--runtime-profile",
+            "none",
+            "--output-path",
+            ".temp/self-heal-report.json",
+            "--log-path",
+            ".temp/logs/self-heal.log",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Runtime profile: none"))
+        .stdout(predicate::str::contains("Total steps: 2"))
+        .stdout(predicate::str::contains("Failed steps: 0"));
+
+    assert!(repo.path().join(".temp/self-heal-report.json").is_file());
+    assert!(repo.path().join(".temp/logs/self-heal.log").is_file());
 }
 
 #[test]
