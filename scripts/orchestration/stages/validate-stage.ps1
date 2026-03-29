@@ -468,9 +468,9 @@ if ($null -ne $taskPlanData) {
 $validationScripts = @(
     [ordered]@{ Name = 'validate-instructions'; Runner = 'script'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-instructions.ps1'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
     [ordered]@{ Name = 'validate-policy'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-policy'; Command = @('validation', 'policy'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
-    [ordered]@{ Name = 'validate-agent-orchestration'; Runner = 'script'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-agent-orchestration.ps1'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
+    [ordered]@{ Name = 'validate-agent-orchestration'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-agent-orchestration'; Command = @('validation', 'agent-orchestration'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
     [ordered]@{ Name = 'validate-planning-structure'; Runner = 'script'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-planning-structure.ps1'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
-    [ordered]@{ Name = 'validate-release-governance'; Runner = 'script'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-release-governance.ps1'); Arguments = @{ RepoRoot = $resolvedRepoRoot } }
+    [ordered]@{ Name = 'validate-release-governance'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-release-governance'; Command = @('validation', 'release-governance'); Arguments = @{ RepoRoot = $resolvedRepoRoot; WarningOnly = $false } }
 )
 
 $results = New-Object System.Collections.Generic.List[object]

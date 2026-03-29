@@ -2,7 +2,7 @@
 
 ## Scope
 
-Use this runbook when one or more validation scripts report failures or warnings that need triage.
+Use this runbook when one or more validation checks report failures or warnings that need triage.
 
 ## Triage
 
@@ -45,7 +45,7 @@ pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile relea
 ## Recovery
 
 1. Apply targeted fixes.
-2. Re-run failing scripts individually.
+2. Re-run failing checks individually through `ntk validation <check>` when a native command exists, or through the remaining PowerShell entrypoint when the check is still script-owned.
 3. Re-run `validate-all`.
 4. Generate updated audit report.
 

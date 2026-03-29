@@ -814,7 +814,9 @@ $baseCheckDefinitions['validate-shared-script-checksums'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-agent-orchestration'] = [pscustomobject]@{
     name = 'validate-agent-orchestration'
-    script = 'scripts/validation/validate-agent-orchestration.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-agent-orchestration'
+    command = @('validation', 'agent-orchestration')
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-agent-skill-alignment'] = [pscustomobject]@{
@@ -953,12 +955,20 @@ $baseCheckDefinitions['validate-supply-chain'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-release-governance'] = [pscustomobject]@{
     name = 'validate-release-governance'
-    script = 'scripts/validation/validate-release-governance.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-release-governance'
+    command = @('validation', 'release-governance')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-release-provenance'] = [pscustomobject]@{
     name = 'validate-release-provenance'
-    script = 'scripts/validation/validate-release-provenance.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-release-provenance'
+    command = @('validation', 'release-provenance')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-audit-ledger'] = [pscustomobject]@{

@@ -48,7 +48,7 @@ No additional package installation is required. Use PowerShell 7+ and run comman
 ## Quick Start
 
 ```powershell
-pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
+ntk validation agent-orchestration
 pwsh -File .\scripts\runtime\render-codex-orchestration-surfaces.ps1 -RepoRoot .
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run orchestration smoke test" -ExecutionBackend codex-exec
 ```
@@ -60,7 +60,7 @@ pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run orchestrat
 ### Example 1: Validate orchestration contracts
 
 ```powershell
-pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
+ntk validation agent-orchestration
 ```
 
 ### Example 2: Execute the default pipeline with live dispatch
@@ -104,7 +104,7 @@ pwsh -File .\scripts\runtime\new-super-agent-worktree.ps1 -WorktreeName "feature
 ## Build and Tests
 
 ```powershell
-pwsh -File .\scripts\validation\validate-agent-orchestration.ps1
+ntk validation agent-orchestration
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Smoke run" -ExecutionBackend codex-exec
 pwsh -File .\scripts\tests\runtime\super-agent-worktree.tests.ps1 -RepoRoot .
 pwsh -File .\scripts\tests\runtime\super-agent-entrypoints.tests.ps1 -RepoRoot .
@@ -137,7 +137,7 @@ pwsh -File .\scripts\tests\runtime\super-agent-entrypoints.tests.ps1 -RepoRoot .
 - `definitions/providers/codex/orchestration/`
 - `scripts/orchestration/engine/invoke-codex-dispatch.ps1`
 - `scripts/orchestration/engine/invoke-task-worker.ps1`
-- `scripts/validation/validate-agent-orchestration.ps1`
+- `ntk validation agent-orchestration`
 - `planning/README.md`
 - `planning/specs/README.md`
 

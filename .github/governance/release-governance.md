@@ -3,7 +3,7 @@
 ## Scope
 
 This repository uses local-first governance for instruction and runtime assets.
-Validation is deterministic and runs from scripts under `scripts/validation` and `scripts/runtime`.
+Validation is deterministic and runs through the native `ntk validation` surface plus the remaining scripted runtime entrypoints under `scripts/runtime`.
 
 ## Branch Protection
 
@@ -24,7 +24,7 @@ Notes:
 
 `CODEOWNERS` is mandatory and validated by:
 - `ntk validation policy` (file presence)
-- `scripts/validation/validate-release-governance.ps1` (rule quality checks)
+- `ntk validation release-governance --warning-only false` (rule quality checks)
 
 At minimum:
 - Catch-all owner rule (`* owner`)
@@ -48,10 +48,10 @@ These files are validated through the governance and provenance baselines so onb
    - `ntk validation agent-permissions --warning-only false`
    - `ntk validation supply-chain --warning-only false`
    - `ntk validation warning-baseline --warning-only false`
-   - `pwsh -File .\scripts\validation\validate-agent-orchestration.ps1`
+   - `ntk validation agent-orchestration`
    - `pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -WarningOnly:$false`
-   - `pwsh -File .\scripts\validation\validate-release-governance.ps1`
-   - `pwsh -File .\scripts\validation\validate-release-provenance.ps1`
+   - `ntk validation release-governance --warning-only false`
+   - `ntk validation release-provenance --warning-only false`
    - `ntk validation audit-ledger --warning-only false`
    - `pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release`
 2. Confirm branch protection drift is zero:

@@ -30,5 +30,5 @@ description: Design and enforce privacy and data protection controls across appl
 
 ```powershell
 ntk validation security-baseline --warning-only false
-pwsh -File ./scripts/validation/validate-release-provenance.ps1
+ntk validation release-provenance --warning-only false
 ```
