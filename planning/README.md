@@ -53,7 +53,6 @@ planning/
 ## Active Workstreams
 
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
-- [planning/active/plan-ai-usage-history-and-sqlite-local-memory.md](planning/active/plan-ai-usage-history-and-sqlite-local-memory.md)
 
 ---
 
@@ -99,6 +98,7 @@ planning/
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
 - [planning/completed/plan-repository-unification-and-rust-migration.md](planning/completed/plan-repository-unification-and-rust-migration.md)
 - [planning/completed/plan-rust-migration-closeout-and-cutover.md](planning/completed/plan-rust-migration-closeout-and-cutover.md)
+- [planning/completed/plan-ai-usage-history-and-sqlite-local-memory.md](planning/completed/plan-ai-usage-history-and-sqlite-local-memory.md)
 - [planning/completed/rust-script-cutover-default-map.md](planning/completed/rust-script-cutover-default-map.md)
 - [planning/completed/rust-script-parity-ledger.md](planning/completed/rust-script-parity-ledger.md)
 - [planning/completed/rust-script-transcription-ownership-matrix.md](planning/completed/rust-script-transcription-ownership-matrix.md)

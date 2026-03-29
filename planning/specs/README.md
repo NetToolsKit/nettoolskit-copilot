@@ -52,7 +52,6 @@ planning/
 ## Active Specs
 
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
-- [planning/specs/active/spec-ai-usage-history-and-sqlite-local-memory.md](planning/specs/active/spec-ai-usage-history-and-sqlite-local-memory.md)
 
 ---
 
@@ -93,6 +92,7 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md](planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md)
 - [planning/specs/completed/spec-script-retirement-phase-20f-codex-orchestration-renderer.md](planning/specs/completed/spec-script-retirement-phase-20f-codex-orchestration-renderer.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
+- [planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md](planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
 - [super-agent.instructions.md](../../.github/instructions/super-agent.instructions.md)

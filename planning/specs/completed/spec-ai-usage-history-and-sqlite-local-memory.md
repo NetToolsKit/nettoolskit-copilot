@@ -4,10 +4,10 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 20:41
+- LastUpdated: 2026-03-29 21:18
 - Objective: define the design intent, boundaries, and rollout strategy for two related capabilities: persisted weekly AI usage history and a SQLite-backed local RAG/CAG memory system that supersedes the current JSON-only local context index.
 - Planning Readiness: ready-for-plan
-- Related Plan: `planning/active/plan-ai-usage-history-and-sqlite-local-memory.md`
+- Related Plan: `planning/completed/plan-ai-usage-history-and-sqlite-local-memory.md`
 - Source Inputs:
   - `crates/orchestrator/src/execution/ai.rs`
   - `crates/orchestrator/src/execution/ai_session.rs`
@@ -122,6 +122,8 @@ Current implementation checkpoint:
 - planning-summary exports now persist bounded `planning-summary` events into the repository-local memory store
 - orchestrator AI session checkpoints now persist bounded `sessions` rows plus `ai-session-checkpoint` events into the repository-local memory store
 - selected queued/failure/cancelled task audit transitions now persist bounded `runtime-task-audit` events using resolved repository-root detection
+- `query-local-context-index` now uses the SQLite memory store by default, while `--use-json-index` remains the explicit compatibility/debug path
+- the default recall contract now carries SQLite-native filters and backend reporting without removing the compatibility JSON document
 
 ### 4. Weekly Usage History Must Record Both Actual and Estimated Values
 
@@ -193,6 +195,8 @@ Current implementation checkpoint:
 - both commands support JSON/text output
 - both commands support explicit budget config path and budget profile selection
 - summary reports expose current-week budget burn plus multi-week provider rollups
+- `query-local-context-index` now defaults to the SQLite memory backend and reports the chosen backend in CLI output
+- the JSON compatibility path remains operator-visible only through an explicit `use_json_index` / `--use-json-index` fallback
 
 The current `update-local-context-index` and `query-local-context-index` remain supported during migration.
 

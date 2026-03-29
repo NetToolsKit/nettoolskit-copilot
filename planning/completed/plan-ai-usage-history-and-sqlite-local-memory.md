@@ -4,11 +4,11 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 20:41
+- LastUpdated: 2026-03-29 21:18
 - Objective: plan the implementation of persisted weekly AI usage history and the migration from the current JSON-backed local context index to a SQLite-backed local RAG/CAG memory system.
 - Normalized Request: create a planning workstream for weekly limit-consumption history and create a planning workstream for a local SQLite-based RAG/CAG system similar in spirit to `context-mode`, while keeping the repository operating model and current local-context behavior intact.
 - Active Branch: `feature/ai-usage-history-ledger`
-- Spec Path: `planning/specs/active/spec-ai-usage-history-and-sqlite-local-memory.md`
+- Spec Path: `planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md`
 - Inputs:
   - `crates/orchestrator/src/execution/ai.rs`
   - `crates/orchestrator/src/execution/ai_session.rs`
@@ -165,7 +165,7 @@ Status: `[x]` Complete
 
 ### Workstream U2 — SQLite Local RAG/CAG Memory
 
-Status: `[~]` In Progress
+Status: `[x]` Complete
 
 #### Task U2.1: Freeze Current Local-Context Baseline
 
@@ -284,13 +284,19 @@ Status: `[x]` Complete
 
 #### Task U2.6: Cut Over the Default Retrieval Path
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Make SQLite the default local-memory retrieval path only after parity evidence passes.
 - Keep JSON export/debug fallback behind an explicit path or flag.
 - Update docs and operator guidance.
+- Delivered in this checkpoint:
+  - `query-local-context-index` now routes to the SQLite-backed repository-local memory store by default
+  - the legacy JSON compatibility path is now explicit through `use_json_index` / `--use-json-index`
+  - the cutover request surface now keeps SQLite-only filters (`path_prefix`, `heading_contains`, `exclude_paths`) available on the legacy command name
+  - CLI output now reports the effective backend and continues to surface both the compatibility `index.json` path and the SQLite `context.db` path
+  - runtime and CLI docs now describe the SQLite store as the default recall path and the JSON index as an explicit fallback
 - Checkpoint commit:
-  - `refactor(runtime): make sqlite local memory the default recall store`
+  - `refactor(runtime): make sqlite local memory the default recall path`
 
 ---
 
@@ -345,6 +351,12 @@ Status: `[ ]` Pending
   - `cargo test -p nettoolskit-orchestrator persist_local_memory_ --quiet` ✅
   - `cargo clippy -p nettoolskit-core -p nettoolskit-runtime -p nettoolskit-orchestrator --all-targets -- -D warnings` ✅
   - `git diff --check` ✅
+- Checkpoint validation executed for the SQLite default-recall cutover slice:
+  - `cargo fmt --all -- --check` ✅
+  - `cargo test -p nettoolskit-runtime --test test_suite continuity::local_context_tests --quiet` ✅
+  - `cargo test -p nettoolskit-cli --test test_suite runtime_commands_tests --quiet` ✅
+  - `cargo clippy -p nettoolskit-runtime -p nettoolskit-cli --all-targets -- -D warnings` ✅
+  - `git diff --check` ✅
 
 ---
 
@@ -353,5 +365,6 @@ Status: `[ ]` Pending
 - The weekly usage ledger exists and can answer weekly burn questions locally.
 - The AI usage CLI exposes both `weekly` and `summary` reporting with local budget profiles.
 - The SQLite local-memory store exists and supports bounded repo-local recall.
+- The default recall path now uses the SQLite local-memory store while preserving an explicit JSON compatibility fallback.
 - Planning and operator docs explain the split between repo-local memory and user-local usage history.
 - The active plan and spec move to `completed/` only after implementation, validation, and documentation are materially finished.
