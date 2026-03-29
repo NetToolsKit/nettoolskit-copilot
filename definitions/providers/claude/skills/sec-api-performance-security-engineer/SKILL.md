@@ -33,6 +33,6 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 ## Validation examples
 
 ```powershell
-pwsh -File ./scripts/validation/validate-security-baseline.ps1
+ntk validation security-baseline --warning-only false
 dotnet test --filter "Category=Unit"
 ```

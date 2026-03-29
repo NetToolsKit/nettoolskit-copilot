@@ -51,8 +51,8 @@
         "\\.github/copilot-instructions\\.md",
         "README\\.md",
         "CHANGELOG\\.md",
-        "validate-instruction-metadata\\.ps1",
-        "validate-instructions\\.ps1",
+        "ntk validation instruction-metadata --repo-root \\.",
+        "ntk validation instructions --repo-root \\.",
         "## Change Notes"
       ],
       "forbiddenPatterns": [
@@ -60,8 +60,7 @@
         "Checklist:\\s+\\.github Change"
       ],
       "requiredPathReferences": [
-        "scripts/validation/validate-instruction-metadata.ps1",
-        "scripts/validation/validate-instructions.ps1",
+        "crates/commands/validation/src/instruction_graph/instructions.rs",
         ".github/copilot-instructions.md",
         "README.md",
         "CHANGELOG.md"

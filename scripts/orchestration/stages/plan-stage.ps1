@@ -255,7 +255,7 @@ function New-FallbackPlanResult {
                 commands = @(
                     [ordered]@{
                         purpose = 'repository validation'
-                        command = 'pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile dev'
+                        command = 'ntk validation all --repo-root . --validation-profile dev'
                         expectedOutcome = 'Validation finishes without new failures for the changed scope.'
                     }
                 )
@@ -268,7 +268,7 @@ function New-FallbackPlanResult {
                     [ordered]@{
                         name = 'validation-green'
                         expectedOutcome = 'expected-pass'
-                        command = 'pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile dev'
+                        command = 'ntk validation all --repo-root . --validation-profile dev'
                         evidence = 'Repository validation succeeds after the requested change is applied.'
                     }
                 )

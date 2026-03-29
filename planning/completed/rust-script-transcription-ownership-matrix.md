@@ -4,7 +4,7 @@ Generated: 2026-03-26 17:05
 
 ## Status
 
-- LastUpdated: 2026-03-28 16:10
+- LastUpdated: 2026-03-28 17:18
 - Objective: freeze the canonical PowerShell inventory, Rust owner boundary, target surface, and migration wave for every tracked script under `scripts/**/*.ps1`.
 - Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
 - Source Spec: `planning/specs/completed/spec-repository-unification-and-rust-migration.md`
@@ -12,7 +12,8 @@ Generated: 2026-03-26 17:05
 - Archived From Branch: `feature/native-validation-policy`
 - Remaining Open Backlog: none; retained-wrapper decisions are now preserved in the completed cutover archive.
 - Artifact Role: canonical inventory and ownership map only; execution and cutover state are tracked in the parity ledger and closeout plan.
-- Closeout Note: the inventory and owner boundaries now reflect the final non-runtime test-automation split too: `refactor_tests_to_aaa` belongs to the validation boundary, while `apply-aaa-pattern` and `run-coverage` remain explicit retained wrapper exceptions tracked in the cutover map. The remaining shell-owned behavior is now recorded as approved retained exceptions rather than as open migration backlog.
+- Historical Inventory Total: `147`; the live local wrapper estate after retirement slices is tracked separately in `planning/completed/script-retirement-safety-matrix.md` and is currently `141`.
+- Closeout Note: the inventory and owner boundaries now reflect the final non-runtime test-automation split too: `refactor_tests_to_aaa` belongs to the validation boundary, while `apply-aaa-pattern` and `run-coverage` remain explicit retained wrapper exceptions tracked in the cutover map. The two validation-owned test automation wrappers were later retired locally after parity was proven, and that live wrapper removal is tracked in the retirement matrix and parity ledger.
 
 ## Owner Summary
 
@@ -120,12 +121,14 @@ Generated: 2026-03-26 17:05
 - Rust owner: `crates/commands/validation`
 - Wave: `Wave 2`
 - Included scripts: `check-test-naming`
+- Retirement status: retired locally on `2026-03-28` after the phase-2 validation contract cleanup
 
 ### `scripts/tests/refactor_tests_to_aaa.ps1`
 
 - Rust owner: `crates/commands/validation`
 - Wave: `Wave 2`
 - Included scripts: `refactor_tests_to_aaa`
+- Retirement status: retired locally on `2026-03-28` after the phase-2 validation contract cleanup
 
 ### `scripts/tests/*.ps1` excluding `check-test-naming.ps1`, `refactor_tests_to_aaa.ps1`, and runtime subfolder
 

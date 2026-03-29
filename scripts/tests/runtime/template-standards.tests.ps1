@@ -3,7 +3,8 @@
     Runtime tests for template standards validation without external frameworks.
 
 .DESCRIPTION
-    Covers success and failure cases for baseline-driven template validation.
+    Covers success and failure cases for the native
+    `ntk validation template-standards` contract.
 
 .PARAMETER RepoRoot
     Optional repository root. If omitted, auto-detects a root containing .github and .codex.
@@ -34,7 +35,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 # Fails the current runtime test when the exit code differs from the expected value.
 function Assert-ExitCode {
     param(
@@ -89,7 +90,7 @@ function Write-TextFile {
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-template-standards.ps1'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
@@ -113,7 +114,7 @@ try {
             -RequiredPathReferences @($supportFilePath)
         Write-TextFile -Path $baselinePath -Content $baselineContent
 
-        & $scriptPath -RepoRoot $resolvedRepoRoot -TemplateDirectory $templateDirectory -BaselinePath $baselinePath | Out-Null
+        & $runtimeBinaryPath 'validation' 'template-standards' '--repo-root' $resolvedRepoRoot '--template-directory' $templateDirectory '--baseline-path' $baselinePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Valid template baseline should pass.'
 
@@ -125,7 +126,7 @@ try {
 
 scripts/copilot.ps1
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -TemplateDirectory $templateDirectory -BaselinePath $baselinePath | Out-Null
+        & $runtimeBinaryPath 'validation' 'template-standards' '--repo-root' $resolvedRepoRoot '--template-directory' $templateDirectory '--baseline-path' $baselinePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Forbidden pattern should fail template validation.'
 
@@ -143,7 +144,7 @@ scripts/copilot.ps1
             -RequiredPathReferences @($missingReferencePath)
         Write-TextFile -Path $baselinePath -Content $baselineContent
 
-        & $scriptPath -RepoRoot $resolvedRepoRoot -TemplateDirectory $templateDirectory -BaselinePath $baselinePath | Out-Null
+        & $runtimeBinaryPath 'validation' 'template-standards' '--repo-root' $resolvedRepoRoot '--template-directory' $templateDirectory '--baseline-path' $baselinePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing template path reference should fail validation.'
     }

@@ -527,7 +527,7 @@ if ($workItems.Count -eq 0) {
             commands = @(
                 [ordered]@{
                     purpose = 'repository validation'
-                    command = 'pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile dev'
+                    command = 'ntk validation all --repo-root . --validation-profile dev'
                     expectedOutcome = 'Validation finishes without blocking failures.'
                 }
             )
@@ -540,7 +540,7 @@ if ($workItems.Count -eq 0) {
                 [ordered]@{
                     name = 'validation-green'
                     expectedOutcome = 'expected-pass'
-                    command = 'pwsh -File scripts/validation/validate-all.ps1 -ValidationProfile dev'
+                    command = 'ntk validation all --repo-root . --validation-profile dev'
                     evidence = 'Repository validation is green after implementation.'
                 }
             )

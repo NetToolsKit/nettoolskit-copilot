@@ -5,8 +5,9 @@
 .DESCRIPTION
     Resolves the canonical provider-surface projection catalog used to describe
     repository-owned authored surfaces, generated exceptions, and the renderer
-    scripts that project them into `.github/`, `.codex/`, `.claude/`, and
-    `.vscode/`.
+    entrypoints that project them into `.github/`, `.codex/`, `.claude/`, and
+    `.vscode/`. Renderers may stay script-backed or dispatch through the native
+    `ntk runtime render-provider-surfaces` contract.
 
 .EXAMPLE
     . .\scripts\common\provider-surface-catalog.ps1
@@ -179,6 +180,100 @@ function Convert-ProviderSurfaceArgumentMap {
     return $argumentMap
 }
 
+# Resolves one native renderer metadata object from the catalog.
+function Get-ProviderSurfaceCatalogNativeCommand {
+    param(
+        [object] $Renderer
+    )
+
+    return Get-ProviderSurfaceCatalogOptionalValue -Object $Renderer -PropertyName 'nativeCommand'
+}
+
+# Resolves the best available `ntk` runtime binary for native provider-surface renderer dispatch.
+function Resolve-ProviderSurfaceNativeRuntimeBinaryPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $RepoRoot
+    )
+
+    if (-not (Get-Command -Name Resolve-NtkRuntimeBinaryPath -ErrorAction SilentlyContinue)) {
+        $runtimePathsHelperPath = Join-Path $PSScriptRoot 'runtime-paths.ps1'
+        if (-not (Test-Path -LiteralPath $runtimePathsHelperPath -PathType Leaf)) {
+            throw ("Missing runtime paths helper for native provider-surface dispatch: {0}" -f $runtimePathsHelperPath)
+        }
+
+        . $runtimePathsHelperPath
+    }
+
+    $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $RepoRoot -RuntimePreference github
+    if (-not (Test-Path -LiteralPath $runtimeBinaryPath -PathType Leaf)) {
+        throw ("Managed runtime binary not found for provider-surface dispatch: {0}" -f $runtimeBinaryPath)
+    }
+
+    return [System.IO.Path]::GetFullPath($runtimeBinaryPath)
+}
+
+# Invokes one native provider-surface renderer through the managed runtime binary.
+function Invoke-ProviderSurfaceNativeRenderer {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $RepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string] $RendererId,
+        [Parameter(Mandatory = $true)]
+        [object] $NativeCommand,
+        [string] $CatalogPath,
+        [string] $ConsumerName = 'direct',
+        [bool] $EnableCodexRuntime = $false,
+        [bool] $EnableClaudeRuntime = $false
+    )
+
+    $nativeKind = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $NativeCommand -PropertyName 'kind' -DefaultValue '')
+    switch ($nativeKind) {
+        'ntk-runtime-render-provider-surfaces' {
+            $runtimeBinaryPath = Resolve-ProviderSurfaceNativeRuntimeBinaryPath -RepoRoot $RepoRoot
+            $argumentList = @(
+                'runtime',
+                'render-provider-surfaces',
+                '--repo-root',
+                $RepoRoot,
+                '--renderer-id',
+                $RendererId,
+                '--consumer-name',
+                $ConsumerName
+            )
+
+            if (-not [string]::IsNullOrWhiteSpace($CatalogPath)) {
+                $argumentList += @('--catalog-path', $CatalogPath)
+            }
+
+            if ($EnableCodexRuntime) {
+                $argumentList += '--enable-codex-runtime'
+            }
+
+            if ($EnableClaudeRuntime) {
+                $argumentList += '--enable-claude-runtime'
+            }
+
+            & $runtimeBinaryPath @argumentList | Out-Null
+            $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+            if ($exitCode -ne 0) {
+                throw ("Native provider surface renderer '{0}' failed. ExitCode={1}" -f $RendererId, $exitCode)
+            }
+
+            return [pscustomobject]@{
+                DispatchKind = 'native-runtime'
+                RuntimeBinaryPath = $runtimeBinaryPath
+                ScriptPath = $null
+                ExitCode = $exitCode
+            }
+        }
+        default {
+            throw ("Unsupported provider surface native command kind '{0}' for renderer '{1}'." -f $nativeKind, $RendererId)
+        }
+    }
+}
+
 # Selects the renderers enabled for one consumer view of the catalog.
 function Get-ProviderSurfaceProjectionRenderers {
     param(
@@ -266,6 +361,7 @@ function Invoke-ProviderSurfaceProjectionRenderers {
         [string] $RepoRoot,
         [Parameter(Mandatory = $true)]
         [object] $Catalog,
+        [string] $CatalogPath,
         [string[]] $RendererIds = @(),
         [string] $ConsumerName = 'direct',
         [bool] $EnableCodexRuntime = $false,
@@ -278,7 +374,35 @@ function Invoke-ProviderSurfaceProjectionRenderers {
 
     foreach ($renderer in @($renderers)) {
         $rendererId = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $renderer -PropertyName 'id' -DefaultValue '')
-        $scriptPath = Resolve-ProviderSurfaceCatalogPathValue -RepoRoot $RepoRoot -PathValue ([string] (Get-ProviderSurfaceCatalogOptionalValue -Object $renderer -PropertyName 'scriptPath' -DefaultValue ''))
+        $nativeCommand = Get-ProviderSurfaceCatalogNativeCommand -Renderer $renderer
+        if ($null -ne $nativeCommand) {
+            $nativeResult = Invoke-ProviderSurfaceNativeRenderer `
+                -RepoRoot $RepoRoot `
+                -RendererId $rendererId `
+                -NativeCommand $nativeCommand `
+                -CatalogPath $CatalogPath `
+                -ConsumerName $ConsumerName `
+                -EnableCodexRuntime:$EnableCodexRuntime `
+                -EnableClaudeRuntime:$EnableClaudeRuntime
+
+            $results.Add([pscustomobject]@{
+                    Id = $rendererId
+                    ScriptPath = $nativeResult.ScriptPath
+                    RuntimeBinaryPath = $nativeResult.RuntimeBinaryPath
+                    DispatchKind = $nativeResult.DispatchKind
+                    Consumer = $ConsumerName
+                    ExitCode = $nativeResult.ExitCode
+                }) | Out-Null
+
+            continue
+        }
+
+        $scriptPathValue = [string] (Get-ProviderSurfaceCatalogOptionalValue -Object $renderer -PropertyName 'scriptPath' -DefaultValue '')
+        if ([string]::IsNullOrWhiteSpace($scriptPathValue)) {
+            throw ("Provider surface renderer '{0}' must define either scriptPath or nativeCommand." -f $rendererId)
+        }
+
+        $scriptPath = Resolve-ProviderSurfaceCatalogPathValue -RepoRoot $RepoRoot -PathValue $scriptPathValue
         if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
             throw ("Provider surface renderer not found: {0}" -f $scriptPath)
         }
@@ -296,6 +420,8 @@ function Invoke-ProviderSurfaceProjectionRenderers {
         $results.Add([pscustomobject]@{
                 Id = $rendererId
                 ScriptPath = $scriptPath
+                RuntimeBinaryPath = $null
+                DispatchKind = 'script-path'
                 Consumer = $ConsumerName
                 ExitCode = $exitCode
             }) | Out-Null

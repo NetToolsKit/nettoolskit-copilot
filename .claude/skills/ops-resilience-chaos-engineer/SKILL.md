@@ -38,6 +38,7 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 ## Validation examples
 
 ```powershell
-pwsh -File ./scripts/validation/validate-all.ps1 -Profile release
-pwsh -File ./scripts/runtime/healthcheck.ps1 -ValidationProfile release -StrictExtras
+ntk validation all --repo-root . --validation-profile release
+ntk runtime doctor --repo-root . --detailed
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release
 ```

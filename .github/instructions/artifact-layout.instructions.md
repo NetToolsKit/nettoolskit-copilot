@@ -44,5 +44,5 @@ priority: high
   - `dotnet publish -o .deployment/...` for deployable outputs
 
 ## Maintenance Guidance
-- Use `scripts/maintenance/clean-build-artifacts.ps1` to clean `.build/`, `.deployment/`, `bin/`, and `obj/`.
+- Use the native `clean-build-artifacts` runtime surface in `nettoolskit-runtime` to clean `.build/`, `.deployment/`, `bin/`, and `obj/`.
 - When creating new scripts or templates that emit generated files, default their outputs into one of these canonical directories unless repository context requires a stronger exception.

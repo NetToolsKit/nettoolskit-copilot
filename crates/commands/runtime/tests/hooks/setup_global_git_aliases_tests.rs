@@ -6,6 +6,14 @@ use std::path::Path;
 use std::process::Command;
 use tempfile::TempDir;
 
+fn runtime_binary_file_name() -> &'static str {
+    if cfg!(windows) {
+        "ntk.exe"
+    } else {
+        "ntk"
+    }
+}
+
 fn write_file(path: &Path, contents: &str) {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).expect("parent directory should be created");
@@ -17,11 +25,13 @@ fn write_file(path: &Path, contents: &str) {
 fn initialize_runtime_alias_repo(repo_root: &Path, target_codex_path: &Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
-    fs::create_dir_all(target_codex_path.join("shared-scripts/maintenance"))
-        .expect("codex shared scripts directory should be created");
+    fs::create_dir_all(target_codex_path.join("bin"))
+        .expect("codex runtime bin directory should be created");
     write_file(
-        &target_codex_path.join("shared-scripts/maintenance/trim-trailing-blank-lines.ps1"),
-        "Write-Output 'trim'",
+        &target_codex_path
+            .join("bin")
+            .join(runtime_binary_file_name()),
+        "binary",
     );
 }
 
@@ -78,8 +88,10 @@ fn test_invoke_setup_global_git_aliases_installs_trim_alias_into_isolated_config
         .configured_aliases
         .get("trim-eof")
         .expect("trim-eof alias should be configured");
-    assert!(alias_value.contains("trim-trailing-blank-lines.ps1"));
-    assert!(alias_value.contains("-GitChangedOnly"));
+    assert!(alias_value.contains(runtime_binary_file_name()));
+    assert!(alias_value.contains("runtime trim-trailing-blank-lines"));
+    assert!(alias_value.contains("--repo-root"));
+    assert!(alias_value.contains("--git-changed-only"));
 
     assert_eq!(
         read_global_alias(&git_config, "trim-eof"),

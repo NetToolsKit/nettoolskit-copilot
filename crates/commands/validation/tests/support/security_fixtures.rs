@@ -14,6 +14,8 @@ pub fn write_file(path: &Path, contents: &str) {
 pub fn initialize_security_repo(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex"))
         .expect("codex directory should be created for repository resolution");
+    fs::create_dir_all(repo_root.join("scripts/validation"))
+        .expect("scripts/validation directory should be created");
     write_repo_file(repo_root, "CODEOWNERS", "* @example\n");
     write_repo_file(repo_root, ".github/AGENTS.md", "# Agents\n");
     write_repo_file(repo_root, ".github/copilot-instructions.md", "# Copilot\n");
@@ -46,8 +48,8 @@ pub fn initialize_security_repo(repo_root: &Path) {
     );
     write_repo_file(
         repo_root,
-        "scripts/validation/validate-agent-hooks.ps1",
-        "Write-Output 'ok'\n",
+        "crates/commands/validation/src/agent_orchestration/agent_hooks.rs",
+        "// fixture\n",
     );
     write_repo_file(repo_root, "README.md", "# Repo\n");
 }

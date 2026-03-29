@@ -507,34 +507,32 @@ fn validate_forbidden_content(
         };
 
         for rule in rules {
-            let Some(mat) = rule.regex.find(&content).ok().flatten() else {
-                continue;
-            };
+            for mat in rule.regex.find_iter(&content).flatten() {
+                let matched_value = mat.as_str();
+                if allowed_patterns
+                    .iter()
+                    .any(|regex| regex.is_match(matched_value).ok().unwrap_or(false))
+                {
+                    continue;
+                }
 
-            let matched_value = mat.as_str();
-            if allowed_patterns
-                .iter()
-                .any(|regex| regex.is_match(matched_value).ok().unwrap_or(false))
-            {
-                continue;
-            }
-
-            let line_number = content[..mat.start()]
-                .chars()
-                .filter(|character| *character == '\n')
-                .count()
-                + 1;
-            let message = format!(
-                "{}:{} matched '{}' -> {}",
-                entry.relative_path,
-                line_number,
-                rule.id,
-                match_preview(matched_value)
-            );
-            match rule.severity {
-                ContentRuleSeverity::Warning => warnings.push(message),
-                ContentRuleSeverity::Failure => {
-                    push_required_finding(warning_only, warnings, failures, message)
+                let line_number = content[..mat.start()]
+                    .chars()
+                    .filter(|character| *character == '\n')
+                    .count()
+                    + 1;
+                let message = format!(
+                    "{}:{} matched '{}' -> {}",
+                    entry.relative_path,
+                    line_number,
+                    rule.id,
+                    match_preview(matched_value)
+                );
+                match rule.severity {
+                    ContentRuleSeverity::Warning => warnings.push(message),
+                    ContentRuleSeverity::Failure => {
+                        push_required_finding(warning_only, warnings, failures, message)
+                    }
                 }
             }
         }
