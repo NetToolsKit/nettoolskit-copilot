@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_repository_root};
 use regex::{Regex, RegexBuilder};
 use serde::Deserialize;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 use crate::{error::ValidateInstructionArchitectureCommandError, ValidationCheckStatus};
 
@@ -703,34 +703,113 @@ fn manifest_layer_by_id<'a>(
 }
 
 fn get_matching_files_for_layer(repo_root: &Path, layer: &InstructionLayer) -> Vec<PathBuf> {
-    let mut matches = WalkDir::new(repo_root)
-        .into_iter()
-        .filter_map(Result::ok)
-        .filter(|entry| entry.file_type().is_file())
-        .map(|entry| entry.into_path())
-        .filter(|path| {
-            let relative_path = to_repo_relative_path(repo_root, path);
-            layer
-                .path_patterns
-                .iter()
-                .any(|pattern| path_pattern_matches(&relative_path, pattern))
-                && !layer
-                    .exclude_patterns
-                    .iter()
-                    .any(|pattern| path_pattern_matches(&relative_path, pattern))
-        })
-        .collect::<Vec<_>>();
+    let mut matches = Vec::new();
+    let include_patterns = compile_wildcard_patterns(&layer.path_patterns);
+    let exclude_patterns = compile_wildcard_patterns(&layer.exclude_patterns);
+
+    for scan_root in resolve_scan_roots(repo_root, &layer.path_patterns) {
+        if !scan_root.exists() {
+            continue;
+        }
+
+        if scan_root.is_file() {
+            if layer_file_matches(repo_root, &include_patterns, &exclude_patterns, &scan_root) {
+                matches.push(scan_root);
+            }
+            continue;
+        }
+
+        matches.extend(
+            WalkDir::new(&scan_root)
+                .into_iter()
+                .filter_entry(should_descend)
+                .filter_map(Result::ok)
+                .filter(|entry| entry.file_type().is_file())
+                .map(|entry| entry.into_path())
+                .filter(|path| {
+                    layer_file_matches(repo_root, &include_patterns, &exclude_patterns, path)
+                }),
+        );
+    }
+
     matches.sort();
     matches.dedup();
     matches
 }
 
-fn path_pattern_matches(relative_path: &str, pattern: &str) -> bool {
+fn resolve_scan_roots(repo_root: &Path, patterns: &[String]) -> Vec<PathBuf> {
+    let mut roots = patterns
+        .iter()
+        .map(|pattern| resolve_scan_root(repo_root, pattern))
+        .collect::<Vec<_>>();
+    roots.sort();
+    roots.dedup();
+    roots
+}
+
+fn resolve_scan_root(repo_root: &Path, pattern: &str) -> PathBuf {
+    let normalized_pattern = pattern.replace('\\', "/");
+    let wildcard_index = normalized_pattern
+        .find(|character| matches!(character, '*' | '?'))
+        .unwrap_or(normalized_pattern.len());
+    let static_prefix = normalized_pattern[..wildcard_index].trim_end_matches('/');
+
+    if static_prefix.is_empty() {
+        return repo_root.to_path_buf();
+    }
+
+    let candidate = repo_root.join(static_prefix);
+    if candidate.is_file() || has_file_extension(static_prefix) {
+        return candidate;
+    }
+
+    candidate
+}
+
+fn has_file_extension(path: &str) -> bool {
+    Path::new(path).extension().is_some()
+}
+
+fn should_descend(entry: &DirEntry) -> bool {
+    if entry.depth() == 0 {
+        return true;
+    }
+
+    let Some(name) = entry.file_name().to_str() else {
+        return true;
+    };
+
+    if entry.file_type().is_dir() {
+        return !matches!(
+            normalize_path_key(name).as_str(),
+            ".git" | ".build" | "target" | "node_modules" | ".temp"
+        );
+    }
+
+    true
+}
+
+fn layer_file_matches(
+    repo_root: &Path,
+    include_patterns: &[Regex],
+    exclude_patterns: &[Regex],
+    path: &Path,
+) -> bool {
+    let relative_path = to_repo_relative_path(repo_root, path);
+    path_matches_any_pattern(&relative_path, include_patterns)
+        && !path_matches_any_pattern(&relative_path, exclude_patterns)
+}
+
+fn path_matches_any_pattern(relative_path: &str, patterns: &[Regex]) -> bool {
     let normalized_path = normalize_path_key(relative_path);
-    let normalized_pattern = normalize_path_key(pattern);
-    wildcard_to_regex(&normalized_pattern)
-        .map(|regex| regex.is_match(&normalized_path))
-        .unwrap_or(false)
+    patterns.iter().any(|pattern| pattern.is_match(&normalized_path))
+}
+
+fn compile_wildcard_patterns(patterns: &[String]) -> Vec<Regex> {
+    patterns
+        .iter()
+        .filter_map(|pattern| wildcard_to_regex(&normalize_path_key(pattern)).ok())
+        .collect()
 }
 
 fn wildcard_to_regex(pattern: &str) -> Result<Regex, regex::Error> {
@@ -810,6 +889,7 @@ fn get_files_from_scan_root(
 
     let mut files = WalkDir::new(target_root)
         .into_iter()
+        .filter_entry(should_descend)
         .filter_map(Result::ok)
         .filter(|entry| entry.file_type().is_file())
         .map(|entry| entry.into_path())

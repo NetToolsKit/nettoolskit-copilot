@@ -2,7 +2,9 @@
 
 use anyhow::{anyhow, Context};
 use nettoolskit_core::editorconfig::resolve_insert_final_newline_policy;
-use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_git_root_or_current_path};
+use nettoolskit_core::path_utils::repository::{
+    resolve_full_path, resolve_git_root_or_current_path,
+};
 use std::env;
 use std::fs;
 use std::path::{Component, Path, PathBuf};

@@ -52,6 +52,7 @@ planning/
 ## Active Specs
 
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
+- [planning/specs/active/spec-ai-usage-history-and-sqlite-local-memory.md](planning/specs/active/spec-ai-usage-history-and-sqlite-local-memory.md)
 
 ---
 

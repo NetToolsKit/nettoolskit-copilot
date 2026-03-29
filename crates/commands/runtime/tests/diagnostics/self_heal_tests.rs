@@ -55,22 +55,13 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
     write_validation_profile_catalog(repo_root);
     write_repository_policy_catalog(repo_root);
     initialize_minimal_provider_surface_projection(repo_root);
-    write_file(
-        &repo_root.join("README.md"),
-        "# Repo\n",
-    );
+    write_file(&repo_root.join("README.md"), "# Repo\n");
     write_file(
         &repo_root.join("scripts/runtime/install.ps1"),
         "Write-Output 'install'\n",
     );
-    write_file(
-        &repo_root.join(".githooks/pre-commit"),
-        "#!/bin/sh\n",
-    );
-    write_file(
-        &repo_root.join(".githooks/post-commit"),
-        "#!/bin/sh\n",
-    );
+    write_file(&repo_root.join(".githooks/pre-commit"), "#!/bin/sh\n");
+    write_file(&repo_root.join(".githooks/post-commit"), "#!/bin/sh\n");
 }
 
 fn runtime_request(repo_root: &std::path::Path) -> RuntimeSelfHealRequest {

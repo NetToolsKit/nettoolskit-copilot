@@ -181,7 +181,11 @@ fn runtime_binary_path(runtime_root: &Path) -> PathBuf {
 }
 
 fn runtime_binary_file_name() -> &'static str {
-    if cfg!(windows) { "ntk.exe" } else { "ntk" }
+    if cfg!(windows) {
+        "ntk.exe"
+    } else {
+        "ntk"
+    }
 }
 
 fn normalize_shell_path(path: &Path) -> String {

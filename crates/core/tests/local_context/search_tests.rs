@@ -20,7 +20,9 @@ fn sample_document() -> LocalContextIndexDocument {
                 kind: LocalContextChunkKind::Markdown,
                 heading: Some("Rust migration plan".to_string()),
                 text: "The runtime rewrite tracks wave one and query contracts.".to_string(),
-                search_text: "rust migration plan the runtime rewrite tracks wave one and query contracts".to_string(),
+                search_text:
+                    "rust migration plan the runtime rewrite tracks wave one and query contracts"
+                        .to_string(),
             },
             LocalContextChunk {
                 id: "scripts/runtime/demo.ps1::0".to_string(),
@@ -28,7 +30,9 @@ fn sample_document() -> LocalContextIndexDocument {
                 kind: LocalContextChunkKind::Text,
                 heading: None,
                 text: "Query the local context index and emit json output.".to_string(),
-                search_text: "scripts/runtime/demo.ps1 query the local context index and emit json output".to_string(),
+                search_text:
+                    "scripts/runtime/demo.ps1 query the local context index and emit json output"
+                        .to_string(),
             },
         ],
     }

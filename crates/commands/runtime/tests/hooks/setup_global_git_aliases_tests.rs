@@ -7,7 +7,11 @@ use std::process::Command;
 use tempfile::TempDir;
 
 fn runtime_binary_file_name() -> &'static str {
-    if cfg!(windows) { "ntk.exe" } else { "ntk" }
+    if cfg!(windows) {
+        "ntk.exe"
+    } else {
+        "ntk"
+    }
 }
 
 fn write_file(path: &Path, contents: &str) {
@@ -24,7 +28,9 @@ fn initialize_runtime_alias_repo(repo_root: &Path, target_codex_path: &Path) {
     fs::create_dir_all(target_codex_path.join("bin"))
         .expect("codex runtime bin directory should be created");
     write_file(
-        &target_codex_path.join("bin").join(runtime_binary_file_name()),
+        &target_codex_path
+            .join("bin")
+            .join(runtime_binary_file_name()),
         "binary",
     );
 }

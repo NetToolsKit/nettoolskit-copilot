@@ -113,7 +113,8 @@ fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence()
 }
 
 #[test]
-fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_when_path_is_omitted() {
+fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_when_path_is_omitted(
+) {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_supply_chain_repo(repo.path());
     write_supply_chain_baseline(
@@ -144,7 +145,8 @@ fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_w
 }
 
 #[test]
-fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_when_path_is_empty() {
+fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_when_path_is_empty()
+{
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_supply_chain_repo(repo.path());
     write_supply_chain_baseline(

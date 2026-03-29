@@ -70,9 +70,7 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
     assert!(result.document.contains("## Suggested Local References"));
     assert!(
         result.document.contains("`README.md`")
-            || result
-                .document
-                .contains("`scripts/runtime/demo.ps1`")
+            || result.document.contains("`scripts/runtime/demo.ps1`")
     );
     assert!(result.document.contains("## Resume Instructions"));
 }

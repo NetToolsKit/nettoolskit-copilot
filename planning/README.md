@@ -53,6 +53,7 @@ planning/
 ## Active Workstreams
 
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
+- [planning/active/plan-ai-usage-history-and-sqlite-local-memory.md](planning/active/plan-ai-usage-history-and-sqlite-local-memory.md)
 
 ---
 
