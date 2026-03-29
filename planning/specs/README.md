@@ -86,6 +86,8 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-16.md](planning/specs/completed/spec-script-retirement-phase-16.md)
 - [planning/specs/completed/spec-script-retirement-phase-17.md](planning/specs/completed/spec-script-retirement-phase-17.md)
 - [planning/specs/completed/spec-script-retirement-phase-18.md](planning/specs/completed/spec-script-retirement-phase-18.md)
+- [planning/specs/completed/spec-script-retirement-phase-19.md](planning/specs/completed/spec-script-retirement-phase-19.md)
+- [planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md](planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
