@@ -1,7 +1,7 @@
 //! Tests for `validate-instructions`.
 
 use nettoolskit_validation::{
-    ValidateInstructionsRequest, ValidationCheckStatus, invoke_validate_instructions,
+    invoke_validate_instructions, ValidateInstructionsRequest, ValidationCheckStatus,
 };
 use std::fs;
 use tempfile::TempDir;
@@ -56,12 +56,10 @@ fn test_invoke_validate_instructions_reports_missing_required_file() {
     .expect("validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|message| message.contains("Required file not found: .github/AGENTS.md"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|message| message.contains("Required file not found: .github/AGENTS.md")));
 }
 
 #[test]
@@ -80,12 +78,10 @@ fn test_invoke_validate_instructions_reports_broken_catalog_path() {
     .expect("validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|message| message.contains("Catalog path not found: missing.file"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|message| message.contains("Catalog path not found: missing.file")));
 }
 
 #[test]
@@ -104,12 +100,10 @@ fn test_invoke_validate_instructions_reports_broken_markdown_link() {
     .expect("validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|message| message.contains("Broken markdown link"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|message| message.contains("Broken markdown link")));
 }
 
 #[test]
@@ -126,12 +120,10 @@ fn test_invoke_validate_instructions_reports_missing_openai_yaml() {
     .expect("validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|message| message.contains("Skill missing agents/openai.yaml"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|message| message.contains("Skill missing agents/openai.yaml")));
 }
 
 #[test]
@@ -186,12 +178,10 @@ fn test_invoke_validate_instructions_reports_broken_snippet_reference() {
     .expect("validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Failed);
-    assert!(
-        result
-            .failures
-            .iter()
-            .any(|message| message.contains("Broken snippet path"))
-    );
+    assert!(result
+        .failures
+        .iter()
+        .any(|message| message.contains("Broken snippet path")));
 }
 
 #[test]
@@ -243,10 +233,8 @@ fn test_invoke_validate_instructions_converts_failures_to_warnings() {
     assert_eq!(result.status, ValidationCheckStatus::Warning);
     assert_eq!(result.exit_code, 0);
     assert!(result.failures.is_empty());
-    assert!(
-        result
-            .warnings
-            .iter()
-            .any(|message| message.contains("Required file not found: .github/AGENTS.md"))
-    );
+    assert!(result
+        .warnings
+        .iter()
+        .any(|message| message.contains("Required file not found: .github/AGENTS.md")));
 }

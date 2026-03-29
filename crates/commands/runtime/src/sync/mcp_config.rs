@@ -67,16 +67,16 @@ pub fn invoke_sync_codex_mcp_config(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| {
-            RuntimeSyncCodexMcpConfigCommandError::ResolveWorkspaceRoot { source }
-        })?;
+        .map_err(|source| RuntimeSyncCodexMcpConfigCommandError::ResolveWorkspaceRoot { source })?;
     let target_config_path =
         resolve_target_config_path(&repo_root, request.target_config_path.as_deref());
 
     if !target_config_path.is_file() {
-        return Err(RuntimeSyncCodexMcpConfigCommandError::TargetConfigNotFound {
-            target_config_path: target_config_path.display().to_string(),
-        });
+        return Err(
+            RuntimeSyncCodexMcpConfigCommandError::TargetConfigNotFound {
+                target_config_path: target_config_path.display().to_string(),
+            },
+        );
     }
 
     let servers = resolve_manifest_servers(
@@ -91,9 +91,8 @@ pub fn invoke_sync_codex_mcp_config(
         }
     })?;
     let base_lines = remove_mcp_sections(&original_document);
-    let rendered_mcp_lines = render_mcp_toml(&servers).map_err(|source| {
-        RuntimeSyncCodexMcpConfigCommandError::RenderConfig { source }
-    })?;
+    let rendered_mcp_lines = render_mcp_toml(&servers)
+        .map_err(|source| RuntimeSyncCodexMcpConfigCommandError::RenderConfig { source })?;
 
     let mut output_lines = base_lines;
     if !output_lines.is_empty() {
@@ -104,9 +103,8 @@ pub fn invoke_sync_codex_mcp_config(
 
     let backup_path = if request.create_backup {
         Some(
-            create_backup(&target_config_path).map_err(|source| {
-                RuntimeSyncCodexMcpConfigCommandError::CreateBackup { source }
-            })?,
+            create_backup(&target_config_path)
+                .map_err(|source| RuntimeSyncCodexMcpConfigCommandError::CreateBackup { source })?,
         )
     } else {
         None

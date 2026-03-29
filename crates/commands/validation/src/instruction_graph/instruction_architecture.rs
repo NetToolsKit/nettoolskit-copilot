@@ -802,7 +802,9 @@ fn layer_file_matches(
 
 fn path_matches_any_pattern(relative_path: &str, patterns: &[Regex]) -> bool {
     let normalized_path = normalize_path_key(relative_path);
-    patterns.iter().any(|pattern| pattern.is_match(&normalized_path))
+    patterns
+        .iter()
+        .any(|pattern| pattern.is_match(&normalized_path))
 }
 
 fn compile_wildcard_patterns(patterns: &[String]) -> Vec<Regex> {

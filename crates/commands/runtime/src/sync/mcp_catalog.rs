@@ -126,8 +126,13 @@ pub(crate) fn read_runtime_catalog(
 
     let catalog_document = fs::read_to_string(&resolved_catalog_path)
         .with_context(|| format!("failed to read '{}'", resolved_catalog_path.display()))?;
-    let catalog: McpRuntimeCatalog = serde_json::from_str(&catalog_document)
-        .with_context(|| format!("invalid MCP runtime catalog '{}'", resolved_catalog_path.display()))?;
+    let catalog: McpRuntimeCatalog =
+        serde_json::from_str(&catalog_document).with_context(|| {
+            format!(
+                "invalid MCP runtime catalog '{}'",
+                resolved_catalog_path.display()
+            )
+        })?;
 
     if catalog.servers.is_empty() {
         return Err(anyhow!(
@@ -161,8 +166,13 @@ pub(crate) fn read_codex_manifest(
 
     let manifest_document = fs::read_to_string(&resolved_manifest_path)
         .with_context(|| format!("failed to read '{}'", resolved_manifest_path.display()))?;
-    let manifest: CodexManifestDocument = serde_json::from_str(&manifest_document)
-        .with_context(|| format!("invalid Codex MCP manifest '{}'", resolved_manifest_path.display()))?;
+    let manifest: CodexManifestDocument =
+        serde_json::from_str(&manifest_document).with_context(|| {
+            format!(
+                "invalid Codex MCP manifest '{}'",
+                resolved_manifest_path.display()
+            )
+        })?;
     if manifest.servers.is_empty() {
         return Err(anyhow!(
             "manifest has no servers: {}",

@@ -3,9 +3,7 @@
 use crate::sync::provider_surface_test_support::{
     initialize_minimal_mcp_runtime_catalog, initialize_minimal_provider_surface_projection,
 };
-use nettoolskit_runtime::{
-    invoke_render_provider_surfaces, RuntimeRenderProviderSurfacesRequest,
-};
+use nettoolskit_runtime::{invoke_render_provider_surfaces, RuntimeRenderProviderSurfacesRequest};
 use std::fs;
 use tempfile::TempDir;
 
@@ -26,7 +24,10 @@ fn test_invoke_render_provider_surfaces_supports_summary_only_for_direct_consume
     assert!(result.summary_only);
     assert_eq!(result.selected_renderer_ids.len(), 9);
     assert!(!repo.path().join(".github/AGENTS.md").exists());
-    assert!(!repo.path().join(".codex/mcp/servers.manifest.json").exists());
+    assert!(!repo
+        .path()
+        .join(".codex/mcp/servers.manifest.json")
+        .exists());
 }
 
 #[test]
@@ -52,7 +53,10 @@ fn test_invoke_render_provider_surfaces_renders_requested_direct_renderer_only()
         .path()
         .join(".github/instructions/super-agent.instructions.md")
         .is_file());
-    assert!(!repo.path().join(".vscode/profiles/profile-base.json").exists());
+    assert!(!repo
+        .path()
+        .join(".vscode/profiles/profile-base.json")
+        .exists());
 }
 
 #[test]
@@ -73,7 +77,10 @@ fn test_invoke_render_provider_surfaces_preserves_bootstrap_gating() {
     assert_eq!(result.consumer_name, "bootstrap");
     assert_eq!(result.rendered_count, 6);
     assert!(repo.path().join(".github/AGENTS.md").is_file());
-    assert!(repo.path().join(".vscode/profiles/profile-base.json").is_file());
+    assert!(repo
+        .path()
+        .join(".vscode/profiles/profile-base.json")
+        .is_file());
     assert!(repo.path().join(".codex/mcp/README.md").is_file());
     assert!(repo.path().join(".codex/orchestration/flow.md").is_file());
     assert!(!repo.path().join(".claude/settings.json").exists());
@@ -94,7 +101,10 @@ fn test_invoke_render_provider_surfaces_supports_mcp_runtime_renderer() {
 
     assert_eq!(result.rendered_count, 1);
     assert!(repo.path().join(".vscode/mcp.tamplate.jsonc").is_file());
-    assert!(repo.path().join(".codex/mcp/servers.manifest.json").is_file());
+    assert!(repo
+        .path()
+        .join(".codex/mcp/servers.manifest.json")
+        .is_file());
     let manifest = fs::read_to_string(repo.path().join(".codex/mcp/servers.manifest.json"))
         .expect("rendered manifest should be readable");
     assert!(manifest.contains("\"playwright\""));

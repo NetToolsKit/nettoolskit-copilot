@@ -87,9 +87,9 @@ pub fn invoke_render_vscode_mcp_template(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| {
-            RuntimeRenderVscodeMcpTemplateCommandError::ResolveWorkspaceRoot { source }
-        })?;
+        .map_err(
+            |source| RuntimeRenderVscodeMcpTemplateCommandError::ResolveWorkspaceRoot { source },
+        )?;
 
     let (catalog_path, catalog) = read_runtime_catalog(&repo_root, request.catalog_path.as_deref())
         .map_err(|source| RuntimeRenderVscodeMcpTemplateCommandError::ReadCatalog { source })?;
@@ -105,9 +105,8 @@ pub fn invoke_render_vscode_mcp_template(
         }
     })?;
 
-    write_document(&output_path, &serialized).map_err(|source| {
-        RuntimeRenderVscodeMcpTemplateCommandError::WriteOutput { source }
-    })?;
+    write_document(&output_path, &serialized)
+        .map_err(|source| RuntimeRenderVscodeMcpTemplateCommandError::WriteOutput { source })?;
 
     Ok(RuntimeRenderVscodeMcpTemplateResult {
         repo_root,
@@ -126,19 +125,16 @@ pub fn invoke_render_vscode_mcp_template(
 /// resolution, catalog loading, rendering, or output writing fails.
 pub fn invoke_render_mcp_runtime_artifacts(
     request: &RuntimeRenderMcpRuntimeArtifactsRequest,
-) -> Result<
-    RuntimeRenderMcpRuntimeArtifactsResult,
-    RuntimeRenderMcpRuntimeArtifactsCommandError,
-> {
+) -> Result<RuntimeRenderMcpRuntimeArtifactsResult, RuntimeRenderMcpRuntimeArtifactsCommandError> {
     let current_dir = env::current_dir().map_err(|source| {
         RuntimeRenderMcpRuntimeArtifactsCommandError::ResolveWorkspaceRoot {
             source: source.into(),
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| {
-            RuntimeRenderMcpRuntimeArtifactsCommandError::ResolveWorkspaceRoot { source }
-        })?;
+        .map_err(
+            |source| RuntimeRenderMcpRuntimeArtifactsCommandError::ResolveWorkspaceRoot { source },
+        )?;
 
     let (catalog_path, catalog) = read_runtime_catalog(&repo_root, request.catalog_path.as_deref())
         .map_err(|source| RuntimeRenderMcpRuntimeArtifactsCommandError::ReadCatalog { source })?;
@@ -169,12 +165,10 @@ pub fn invoke_render_mcp_runtime_artifacts(
         }
     })?;
 
-    write_document(&vscode_output_path, &vscode_serialized).map_err(|source| {
-        RuntimeRenderMcpRuntimeArtifactsCommandError::WriteOutput { source }
-    })?;
-    write_document(&codex_output_path, &codex_serialized).map_err(|source| {
-        RuntimeRenderMcpRuntimeArtifactsCommandError::WriteOutput { source }
-    })?;
+    write_document(&vscode_output_path, &vscode_serialized)
+        .map_err(|source| RuntimeRenderMcpRuntimeArtifactsCommandError::WriteOutput { source })?;
+    write_document(&codex_output_path, &codex_serialized)
+        .map_err(|source| RuntimeRenderMcpRuntimeArtifactsCommandError::WriteOutput { source })?;
 
     Ok(RuntimeRenderMcpRuntimeArtifactsResult {
         repo_root,
@@ -187,7 +181,11 @@ pub fn invoke_render_mcp_runtime_artifacts(
     })
 }
 
-fn resolve_output_path(repo_root: &Path, requested_path: Option<&Path>, default_path: &Path) -> PathBuf {
+fn resolve_output_path(
+    repo_root: &Path,
+    requested_path: Option<&Path>,
+    default_path: &Path,
+) -> PathBuf {
     match requested_path {
         Some(path) if path.is_absolute() => path.to_path_buf(),
         Some(path) => resolve_full_path(repo_root, path),

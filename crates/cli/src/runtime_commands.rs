@@ -4,18 +4,16 @@ use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
     export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
-    invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_doctor,
-    invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
-    invoke_render_vscode_mcp_template,
+    invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_render_mcp_runtime_artifacts,
+    invoke_render_provider_surfaces, invoke_render_vscode_mcp_template, invoke_runtime_doctor,
     invoke_runtime_healthcheck, invoke_runtime_self_heal, invoke_setup_git_hooks,
     invoke_setup_global_git_aliases, invoke_sync_codex_mcp_config,
     invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
     ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
     RuntimeApplyVscodeTemplatesRequest, RuntimeDoctorRequest, RuntimeDoctorStatus,
     RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
-    RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
-    RuntimePreToolUseRequest, RuntimeRenderMcpRuntimeArtifactsRequest,
-    RuntimeRenderProviderSurfacesRequest,
+    RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus, RuntimePreToolUseRequest,
+    RuntimeRenderMcpRuntimeArtifactsRequest, RuntimeRenderProviderSurfacesRequest,
     RuntimeRenderVscodeMcpTemplateRequest, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
     RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
     RuntimeSyncCodexMcpConfigRequest, RuntimeTrimTrailingBlankLinesRequest,
@@ -494,9 +492,7 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         RuntimeCommand::RenderMcpRuntimeArtifacts(arguments) => {
             execute_render_mcp_runtime_artifacts(arguments)
         }
-        RuntimeCommand::SyncCodexMcpConfig(arguments) => {
-            execute_sync_codex_mcp_config(arguments)
-        }
+        RuntimeCommand::SyncCodexMcpConfig(arguments) => execute_sync_codex_mcp_config(arguments),
         RuntimeCommand::TrimTrailingBlankLines(arguments) => {
             execute_trim_trailing_blank_lines(arguments)
         }
@@ -629,7 +625,10 @@ fn execute_runtime_healthcheck(arguments: RuntimeHealthcheckArgs) -> ExitStatus 
         }
     };
 
-    println!("Status: {}", healthcheck_status_label(result.overall_status));
+    println!(
+        "Status: {}",
+        healthcheck_status_label(result.overall_status)
+    );
     println!("Runtime profile: {}", result.runtime_profile_name);
     println!("Validation profile: {}", result.validation_profile);
     println!("Output path: {}", result.output_path.display());
@@ -861,9 +860,7 @@ fn execute_apply_vscode_templates(arguments: RuntimeApplyVscodeTemplatesArgs) ->
     ExitStatus::Success
 }
 
-fn execute_render_vscode_mcp_template(
-    arguments: RuntimeRenderVscodeMcpTemplateArgs,
-) -> ExitStatus {
+fn execute_render_vscode_mcp_template(arguments: RuntimeRenderVscodeMcpTemplateArgs) -> ExitStatus {
     let result = match invoke_render_vscode_mcp_template(&RuntimeRenderVscodeMcpTemplateRequest {
         repo_root: arguments.repo_root,
         catalog_path: arguments.catalog_path,
@@ -902,7 +899,10 @@ fn execute_render_provider_surfaces(arguments: RuntimeRenderProviderSurfacesArgs
     println!("Provider surface render selection");
     println!("  Catalog: {}", result.catalog_path.display());
     println!("  Consumer: {}", result.consumer_name);
-    println!("  Selected renderers: {}", result.selected_renderer_ids.len());
+    println!(
+        "  Selected renderers: {}",
+        result.selected_renderer_ids.len()
+    );
     for renderer_id in &result.selected_renderer_ids {
         println!("  - {renderer_id}");
     }
@@ -922,25 +922,27 @@ fn execute_render_provider_surfaces(arguments: RuntimeRenderProviderSurfacesArgs
 fn execute_render_mcp_runtime_artifacts(
     arguments: RuntimeRenderMcpRuntimeArtifactsArgs,
 ) -> ExitStatus {
-    let result = match invoke_render_mcp_runtime_artifacts(
-        &RuntimeRenderMcpRuntimeArtifactsRequest {
+    let result =
+        match invoke_render_mcp_runtime_artifacts(&RuntimeRenderMcpRuntimeArtifactsRequest {
             repo_root: arguments.repo_root,
             catalog_path: arguments.catalog_path,
             vscode_output_path: arguments.vscode_output_path,
             codex_output_path: arguments.codex_output_path,
-        },
-    ) {
-        Ok(result) => result,
-        Err(error) => {
-            eprintln!("{error}");
-            return ExitStatus::Error;
-        }
-    };
+        }) {
+            Ok(result) => result,
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        };
 
     println!();
     println!("MCP runtime render summary");
     println!("  Catalog: {}", result.catalog_path.display());
-    println!("  VS Code template: {}", result.vscode_output_path.display());
+    println!(
+        "  VS Code template: {}",
+        result.vscode_output_path.display()
+    );
     println!("  Codex manifest: {}", result.codex_output_path.display());
     println!("  VS Code servers: {}", result.vscode_server_count);
     println!("  Codex servers: {}", result.codex_server_count);

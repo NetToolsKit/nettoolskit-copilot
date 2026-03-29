@@ -1,8 +1,6 @@
 //! Tests for enterprise-trends export commands.
 
-use nettoolskit_runtime::{
-    invoke_export_enterprise_trends, RuntimeExportEnterpriseTrendsRequest,
-};
+use nettoolskit_runtime::{invoke_export_enterprise_trends, RuntimeExportEnterpriseTrendsRequest};
 use std::fs;
 use tempfile::TempDir;
 
@@ -48,7 +46,9 @@ fn test_invoke_export_enterprise_trends_writes_json_and_markdown_outputs() {
     assert!(result.summary_path.is_file());
     assert_eq!(result.history_entries, 1);
     assert!(result.dashboard_json.contains("\"validationHistory\""));
-    assert!(result.summary_markdown.contains("# Enterprise Trends Snapshot"));
+    assert!(result
+        .summary_markdown
+        .contains("# Enterprise Trends Snapshot"));
 }
 
 #[test]

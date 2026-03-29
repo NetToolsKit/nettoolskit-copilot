@@ -110,7 +110,10 @@ fn test_invoke_render_mcp_runtime_artifacts_writes_tracked_outputs() {
     assert_eq!(result.vscode_server_count, 2);
     assert_eq!(result.codex_server_count, 1);
     assert!(repo.path().join(".vscode/mcp.tamplate.jsonc").is_file());
-    assert!(repo.path().join(".codex/mcp/servers.manifest.json").is_file());
+    assert!(repo
+        .path()
+        .join(".codex/mcp/servers.manifest.json")
+        .is_file());
 
     let manifest: Value = serde_json::from_str(
         &fs::read_to_string(repo.path().join(".codex/mcp/servers.manifest.json"))
@@ -118,8 +121,5 @@ fn test_invoke_render_mcp_runtime_artifacts_writes_tracked_outputs() {
     )
     .expect("rendered manifest should parse");
     assert_eq!(manifest["servers"].as_array().map(Vec::len), Some(1));
-    assert_eq!(
-        manifest["servers"][0]["name"].as_str(),
-        Some("playwright")
-    );
+    assert_eq!(manifest["servers"][0]["name"].as_str(), Some("playwright"));
 }

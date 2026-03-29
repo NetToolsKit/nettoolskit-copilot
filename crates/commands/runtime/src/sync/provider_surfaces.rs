@@ -67,9 +67,9 @@ pub fn invoke_render_provider_surfaces(
         }
     })?;
     let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
-        .map_err(|source| RuntimeRenderProviderSurfacesCommandError::ResolveWorkspaceRoot {
-            source,
-        })?;
+        .map_err(
+            |source| RuntimeRenderProviderSurfacesCommandError::ResolveWorkspaceRoot { source },
+        )?;
 
     let consumer_name = normalize_consumer_name(request.consumer_name.as_deref());
     let catalog_path =
@@ -237,10 +237,7 @@ fn select_renderer_ids(
             continue;
         }
 
-        let order = consumer
-            .get("order")
-            .and_then(Value::as_u64)
-            .unwrap_or(0);
+        let order = consumer.get("order").and_then(Value::as_u64).unwrap_or(0);
         selected.push((order, renderer_id.to_string()));
     }
 

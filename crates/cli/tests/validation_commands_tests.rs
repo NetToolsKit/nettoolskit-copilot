@@ -1,7 +1,7 @@
 //! Tests for executable validation command surfaces exposed by `ntk`.
 
-use assert_cmd::Command;
 use assert_cmd::cargo::cargo_bin_cmd;
+use assert_cmd::Command;
 use predicates::prelude::*;
 use serde_json::json;
 use std::fs;
@@ -1891,8 +1891,8 @@ fn test_validation_security_baseline_reports_pass_for_valid_assets() {
 }
 
 #[test]
-fn test_validation_security_baseline_reports_warning_for_allowlisted_first_match_and_real_secret_later()
- {
+fn test_validation_security_baseline_reports_warning_for_allowlisted_first_match_and_real_secret_later(
+) {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_security_baseline_repo_root(repo.path());
     write_file(

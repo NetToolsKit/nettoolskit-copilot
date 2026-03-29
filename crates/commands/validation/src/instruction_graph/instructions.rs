@@ -11,8 +11,8 @@ use serde_json::{Map, Value};
 use walkdir::WalkDir;
 
 use crate::{
-    ValidateRoutingCoverageRequest, ValidationCheckStatus, error::ValidateInstructionsCommandError,
-    invoke_validate_routing_coverage,
+    error::ValidateInstructionsCommandError, invoke_validate_routing_coverage,
+    ValidateRoutingCoverageRequest, ValidationCheckStatus,
 };
 
 const REQUIRED_FILES: &[&str] = &[

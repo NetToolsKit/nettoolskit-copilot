@@ -182,7 +182,8 @@ pub fn invoke_validate_release_provenance(
             "release-provenance baseline must define changelogPath.".to_string(),
         );
     }
-    if baseline.validate_all_path.trim().is_empty() && baseline.validate_all_command.trim().is_empty()
+    if baseline.validate_all_path.trim().is_empty()
+        && baseline.validate_all_command.trim().is_empty()
     {
         push_required_finding(
             request.warning_only,

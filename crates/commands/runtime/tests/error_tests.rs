@@ -5,9 +5,8 @@ use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
     RuntimeDoctorCommandError, RuntimeExportEnterpriseTrendsCommandError,
-    RuntimeHealthcheckCommandError,
-    RuntimeRenderProviderSurfacesCommandError,
-    RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
+    RuntimeHealthcheckCommandError, RuntimePreCommitEofHygieneCommandError,
+    RuntimePreToolUseCommandError, RuntimeRenderProviderSurfacesCommandError,
     RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
     RuntimeSetupGlobalGitAliasesCommandError,
 };
@@ -185,7 +184,10 @@ fn test_runtime_render_provider_surfaces_error_display_is_stable() {
         source: anyhow!("unsupported renderer"),
     };
 
-    assert_eq!(error.to_string(), "failed to render runtime provider surfaces");
+    assert_eq!(
+        error.to_string(),
+        "failed to render runtime provider surfaces"
+    );
     assert_eq!(
         error
             .source()

@@ -1,7 +1,9 @@
 //! Enterprise validation and vulnerability trend export.
 
 use anyhow::Context;
-use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_git_root_or_current_path};
+use nettoolskit_core::path_utils::repository::{
+    resolve_full_path, resolve_git_root_or_current_path,
+};
 use serde_json::{json, Value};
 use std::env;
 use std::fs;
@@ -80,11 +82,14 @@ pub fn invoke_export_enterprise_trends(
         }
     })?;
     let repo_root = resolve_git_root_or_current_path(request.repo_root.as_deref(), &current_dir)
-        .map_err(|source| RuntimeExportEnterpriseTrendsCommandError::ResolveWorkspaceRoot {
-            source,
-        })?;
-    let ledger_path =
-        resolve_path(&repo_root, request.ledger_path.as_deref(), ".temp/audit/validation-ledger.jsonl");
+        .map_err(
+            |source| RuntimeExportEnterpriseTrendsCommandError::ResolveWorkspaceRoot { source },
+        )?;
+    let ledger_path = resolve_path(
+        &repo_root,
+        request.ledger_path.as_deref(),
+        ".temp/audit/validation-ledger.jsonl",
+    );
     let validation_report_path = resolve_path(
         &repo_root,
         request.validation_report_path.as_deref(),
@@ -110,8 +115,11 @@ pub fn invoke_export_enterprise_trends(
     initialize_output_parent(&summary_path)?;
 
     let mut warnings = Vec::new();
-    let validation_report =
-        read_json_file_safe(&validation_report_path, "validate-all report", &mut warnings);
+    let validation_report = read_json_file_safe(
+        &validation_report_path,
+        "validate-all report",
+        &mut warnings,
+    );
     let vulnerability_summary = read_json_file_safe(
         &vulnerability_summary_path,
         "vulnerability summary",
@@ -150,7 +158,8 @@ pub fn invoke_export_enterprise_trends(
         let duration_total = history
             .iter()
             .map(|entry| {
-                entry.get("totalDurationMs")
+                entry
+                    .get("totalDurationMs")
                     .and_then(Value::as_u64)
                     .unwrap_or(0) as f64
             })
@@ -229,15 +238,13 @@ fn resolve_path(repo_root: &Path, path: Option<&Path>, default_relative: &str) -
     }
 }
 
-fn initialize_output_parent(
-    path: &Path,
-) -> Result<(), RuntimeExportEnterpriseTrendsCommandError> {
+fn initialize_output_parent(path: &Path) -> Result<(), RuntimeExportEnterpriseTrendsCommandError> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)
             .with_context(|| format!("failed to create '{}'", parent.display()))
-            .map_err(|source| RuntimeExportEnterpriseTrendsCommandError::PrepareArtifacts {
-                source,
-            })?;
+            .map_err(
+                |source| RuntimeExportEnterpriseTrendsCommandError::PrepareArtifacts { source },
+            )?;
     }
 
     Ok(())
@@ -272,7 +279,10 @@ fn read_ledger_records(path: &Path, warnings: &mut Vec<String>) -> Vec<Value> {
     }
 
     let Ok(document) = fs::read_to_string(path) else {
-        warnings.push(format!("Validation ledger not readable: {}", path.display()));
+        warnings.push(format!(
+            "Validation ledger not readable: {}",
+            path.display()
+        ));
         return Vec::new();
     };
 
@@ -500,8 +510,6 @@ fn current_timestamp_string() -> Result<String, RuntimeExportEnterpriseTrendsCom
     let duration = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .context("failed to compute current timestamp")
-        .map_err(|source| RuntimeExportEnterpriseTrendsCommandError::PrepareArtifacts {
-            source,
-        })?;
+        .map_err(|source| RuntimeExportEnterpriseTrendsCommandError::PrepareArtifacts { source })?;
     Ok(duration.as_secs().to_string())
 }

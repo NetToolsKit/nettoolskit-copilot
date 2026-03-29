@@ -439,7 +439,10 @@ fn test_runtime_render_vscode_mcp_template_cli_writes_requested_output_path() {
         .stdout(predicate::str::contains("Generated:"))
         .stdout(predicate::str::contains("Servers rendered: 2"));
 
-    assert!(repo.path().join(".temp/vscode.mcp.generated.json").is_file());
+    assert!(repo
+        .path()
+        .join(".temp/vscode.mcp.generated.json")
+        .is_file());
 }
 
 #[test]
@@ -504,7 +507,10 @@ fn test_runtime_render_mcp_runtime_artifacts_cli_writes_tracked_outputs() {
         .stdout(predicate::str::contains("Codex servers: 2"));
 
     assert!(repo.path().join(".vscode/mcp.tamplate.jsonc").is_file());
-    assert!(repo.path().join(".codex/mcp/servers.manifest.json").is_file());
+    assert!(repo
+        .path()
+        .join(".codex/mcp/servers.manifest.json")
+        .is_file());
 }
 
 #[test]
@@ -545,11 +551,12 @@ fn test_runtime_sync_codex_mcp_config_cli_supports_manifest_dry_run() {
         .assert()
         .success()
         .stdout(predicate::str::contains("[mcp_servers.playwright]"))
-        .stdout(predicate::str::contains("Dry-run only. No file changes were written."));
+        .stdout(predicate::str::contains(
+            "Dry-run only. No file changes were written.",
+        ));
 
     assert_eq!(
-        fs::read_to_string(repo.path().join("config.toml"))
-            .expect("config should be readable"),
+        fs::read_to_string(repo.path().join("config.toml")).expect("config should be readable"),
         "model = \"gpt-5\"\n"
     );
 }
@@ -645,13 +652,17 @@ fn test_runtime_export_enterprise_trends_cli_writes_dashboard_outputs() {
         .args(["runtime", "export-enterprise-trends"])
         .assert()
         .success()
-        .stdout(predicate::str::contains(
-            "Enterprise trends JSON written:",
-        ))
+        .stdout(predicate::str::contains("Enterprise trends JSON written:"))
         .stdout(predicate::str::contains(
             "Enterprise trends summary written:",
         ));
 
-    assert!(repo.path().join(".temp/audit/enterprise-trends.latest.json").is_file());
-    assert!(repo.path().join(".temp/audit/enterprise-trends.latest.md").is_file());
+    assert!(repo
+        .path()
+        .join(".temp/audit/enterprise-trends.latest.json")
+        .is_file());
+    assert!(repo
+        .path()
+        .join(".temp/audit/enterprise-trends.latest.md")
+        .is_file());
 }

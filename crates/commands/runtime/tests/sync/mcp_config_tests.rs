@@ -111,9 +111,16 @@ fn test_invoke_sync_codex_mcp_config_supports_manifest_input_and_dry_run() {
     .expect("dry-run sync should succeed");
 
     assert_eq!(result.servers_applied, 2);
-    assert!(result.backup_path.as_ref().is_some_and(|path| path.is_file()));
-    assert!(result.rendered_document.contains("[mcp_servers.playwright]"));
-    assert!(result.rendered_document.contains("url = \"https://learn.microsoft.com/api/mcp\""));
+    assert!(result
+        .backup_path
+        .as_ref()
+        .is_some_and(|path| path.is_file()));
+    assert!(result
+        .rendered_document
+        .contains("[mcp_servers.playwright]"));
+    assert!(result
+        .rendered_document
+        .contains("url = \"https://learn.microsoft.com/api/mcp\""));
     assert_eq!(
         fs::read_to_string(config_path).expect("config should be readable"),
         "model = \"gpt-5\"\n\n[tools]\nsearch = true\n"
@@ -145,8 +152,8 @@ fn test_invoke_sync_codex_mcp_config_supports_catalog_input() {
     assert!(content.contains("[mcp_servers.playwright]"));
     assert!(!content.contains("vscode-only"));
 
-    let parsed_manifest: Value =
-        serde_json::from_str(r#"{"servers":[{"name":"microsoftdocs"}]}"#).expect("json should parse");
+    let parsed_manifest: Value = serde_json::from_str(r#"{"servers":[{"name":"microsoftdocs"}]}"#)
+        .expect("json should parse");
     assert_eq!(
         parsed_manifest["servers"][0]["name"].as_str(),
         Some("microsoftdocs")
