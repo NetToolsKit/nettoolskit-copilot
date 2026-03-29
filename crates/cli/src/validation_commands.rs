@@ -5,16 +5,19 @@ use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
     invoke_validate_agent_orchestration, invoke_validate_agent_permissions,
     invoke_validate_agent_skill_alignment, invoke_validate_architecture_boundaries,
-    invoke_validate_audit_ledger, invoke_validate_compatibility_lifecycle_policy,
-    invoke_validate_dotnet_standards, invoke_validate_policy, invoke_validate_powershell_standards,
-    invoke_validate_release_governance, invoke_validate_release_provenance,
-    invoke_validate_routing_coverage, invoke_validate_security_baseline,
-    invoke_validate_shared_script_checksums, invoke_validate_supply_chain,
-    invoke_validate_warning_baseline, ValidateAgentOrchestrationRequest,
-    ValidateAgentPermissionsRequest, ValidateAgentSkillAlignmentRequest,
-    ValidateArchitectureBoundariesRequest, ValidateAuditLedgerRequest,
+    invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
+    invoke_validate_compatibility_lifecycle_policy, invoke_validate_dotnet_standards,
+    invoke_validate_instruction_architecture, invoke_validate_policy,
+    invoke_validate_powershell_standards, invoke_validate_release_governance,
+    invoke_validate_release_provenance, invoke_validate_routing_coverage,
+    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    invoke_validate_supply_chain, invoke_validate_warning_baseline,
+    ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
+    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
-    ValidatePolicyRequest, ValidatePowerShellStandardsRequest, ValidateReleaseGovernanceRequest,
+    ValidateInstructionArchitectureRequest, ValidatePolicyRequest,
+    ValidatePowerShellStandardsRequest, ValidateReleaseGovernanceRequest,
     ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
     ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
@@ -35,8 +38,14 @@ pub enum ValidationCommand {
     AgentSkillAlignment(ValidationAgentSkillAlignmentArgs),
     /// Validate the audit ledger hash chain.
     AuditLedger(ValidationAuditLedgerArgs),
+    /// Validate the centralized authoritative documentation policy and source map.
+    #[command(name = "authoritative-source-policy")]
+    AuthoritativeSourcePolicy(ValidationAuthoritativeSourcePolicyArgs),
     /// Validate repository architecture boundary baselines.
     ArchitectureBoundaries(ValidationArchitectureBoundariesArgs),
+    /// Validate instruction architecture ownership and boundary rules.
+    #[command(name = "instruction-architecture")]
+    InstructionArchitecture(ValidationInstructionArchitectureArgs),
     /// Validate COMPATIBILITY lifecycle and EOL policy semantics.
     #[command(name = "compatibility-lifecycle-policy")]
     CompatibilityLifecyclePolicy(ValidationCompatibilityLifecyclePolicyArgs),
@@ -132,6 +141,38 @@ pub struct ValidationAuditLedgerArgs {
     pub warning_only: bool,
 }
 
+/// CLI arguments for `validation authoritative-source-policy`.
+#[derive(Debug, Args)]
+pub struct ValidationAuthoritativeSourcePolicyArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit authoritative source map path.
+    #[clap(long)]
+    pub source_map_path: Option<PathBuf>,
+    /// Optional explicit centralized instruction path.
+    #[clap(long)]
+    pub instruction_path: Option<PathBuf>,
+    /// Optional explicit AGENTS path.
+    #[clap(long)]
+    pub agents_path: Option<PathBuf>,
+    /// Optional explicit global instruction path.
+    #[clap(long)]
+    pub global_instructions_path: Option<PathBuf>,
+    /// Optional explicit routing catalog path.
+    #[clap(long)]
+    pub routing_catalog_path: Option<PathBuf>,
+    /// Optional explicit instruction search root.
+    #[clap(long)]
+    pub instruction_search_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+    /// Emit warning and failure details explicitly.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub detailed_output: bool,
+}
+
 /// CLI arguments for `validation architecture-boundaries`.
 #[derive(Debug, Args)]
 pub struct ValidationArchitectureBoundariesArgs {
@@ -141,6 +182,44 @@ pub struct ValidationArchitectureBoundariesArgs {
     /// Optional explicit baseline path.
     #[clap(long)]
     pub baseline_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `validation instruction-architecture`.
+#[derive(Debug, Args)]
+pub struct ValidationInstructionArchitectureArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit instruction ownership manifest path.
+    #[clap(long)]
+    pub manifest_path: Option<PathBuf>,
+    /// Optional explicit AGENTS path.
+    #[clap(long)]
+    pub agents_path: Option<PathBuf>,
+    /// Optional explicit global instruction path.
+    #[clap(long)]
+    pub global_instructions_path: Option<PathBuf>,
+    /// Optional explicit routing catalog path.
+    #[clap(long)]
+    pub routing_catalog_path: Option<PathBuf>,
+    /// Optional explicit route prompt path.
+    #[clap(long)]
+    pub route_prompt_path: Option<PathBuf>,
+    /// Optional explicit prompt root.
+    #[clap(long)]
+    pub prompt_root: Option<PathBuf>,
+    /// Optional explicit template root.
+    #[clap(long)]
+    pub template_root: Option<PathBuf>,
+    /// Optional explicit skill root.
+    #[clap(long)]
+    pub skill_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+    /// Emit warning and failure details explicitly.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub detailed_output: bool,
 }
 
 /// CLI arguments for `validation compatibility-lifecycle-policy`.
@@ -339,8 +418,14 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
             execute_agent_skill_alignment(arguments)
         }
         ValidationCommand::AuditLedger(arguments) => execute_audit_ledger(arguments),
+        ValidationCommand::AuthoritativeSourcePolicy(arguments) => {
+            execute_authoritative_source_policy(arguments)
+        }
         ValidationCommand::ArchitectureBoundaries(arguments) => {
             execute_architecture_boundaries(arguments)
+        }
+        ValidationCommand::InstructionArchitecture(arguments) => {
+            execute_instruction_architecture(arguments)
         }
         ValidationCommand::CompatibilityLifecyclePolicy(arguments) => {
             execute_compatibility_lifecycle_policy(arguments)
@@ -471,6 +556,57 @@ fn execute_audit_ledger(arguments: ValidationAuditLedgerArgs) -> ExitStatus {
     exit_status_from_code(result.exit_code)
 }
 
+fn execute_authoritative_source_policy(
+    arguments: ValidationAuthoritativeSourcePolicyArgs,
+) -> ExitStatus {
+    let result = match invoke_validate_authoritative_source_policy(
+        &ValidateAuthoritativeSourcePolicyRequest {
+            repo_root: arguments.repo_root,
+            source_map_path: arguments.source_map_path,
+            instruction_path: arguments.instruction_path,
+            agents_path: arguments.agents_path,
+            global_instructions_path: arguments.global_instructions_path,
+            routing_catalog_path: arguments.routing_catalog_path,
+            instruction_search_root: arguments.instruction_search_root,
+            warning_only: arguments.warning_only,
+        },
+    ) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Detailed output: {}", arguments.detailed_output);
+    println!("Source map path: {}", result.source_map_path.display());
+    println!("Instruction path: {}", result.instruction_path.display());
+    println!("AGENTS path: {}", result.agents_path.display());
+    println!(
+        "Global instructions path: {}",
+        result.global_instructions_path.display()
+    );
+    println!(
+        "Routing catalog path: {}",
+        result.routing_catalog_path.display()
+    );
+    println!(
+        "Instruction search root: {}",
+        result.instruction_search_root.display()
+    );
+    println!("Stack rules checked: {}", result.stack_rules_checked);
+    println!(
+        "Instruction files scanned: {}",
+        result.instruction_files_scanned
+    );
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
 fn execute_architecture_boundaries(arguments: ValidationArchitectureBoundariesArgs) -> ExitStatus {
     let result =
         match invoke_validate_architecture_boundaries(&ValidateArchitectureBoundariesRequest {
@@ -488,6 +624,56 @@ fn execute_architecture_boundaries(arguments: ValidationArchitectureBoundariesAr
     println!("Baseline path: {}", result.baseline_path.display());
     println!("Rules checked: {}", result.rules_checked);
     println!("File checks: {}", result.file_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_instruction_architecture(
+    arguments: ValidationInstructionArchitectureArgs,
+) -> ExitStatus {
+    let result =
+        match invoke_validate_instruction_architecture(&ValidateInstructionArchitectureRequest {
+            repo_root: arguments.repo_root,
+            manifest_path: arguments.manifest_path,
+            agents_path: arguments.agents_path,
+            global_instructions_path: arguments.global_instructions_path,
+            routing_catalog_path: arguments.routing_catalog_path,
+            route_prompt_path: arguments.route_prompt_path,
+            prompt_root: arguments.prompt_root,
+            template_root: arguments.template_root,
+            skill_root: arguments.skill_root,
+            warning_only: arguments.warning_only,
+        }) {
+            Ok(result) => result,
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Detailed output: {}", arguments.detailed_output);
+    println!("Manifest path: {}", result.manifest_path.display());
+    println!("AGENTS path: {}", result.agents_path.display());
+    println!(
+        "Global instructions path: {}",
+        result.global_instructions_path.display()
+    );
+    println!(
+        "Routing catalog path: {}",
+        result.routing_catalog_path.display()
+    );
+    println!("Route prompt path: {}", result.route_prompt_path.display());
+    println!("Prompt root: {}", result.prompt_root.display());
+    println!("Template root: {}", result.template_root.display());
+    println!("Skill root: {}", result.skill_root.display());
+    println!("Layers checked: {}", result.layers_checked);
+    println!("Prompt files scanned: {}", result.prompt_files_scanned);
+    println!("Template files scanned: {}", result.template_files_scanned);
+    println!("Skill files scanned: {}", result.skill_files_scanned);
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 

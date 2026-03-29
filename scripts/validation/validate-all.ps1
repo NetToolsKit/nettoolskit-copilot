@@ -851,12 +851,20 @@ $baseCheckDefinitions['validate-routing-coverage'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-authoritative-source-policy'] = [pscustomobject]@{
     name = 'validate-authoritative-source-policy'
-    script = 'scripts/validation/validate-authoritative-source-policy.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-authoritative-source-policy'
+    command = @('validation', 'authoritative-source-policy')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-instruction-architecture'] = [pscustomobject]@{
     name = 'validate-instruction-architecture'
-    script = 'scripts/validation/validate-instruction-architecture.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-instruction-architecture'
+    command = @('validation', 'instruction-architecture')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-readme-standards'] = [pscustomobject]@{

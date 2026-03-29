@@ -418,6 +418,301 @@ public class [ClassName]
     );
 }
 
+fn initialize_authoritative_source_policy_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/governance/authoritative-source-map.json"),
+        r#"{
+  "version": 1,
+  "defaultPolicy": {
+    "repositoryContextFirst": true
+  },
+  "stackRules": [
+    { "id": "dotnet", "displayName": ".NET", "keywords": ["dotnet"], "officialDomains": ["learn.microsoft.com"] },
+    { "id": "github-copilot", "displayName": "GitHub Copilot", "keywords": ["copilot"], "officialDomains": ["docs.github.com"] },
+    { "id": "vscode", "displayName": "VS Code", "keywords": ["vscode"], "officialDomains": ["code.visualstudio.com"] },
+    { "id": "rust", "displayName": "Rust", "keywords": ["rust"], "officialDomains": ["doc.rust-lang.org"] },
+    { "id": "vue", "displayName": "Vue", "keywords": ["vue"], "officialDomains": ["vuejs.org"] },
+    { "id": "quasar", "displayName": "Quasar", "keywords": ["quasar"], "officialDomains": ["quasar.dev"] },
+    { "id": "docker", "displayName": "Docker", "keywords": ["docker"], "officialDomains": ["docs.docker.com"] },
+    { "id": "kubernetes", "displayName": "Kubernetes", "keywords": ["kubernetes"], "officialDomains": ["kubernetes.io"] },
+    { "id": "postgresql", "displayName": "PostgreSQL", "keywords": ["postgresql"], "officialDomains": ["postgresql.org"] },
+    { "id": "openai", "displayName": "OpenAI", "keywords": ["openai"], "officialDomains": ["platform.openai.com"] }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/instructions/authoritative-sources.instructions.md"),
+        r#"# Authoritative Sources
+
+Use `.github/governance/authoritative-source-map.json`.
+Repository context first.
+Use official documentation.
+Use community sources only as fallback.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/AGENTS.md"),
+        r#"# AGENTS
+
+Use `instructions/authoritative-sources.instructions.md`.
+Use `.github/governance/authoritative-source-map.json`.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/copilot-instructions.md"),
+        r#"# Global Instructions
+
+Use `instructions/authoritative-sources.instructions.md`.
+Use `.github/governance/authoritative-source-map.json`.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/instruction-routing.catalog.yml"),
+        "always:\n  - path: instructions/authoritative-sources.instructions.md\n",
+    );
+}
+
+fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/governance/instruction-ownership.manifest.json"),
+        r#"{
+  "version": 1,
+  "intentionalGlobalExceptions": [
+    {
+      "concern": "Global context must remain visible.",
+      "ownedBy": "global-core"
+    }
+  ],
+  "architectureConstraints": {
+    "globalCoreMaxChars": {
+      "AGENTS.md": 14000,
+      "copilot-instructions.md": 14000
+    },
+    "routing": {
+      "maxAlwaysFiles": 10,
+      "maxSelectedFiles": 5,
+      "requiredAlwaysPaths": [
+        "AGENTS.md",
+        "copilot-instructions.md",
+        "instructions/super-agent.instructions.md",
+        "instructions/repository-operating-model.instructions.md",
+        "instructions/artifact-layout.instructions.md",
+        "instructions/subagent-planning-workflow.instructions.md",
+        "instructions/workflow-optimization.instructions.md",
+        "instructions/authoritative-sources.instructions.md",
+        "instructions/powershell-execution.instructions.md",
+        "instructions/feedback-changelog.instructions.md"
+      ]
+    }
+  },
+  "layers": [
+    {
+      "id": "global-core",
+      "pathPatterns": [
+        ".github/AGENTS.md",
+        ".github/copilot-instructions.md"
+      ]
+    },
+    {
+      "id": "repository-operating-model",
+      "pathPatterns": [
+        ".github/instructions/repository-operating-model.instructions.md"
+      ]
+    },
+    {
+      "id": "cross-cutting-policies",
+      "pathPatterns": [
+        ".github/instructions/super-agent.instructions.md",
+        ".github/instructions/authoritative-sources.instructions.md",
+        ".github/governance/*",
+        ".github/policies/*"
+      ]
+    },
+    {
+      "id": "domain-instructions",
+      "pathPatterns": [
+        ".github/instructions/*.instructions.md"
+      ],
+      "excludePatterns": [
+        ".github/instructions/authoritative-sources.instructions.md",
+        ".github/instructions/super-agent.instructions.md",
+        ".github/instructions/repository-operating-model.instructions.md"
+      ]
+    },
+    {
+      "id": "prompts",
+      "pathPatterns": [
+        ".github/prompts/*"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here",
+        "always applied"
+      ]
+    },
+    {
+      "id": "templates",
+      "pathPatterns": [
+        ".github/templates/*",
+        ".vscode/*.tamplate.jsonc"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here",
+        "always applied"
+      ]
+    },
+    {
+      "id": "codex-skills",
+      "pathPatterns": [
+        ".codex/skills/*/SKILL.md"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here"
+      ]
+    },
+    {
+      "id": "orchestration",
+      "pathPatterns": [
+        "scripts/orchestration/*"
+      ]
+    },
+    {
+      "id": "runtime-projection",
+      "pathPatterns": [
+        "scripts/runtime/*"
+      ]
+    }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/AGENTS.md"),
+        r#"# AGENTS
+
+Use `instructions/repository-operating-model.instructions.md`.
+Use `instructions/authoritative-sources.instructions.md`.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/copilot-instructions.md"),
+        r#"# Global Instructions
+
+Use `instructions/repository-operating-model.instructions.md`.
+Use `instructions/authoritative-sources.instructions.md`.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/instruction-routing.catalog.yml"),
+        r#"always:
+  - path: AGENTS.md
+  - path: copilot-instructions.md
+  - path: instructions/super-agent.instructions.md
+  - path: instructions/repository-operating-model.instructions.md
+  - path: instructions/artifact-layout.instructions.md
+  - path: instructions/subagent-planning-workflow.instructions.md
+  - path: instructions/workflow-optimization.instructions.md
+  - path: instructions/authoritative-sources.instructions.md
+  - path: instructions/powershell-execution.instructions.md
+  - path: instructions/feedback-changelog.instructions.md
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/prompts/route-instructions.prompt.md"),
+        r#"---
+description: Route a request
+mode: ask
+tools: ['readFile']
+---
+
+# Route Instructions
+
+Hard cap: at most 5 selected instruction files (excluding mandatory).
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/prompts/example.prompt.md"),
+        r#"---
+description: Example prompt
+mode: ask
+tools: ['readFile']
+---
+
+# Example Prompt
+
+Use the routing catalog.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/templates/example.md"),
+        "# Example Template\n\nUse this as a reusable artifact.\n",
+    );
+    write_file(
+        &repo_root.join(".github/policies/example.policy.md"),
+        "# Example Policy\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/repository-operating-model.instructions.md"),
+        "# Repository Operating Model\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/authoritative-sources.instructions.md"),
+        "# Authoritative Sources\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/super-agent.instructions.md"),
+        "# Super Agent\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/artifact-layout.instructions.md"),
+        "# Artifact Layout\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/subagent-planning-workflow.instructions.md"),
+        "# Subagent Planning Workflow\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/workflow-optimization.instructions.md"),
+        "# Workflow Optimization\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/powershell-execution.instructions.md"),
+        "# PowerShell Execution\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/feedback-changelog.instructions.md"),
+        "# Feedback Changelog\n",
+    );
+    write_file(
+        &repo_root.join(".github/instructions/example-domain.instructions.md"),
+        "# Domain Instruction\n",
+    );
+    write_file(
+        &repo_root.join(".codex/skills/sample/SKILL.md"),
+        r#"---
+name: sample-skill
+description: sample skill
+---
+
+# Sample Skill
+
+Load `repository-operating-model.instructions.md`.
+"#,
+    );
+    write_file(
+        &repo_root.join("scripts/orchestration/example.ps1"),
+        "Write-Host 'orchestration'\n",
+    );
+    write_file(
+        &repo_root.join("scripts/runtime/bootstrap.ps1"),
+        "Write-Host 'runtime'\n",
+    );
+}
+
+#[allow(dead_code)]
 fn initialize_git_repository(repo_root: &Path) -> String {
     run_git(repo_root, &["init", "-b", "main"]);
     run_git(
@@ -841,6 +1136,109 @@ fn test_validation_architecture_boundaries_reports_pass_for_matching_baseline() 
         .success()
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Rules checked: 1"));
+}
+
+#[test]
+fn test_validation_authoritative_source_policy_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_authoritative_source_policy_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "authoritative-source-policy",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Stack rules checked: 10"))
+        .stdout(predicate::str::contains("Instruction files scanned: 0"));
+}
+
+#[test]
+fn test_validation_authoritative_source_policy_reports_failure_for_invalid_agents_reference() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_authoritative_source_policy_repo_root(repo.path());
+    write_file(
+        &repo.path().join(".github/AGENTS.md"),
+        "# Temporary AGENTS\n\nThis file intentionally omits the required reference.\n",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "authoritative-source-policy",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("Status: failed"))
+        .stdout(predicate::str::contains(
+            "AGENTS.md is missing required pattern",
+        ));
+}
+
+#[test]
+fn test_validation_instruction_architecture_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_instruction_architecture_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "instruction-architecture",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Layers checked: 9"))
+        .stdout(predicate::str::contains("Prompt files scanned: 2"))
+        .stdout(predicate::str::contains("Template files scanned: 1"))
+        .stdout(predicate::str::contains("Skill files scanned: 1"));
+}
+
+#[test]
+fn test_validation_instruction_architecture_reports_failure_for_missing_route_hard_cap() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_instruction_architecture_repo_root(repo.path());
+    write_file(
+        &repo
+            .path()
+            .join(".github/prompts/route-instructions.prompt.md"),
+        r#"---
+description: Temporary route prompt
+mode: ask
+tools: ['readFile']
+---
+
+# Route Instructions
+
+Use the routing catalog and return JSON.
+"#,
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "instruction-architecture",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("Status: failed"))
+        .stdout(predicate::str::contains(
+            "Route prompt is missing deterministic hard-cap text",
+        ));
 }
 
 #[test]
