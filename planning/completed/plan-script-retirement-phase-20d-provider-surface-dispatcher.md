@@ -4,11 +4,11 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 11:35
+- LastUpdated: 2026-03-29 12:20
 - Objective: retire the local `scripts/runtime/render-provider-surfaces.ps1` dispatcher after the native `ntk runtime render-provider-surfaces` boundary, runtime parity harness, docs, and continuity evidence all converge on the Rust-owned contract.
 - Normalized Request: continue the aggressive script-retirement flow, keep planning updated, and commit each stable phase with detailed messages.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
-- Spec Path: `planning/specs/active/spec-script-retirement-phase-20d-provider-surface-dispatcher.md`
+- Spec Path: `planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md`
 - Inputs:
   - `planning/active/plan-repository-consolidation-continuity.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
@@ -41,7 +41,7 @@ This phase is complete only if:
 
 ### Task 1: Freeze The Native Dispatcher Boundary
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Expose `ntk runtime render-provider-surfaces` as the managed dispatcher for provider-surface rendering.
 - Preserve the PowerShell wrapper semantics for:
@@ -54,7 +54,7 @@ Status: `[ ]` Pending
 
 ### Task 2: Repoint Live Consumers To The Native Boundary
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Repoint `scripts/runtime/bootstrap.ps1` to the managed runtime binary.
 - Move the retained runtime parity harness from script-parameter inspection to native CLI coverage for the dispatcher.
@@ -64,13 +64,13 @@ Status: `[ ]` Pending
 
 ### Task 3: Delete The Local Wrapper
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Delete `scripts/runtime/render-provider-surfaces.ps1` after the same-slice consumer repoints land.
 
 ### Task 4: Rebaseline Continuity And Archive
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Update `planning/completed/script-retirement-safety-matrix.md`.
 - Update `planning/completed/rust-script-parity-ledger.md`.
@@ -79,11 +79,13 @@ Status: `[ ]` Pending
 
 ## Validation Checklist
 
-- [ ] `cargo test -p nettoolskit-runtime --test test_suite sync::provider_surfaces_tests --quiet`
-- [ ] `cargo test -p nettoolskit-cli --test runtime_commands_tests --quiet`
-- [ ] `pwsh -NoProfile -File .\scripts\tests\runtime\runtime-scripts.tests.ps1`
-- [ ] `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
-- [ ] `git diff --check`
+- [x] `cargo test -p nettoolskit-runtime --test test_suite sync::provider_surfaces_tests --quiet`
+- [x] `cargo test -p nettoolskit-runtime --test test_suite error_tests --quiet`
+- [x] `cargo test -p nettoolskit-cli --test runtime_commands_tests --quiet`
+- [x] `cargo test -p nettoolskit-orchestrator --test test_suite pipeline_parity --quiet`
+- [x] `pwsh -NoProfile -File .\scripts\tests\runtime\runtime-scripts.tests.ps1`
+- [x] `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
+- [x] `git diff --check`
 
 ## Risks And Fallbacks
 
@@ -94,3 +96,10 @@ Status: `[ ]` Pending
 
 - Keep the native command-surface commit and the wrapper-retirement/planning closeout commits separate.
 - Archive the phase only after the wrapper is deleted and the continuity baseline reflects the new 98-script live estate.
+
+## Executed Result
+
+- `ntk runtime render-provider-surfaces` is now the canonical operator-facing dispatcher for provider-surface rendering.
+- `scripts/runtime/bootstrap.ps1`, runtime parity coverage, authored docs, and orchestrator validation baselines now point to the native command instead of the deleted local wrapper.
+- `scripts/runtime/render-provider-surfaces.ps1` was removed in the same slice.
+- The live local `scripts/**/*.ps1` estate dropped from `99` to `98`, and the continuity backlog now reflects `65` `retain until consumer migration completes` leaves.

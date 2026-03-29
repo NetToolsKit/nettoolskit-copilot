@@ -4,10 +4,10 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 11:35
+- LastUpdated: 2026-03-29 12:20
 - Objective: define the cutover conditions for deleting `scripts/runtime/render-provider-surfaces.ps1` once the native `ntk runtime render-provider-surfaces` contract, runtime parity evidence, and continuity planning all converge on Rust ownership.
-- Planning Readiness: ready-for-implementation
-- Related Plan: `planning/active/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`
+- Planning Readiness: executed-and-completed
+- Related Plan: `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`
 - Source Inputs:
   - `planning/active/plan-repository-consolidation-continuity.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
@@ -54,3 +54,10 @@ Treat `render-provider-surfaces` as a tactical Phase 20d runtime leaf cutover. T
 - Runtime parity coverage and reference docs stop requiring `scripts/runtime/render-provider-surfaces.ps1`.
 - The local wrapper is deleted.
 - The safety matrix, parity ledger, and continuity plan/spec reflect a 98-script live estate and 65 `retain until consumer migration completes`.
+
+## Executed Result
+
+- The native dispatcher landed in `crates/commands/runtime` and `crates/cli` with deterministic runtime and CLI coverage.
+- Same-slice consumer repoints were completed in bootstrap, runtime parity tests, authored docs, and orchestrator parity support.
+- `scripts/runtime/render-provider-surfaces.ps1` was deleted after the native dispatcher became canonical.
+- The continuity plan/spec, safety matrix, and parity ledger now inherit the `99 -> 98` live-estate rebaseline and the `66 -> 65` consumer-migration backlog change.

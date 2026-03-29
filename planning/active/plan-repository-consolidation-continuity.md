@@ -4,12 +4,12 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 09:24
-- Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-20c self-heal domain consumer migration that will retire the remaining 66 `retain until` scripts.
+- LastUpdated: 2026-03-29 12:20
+- Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-20d provider-surface dispatcher consumer migration that will retire the remaining 65 `retain until` scripts.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
 - Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
-- Dependency: `planning/completed/plan-script-retirement-phase-18.md`, `planning/completed/plan-script-retirement-phase-19.md`, and `planning/completed/plan-script-retirement-phase-20c-self-heal.md` are now complete; Workstream W5 now continues from the closed 99-script baseline.
+- Dependency: `planning/completed/plan-script-retirement-phase-18.md`, `planning/completed/plan-script-retirement-phase-19.md`, `planning/completed/plan-script-retirement-phase-20c-self-heal.md`, and `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md` are now complete; Workstream W5 now continues from the closed 98-script baseline.
 - Inputs:
   - `planning/completed/plan-script-retirement-phase-17.md`
   - `planning/completed/plan-script-retirement-phase-18.md`
@@ -62,14 +62,14 @@ Together they targeted the runtime diagnostics and MCP wrapper slices and reduce
 the live script estate from 104 to 100.
 
 **This plan's only dependency on W1:**
-- W5 now starts from the archived Phase 20c self-heal result with the safety matrix reflecting 99 scripts.
+- W5 now starts from the archived Phase 20d provider-surface dispatcher result with the safety matrix reflecting 98 scripts.
 
 **Checkpoint: Phases 17 and 18 Complete**
 - `planning/completed/plan-script-retirement-phase-17.md` archived with executed result
 - `planning/completed/plan-script-retirement-phase-18.md` archived with executed result
 - `planning/completed/plan-script-retirement-phase-19.md` archived with audit-only blocker evidence
 - `planning/completed/plan-script-retirement-phase-20c-self-heal.md` archived with executed result
-- `planning/completed/script-retirement-safety-matrix.md` reflects live estate of 99
+- `planning/completed/script-retirement-safety-matrix.md` reflects live estate of 98
 - `planning/completed/rust-script-parity-ledger.md` records `doctor`, `healthcheck`, `sync-codex-mcp-config`, `render-vscode-mcp-template`, and `self-heal` as `retired locally`
 
 ---
@@ -430,14 +430,14 @@ Status: `[ ]` Pending
 
 **Pre-condition:** satisfied. `plan-script-retirement-phase-17.md`, `plan-script-retirement-phase-18.md`, `plan-script-retirement-phase-19.md`, and `plan-script-retirement-phase-20c-self-heal.md` are now in `planning/completed/`, so future consumer sweeps can start from a stable script estate.
 
-**Script estate after Phase 20c self-heal:** 99 total (33 retained by policy + 66 `retain until consumer migration`).
+**Script estate after Phase 20d provider-surface dispatcher:** 98 total (33 retained by policy + 65 `retain until consumer migration`).
 
-The 66 `retain until` scripts are distributed:
+The 65 `retain until` scripts are distributed:
 
 | Domain | Count | Safety Matrix Status |
 |---|---:|---|
 | `scripts/common/*.ps1` | 15 | `retain until consumer migration completes` |
-| `scripts/runtime/*.ps1` excl. hooks and Phases 17–18 plus 20c retirees | 33 | `retain until consumer migration completes` |
+| `scripts/runtime/*.ps1` excl. hooks and retired Phases 17, 18, 20c, and 20d leaves | 32 | `retain until consumer migration completes` |
 | `scripts/security/*.ps1` | 6 | `retain until consumer migration completes` |
 | `scripts/governance/*.ps1` | 2 | `retain until consumer migration completes` |
 | `scripts/orchestration/**/*.ps1` | 10 | `retain until consumer migration completes` |
@@ -464,18 +464,18 @@ Status: `[x]` Completed
 - Executed the common-domain consumer sweep and confirmed no zero-consumer deletions were safe in this phase.
 - Representative blockers recorded in the archived phase artifacts:
   - `common-bootstrap.ps1` is still the high-fanout shared bootstrap loader across runtime, security, orchestration, and tests.
-  - `provider-surface-catalog.ps1` remains blocked by `render-provider-surfaces.ps1`.
+  - `provider-surface-catalog.ps1` remains blocked by the path-backed provider-surface renderer leaves that are still catalog-driven after the Phase 20d dispatcher retirement, especially `render-mcp-runtime-artifacts.ps1`.
   - `mcp-runtime-catalog.ps1` remains blocked by `sync-vscode-global-mcp.ps1` and `render-mcp-runtime-artifacts.ps1`.
   - `runtime-execution-context.ps1`, `runtime-install-profiles.ps1`, and `runtime-operation-support.ps1` remain blocked by `bootstrap.ps1`, `install.ps1`, and retained runtime parity flows.
 - Updated the continuity workstream so the runtime-domain tactical leaf cutovers can proceed without falsely implying the common domain is deletion-ready.
 
-#### Task W5.3: Create Phase 20 Plan — `scripts/runtime/*.ps1` Excluding Hooks (33)
+#### Task W5.3: Create Phase 20 Plan — `scripts/runtime/*.ps1` Excluding Hooks (32)
 
-Status: `[ ]` Pending (blocked on Phase 19 complete)
+Status: `[ ]` Pending
 
-- This is the largest single domain: 33 scripts after Phases 17, 18, and the tactical Phase 20c self-heal slice remove `doctor.ps1`, `healthcheck.ps1`, `sync-codex-mcp-config.ps1`, `render-vscode-mcp-template.ps1`, and `self-heal.ps1`.
+- This is the largest single domain: 32 scripts after Phases 17, 18, the tactical Phase 20c self-heal slice, and the tactical Phase 20d provider-surface dispatcher slice remove `doctor.ps1`, `healthcheck.ps1`, `sync-codex-mcp-config.ps1`, `render-vscode-mcp-template.ps1`, `self-heal.ps1`, and `render-provider-surfaces.ps1`.
 - Create `planning/specs/active/spec-script-retirement-phase-20.md` with:
-    - Problem: 33 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
+    - Problem: 32 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
   - Group the remaining scripts into sub-slices by functional surface to enable incremental deletion:
     - Sub-slice A: sync/render scripts (`render-*.ps1`, `sync-*.ps1`, `setup-*.ps1`) — likely consumed only by CI/docs
     - Sub-slice B: invoke/pipeline scripts (`invoke-*.ps1`, `run-*.ps1`, `replay-*.ps1`, `resume-*.ps1`, `evaluate-*.ps1`) — likely consumed by orchestration and CI

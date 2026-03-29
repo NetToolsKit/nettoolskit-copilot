@@ -52,7 +52,6 @@ planning/
 ## Active Specs
 
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
-- [planning/specs/active/spec-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/specs/active/spec-script-retirement-phase-20d-provider-surface-dispatcher.md)
 
 ---
 
@@ -89,6 +88,7 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-18.md](planning/specs/completed/spec-script-retirement-phase-18.md)
 - [planning/specs/completed/spec-script-retirement-phase-19.md](planning/specs/completed/spec-script-retirement-phase-19.md)
 - [planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md](planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md)
+- [planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
