@@ -4,11 +4,11 @@ Generated: 2026-03-28 21:41
 
 ## Status
 
-- LastUpdated: 2026-03-28 21:41
+- LastUpdated: 2026-03-28 21:55
 - Objective: retire the remaining low-fanout validation wrappers by exposing native `ntk validation` executable boundaries for `agent-orchestration`, `release-governance`, and `release-provenance`, then delete the local PowerShell leaves after the documentation and orchestration consumers stop requiring their paths.
 - Normalized Request: continue deleting local PowerShell scripts in favor of Rust-native behavior, keep planning current, and commit each stable retirement phase.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
-- Spec Path: `planning/specs/active/spec-script-retirement-phase-9.md`
+- Spec Path: `planning/specs/completed/spec-script-retirement-phase-9.md`
 - Inputs:
   - `planning/completed/plan-script-retirement-phase-8.md`
   - `planning/specs/completed/spec-script-retirement-phase-8.md`
@@ -19,9 +19,9 @@ Generated: 2026-03-28 21:41
   - `definitions/providers/claude/skills/privacy-compliance-engineer/SKILL.md`
   - `definitions/providers/claude/skills/sec-security-vulnerability-engineer/SKILL.md`
 - Current Slice Snapshot:
-  - `scripts/**/*.ps1` inventory is `124`
-  - native Rust validation owners already exist for the three target checks
-  - local wrapper paths still appear in planning documentation and provider-authored examples
+  - `scripts/**/*.ps1` inventory is `121`
+  - native Rust validation owners and executable CLI boundaries now exist for the three target checks
+  - local wrapper paths have been removed from validation/orchestration consumers, governance evidence, and projected provider surfaces
 
 ## Scope Summary
 
@@ -40,7 +40,7 @@ This phase is complete only if:
 
 ### Task 1: Freeze The Phase-9 Native Validation Contract
 
-Status: `[2026-03-28 21:41]`
+Status: `[x]` Completed
 
 - Register the phase-9 design intent in the spec and lock the cutover acceptance criteria.
 - Confirm the native Rust owners and the exact CLI contract for each of:
@@ -58,7 +58,7 @@ Status: `[2026-03-28 21:41]`
 
 ### Task 2: Repoint Docs And Provider Examples To Native Commands
 
-Status: `[2026-03-28 21:41]`
+Status: `[x]` Completed
 
 - Update provider-authored orchestration and security docs to reference `ntk validation` instead of retired wrapper paths.
 - Keep the docs aligned with the native validation contract while leaving execution details for the implementation phase.
@@ -75,7 +75,7 @@ Status: `[2026-03-28 21:41]`
 
 ### Task 3: Retire The Remaining Validation Wrappers
 
-Status: `[2026-03-28 21:41]`
+Status: `[x]` Completed
 
 - Repoint the live consumers that still hardcode wrapper paths:
   - `scripts/validation/validate-all.ps1`
@@ -107,7 +107,31 @@ Status: `[2026-03-28 21:41]`
 
 ### Task 4: Rebaseline Planning Evidence And Archive The Phase
 
-Status: `[2026-03-28 21:41]`
+Status: `[x]` Completed
+
+## Execution Outcome
+
+- Added native `ntk validation` executable boundaries for:
+  - `agent-orchestration`
+  - `release-governance`
+  - `release-provenance`
+- Repointed:
+  - `scripts/validation/validate-all.ps1`
+  - `scripts/orchestration/stages/validate-stage.ps1`
+  - `scripts/runtime/run-agent-pipeline.ps1`
+- Replaced wrapper-path evidence in governance and policy baselines with the real Rust owners:
+  - `crates/commands/validation/src/agent_orchestration/orchestration_integrity.rs`
+  - `crates/commands/validation/src/release/release_governance.rs`
+  - `crates/commands/validation/src/release/release_provenance.rs`
+- Re-rendered the affected projected provider surfaces under `.codex/` and `.claude/`.
+- Deleted:
+  - `scripts/validation/validate-agent-orchestration.ps1`
+  - `scripts/validation/validate-release-governance.ps1`
+  - `scripts/validation/validate-release-provenance.ps1`
+- Confirmed the local `scripts/**/*.ps1` estate fell from `124` to `121`.
+- Focused `validate-all` proof for this phase produced:
+  - enforcing: executed the native checks correctly and failed only on pre-existing release baseline debt (`CODEOWNERS`, issue templates, workflow evidence, changelog ordering)
+  - warning-only: passed with all 3 checks routed through the native executable contract
 
 - Update the completed matrix and parity ledger with the executed phase-9 result.
 - Archive the phase-9 plan and spec only after the implementation, validation, and closeout evidence is complete.
@@ -158,7 +182,7 @@ Status: `[2026-03-28 21:41]`
 - Update `planning/README.md` and `planning/specs/README.md` when the active phase is created and again when it is archived.
 - Use an English commit message aligned to the retirement slice, for example: `refactor(validation): retire agent orchestration and release governance wrappers`.
 - Do not add a changelog entry for this planning artifact alone; add release notes only when the implementation phase lands user-visible behavior.
-- Archive this plan and its spec only after the wrappers are actually removed and the replacement references have been validated.
+- This plan is now archived because the wrappers were removed and the replacement references were validated.
 
 ## Worktree Guidance
 

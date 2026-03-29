@@ -51,7 +51,7 @@ planning/
 
 ## Active Specs
 
-- [planning/specs/active/spec-script-retirement-phase-9.md](planning/specs/active/spec-script-retirement-phase-9.md)
+- No active specs.
 
 ---
 
@@ -76,10 +76,10 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-6.md](planning/specs/completed/spec-script-retirement-phase-6.md)
 - [planning/specs/completed/spec-script-retirement-phase-7.md](planning/specs/completed/spec-script-retirement-phase-7.md)
 - [planning/specs/completed/spec-script-retirement-phase-8.md](planning/specs/completed/spec-script-retirement-phase-8.md)
+- [planning/specs/completed/spec-script-retirement-phase-9.md](planning/specs/completed/spec-script-retirement-phase-9.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
-- [planning/specs/active/spec-script-retirement-phase-9.md](planning/specs/active/spec-script-retirement-phase-9.md)
 - [super-agent.instructions.md](../../.github/instructions/super-agent.instructions.md)
 - [brainstorm-spec-workflow.instructions.md](../../.github/instructions/brainstorm-spec-workflow.instructions.md)
 - [subagent-planning-workflow.instructions.md](../../.github/instructions/subagent-planning-workflow.instructions.md)

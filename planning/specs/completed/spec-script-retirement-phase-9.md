@@ -4,10 +4,10 @@ Generated: 2026-03-28 21:41
 
 ## Status
 
-- LastUpdated: 2026-03-28 21:41
+- LastUpdated: 2026-03-28 21:55
 - Objective: define the design intent and acceptance criteria for retiring the remaining validation wrappers for agent orchestration and release governance/provenance.
-- Planning Readiness: ready for execution planning
-- Related Plan: `planning/active/plan-script-retirement-phase-9.md`
+- Planning Readiness: executed-and-completed
+- Related Plan: `planning/completed/plan-script-retirement-phase-9.md`
 - Source Inputs:
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
@@ -65,8 +65,12 @@ This keeps the behavior stable while allowing the local `.ps1` leaves to be dele
 - The three wrapper files are deleted only after the above conditions are met.
 - The completed safety matrix and parity ledger record the phase-9 result and live inventory change.
 
+## Executed Result
+
+The three validation wrappers were retired after the native `ntk validation` surface, the PowerShell consumer chain, the governance evidence, and the projected provider surfaces were all updated in the same slice. Focused `validate-all` warning-only proof passed with the native routing active, and enforcing mode exposed only pre-existing repository release-baseline debt rather than cutover regressions.
+
 ## Planning Readiness
 
-- The scope is narrow enough to execute in one retirement phase, but broad enough to require a staged plan and validation gate.
-- No additional architecture decision is required before implementation; the design intent is to delete the wrappers after the native command surfaces and consumers are aligned.
-- The next step is execution planning and implementation in the active plan.
+- The scope was narrow enough to execute in one retirement phase while still requiring a staged validation gate.
+- No further architecture decision remains open for this slice.
+- The spec is archived with the completed Phase 9 plan.
