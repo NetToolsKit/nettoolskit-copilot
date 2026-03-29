@@ -51,7 +51,7 @@ planning/
 
 ## Active Specs
 
-- No active specs.
+- [planning/specs/active/spec-script-retirement-phase-10.md](active/spec-script-retirement-phase-10.md) - design intent for retiring the compatibility lifecycle and dotnet standards validation wrappers
 
 ---
 

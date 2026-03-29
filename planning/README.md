@@ -52,7 +52,7 @@ planning/
 
 ## Active Workstreams
 
-- No active workstreams.
+- [planning/active/plan-script-retirement-phase-10.md](active/plan-script-retirement-phase-10.md) - retire the remaining low-fanout validation wrappers for compatibility lifecycle and dotnet standards
 
 ---
 
