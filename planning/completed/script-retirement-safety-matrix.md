@@ -57,7 +57,7 @@ Generated: 2026-03-28 19:39
 | --- | ---: | --- | --- |
 | `scripts/common/*.ps1` | 15 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/runtime/*.ps1` excluding hooks | 38 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/validation/*.ps1` | 5 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
+| `scripts/validation/*.ps1` | 5 | the remaining validation coordination/reporting cluster still needs explicit Rust CLI ownership or retained-wrapper decisions before deletion | requires follow-up consumer sweep before deletion |
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
@@ -68,9 +68,12 @@ Generated: 2026-03-28 19:39
 - The next consumer sweep should move to domain-level proof for:
   - `scripts/common/*.ps1`
   - `scripts/runtime/*.ps1` excluding the retained hook wrappers and the Phase 4 retired continuity/template leaves
-  - `scripts/validation/*.ps1`, starting with the remaining shell-owned coordination cluster:
+  - `scripts/validation/*.ps1`, starting with the remaining coordination/reporting cluster:
     - `validate-instructions`
     - `validate-all`
+    - `test-routing-selection`
+    - `export-audit-report`
+    - `export-enterprise-trends`
 
 ## Notes
 
