@@ -51,6 +51,15 @@ pub struct RuntimeRenderProviderSurfacesResult {
     pub summary_only: bool,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct ProviderSurfaceRenderOptions<'a> {
+    requested_renderer_ids: &'a [String],
+    consumer_name: &'a str,
+    enable_codex_runtime: bool,
+    enable_claude_runtime: bool,
+    summary_only: bool,
+}
+
 /// Render tracked provider surfaces selected by the canonical projection
 /// catalog.
 ///
@@ -81,11 +90,13 @@ pub fn invoke_render_provider_surfaces(
         &repo_root,
         catalog_path,
         &catalog,
-        &request.renderer_ids,
-        &consumer_name,
-        request.enable_codex_runtime,
-        request.enable_claude_runtime,
-        request.summary_only,
+        ProviderSurfaceRenderOptions {
+            requested_renderer_ids: &request.renderer_ids,
+            consumer_name: &consumer_name,
+            enable_codex_runtime: request.enable_codex_runtime,
+            enable_claude_runtime: request.enable_claude_runtime,
+            summary_only: request.summary_only,
+        },
     )
     .map_err(|source| RuntimeRenderProviderSurfacesCommandError::RenderSurfaces { source })
 }
@@ -109,11 +120,13 @@ pub(crate) fn render_provider_surfaces_for_bootstrap(
         repo_root,
         catalog_path,
         &catalog,
-        &[],
-        "bootstrap",
-        enable_codex_runtime,
-        enable_claude_runtime,
-        false,
+        ProviderSurfaceRenderOptions {
+            requested_renderer_ids: &[],
+            consumer_name: "bootstrap",
+            enable_codex_runtime,
+            enable_claude_runtime,
+            summary_only: false,
+        },
     )?;
     Ok(())
 }
@@ -122,31 +135,31 @@ fn render_provider_surfaces_from_catalog(
     repo_root: &Path,
     catalog_path: PathBuf,
     catalog: &Value,
-    requested_renderer_ids: &[String],
-    consumer_name: &str,
-    enable_codex_runtime: bool,
-    enable_claude_runtime: bool,
-    summary_only: bool,
+    options: ProviderSurfaceRenderOptions<'_>,
 ) -> Result<RuntimeRenderProviderSurfacesResult> {
     let renderer_ids = select_renderer_ids(
         catalog,
-        requested_renderer_ids,
-        consumer_name,
-        enable_codex_runtime,
-        enable_claude_runtime,
+        options.requested_renderer_ids,
+        options.consumer_name,
+        options.enable_codex_runtime,
+        options.enable_claude_runtime,
     )?;
 
-    if !summary_only {
+    if !options.summary_only {
         render_selected_renderer_ids(repo_root, &renderer_ids)?;
     }
 
     Ok(RuntimeRenderProviderSurfacesResult {
         repo_root: repo_root.to_path_buf(),
         catalog_path,
-        consumer_name: consumer_name.to_string(),
+        consumer_name: options.consumer_name.to_string(),
         selected_renderer_ids: renderer_ids.clone(),
-        rendered_count: if summary_only { 0 } else { renderer_ids.len() },
-        summary_only,
+        rendered_count: if options.summary_only {
+            0
+        } else {
+            renderer_ids.len()
+        },
+        summary_only: options.summary_only,
     })
 }
 
@@ -170,7 +183,7 @@ fn resolve_provider_surface_catalog_path(
 }
 
 fn read_provider_surface_catalog(catalog_path: &Path) -> Result<Value> {
-    let catalog_document = fs::read_to_string(&catalog_path)
+    let catalog_document = fs::read_to_string(catalog_path)
         .with_context(|| format!("failed to read '{}'", catalog_path.display()))?;
     let catalog: Value = serde_json::from_str(&catalog_document).with_context(|| {
         format!(
