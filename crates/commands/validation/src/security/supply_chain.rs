@@ -239,7 +239,15 @@ pub fn invoke_validate_supply_chain(
         );
         sbom_path = Some(resolved_sbom_path);
 
-        if !baseline.license_evidence_path.trim().is_empty() {
+        let license_evidence_path_value = baseline.license_evidence_path.trim();
+        if baseline.require_license_evidence && license_evidence_path_value.is_empty() {
+            push_required_finding(
+                request.warning_only,
+                &mut warnings,
+                &mut failures,
+                "License evidence path is required but missing or empty.".to_string(),
+            );
+        } else if !license_evidence_path_value.is_empty() {
             let resolved_license_path =
                 resolve_output_path(&repo_root, &baseline.license_evidence_path);
             if baseline.require_license_evidence && !resolved_license_path.is_file() {

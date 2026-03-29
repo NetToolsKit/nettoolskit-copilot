@@ -5,10 +5,12 @@ use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
     invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
     invoke_validate_powershell_standards, invoke_validate_routing_coverage,
-    invoke_validate_shared_script_checksums, invoke_validate_warning_baseline,
+    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
+    invoke_validate_supply_chain, invoke_validate_warning_baseline,
     ValidateArchitectureBoundariesRequest, ValidateAuditLedgerRequest,
     ValidatePowerShellStandardsRequest, ValidateRoutingCoverageRequest,
-    ValidateSharedScriptChecksumsRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
+    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
+    ValidateSupplyChainRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
 };
 use std::path::PathBuf;
 
@@ -24,9 +26,15 @@ pub enum ValidationCommand {
     PowershellStandards(ValidationPowerShellStandardsArgs),
     /// Validate routing catalog coverage against golden fixtures.
     RoutingCoverage(ValidationRoutingCoverageArgs),
+    /// Validate repository security baseline contracts.
+    #[command(name = "security-baseline")]
+    SecurityBaseline(ValidationSecurityBaselineArgs),
     /// Validate shared script checksum manifest integrity.
     #[command(name = "shared-script-checksums")]
     SharedScriptChecksums(ValidationSharedScriptChecksumsArgs),
+    /// Validate local supply-chain baseline and export SBOM evidence.
+    #[command(name = "supply-chain")]
+    SupplyChain(ValidationSupplyChainArgs),
     /// Validate analyzer warning volume against the warning baseline.
     #[command(name = "warning-baseline")]
     WarningBaseline(ValidationWarningBaselineArgs),
@@ -74,6 +82,20 @@ pub struct ValidationRoutingCoverageArgs {
     pub warning_only: bool,
 }
 
+/// CLI arguments for `validation security-baseline`.
+#[derive(Debug, Args)]
+pub struct ValidationSecurityBaselineArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit baseline path.
+    #[clap(long)]
+    pub baseline_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// CLI arguments for `validation powershell-standards`.
 #[derive(Debug, Args)]
 pub struct ValidationPowerShellStandardsArgs {
@@ -114,6 +136,20 @@ pub struct ValidationSharedScriptChecksumsArgs {
     pub detailed_output: bool,
 }
 
+/// CLI arguments for `validation supply-chain`.
+#[derive(Debug, Args)]
+pub struct ValidationSupplyChainArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit baseline path.
+    #[clap(long)]
+    pub baseline_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// CLI arguments for `validation warning-baseline`.
 #[derive(Debug, Args)]
 pub struct ValidationWarningBaselineArgs {
@@ -145,9 +181,11 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
             execute_powershell_standards(arguments)
         }
         ValidationCommand::RoutingCoverage(arguments) => execute_routing_coverage(arguments),
+        ValidationCommand::SecurityBaseline(arguments) => execute_security_baseline(arguments),
         ValidationCommand::SharedScriptChecksums(arguments) => {
             execute_shared_script_checksums(arguments)
         }
+        ValidationCommand::SupplyChain(arguments) => execute_supply_chain(arguments),
         ValidationCommand::WarningBaseline(arguments) => execute_warning_baseline(arguments),
     }
 }
@@ -219,6 +257,32 @@ fn execute_routing_coverage(arguments: ValidationRoutingCoverageArgs) -> ExitSta
     println!("Fixture path: {}", result.fixture_path.display());
     println!("Routes checked: {}", result.routes_checked);
     println!("Cases checked: {}", result.cases_checked);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_security_baseline(arguments: ValidationSecurityBaselineArgs) -> ExitStatus {
+    let result = match invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
+        repo_root: arguments.repo_root,
+        baseline_path: arguments.baseline_path,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!(
+        "Repository files evaluated: {}",
+        result.repository_files_evaluated
+    );
+    println!("Files scanned: {}", result.files_scanned);
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 
@@ -298,6 +362,32 @@ fn execute_warning_baseline(arguments: ValidationWarningBaselineArgs) -> ExitSta
     println!("Baseline path: {}", result.baseline_path.display());
     println!("Total warnings: {}", result.total_warnings);
     println!("Report path: {}", result.report_path.display());
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_supply_chain(arguments: ValidationSupplyChainArgs) -> ExitStatus {
+    let result = match invoke_validate_supply_chain(&ValidateSupplyChainRequest {
+        repo_root: arguments.repo_root,
+        baseline_path: arguments.baseline_path,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!("Dependency manifests: {}", result.dependency_manifests);
+    println!("Packages discovered: {}", result.packages_discovered);
+    if let Some(sbom_path) = result.sbom_path.as_ref() {
+        println!("SBOM path: {}", sbom_path.display());
+    }
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 

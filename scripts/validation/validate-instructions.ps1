@@ -1076,8 +1076,6 @@ $requiredFiles = @(
     'scripts/validation/validate-instruction-metadata.ps1',
     'scripts/validation/validate-agent-skill-alignment.ps1',
     'scripts/validation/validate-agent-permissions.ps1',
-    'scripts/validation/validate-security-baseline.ps1',
-    'scripts/validation/validate-supply-chain.ps1',
     'scripts/validation/validate-release-provenance.ps1',
     'scripts/validation/validate-all.ps1',
     'scripts/governance/update-shared-script-checksums-manifest.ps1',

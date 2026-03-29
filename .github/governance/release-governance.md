@@ -44,9 +44,9 @@ These files are validated through the governance and provenance baselines so onb
 1. Run baseline validations:
    - `pwsh -File .\scripts\validation\validate-instructions.ps1`
    - `pwsh -File .\scripts\validation\validate-policy.ps1`
-   - `pwsh -File .\scripts\validation\validate-security-baseline.ps1`
+   - `ntk validation security-baseline --warning-only false`
    - `pwsh -File .\scripts\validation\validate-agent-permissions.ps1`
-   - `pwsh -File .\scripts\validation\validate-supply-chain.ps1`
+   - `ntk validation supply-chain --warning-only false`
    - `ntk validation warning-baseline --warning-only false`
    - `pwsh -File .\scripts\validation\validate-agent-orchestration.ps1`
    - `pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -WarningOnly:$false`

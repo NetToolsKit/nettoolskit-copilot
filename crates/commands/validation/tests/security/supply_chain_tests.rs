@@ -113,6 +113,69 @@ fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence()
 }
 
 #[test]
+fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_when_path_is_omitted() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_supply_chain_repo(repo.path());
+    write_supply_chain_baseline(
+        repo.path(),
+        r#"{
+  "version": 1,
+  "sbomOutputPath": ".temp/audit/sbom.latest.json",
+  "requireLicenseEvidence": true,
+  "warnOnMissingLicenseEvidence": false,
+  "warnOnEmptyDependencySet": false,
+  "excludedPathGlobs": [".temp/**"],
+  "blockedDependencyPatterns": [],
+  "sensitiveDependencyPatterns": []
+}"#,
+    );
+
+    let result = invoke_validate_supply_chain(&ValidateSupplyChainRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateSupplyChainRequest::default()
+    })
+    .expect("supply chain validation should execute");
+
+    assert_eq!(result.status, ValidationCheckStatus::Failed);
+    assert!(result.failures.iter().any(|message| {
+        message.contains("License evidence path is required but missing or empty.")
+    }));
+}
+
+#[test]
+fn test_invoke_validate_supply_chain_reports_missing_required_license_evidence_when_path_is_empty() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_supply_chain_repo(repo.path());
+    write_supply_chain_baseline(
+        repo.path(),
+        r#"{
+  "version": 1,
+  "sbomOutputPath": ".temp/audit/sbom.latest.json",
+  "licenseEvidencePath": "",
+  "requireLicenseEvidence": true,
+  "warnOnMissingLicenseEvidence": false,
+  "warnOnEmptyDependencySet": false,
+  "excludedPathGlobs": [".temp/**"],
+  "blockedDependencyPatterns": [],
+  "sensitiveDependencyPatterns": []
+}"#,
+    );
+
+    let result = invoke_validate_supply_chain(&ValidateSupplyChainRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateSupplyChainRequest::default()
+    })
+    .expect("supply chain validation should execute");
+
+    assert_eq!(result.status, ValidationCheckStatus::Failed);
+    assert!(result.failures.iter().any(|message| {
+        message.contains("License evidence path is required but missing or empty.")
+    }));
+}
+
+#[test]
 fn test_invoke_validate_supply_chain_converts_required_findings_to_warnings() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_supply_chain_repo(repo.path());

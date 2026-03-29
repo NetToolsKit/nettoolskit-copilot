@@ -25,6 +25,47 @@ fn initialize_validation_repo_root(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex")).expect(".codex should be created");
 }
 
+fn initialize_security_baseline_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(&repo_root.join("CODEOWNERS"), "* @example\n");
+    write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
+    write_file(
+        &repo_root.join(".github/copilot-instructions.md"),
+        "# Copilot\n",
+    );
+    write_file(
+        &repo_root.join(".github/governance/security-baseline.json"),
+        r#"{
+  "version": 1,
+  "requiredFiles": ["CODEOWNERS", ".github/AGENTS.md"],
+  "requiredDirectories": [".github/governance", "scripts/validation"],
+  "scanExtensions": [".md", ".ps1"],
+  "excludedPathGlobs": [".temp/**"],
+  "forbiddenPathGlobs": ["**/*.key"],
+  "forbiddenContentPatterns": [
+    {
+      "id": "private-key-block",
+      "pattern": "-----BEGIN PRIVATE KEY-----",
+      "severity": "failure"
+    },
+    {
+      "id": "hardcoded-password-assignment",
+      "pattern": "(?i)(password|passwd|pwd)\\s*[:=]\\s*[\"'](?!\\*{3}|changeme|password|example|your-password)[^\"']{8,}[\"']",
+      "severity": "warning"
+    }
+  ],
+  "allowedContentPatterns": [
+    "(?i)example-password"
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join("scripts/validation/validate-agent-hooks.ps1"),
+        "Write-Output 'ok'\n",
+    );
+    write_file(&repo_root.join("README.md"), "# Repo\n");
+}
+
 fn initialize_shared_script_checksums_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
     write_file(&repo_root.join("scripts/common/a.ps1"), "Write-Output 'a'\n");
@@ -50,6 +91,71 @@ fn initialize_shared_script_checksums_repo_root(repo_root: &Path) {
     }
   ]
 }"#,
+    );
+}
+
+fn initialize_supply_chain_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/governance/supply-chain.baseline.json"),
+        r#"{
+  "version": 1,
+  "sbomOutputPath": ".temp/audit/sbom.latest.json",
+  "licenseEvidencePath": ".temp/audit/licenses.latest.json",
+  "requireLicenseEvidence": false,
+  "warnOnMissingLicenseEvidence": false,
+  "warnOnEmptyDependencySet": false,
+  "excludedPathGlobs": [
+    ".git/**",
+    ".temp/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/.vs/**"
+  ],
+  "blockedDependencyPatterns": [
+    "(?i)^event-stream$"
+  ],
+  "sensitiveDependencyPatterns": [
+    "(?i)^log4j(?:-.*)?$"
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join("package.json"),
+        r#"{
+  "dependencies": {
+    "chalk": "^5.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join("Cargo.toml"),
+        r#"[package]
+name = "fixture"
+version = "0.1.0"
+
+[dependencies]
+serde = "1.0"
+"#,
+    );
+    write_file(
+        &repo_root.join("src/App/App.csproj"),
+        r#"<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.0.1" />
+  </ItemGroup>
+</Project>"#,
+    );
+    write_file(
+        &repo_root.join("Directory.Packages.props"),
+        r#"<Project>
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.0.0" />
+  </ItemGroup>
+</Project>"#,
     );
 }
 
@@ -199,6 +305,49 @@ routing:
 }
 
 #[test]
+fn test_validation_security_baseline_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_security_baseline_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "security-baseline",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Files scanned: 4"));
+}
+
+#[test]
+fn test_validation_security_baseline_reports_warning_for_allowlisted_first_match_and_real_secret_later(
+) {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_security_baseline_repo_root(repo.path());
+    write_file(
+        &repo.path().join("docs/notes.md"),
+        "password = \"example-password\"\npassword = \"supersecret1\"\n",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "security-baseline",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: warning"))
+        .stdout(predicate::str::contains("supersecret1"));
+}
+
+#[test]
 fn test_validation_powershell_standards_reports_pass_for_valid_scripts() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_powershell_standards_repo_root(repo.path());
@@ -236,6 +385,57 @@ fn test_validation_shared_script_checksums_reports_pass_for_valid_manifest() {
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Manifest entries: 2"))
         .stdout(predicate::str::contains("Current entries: 2"));
+}
+
+#[test]
+fn test_validation_supply_chain_reports_pass_for_valid_manifests() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_supply_chain_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "supply-chain", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Dependency manifests: 4"))
+        .stdout(predicate::str::contains("Packages discovered: 5"))
+        .stdout(predicate::str::contains("SBOM path:"));
+}
+
+#[test]
+fn test_validation_supply_chain_fails_when_required_license_evidence_path_is_missing() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_supply_chain_repo_root(repo.path());
+    write_file(
+        &repo.path().join(".github/governance/supply-chain.baseline.json"),
+        r#"{
+  "version": 1,
+  "sbomOutputPath": ".temp/audit/sbom.latest.json",
+  "requireLicenseEvidence": true,
+  "warnOnMissingLicenseEvidence": false,
+  "warnOnEmptyDependencySet": false,
+  "excludedPathGlobs": [
+    ".git/**",
+    ".temp/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/.vs/**"
+  ],
+  "blockedDependencyPatterns": [],
+  "sensitiveDependencyPatterns": []
+}"#,
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "supply-chain", "--warning-only", "false"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("Status: failed"))
+        .stdout(predicate::str::contains(
+            "License evidence path is required but missing or empty.",
+        ));
 }
 
 #[test]

@@ -794,7 +794,11 @@ $baseCheckDefinitions['validate-policy'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-security-baseline'] = [pscustomobject]@{
     name = 'validate-security-baseline'
-    script = 'scripts/validation/validate-security-baseline.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-security-baseline'
+    command = @('validation', 'security-baseline')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-shared-script-checksums'] = [pscustomobject]@{
@@ -932,7 +936,11 @@ $baseCheckDefinitions['validate-instruction-metadata'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-supply-chain'] = [pscustomobject]@{
     name = 'validate-supply-chain'
-    script = 'scripts/validation/validate-supply-chain.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-supply-chain'
+    command = @('validation', 'supply-chain')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-release-governance'] = [pscustomobject]@{
