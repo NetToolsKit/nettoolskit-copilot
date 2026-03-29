@@ -372,15 +372,23 @@ function Invoke-ProviderSurfaceBootstrapRender {
         [bool] $EnableClaudeRuntime = $false
     )
 
-    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-provider-surfaces.ps1'
-    Assert-PathPresent -Path $renderScriptPath -Label 'provider surface render dispatcher'
+    $runtimeBinaryPath = Resolve-OrBuild-NtkRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot
+    Assert-PathPresent -Path $runtimeBinaryPath -Label 'managed runtime binary'
 
-    & $renderScriptPath `
-        -RepoRoot $ResolvedRepoRoot `
-        -ConsumerName bootstrap `
-        -EnableCodexRuntime:$EnableCodexRuntime `
-        -EnableClaudeRuntime:$EnableClaudeRuntime `
-        -Verbose:$script:IsVerboseEnabled | Out-Null
+    $renderArgs = @(
+        'runtime',
+        'render-provider-surfaces',
+        '--repo-root', $ResolvedRepoRoot,
+        '--consumer-name', 'bootstrap'
+    )
+    if ($EnableCodexRuntime) {
+        $renderArgs += '--enable-codex-runtime'
+    }
+    if ($EnableClaudeRuntime) {
+        $renderArgs += '--enable-claude-runtime'
+    }
+
+    & $runtimeBinaryPath @renderArgs | Out-Null
     $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
     if ($exitCode -ne 0) {
         throw ("Provider surface render dispatch failed before bootstrap sync. ExitCode={0}" -f $exitCode)

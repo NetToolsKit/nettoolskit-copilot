@@ -44,7 +44,7 @@ The authoritative projection map between authored definitions, generated excepti
 - [definitions/providers/codex/scripts/README.md](definitions/providers/codex/scripts/README.md)
 - [definitions/providers/codex/skills/README.md](definitions/providers/codex/skills/README.md)
 - [.github/governance/provider-surface-projection.catalog.json](.github/governance/provider-surface-projection.catalog.json)
-- [scripts/runtime/render-provider-surfaces.ps1](scripts/runtime/render-provider-surfaces.ps1)
+- `ntk runtime render-provider-surfaces --repo-root .`
 
 ---
 

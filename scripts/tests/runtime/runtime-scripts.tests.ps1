@@ -144,6 +144,18 @@ try {
     Assert-True ($renderMcpArtifactsHelpText -match '--vscode-output-path') 'runtime render-mcp-runtime-artifacts help must expose --vscode-output-path.'
     Assert-True ($renderMcpArtifactsHelpText -match '--codex-output-path') 'runtime render-mcp-runtime-artifacts help must expose --codex-output-path.'
 
+    $renderProviderSurfacesHelp = & $runtimeBinaryPath runtime render-provider-surfaces --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime render-provider-surfaces help smoke test failed.'
+    $renderProviderSurfacesHelpText = ($renderProviderSurfacesHelp | Out-String)
+    Assert-True ($renderProviderSurfacesHelpText -match '--repo-root') 'runtime render-provider-surfaces help must expose --repo-root.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--catalog-path') 'runtime render-provider-surfaces help must expose --catalog-path.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--renderer-id') 'runtime render-provider-surfaces help must expose --renderer-id.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--consumer-name') 'runtime render-provider-surfaces help must expose --consumer-name.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--enable-codex-runtime') 'runtime render-provider-surfaces help must expose --enable-codex-runtime.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--enable-claude-runtime') 'runtime render-provider-surfaces help must expose --enable-claude-runtime.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--summary-only') 'runtime render-provider-surfaces help must expose --summary-only.'
+
     $syncCodexMcpHelp = & $runtimeBinaryPath runtime sync-codex-mcp-config --help
     $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
     Assert-True ($exitCode -eq 0) 'runtime sync-codex-mcp-config help smoke test failed.'
@@ -282,17 +294,6 @@ try {
     Assert-Contains -Collection $keys -Value 'Provider' -Message 'render-provider-skill-surfaces missing Provider parameter.'
     Assert-Contains -Collection $keys -Value 'CodexOutputRoot' -Message 'render-provider-skill-surfaces missing CodexOutputRoot parameter.'
     Assert-Contains -Collection $keys -Value 'ClaudeOutputRoot' -Message 'render-provider-skill-surfaces missing ClaudeOutputRoot parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-provider-surfaces.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-provider-surfaces missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-provider-surfaces missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'RendererId' -Message 'render-provider-surfaces missing RendererId parameter.'
-    Assert-Contains -Collection $keys -Value 'ConsumerName' -Message 'render-provider-surfaces missing ConsumerName parameter.'
-    Assert-Contains -Collection $keys -Value 'EnableCodexRuntime' -Message 'render-provider-surfaces missing EnableCodexRuntime parameter.'
-    Assert-Contains -Collection $keys -Value 'EnableClaudeRuntime' -Message 'render-provider-surfaces missing EnableClaudeRuntime parameter.'
-    Assert-Contains -Collection $keys -Value 'SummaryOnly' -Message 'render-provider-surfaces missing SummaryOnly parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -538,7 +539,6 @@ try {
         Assert-True (@($renderedManifestDocument.servers).Count -gt 0) 'Rendered Codex manifest should emit servers.'
 
         $renderProviderSkillsScriptPath = Join-Path $runtimeScriptRoot 'render-provider-skill-surfaces.ps1'
-        $renderProviderSurfacesScriptPath = Join-Path $runtimeScriptRoot 'render-provider-surfaces.ps1'
         $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
         $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
         $renderVscodeWorkspaceScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
@@ -686,7 +686,7 @@ try {
         Assert-True ($exitCode -eq 0) 'render-claude-runtime-surfaces smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $claudeRuntimeOutputRoot 'settings.json') -PathType Leaf) 'render-claude-runtime-surfaces did not write the projected Claude settings.'
 
-        & $renderProviderSurfacesScriptPath -RepoRoot $resolvedRepoRoot -ConsumerName bootstrap -EnableCodexRuntime -EnableClaudeRuntime -SummaryOnly | Out-Null
+        & $runtimeBinaryPath runtime render-provider-surfaces --repo-root $resolvedRepoRoot --consumer-name bootstrap --enable-codex-runtime --enable-claude-runtime --summary-only | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'render-provider-surfaces bootstrap summary smoke test failed.'
 
