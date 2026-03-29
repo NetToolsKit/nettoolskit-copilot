@@ -4,10 +4,10 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 12:45
+- LastUpdated: 2026-03-29 13:05
 - Objective: define the safe cutover conditions for retiring `scripts/runtime/render-codex-compatibility-surfaces.ps1` by teaching the shared provider-surface catalog to dispatch native runtime renderers.
-- Planning Readiness: ready-for-implementation
-- Related Plan: `planning/active/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`
+- Planning Readiness: executed-and-completed
+- Related Plan: `planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`
 - Source Inputs:
   - `planning/active/plan-repository-consolidation-continuity.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
@@ -59,3 +59,10 @@ Adopt a mixed catalog model. Script-backed renderers keep `scriptPath`, but nati
 - Runtime parity tests and operator smoke checks prove the native Codex compatibility renderer path.
 - `scripts/runtime/render-codex-compatibility-surfaces.ps1` is deleted.
 - The safety matrix, parity ledger, and continuity plan/spec reflect a 97-script live estate and 64 `retain until consumer migration completes`.
+
+## Executed Result
+
+- The catalog schema now allows native provider-surface renderer metadata without a local `scriptPath`.
+- The shared PowerShell catalog helper now dispatches native renderer leaves through `ntk runtime render-provider-surfaces` while preserving the remaining script-backed renderers.
+- The `codex-compatibility-surfaces` renderer moved onto the native dispatcher contract, runtime parity coverage was repointed, and `scripts/runtime/render-codex-compatibility-surfaces.ps1` was deleted.
+- The continuity plan/spec, safety matrix, and parity ledger now inherit the `98 -> 97` live-estate rebaseline and the `65 -> 64` consumer-migration backlog change.

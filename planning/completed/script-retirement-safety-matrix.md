@@ -4,14 +4,14 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-03-29 12:20
+- LastUpdated: 2026-03-29 13:05
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
-- Live Inventory After Executed Slice: `98`
+- Live Inventory After Executed Slice: `97`
 - Current Classification Totals:
-  - `retired in this workstream`: `49`
+  - `retired in this workstream`: `50`
   - `retain wrapper intentionally`: `33`
-  - `retain until consumer migration completes`: `65`
+  - `retain until consumer migration completes`: `64`
 - Decision Rule:
   - `remove-now candidate` means Rust parity exists and no blocking local consumer remains after same-slice doc cleanup.
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
@@ -46,6 +46,7 @@ Generated: 2026-03-28 19:39
 | `scripts/runtime/sync-codex-mcp-config.ps1`, `scripts/runtime/render-vscode-mcp-template.ps1` | 2 | `crates/commands/runtime + crates/cli` | The remaining blockers were the missing native MCP CLI surfaces plus bootstrap/docs/projected wrappers and runtime parity tests that still treated the local wrapper paths as canonical. | Added native `ntk runtime` MCP entrypoints, repointed bootstrap, MCP docs, projected Codex wrappers, and runtime parity tests to the managed binary contract, deleted the two local wrappers, and archived Phase 18 while retaining `render-mcp-runtime-artifacts.ps1` temporarily for the path-backed provider-surface catalog. | retired |
 | `scripts/runtime/self-heal.ps1` | 1 | `crates/commands/runtime + crates/cli` | The remaining blockers were `scripts/README.md`, the instruction-system policy inventory, the orchestration validation baseline fixture, and the retained runtime parity harness that still referenced the local wrapper path even though `ntk runtime self-heal` already existed with deterministic tests. | Repointed docs, validation inventory, and parity fixtures to the native `ntk runtime self-heal` contract, deleted the local wrapper, and archived Phase 20c self-heal. | retired |
 | `scripts/runtime/render-provider-surfaces.ps1` | 1 | `crates/commands/runtime + crates/cli` | The remaining blockers were bootstrap compatibility glue, runtime parity harness coverage, `definitions/README.md`, and the orchestrator validation baseline fixture that still treated the dispatcher wrapper path as canonical. | Added the native `ntk runtime render-provider-surfaces` boundary, repointed bootstrap, runtime parity tests, authored docs, and orchestrator validation evidence to the managed binary contract, deleted the local wrapper, and archived Phase 20d. | retired |
+| `scripts/runtime/render-codex-compatibility-surfaces.ps1` | 1 | `crates/commands/runtime + crates/cli` | The remaining blockers were the script-path-only provider-surface catalog contract, runtime parity coverage, and governance metadata that still treated the local wrapper as the canonical Codex compatibility renderer. | Added mixed native-renderer support to the provider-surface projection catalog schema and shared helper, moved the `codex-compatibility-surfaces` catalog entry onto the native `ntk runtime render-provider-surfaces` dispatcher, repointed runtime parity coverage, deleted the local wrapper, and archived Phase 20e. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -63,14 +64,14 @@ Generated: 2026-03-28 19:39
 | Scope | Count | Blocking Reason | Blocking Evidence |
 | --- | ---: | --- | --- |
 | `scripts/common/*.ps1` | 15 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/runtime/*.ps1` excluding hooks | 32 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain; `render-mcp-runtime-artifacts.ps1` remains a temporary retained renderer because the provider-surface projection catalog still requires a path-backed script | requires follow-up consumer sweep before deletion |
+| `scripts/runtime/*.ps1` excluding hooks | 31 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain; `render-mcp-runtime-artifacts.ps1` remains a temporary retained renderer because the provider-surface projection catalog still requires a path-backed script | requires follow-up consumer sweep before deletion |
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 
 ## Current Immediate Queue
 
-- No single-file `remove-now candidate` remains after Phase 20d provider-surface dispatcher.
+- No single-file `remove-now candidate` remains after Phase 20e catalog-native renderer dispatch.
 - The next consumer sweep should move to domain-level proof for:
   - `scripts/common/*.ps1`
   - `scripts/runtime/*.ps1` excluding the retained hook wrappers plus the retired continuity/template, diagnostics, MCP, and self-heal leaves
@@ -103,5 +104,6 @@ Generated: 2026-03-28 19:39
 - Phase 19 closed as an audit-only common-domain sweep with zero deletions because all 15 shared helpers still had live local consumers.
 - The Phase 20c self-heal slice retired `self-heal`, reducing the live local estate from `100` to `99`.
 - The Phase 20d provider-surface dispatcher slice retired `render-provider-surfaces`, reducing the live local estate from `99` to `98`.
+- The Phase 20e catalog-native renderer slice retired `render-codex-compatibility-surfaces`, reducing the live local estate from `98` to `97`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
 - The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.

@@ -4,11 +4,11 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 12:45
+- LastUpdated: 2026-03-29 13:05
 - Objective: teach the shared provider-surface projection catalog to dispatch native `ntk runtime render-provider-surfaces` renderer leaves, then retire the local `scripts/runtime/render-codex-compatibility-surfaces.ps1` wrapper in the same slice.
 - Normalized Request: continue the aggressive script-retirement flow, keep planning updated, and commit each stable phase with detailed messages.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
-- Spec Path: `planning/specs/active/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`
+- Spec Path: `planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`
 - Inputs:
   - `planning/active/plan-repository-consolidation-continuity.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
@@ -42,7 +42,7 @@ This phase is complete only if:
 
 ### Task 1: Add Native Renderer Metadata To The Catalog Contract
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Extend `.github/schemas/provider-surface-projection.catalog.schema.json` so a renderer can be described by either:
   - `scriptPath`
@@ -51,7 +51,7 @@ Status: `[ ]` Pending
 
 ### Task 2: Teach The Shared Catalog Helper To Dispatch Native Renderers
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Update `scripts/common/provider-surface-catalog.ps1` so it can dispatch:
   - script-backed renderers through `scriptPath`
@@ -60,7 +60,7 @@ Status: `[ ]` Pending
 
 ### Task 3: Retire The Codex Compatibility Wrapper
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Move the `codex-compatibility-surfaces` renderer entry in `.github/governance/provider-surface-projection.catalog.json` onto the native dispatcher contract.
 - Repoint runtime parity coverage away from the deleted wrapper.
@@ -68,7 +68,7 @@ Status: `[ ]` Pending
 
 ### Task 4: Rebaseline Continuity And Archive
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Update `planning/completed/script-retirement-safety-matrix.md`.
 - Update `planning/completed/rust-script-parity-ledger.md`.
@@ -77,11 +77,11 @@ Status: `[ ]` Pending
 
 ## Validation Checklist
 
-- [ ] `cargo test -p nettoolskit-runtime --test test_suite sync::provider_surfaces_tests --quiet`
-- [ ] `cargo test -p nettoolskit-cli --test runtime_commands_tests --quiet`
-- [ ] `pwsh -NoProfile -File .\scripts\tests\runtime\runtime-scripts.tests.ps1`
-- [ ] `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
-- [ ] `git diff --check`
+- [x] `cargo test -p nettoolskit-runtime --test test_suite sync::provider_surfaces_tests --quiet`
+- [x] `cargo test -p nettoolskit-cli --test runtime_commands_tests --quiet`
+- [x] `pwsh -NoProfile -File .\scripts\tests\runtime\runtime-scripts.tests.ps1`
+- [x] `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
+- [x] `git diff --check`
 
 ## Risks And Fallbacks
 
@@ -92,3 +92,10 @@ Status: `[ ]` Pending
 
 - Keep the phase-opening planning commit, the native catalog/helper plus wrapper-retirement code commit, and the planning closeout commit separate.
 - Archive the phase only after the deleted wrapper is removed and the continuity baseline reflects the new 97-script live estate.
+
+## Executed Result
+
+- The provider-surface projection catalog now supports mixed script-backed and native runtime renderer dispatch.
+- The shared `provider-surface-catalog.ps1` helper can invoke `ntk runtime render-provider-surfaces` for native leaves while preserving the remaining script-backed renderers.
+- The `codex-compatibility-surfaces` catalog entry now dispatches natively, and `scripts/runtime/render-codex-compatibility-surfaces.ps1` was removed in the same slice.
+- The live local `scripts/**/*.ps1` estate dropped from `98` to `97`, and the continuity backlog now reflects `64` `retain until consumer migration completes` leaves.

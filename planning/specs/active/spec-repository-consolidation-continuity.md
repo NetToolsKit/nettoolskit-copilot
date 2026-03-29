@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 12:20
+- LastUpdated: 2026-03-29 13:05
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
@@ -34,7 +34,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 3. **CI gap for PowerShell parity tests**: The 23 `scripts/tests/runtime/*.ps1` files are classified as `compatibility wrapper retained intentionally` in the safety matrix and described as the canonical parity harness. However, `ci.yml` contains zero PowerShell test invocations — these scripts run only on developer machines. If they regress silently, the parity evidence base becomes stale.
 
-4. **Post-Phase-20d domain consumer migration**: After Phases 17, 18, the tactical `self-heal` runtime slice, and the tactical provider-surface dispatcher slice close, 65 scripts remain in the `retain until consumer migration completes` bucket across five domains (`scripts/common/`, `scripts/runtime/` excl. hooks, `scripts/security/`, `scripts/governance/`, `scripts/orchestration/`). Each domain has confirmed Rust ownership but no exact local-consumer proof. Without planned consumer sweeps, these scripts will remain indefinitely even though deletions are safe once consumer evidence is collected.
+4. **Post-Phase-20e domain consumer migration**: After Phases 17, 18, the tactical `self-heal` runtime slice, the tactical provider-surface dispatcher slice, and the tactical catalog-native renderer slice close, 64 scripts remain in the `retain until consumer migration completes` bucket across five domains (`scripts/common/`, `scripts/runtime/` excl. hooks, `scripts/security/`, `scripts/governance/`, `scripts/orchestration/`). Each domain has confirmed Rust ownership but no exact local-consumer proof. Without planned consumer sweeps, these scripts will remain indefinitely even though deletions are safe once consumer evidence is collected.
 
 5. **`copilot-instructions` Phase 8 awaiting directives**: The `copilot-instructions` repo has a planning-ready spec (`spec-rust-runtime-engine-foundation-phase-8.md`) that is blocked on user-provided Rust directives. The spec defines the compatibility-first migration contract but does not create any Cargo files until directives arrive. Starting this migration would bring the instruction runtime into the same Rust-native model that `nettoolskit-copilot` already operates with.
 
@@ -47,7 +47,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 - Every AI agent that routes through `repository-operating-model.instructions.md` receives correct Rust workspace commands, correct topology, and correct domain instruction references.
 - Root `README.md` and `crates/cli/README.md` document the full `ntk` CLI surface with named subcommands, so feature discoverability matches implementation reality.
 - The 23 PowerShell parity tests either run in CI with an explicit gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
-- Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 65 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
+- Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 64 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
 - `definitions/shared/instructions/repository-operating-model.instructions.md` stays in sync with the `.github/instructions/` projection after every update.
 
@@ -91,7 +91,7 @@ For `crates/cli/README.md`, the existing 3-feature bullet list is too shallow. E
 Consumer sweeps are executed in domain order, smallest-first, with parity requirement: each domain must prove zero local non-self consumers before being treated as a deletion candidate. The sequence is:
 
 - Phase 19: `scripts/common/*.ps1` (15) — shared helpers; high risk of implicit consumers in every other domain.
-- Phase 20: `scripts/runtime/*.ps1` excluding hooks (32 after Phases 17, 18, the tactical 20c `self-heal` cutover, and the tactical 20d provider-surface dispatcher cutover) — largest single domain; planned as one grouped sweep, may split into sub-phases.
+- Phase 20: `scripts/runtime/*.ps1` excluding hooks (31 after Phases 17, 18, the tactical 20c `self-heal` cutover, the tactical 20d provider-surface dispatcher cutover, and the tactical 20e catalog-native renderer cutover) — largest single domain; planned as one grouped sweep, may split into sub-phases.
 - Phase 21: `scripts/security/*.ps1` (6) + `scripts/governance/*.ps1` (2) — governance surface; `shared-script-checksums.manifest.json` is the key blocker to repoint.
 - Phase 22: `scripts/orchestration/**/*.ps1` (10) — staged execution; depends on orchestrator parity being proven end-to-end.
 
