@@ -69,8 +69,14 @@ fn initialize_security_baseline_repo_root(repo_root: &Path) {
 
 fn initialize_shared_script_checksums_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
-    write_file(&repo_root.join("scripts/common/a.ps1"), "Write-Output 'a'\n");
-    write_file(&repo_root.join("scripts/security/b.ps1"), "Write-Output 'b'\n");
+    write_file(
+        &repo_root.join("scripts/common/a.ps1"),
+        "Write-Output 'a'\n",
+    );
+    write_file(
+        &repo_root.join("scripts/security/b.ps1"),
+        "Write-Output 'b'\n",
+    );
     write_file(
         &repo_root.join(".github/governance/shared-script-checksums.manifest.json"),
         r#"{
@@ -211,7 +217,10 @@ fn initialize_warning_baseline_repo_root(repo_root: &Path) {
   }
 }"#,
     );
-    write_file(&repo_root.join("scripts/example.ps1"), "Write-Output 'example'\n");
+    write_file(
+        &repo_root.join("scripts/example.ps1"),
+        "Write-Output 'example'\n",
+    );
 }
 
 fn initialize_policy_command_repo_root(repo_root: &Path) {
@@ -330,9 +339,91 @@ fn initialize_release_provenance_repo_root(repo_root: &Path) {
     );
 }
 
+fn initialize_compatibility_lifecycle_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join("COMPATIBILITY.md"),
+        r#"# Compatibility
+
+## Support Lifecycle and EOL
+Reference date for status labels in this table: **January 15, 2025**.
+
+| Minor | GA date | Active support until | Maintenance support until | EOL date | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1.2 | January 1, 2024 | February 1, 2025 | March 1, 2025 | March 2, 2025 | Active |
+"#,
+    );
+}
+
+fn initialize_dotnet_standards_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/templates/dotnet-class-template.cs"),
+        r#"namespace [Namespace];
+
+/// <summary>
+/// Template summary.
+/// </summary>
+public class [ClassName]
+{
+}
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/templates/dotnet-interface-template.cs"),
+        r#"namespace [Namespace];
+
+/// <summary>
+/// Template summary.
+/// </summary>
+public interface [InterfaceName]
+{
+}
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/templates/dotnet-unit-test-template.cs"),
+        r#"namespace [Namespace];
+
+/// <summary>
+/// Template summary.
+/// </summary>
+[TEST_CLASS]
+public class [ClassName]
+{
+    [Fact]
+    public void Test()
+    {
+    }
+}
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/templates/dotnet-integration-test-template.cs"),
+        r#"namespace [Namespace];
+
+/// <summary>
+/// Template summary.
+/// </summary>
+public class [ClassName]
+{
+    private readonly IMediator _mediator;
+
+    [Test]
+    public void Test()
+    {
+    }
+}
+"#,
+    );
+}
+
 fn initialize_git_repository(repo_root: &Path) -> String {
     run_git(repo_root, &["init", "-b", "main"]);
-    run_git(repo_root, &["config", "user.email", "fixtures@example.invalid"]);
+    run_git(
+        repo_root,
+        &["config", "user.email", "fixtures@example.invalid"],
+    );
     run_git(repo_root, &["config", "user.name", "Fixture User"]);
     run_git(repo_root, &["add", "."]);
     run_git(repo_root, &["commit", "-m", "Initial release fixtures"]);
@@ -592,9 +683,7 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
         "version: 1\nroutes: []\n",
     );
     write_file(
-        &repo_root.join(
-            ".github/instructions/repository-operating-model.instructions.md",
-        ),
+        &repo_root.join(".github/instructions/repository-operating-model.instructions.md"),
         "# Repository Operating Model\n",
     );
     write_file(
@@ -755,6 +844,40 @@ fn test_validation_architecture_boundaries_reports_pass_for_matching_baseline() 
 }
 
 #[test]
+fn test_validation_compatibility_lifecycle_policy_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_compatibility_lifecycle_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "compatibility-lifecycle-policy",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Reference date: 2025-01-15"))
+        .stdout(predicate::str::contains("Rows checked: 1"));
+}
+
+#[test]
+fn test_validation_dotnet_standards_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_dotnet_standards_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "dotnet-standards"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Templates checked: 4"));
+}
+
+#[test]
 fn test_validation_routing_coverage_reports_pass_for_matching_catalog_and_fixture() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validation_repo_root(repo.path());
@@ -805,12 +928,7 @@ fn test_validation_security_baseline_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args([
-            "validation",
-            "security-baseline",
-            "--warning-only",
-            "false",
-        ])
+        .args(["validation", "security-baseline", "--warning-only", "false"])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -829,12 +947,7 @@ fn test_validation_security_baseline_reports_warning_for_allowlisted_first_match
 
     ntk()
         .current_dir(repo.path())
-        .args([
-            "validation",
-            "security-baseline",
-            "--warning-only",
-            "false",
-        ])
+        .args(["validation", "security-baseline", "--warning-only", "false"])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: warning"))
@@ -902,7 +1015,9 @@ fn test_validation_supply_chain_fails_when_required_license_evidence_path_is_mis
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_supply_chain_repo_root(repo.path());
     write_file(
-        &repo.path().join(".github/governance/supply-chain.baseline.json"),
+        &repo
+            .path()
+            .join(".github/governance/supply-chain.baseline.json"),
         r#"{
   "version": 1,
   "sbomOutputPath": ".temp/audit/sbom.latest.json",
@@ -1030,7 +1145,12 @@ fn test_validation_release_governance_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args(["validation", "release-governance", "--warning-only", "false"])
+        .args([
+            "validation",
+            "release-governance",
+            "--warning-only",
+            "false",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -1042,7 +1162,12 @@ fn test_validation_release_provenance_reports_pass_for_valid_assets() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_release_provenance_repo_root(repo.path());
     let head_commit = initialize_git_repository(repo.path());
-    write_audit_report(repo.path(), ".temp/audit-report.json", &head_commit, "passed");
+    write_audit_report(
+        repo.path(),
+        ".temp/audit-report.json",
+        &head_commit,
+        "passed",
+    );
 
     ntk()
         .current_dir(repo.path())

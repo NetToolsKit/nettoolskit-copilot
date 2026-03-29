@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-    Runtime tests for COMPATIBILITY lifecycle validation without external frameworks.
+    Runtime tests for the native `ntk validation compatibility-lifecycle-policy`
+    surface without external frameworks.
 
 .DESCRIPTION
     Covers success and failure cases for lifecycle/EOL table validation.
@@ -34,7 +35,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 # Fails the current runtime test when the exit code differs from the expected value.
 function Assert-ExitCode {
     param(
@@ -84,7 +85,7 @@ function Write-CompatibilityFile {
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-compatibility-lifecycle-policy.ps1'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 try {
     $filePaths = New-Object System.Collections.Generic.List[string]
@@ -94,7 +95,7 @@ try {
         )
         $filePath = Write-CompatibilityFile -ReferenceDate 'January 15, 2025' -Rows $rows
         $filePaths.Add($filePath) | Out-Null
-        & $scriptPath -RepoRoot $resolvedRepoRoot -CompatibilityPath $filePath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'compatibility-lifecycle-policy' '--repo-root' $resolvedRepoRoot '--compatibility-path' $filePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Valid lifecycle row should pass.'
 
@@ -103,7 +104,7 @@ try {
         )
         $filePath = Write-CompatibilityFile -ReferenceDate 'January 15, 2025' -Rows $rows
         $filePaths.Add($filePath) | Out-Null
-        & $scriptPath -RepoRoot $resolvedRepoRoot -CompatibilityPath $filePath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'compatibility-lifecycle-policy' '--repo-root' $resolvedRepoRoot '--compatibility-path' $filePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Invalid EOL date should fail.'
 
@@ -112,7 +113,7 @@ try {
         )
         $filePath = Write-CompatibilityFile -ReferenceDate 'April 10, 2025' -Rows $rows
         $filePaths.Add($filePath) | Out-Null
-        & $scriptPath -RepoRoot $resolvedRepoRoot -CompatibilityPath $filePath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'compatibility-lifecycle-policy' '--repo-root' $resolvedRepoRoot '--compatibility-path' $filePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Status mismatch should fail.'
 
@@ -121,7 +122,7 @@ try {
         )
         $filePath = Write-CompatibilityFile -ReferenceDate 'January 15, 2025' -Rows $rows
         $filePaths.Add($filePath) | Out-Null
-        & $scriptPath -RepoRoot $resolvedRepoRoot -CompatibilityPath $filePath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'compatibility-lifecycle-policy' '--repo-root' $resolvedRepoRoot '--compatibility-path' $filePath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'N/A row with non-Unsupported status should fail.'
     }

@@ -1072,7 +1072,7 @@ $requiredFiles = @(
     'scripts/validation/validate-instruction-architecture.ps1',
     'scripts/validation/validate-template-standards.ps1',
     'scripts/validation/validate-workspace-efficiency.ps1',
-    'scripts/validation/validate-dotnet-standards.ps1',
+    'crates/commands/validation/src/standards/dotnet_standards.rs',
     'scripts/validation/validate-instruction-metadata.ps1',
     'crates/commands/validation/src/release/release_provenance.rs',
     'scripts/validation/validate-all.ps1',

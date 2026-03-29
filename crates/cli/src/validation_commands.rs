@@ -3,20 +3,19 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
-    invoke_validate_agent_orchestration,
-    invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment,
-    invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
-    invoke_validate_policy,
-    invoke_validate_powershell_standards, invoke_validate_routing_coverage,
+    invoke_validate_agent_orchestration, invoke_validate_agent_permissions,
+    invoke_validate_agent_skill_alignment, invoke_validate_architecture_boundaries,
+    invoke_validate_audit_ledger, invoke_validate_compatibility_lifecycle_policy,
+    invoke_validate_dotnet_standards, invoke_validate_policy, invoke_validate_powershell_standards,
     invoke_validate_release_governance, invoke_validate_release_provenance,
-    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
-    invoke_validate_supply_chain, invoke_validate_warning_baseline,
-    ValidateAgentOrchestrationRequest,
+    invoke_validate_routing_coverage, invoke_validate_security_baseline,
+    invoke_validate_shared_script_checksums, invoke_validate_supply_chain,
+    invoke_validate_warning_baseline, ValidateAgentOrchestrationRequest,
     ValidateAgentPermissionsRequest, ValidateAgentSkillAlignmentRequest,
     ValidateArchitectureBoundariesRequest, ValidateAuditLedgerRequest,
-    ValidatePolicyRequest,
-    ValidatePowerShellStandardsRequest, ValidateRoutingCoverageRequest,
-    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
+    ValidatePolicyRequest, ValidatePowerShellStandardsRequest, ValidateReleaseGovernanceRequest,
+    ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
     ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
 };
@@ -38,6 +37,12 @@ pub enum ValidationCommand {
     AuditLedger(ValidationAuditLedgerArgs),
     /// Validate repository architecture boundary baselines.
     ArchitectureBoundaries(ValidationArchitectureBoundariesArgs),
+    /// Validate COMPATIBILITY lifecycle and EOL policy semantics.
+    #[command(name = "compatibility-lifecycle-policy")]
+    CompatibilityLifecyclePolicy(ValidationCompatibilityLifecyclePolicyArgs),
+    /// Validate .NET template standards under `.github/templates`.
+    #[command(name = "dotnet-standards")]
+    DotnetStandards(ValidationDotnetStandardsArgs),
     /// Validate repository policy contracts under `.github/policies`.
     Policy(ValidationPolicyArgs),
     /// Validate PowerShell script standards across repository scripts.
@@ -136,6 +141,34 @@ pub struct ValidationArchitectureBoundariesArgs {
     /// Optional explicit baseline path.
     #[clap(long)]
     pub baseline_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `validation compatibility-lifecycle-policy`.
+#[derive(Debug, Args)]
+pub struct ValidationCompatibilityLifecyclePolicyArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit compatibility document path.
+    #[clap(long)]
+    pub compatibility_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+    /// Emit per-row validation details.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub detailed_output: bool,
+}
+
+/// CLI arguments for `validation dotnet-standards`.
+#[derive(Debug, Args)]
+pub struct ValidationDotnetStandardsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit template directory override.
+    #[clap(long)]
+    pub template_directory: Option<PathBuf>,
 }
 
 /// CLI arguments for `validation routing-coverage`.
@@ -300,9 +333,7 @@ pub struct ValidationWarningBaselineArgs {
 /// Execute one validation command through the `ntk` binary.
 pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
     match command {
-        ValidationCommand::AgentOrchestration(arguments) => {
-            execute_agent_orchestration(arguments)
-        }
+        ValidationCommand::AgentOrchestration(arguments) => execute_agent_orchestration(arguments),
         ValidationCommand::AgentPermissions(arguments) => execute_agent_permissions(arguments),
         ValidationCommand::AgentSkillAlignment(arguments) => {
             execute_agent_skill_alignment(arguments)
@@ -311,6 +342,10 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         ValidationCommand::ArchitectureBoundaries(arguments) => {
             execute_architecture_boundaries(arguments)
         }
+        ValidationCommand::CompatibilityLifecyclePolicy(arguments) => {
+            execute_compatibility_lifecycle_policy(arguments)
+        }
+        ValidationCommand::DotnetStandards(arguments) => execute_dotnet_standards(arguments),
         ValidationCommand::Policy(arguments) => execute_policy(arguments),
         ValidationCommand::PowershellStandards(arguments) => {
             execute_powershell_standards(arguments)
@@ -321,12 +356,8 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
             execute_shared_script_checksums(arguments)
         }
         ValidationCommand::SupplyChain(arguments) => execute_supply_chain(arguments),
-        ValidationCommand::ReleaseGovernance(arguments) => {
-            execute_release_governance(arguments)
-        }
-        ValidationCommand::ReleaseProvenance(arguments) => {
-            execute_release_provenance(arguments)
-        }
+        ValidationCommand::ReleaseGovernance(arguments) => execute_release_governance(arguments),
+        ValidationCommand::ReleaseProvenance(arguments) => execute_release_provenance(arguments),
         ValidationCommand::WarningBaseline(arguments) => execute_warning_baseline(arguments),
     }
 }
@@ -387,15 +418,13 @@ fn execute_agent_permissions(arguments: ValidationAgentPermissionsArgs) -> ExitS
 }
 
 fn execute_agent_skill_alignment(arguments: ValidationAgentSkillAlignmentArgs) -> ExitStatus {
-    let result = match invoke_validate_agent_skill_alignment(
-        &ValidateAgentSkillAlignmentRequest {
-            repo_root: arguments.repo_root,
-            agent_manifest_path: arguments.agent_manifest_path,
-            pipeline_path: arguments.pipeline_path,
-            eval_fixture_path: arguments.eval_fixture_path,
-            skills_root_path: arguments.skills_root_path,
-        },
-    ) {
+    let result = match invoke_validate_agent_skill_alignment(&ValidateAgentSkillAlignmentRequest {
+        repo_root: arguments.repo_root,
+        agent_manifest_path: arguments.agent_manifest_path,
+        pipeline_path: arguments.pipeline_path,
+        eval_fixture_path: arguments.eval_fixture_path,
+        skills_root_path: arguments.skills_root_path,
+    }) {
         Ok(result) => result,
         Err(error) => {
             eprintln!("{error}");
@@ -442,13 +471,38 @@ fn execute_audit_ledger(arguments: ValidationAuditLedgerArgs) -> ExitStatus {
     exit_status_from_code(result.exit_code)
 }
 
-fn execute_architecture_boundaries(
-    arguments: ValidationArchitectureBoundariesArgs,
-) -> ExitStatus {
-    let result = match invoke_validate_architecture_boundaries(
-        &ValidateArchitectureBoundariesRequest {
+fn execute_architecture_boundaries(arguments: ValidationArchitectureBoundariesArgs) -> ExitStatus {
+    let result =
+        match invoke_validate_architecture_boundaries(&ValidateArchitectureBoundariesRequest {
             repo_root: arguments.repo_root,
             baseline_path: arguments.baseline_path,
+        }) {
+            Ok(result) => result,
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!("Rules checked: {}", result.rules_checked);
+    println!("File checks: {}", result.file_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_compatibility_lifecycle_policy(
+    arguments: ValidationCompatibilityLifecyclePolicyArgs,
+) -> ExitStatus {
+    let result = match invoke_validate_compatibility_lifecycle_policy(
+        &ValidateCompatibilityLifecyclePolicyRequest {
+            repo_root: arguments.repo_root,
+            compatibility_path: arguments.compatibility_path,
+            warning_only: arguments.warning_only,
+            detailed_output: arguments.detailed_output,
         },
     ) {
         Ok(result) => result,
@@ -459,9 +513,41 @@ fn execute_architecture_boundaries(
     };
 
     println!("Status: {}", status_label(result.status));
-    println!("Baseline path: {}", result.baseline_path.display());
-    println!("Rules checked: {}", result.rules_checked);
-    println!("File checks: {}", result.file_checks);
+    println!("Warning only: {}", result.warning_only);
+    println!("Detailed output: {}", result.detailed_output);
+    println!(
+        "Compatibility path: {}",
+        result.compatibility_path.display()
+    );
+    if let Some(reference_date) = result.reference_date.as_ref() {
+        println!("Reference date: {reference_date}");
+    }
+    println!("Rows checked: {}", result.rows_checked);
+    print_messages("Details", &result.details);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_dotnet_standards(arguments: ValidationDotnetStandardsArgs) -> ExitStatus {
+    let result = match invoke_validate_dotnet_standards(&ValidateDotnetStandardsRequest {
+        repo_root: arguments.repo_root,
+        template_directory: arguments.template_directory,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!(
+        "Template directory: {}",
+        result.template_directory.display()
+    );
+    println!("Templates checked: {}", result.templates_checked);
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 
@@ -565,23 +651,20 @@ fn execute_powershell_standards(arguments: ValidationPowerShellStandardsArgs) ->
     exit_status_from_code(result.exit_code)
 }
 
-fn execute_shared_script_checksums(
-    arguments: ValidationSharedScriptChecksumsArgs,
-) -> ExitStatus {
-    let result = match invoke_validate_shared_script_checksums(
-        &ValidateSharedScriptChecksumsRequest {
+fn execute_shared_script_checksums(arguments: ValidationSharedScriptChecksumsArgs) -> ExitStatus {
+    let result =
+        match invoke_validate_shared_script_checksums(&ValidateSharedScriptChecksumsRequest {
             repo_root: arguments.repo_root,
             manifest_path: arguments.manifest_path,
             warning_only: arguments.warning_only,
             detailed_output: arguments.detailed_output,
-        },
-    ) {
-        Ok(result) => result,
-        Err(error) => {
-            eprintln!("{error}");
-            return ExitStatus::Error;
-        }
-    };
+        }) {
+            Ok(result) => result,
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        };
 
     println!("Status: {}", status_label(result.status));
     println!("Manifest path: {}", result.manifest_path.display());

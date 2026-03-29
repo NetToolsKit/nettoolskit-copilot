@@ -876,7 +876,11 @@ $baseCheckDefinitions['validate-workspace-efficiency'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-compatibility-lifecycle-policy'] = [pscustomobject]@{
     name = 'validate-compatibility-lifecycle-policy'
-    script = 'scripts/validation/validate-compatibility-lifecycle-policy.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-compatibility-lifecycle-policy'
+    command = @('validation', 'compatibility-lifecycle-policy')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 
@@ -929,7 +933,9 @@ $baseCheckDefinitions['validate-warning-baseline'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-dotnet-standards'] = [pscustomobject]@{
     name = 'validate-dotnet-standards'
-    script = 'scripts/validation/validate-dotnet-standards.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-dotnet-standards'
+    command = @('validation', 'dotnet-standards')
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-architecture-boundaries'] = [pscustomobject]@{
@@ -1019,7 +1025,20 @@ else {
     if ($profileChecks.Count -eq 0) { $defaultCheckOrder } else { $profileChecks }
 }
 
-$profileCheckOptionMap = if ($null -eq $selectedProfile) { @{} } else { Convert-ToHashtable -Value $selectedProfile.checkOptions }
+$selectedProfileCheckOptions = $null
+if ($null -ne $selectedProfile) {
+    $checkOptionsProperty = $selectedProfile.PSObject.Properties['checkOptions']
+    if ($null -ne $checkOptionsProperty) {
+        $selectedProfileCheckOptions = $checkOptionsProperty.Value
+    }
+}
+
+$profileCheckOptionMap = if ($null -eq $selectedProfileCheckOptions) {
+    @{}
+}
+else {
+    Convert-ToHashtable -Value $selectedProfileCheckOptions
+}
 
 $results = New-Object System.Collections.Generic.List[object]
 foreach ($checkName in $selectedCheckOrder) {
