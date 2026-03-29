@@ -48,7 +48,7 @@ pwsh -File .\scripts\runtime\bootstrap.ps1 -Mirror
 2. Re-run healthcheck:
 
 ```powershell
-pwsh -File .\scripts\runtime\healthcheck.ps1
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release
 ```
 
 3. Attach audit artifacts to release notes.

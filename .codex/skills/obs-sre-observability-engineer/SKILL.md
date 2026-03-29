@@ -30,5 +30,6 @@ description: Design and implement observability and SRE controls including SLO/S
 
 ```powershell
 ntk validation all --repo-root . --validation-profile release
-pwsh -File ./scripts/runtime/healthcheck.ps1 -ValidationProfile release
+ntk runtime doctor --repo-root . --detailed
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release
 ```

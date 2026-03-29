@@ -81,7 +81,9 @@
     "scripts/tests/runtime/super-agent-worktree.tests.ps1",
     "scripts/runtime/run-agent-pipeline.ps1",
     "scripts/runtime/clean-codex-runtime.ps1",
-    "scripts/runtime/healthcheck.ps1",
+    "crates/cli/src/runtime_commands.rs",
+    "crates/commands/runtime/src/diagnostics/doctor.rs",
+    "crates/commands/runtime/src/diagnostics/healthcheck.rs",
     "scripts/runtime/self-heal.ps1"
   ],
   "requiredDirectories": [

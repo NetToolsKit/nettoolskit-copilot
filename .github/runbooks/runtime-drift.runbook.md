@@ -7,7 +7,7 @@ Use this runbook when runtime folders (`~/.github`, `~/.codex`) diverge from rep
 ## Detect
 
 ```powershell
-pwsh -File .\scripts\runtime\doctor.ps1 -Detailed
+ntk runtime doctor --repo-root . --detailed
 ```
 
 ## Repair
@@ -21,13 +21,13 @@ pwsh -File .\scripts\runtime\bootstrap.ps1 -Mirror
 2. Re-check drift:
 
 ```powershell
-pwsh -File .\scripts\runtime\doctor.ps1 -Detailed
+ntk runtime doctor --repo-root . --detailed
 ```
 
 3. Run healthcheck:
 
 ```powershell
-pwsh -File .\scripts\runtime\healthcheck.ps1
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile dev
 ```
 
 ## Cleanup
