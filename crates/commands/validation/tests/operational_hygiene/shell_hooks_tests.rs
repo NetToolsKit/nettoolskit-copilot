@@ -59,7 +59,7 @@ fn test_invoke_validate_shell_hooks_reports_semantic_guard_failures() {
     write_hook_file(
         repo.path(),
         "pre-commit",
-        "#!/bin/sh\nntk runtime healthcheck --repo-root . -WarningOnly true\n",
+        "#!/bin/sh\npwsh -File scripts/runtime/validate-vscode-global-alignment.ps1 -WarningOnly true\n",
     );
     let shell_path = write_fake_shell_command(repo.path());
 

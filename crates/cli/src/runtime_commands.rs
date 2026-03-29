@@ -4,10 +4,11 @@ use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
     export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
-    invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_healthcheck,
-    invoke_setup_git_hooks, invoke_setup_global_git_aliases, invoke_trim_trailing_blank_lines,
-    query_local_context_index, update_local_context_index, ExportPlanningSummaryRequest,
-    QueryLocalContextIndexRequest, RuntimeApplyVscodeTemplatesRequest,
+    invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_doctor,
+    invoke_runtime_healthcheck, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
+    invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
+    ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
+    RuntimeApplyVscodeTemplatesRequest, RuntimeDoctorRequest, RuntimeDoctorStatus,
     RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
     RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
     RuntimePreToolUseRequest, RuntimeSetupGitHooksRequest,
@@ -24,6 +25,8 @@ use std::path::{Path, PathBuf};
 pub enum RuntimeCommand {
     /// Normalize hook payloads for VS Code `PreToolUse`.
     PreToolUse,
+    /// Run the native runtime doctor workflow.
+    Doctor(RuntimeDoctorArgs),
     /// Run the native runtime healthcheck workflow.
     Healthcheck(RuntimeHealthcheckArgs),
     /// Build or refresh the repository-owned local context index.
@@ -45,6 +48,38 @@ pub enum RuntimeCommand {
     SetupGitHooks(RuntimeSetupGitHooksArgs),
     /// Configure managed global Git aliases.
     SetupGlobalGitAliases(RuntimeSetupGlobalGitAliasesArgs),
+}
+
+/// CLI arguments for `runtime doctor`.
+#[derive(Debug, Args)]
+pub struct RuntimeDoctorArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit GitHub runtime target path.
+    #[clap(long)]
+    pub target_github_path: Option<PathBuf>,
+    /// Optional explicit Codex runtime target path.
+    #[clap(long)]
+    pub target_codex_path: Option<PathBuf>,
+    /// Optional explicit picker-visible agent skills path.
+    #[clap(long)]
+    pub target_agents_skills_path: Option<PathBuf>,
+    /// Optional explicit Copilot native skills path.
+    #[clap(long)]
+    pub target_copilot_skills_path: Option<PathBuf>,
+    /// Optional explicit runtime profile name.
+    #[clap(long)]
+    pub runtime_profile: Option<String>,
+    /// Emit detailed mapping output.
+    #[clap(long)]
+    pub detailed: bool,
+    /// Re-run bootstrap remediation when drift is detected.
+    #[clap(long)]
+    pub sync_on_drift: bool,
+    /// Treat extra runtime files as drift failures.
+    #[clap(long)]
+    pub strict_extras: bool,
 }
 
 /// CLI arguments for `runtime healthcheck`.
@@ -288,6 +323,7 @@ struct PreToolUsePayload {
 pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
     match command {
         RuntimeCommand::PreToolUse => execute_pre_tool_use(),
+        RuntimeCommand::Doctor(arguments) => execute_runtime_doctor(arguments),
         RuntimeCommand::Healthcheck(arguments) => execute_runtime_healthcheck(arguments),
         RuntimeCommand::UpdateLocalContextIndex(arguments) => {
             execute_update_local_context_index(arguments)
@@ -353,6 +389,62 @@ fn execute_pre_tool_use() -> ExitStatus {
 
     println!("{}", json!({ "hookSpecificOutput": hook_specific_output }));
     ExitStatus::Success
+}
+
+fn execute_runtime_doctor(arguments: RuntimeDoctorArgs) -> ExitStatus {
+    let result = match invoke_runtime_doctor(&RuntimeDoctorRequest {
+        repo_root: arguments.repo_root,
+        target_github_path: arguments.target_github_path,
+        target_codex_path: arguments.target_codex_path,
+        target_agents_skills_path: arguments.target_agents_skills_path,
+        target_copilot_skills_path: arguments.target_copilot_skills_path,
+        runtime_profile: arguments.runtime_profile,
+        sync_on_drift: arguments.sync_on_drift,
+        strict_extras: arguments.strict_extras,
+        ..RuntimeDoctorRequest::default()
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", doctor_status_label(result.status));
+    println!("Runtime profile: {}", result.runtime_profile_name);
+    println!("Mappings checked: {}", result.mappings_checked);
+    println!("Drift detected: {}", result.has_drift);
+    println!("Extras detected: {}", result.has_extras);
+
+    if arguments.detailed {
+        for report in &result.reports {
+            println!();
+            println!("Mapping: {}", report.name);
+            println!("  Source: {}", report.source_path.display());
+            println!("  Target: {}", report.target_path.display());
+            println!("  Source count: {}", report.source_count);
+            println!("  Target count: {}", report.target_count);
+            println!("  Missing in runtime: {}", report.missing_in_runtime.len());
+            println!("  Extra in runtime: {}", report.extra_in_runtime.len());
+            println!("  Drifted files: {}", report.drifted_files.len());
+
+            for path in &report.missing_in_runtime {
+                println!("    [missing] {path}");
+            }
+            for path in &report.extra_in_runtime {
+                println!("    [extra] {path}");
+            }
+            for path in &report.drifted_files {
+                println!("    [drift] {path}");
+            }
+        }
+    }
+
+    if result.has_drift {
+        ExitStatus::Error
+    } else {
+        ExitStatus::Success
+    }
 }
 
 fn execute_runtime_healthcheck(arguments: RuntimeHealthcheckArgs) -> ExitStatus {
@@ -711,5 +803,13 @@ fn healthcheck_status_label(status: RuntimeHealthcheckStatus) -> &'static str {
         RuntimeHealthcheckStatus::Passed => "passed",
         RuntimeHealthcheckStatus::Warning => "warning",
         RuntimeHealthcheckStatus::Failed => "failed",
+    }
+}
+
+fn doctor_status_label(status: RuntimeDoctorStatus) -> &'static str {
+    match status {
+        RuntimeDoctorStatus::Clean => "clean",
+        RuntimeDoctorStatus::CleanWithExtras => "clean-with-extras",
+        RuntimeDoctorStatus::Detected => "detected",
     }
 }

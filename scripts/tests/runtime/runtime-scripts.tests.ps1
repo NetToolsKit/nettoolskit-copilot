@@ -96,16 +96,25 @@ try {
     Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'bootstrap missing RuntimeProfile parameter.'
     Assert-Contains -Collection $keys -Value 'Mirror' -Message 'bootstrap missing Mirror parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'healthcheck.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'ValidationProfile' -Message 'healthcheck missing ValidationProfile parameter.'
-    Assert-Contains -Collection $keys -Value 'WarningOnly' -Message 'healthcheck missing WarningOnly parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'healthcheck missing TargetGithubPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'healthcheck missing TargetCodexPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'healthcheck missing TargetAgentsSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCopilotSkillsPath' -Message 'healthcheck missing TargetCopilotSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'healthcheck missing RuntimeProfile parameter.'
+    $doctorHelp = & $runtimeBinaryPath runtime doctor --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime doctor help smoke test failed.'
+    $doctorHelpText = ($doctorHelp | Out-String)
+    Assert-True ($doctorHelpText -match '--runtime-profile') 'runtime doctor help must expose --runtime-profile.'
+    Assert-True ($doctorHelpText -match '--sync-on-drift') 'runtime doctor help must expose --sync-on-drift.'
+    Assert-True ($doctorHelpText -match '--strict-extras') 'runtime doctor help must expose --strict-extras.'
+
+    $healthcheckHelp = & $runtimeBinaryPath runtime healthcheck --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime healthcheck help smoke test failed.'
+    $healthcheckHelpText = ($healthcheckHelp | Out-String)
+    Assert-True ($healthcheckHelpText -match '--validation-profile') 'runtime healthcheck help must expose --validation-profile.'
+    Assert-True ($healthcheckHelpText -match '--warning-only') 'runtime healthcheck help must expose --warning-only.'
+    Assert-True ($healthcheckHelpText -match '--target-github-path') 'runtime healthcheck help must expose --target-github-path.'
+    Assert-True ($healthcheckHelpText -match '--target-codex-path') 'runtime healthcheck help must expose --target-codex-path.'
+    Assert-True ($healthcheckHelpText -match '--target-agents-skills-path') 'runtime healthcheck help must expose --target-agents-skills-path.'
+    Assert-True ($healthcheckHelpText -match '--target-copilot-skills-path') 'runtime healthcheck help must expose --target-copilot-skills-path.'
+    Assert-True ($healthcheckHelpText -match '--runtime-profile') 'runtime healthcheck help must expose --runtime-profile.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'self-heal.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop

@@ -158,7 +158,6 @@ Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
 $steps = New-Object System.Collections.Generic.List[object]
 
 $bootstrapScript = Join-Path $resolvedRepoRoot 'scripts/runtime/bootstrap.ps1'
-$healthcheckScript = Join-Path $resolvedRepoRoot 'scripts/runtime/healthcheck.ps1'
 $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 $bootstrapArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
@@ -189,14 +188,23 @@ else {
 
 $healthcheckReportPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path '.temp/healthcheck-report.json'
 $healthcheckLogPath = Resolve-RepoPath -Root $resolvedRepoRoot -Path '.temp/logs/healthcheck-from-self-heal.log'
-$healthcheckArgs = New-ResolvedRuntimeTargetArgumentMap -Context $runtimeContext -ResolvedRepoRoot $resolvedRepoRoot -IncludeRepoRoot -IncludeRuntimeProfile
-$healthcheckArgs.OutputPath = $healthcheckReportPath
-$healthcheckArgs.LogPath = $healthcheckLogPath
+$healthcheckArgumentList = @(
+    'runtime',
+    'healthcheck',
+    '--repo-root',
+    $resolvedRepoRoot,
+    '--runtime-profile',
+    $resolvedRuntimeProfile.Name,
+    '--output-path',
+    $healthcheckReportPath,
+    '--log-path',
+    $healthcheckLogPath
+)
 if ($StrictExtras) {
-    $healthcheckArgs.StrictExtras = $true
+    $healthcheckArgumentList += @('--strict-extras')
 }
 
-$healthcheckStep = @(Invoke-ManagedRuntimeStep -Name 'healthcheck' -ScriptPath $healthcheckScript -Arguments $healthcheckArgs) | Select-Object -Last 1
+$healthcheckStep = @(Invoke-ManagedRuntimeBinaryStep -Name 'healthcheck' -RuntimeBinaryPath $runtimeBinaryPath -ArgumentList $healthcheckArgumentList) | Select-Object -Last 1
 if ($null -ne $healthcheckStep) {
     $steps.Add($healthcheckStep) | Out-Null
 }

@@ -299,6 +299,20 @@ fn test_runtime_healthcheck_cli_writes_report_to_requested_output_path() {
 }
 
 #[test]
+fn test_runtime_doctor_cli_reports_clean_runtime_for_none_profile() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_health_repo(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "doctor", "--runtime-profile", "none"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: clean"))
+        .stdout(predicate::str::contains("Runtime profile: none"));
+}
+
+#[test]
 fn test_runtime_export_enterprise_trends_cli_writes_dashboard_outputs() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_runtime_repo_root(repo.path());

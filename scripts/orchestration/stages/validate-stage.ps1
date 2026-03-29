@@ -223,7 +223,7 @@ function Test-IsDeferredValidationCommand {
         'ntk validation all',
         'scripts/tests/runtime/agent-orchestration-engine.tests.ps1',
         'scripts/runtime/run-agent-pipeline.ps1',
-        'scripts/runtime/healthcheck.ps1'
+        'ntk runtime healthcheck'
     )
 
     foreach ($pattern in $deferredPatterns) {
