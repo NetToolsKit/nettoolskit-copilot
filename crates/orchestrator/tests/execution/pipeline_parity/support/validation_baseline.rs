@@ -303,7 +303,7 @@ fn scripts_readme_contents() -> &'static str {
 - [Render Provider Surfaces](runtime/render-provider-surfaces.ps1)
 - [Healthcheck](runtime/healthcheck.ps1)
 - [Self-Heal](runtime/self-heal.ps1)
-- [Validate All](validation/validate-all.ps1)
+- Native Validate All: `ntk validation all --repo-root . --validation-profile release`
 - Native README Standards Check: `ntk validation readme-standards --repo-root .`
 
 ---

@@ -55,7 +55,7 @@ These files are validated through the governance and provenance baselines so onb
    - `ntk validation release-governance --warning-only false`
    - `ntk validation release-provenance --warning-only false`
    - `ntk validation audit-ledger --warning-only false`
-   - `pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release`
+   - `ntk validation all --repo-root . --validation-profile release`
 2. Confirm branch protection drift is zero:
    - `pwsh -File .\scripts\governance\set-branch-protection.ps1`
 3. Update `CHANGELOG.md` with semantic version entry `[X.Y.Z] - YYYY-MM-DD`.

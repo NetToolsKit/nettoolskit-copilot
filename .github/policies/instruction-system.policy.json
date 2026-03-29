@@ -61,7 +61,6 @@
     "crates/commands/validation/src/structure/planning_structure.rs",
     "crates/commands/validation/src/governance/template_standards.rs",
     "crates/commands/validation/src/workspace/workspace_efficiency.rs",
-    "scripts/validation/validate-all.ps1",
     "crates/commands/validation/src/agent_orchestration/orchestration_integrity.rs",
     "crates/commands/validation/src/release/release_provenance.rs",
     "scripts/validation/export-audit-report.ps1",

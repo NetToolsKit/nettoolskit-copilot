@@ -29,6 +29,6 @@ description: Design and implement observability and SRE controls including SLO/S
 ## Validation examples
 
 ```powershell
-pwsh -File ./scripts/validation/validate-all.ps1 -ValidationProfile release
+ntk validation all --repo-root . --validation-profile release
 pwsh -File ./scripts/runtime/healthcheck.ps1 -ValidationProfile release
 ```

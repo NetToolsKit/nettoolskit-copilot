@@ -5,7 +5,7 @@
 .DESCRIPTION
     Executes:
     - optional runtime bootstrap sync
-    - validation suite (`scripts/validation/validate-all.ps1`)
+    - validation suite (`ntk validation all`)
     - runtime drift doctor (`scripts/runtime/doctor.ps1`)
 
     This is the PowerShell compatibility entrypoint for the Rust-owned health
@@ -52,7 +52,7 @@
     Passes -StrictExtras to runtime doctor.
 
 .PARAMETER ValidationProfile
-    Validation profile id used by validate-all.
+    Validation profile id used by the native `ntk validation all` boundary.
 
 .PARAMETER WarningOnly
     Global warning-only mode. Default true.
@@ -122,6 +122,95 @@ $script:LogFilePath = $null
 $script:IsVerboseEnabled = [bool] $Verbose
 Initialize-ExecutionIssueTracking
 
+# Converts a validation parameter name to the native CLI option name.
+function Convert-ValidationParameterNameToCliOption {
+    param([string] $Name)
+
+    $kebab = [regex]::Replace($Name, '([a-z0-9])([A-Z])', '$1-$2').ToLowerInvariant()
+    return "--$kebab"
+}
+
+# Converts hashtable validation arguments into CLI arguments for `ntk validation`.
+function Convert-ValidationArgumentsToCliArguments {
+    param([hashtable] $Arguments)
+
+    $cliArguments = New-Object System.Collections.Generic.List[string]
+    if ($null -eq $Arguments) {
+        return @()
+    }
+
+    foreach ($entry in ($Arguments.GetEnumerator() | Sort-Object -Property Name)) {
+        if ($null -eq $entry.Value) {
+            continue
+        }
+
+        $optionName = Convert-ValidationParameterNameToCliOption -Name ([string] $entry.Key)
+        $cliArguments.Add($optionName) | Out-Null
+        if ($entry.Value -is [bool]) {
+            $cliArguments.Add(([string] $entry.Value).ToLowerInvariant()) | Out-Null
+            continue
+        }
+
+        $stringValue = [string] $entry.Value
+        if ([string]::IsNullOrWhiteSpace($stringValue)) {
+            continue
+        }
+
+        $cliArguments.Add($stringValue) | Out-Null
+    }
+
+    return @($cliArguments)
+}
+
+# Executes a native validation command through the managed runtime binary.
+function Invoke-NativeValidationCheck {
+    param(
+        [string] $Name,
+        [string] $SurfaceId,
+        [string[]] $CommandSegments,
+        [hashtable] $Arguments,
+        [string] $Root,
+        [bool] $TreatFailureAsWarning
+    )
+
+    $startedAt = Get-Date
+    $status = 'failed'
+    $exitCode = 1
+    $errorMessage = $null
+
+    try {
+        $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $Root -RuntimePreference github
+        $cliArguments = Convert-ValidationArgumentsToCliArguments -Arguments $Arguments
+        & $runtimeBinaryPath @CommandSegments @cliArguments | Out-Host
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        if ($exitCode -eq 0) {
+            $status = 'passed'
+        }
+        elseif ($TreatFailureAsWarning) {
+            $status = 'warning'
+        }
+    }
+    catch {
+        $exitCode = 1
+        $errorMessage = $_.Exception.Message
+        if ($TreatFailureAsWarning) {
+            $status = 'warning'
+        }
+    }
+
+    $finishedAt = Get-Date
+    return [pscustomobject]@{
+        name = $Name
+        script = $SurfaceId
+        status = $status
+        exitCode = $exitCode
+        startedAt = $startedAt.ToString('o')
+        finishedAt = $finishedAt.ToString('o')
+        durationMs = [int] ($finishedAt - $startedAt).TotalMilliseconds
+        error = $errorMessage
+    }
+}
+
 # -------------------------------
 # Main execution
 # -------------------------------
@@ -171,7 +260,6 @@ Write-ExecutionLog -Level 'INFO' -Message ("Log file: {0}" -f $resolvedLogPath)
 $checks = New-Object System.Collections.Generic.List[object]
 
 $bootstrapScript = Join-Path $resolvedRepoRoot 'scripts/runtime/bootstrap.ps1'
-$validateAllScript = Join-Path $resolvedRepoRoot 'scripts/validation/validate-all.ps1'
 $doctorScript = Join-Path $resolvedRepoRoot 'scripts/runtime/doctor.ps1'
 
 if ($SyncRuntime) {
@@ -191,7 +279,7 @@ $validateAllArgs = @{
     ValidationProfile = $ValidationProfile
     WarningOnly = $WarningOnly
 }
-$validateAllCheck = @(Invoke-ManagedRuntimeCheck -Name 'validate-all' -ScriptPath $validateAllScript -Arguments $validateAllArgs -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
+$validateAllCheck = @(Invoke-NativeValidationCheck -Name 'validate-all' -SurfaceId 'rust:nettoolskit-validation::validate-all' -CommandSegments @('validation', 'all') -Arguments $validateAllArgs -Root $resolvedRepoRoot -TreatFailureAsWarning:$WarningOnly) | Select-Object -Last 1
 if ($null -ne $validateAllCheck) {
     $checks.Add($validateAllCheck) | Out-Null
 }

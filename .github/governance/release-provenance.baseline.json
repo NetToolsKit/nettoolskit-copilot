@@ -7,7 +7,7 @@
   "warnOnMissingOptionalAuditReport": false,
   "warnOnAuditCommitMismatch": false,
   "changelogPath": "CHANGELOG.md",
-  "validateAllPath": "scripts/validation/validate-all.ps1",
+  "validateAllCommand": "ntk validation all",
   "requiredValidationChecks": [
     "validate-instructions",
     "validate-policy",
@@ -98,7 +98,6 @@
     ".codex/orchestration/prompts/task-quality-review.prompt.md",
     ".codex/orchestration/prompts/reviewer-stage.prompt.md",
     ".codex/orchestration/prompts/closeout-stage.prompt.md",
-    "scripts/validation/validate-all.ps1",
     "crates/commands/validation/src/release/release_governance.rs",
     "crates/commands/validation/src/instruction_graph/authoritative_source_policy.rs",
     "crates/commands/validation/src/instruction_graph/instruction_architecture.rs",

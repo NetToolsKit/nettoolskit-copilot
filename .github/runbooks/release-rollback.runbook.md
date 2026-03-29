@@ -26,7 +26,7 @@ git revert <commit-hash>
 3. Run release profile validations:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
+ntk validation all --repo-root . --validation-profile release
 ```
 
 4. Generate audit evidence:

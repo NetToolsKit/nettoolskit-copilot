@@ -39,7 +39,7 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 ```powershell
 pwsh -File .\scripts\runtime\bootstrap.ps1
 pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile dev
+ntk validation all --repo-root . --validation-profile dev
 ntk validation readme-standards --repo-root .
 ```
 
@@ -51,7 +51,7 @@ ntk validation readme-standards --repo-root .
 pwsh -File .\scripts\runtime\bootstrap.ps1
 pwsh -File .\scripts\runtime\render-provider-surfaces.ps1 -RepoRoot .
 pwsh -File .\scripts\runtime\self-heal.ps1 -StrictExtras
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
+ntk validation all --repo-root . --validation-profile release
 ntk validation readme-standards --repo-root .
 ```
 
@@ -68,7 +68,7 @@ ntk validation readme-standards --repo-root .
 - [Render Provider Surfaces](runtime/render-provider-surfaces.ps1)
 - [Healthcheck](runtime/healthcheck.ps1)
 - [Self-Heal](runtime/self-heal.ps1)
-- [Validate All](validation/validate-all.ps1)
+- Native Validate All: `ntk validation all --repo-root . --validation-profile release`
 - Native README Standards Check: `ntk validation readme-standards --repo-root .`
 
 ---

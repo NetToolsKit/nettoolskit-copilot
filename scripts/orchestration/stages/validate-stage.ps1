@@ -220,7 +220,7 @@ function Test-IsDeferredValidationCommand {
         'ntk validation agent-hooks',
         'ntk validation shell-hooks',
         'ntk validation runtime-script-tests',
-        'scripts/validation/validate-all.ps1',
+        'ntk validation all',
         'scripts/tests/runtime/agent-orchestration-engine.tests.ps1',
         'scripts/runtime/run-agent-pipeline.ps1',
         'scripts/runtime/healthcheck.ps1'

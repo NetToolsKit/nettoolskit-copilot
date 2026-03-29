@@ -9,13 +9,13 @@ Use this runbook when one or more validation checks report failures or warnings 
 1. Run full suite with current profile:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-all.ps1
+ntk validation all --repo-root . --validation-profile dev
 ```
 
 2. Run with release profile for full diagnostics:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
+ntk validation all --repo-root . --validation-profile release
 ```
 
 3. Export evidence:
@@ -46,7 +46,7 @@ pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile relea
 
 1. Apply targeted fixes.
 2. Re-run failing checks individually through `ntk validation <check>` when a native command exists, or through the remaining PowerShell entrypoint when the check is still script-owned.
-3. Re-run `validate-all`.
+3. Re-run `ntk validation all`.
 4. Generate updated audit report.
 
 ## Escalation

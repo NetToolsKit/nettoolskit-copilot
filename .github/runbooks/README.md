@@ -70,7 +70,7 @@ Runbooks are validated indirectly by:
 
 ```powershell
 ntk validation instructions --repo-root . --warning-only false
-pwsh -File .\scripts\validation\validate-all.ps1
+ntk validation all --repo-root . --validation-profile dev
 ```
 
 ---
