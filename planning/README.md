@@ -29,6 +29,7 @@ This folder is part of the repository operating model, not disposable scratch st
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
+- [Active Workstreams](#active-workstreams)
 - [Structure](#structure)
 - [Rules](#rules)
 - [References](#references)
@@ -48,6 +49,11 @@ planning/
    ├─ active/
    └─ completed/
 ```
+
+## Active Workstreams
+
+- [planning/active/plan-script-retirement-phase-9.md](planning/active/plan-script-retirement-phase-9.md)
+- [planning/specs/active/spec-script-retirement-phase-9.md](planning/specs/active/spec-script-retirement-phase-9.md)
 
 ---
 
@@ -81,6 +87,8 @@ planning/
 - [planning/completed/rust-script-cutover-default-map.md](planning/completed/rust-script-cutover-default-map.md)
 - [planning/completed/rust-script-parity-ledger.md](planning/completed/rust-script-parity-ledger.md)
 - [planning/completed/rust-script-transcription-ownership-matrix.md](planning/completed/rust-script-transcription-ownership-matrix.md)
+- [planning/active/plan-script-retirement-phase-9.md](planning/active/plan-script-retirement-phase-9.md)
+- [planning/specs/active/spec-script-retirement-phase-9.md](planning/specs/active/spec-script-retirement-phase-9.md)
 - [planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md](planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md)
 - [planning/specs/completed/spec-script-retirement-phase-2.md](planning/specs/completed/spec-script-retirement-phase-2.md)
 - [planning/specs/completed/spec-script-retirement-phase-3.md](planning/specs/completed/spec-script-retirement-phase-3.md)

@@ -59,6 +59,10 @@ Generated: 2026-03-28 19:39
 ## Current Immediate Queue
 
 - No single-file `remove-now candidate` remains after Phase 8.
+- Phase 9 active planning now tracks the next wrapper cluster:
+  - `scripts/validation/validate-agent-orchestration.ps1`
+  - `scripts/validation/validate-release-governance.ps1`
+  - `scripts/validation/validate-release-provenance.ps1`
 - The next consumer sweep should move to domain-level proof for:
   - `scripts/common/*.ps1`
   - `scripts/runtime/*.ps1` excluding the retained hook wrappers and the Phase 4 retired continuity/template leaves

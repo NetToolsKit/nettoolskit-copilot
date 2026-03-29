@@ -10,10 +10,11 @@ Generated: 2026-03-28 19:39
 - Supporting Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
 - Cutover Map: `planning/completed/rust-script-cutover-default-map.md`
 - Archived From Branch: `feature/native-validation-policy`
-- Remaining Open Backlog: none; retained-wrapper decisions are now part of the completed migration operating model.
+- Remaining Open Backlog: none within the completed migration bundle; Phase 9 active planning now tracks the agent-orchestration and release governance/provenance wrapper retirement workstream separately.
 - Live parity harness: `approval-approved-test`, the staged `run-test` closeout success path, `evaluate-agent-pipeline`, and `resume-agent-pipeline` are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
 - Parity cleanup note: tracked repository artifacts now restore through Git-backed recovery, and projected POML assets are restored explicitly after parity runs so the worktree returns to a clean baseline deterministically.
 - Current closeout stance: the explicit cutover map now records which parity-proven domains are Rust-default now, intentionally wrapper-retained, or retained as legacy integration wrappers; the parity ledger still avoids promoting a domain to `cutover ready` by implication alone.
+- Follow-up note: the remaining `validate-agent-orchestration`, `validate-release-governance`, and `validate-release-provenance` wrappers are not part of the completed bundle yet; they are tracked in the active phase-9 planning workstream.
 - Closeout board semantics:
   - `parity proven`: native Rust behavior and deterministic evidence exist; the cutover map then decides whether the domain is Rust-default now or wrapper retained intentionally
   - `cutover ready`: parity is proven and the domain is ready to become Rust-default
