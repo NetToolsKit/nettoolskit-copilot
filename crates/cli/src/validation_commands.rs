@@ -3,16 +3,20 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
+    invoke_validate_agent_orchestration,
     invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment,
     invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
     invoke_validate_policy,
     invoke_validate_powershell_standards, invoke_validate_routing_coverage,
+    invoke_validate_release_governance, invoke_validate_release_provenance,
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     invoke_validate_supply_chain, invoke_validate_warning_baseline,
+    ValidateAgentOrchestrationRequest,
     ValidateAgentPermissionsRequest, ValidateAgentSkillAlignmentRequest,
     ValidateArchitectureBoundariesRequest, ValidateAuditLedgerRequest,
     ValidatePolicyRequest,
     ValidatePowerShellStandardsRequest, ValidateRoutingCoverageRequest,
+    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
     ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
 };
@@ -21,6 +25,9 @@ use std::path::PathBuf;
 /// Validation command group.
 #[derive(Debug, Subcommand)]
 pub enum ValidationCommand {
+    /// Validate multi-agent orchestration contracts and runtime assets.
+    #[command(name = "agent-orchestration")]
+    AgentOrchestration(ValidationAgentOrchestrationArgs),
     /// Validate agent permission matrix and stage command contracts.
     #[command(name = "agent-permissions")]
     AgentPermissions(ValidationAgentPermissionsArgs),
@@ -47,9 +54,23 @@ pub enum ValidationCommand {
     /// Validate local supply-chain baseline and export SBOM evidence.
     #[command(name = "supply-chain")]
     SupplyChain(ValidationSupplyChainArgs),
+    /// Validate release governance contracts and release guardrails.
+    #[command(name = "release-governance")]
+    ReleaseGovernance(ValidationReleaseGovernanceArgs),
+    /// Validate release provenance evidence and git traceability.
+    #[command(name = "release-provenance")]
+    ReleaseProvenance(ValidationReleaseProvenanceArgs),
     /// Validate analyzer warning volume against the warning baseline.
     #[command(name = "warning-baseline")]
     WarningBaseline(ValidationWarningBaselineArgs),
+}
+
+/// CLI arguments for `validation agent-orchestration`.
+#[derive(Debug, Args)]
+pub struct ValidationAgentOrchestrationArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
 }
 
 /// CLI arguments for `validation agent-permissions`.
@@ -213,6 +234,49 @@ pub struct ValidationSupplyChainArgs {
     pub warning_only: bool,
 }
 
+/// CLI arguments for `validation release-governance`.
+#[derive(Debug, Args)]
+pub struct ValidationReleaseGovernanceArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional changelog path override.
+    #[clap(long)]
+    pub changelog_path: Option<PathBuf>,
+    /// Optional CODEOWNERS path override.
+    #[clap(long)]
+    pub codeowners_path: Option<PathBuf>,
+    /// Optional governance document path override.
+    #[clap(long)]
+    pub governance_doc_path: Option<PathBuf>,
+    /// Optional branch protection baseline path override.
+    #[clap(long)]
+    pub branch_protection_baseline_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
+/// CLI arguments for `validation release-provenance`.
+#[derive(Debug, Args)]
+pub struct ValidationReleaseProvenanceArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional baseline path override.
+    #[clap(long)]
+    pub baseline_path: Option<PathBuf>,
+    /// Optional audit report path override.
+    #[clap(long)]
+    pub audit_report_path: Option<PathBuf>,
+    /// Force audit-report validation even if the baseline does not require it.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub require_audit_report: bool,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// CLI arguments for `validation warning-baseline`.
 #[derive(Debug, Args)]
 pub struct ValidationWarningBaselineArgs {
@@ -236,6 +300,9 @@ pub struct ValidationWarningBaselineArgs {
 /// Execute one validation command through the `ntk` binary.
 pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
     match command {
+        ValidationCommand::AgentOrchestration(arguments) => {
+            execute_agent_orchestration(arguments)
+        }
         ValidationCommand::AgentPermissions(arguments) => execute_agent_permissions(arguments),
         ValidationCommand::AgentSkillAlignment(arguments) => {
             execute_agent_skill_alignment(arguments)
@@ -254,8 +321,39 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
             execute_shared_script_checksums(arguments)
         }
         ValidationCommand::SupplyChain(arguments) => execute_supply_chain(arguments),
+        ValidationCommand::ReleaseGovernance(arguments) => {
+            execute_release_governance(arguments)
+        }
+        ValidationCommand::ReleaseProvenance(arguments) => {
+            execute_release_provenance(arguments)
+        }
         ValidationCommand::WarningBaseline(arguments) => execute_warning_baseline(arguments),
     }
+}
+
+fn execute_agent_orchestration(arguments: ValidationAgentOrchestrationArgs) -> ExitStatus {
+    let result = match invoke_validate_agent_orchestration(&ValidateAgentOrchestrationRequest {
+        repo_root: arguments.repo_root,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!(
+        "Required directories checked: {}",
+        result.required_directories_checked
+    );
+    println!("Required files checked: {}", result.required_files_checked);
+    println!("Agents checked: {}", result.agents_checked);
+    println!("Stage checks: {}", result.stage_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
 }
 
 fn execute_agent_permissions(arguments: ValidationAgentPermissionsArgs) -> ExitStatus {
@@ -540,6 +638,88 @@ fn execute_supply_chain(arguments: ValidationSupplyChainArgs) -> ExitStatus {
     println!("Packages discovered: {}", result.packages_discovered);
     if let Some(sbom_path) = result.sbom_path.as_ref() {
         println!("SBOM path: {}", sbom_path.display());
+    }
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_release_governance(arguments: ValidationReleaseGovernanceArgs) -> ExitStatus {
+    let result = match invoke_validate_release_governance(&ValidateReleaseGovernanceRequest {
+        repo_root: arguments.repo_root,
+        changelog_path: arguments.changelog_path,
+        codeowners_path: arguments.codeowners_path,
+        governance_doc_path: arguments.governance_doc_path,
+        branch_protection_baseline_path: arguments.branch_protection_baseline_path,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Changelog path: {}", result.changelog_path.display());
+    println!("CODEOWNERS path: {}", result.codeowners_path.display());
+    println!(
+        "Governance doc path: {}",
+        result.governance_doc_path.display()
+    );
+    println!(
+        "Branch protection baseline path: {}",
+        result.branch_protection_baseline_path.display()
+    );
+    if let Some(version) = result.latest_version.as_ref() {
+        println!("Latest changelog version: {version}");
+    }
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_release_provenance(arguments: ValidationReleaseProvenanceArgs) -> ExitStatus {
+    let result = match invoke_validate_release_provenance(&ValidateReleaseProvenanceRequest {
+        repo_root: arguments.repo_root,
+        baseline_path: arguments.baseline_path,
+        audit_report_path: arguments.audit_report_path,
+        require_audit_report: arguments.require_audit_report,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Require audit report: {}", result.require_audit_report);
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!("Audit report path: {}", result.audit_report_path.display());
+    println!("Checks declared: {}", result.checks_declared);
+    println!(
+        "Checks found in validate-all: {}",
+        result.checks_found_in_validate_all
+    );
+    println!("Evidence files: {}", result.evidence_files);
+    println!("Git available: {}", result.git_available);
+    if let Some(version) = result.latest_version.as_ref() {
+        println!("Latest changelog version: {version}");
+    }
+    if let Some(branch) = result.current_branch.as_ref() {
+        println!("Current branch: {branch}");
+    }
+    if let Some(commit) = result.head_commit.as_ref() {
+        println!("HEAD commit: {commit}");
+    }
+    if let Some(is_dirty) = result.is_dirty {
+        println!("Worktree dirty: {is_dirty}");
     }
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);

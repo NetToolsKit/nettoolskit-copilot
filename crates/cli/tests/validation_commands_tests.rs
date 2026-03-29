@@ -6,6 +6,7 @@ use predicates::prelude::*;
 use serde_json::json;
 use std::fs;
 use std::path::Path;
+use std::process::Command as ProcessCommand;
 use tempfile::TempDir;
 
 fn ntk() -> Command {
@@ -234,6 +235,157 @@ fn initialize_policy_command_repo_root(repo_root: &Path) {
     );
 }
 
+fn initialize_release_governance_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join("CHANGELOG.md"),
+        r#"# Changelog
+
+[2.0.0] - 2026-03-20
+[1.9.0] - 2026-02-10
+"#,
+    );
+    write_file(
+        &repo_root.join("CODEOWNERS"),
+        "* @example\n.github/ @example\n.githooks/ @example\nscripts/ @example\n",
+    );
+    write_file(
+        &repo_root.join(".github/governance/release-governance.md"),
+        r#"# Release Governance
+
+## Scope
+
+Scope.
+
+## Branch Protection
+
+Branch protection.
+
+## CODEOWNERS
+
+Owners.
+
+## Release Checklist
+
+Checklist.
+
+## Rollback
+
+Rollback.
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/branch-protection.baseline.json"),
+        r#"{
+  "schemaVersion": 1,
+  "repository": "example/repo",
+  "branch": "main",
+  "protection": {
+    "required_status_checks": {
+      "strict": true,
+      "contexts": [
+        "Validate Instructions Runtime and Policies"
+      ]
+    },
+    "enforce_admins": true,
+    "required_pull_request_reviews": {
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true,
+      "required_approving_review_count": 1
+    }
+  }
+}"#,
+    );
+}
+
+fn initialize_release_provenance_repo_root(repo_root: &Path) {
+    initialize_release_governance_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/governance/release-provenance.baseline.json"),
+        r#"{
+  "version": 1,
+  "releaseBranch": "main",
+  "requireCleanWorktree": false,
+  "warnOnDirtyWorktree": false,
+  "requireAuditReport": false,
+  "warnOnMissingOptionalAuditReport": false,
+  "warnOnAuditCommitMismatch": true,
+  "changelogPath": "CHANGELOG.md",
+  "validateAllPath": "scripts/validation/validate-all.ps1",
+  "requiredValidationChecks": [
+    "validate-release-governance",
+    "validate-release-provenance"
+  ],
+  "requiredEvidenceFiles": [
+    "CHANGELOG.md",
+    "CODEOWNERS",
+    ".github/governance/release-governance.md",
+    ".github/governance/release-provenance.baseline.json"
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join("scripts/validation/validate-all.ps1"),
+        "$definitions = @(\n    @{ name = 'validate-release-governance' },\n    @{ name = 'validate-release-provenance' }\n)\n",
+    );
+}
+
+fn initialize_git_repository(repo_root: &Path) -> String {
+    run_git(repo_root, &["init", "-b", "main"]);
+    run_git(repo_root, &["config", "user.email", "fixtures@example.invalid"]);
+    run_git(repo_root, &["config", "user.name", "Fixture User"]);
+    run_git(repo_root, &["add", "."]);
+    run_git(repo_root, &["commit", "-m", "Initial release fixtures"]);
+
+    run_git_capture(repo_root, &["rev-parse", "HEAD"])
+}
+
+fn write_audit_report(repo_root: &Path, relative_path: &str, commit: &str, overall_status: &str) {
+    write_file(
+        &repo_root.join(relative_path),
+        &format!(
+            r#"{{
+  "generatedAt": "2026-03-27T13:43:00Z",
+  "summary": {{
+    "overallStatus": "{overall_status}"
+  }},
+  "git": {{
+    "commit": "{commit}"
+  }}
+}}"#
+        ),
+    );
+}
+
+fn run_git(repo_root: &Path, arguments: &[&str]) {
+    let status = ProcessCommand::new("git")
+        .arg("-C")
+        .arg(repo_root)
+        .args(arguments)
+        .status()
+        .expect("git command should start");
+    assert!(
+        status.success(),
+        "git command should succeed: {:?}",
+        arguments
+    );
+}
+
+fn run_git_capture(repo_root: &Path, arguments: &[&str]) -> String {
+    let output = ProcessCommand::new("git")
+        .arg("-C")
+        .arg(repo_root)
+        .args(arguments)
+        .output()
+        .expect("git command should start");
+    assert!(
+        output.status.success(),
+        "git command should succeed: {:?}",
+        arguments
+    );
+    String::from_utf8_lossy(&output.stdout).trim().to_string()
+}
+
 fn initialize_agent_skill(repo_root: &Path, skill_name: &str) {
     write_file(
         &repo_root.join(format!(".codex/skills/{skill_name}/SKILL.md")),
@@ -400,6 +552,34 @@ fn valid_eval_fixtures_json() -> &'static str {
 }"#
 }
 
+fn valid_handoff_template_json() -> &'static str {
+    r#"{
+  "fromStage": "plan",
+  "toStage": "implement",
+  "artifacts": [
+    { "name": "task-plan", "path": ".temp/task-plan.md", "checksum": "sha256:replace-me" }
+  ]
+}"#
+}
+
+fn valid_run_artifact_template_json() -> &'static str {
+    r#"{
+  "stages": [
+    { "stageId": "intake", "agentId": "super-agent" },
+    { "stageId": "spec", "agentId": "brainstormer" },
+    { "stageId": "plan", "agentId": "planner" },
+    { "stageId": "route", "agentId": "router" },
+    { "stageId": "implement", "agentId": "specialist" },
+    { "stageId": "validate", "agentId": "tester" },
+    { "stageId": "review", "agentId": "reviewer" },
+    { "stageId": "closeout", "agentId": "release-engineer" }
+  ],
+  "summary": {
+    "stageCount": 8
+  }
+}"#
+}
+
 fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
     write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
@@ -456,6 +636,13 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
     }
 
     for relative_path in [
+        "scripts/common/agent-runtime-hardening.ps1",
+        "scripts/runtime/run-agent-pipeline.ps1",
+        "scripts/runtime/resume-agent-pipeline.ps1",
+        "scripts/runtime/replay-agent-run.ps1",
+        "scripts/runtime/evaluate-agent-pipeline.ps1",
+        "scripts/orchestration/engine/invoke-codex-dispatch.ps1",
+        "scripts/orchestration/engine/invoke-task-worker.ps1",
         "scripts/orchestration/stages/intake-stage.ps1",
         "scripts/orchestration/stages/spec-stage.ps1",
         "scripts/orchestration/stages/plan-stage.ps1",
@@ -474,6 +661,8 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
         ".codex/orchestration/prompts/planner-stage.prompt.md",
         ".codex/orchestration/prompts/router-stage.prompt.md",
         ".codex/orchestration/prompts/executor-task.prompt.md",
+        ".codex/orchestration/prompts/task-spec-review.prompt.md",
+        ".codex/orchestration/prompts/task-quality-review.prompt.md",
         ".codex/orchestration/prompts/reviewer-stage.prompt.md",
         ".codex/orchestration/prompts/closeout-stage.prompt.md",
     ] {
@@ -481,6 +670,27 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
     }
 
     for relative_path in [
+        ".codex/orchestration/templates/trace-record.template.json",
+        ".codex/orchestration/templates/policy-evaluations.template.json",
+        ".codex/orchestration/templates/checkpoint-state.template.json",
+    ] {
+        write_file(&repo_root.join(relative_path), r#"{ "type": "object" }"#);
+    }
+    write_file(
+        &repo_root.join(".codex/orchestration/templates/handoff.template.json"),
+        valid_handoff_template_json(),
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/templates/run-artifact.template.json"),
+        valid_run_artifact_template_json(),
+    );
+
+    for relative_path in [
+        ".github/schemas/agent.contract.schema.json",
+        ".github/schemas/agent.pipeline.schema.json",
+        ".github/schemas/agent.handoff.schema.json",
+        ".github/schemas/agent.run-artifact.schema.json",
+        ".github/schemas/agent.evals.schema.json",
         ".github/schemas/agent.stage-intake-result.schema.json",
         ".github/schemas/agent.stage-spec-result.schema.json",
         ".github/schemas/agent.stage-plan-result.schema.json",
@@ -488,6 +698,10 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
         ".github/schemas/agent.stage-implementation-result.schema.json",
         ".github/schemas/agent.stage-review-result.schema.json",
         ".github/schemas/agent.stage-closeout-result.schema.json",
+        ".github/schemas/agent.task-review-result.schema.json",
+        ".github/schemas/agent.trace-record.schema.json",
+        ".github/schemas/agent.policy-evaluation.schema.json",
+        ".github/schemas/agent.checkpoint-state.schema.json",
     ] {
         write_file(&repo_root.join(relative_path), r#"{ "type": "object" }"#);
     }
@@ -792,6 +1006,74 @@ fn test_validation_agent_permissions_reports_pass_for_valid_assets() {
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Agents checked: 8"))
         .stdout(predicate::str::contains("Stage checks: 8"));
+}
+
+#[test]
+fn test_validation_agent_orchestration_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_agent_contract_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "agent-orchestration"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Agents checked: 8"))
+        .stdout(predicate::str::contains("Stage checks: 8"));
+}
+
+#[test]
+fn test_validation_release_governance_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_release_governance_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "release-governance", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Latest changelog version: 2.0.0"));
+}
+
+#[test]
+fn test_validation_release_provenance_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_release_provenance_repo_root(repo.path());
+    let head_commit = initialize_git_repository(repo.path());
+    write_audit_report(repo.path(), ".temp/audit-report.json", &head_commit, "passed");
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "release-provenance",
+            "--warning-only",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Checks declared: 2"))
+        .stdout(predicate::str::contains("Checks found in validate-all: 2"))
+        .stdout(predicate::str::contains("Git available: true"));
+}
+
+#[test]
+fn test_validation_release_provenance_require_audit_report_reports_warning_when_missing() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_release_provenance_repo_root(repo.path());
+    initialize_git_repository(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "release-provenance", "--require-audit-report"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: warning"))
+        .stdout(predicate::str::contains("Require audit report: true"))
+        .stdout(predicate::str::contains("Required audit report not found"));
 }
 
 #[test]
