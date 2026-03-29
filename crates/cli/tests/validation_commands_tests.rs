@@ -213,6 +213,286 @@ fn initialize_warning_baseline_repo_root(repo_root: &Path) {
     write_file(&repo_root.join("scripts/example.ps1"), "Write-Output 'example'\n");
 }
 
+fn initialize_policy_command_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(&repo_root.join("README.md"), "# Repo\n");
+    write_file(
+        &repo_root.join("scripts/runtime/install.ps1"),
+        "Write-Output 'install'\n",
+    );
+    write_file(&repo_root.join(".githooks/pre-commit"), "#!/bin/sh\n");
+    write_file(&repo_root.join(".githooks/post-commit"), "#!/bin/sh\n");
+    write_file(
+        &repo_root.join(".github/policies/baseline.policy.json"),
+        r#"{
+  "id": "repository-baseline",
+  "requiredFiles": ["README.md", "scripts/runtime/install.ps1"],
+  "requiredDirectories": [".github/policies", ".githooks"],
+  "forbiddenFiles": ["forbidden.txt"],
+  "requiredGitHooks": ["pre-commit", "post-commit"]
+}"#,
+    );
+}
+
+fn initialize_agent_skill(repo_root: &Path, skill_name: &str) {
+    write_file(
+        &repo_root.join(format!(".codex/skills/{skill_name}/SKILL.md")),
+        &format!(
+            "---\nname: {skill_name}\n---\nReference .github/AGENTS.md\nReference .github/copilot-instructions.md\nReference .github/instruction-routing.catalog.yml\nReference .github/instructions/repository-operating-model.instructions.md\n"
+        ),
+    );
+    write_file(
+        &repo_root.join(format!(".codex/skills/{skill_name}/agents/openai.yaml")),
+        "name: openai\n",
+    );
+}
+
+fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
+    write_file(
+        &repo_root.join(".github/copilot-instructions.md"),
+        "# Copilot Instructions\n",
+    );
+    write_file(
+        &repo_root.join(".github/instruction-routing.catalog.yml"),
+        "version: 1\nroutes: []\n",
+    );
+    write_file(
+        &repo_root.join(
+            ".github/instructions/repository-operating-model.instructions.md",
+        ),
+        "# Repository Operating Model\n",
+    );
+    write_file(
+        &repo_root.join(".github/governance/agent-runtime-policy.catalog.json"),
+        r#"{ "version": 1, "rules": [] }"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/agent-model-routing.catalog.json"),
+        r#"{ "version": 1, "rules": [] }"#,
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/agents.manifest.json"),
+        valid_agents_manifest_json(),
+    );
+    write_file(
+        &repo_root.join(".github/governance/agent-skill-permissions.matrix.json"),
+        valid_permission_matrix_json(),
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/pipelines/default.pipeline.json"),
+        valid_pipeline_manifest_json(),
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/evals/golden-tests.json"),
+        valid_eval_fixtures_json(),
+    );
+
+    for skill_name in [
+        "super-agent",
+        "brainstorm-spec-architect",
+        "plan-active-work-planner",
+        "context-token-optimizer",
+        "dev-software-engineer",
+        "test-engineer",
+        "review-code-engineer",
+        "release-closeout-engineer",
+    ] {
+        initialize_agent_skill(repo_root, skill_name);
+    }
+
+    for relative_path in [
+        "scripts/orchestration/stages/intake-stage.ps1",
+        "scripts/orchestration/stages/spec-stage.ps1",
+        "scripts/orchestration/stages/plan-stage.ps1",
+        "scripts/orchestration/stages/route-stage.ps1",
+        "scripts/orchestration/stages/implement-stage.ps1",
+        "scripts/orchestration/stages/validate-stage.ps1",
+        "scripts/orchestration/stages/review-stage.ps1",
+        "scripts/orchestration/stages/closeout-stage.ps1",
+    ] {
+        write_file(&repo_root.join(relative_path), "Write-Output 'ok'\n");
+    }
+
+    for relative_path in [
+        ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md",
+        ".codex/orchestration/prompts/spec-stage.prompt.md",
+        ".codex/orchestration/prompts/planner-stage.prompt.md",
+        ".codex/orchestration/prompts/router-stage.prompt.md",
+        ".codex/orchestration/prompts/executor-task.prompt.md",
+        ".codex/orchestration/prompts/reviewer-stage.prompt.md",
+        ".codex/orchestration/prompts/closeout-stage.prompt.md",
+    ] {
+        write_file(&repo_root.join(relative_path), "# Prompt\n");
+    }
+
+    for relative_path in [
+        ".github/schemas/agent.stage-intake-result.schema.json",
+        ".github/schemas/agent.stage-spec-result.schema.json",
+        ".github/schemas/agent.stage-plan-result.schema.json",
+        ".github/schemas/agent.stage-route-result.schema.json",
+        ".github/schemas/agent.stage-implementation-result.schema.json",
+        ".github/schemas/agent.stage-review-result.schema.json",
+        ".github/schemas/agent.stage-closeout-result.schema.json",
+    ] {
+        write_file(&repo_root.join(relative_path), r#"{ "type": "object" }"#);
+    }
+}
+
+fn valid_agents_manifest_json() -> &'static str {
+    r#"{
+  "version": 1,
+  "agents": [
+    {
+      "id": "super-agent",
+      "role": "planner",
+      "skill": "super-agent",
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": { "maxSteps": 16, "maxDurationMinutes": 15, "maxFileEdits": 8, "maxTokens": 45000 },
+      "fallbackAgentId": "planner"
+    },
+    {
+      "id": "brainstormer",
+      "role": "planner",
+      "skill": "brainstorm-spec-architect",
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": { "maxSteps": 18, "maxDurationMinutes": 20, "maxFileEdits": 10, "maxTokens": 55000 },
+      "fallbackAgentId": "planner"
+    },
+    {
+      "id": "planner",
+      "role": "planner",
+      "skill": "plan-active-work-planner",
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": { "maxSteps": 20, "maxDurationMinutes": 20, "maxFileEdits": 12, "maxTokens": 70000 },
+      "fallbackAgentId": "router"
+    },
+    {
+      "id": "router",
+      "role": "router",
+      "skill": "context-token-optimizer",
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": { "maxSteps": 15, "maxDurationMinutes": 15, "maxFileEdits": 8, "maxTokens": 50000 },
+      "fallbackAgentId": "specialist"
+    },
+    {
+      "id": "specialist",
+      "role": "specialist",
+      "skill": "dev-software-engineer",
+      "allowedPaths": ["src/**", "modules/**", "samples/**", "tests/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "approvalRequired": true,
+      "approvalInstructions": "approval required",
+      "budget": { "maxSteps": 45, "maxDurationMinutes": 50, "maxFileEdits": 40, "maxTokens": 180000 },
+      "fallbackAgentId": "tester"
+    },
+    {
+      "id": "tester",
+      "role": "tester",
+      "skill": "test-engineer",
+      "allowedPaths": ["tests/**", "src/**", "modules/**", "samples/**", "scripts/**", ".github/**", ".temp/**"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": { "maxSteps": 25, "maxDurationMinutes": 30, "maxFileEdits": 20, "maxTokens": 120000 },
+      "fallbackAgentId": "reviewer"
+    },
+    {
+      "id": "reviewer",
+      "role": "reviewer",
+      "skill": "review-code-engineer",
+      "allowedPaths": ["src/**", "modules/**", "samples/**", "planning/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "budget": { "maxSteps": 20, "maxDurationMinutes": 25, "maxFileEdits": 10, "maxTokens": 90000 },
+      "fallbackAgentId": "release-engineer"
+    },
+    {
+      "id": "release-engineer",
+      "role": "release",
+      "skill": "release-closeout-engineer",
+      "allowedPaths": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+      "blockedCommands": ["git reset --hard", "git checkout --"],
+      "approvalRequired": true,
+      "approvalInstructions": "approval required",
+      "budget": { "maxSteps": 20, "maxDurationMinutes": 20, "maxFileEdits": 15, "maxTokens": 80000 }
+    }
+  ]
+}"#
+}
+
+fn valid_permission_matrix_json() -> &'static str {
+    r#"{
+  "version": 1,
+  "defaultWarningOnly": true,
+  "globalRules": {
+    "requiredBlockedCommandPrefixes": ["git reset --hard", "git checkout --"],
+    "allowedStageScriptPrefixes": ["scripts/orchestration/stages/"]
+  },
+  "agents": [
+    { "agentId": "super-agent", "role": "planner", "skill": "super-agent", "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/intake-stage.ps1"], "requiredBudget": { "maxSteps": 16, "maxDurationMinutes": 15, "maxFileEdits": 8, "maxTokens": 45000 } },
+    { "agentId": "brainstormer", "role": "planner", "skill": "brainstorm-spec-architect", "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/spec-stage.ps1"], "requiredBudget": { "maxSteps": 18, "maxDurationMinutes": 20, "maxFileEdits": 10, "maxTokens": 55000 } },
+    { "agentId": "planner", "role": "planner", "skill": "plan-active-work-planner", "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/plan-stage.ps1"], "requiredBudget": { "maxSteps": 20, "maxDurationMinutes": 20, "maxFileEdits": 12, "maxTokens": 70000 } },
+    { "agentId": "router", "role": "router", "skill": "context-token-optimizer", "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/route-stage.ps1"], "requiredBudget": { "maxSteps": 15, "maxDurationMinutes": 15, "maxFileEdits": 8, "maxTokens": 50000 } },
+    { "agentId": "specialist", "role": "specialist", "skill": "dev-software-engineer", "allowedPathGlobs": ["src/**", "modules/**", "samples/**", "tests/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/implement-stage.ps1"], "requiredBudget": { "maxSteps": 45, "maxDurationMinutes": 50, "maxFileEdits": 40, "maxTokens": 180000 } },
+    { "agentId": "tester", "role": "tester", "skill": "test-engineer", "allowedPathGlobs": ["tests/**", "src/**", "modules/**", "samples/**", "scripts/**", ".github/**", ".temp/**"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/validate-stage.ps1"], "requiredBudget": { "maxSteps": 25, "maxDurationMinutes": 30, "maxFileEdits": 20, "maxTokens": 120000 } },
+    { "agentId": "reviewer", "role": "reviewer", "skill": "review-code-engineer", "allowedPathGlobs": ["src/**", "modules/**", "samples/**", "planning/**", "scripts/**", ".github/**", ".codex/**", ".temp/**", "README.md", "CHANGELOG.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/review-stage.ps1"], "requiredBudget": { "maxSteps": 20, "maxDurationMinutes": 25, "maxFileEdits": 10, "maxTokens": 90000 } },
+    { "agentId": "release-engineer", "role": "release", "skill": "release-closeout-engineer", "allowedPathGlobs": [".github/**", ".codex/**", "planning/**", "scripts/**", ".temp/**", "README.md", "CHANGELOG.md", "CONTRIBUTING.md"], "allowedStageScriptGlobs": ["scripts/orchestration/stages/closeout-stage.ps1"], "requiredBudget": { "maxSteps": 20, "maxDurationMinutes": 20, "maxFileEdits": 15, "maxTokens": 80000 } }
+  ]
+}"#
+}
+
+fn valid_pipeline_manifest_json() -> &'static str {
+    r#"{
+  "id": "default-dev-flow",
+  "version": 1,
+  "description": "Validation fixture for agent orchestration.",
+  "runtime": {
+    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
+  },
+  "stages": [
+    { "id": "intake", "agentId": "super-agent", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"], "onFailure": "retry-once" },
+    { "id": "spec", "agentId": "brainstormer", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/spec-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/spec-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-spec-result.schema.json" }, "inputArtifacts": ["request", "normalized-request", "intake-report"], "outputArtifacts": ["spec-summary", "active-spec"], "onFailure": "retry-once" },
+    { "id": "plan", "agentId": "planner", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/plan-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/planner-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-plan-result.schema.json" }, "inputArtifacts": ["request", "normalized-request", "intake-report", "spec-summary", "active-spec"], "outputArtifacts": ["task-plan", "task-plan-data", "context-pack", "active-plan"], "onFailure": "stop" },
+    { "id": "route", "agentId": "router", "mode": "execute", "execution": { "scriptPath": "scripts/orchestration/stages/route-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/router-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-route-result.schema.json" }, "inputArtifacts": ["task-plan-data", "context-pack", "active-plan"], "outputArtifacts": ["route-selection", "specialist-context-pack"], "onFailure": "retry-once" },
+    { "id": "implement", "agentId": "specialist", "mode": "execute", "execution": { "scriptPath": "scripts/orchestration/stages/implement-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/executor-task.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-implementation-result.schema.json" }, "inputArtifacts": ["task-plan", "task-plan-data", "context-pack", "route-selection", "specialist-context-pack", "active-plan"], "outputArtifacts": ["changeset", "implementation-log", "task-review-report"], "onFailure": "retry-once" },
+    { "id": "validate", "agentId": "tester", "mode": "validate", "execution": { "scriptPath": "scripts/orchestration/stages/validate-stage.ps1", "dispatchMode": "scripted" }, "inputArtifacts": ["changeset", "implementation-log", "task-review-report"], "outputArtifacts": ["validation-report"], "onFailure": "retry-once" },
+    { "id": "review", "agentId": "reviewer", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/review-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/reviewer-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-review-result.schema.json" }, "inputArtifacts": ["changeset", "validation-report", "task-review-report", "active-plan"], "outputArtifacts": ["review-report", "decision-log"], "onFailure": "stop" },
+    { "id": "closeout", "agentId": "release-engineer", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/closeout-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/closeout-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-closeout-result.schema.json" }, "inputArtifacts": ["changeset", "validation-report", "review-report", "decision-log", "active-plan"], "outputArtifacts": ["closeout-report", "release-summary", "completed-plan"], "onFailure": "stop" }
+  ],
+  "handoffs": [
+    { "fromStage": "intake", "toStage": "spec", "requiredArtifacts": ["normalized-request", "intake-report"] },
+    { "fromStage": "spec", "toStage": "plan", "requiredArtifacts": ["spec-summary", "active-spec"] },
+    { "fromStage": "plan", "toStage": "route", "requiredArtifacts": ["task-plan-data", "context-pack", "active-plan"] },
+    { "fromStage": "route", "toStage": "implement", "requiredArtifacts": ["route-selection", "specialist-context-pack"] },
+    { "fromStage": "implement", "toStage": "validate", "requiredArtifacts": ["changeset", "implementation-log", "task-review-report"] },
+    { "fromStage": "validate", "toStage": "review", "requiredArtifacts": ["validation-report"] },
+    { "fromStage": "review", "toStage": "closeout", "requiredArtifacts": ["review-report", "decision-log"] }
+  ],
+  "completionCriteria": {
+    "requiredStages": ["intake", "spec", "plan", "route", "implement", "validate", "review", "closeout"],
+    "requiredArtifacts": ["intake-report", "spec-summary", "validation-report", "review-report", "decision-log", "closeout-report", "release-summary"]
+  }
+}"#
+}
+
+fn valid_eval_fixtures_json() -> &'static str {
+    r#"{
+  "version": 1,
+  "cases": [
+    {
+      "id": "feature-implementation",
+      "expectedPipelineId": "default-dev-flow",
+      "expectedStageOrder": ["intake", "spec", "plan", "route", "implement", "validate", "review", "closeout"],
+      "requiredAgents": ["super-agent", "brainstormer", "planner", "router", "specialist", "tester", "reviewer", "release-engineer"]
+    }
+  ]
+}"#
+}
+
 #[test]
 fn test_validation_audit_ledger_reports_pass_for_missing_ledger() {
     let repo = TempDir::new().expect("temporary repository should be created");
@@ -467,4 +747,49 @@ fn test_validation_warning_baseline_reports_pass_for_matching_report() {
         .success()
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Total warnings: 1"));
+}
+
+#[test]
+fn test_validation_policy_reports_pass_for_valid_policy_directory() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_policy_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "policy"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Policies checked: 1"));
+}
+
+#[test]
+fn test_validation_agent_skill_alignment_reports_pass_for_valid_contract_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_agent_contract_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "agent-skill-alignment"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Agents checked: 8"))
+        .stdout(predicate::str::contains("Stage checks: 8"))
+        .stdout(predicate::str::contains("Eval case checks: 1"));
+}
+
+#[test]
+fn test_validation_agent_permissions_reports_pass_for_valid_contract_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_agent_contract_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "agent-permissions", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Agents checked: 8"))
+        .stdout(predicate::str::contains("Stage checks: 8"));
 }

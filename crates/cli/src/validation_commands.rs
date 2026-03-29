@@ -3,11 +3,15 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
+    invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment,
     invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
+    invoke_validate_policy,
     invoke_validate_powershell_standards, invoke_validate_routing_coverage,
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
     invoke_validate_supply_chain, invoke_validate_warning_baseline,
+    ValidateAgentPermissionsRequest, ValidateAgentSkillAlignmentRequest,
     ValidateArchitectureBoundariesRequest, ValidateAuditLedgerRequest,
+    ValidatePolicyRequest,
     ValidatePowerShellStandardsRequest, ValidateRoutingCoverageRequest,
     ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
     ValidateSupplyChainRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
@@ -17,10 +21,18 @@ use std::path::PathBuf;
 /// Validation command group.
 #[derive(Debug, Subcommand)]
 pub enum ValidationCommand {
+    /// Validate agent permission matrix and stage command contracts.
+    #[command(name = "agent-permissions")]
+    AgentPermissions(ValidationAgentPermissionsArgs),
+    /// Validate agent skill references against manifests, pipeline, and evals.
+    #[command(name = "agent-skill-alignment")]
+    AgentSkillAlignment(ValidationAgentSkillAlignmentArgs),
     /// Validate the audit ledger hash chain.
     AuditLedger(ValidationAuditLedgerArgs),
     /// Validate repository architecture boundary baselines.
     ArchitectureBoundaries(ValidationArchitectureBoundariesArgs),
+    /// Validate repository policy contracts under `.github/policies`.
+    Policy(ValidationPolicyArgs),
     /// Validate PowerShell script standards across repository scripts.
     #[command(name = "powershell-standards")]
     PowershellStandards(ValidationPowerShellStandardsArgs),
@@ -38,6 +50,46 @@ pub enum ValidationCommand {
     /// Validate analyzer warning volume against the warning baseline.
     #[command(name = "warning-baseline")]
     WarningBaseline(ValidationWarningBaselineArgs),
+}
+
+/// CLI arguments for `validation audit-ledger`.
+#[derive(Debug, Args)]
+pub struct ValidationAgentPermissionsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit permission matrix path.
+    #[clap(long)]
+    pub matrix_path: Option<PathBuf>,
+    /// Optional explicit agent manifest path.
+    #[clap(long)]
+    pub agent_manifest_path: Option<PathBuf>,
+    /// Optional explicit pipeline path.
+    #[clap(long)]
+    pub pipeline_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
+/// CLI arguments for `validation agent-skill-alignment`.
+#[derive(Debug, Args)]
+pub struct ValidationAgentSkillAlignmentArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit agent manifest path.
+    #[clap(long)]
+    pub agent_manifest_path: Option<PathBuf>,
+    /// Optional explicit pipeline path.
+    #[clap(long)]
+    pub pipeline_path: Option<PathBuf>,
+    /// Optional explicit eval fixture path.
+    #[clap(long)]
+    pub eval_fixture_path: Option<PathBuf>,
+    /// Optional explicit skills root path.
+    #[clap(long)]
+    pub skills_root_path: Option<PathBuf>,
 }
 
 /// CLI arguments for `validation audit-ledger`.
@@ -94,6 +146,17 @@ pub struct ValidationSecurityBaselineArgs {
     /// Convert required findings to warnings instead of failures.
     #[clap(long, action = ArgAction::Set, default_value_t = true)]
     pub warning_only: bool,
+}
+
+/// CLI arguments for `validation powershell-standards`.
+#[derive(Debug, Args)]
+pub struct ValidationPolicyArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit policy directory.
+    #[clap(long)]
+    pub policy_directory: Option<PathBuf>,
 }
 
 /// CLI arguments for `validation powershell-standards`.
@@ -173,10 +236,15 @@ pub struct ValidationWarningBaselineArgs {
 /// Execute one validation command through the `ntk` binary.
 pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
     match command {
+        ValidationCommand::AgentPermissions(arguments) => execute_agent_permissions(arguments),
+        ValidationCommand::AgentSkillAlignment(arguments) => {
+            execute_agent_skill_alignment(arguments)
+        }
         ValidationCommand::AuditLedger(arguments) => execute_audit_ledger(arguments),
         ValidationCommand::ArchitectureBoundaries(arguments) => {
             execute_architecture_boundaries(arguments)
         }
+        ValidationCommand::Policy(arguments) => execute_policy(arguments),
         ValidationCommand::PowershellStandards(arguments) => {
             execute_powershell_standards(arguments)
         }
@@ -188,6 +256,70 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         ValidationCommand::SupplyChain(arguments) => execute_supply_chain(arguments),
         ValidationCommand::WarningBaseline(arguments) => execute_warning_baseline(arguments),
     }
+}
+
+fn execute_agent_permissions(arguments: ValidationAgentPermissionsArgs) -> ExitStatus {
+    let result = match invoke_validate_agent_permissions(&ValidateAgentPermissionsRequest {
+        repo_root: arguments.repo_root,
+        matrix_path: arguments.matrix_path,
+        agent_manifest_path: arguments.agent_manifest_path,
+        pipeline_path: arguments.pipeline_path,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Matrix path: {}", result.matrix_path.display());
+    println!(
+        "Agent manifest path: {}",
+        result.agent_manifest_path.display()
+    );
+    println!("Pipeline path: {}", result.pipeline_path.display());
+    println!("Agents checked: {}", result.agents_checked);
+    println!("Stage checks: {}", result.stage_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_agent_skill_alignment(arguments: ValidationAgentSkillAlignmentArgs) -> ExitStatus {
+    let result = match invoke_validate_agent_skill_alignment(
+        &ValidateAgentSkillAlignmentRequest {
+            repo_root: arguments.repo_root,
+            agent_manifest_path: arguments.agent_manifest_path,
+            pipeline_path: arguments.pipeline_path,
+            eval_fixture_path: arguments.eval_fixture_path,
+            skills_root_path: arguments.skills_root_path,
+        },
+    ) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!(
+        "Agent manifest path: {}",
+        result.agent_manifest_path.display()
+    );
+    println!("Pipeline path: {}", result.pipeline_path.display());
+    println!("Eval fixture path: {}", result.eval_fixture_path.display());
+    println!("Skills root path: {}", result.skills_root_path.display());
+    println!("Agents checked: {}", result.agents_checked);
+    println!("Stage checks: {}", result.stage_checks);
+    println!("Eval case checks: {}", result.eval_case_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
 }
 
 fn execute_audit_ledger(arguments: ValidationAuditLedgerArgs) -> ExitStatus {
@@ -232,6 +364,27 @@ fn execute_architecture_boundaries(
     println!("Baseline path: {}", result.baseline_path.display());
     println!("Rules checked: {}", result.rules_checked);
     println!("File checks: {}", result.file_checks);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_policy(arguments: ValidationPolicyArgs) -> ExitStatus {
+    let result = match invoke_validate_policy(&ValidatePolicyRequest {
+        repo_root: arguments.repo_root,
+        policy_directory: arguments.policy_directory,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Policy directory: {}", result.policy_directory.display());
+    println!("Policies checked: {}", result.policies_checked);
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 
