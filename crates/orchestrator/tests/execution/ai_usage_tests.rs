@@ -2,7 +2,8 @@
 
 use chrono::{Datelike, Duration, Utc};
 use nettoolskit_orchestrator::{
-    query_weekly_ai_usage_summary, record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource,
+    query_ai_usage_summary, query_weekly_ai_usage_summary, record_ai_usage_event,
+    AiUsageEventRecord, AiUsageEventSource, AiUsageSummaryReportRequest,
     AiUsageWeeklyReportRequest, NTK_AI_USAGE_DB_PATH_ENV, NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV,
     NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
 };
@@ -38,6 +39,10 @@ fn usage_db_path(temp_dir: &TempDir) -> PathBuf {
     temp_dir.path().join("ai-usage").join("usage.db")
 }
 
+fn budget_config_path(temp_dir: &TempDir) -> PathBuf {
+    temp_dir.path().join("ai-usage").join("budgets.toml")
+}
+
 struct RecordFixture<'a> {
     provider: &'a str,
     model: Option<&'a str>,
@@ -71,6 +76,13 @@ fn make_record(
         actual_cost_usd: None,
         status: "success".to_string(),
     }
+}
+
+fn write_budget_config(path: &Path, content: &str) {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).expect("budget config parent should be created");
+    }
+    std::fs::write(path, content).expect("budget config should be written");
 }
 
 #[test]
@@ -121,6 +133,8 @@ fn test_record_ai_usage_event_persists_provider_and_cache_rows_for_weekly_report
         repo_root: Some(repo_root),
         iso_year: None,
         iso_week: None,
+        budget_config_path: None,
+        budget_profile: None,
     })
     .expect("weekly report should load");
 
@@ -185,6 +199,8 @@ fn test_query_weekly_ai_usage_summary_filters_repo_root() {
         repo_root: Some(repo_one),
         iso_year: None,
         iso_week: None,
+        budget_config_path: None,
+        budget_profile: None,
     })
     .expect("weekly report should load");
 
@@ -207,6 +223,8 @@ fn test_query_weekly_ai_usage_summary_rejects_partial_week_selector() {
         repo_root: None,
         iso_year: Some(2026),
         iso_week: None,
+        budget_config_path: None,
+        budget_profile: None,
     });
 
     // Assert
@@ -254,6 +272,8 @@ fn test_query_weekly_ai_usage_summary_calculates_budget_status_from_env() {
         repo_root: Some(repo_root),
         iso_year: Some(current_week.year()),
         iso_week: Some(current_week.week()),
+        budget_config_path: None,
+        budget_profile: None,
     })
     .expect("weekly report should load");
     let budget = report
@@ -267,4 +287,139 @@ fn test_query_weekly_ai_usage_summary_calculates_budget_status_from_env() {
     assert_eq!(budget.estimated_cost_usd_remaining, Some(0.75));
     assert_eq!(budget.estimated_token_burn_pct, Some(50.0));
     assert_eq!(budget.estimated_cost_burn_pct, Some(25.0));
+}
+
+#[test]
+#[serial]
+fn test_query_weekly_ai_usage_summary_reads_budget_profile_from_config_file() {
+    // Arrange
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let budget_path = budget_config_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+    let timestamp_unix_ms = u64::try_from(Utc::now().timestamp_millis()).expect("timestamp");
+    write_budget_config(
+        &budget_path,
+        r#"
+version = 1
+defaultProfile = "team"
+
+[profiles.team]
+tokenBudgetTotal = 2000
+costBudgetUsdTotal = 2.5
+"#,
+    );
+
+    record_ai_usage_event(&make_record(
+        timestamp_unix_ms,
+        &repo_root,
+        (400, 200),
+        RecordFixture {
+            provider: "openai",
+            model: Some("gpt-5-mini"),
+            intent: "plan",
+            session_id: "session-config-budget",
+            source: AiUsageEventSource::Provider,
+            billable: true,
+            estimated_cost_usd: 0.5,
+        },
+    ))
+    .expect("usage record should persist");
+
+    // Act
+    let report = query_weekly_ai_usage_summary(&AiUsageWeeklyReportRequest {
+        db_path: Some(db_path),
+        repo_root: Some(repo_root),
+        iso_year: None,
+        iso_week: None,
+        budget_config_path: Some(budget_path),
+        budget_profile: Some("team".to_string()),
+    })
+    .expect("weekly report should load");
+
+    // Assert
+    let budget = report
+        .budget_status
+        .expect("budget profile from config should be applied");
+    assert_eq!(report.budget_profile_name.as_deref(), Some("team"));
+    assert_eq!(budget.profile_name, "team");
+    assert_eq!(budget.token_budget_total, Some(2000));
+    assert_eq!(budget.cost_budget_usd_total, Some(2.5));
+    assert_eq!(budget.estimated_tokens_remaining, Some(1400));
+    assert_eq!(budget.estimated_cost_usd_remaining, Some(2.0));
+}
+
+#[test]
+#[serial]
+fn test_query_ai_usage_summary_aggregates_recent_weeks() {
+    // Arrange
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+    let current_monday =
+        Utc::now() - Duration::days(i64::from(Utc::now().weekday().num_days_from_monday()));
+    let previous_monday = current_monday - Duration::days(7);
+
+    record_ai_usage_event(&make_record(
+        u64::try_from(current_monday.timestamp_millis()).expect("timestamp should fit"),
+        &repo_root,
+        (300, 100),
+        RecordFixture {
+            provider: "openai",
+            model: Some("gpt-5-mini"),
+            intent: "plan",
+            session_id: "session-current",
+            source: AiUsageEventSource::Provider,
+            billable: true,
+            estimated_cost_usd: 0.2,
+        },
+    ))
+    .expect("current week record should persist");
+    record_ai_usage_event(&make_record(
+        u64::try_from(previous_monday.timestamp_millis()).expect("timestamp should fit"),
+        &repo_root,
+        (150, 50),
+        RecordFixture {
+            provider: "openai",
+            model: Some("gpt-5-mini"),
+            intent: "ask",
+            session_id: "session-previous",
+            source: AiUsageEventSource::Provider,
+            billable: true,
+            estimated_cost_usd: 0.1,
+        },
+    ))
+    .expect("previous week record should persist");
+
+    // Act
+    let report = query_ai_usage_summary(&AiUsageSummaryReportRequest {
+        db_path: Some(db_path),
+        repo_root: Some(repo_root),
+        week_count: 2,
+        end_iso_year: None,
+        end_iso_week: None,
+        budget_config_path: None,
+        budget_profile: None,
+    })
+    .expect("multi-week summary should load");
+
+    // Assert
+    assert_eq!(report.week_count_requested, 2);
+    assert_eq!(report.week_count_returned, 2);
+    assert_eq!(report.total_events, 2);
+    assert_eq!(report.estimated_billable_tokens_total, 600);
+    assert!(
+        (report.estimated_billable_cost_usd_total - 0.3).abs() < f64::EPSILON,
+        "summary cost total should aggregate both weeks"
+    );
+    assert_eq!(report.weekly_totals.len(), 2);
+    assert_eq!(report.provider_totals.len(), 1);
+    assert_eq!(
+        report.provider_totals[0].estimated_billable_tokens_total,
+        600
+    );
 }

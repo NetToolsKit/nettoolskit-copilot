@@ -43,6 +43,10 @@ fn usage_db_path(temp_dir: &TempDir) -> PathBuf {
     temp_dir.path().join("ai-usage").join("usage.db")
 }
 
+fn budget_config_path(temp_dir: &TempDir) -> PathBuf {
+    temp_dir.path().join("ai-usage").join("budgets.toml")
+}
+
 fn make_record(repo_root: &Path, timestamp_unix_ms: u64) -> AiUsageEventRecord {
     AiUsageEventRecord {
         timestamp_unix_ms,
@@ -71,6 +75,13 @@ fn current_unix_timestamp_ms() -> u64 {
             .as_millis(),
     )
     .expect("timestamp should fit")
+}
+
+fn write_budget_config(path: &Path, content: &str) {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).expect("budget config parent should be created");
+    }
+    std::fs::write(path, content).expect("budget config should be written");
 }
 
 #[test]
@@ -136,4 +147,82 @@ fn test_ai_usage_weekly_text_output_includes_budget_section_when_configured() {
         .stdout(predicate::str::contains("Configured weekly budget"))
         .stdout(predicate::str::contains("Providers/models"))
         .stdout(predicate::str::contains("openai / gpt-5-mini"));
+}
+
+#[test]
+#[serial]
+fn test_ai_usage_summary_json_output_reports_recent_weeks() {
+    // Arrange
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+    let timestamp_unix_ms = current_unix_timestamp_ms();
+    record_ai_usage_event(&make_record(&repo_root, timestamp_unix_ms))
+        .expect("usage record should persist");
+
+    // Act / Assert
+    ntk()
+        .args([
+            "ai",
+            "usage",
+            "summary",
+            "--db-path",
+            db_path.to_string_lossy().as_ref(),
+            "--repo-root",
+            repo_root.to_string_lossy().as_ref(),
+            "--weeks",
+            "2",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""week_count_requested": 2"#))
+        .stdout(predicate::str::contains(r#""weekly_totals":"#))
+        .stdout(predicate::str::contains(r#""provider": "openai""#));
+}
+
+#[test]
+#[serial]
+fn test_ai_usage_summary_text_output_uses_budget_profile_from_config() {
+    // Arrange
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let budget_path = budget_config_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+    write_budget_config(
+        &budget_path,
+        r#"
+version = 1
+defaultProfile = "team"
+
+[profiles.team]
+tokenBudgetTotal = 800
+costBudgetUsdTotal = 1.2
+"#,
+    );
+    record_ai_usage_event(&make_record(&repo_root, current_unix_timestamp_ms()))
+        .expect("usage record should persist");
+
+    // Act / Assert
+    ntk()
+        .args([
+            "ai",
+            "usage",
+            "summary",
+            "--db-path",
+            db_path.to_string_lossy().as_ref(),
+            "--repo-root",
+            repo_root.to_string_lossy().as_ref(),
+            "--budget-config-path",
+            budget_path.to_string_lossy().as_ref(),
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Current week budget (team)"))
+        .stdout(predicate::str::contains("Recent weeks"))
+        .stdout(predicate::str::contains("Providers/models in range"));
 }
