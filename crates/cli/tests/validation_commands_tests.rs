@@ -247,99 +247,6 @@ fn initialize_agent_skill(repo_root: &Path, skill_name: &str) {
     );
 }
 
-fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
-    initialize_validation_repo_root(repo_root);
-    write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
-    write_file(
-        &repo_root.join(".github/copilot-instructions.md"),
-        "# Copilot Instructions\n",
-    );
-    write_file(
-        &repo_root.join(".github/instruction-routing.catalog.yml"),
-        "version: 1\nroutes: []\n",
-    );
-    write_file(
-        &repo_root.join(
-            ".github/instructions/repository-operating-model.instructions.md",
-        ),
-        "# Repository Operating Model\n",
-    );
-    write_file(
-        &repo_root.join(".github/governance/agent-runtime-policy.catalog.json"),
-        r#"{ "version": 1, "rules": [] }"#,
-    );
-    write_file(
-        &repo_root.join(".github/governance/agent-model-routing.catalog.json"),
-        r#"{ "version": 1, "rules": [] }"#,
-    );
-    write_file(
-        &repo_root.join(".codex/orchestration/agents.manifest.json"),
-        valid_agents_manifest_json(),
-    );
-    write_file(
-        &repo_root.join(".github/governance/agent-skill-permissions.matrix.json"),
-        valid_permission_matrix_json(),
-    );
-    write_file(
-        &repo_root.join(".codex/orchestration/pipelines/default.pipeline.json"),
-        valid_pipeline_manifest_json(),
-    );
-    write_file(
-        &repo_root.join(".codex/orchestration/evals/golden-tests.json"),
-        valid_eval_fixtures_json(),
-    );
-
-    for skill_name in [
-        "super-agent",
-        "brainstorm-spec-architect",
-        "plan-active-work-planner",
-        "context-token-optimizer",
-        "dev-software-engineer",
-        "test-engineer",
-        "review-code-engineer",
-        "release-closeout-engineer",
-    ] {
-        initialize_agent_skill(repo_root, skill_name);
-    }
-
-    for relative_path in [
-        "scripts/orchestration/stages/intake-stage.ps1",
-        "scripts/orchestration/stages/spec-stage.ps1",
-        "scripts/orchestration/stages/plan-stage.ps1",
-        "scripts/orchestration/stages/route-stage.ps1",
-        "scripts/orchestration/stages/implement-stage.ps1",
-        "scripts/orchestration/stages/validate-stage.ps1",
-        "scripts/orchestration/stages/review-stage.ps1",
-        "scripts/orchestration/stages/closeout-stage.ps1",
-    ] {
-        write_file(&repo_root.join(relative_path), "Write-Output 'ok'\n");
-    }
-
-    for relative_path in [
-        ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md",
-        ".codex/orchestration/prompts/spec-stage.prompt.md",
-        ".codex/orchestration/prompts/planner-stage.prompt.md",
-        ".codex/orchestration/prompts/router-stage.prompt.md",
-        ".codex/orchestration/prompts/executor-task.prompt.md",
-        ".codex/orchestration/prompts/reviewer-stage.prompt.md",
-        ".codex/orchestration/prompts/closeout-stage.prompt.md",
-    ] {
-        write_file(&repo_root.join(relative_path), "# Prompt\n");
-    }
-
-    for relative_path in [
-        ".github/schemas/agent.stage-intake-result.schema.json",
-        ".github/schemas/agent.stage-spec-result.schema.json",
-        ".github/schemas/agent.stage-plan-result.schema.json",
-        ".github/schemas/agent.stage-route-result.schema.json",
-        ".github/schemas/agent.stage-implementation-result.schema.json",
-        ".github/schemas/agent.stage-review-result.schema.json",
-        ".github/schemas/agent.stage-closeout-result.schema.json",
-    ] {
-        write_file(&repo_root.join(relative_path), r#"{ "type": "object" }"#);
-    }
-}
-
 fn valid_agents_manifest_json() -> &'static str {
     r#"{
   "version": 1,
@@ -491,6 +398,99 @@ fn valid_eval_fixtures_json() -> &'static str {
     }
   ]
 }"#
+}
+
+fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
+    write_file(
+        &repo_root.join(".github/copilot-instructions.md"),
+        "# Copilot Instructions\n",
+    );
+    write_file(
+        &repo_root.join(".github/instruction-routing.catalog.yml"),
+        "version: 1\nroutes: []\n",
+    );
+    write_file(
+        &repo_root.join(
+            ".github/instructions/repository-operating-model.instructions.md",
+        ),
+        "# Repository Operating Model\n",
+    );
+    write_file(
+        &repo_root.join(".github/governance/agent-runtime-policy.catalog.json"),
+        r#"{ "version": 1, "rules": [] }"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/agent-model-routing.catalog.json"),
+        r#"{ "version": 1, "rules": [] }"#,
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/agents.manifest.json"),
+        valid_agents_manifest_json(),
+    );
+    write_file(
+        &repo_root.join(".github/governance/agent-skill-permissions.matrix.json"),
+        valid_permission_matrix_json(),
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/pipelines/default.pipeline.json"),
+        valid_pipeline_manifest_json(),
+    );
+    write_file(
+        &repo_root.join(".codex/orchestration/evals/golden-tests.json"),
+        valid_eval_fixtures_json(),
+    );
+
+    for skill_name in [
+        "super-agent",
+        "brainstorm-spec-architect",
+        "plan-active-work-planner",
+        "context-token-optimizer",
+        "dev-software-engineer",
+        "test-engineer",
+        "review-code-engineer",
+        "release-closeout-engineer",
+    ] {
+        initialize_agent_skill(repo_root, skill_name);
+    }
+
+    for relative_path in [
+        "scripts/orchestration/stages/intake-stage.ps1",
+        "scripts/orchestration/stages/spec-stage.ps1",
+        "scripts/orchestration/stages/plan-stage.ps1",
+        "scripts/orchestration/stages/route-stage.ps1",
+        "scripts/orchestration/stages/implement-stage.ps1",
+        "scripts/orchestration/stages/validate-stage.ps1",
+        "scripts/orchestration/stages/review-stage.ps1",
+        "scripts/orchestration/stages/closeout-stage.ps1",
+    ] {
+        write_file(&repo_root.join(relative_path), "Write-Output 'ok'\n");
+    }
+
+    for relative_path in [
+        ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md",
+        ".codex/orchestration/prompts/spec-stage.prompt.md",
+        ".codex/orchestration/prompts/planner-stage.prompt.md",
+        ".codex/orchestration/prompts/router-stage.prompt.md",
+        ".codex/orchestration/prompts/executor-task.prompt.md",
+        ".codex/orchestration/prompts/reviewer-stage.prompt.md",
+        ".codex/orchestration/prompts/closeout-stage.prompt.md",
+    ] {
+        write_file(&repo_root.join(relative_path), "# Prompt\n");
+    }
+
+    for relative_path in [
+        ".github/schemas/agent.stage-intake-result.schema.json",
+        ".github/schemas/agent.stage-spec-result.schema.json",
+        ".github/schemas/agent.stage-plan-result.schema.json",
+        ".github/schemas/agent.stage-route-result.schema.json",
+        ".github/schemas/agent.stage-implementation-result.schema.json",
+        ".github/schemas/agent.stage-review-result.schema.json",
+        ".github/schemas/agent.stage-closeout-result.schema.json",
+    ] {
+        write_file(&repo_root.join(relative_path), r#"{ "type": "object" }"#);
+    }
 }
 
 #[test]
@@ -747,6 +747,51 @@ fn test_validation_warning_baseline_reports_pass_for_matching_report() {
         .success()
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Total warnings: 1"));
+}
+
+#[test]
+fn test_validation_policy_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_policy_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "policy"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Policies checked: 1"));
+}
+
+#[test]
+fn test_validation_agent_skill_alignment_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_agent_contract_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "agent-skill-alignment"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Agents checked: 8"))
+        .stdout(predicate::str::contains("Stage checks: 8"))
+        .stdout(predicate::str::contains("Eval case checks: 1"));
+}
+
+#[test]
+fn test_validation_agent_permissions_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_agent_contract_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "agent-permissions", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Agents checked: 8"))
+        .stdout(predicate::str::contains("Stage checks: 8"));
 }
 
 #[test]

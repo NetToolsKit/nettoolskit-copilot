@@ -23,7 +23,7 @@ Notes:
 ## CODEOWNERS
 
 `CODEOWNERS` is mandatory and validated by:
-- `scripts/validation/validate-policy.ps1` (file presence)
+- `ntk validation policy` (file presence)
 - `scripts/validation/validate-release-governance.ps1` (rule quality checks)
 
 At minimum:
@@ -43,9 +43,9 @@ These files are validated through the governance and provenance baselines so onb
 
 1. Run baseline validations:
    - `pwsh -File .\scripts\validation\validate-instructions.ps1`
-   - `pwsh -File .\scripts\validation\validate-policy.ps1`
+   - `ntk validation policy`
    - `ntk validation security-baseline --warning-only false`
-   - `pwsh -File .\scripts\validation\validate-agent-permissions.ps1`
+   - `ntk validation agent-permissions --warning-only false`
    - `ntk validation supply-chain --warning-only false`
    - `ntk validation warning-baseline --warning-only false`
    - `pwsh -File .\scripts\validation\validate-agent-orchestration.ps1`

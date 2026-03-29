@@ -789,7 +789,9 @@ $baseCheckDefinitions['validate-instructions'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-policy'] = [pscustomobject]@{
     name = 'validate-policy'
-    script = 'scripts/validation/validate-policy.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-policy'
+    command = @('validation', 'policy')
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-security-baseline'] = [pscustomobject]@{
@@ -817,12 +819,18 @@ $baseCheckDefinitions['validate-agent-orchestration'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-agent-skill-alignment'] = [pscustomobject]@{
     name = 'validate-agent-skill-alignment'
-    script = 'scripts/validation/validate-agent-skill-alignment.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-agent-skill-alignment'
+    command = @('validation', 'agent-skill-alignment')
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-agent-permissions'] = [pscustomobject]@{
     name = 'validate-agent-permissions'
-    script = 'scripts/validation/validate-agent-permissions.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-agent-permissions'
+    command = @('validation', 'agent-permissions')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-planning-structure'] = [pscustomobject]@{

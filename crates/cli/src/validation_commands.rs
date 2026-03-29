@@ -52,7 +52,7 @@ pub enum ValidationCommand {
     WarningBaseline(ValidationWarningBaselineArgs),
 }
 
-/// CLI arguments for `validation audit-ledger`.
+/// CLI arguments for `validation agent-permissions`.
 #[derive(Debug, Args)]
 pub struct ValidationAgentPermissionsArgs {
     /// Optional explicit repository root.
@@ -148,7 +148,7 @@ pub struct ValidationSecurityBaselineArgs {
     pub warning_only: bool,
 }
 
-/// CLI arguments for `validation powershell-standards`.
+/// CLI arguments for `validation policy`.
 #[derive(Debug, Args)]
 pub struct ValidationPolicyArgs {
     /// Optional explicit repository root.
