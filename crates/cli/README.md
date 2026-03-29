@@ -29,6 +29,7 @@ It owns the `ntk` binary entry point, wires terminal input and layout, and deleg
 - [Usage Examples](#usage-examples)
   - [Example 1: Launch interactive mode with telemetry](#example-1-launch-interactive-mode-with-telemetry)
   - [Example 2: Tune attention and session retention](#example-2-tune-attention-and-session-retention)
+- [AI Usage History](#ai-usage-history)
 - [API Reference](#api-reference)
   - [Interactive Options](#interactive-options)
   - [Entry Point](#entry-point)
@@ -127,6 +128,44 @@ let options = InteractiveOptions {
 let _ = interactive_mode(options).await;
 # }
 ```
+
+---
+
+## AI Usage History
+
+`ntk` persists local AI usage events in `AppConfig::default_data_dir()/ai-usage/usage.db` and exposes two operator-facing report surfaces:
+
+- `ntk ai usage weekly`
+- `ntk ai usage summary`
+
+### Example 3: Weekly usage report
+
+```powershell
+ntk ai usage weekly --repo-root . --json-output
+```
+
+### Example 4: Multi-week summary with a named budget profile
+
+```powershell
+ntk ai usage summary `
+  --repo-root . `
+  --weeks 4 `
+  --budget-config-path "$env:APPDATA\\ntk\\ai-usage\\budgets.toml" `
+  --budget-profile "team"
+```
+
+Budget profiles are configured locally with a versioned TOML document. Minimal example:
+
+```toml
+version = 1
+defaultProfile = "team"
+
+[profiles.team]
+tokenBudgetTotal = 120000
+costBudgetUsdTotal = 25.0
+```
+
+Use `NTK_AI_USAGE_DB_PATH`, `NTK_AI_USAGE_BUDGET_CONFIG_PATH`, and `NTK_AI_WEEKLY_BUDGET_PROFILE` when you need non-default local paths or profile selection.
 
 ---
 

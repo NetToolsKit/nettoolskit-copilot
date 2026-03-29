@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 17:19
+- LastUpdated: 2026-03-29 18:08
 - Objective: plan the implementation of persisted weekly AI usage history and the migration from the current JSON-backed local context index to a SQLite-backed local RAG/CAG memory system.
 - Normalized Request: create a planning workstream for weekly limit-consumption history and create a planning workstream for a local SQLite-based RAG/CAG system similar in spirit to `context-mode`, while keeping the repository operating model and current local-context behavior intact.
 - Active Branch: `feature/ai-usage-history-ledger`
@@ -40,7 +40,7 @@ The workstreams are linked by continuity and usage telemetry, but they intention
 
 ### Workstream U1 — Weekly AI Usage History
 
-Status: `[~]` In Progress
+Status: `[x]` Complete
 
 #### Task U1.1: Freeze Current AI Usage Capture Baseline
 
@@ -123,7 +123,7 @@ Status: `[x]` Complete
 
 #### Task U1.4: Add Weekly Reporting CLI Surface
 
-Status: `[~]` In Progress
+Status: `[x]` Complete
 
 - Add CLI command surfaces for:
   - `ntk ai usage weekly`
@@ -137,20 +137,27 @@ Status: `[~]` In Progress
 - Support both text and JSON output.
 - Delivered in this checkpoint:
   - `ntk ai usage weekly`
-  - human-readable and JSON output modes
-  - provider/model breakdown plus configured weekly budget burn when env budgets are set
-- Remaining:
   - `ntk ai usage summary`
+  - human-readable and JSON output modes for both commands
+  - weekly and multi-week provider/model breakdown
+  - current-week budget burn surfaced inside the summary command
+  - CLI overrides for budget config path and budget profile selection
 - Checkpoint commit:
   - `feat(cli): add weekly ai usage reporting commands`
 
 #### Task U1.5: Add Budget Config and Validation
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Decide config path and schema for optional weekly budget definitions.
 - Add validation for invalid budgets and malformed week/profile settings.
 - Add docs to the CLI README and runtime/operator docs.
+- Delivered in this checkpoint:
+  - local budget config document support at `AppConfig::default_data_dir()/ai-usage/budgets.toml`
+  - explicit path override via `NTK_AI_USAGE_BUDGET_CONFIG_PATH` and CLI `--budget-config-path`
+  - named profile selection via `NTK_AI_WEEKLY_BUDGET_PROFILE` and CLI `--budget-profile`
+  - config validation for version, empty profiles, missing defaults, and non-positive cost budgets
+  - CLI/operator documentation for `weekly` and `summary` usage plus budget config examples
 - Checkpoint commit:
   - `docs(runtime): document configured weekly ai usage budgets`
 
@@ -282,12 +289,17 @@ Status: `[ ]` Pending
   - `pwsh -NoProfile -File .\\scripts\\security\\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` ✅
   - `cargo test -p nettoolskit-orchestrator --quiet` ⚠️ blocked by pre-existing unrelated failure in `execution::chatops::tests::execute_chatops_envelope_submit_records_control_plane_metadata`
   - `cargo clippy -p nettoolskit-cli --all-targets -- -D warnings` ⚠️ blocked by a pre-existing `nettoolskit-validation` warning outside this slice
+  - `cargo test -p nettoolskit-orchestrator --test test_suite ai_usage --quiet` ✅
+  - `cargo test -p nettoolskit-cli --test test_suite ai_usage --quiet` ✅
+  - `cargo check -p nettoolskit-orchestrator` ✅
+  - `cargo check -p nettoolskit-cli` ✅
 
 ---
 
 ## Closeout Conditions
 
 - The weekly usage ledger exists and can answer weekly burn questions locally.
+- The AI usage CLI exposes both `weekly` and `summary` reporting with local budget profiles.
 - The SQLite local-memory store exists and supports bounded repo-local recall.
 - Planning and operator docs explain the split between repo-local memory and user-local usage history.
 - The active plan and spec move to `completed/` only after implementation, validation, and documentation are materially finished.

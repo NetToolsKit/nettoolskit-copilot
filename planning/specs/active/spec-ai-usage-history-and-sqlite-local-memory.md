@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 17:19
+- LastUpdated: 2026-03-29 18:08
 - Objective: define the design intent, boundaries, and rollout strategy for two related capabilities: persisted weekly AI usage history and a SQLite-backed local RAG/CAG memory system that supersedes the current JSON-only local context index.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-ai-usage-history-and-sqlite-local-memory.md`
@@ -77,6 +77,11 @@ Two local SQLite stores are required because the ownership boundary is different
    - Path: `AppConfig::default_data_dir()/ai-usage/usage.db`
    - Scope: provider/model/session/repo usage events across local runs
    - Purpose: weekly limit history, burn-rate reporting, operator budget visibility
+   - Current checkpoint:
+     - `ntk ai usage weekly`
+     - `ntk ai usage summary`
+     - local budget config document at `AppConfig::default_data_dir()/ai-usage/budgets.toml`
+     - explicit overrides via `NTK_AI_USAGE_DB_PATH`, `NTK_AI_USAGE_BUDGET_CONFIG_PATH`, and `NTK_AI_WEEKLY_BUDGET_PROFILE`
 
 This avoids mixing repo-operational continuity with cross-repo account usage telemetry.
 
@@ -135,6 +140,7 @@ Instead:
 - operators configure optional weekly budgets locally by provider/model/profile
 - reports compare observed usage against configured weekly budget
 - the CLI clearly marks the result as `configured budget tracking`, not authoritative provider billing
+- current implementation checkpoint uses a versioned local TOML document with named profiles and an optional default profile
 
 This avoids false precision and still gives a useful burn-rate view.
 
@@ -164,6 +170,12 @@ Planned command families:
 - `ntk runtime update-local-memory`
 - `ntk runtime query-local-memory`
 - optional `ntk runtime memory-doctor`
+
+Current implementation checkpoint:
+- `weekly` and `summary` are now native CLI/reporting surfaces
+- both commands support JSON/text output
+- both commands support explicit budget config path and budget profile selection
+- summary reports expose current-week budget burn plus multi-week provider rollups
 
 The current `update-local-context-index` and `query-local-context-index` remain supported during migration.
 
@@ -206,6 +218,7 @@ The current `update-local-context-index` and `query-local-context-index` remain 
 ### Weekly Usage History
 - A persistent local usage ledger exists and survives process restarts.
 - A native CLI command reports weekly usage aggregated by provider/model and marks configured budget burn clearly.
+- A native CLI summary command reports a bounded recent week window and current-week budget burn.
 - The report distinguishes actual usage from estimated usage.
 - Tests cover aggregation across multiple days and ISO-week boundaries.
 
