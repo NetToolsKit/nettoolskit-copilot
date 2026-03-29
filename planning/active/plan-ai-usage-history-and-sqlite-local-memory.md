@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 18:08
+- LastUpdated: 2026-03-29 17:59
 - Objective: plan the implementation of persisted weekly AI usage history and the migration from the current JSON-backed local context index to a SQLite-backed local RAG/CAG memory system.
 - Normalized Request: create a planning workstream for weekly limit-consumption history and create a planning workstream for a local SQLite-based RAG/CAG system similar in spirit to `context-mode`, while keeping the repository operating model and current local-context behavior intact.
 - Active Branch: `feature/ai-usage-history-ledger`
@@ -165,11 +165,11 @@ Status: `[x]` Complete
 
 ### Workstream U2 — SQLite Local RAG/CAG Memory
 
-Status: `[ ]` Pending
+Status: `[~]` In Progress
 
 #### Task U2.1: Freeze Current Local-Context Baseline
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Audit the current JSON-backed path in:
   - `crates/core/src/local-context/catalog.rs`
@@ -182,12 +182,17 @@ Status: `[ ]` Pending
   - persisted `index.json` format
   - lexical ranking expectations
   - existing CLI and test coverage
+- Delivered in this checkpoint:
+  - the JSON baseline remains authoritative for chunk inclusion through `local-context-index.catalog.json`
+  - persisted compatibility output remains `index.json` under `.temp/context-index/`
+  - lexical retrieval expectations remain path/heading/text deterministic scoring with path/id tie-breaking
+  - existing `build_local_context_index(...)` and JSON search tests were frozen as the parity baseline for the SQLite migration
 - Checkpoint commit:
   - `docs(planning): freeze local-context json baseline`
 
 #### Task U2.2: Define SQLite Memory Schema and Query Rules
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Create the schema contract for `.temp/context-memory/context.db`.
 - Minimum tables:
@@ -206,12 +211,17 @@ Status: `[ ]` Pending
 - Define ranking policy:
   - FTS/BM25 primary
   - deterministic tie-breakers by path/id
+- Delivered in this checkpoint:
+  - repository-local store path fixed at `.temp/context-memory/context.db`
+  - schema bootstrap now provisions `documents`, `files`, `chunks`, `chunk_fts`, `events`, `sessions`, `artifacts`, and `schema_metadata`
+  - compatibility snapshot mirroring currently writes catalog/document/file/chunk state while keeping `events`, `sessions`, and `artifacts` reserved for later ingestion phases
+  - schema versioning is recorded in `schema_metadata` and covered by idempotent initialization tests
 - Checkpoint commit:
   - `docs(planning): define sqlite local memory schema`
 
 #### Task U2.3: Implement Dual-Write Memory Builder
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Extend the current local-context update flow so one command can:
   - keep writing `index.json`
@@ -223,6 +233,11 @@ Status: `[ ]` Pending
   - rebuild
   - incremental update
   - JSON/SQLite count parity
+- Delivered in this checkpoint:
+  - `build_local_context_index(...)` now dual-writes `index.json` plus the SQLite snapshot in one pass
+  - the SQLite writer clears and repopulates the current document/files/chunks/FTS snapshot without touching future continuity tables
+  - build reports now surface `memory_root` and `memory_db_path` for downstream runtime/doctor use
+  - tests now cover path resolution, schema bootstrap, idempotent initialization, repeated rebuilds, and JSON/SQLite chunk-count parity
 - Checkpoint commit:
   - `feat(core): add sqlite local memory dual-write builder`
 
@@ -280,6 +295,11 @@ Status: `[ ]` Pending
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - `pwsh -File .\\scripts\\security\\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
 - targeted parity tests comparing JSON and SQLite local-memory retrieval
+- Checkpoint validation executed for the SQLite local-memory foundation slice:
+  - `cargo fmt --all -- --check` ✅
+  - `cargo check -p nettoolskit-core` ✅
+  - `cargo test -p nettoolskit-core --test test_suite local_context::sqlite_tests --quiet` ✅
+  - `cargo test -p nettoolskit-core --test test_suite local_context::document_tests --quiet` ✅
 - Checkpoint validation executed for this slice:
   - `cargo fmt --all -- --check` ✅
   - `cargo test -p nettoolskit-orchestrator --test test_suite ai_usage --quiet` ✅
