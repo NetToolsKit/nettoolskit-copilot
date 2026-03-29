@@ -36,8 +36,29 @@ fn test_invoke_validate_release_provenance_reports_missing_required_check() {
     initialize_release_provenance_repo(repo.path());
     write_repo_file(
         repo.path(),
-        "scripts/validation/validate-all.ps1",
-        "$definitions = @(\n    @{ name = 'validate-release-governance' }\n)\n",
+        ".github/governance/release-provenance.baseline.json",
+        r#"{
+  "version": 1,
+  "releaseBranch": "main",
+  "requireCleanWorktree": false,
+  "warnOnDirtyWorktree": false,
+  "requireAuditReport": false,
+  "warnOnMissingOptionalAuditReport": false,
+  "warnOnAuditCommitMismatch": true,
+  "changelogPath": "CHANGELOG.md",
+  "validateAllCommand": "ntk validation all",
+  "requiredValidationChecks": [
+    "validate-release-governance",
+    "validate-release-provenance",
+    "validate-nonexistent"
+  ],
+  "requiredEvidenceFiles": [
+    "CHANGELOG.md",
+    "CODEOWNERS",
+    ".github/governance/release-governance.md",
+    ".github/governance/release-provenance.baseline.json"
+  ]
+}"#,
     );
     initialize_git_repository(repo.path());
 
@@ -92,7 +113,7 @@ fn test_invoke_validate_release_provenance_reports_dirty_worktree_when_required_
   "warnOnMissingOptionalAuditReport": false,
   "warnOnAuditCommitMismatch": false,
   "changelogPath": "CHANGELOG.md",
-  "validateAllPath": "scripts/validation/validate-all.ps1",
+  "validateAllCommand": "ntk validation all",
   "requiredValidationChecks": [
     "validate-release-governance",
     "validate-release-provenance"

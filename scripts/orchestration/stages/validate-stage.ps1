@@ -468,7 +468,7 @@ if ($null -ne $taskPlanData) {
 }
 
 $validationScripts = @(
-    [ordered]@{ Name = 'validate-instructions'; Runner = 'script'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-instructions.ps1'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
+    [ordered]@{ Name = 'validate-instructions'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-instructions'; Command = @('validation', 'instructions'); Arguments = @{ RepoRoot = $resolvedRepoRoot; WarningOnly = $false } },
     [ordered]@{ Name = 'validate-policy'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-policy'; Command = @('validation', 'policy'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
     [ordered]@{ Name = 'validate-agent-orchestration'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-agent-orchestration'; Command = @('validation', 'agent-orchestration'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
     [ordered]@{ Name = 'validate-planning-structure'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-planning-structure'; Command = @('validation', 'planning-structure'); Arguments = @{ RepoRoot = $resolvedRepoRoot; WarningOnly = $false } },

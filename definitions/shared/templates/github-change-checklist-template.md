@@ -17,7 +17,7 @@
 
 ## Validation
 - [ ] `ntk validation instruction-metadata --repo-root .`
-- [ ] `pwsh -File scripts/validation/validate-instructions.ps1 -RepoRoot .`
+- [ ] `ntk validation instructions --repo-root . --warning-only false`
 - [ ] Additional targeted validation was executed when the change affected scripts, templates, routing, or governance artifacts
 - [ ] EOF and trailing-whitespace rules were verified
 

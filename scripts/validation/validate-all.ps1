@@ -784,7 +784,11 @@ else {
 $baseCheckDefinitions = @{}
 $baseCheckDefinitions['validate-instructions'] = [pscustomobject]@{
     name = 'validate-instructions'
-    script = 'scripts/validation/validate-instructions.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-instructions'
+    command = @('validation', 'instructions')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-policy'] = [pscustomobject]@{

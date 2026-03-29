@@ -10,6 +10,7 @@ use serde_json::Value;
 use crate::agent_orchestration::common::read_required_json_document;
 use crate::error::ValidateReleaseProvenanceCommandError;
 use crate::operational_hygiene::common::{derive_status, push_required_finding};
+use crate::orchestration::DEFAULT_VALIDATE_ALL_CHECK_ORDER;
 use crate::release::common::{
     collect_changelog_matches, current_utc_date, invoke_git_command, parse_iso_date,
     resolve_release_path, resolve_release_repo_root, to_repo_relative_path, ChangelogEntry,
@@ -97,8 +98,15 @@ struct ReleaseProvenanceBaseline {
     warn_on_audit_commit_mismatch: bool,
     changelog_path: String,
     validate_all_path: String,
+    validate_all_command: String,
     required_validation_checks: Vec<String>,
     required_evidence_files: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ValidateAllContract {
+    ScriptPath(PathBuf),
+    NativeCommand(String),
 }
 
 /// Run the release provenance validation.
@@ -174,12 +182,14 @@ pub fn invoke_validate_release_provenance(
             "release-provenance baseline must define changelogPath.".to_string(),
         );
     }
-    if baseline.validate_all_path.trim().is_empty() {
+    if baseline.validate_all_path.trim().is_empty() && baseline.validate_all_command.trim().is_empty()
+    {
         push_required_finding(
             request.warning_only,
             &mut warnings,
             &mut failures,
-            "release-provenance baseline must define validateAllPath.".to_string(),
+            "release-provenance baseline must define validateAllPath or validateAllCommand."
+                .to_string(),
         );
     }
     if baseline.required_validation_checks.is_empty() {
@@ -202,7 +212,13 @@ pub fn invoke_validate_release_provenance(
     }
 
     let changelog_path = resolve_release_path(&repo_root, None, &baseline.changelog_path);
-    let validate_all_path = resolve_release_path(&repo_root, None, &baseline.validate_all_path);
+    let validate_all_contract = resolve_validate_all_contract(
+        &repo_root,
+        &baseline,
+        request.warning_only,
+        &mut warnings,
+        &mut failures,
+    );
     let effective_require_audit_report =
         baseline.require_audit_report || request.require_audit_report;
 
@@ -216,7 +232,7 @@ pub fn invoke_validate_release_provenance(
 
     let defined_checks = collect_validate_all_check_names(
         &repo_root,
-        &validate_all_path,
+        validate_all_contract.as_ref(),
         request.warning_only,
         &mut warnings,
         &mut failures,
@@ -425,46 +441,107 @@ fn validate_latest_changelog_entry(
 
 fn collect_validate_all_check_names(
     repo_root: &Path,
-    validate_all_path: &Path,
+    validate_all_contract: Option<&ValidateAllContract>,
     warning_only: bool,
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) -> Vec<String> {
-    if !validate_all_path.is_file() {
-        push_required_finding(
-            warning_only,
-            warnings,
-            failures,
-            format!(
-                "validate-all script not found: {}",
-                to_repo_relative_path(repo_root, validate_all_path)
-            ),
-        );
+    let Some(validate_all_contract) = validate_all_contract else {
         return Vec::new();
-    }
-
-    let content = match fs::read_to_string(validate_all_path) {
-        Ok(content) => content,
-        Err(error) => {
-            push_required_finding(
-                warning_only,
-                warnings,
-                failures,
-                format!("Failed to read validate-all script: {error}"),
-            );
-            return Vec::new();
-        }
     };
 
-    let regex = Regex::new(r"name\s*=\s*'(?P<name>[^']+)'")
-        .expect("release provenance validate-all regex should compile");
-    let mut check_names = regex
-        .captures_iter(&content)
-        .filter_map(|captures| captures.name("name").map(|name| name.as_str().to_string()))
-        .collect::<Vec<_>>();
-    check_names.sort();
-    check_names.dedup();
-    check_names
+    match validate_all_contract {
+        ValidateAllContract::ScriptPath(validate_all_path) => {
+            if !validate_all_path.is_file() {
+                push_required_finding(
+                    warning_only,
+                    warnings,
+                    failures,
+                    format!(
+                        "validate-all script not found: {}",
+                        to_repo_relative_path(repo_root, validate_all_path)
+                    ),
+                );
+                return Vec::new();
+            }
+
+            let content = match fs::read_to_string(validate_all_path) {
+                Ok(content) => content,
+                Err(error) => {
+                    push_required_finding(
+                        warning_only,
+                        warnings,
+                        failures,
+                        format!("Failed to read validate-all script: {error}"),
+                    );
+                    return Vec::new();
+                }
+            };
+
+            let regex = Regex::new(r"name\s*=\s*'(?P<name>[^']+)'")
+                .expect("release provenance validate-all regex should compile");
+            let mut check_names = regex
+                .captures_iter(&content)
+                .filter_map(|captures| captures.name("name").map(|name| name.as_str().to_string()))
+                .collect::<Vec<_>>();
+            check_names.sort();
+            check_names.dedup();
+            check_names
+        }
+        ValidateAllContract::NativeCommand(command) => {
+            if !is_supported_validate_all_command(command) {
+                push_required_finding(
+                    warning_only,
+                    warnings,
+                    failures,
+                    format!("Unsupported validate-all command contract: {command}"),
+                );
+                return Vec::new();
+            }
+
+            DEFAULT_VALIDATE_ALL_CHECK_ORDER
+                .iter()
+                .map(|name| (*name).to_string())
+                .collect()
+        }
+    }
+}
+
+fn resolve_validate_all_contract(
+    repo_root: &Path,
+    baseline: &ReleaseProvenanceBaseline,
+    warning_only: bool,
+    warnings: &mut Vec<String>,
+    failures: &mut Vec<String>,
+) -> Option<ValidateAllContract> {
+    let command = baseline.validate_all_command.trim();
+    if !command.is_empty() {
+        return Some(ValidateAllContract::NativeCommand(command.to_string()));
+    }
+
+    let path = baseline.validate_all_path.trim();
+    if !path.is_empty() {
+        return Some(ValidateAllContract::ScriptPath(resolve_release_path(
+            repo_root, None, path,
+        )));
+    }
+
+    push_required_finding(
+        warning_only,
+        warnings,
+        failures,
+        "release-provenance baseline must define validateAllPath or validateAllCommand."
+            .to_string(),
+    );
+    None
+}
+
+fn is_supported_validate_all_command(command: &str) -> bool {
+    let tokens = command.split_whitespace().collect::<Vec<_>>();
+    tokens.len() >= 3
+        && tokens[0].eq_ignore_ascii_case("ntk")
+        && tokens[1].eq_ignore_ascii_case("validation")
+        && tokens[2].eq_ignore_ascii_case("all")
 }
 
 fn validate_check_coverage(

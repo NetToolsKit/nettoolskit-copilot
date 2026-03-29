@@ -49,7 +49,7 @@
     "crates/commands/validation/src/policy/repository_policy.rs",
     "crates/commands/validation/src/security/security_baseline.rs",
     "crates/commands/validation/src/security/supply_chain.rs",
-    "scripts/validation/validate-instructions.ps1",
+    "crates/commands/validation/src/instruction_graph/instructions.rs",
     "crates/commands/validation/src/documentation/readme_standards.rs",
     "crates/commands/validation/src/instruction_graph/authoritative_source_policy.rs",
     "crates/commands/validation/src/instruction_graph/instruction_architecture.rs",

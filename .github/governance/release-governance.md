@@ -42,7 +42,7 @@ These files are validated through the governance and provenance baselines so onb
 ## Release Checklist
 
 1. Run baseline validations:
-   - `pwsh -File .\scripts\validation\validate-instructions.ps1`
+   - `ntk validation instructions --repo-root . --warning-only false`
    - `ntk validation policy`
    - `ntk validation security-baseline --warning-only false`
    - `ntk validation agent-permissions --warning-only false`

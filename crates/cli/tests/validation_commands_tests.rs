@@ -1,7 +1,7 @@
 //! Tests for executable validation command surfaces exposed by `ntk`.
 
-use assert_cmd::cargo::cargo_bin_cmd;
 use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use serde_json::json;
 use std::fs;
@@ -414,7 +414,7 @@ fn initialize_release_provenance_repo_root(repo_root: &Path) {
   "warnOnMissingOptionalAuditReport": false,
   "warnOnAuditCommitMismatch": true,
   "changelogPath": "CHANGELOG.md",
-  "validateAllPath": "scripts/validation/validate-all.ps1",
+  "validateAllCommand": "ntk validation all",
   "requiredValidationChecks": [
     "validate-release-governance",
     "validate-release-provenance"
@@ -426,10 +426,6 @@ fn initialize_release_provenance_repo_root(repo_root: &Path) {
     ".github/governance/release-provenance.baseline.json"
   ]
 }"#,
-    );
-    write_file(
-        &repo_root.join("scripts/validation/validate-all.ps1"),
-        "$definitions = @(\n    @{ name = 'validate-release-governance' },\n    @{ name = 'validate-release-provenance' }\n)\n",
     );
 }
 
@@ -712,6 +708,13 @@ Use `instructions/authoritative-sources.instructions.md`.
   - path: instructions/authoritative-sources.instructions.md
   - path: instructions/powershell-execution.instructions.md
   - path: instructions/feedback-changelog.instructions.md
+routing:
+  - id: repo-guidance
+    triggers:
+      - repository
+      - operating model
+    include:
+      - path: instructions/repository-operating-model.instructions.md
 "#,
     );
     write_file(
@@ -787,7 +790,7 @@ Use the routing catalog.
     write_file(
         &repo_root.join(".codex/skills/sample/SKILL.md"),
         r#"---
-name: sample-skill
+name: sample
 description: sample skill
 ---
 
@@ -806,6 +809,199 @@ Load `repository-operating-model.instructions.md`.
     );
 }
 
+fn initialize_validate_instructions_command_repo_root(repo_root: &Path) {
+    initialize_instruction_architecture_repo_root(repo_root);
+    write_file(
+        &repo_root.join("README.md"),
+        "# Example\n\nSee [.github/AGENTS.md](.github/AGENTS.md).\n",
+    );
+    write_file(
+        &repo_root.join(".github/chatmodes/example.chatmode.md"),
+        "# Example Chatmode\n\nSee [Route Prompt](../prompts/route-instructions.prompt.md).\n",
+    );
+    write_file(
+        &repo_root.join(".github/runbooks/README.md"),
+        "# Runbooks\n\nSee [Runtime Drift](runtime-drift.runbook.md).\n",
+    );
+    write_file(
+        &repo_root.join(".github/runbooks/runtime-drift.runbook.md"),
+        "# Runtime Drift\n",
+    );
+    write_file(
+        &repo_root.join(".codex/mcp/README.md"),
+        "# MCP\n\nSee [Servers](servers.manifest.json).\n",
+    );
+    write_file(
+        &repo_root.join(".github/schemas/instruction-routing.catalog.schema.json"),
+        r#"{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Instruction Routing Catalog",
+  "type": "object",
+  "properties": {
+    "always": {
+      "type": "array"
+    }
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/local-context-index.catalog.json"),
+        r#"{
+  "includeGlobs": ["planning/**/*.md"]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/authoritative-source-map.json"),
+        r#"{
+  "stackRules": [
+    { "id": "rust", "officialDomains": ["doc.rust-lang.org"] }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+        r#"{
+  "servers": [
+    { "id": "filesystem" }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
+        r#"{
+  "renderers": [
+    { "id": "github" }
+  ],
+  "surfaces": [
+    { "id": "agents", "rendererId": "github" }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/validation-profiles.json"),
+        r#"{
+  "version": 1,
+  "defaultProfile": "dev",
+  "profiles": [
+    {
+      "id": "dev",
+      "warningOnly": false,
+      "checkOrder": ["validate-instructions"]
+    }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".codex/mcp/servers.manifest.json"),
+        r#"{
+  "servers": [
+    { "id": "filesystem" }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".vscode/base.code-workspace"),
+        r#"{
+  "folders": [],
+  "extensions": {
+    "recommendations": ["rust-lang.rust-analyzer"]
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".vscode/settings.tamplate.jsonc"),
+        r#"{
+  "chat.instructionsFilesLocations": {
+    "%USERPROFILE%\\.github\\instructions": true
+  },
+  "github.copilot.chat.reviewSelection.instructions": [
+    { "file": "%USERPROFILE%\\.github\\AGENTS.md" }
+  ],
+  "files.exclude": {
+    "**/.git": true
+  },
+  "extensions.autoUpdate": false
+}"#,
+    );
+    write_file(
+        &repo_root.join(".vscode/mcp.tamplate.jsonc"),
+        r#"{
+  "servers": {
+    "filesystem": {
+      "type": "stdio"
+    }
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".vscode/snippets/codex-cli.tamplate.code-snippets"),
+        r#"{
+  "Example": {
+    "prefix": "codex",
+    "body": [
+      "Open .github/prompts/route-instructions.prompt.md"
+    ]
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".vscode/snippets/copilot.tamplate.code-snippets"),
+        r#"{
+  "Example": {
+    "prefix": "copilot",
+    "body": [
+      "Open .github/AGENTS.md"
+    ]
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+        r#"{
+  "requiredSettings": {
+    "files.exclude": {
+      "requiredKeys": ["**/.git"]
+    }
+  },
+  "recommendedSettings": {
+    "extensions.autoUpdate": false
+  },
+  "recommendedNumericUpperBounds": {},
+  "forbiddenSettings": {},
+  "allowedWorkspaceOverrideSettings": [],
+  "heuristics": {
+    "maxFolderCountWarning": 4
+  }
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/governance/template-standards.baseline.json"),
+        r#"{
+  "templateRules": [
+    { "path": ".github/templates/example.md" }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".codex/skills/sample/agents/openai.yaml"),
+        "display_name: Sample Skill\nshort_description: Example\ndefault_prompt: $sample\n",
+    );
+    write_file(
+        &repo_root.join("scripts/validation/fixtures/routing-golden-tests.json"),
+        r#"{
+  "cases": [
+    {
+      "id": "repository-operating-model",
+      "expected_route_ids": ["repo-guidance"],
+      "expected_selected_paths": [
+        "instructions/repository-operating-model.instructions.md"
+      ]
+    }
+  ]
+}"#,
+    );
+}
+
 fn initialize_planning_structure_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
     fs::create_dir_all(repo_root.join("planning/active")).expect("planning/active should exist");
@@ -816,7 +1012,10 @@ fn initialize_planning_structure_repo_root(repo_root: &Path) {
     fs::create_dir_all(repo_root.join("planning/specs/completed"))
         .expect("planning/specs/completed should exist");
     write_file(&repo_root.join("planning/README.md"), "# Planning\n");
-    write_file(&repo_root.join("planning/specs/README.md"), "# Planning Specs\n");
+    write_file(
+        &repo_root.join("planning/specs/README.md"),
+        "# Planning Specs\n",
+    );
 }
 
 fn initialize_readme_standards_repo_root(repo_root: &Path) {
@@ -940,7 +1139,12 @@ fn test_validation_planning_structure_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args(["validation", "planning-structure", "--warning-only", "false"])
+        .args([
+            "validation",
+            "planning-structure",
+            "--warning-only",
+            "false",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -969,7 +1173,12 @@ fn test_validation_template_standards_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args(["validation", "template-standards", "--warning-only", "false"])
+        .args([
+            "validation",
+            "template-standards",
+            "--warning-only",
+            "false",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -984,7 +1193,12 @@ fn test_validation_workspace_efficiency_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args(["validation", "workspace-efficiency", "--warning-only", "false"])
+        .args([
+            "validation",
+            "workspace-efficiency",
+            "--warning-only",
+            "false",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -998,7 +1212,12 @@ fn test_validation_instruction_metadata_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args(["validation", "instruction-metadata", "--warning-only", "false"])
+        .args([
+            "validation",
+            "instruction-metadata",
+            "--warning-only",
+            "false",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -1537,6 +1756,49 @@ Use the routing catalog and return JSON.
 }
 
 #[test]
+fn test_validation_instructions_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_validate_instructions_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "instructions", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Required files checked:"))
+        .stdout(predicate::str::contains("Catalog paths checked:"))
+        .stdout(predicate::str::contains("Routing routes checked:"))
+        .stdout(predicate::str::contains("Skill files checked: 1"));
+}
+
+#[test]
+fn test_validation_all_reports_pass_for_selected_instruction_profile() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_validate_instructions_command_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "validation",
+            "all",
+            "--validation-profile",
+            "dev",
+            "--warning-only",
+            "false",
+            "--write-ledger",
+            "false",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Profile id: dev"))
+        .stdout(predicate::str::contains("Total checks: 1"))
+        .stdout(predicate::str::contains("Passed checks: 1"))
+        .stdout(predicate::str::contains("Failed checks: 0"));
+}
+
+#[test]
 fn test_validation_compatibility_lifecycle_policy_reports_pass_for_valid_assets() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_compatibility_lifecycle_repo_root(repo.path());
@@ -1629,8 +1891,8 @@ fn test_validation_security_baseline_reports_pass_for_valid_assets() {
 }
 
 #[test]
-fn test_validation_security_baseline_reports_warning_for_allowlisted_first_match_and_real_secret_later(
-) {
+fn test_validation_security_baseline_reports_warning_for_allowlisted_first_match_and_real_secret_later()
+ {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_security_baseline_repo_root(repo.path());
     write_file(
@@ -1858,7 +2120,9 @@ fn test_validation_shell_hooks_reports_pass_for_valid_assets() {
             "validation",
             "shell-hooks",
             "--shell-path",
-            shell_path.to_str().expect("shell path should be valid utf-8"),
+            shell_path
+                .to_str()
+                .expect("shell path should be valid utf-8"),
             "--shellcheck-path",
             shellcheck_path
                 .to_str()
@@ -1890,7 +2154,12 @@ fn test_validation_runtime_script_tests_reports_pass_for_valid_assets() {
 
     ntk()
         .current_dir(repo.path())
-        .args(["validation", "runtime-script-tests", "--warning-only", "false"])
+        .args([
+            "validation",
+            "runtime-script-tests",
+            "--warning-only",
+            "false",
+        ])
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
@@ -1942,7 +2211,7 @@ fn test_validation_release_provenance_reports_pass_for_valid_assets() {
         .success()
         .stdout(predicate::str::contains("Status: passed"))
         .stdout(predicate::str::contains("Checks declared: 2"))
-        .stdout(predicate::str::contains("Checks found in validate-all: 2"))
+        .stdout(predicate::str::contains("Checks found in validate-all: 30"))
         .stdout(predicate::str::contains("Git available: true"));
 }
 

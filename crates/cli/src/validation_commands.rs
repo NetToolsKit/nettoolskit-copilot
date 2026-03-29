@@ -3,40 +3,39 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_validation::{
+    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
+    ValidateAgentSkillAlignmentRequest, ValidateAllRequest, ValidateArchitectureBoundariesRequest,
+    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
+    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
+    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
+    ValidateInstructionsRequest, ValidatePlanningStructureRequest, ValidatePolicyRequest,
+    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
+    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
+    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
+    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
+    ValidateShellHooksRequest, ValidateSupplyChainRequest, ValidateTemplateStandardsRequest,
+    ValidateWarningBaselineRequest, ValidateWorkspaceEfficiencyRequest, ValidationCheckStatus,
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
-    invoke_validate_agent_permissions,
-    invoke_validate_agent_skill_alignment, invoke_validate_architecture_boundaries,
-    invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
-    invoke_validate_compatibility_lifecycle_policy, invoke_validate_dotnet_standards,
-    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
+    invoke_validate_agent_permissions, invoke_validate_agent_skill_alignment, invoke_validate_all,
+    invoke_validate_architecture_boundaries, invoke_validate_audit_ledger,
+    invoke_validate_authoritative_source_policy, invoke_validate_compatibility_lifecycle_policy,
+    invoke_validate_dotnet_standards, invoke_validate_instruction_architecture,
+    invoke_validate_instruction_metadata, invoke_validate_instructions,
     invoke_validate_planning_structure, invoke_validate_policy,
     invoke_validate_powershell_standards, invoke_validate_readme_standards,
     invoke_validate_release_governance, invoke_validate_release_provenance,
     invoke_validate_routing_coverage, invoke_validate_runtime_script_tests,
     invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
-    invoke_validate_shell_hooks, invoke_validate_supply_chain,
-    invoke_validate_template_standards, invoke_validate_warning_baseline,
-    invoke_validate_workspace_efficiency,
-    ValidateAgentHooksRequest, ValidateAgentOrchestrationRequest,
-    ValidateAgentPermissionsRequest,
-    ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
-    ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
-    ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
-    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
-    ValidatePlanningStructureRequest, ValidatePolicyRequest,
-    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
-    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
-    ValidateRoutingCoverageRequest, ValidateRuntimeScriptTestsRequest,
-    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
-    ValidateShellHooksRequest, ValidateSupplyChainRequest,
-    ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
-    ValidateWorkspaceEfficiencyRequest, ValidationCheckStatus,
+    invoke_validate_shell_hooks, invoke_validate_supply_chain, invoke_validate_template_standards,
+    invoke_validate_warning_baseline, invoke_validate_workspace_efficiency,
 };
 use std::path::PathBuf;
 
 /// Validation command group.
 #[derive(Debug, Subcommand)]
 pub enum ValidationCommand {
+    /// Run the full validation orchestration for one profile.
+    All(ValidationAllArgs),
     /// Validate multi-agent orchestration contracts and runtime assets.
     #[command(name = "agent-orchestration")]
     AgentOrchestration(ValidationAgentOrchestrationArgs),
@@ -59,6 +58,9 @@ pub enum ValidationCommand {
     /// Validate instruction architecture ownership and boundary rules.
     #[command(name = "instruction-architecture")]
     InstructionArchitecture(ValidationInstructionArchitectureArgs),
+    /// Validate repository instruction and authored guidance assets.
+    #[command(name = "instructions")]
+    Instructions(ValidationInstructionsArgs),
     /// Validate instruction, prompt, and chat mode frontmatter metadata.
     #[command(name = "instruction-metadata")]
     InstructionMetadata(ValidationInstructionMetadataArgs),
@@ -111,6 +113,41 @@ pub enum ValidationCommand {
     /// Validate VS Code workspace efficiency and configuration hygiene.
     #[command(name = "workspace-efficiency")]
     WorkspaceEfficiency(ValidationWorkspaceEfficiencyArgs),
+}
+
+/// CLI arguments for `validation all`.
+#[derive(Debug, Args)]
+pub struct ValidationAllArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit validation profile id.
+    #[clap(long)]
+    pub validation_profile: Option<String>,
+    /// Optional explicit validation profile catalog path.
+    #[clap(long)]
+    pub validation_profiles_path: Option<PathBuf>,
+    /// Include all PowerShell scripts in the PowerShell standards validation.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub include_all_powershell_scripts: bool,
+    /// Run PowerShell standards in strict mode.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub strict_powershell_standards: bool,
+    /// Skip PSScriptAnalyzer during PowerShell standards validation.
+    #[clap(long, action = ArgAction::SetTrue)]
+    pub skip_ps_script_analyzer: bool,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+    /// Write validation ledger evidence.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub write_ledger: bool,
+    /// Optional explicit validation ledger path.
+    #[clap(long)]
+    pub ledger_path: Option<PathBuf>,
+    /// Optional explicit report output path.
+    #[clap(long)]
+    pub output_path: Option<PathBuf>,
 }
 
 /// CLI arguments for `validation agent-orchestration`.
@@ -268,6 +305,17 @@ pub struct ValidationInstructionArchitectureArgs {
     /// Emit warning and failure details explicitly.
     #[clap(long, action = ArgAction::SetTrue)]
     pub detailed_output: bool,
+}
+
+/// CLI arguments for `validation instructions`.
+#[derive(Debug, Args)]
+pub struct ValidationInstructionsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
 }
 
 /// CLI arguments for `validation instruction-metadata`.
@@ -573,6 +621,7 @@ pub struct ValidationWorkspaceEfficiencyArgs {
 /// Execute one validation command through the `ntk` binary.
 pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
     match command {
+        ValidationCommand::All(arguments) => execute_all(arguments),
         ValidationCommand::AgentOrchestration(arguments) => execute_agent_orchestration(arguments),
         ValidationCommand::AgentPermissions(arguments) => execute_agent_permissions(arguments),
         ValidationCommand::AgentSkillAlignment(arguments) => {
@@ -589,6 +638,7 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         ValidationCommand::InstructionArchitecture(arguments) => {
             execute_instruction_architecture(arguments)
         }
+        ValidationCommand::Instructions(arguments) => execute_instructions(arguments),
         ValidationCommand::InstructionMetadata(arguments) => {
             execute_instruction_metadata(arguments)
         }
@@ -603,9 +653,7 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         }
         ValidationCommand::ReadmeStandards(arguments) => execute_readme_standards(arguments),
         ValidationCommand::RoutingCoverage(arguments) => execute_routing_coverage(arguments),
-        ValidationCommand::RuntimeScriptTests(arguments) => {
-            execute_runtime_script_tests(arguments)
-        }
+        ValidationCommand::RuntimeScriptTests(arguments) => execute_runtime_script_tests(arguments),
         ValidationCommand::SecurityBaseline(arguments) => execute_security_baseline(arguments),
         ValidationCommand::SharedScriptChecksums(arguments) => {
             execute_shared_script_checksums(arguments)
@@ -620,6 +668,49 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
             execute_workspace_efficiency(arguments)
         }
     }
+}
+
+fn execute_all(arguments: ValidationAllArgs) -> ExitStatus {
+    let result = match invoke_validate_all(&ValidateAllRequest {
+        repo_root: arguments.repo_root,
+        validation_profile: arguments.validation_profile,
+        validation_profiles_path: arguments.validation_profiles_path,
+        include_all_powershell_scripts: arguments.include_all_powershell_scripts,
+        strict_powershell_standards: arguments.strict_powershell_standards,
+        skip_ps_script_analyzer: arguments.skip_ps_script_analyzer,
+        warning_only: arguments.warning_only,
+        write_ledger: arguments.write_ledger,
+        ledger_path: arguments.ledger_path,
+        output_path: arguments.output_path,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.overall_status));
+    println!("Profile id: {}", result.profile_id);
+    println!("Warning only: {}", result.warning_only);
+    println!("Output path: {}", result.output_path.display());
+    if let Some(ledger_path) = result.ledger_path.as_ref() {
+        println!("Ledger path: {}", ledger_path.display());
+    }
+    if let Some(archived_broken_ledger_path) = result.archived_broken_ledger_path.as_ref() {
+        println!(
+            "Archived broken ledger path: {}",
+            archived_broken_ledger_path.display()
+        );
+    }
+    println!("Total checks: {}", result.total_checks);
+    println!("Passed checks: {}", result.passed_checks);
+    println!("Warning checks: {}", result.warning_checks);
+    println!("Failed checks: {}", result.failed_checks);
+    println!("Supplemental failures: {}", result.supplemental_failures);
+    print_messages("Suite warnings", &result.suite_warning_messages);
+
+    exit_status_from_code(result.exit_code)
 }
 
 fn execute_agent_orchestration(arguments: ValidationAgentOrchestrationArgs) -> ExitStatus {
@@ -877,6 +968,36 @@ fn execute_instruction_architecture(
     exit_status_from_code(result.exit_code)
 }
 
+fn execute_instructions(arguments: ValidationInstructionsArgs) -> ExitStatus {
+    let result = match invoke_validate_instructions(&ValidateInstructionsRequest {
+        repo_root: arguments.repo_root,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Required files checked: {}", result.required_files_checked);
+    println!("Catalog paths checked: {}", result.catalog_paths_checked);
+    println!("JSON files checked: {}", result.json_files_checked);
+    println!("Markdown files checked: {}", result.markdown_files_checked);
+    println!("Markdown links checked: {}", result.markdown_links_checked);
+    println!("Routing routes checked: {}", result.routing_routes_checked);
+    println!("Routing cases checked: {}", result.routing_cases_checked);
+    println!("Skills checked: {}", result.skills_checked);
+    println!("Skill files checked: {}", result.skill_files_checked);
+    println!("OpenAI files checked: {}", result.openai_files_checked);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
 fn execute_instruction_metadata(arguments: ValidationInstructionMetadataArgs) -> ExitStatus {
     let result = match invoke_validate_instruction_metadata(&ValidateInstructionMetadataRequest {
         repo_root: arguments.repo_root,
@@ -995,7 +1116,10 @@ fn execute_planning_structure(arguments: ValidationPlanningStructureArgs) -> Exi
 
     println!("Status: {}", status_label(result.status));
     println!("Warning only: {}", result.warning_only);
-    println!("Missing required files: {}", result.missing_required_files.len());
+    println!(
+        "Missing required files: {}",
+        result.missing_required_files.len()
+    );
     println!(
         "Missing required directories: {}",
         result.missing_required_directories.len()
@@ -1218,7 +1342,10 @@ fn execute_template_standards(arguments: ValidationTemplateStandardsArgs) -> Exi
     println!("Status: {}", status_label(result.status));
     println!("Warning only: {}", result.warning_only);
     println!("Baseline path: {}", result.baseline_path.display());
-    println!("Template directory: {}", result.template_directory.display());
+    println!(
+        "Template directory: {}",
+        result.template_directory.display()
+    );
     println!("Templates checked: {}", result.templates_checked);
     println!("Rules checked: {}", result.rules_checked);
     print_messages("Warnings", &result.warnings);
@@ -1278,7 +1405,10 @@ fn execute_workspace_efficiency(arguments: ValidationWorkspaceEfficiencyArgs) ->
         "Workspace search root: {}",
         result.workspace_search_root.display()
     );
-    println!("Workspace files checked: {}", result.workspace_files_checked);
+    println!(
+        "Workspace files checked: {}",
+        result.workspace_files_checked
+    );
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 

@@ -107,7 +107,7 @@ pub fn initialize_release_provenance_repo(repo_root: &Path) {
   "warnOnMissingOptionalAuditReport": false,
   "warnOnAuditCommitMismatch": true,
   "changelogPath": "CHANGELOG.md",
-  "validateAllPath": "scripts/validation/validate-all.ps1",
+  "validateAllCommand": "ntk validation all",
   "requiredValidationChecks": [
     "validate-release-governance",
     "validate-release-provenance"
@@ -119,11 +119,6 @@ pub fn initialize_release_provenance_repo(repo_root: &Path) {
     ".github/governance/release-provenance.baseline.json"
   ]
 }"#,
-    );
-    write_repo_file(
-        repo_root,
-        "scripts/validation/validate-all.ps1",
-        "$definitions = @(\n    @{ name = 'validate-release-governance' },\n    @{ name = 'validate-release-provenance' }\n)\n",
     );
 }
 

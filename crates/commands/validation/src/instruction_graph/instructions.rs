@@ -10,7 +10,10 @@ use regex::Regex;
 use serde_json::{Map, Value};
 use walkdir::WalkDir;
 
-use crate::{error::ValidateInstructionsCommandError, ValidationCheckStatus};
+use crate::{
+    ValidateRoutingCoverageRequest, ValidationCheckStatus, error::ValidateInstructionsCommandError,
+    invoke_validate_routing_coverage,
+};
 
 const REQUIRED_FILES: &[&str] = &[
     ".github/AGENTS.md",
@@ -91,6 +94,10 @@ pub struct ValidateInstructionsResult {
     pub markdown_files_checked: usize,
     /// Number of markdown links checked.
     pub markdown_links_checked: usize,
+    /// Number of routing catalog routes checked through integrated golden coverage.
+    pub routing_routes_checked: usize,
+    /// Number of routing fixture cases checked through integrated golden coverage.
+    pub routing_cases_checked: usize,
     /// Number of skill directories checked.
     pub skills_checked: usize,
     /// Number of SKILL.md files checked.
@@ -166,6 +173,12 @@ pub fn invoke_validate_instructions(
         &mut warnings,
         &mut failures,
     );
+    let (routing_routes_checked, routing_cases_checked) = test_routing_golden_coverage(
+        &repo_root,
+        request.warning_only,
+        &mut warnings,
+        &mut failures,
+    );
 
     test_workspace_template_compatibility(
         json_documents.get(".github/governance/workspace-efficiency.baseline.json"),
@@ -200,6 +213,8 @@ pub fn invoke_validate_instructions(
         json_files_checked,
         markdown_files_checked: markdown_files.len(),
         markdown_links_checked,
+        routing_routes_checked,
+        routing_cases_checked,
         skills_checked: skill_stats.skills_checked,
         skill_files_checked: skill_stats.skill_files_checked,
         openai_files_checked: skill_stats.openai_files_checked,
@@ -208,6 +223,34 @@ pub fn invoke_validate_instructions(
         status,
         exit_code,
     })
+}
+
+fn test_routing_golden_coverage(
+    repo_root: &Path,
+    warning_only: bool,
+    warnings: &mut Vec<String>,
+    failures: &mut Vec<String>,
+) -> (usize, usize) {
+    match invoke_validate_routing_coverage(&ValidateRoutingCoverageRequest {
+        repo_root: Some(repo_root.to_path_buf()),
+        warning_only,
+        ..ValidateRoutingCoverageRequest::default()
+    }) {
+        Ok(result) => {
+            warnings.extend(result.warnings);
+            failures.extend(result.failures);
+            (result.routes_checked, result.cases_checked)
+        }
+        Err(error) => {
+            push_required_finding(
+                warning_only,
+                warnings,
+                failures,
+                format!("Routing golden coverage execution failed: {error}"),
+            );
+            (0, 0)
+        }
+    }
 }
 
 fn test_required_files(

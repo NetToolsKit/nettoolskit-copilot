@@ -63,7 +63,7 @@ pwsh -File .\scripts\runtime\sync-vscode-global-mcp.ps1 -CreateBackup
 ### Example 1: Validate templates and references
 
 ```powershell
-pwsh -File .\scripts\validation\validate-instructions.ps1
+ntk validation instructions --repo-root . --warning-only false
 ```
 
 ### Example 2: Apply active VS Code files from templates
@@ -127,7 +127,7 @@ pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath C:\Users
 ## Build and Tests
 
 ```powershell
-pwsh -File .\scripts\validation\validate-instructions.ps1
+ntk validation instructions --repo-root . --warning-only false
 ```
 
 ---
@@ -165,7 +165,7 @@ pwsh -File .\scripts\validation\validate-instructions.ps1
 - `scripts/runtime/sync-vscode-global-settings.ps1`
 - `scripts/runtime/sync-vscode-global-snippets.ps1`
 - `scripts/runtime/sync-workspace-settings.ps1`
-- `scripts/validation/validate-instructions.ps1`
+- `ntk validation instructions --repo-root . --warning-only false`
 
 ---
 
