@@ -750,7 +750,7 @@ fn resolve_scan_roots(repo_root: &Path, patterns: &[String]) -> Vec<PathBuf> {
 fn resolve_scan_root(repo_root: &Path, pattern: &str) -> PathBuf {
     let normalized_pattern = pattern.replace('\\', "/");
     let wildcard_index = normalized_pattern
-        .find(|character| matches!(character, '*' | '?'))
+        .find(['*', '?'])
         .unwrap_or(normalized_pattern.len());
     let static_prefix = normalized_pattern[..wildcard_index].trim_end_matches('/');
 
