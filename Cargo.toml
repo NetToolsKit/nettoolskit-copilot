@@ -44,7 +44,7 @@ supports-color = "2.1"
 
 # Interactive prompts
 inquire = "0.9"
-rustyline = "13.0"
+rustyline = "17.0"
 
 # Async utilities
 futures = "0.3"
