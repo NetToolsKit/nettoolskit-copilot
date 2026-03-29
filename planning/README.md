@@ -53,7 +53,6 @@ planning/
 ## Active Workstreams
 
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
-- [planning/active/plan-script-retirement-phase-20f-codex-orchestration-renderer.md](planning/active/plan-script-retirement-phase-20f-codex-orchestration-renderer.md)
 
 ---
 
@@ -93,6 +92,7 @@ planning/
 - [planning/completed/plan-script-retirement-phase-20c-self-heal.md](planning/completed/plan-script-retirement-phase-20c-self-heal.md)
 - [planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md)
 - [planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md](planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md)
+- [planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md](planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md)
 - [planning/completed/script-retirement-safety-matrix.md](planning/completed/script-retirement-safety-matrix.md)
 - [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
@@ -118,6 +118,7 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md](planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md)
 - [planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md)
 - [planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md](planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md)
+- [planning/specs/completed/spec-script-retirement-phase-20f-codex-orchestration-renderer.md](planning/specs/completed/spec-script-retirement-phase-20f-codex-orchestration-renderer.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)

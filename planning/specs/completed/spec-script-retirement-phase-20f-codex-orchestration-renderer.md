@@ -4,10 +4,10 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 13:20
+- LastUpdated: 2026-03-29 13:35
 - Objective: define the safe cutover conditions for deleting `scripts/runtime/render-codex-orchestration-surfaces.ps1` after the provider-surface catalog gained native renderer support.
-- Planning Readiness: ready-for-implementation
-- Related Plan: `planning/active/plan-script-retirement-phase-20f-codex-orchestration-renderer.md`
+- Planning Readiness: executed-and-completed
+- Related Plan: `planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md`
 - Source Inputs:
   - `planning/active/plan-repository-consolidation-continuity.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
@@ -55,3 +55,10 @@ Treat the Codex orchestration renderer as the first pure provider-surface leaf t
 - `.codex/orchestration/README.md` and `definitions/providers/codex/orchestration/README.md` advertise the native renderer contract.
 - `scripts/runtime/render-codex-orchestration-surfaces.ps1` is deleted.
 - The safety matrix, parity ledger, and continuity plan/spec reflect a 96-script live estate and 63 `retain until consumer migration completes`.
+
+## Executed Result
+
+- The `codex-orchestration-surfaces` catalog entry moved onto the native `ntk runtime render-provider-surfaces` contract.
+- Runtime parity coverage now proves the native Codex orchestration renderer path, and the two operator-facing README surfaces were repointed in the same slice.
+- `scripts/runtime/render-codex-orchestration-surfaces.ps1` was deleted after the same-slice consumer cleanup landed.
+- The continuity plan/spec, safety matrix, and parity ledger now inherit the `97 -> 96` live-estate rebaseline and the `64 -> 63` consumer-migration backlog change.
