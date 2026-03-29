@@ -4,14 +4,14 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-03-29 00:08
+- LastUpdated: 2026-03-29 07:35
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
-- Live Inventory After Executed Slice: `107`
+- Live Inventory After Executed Slice: `106`
 - Current Classification Totals:
-  - `retired in this workstream`: `40`
+  - `retired in this workstream`: `41`
   - `retain wrapper intentionally`: `33`
-  - `retain until consumer migration completes`: `74`
+  - `retain until consumer migration completes`: `73`
 - Decision Rule:
   - `remove-now candidate` means Rust parity exists and no blocking local consumer remains after same-slice doc cleanup.
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
@@ -40,6 +40,7 @@ Generated: 2026-03-28 19:39
 | `scripts/validation/validate-planning-structure.ps1`, `scripts/validation/validate-readme-standards.ps1`, `scripts/validation/validate-template-standards.ps1`, `scripts/validation/validate-workspace-efficiency.ps1`, `scripts/validation/validate-instruction-metadata.ps1` | 5 | `crates/commands/validation + crates/cli` | The remaining blockers were the missing `ntk validation` executable boundary for the documentation/structure checks, `validate-all.ps1`, `validate-stage.ps1`, instruction/policy/release evidence, authored guidance, and the runtime parity scripts that still invoked the deleted wrapper paths directly. | Added the missing `ntk validation` entrypoints, repointed `validate-all.ps1`, `validate-stage.ps1`, runtime parity tests, README/checklist guidance, and governance baselines to the native boundary, deleted the five leaves, re-rendered the GitHub instruction surfaces, and archived Phase 12. | retired |
 | `scripts/validation/validate-agent-hooks.ps1`, `scripts/validation/validate-shell-hooks.ps1`, `scripts/validation/validate-runtime-script-tests.ps1` | 3 | `crates/commands/validation + crates/cli` | The remaining blockers were the missing `ntk validation` executable boundary for the hook/runtime-test checks, `validate-all.ps1`, runtime parity fixtures, release/security evidence, and authored Codex guidance that still encoded the local wrapper paths. | Added the missing `ntk validation` entrypoints, repointed the live consumer chain and governance evidence to the native boundary, re-rendered the Codex compatibility surfaces, deleted the three leaves, and archived Phase 13. | retired |
 | `scripts/validation/validate-instructions.ps1`, `scripts/validation/test-routing-selection.ps1` | 2 | `crates/commands/validation + crates/cli` | The remaining blockers were the missing native `instructions` and `all` CLI boundaries plus `validate-all.ps1`, `validate-stage.ps1`, authored checklists, runbooks, and governance baselines that still treated the local wrapper paths as canonical. | Added native `ntk validation instructions` and `ntk validation all` entrypoints, integrated routing golden coverage directly into the Rust instruction-validation flow, repointed the live consumer chain and governance evidence to the native boundary, deleted the two leaves, and archived Phase 14. | retired |
+| `scripts/validation/validate-all.ps1` | 1 | `crates/commands/validation + crates/cli` | The remaining blockers were runtime/orchestration fallbacks, runbooks, governance/policy baselines, projected skill surfaces, and a shell-hook regression fixture that still encoded the local wrapper path. | Repointed the live consumer chain and governance evidence to `ntk validation all`, replaced the shell-hook regression example with a semantically equivalent native path, deleted the wrapper, and archived Phase 15. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -58,19 +59,18 @@ Generated: 2026-03-28 19:39
 | --- | ---: | --- | --- |
 | `scripts/common/*.ps1` | 15 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/runtime/*.ps1` excluding hooks | 38 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/validation/*.ps1` | 3 | the remaining validation coordination/reporting cluster still needs explicit Rust CLI ownership or retained-wrapper decisions before deletion | requires follow-up consumer sweep before deletion |
+| `scripts/validation/*.ps1` | 2 | the remaining validation reporting cluster still needs explicit Rust CLI ownership or retained-wrapper decisions before deletion | requires follow-up consumer sweep before deletion |
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 
 ## Current Immediate Queue
 
-- No single-file `remove-now candidate` remains after Phase 14.
+- No single-file `remove-now candidate` remains after Phase 15.
 - The next consumer sweep should move to domain-level proof for:
   - `scripts/common/*.ps1`
   - `scripts/runtime/*.ps1` excluding the retained hook wrappers and the Phase 4 retired continuity/template leaves
-  - `scripts/validation/*.ps1`, starting with the remaining coordination/reporting cluster:
-    - `validate-all`
+  - `scripts/validation/*.ps1`, now limited to the remaining reporting cluster:
     - `export-audit-report`
     - `export-enterprise-trends`
 
@@ -92,5 +92,6 @@ Generated: 2026-03-28 19:39
 - The twelfth execution slice retired `validate-planning-structure`, `validate-readme-standards`, `validate-template-standards`, `validate-workspace-efficiency`, and `validate-instruction-metadata`, reducing the live local estate from `117` to `112`.
 - The thirteenth execution slice retired `validate-agent-hooks`, `validate-shell-hooks`, and `validate-runtime-script-tests`, reducing the live local estate from `112` to `109`.
 - The fourteenth execution slice retired `validate-instructions` and `test-routing-selection`, reducing the live local estate from `109` to `107`.
+- The fifteenth execution slice retired `validate-all`, reducing the live local estate from `107` to `106` and the validation-folder estate from `3` to `2`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
 - The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.
