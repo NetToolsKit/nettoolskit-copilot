@@ -65,7 +65,7 @@ pub const VALIDATION_SURFACE_CONTRACTS: &[ValidationSurfaceContract] = &[
     ValidationSurfaceContract::new(
         "validation-commands",
         "scripts/validation",
-        31,
+        29,
         ValidationSurfaceKind::ValidationCommands,
         MigrationWave::Wave2,
     ),

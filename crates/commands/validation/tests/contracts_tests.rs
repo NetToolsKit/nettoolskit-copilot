@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 #[test]
 fn test_validation_surface_total_matches_locked_inventory() {
-    assert_eq!(validation_surface_script_total(), 41);
+    assert_eq!(validation_surface_script_total(), 39);
 }
 
 #[test]
@@ -57,7 +57,7 @@ fn test_validation_surface_category_counts_match_matrix() {
         .find(|contract| contract.kind == ValidationSurfaceKind::DeployCommands)
         .expect("deploy surface should exist");
 
-    assert_eq!(validation_commands.legacy_script_count, 31);
+    assert_eq!(validation_commands.legacy_script_count, 29);
     assert_eq!(security_commands.legacy_script_count, 6);
     assert_eq!(governance_commands.legacy_script_count, 2);
     assert_eq!(documentation_commands.legacy_script_count, 1);
