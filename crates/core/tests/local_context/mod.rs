@@ -3,3 +3,4 @@
 mod catalog_tests;
 mod document_tests;
 mod search_tests;
+mod sqlite_tests;
