@@ -64,6 +64,7 @@
     "crates/commands/validation/src/agent_orchestration/orchestration_integrity.rs",
     "crates/commands/validation/src/release/release_provenance.rs",
     "crates/commands/runtime/src/diagnostics/healthcheck.rs",
+    "crates/commands/runtime/src/diagnostics/self_heal.rs",
     "scripts/orchestration/engine/invoke-task-worker.ps1",
     "scripts/runtime/new-super-agent-worktree.ps1",
     "scripts/runtime/invoke-super-agent-brainstorm.ps1",
@@ -83,8 +84,7 @@
     "scripts/runtime/clean-codex-runtime.ps1",
     "crates/cli/src/runtime_commands.rs",
     "crates/commands/runtime/src/diagnostics/doctor.rs",
-    "crates/commands/runtime/src/diagnostics/healthcheck.rs",
-    "scripts/runtime/self-heal.ps1"
+    "crates/commands/runtime/src/diagnostics/healthcheck.rs"
   ],
   "requiredDirectories": [
     ".github/instructions",

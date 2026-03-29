@@ -155,16 +155,23 @@ try {
     Assert-True ($syncCodexMcpHelpText -match '--create-backup') 'runtime sync-codex-mcp-config help must expose --create-backup.'
     Assert-True ($syncCodexMcpHelpText -match '--dry-run') 'runtime sync-codex-mcp-config help must expose --dry-run.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'self-heal.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'Mirror' -Message 'self-heal missing Mirror parameter.'
-    Assert-Contains -Collection $keys -Value 'ApplyMcpConfig' -Message 'self-heal missing ApplyMcpConfig parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'self-heal missing TargetGithubPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'self-heal missing TargetCodexPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'self-heal missing TargetAgentsSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCopilotSkillsPath' -Message 'self-heal missing TargetCopilotSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'self-heal missing RuntimeProfile parameter.'
+    $selfHealHelp = & $runtimeBinaryPath runtime self-heal --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime self-heal help smoke test failed.'
+    $selfHealHelpText = ($selfHealHelp | Out-String)
+    Assert-True ($selfHealHelpText -match '--repo-root') 'runtime self-heal help must expose --repo-root.'
+    Assert-True ($selfHealHelpText -match '--target-github-path') 'runtime self-heal help must expose --target-github-path.'
+    Assert-True ($selfHealHelpText -match '--target-codex-path') 'runtime self-heal help must expose --target-codex-path.'
+    Assert-True ($selfHealHelpText -match '--target-agents-skills-path') 'runtime self-heal help must expose --target-agents-skills-path.'
+    Assert-True ($selfHealHelpText -match '--target-copilot-skills-path') 'runtime self-heal help must expose --target-copilot-skills-path.'
+    Assert-True ($selfHealHelpText -match '--runtime-profile') 'runtime self-heal help must expose --runtime-profile.'
+    Assert-True ($selfHealHelpText -match '--mirror') 'runtime self-heal help must expose --mirror.'
+    Assert-True ($selfHealHelpText -match '--apply-mcp-config') 'runtime self-heal help must expose --apply-mcp-config.'
+    Assert-True ($selfHealHelpText -match '--backup-config') 'runtime self-heal help must expose --backup-config.'
+    Assert-True ($selfHealHelpText -match '--apply-vscode-templates') 'runtime self-heal help must expose --apply-vscode-templates.'
+    Assert-True ($selfHealHelpText -match '--strict-extras') 'runtime self-heal help must expose --strict-extras.'
+    Assert-True ($selfHealHelpText -match '--output-path') 'runtime self-heal help must expose --output-path.'
+    Assert-True ($selfHealHelpText -match '--log-path') 'runtime self-heal help must expose --log-path.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'clean-codex-runtime.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop

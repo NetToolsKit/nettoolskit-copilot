@@ -39,6 +39,7 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 ```powershell
 ntk runtime doctor --repo-root . --detailed
 ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile dev
+ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras
 ntk runtime render-mcp-runtime-artifacts
 ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
 ntk runtime sync-codex-mcp-config --dry-run
@@ -55,7 +56,7 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 ntk runtime render-mcp-runtime-artifacts
 ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
 ntk runtime sync-codex-mcp-config --dry-run
-pwsh -File .\scripts\runtime\self-heal.ps1 -StrictExtras
+ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras
 ntk runtime doctor --repo-root . --detailed
 ntk validation all --repo-root . --validation-profile release
 ntk validation readme-standards --repo-root .
@@ -77,7 +78,7 @@ ntk validation readme-standards --repo-root .
 - `ntk runtime sync-codex-mcp-config --dry-run`
 - `ntk runtime doctor --repo-root . --detailed`
 - `ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release`
-- [Self-Heal](runtime/self-heal.ps1)
+- `ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras`
 - Native Validate All: `ntk validation all --repo-root . --validation-profile release`
 - Native README Standards Check: `ntk validation readme-standards --repo-root .`
 
