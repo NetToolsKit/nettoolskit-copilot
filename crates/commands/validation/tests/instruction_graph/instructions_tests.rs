@@ -34,6 +34,8 @@ fn test_invoke_validate_instructions_passes_for_valid_assets() {
     assert!(result.json_files_checked >= 8);
     assert!(result.markdown_files_checked >= 6);
     assert!(result.markdown_links_checked >= 4);
+    assert_eq!(result.routing_routes_checked, 1);
+    assert_eq!(result.routing_cases_checked, 1);
     assert_eq!(result.skills_checked, 1);
     assert_eq!(result.skill_files_checked, 1);
     assert_eq!(result.openai_files_checked, 1);
@@ -180,6 +182,39 @@ fn test_invoke_validate_instructions_reports_broken_snippet_reference() {
         .failures
         .iter()
         .any(|message| message.contains("Broken snippet path")));
+}
+
+#[test]
+fn test_invoke_validate_instructions_reports_broken_routing_fixture() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_validate_instructions_repo(repo.path());
+    write_file(
+        &repo
+            .path()
+            .join("scripts/validation/fixtures/routing-golden-tests.json"),
+        r#"{
+  "cases": [
+    {
+      "id": "broken-route",
+      "expected_route_ids": ["missing-route"],
+      "expected_selected_paths": ["instructions/repository-operating-model.instructions.md"]
+    }
+  ]
+}"#,
+    );
+
+    let result = invoke_validate_instructions(&ValidateInstructionsRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+    })
+    .expect("validation should execute");
+
+    assert_eq!(result.status, ValidationCheckStatus::Failed);
+    assert_eq!(result.routing_routes_checked, 1);
+    assert_eq!(result.routing_cases_checked, 1);
+    assert!(result.failures.iter().any(|message| {
+        message.contains("Fixture case 'broken-route' references unknown route id: missing-route")
+    }));
 }
 
 #[test]

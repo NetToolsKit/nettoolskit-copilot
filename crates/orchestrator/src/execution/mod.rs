@@ -6,6 +6,8 @@
 pub mod ai;
 /// Local AI session persistence and resume primitives.
 pub mod ai_session;
+/// Local AI usage ledger persistence and weekly reporting.
+pub mod ai_usage;
 /// Approval gateway for AI side-effect operations.
 pub mod approval;
 /// Internal command cache primitives used by processor runtime.
@@ -34,6 +36,17 @@ pub use ai_session::{
     AiSessionCompressionMode, AiSessionExchange, LocalAiSessionSnapshot, LocalAiSessionState,
     LOCAL_AI_SESSIONS_DIR_NAME, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
     NTK_AI_SESSION_COMPRESSION_MODE_ENV, NTK_AI_SESSION_DELTA_MIN_SHARED_PREFIX_CHARS_ENV,
+};
+pub use ai_usage::{
+    current_ai_usage_iso_week, query_ai_usage_summary, query_weekly_ai_usage_summary,
+    record_ai_usage_event, AiUsageBudgetConfigDocument, AiUsageBudgetProfile, AiUsageEventRecord,
+    AiUsageEventSource, AiUsageIsoWeek, AiUsageLedgerError, AiUsageSummaryReport,
+    AiUsageSummaryReportRequest, AiUsageSummaryWeekTotal, AiUsageWeeklyBudgetStatus,
+    AiUsageWeeklyProviderTotal, AiUsageWeeklyReport, AiUsageWeeklyReportRequest,
+    LOCAL_AI_USAGE_BUDGETS_FILE_NAME, LOCAL_AI_USAGE_DB_FILE_NAME, LOCAL_AI_USAGE_DIR_NAME,
+    NTK_AI_USAGE_BUDGET_CONFIG_PATH_ENV, NTK_AI_USAGE_DB_PATH_ENV,
+    NTK_AI_WEEKLY_BUDGET_PROFILE_ENV, NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV,
+    NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
 };
 pub use approval::{
     evaluate_approval, request_approval, ApprovalActionKind, ApprovalDecision, ApprovalRequest,

@@ -35,7 +35,8 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
+. "$PSScriptRoot\..\..\common\mcp-runtime-catalog.ps1"
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
     param(
@@ -80,6 +81,7 @@ function Assert-ContainsAny {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $runtimeScriptRoot = Join-Path $resolvedRepoRoot 'scripts/runtime'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 $exitCode = 0
 
@@ -95,27 +97,93 @@ try {
     Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'bootstrap missing RuntimeProfile parameter.'
     Assert-Contains -Collection $keys -Value 'Mirror' -Message 'bootstrap missing Mirror parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'healthcheck.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'ValidationProfile' -Message 'healthcheck missing ValidationProfile parameter.'
-    Assert-Contains -Collection $keys -Value 'WarningOnly' -Message 'healthcheck missing WarningOnly parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'healthcheck missing TargetGithubPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'healthcheck missing TargetCodexPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'healthcheck missing TargetAgentsSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCopilotSkillsPath' -Message 'healthcheck missing TargetCopilotSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'healthcheck missing RuntimeProfile parameter.'
+    $doctorHelp = & $runtimeBinaryPath runtime doctor --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime doctor help smoke test failed.'
+    $doctorHelpText = ($doctorHelp | Out-String)
+    Assert-True ($doctorHelpText -match '--runtime-profile') 'runtime doctor help must expose --runtime-profile.'
+    Assert-True ($doctorHelpText -match '--sync-on-drift') 'runtime doctor help must expose --sync-on-drift.'
+    Assert-True ($doctorHelpText -match '--strict-extras') 'runtime doctor help must expose --strict-extras.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'self-heal.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'Mirror' -Message 'self-heal missing Mirror parameter.'
-    Assert-Contains -Collection $keys -Value 'ApplyMcpConfig' -Message 'self-heal missing ApplyMcpConfig parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetGithubPath' -Message 'self-heal missing TargetGithubPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCodexPath' -Message 'self-heal missing TargetCodexPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetAgentsSkillsPath' -Message 'self-heal missing TargetAgentsSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetCopilotSkillsPath' -Message 'self-heal missing TargetCopilotSkillsPath parameter.'
-    Assert-Contains -Collection $keys -Value 'RuntimeProfile' -Message 'self-heal missing RuntimeProfile parameter.'
+    $healthcheckHelp = & $runtimeBinaryPath runtime healthcheck --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime healthcheck help smoke test failed.'
+    $healthcheckHelpText = ($healthcheckHelp | Out-String)
+    Assert-True ($healthcheckHelpText -match '--validation-profile') 'runtime healthcheck help must expose --validation-profile.'
+    Assert-True ($healthcheckHelpText -match '--warning-only') 'runtime healthcheck help must expose --warning-only.'
+    Assert-True ($healthcheckHelpText -match '--target-github-path') 'runtime healthcheck help must expose --target-github-path.'
+    Assert-True ($healthcheckHelpText -match '--target-codex-path') 'runtime healthcheck help must expose --target-codex-path.'
+    Assert-True ($healthcheckHelpText -match '--target-agents-skills-path') 'runtime healthcheck help must expose --target-agents-skills-path.'
+    Assert-True ($healthcheckHelpText -match '--target-copilot-skills-path') 'runtime healthcheck help must expose --target-copilot-skills-path.'
+    Assert-True ($healthcheckHelpText -match '--runtime-profile') 'runtime healthcheck help must expose --runtime-profile.'
+
+    $applyTemplatesHelp = & $runtimeBinaryPath runtime apply-vscode-templates --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates help smoke test failed.'
+    $applyTemplatesHelpText = ($applyTemplatesHelp | Out-String)
+    Assert-True ($applyTemplatesHelpText -match '--repo-root') 'runtime apply-vscode-templates help must expose --repo-root.'
+    Assert-True ($applyTemplatesHelpText -match '--vscode-path') 'runtime apply-vscode-templates help must expose --vscode-path.'
+    Assert-True ($applyTemplatesHelpText -match '--force') 'runtime apply-vscode-templates help must expose --force.'
+    Assert-True ($applyTemplatesHelpText -match '--skip-settings') 'runtime apply-vscode-templates help must expose --skip-settings.'
+    Assert-True ($applyTemplatesHelpText -match '--skip-mcp') 'runtime apply-vscode-templates help must expose --skip-mcp.'
+
+    $renderVscodeMcpHelp = & $runtimeBinaryPath runtime render-vscode-mcp-template --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime render-vscode-mcp-template help smoke test failed.'
+    $renderVscodeMcpHelpText = ($renderVscodeMcpHelp | Out-String)
+    Assert-True ($renderVscodeMcpHelpText -match '--repo-root') 'runtime render-vscode-mcp-template help must expose --repo-root.'
+    Assert-True ($renderVscodeMcpHelpText -match '--catalog-path') 'runtime render-vscode-mcp-template help must expose --catalog-path.'
+    Assert-True ($renderVscodeMcpHelpText -match '--output-path') 'runtime render-vscode-mcp-template help must expose --output-path.'
+
+    $renderMcpArtifactsHelp = & $runtimeBinaryPath runtime render-mcp-runtime-artifacts --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime render-mcp-runtime-artifacts help smoke test failed.'
+    $renderMcpArtifactsHelpText = ($renderMcpArtifactsHelp | Out-String)
+    Assert-True ($renderMcpArtifactsHelpText -match '--repo-root') 'runtime render-mcp-runtime-artifacts help must expose --repo-root.'
+    Assert-True ($renderMcpArtifactsHelpText -match '--catalog-path') 'runtime render-mcp-runtime-artifacts help must expose --catalog-path.'
+    Assert-True ($renderMcpArtifactsHelpText -match '--vscode-output-path') 'runtime render-mcp-runtime-artifacts help must expose --vscode-output-path.'
+    Assert-True ($renderMcpArtifactsHelpText -match '--codex-output-path') 'runtime render-mcp-runtime-artifacts help must expose --codex-output-path.'
+
+    $renderProviderSurfacesHelp = & $runtimeBinaryPath runtime render-provider-surfaces --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime render-provider-surfaces help smoke test failed.'
+    $renderProviderSurfacesHelpText = ($renderProviderSurfacesHelp | Out-String)
+    Assert-True ($renderProviderSurfacesHelpText -match '--repo-root') 'runtime render-provider-surfaces help must expose --repo-root.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--catalog-path') 'runtime render-provider-surfaces help must expose --catalog-path.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--renderer-id') 'runtime render-provider-surfaces help must expose --renderer-id.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--consumer-name') 'runtime render-provider-surfaces help must expose --consumer-name.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--enable-codex-runtime') 'runtime render-provider-surfaces help must expose --enable-codex-runtime.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--enable-claude-runtime') 'runtime render-provider-surfaces help must expose --enable-claude-runtime.'
+    Assert-True ($renderProviderSurfacesHelpText -match '--summary-only') 'runtime render-provider-surfaces help must expose --summary-only.'
+
+    $syncCodexMcpHelp = & $runtimeBinaryPath runtime sync-codex-mcp-config --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime sync-codex-mcp-config help smoke test failed.'
+    $syncCodexMcpHelpText = ($syncCodexMcpHelp | Out-String)
+    Assert-True ($syncCodexMcpHelpText -match '--repo-root') 'runtime sync-codex-mcp-config help must expose --repo-root.'
+    Assert-True ($syncCodexMcpHelpText -match '--catalog-path') 'runtime sync-codex-mcp-config help must expose --catalog-path.'
+    Assert-True ($syncCodexMcpHelpText -match '--manifest-path') 'runtime sync-codex-mcp-config help must expose --manifest-path.'
+    Assert-True ($syncCodexMcpHelpText -match '--target-config-path') 'runtime sync-codex-mcp-config help must expose --target-config-path.'
+    Assert-True ($syncCodexMcpHelpText -match '--create-backup') 'runtime sync-codex-mcp-config help must expose --create-backup.'
+    Assert-True ($syncCodexMcpHelpText -match '--dry-run') 'runtime sync-codex-mcp-config help must expose --dry-run.'
+
+    $selfHealHelp = & $runtimeBinaryPath runtime self-heal --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime self-heal help smoke test failed.'
+    $selfHealHelpText = ($selfHealHelp | Out-String)
+    Assert-True ($selfHealHelpText -match '--repo-root') 'runtime self-heal help must expose --repo-root.'
+    Assert-True ($selfHealHelpText -match '--target-github-path') 'runtime self-heal help must expose --target-github-path.'
+    Assert-True ($selfHealHelpText -match '--target-codex-path') 'runtime self-heal help must expose --target-codex-path.'
+    Assert-True ($selfHealHelpText -match '--target-agents-skills-path') 'runtime self-heal help must expose --target-agents-skills-path.'
+    Assert-True ($selfHealHelpText -match '--target-copilot-skills-path') 'runtime self-heal help must expose --target-copilot-skills-path.'
+    Assert-True ($selfHealHelpText -match '--runtime-profile') 'runtime self-heal help must expose --runtime-profile.'
+    Assert-True ($selfHealHelpText -match '--mirror') 'runtime self-heal help must expose --mirror.'
+    Assert-True ($selfHealHelpText -match '--apply-mcp-config') 'runtime self-heal help must expose --apply-mcp-config.'
+    Assert-True ($selfHealHelpText -match '--backup-config') 'runtime self-heal help must expose --backup-config.'
+    Assert-True ($selfHealHelpText -match '--apply-vscode-templates') 'runtime self-heal help must expose --apply-vscode-templates.'
+    Assert-True ($selfHealHelpText -match '--strict-extras') 'runtime self-heal help must expose --strict-extras.'
+    Assert-True ($selfHealHelpText -match '--output-path') 'runtime self-heal help must expose --output-path.'
+    Assert-True ($selfHealHelpText -match '--log-path') 'runtime self-heal help must expose --log-path.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'clean-codex-runtime.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -189,30 +257,31 @@ try {
     Assert-Contains -Collection $keys -Value 'SharedRoot' -Message 'render-github-instruction-surfaces missing SharedRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-github-instruction-surfaces missing OutputRoot parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-mcp-runtime-artifacts.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-mcp-runtime-artifacts missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-mcp-runtime-artifacts missing CatalogPath parameter.'
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $tempRepoRoot = Join-Path $tempRoot 'repo'
+    $workspaceVscode = Join-Path $tempRepoRoot '.vscode'
+    $githubRoot = Join-Path $tempRepoRoot '.github'
+    $codexRoot = Join-Path $tempRepoRoot '.codex'
+    try {
+        New-Item -ItemType Directory -Path $workspaceVscode -Force | Out-Null
+        New-Item -ItemType Directory -Path $githubRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $codexRoot -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $workspaceVscode 'settings.tamplate.jsonc') -Value '{ "editor.tabSize": 4 }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $workspaceVscode 'mcp.tamplate.jsonc') -Value '{ "servers": [] }' -Encoding UTF8 -NoNewline
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-mcp-template.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-vscode-mcp-template missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-vscode-mcp-template missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'render-vscode-mcp-template missing OutputPath parameter.'
+        & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'settings.json') -PathType Leaf) 'runtime apply-vscode-templates did not write settings.json.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'mcp.json') -PathType Leaf) 'runtime apply-vscode-templates did not write mcp.json.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'sync-codex-mcp-config.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'sync-codex-mcp-config missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'sync-codex-mcp-config missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'ManifestPath' -Message 'sync-codex-mcp-config missing ManifestPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetConfigPath' -Message 'sync-codex-mcp-config missing TargetConfigPath parameter.'
-    Assert-Contains -Collection $keys -Value 'CreateBackup' -Message 'sync-codex-mcp-config missing CreateBackup parameter.'
-    Assert-Contains -Collection $keys -Value 'DryRun' -Message 'sync-codex-mcp-config missing DryRun parameter.'
-
-    foreach ($hookScriptName in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1', 'pre-tool-use.ps1')) {
+    foreach ($hookScriptName in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1')) {
         $scriptPath = Join-Path $runtimeScriptRoot ('hooks\' + $hookScriptName)
         Assert-True (Test-Path -LiteralPath $scriptPath -PathType Leaf) ("Missing runtime hook script: {0}" -f $hookScriptName)
     }
@@ -225,17 +294,6 @@ try {
     Assert-Contains -Collection $keys -Value 'Provider' -Message 'render-provider-skill-surfaces missing Provider parameter.'
     Assert-Contains -Collection $keys -Value 'CodexOutputRoot' -Message 'render-provider-skill-surfaces missing CodexOutputRoot parameter.'
     Assert-Contains -Collection $keys -Value 'ClaudeOutputRoot' -Message 'render-provider-skill-surfaces missing ClaudeOutputRoot parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-provider-surfaces.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-provider-surfaces missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-provider-surfaces missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'RendererId' -Message 'render-provider-surfaces missing RendererId parameter.'
-    Assert-Contains -Collection $keys -Value 'ConsumerName' -Message 'render-provider-surfaces missing ConsumerName parameter.'
-    Assert-Contains -Collection $keys -Value 'EnableCodexRuntime' -Message 'render-provider-surfaces missing EnableCodexRuntime parameter.'
-    Assert-Contains -Collection $keys -Value 'EnableClaudeRuntime' -Message 'render-provider-surfaces missing EnableClaudeRuntime parameter.'
-    Assert-Contains -Collection $keys -Value 'SummaryOnly' -Message 'render-provider-surfaces missing SummaryOnly parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -251,46 +309,12 @@ try {
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-workspace-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-workspace-surfaces missing OutputRoot parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-compatibility-surfaces.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-codex-compatibility-surfaces missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-codex-compatibility-surfaces missing SourceRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'ScriptsOutputRoot' -Message 'render-codex-compatibility-surfaces missing ScriptsOutputRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'McpOutputRoot' -Message 'render-codex-compatibility-surfaces missing McpOutputRoot parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-codex-orchestration-surfaces missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-codex-orchestration-surfaces missing SourceRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-codex-orchestration-surfaces missing OutputRoot parameter.'
-
     $scriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
     Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-claude-runtime-surfaces missing RepoRoot parameter.'
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-claude-runtime-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-claude-runtime-surfaces missing OutputRoot parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'update-local-context-index missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'update-local-context-index missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'update-local-context-index missing OutputRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'ForceFullRebuild' -Message 'update-local-context-index missing ForceFullRebuild parameter.'
-    Assert-Contains -Collection $keys -Value 'DetailedOutput' -Message 'update-local-context-index missing DetailedOutput parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'query-local-context-index.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'query-local-context-index missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'QueryText' -Message 'query-local-context-index missing QueryText parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'query-local-context-index missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'query-local-context-index missing OutputRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'Top' -Message 'query-local-context-index missing Top parameter.'
-    Assert-Contains -Collection $keys -Value 'JsonOutput' -Message 'query-local-context-index missing JsonOutput parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'run-agent-pipeline.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -327,13 +351,6 @@ try {
     $keys = @($command.Parameters.Keys)
     Assert-Contains -Collection $keys -Value 'EvalsPath' -Message 'evaluate-agent-pipeline missing EvalsPath parameter.'
     Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'evaluate-agent-pipeline missing OutputPath parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'export-planning-summary missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'export-planning-summary missing OutputPath parameter.'
-    Assert-Contains -Collection $keys -Value 'PrintOnly' -Message 'export-planning-summary missing PrintOnly parameter.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'invoke-super-agent-housekeeping.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -398,7 +415,6 @@ try {
     $workspaceHelperPath = Join-Path $workspaceVscode 'mcp-vscode-global.json'
     $profilePath = Join-Path $workspaceVscode 'profiles\profile-frontend.json'
     $scriptPath = Join-Path $runtimeScriptRoot 'sync-vscode-global-mcp.ps1'
-    $renderScriptPath = Join-Path $runtimeScriptRoot 'render-mcp-runtime-artifacts.ps1'
     try {
         New-Item -ItemType Directory -Path $workspaceVscode -Force | Out-Null
         New-Item -ItemType Directory -Path $codexRoot -Force | Out-Null
@@ -485,25 +501,36 @@ try {
         Assert-True (($renderedDocument.servers.'enabled/by-default'.disabled -eq $true)) 'sync-vscode-global-mcp did not disable a server rejected by the profile.'
         Assert-True ($renderedGlobalMcp -eq $renderedHelper) 'sync-vscode-global-mcp did not keep the workspace helper aligned with the global MCP output.'
 
-        & $renderScriptPath -RepoRoot $tempRepoRoot -CatalogPath $catalogPath | Out-Null
-        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'render-mcp-runtime-artifacts smoke test failed.'
+        $renderedCatalog = Read-McpRuntimeCatalog -RepoRoot $tempRepoRoot -CatalogPath $catalogPath
+        $renderedVscodeDocument = Convert-McpRuntimeCatalogToVscodeDocument -Catalog $renderedCatalog.Catalog
+        $renderedManifest = Convert-McpRuntimeCatalogToCodexManifest -Catalog $renderedCatalog.Catalog
         $renderedTemplatePath = Join-Path $workspaceVscode 'mcp.tamplate.jsonc'
         $renderedManifestPath = Join-Path $tempRepoRoot '.codex\mcp\servers.manifest.json'
-        Assert-True (Test-Path -LiteralPath $renderedTemplatePath -PathType Leaf) 'render-mcp-runtime-artifacts did not write the VS Code template.'
-        Assert-True (Test-Path -LiteralPath $renderedManifestPath -PathType Leaf) 'render-mcp-runtime-artifacts did not write the Codex manifest.'
-        $renderedManifest = Get-Content -LiteralPath $renderedManifestPath -Raw | ConvertFrom-Json -Depth 100
-        Assert-True (@($renderedManifest.servers).Count -gt 0) 'render-mcp-runtime-artifacts should emit manifest servers.'
+        New-Item -ItemType Directory -Path (Split-Path -Path $renderedManifestPath -Parent) -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $workspaceVscode 'settings.tamplate.jsonc') -Value '{ "editor.tabSize": 4 }' -Encoding UTF8 -NoNewline
+        $renderedVscodeDocument | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $renderedTemplatePath -Encoding UTF8 -NoNewline
+        $renderedManifest | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $renderedManifestPath -Encoding UTF8 -NoNewline
+        Assert-True (@($renderedVscodeDocument.inputs).Count -gt 0) 'Rendered MCP VS Code document should emit inputs.'
+        Assert-True (@($renderedVscodeDocument.servers).Count -gt 0) 'Rendered MCP VS Code document should emit servers.'
+
+        & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'settings.json') -PathType Leaf) 'runtime apply-vscode-templates did not write settings.json.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'mcp.json') -PathType Leaf) 'runtime apply-vscode-templates did not write mcp.json.'
+        Assert-True (Test-Path -LiteralPath $renderedTemplatePath -PathType Leaf) 'rendered MCP VS Code template was not written.'
+        Assert-True (Test-Path -LiteralPath $renderedManifestPath -PathType Leaf) 'rendered MCP Codex manifest was not written.'
+        $renderedManifestDocument = Get-Content -LiteralPath $renderedManifestPath -Raw | ConvertFrom-Json -Depth 100
+        Assert-True (@($renderedManifestDocument.servers).Count -gt 0) 'Rendered Codex manifest should emit servers.'
 
         $renderProviderSkillsScriptPath = Join-Path $runtimeScriptRoot 'render-provider-skill-surfaces.ps1'
-        $renderProviderSurfacesScriptPath = Join-Path $runtimeScriptRoot 'render-provider-surfaces.ps1'
         $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
         $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
         $renderVscodeWorkspaceScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
-        $renderCodexCompatibilityScriptPath = Join-Path $runtimeScriptRoot 'render-codex-compatibility-surfaces.ps1'
-        $renderCodexOrchestrationScriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
         $renderClaudeRuntimeScriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
+        $providerSurfaceCatalogHelperPath = Join-Path $resolvedRepoRoot 'scripts\common\provider-surface-catalog.ps1'
+        $providerSurfaceCatalogPath = Join-Path $resolvedRepoRoot '.github\governance\provider-surface-projection.catalog.json'
         $sharedDefinitionRoot = Join-Path $tempRepoRoot 'definitions\shared'
         $sharedPomlSourceRoot = Join-Path $sharedDefinitionRoot 'prompts\poml'
         $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
@@ -517,8 +544,8 @@ try {
         $claudeRuntimeSourceRoot = Join-Path $providerSourceRoot 'claude\runtime'
         $vscodeWorkspaceSourceRoot = Join-Path $providerSourceRoot 'vscode\workspace'
         $codexSkillOutput = Join-Path $tempRepoRoot '.codex\skills'
-        $codexMcpOutputRoot = Join-Path $tempRepoRoot '.codex\mcp'
         $codexScriptsOutputRoot = Join-Path $tempRepoRoot '.codex\scripts'
+        $codexMcpOutputRoot = Join-Path $tempRepoRoot '.codex\mcp'
         $claudeSkillOutput = Join-Path $tempRepoRoot '.claude\skills'
         $codexOrchestrationOutputRoot = Join-Path $tempRepoRoot '.codex\orchestration'
         $claudeRuntimeOutputRoot = Join-Path $tempRepoRoot '.claude'
@@ -546,35 +573,12 @@ try {
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'chatmodes') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $tempRepoRoot 'scripts\runtime') -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'README.md') -Value '# Demo Codex MCP' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'codex.config.template.toml') -Value '[mcp_servers.demo]' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'vscode.mcp.template.json') -Value '{ "servers": {} }' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'README.md') -Value '# Demo Codex Scripts' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'render-vscode-mcp.ps1') -Value @(
-            "[CmdletBinding()]",
-            "param([string] `$OutputPath)",
-            "`$ErrorActionPreference = 'Stop'",
-            "function Resolve-CanonicalRuntimeScriptPath {",
-            "    param([Parameter(Mandatory = `$true)][string] `$ScriptName)",
-            "    return [System.IO.Path]::GetFullPath((Join-Path `$PSScriptRoot (Join-Path '..\\..\\scripts\\runtime' `$ScriptName)))",
-            "}",
-            "& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'render-vscode-mcp-template.ps1') @PSBoundParameters",
-            "exit `$LASTEXITCODE"
-        ) -Encoding UTF8
-        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'sync-mcp-to-codex-config.ps1') -Value @(
-            "[CmdletBinding()]",
-            "param([string] `$TargetConfigPath)",
-            "`$ErrorActionPreference = 'Stop'",
-            "function Resolve-CanonicalRuntimeScriptPath {",
-            "    param([Parameter(Mandatory = `$true)][string] `$ScriptName)",
-            "    return [System.IO.Path]::GetFullPath((Join-Path `$PSScriptRoot (Join-Path '..\\..\\scripts\\runtime' `$ScriptName)))",
-            "}",
-            "& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'sync-codex-mcp-config.ps1') @PSBoundParameters",
-            "exit `$LASTEXITCODE"
-        ) -Encoding UTF8
         Set-Content -LiteralPath (Join-Path $claudeSkillSource 'SKILL.md') -Value '# Demo Claude Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'README.md') -Value '# Demo Codex Orchestration' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'agents.manifest.json') -Value '{ "agents": [] }' -Encoding UTF8 -NoNewline
@@ -609,16 +613,6 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'templates\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\render-vscode-mcp-template.ps1') -Value @(
-            "param([string] `$OutputPath)",
-            "New-Item -ItemType Directory -Path (Split-Path -Path `$OutputPath -Parent) -Force | Out-Null",
-            'Set-Content -LiteralPath $OutputPath -Value ''{ "demo": true }'' -Encoding UTF8 -NoNewline'
-        ) -Encoding UTF8
-        Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\sync-codex-mcp-config.ps1') -Value @(
-            "param([string] `$TargetConfigPath)",
-            "New-Item -ItemType Directory -Path (Split-Path -Path `$TargetConfigPath -Parent) -Force | Out-Null",
-            "Set-Content -LiteralPath `$TargetConfigPath -Value '[mcp_servers.demo]' -Encoding UTF8 -NoNewline"
-        ) -Encoding UTF8
 
         & $renderProviderSkillsScriptPath -RepoRoot $tempRepoRoot -Provider codex,claude | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
@@ -626,25 +620,46 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $codexSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Codex skill output.'
         Assert-True (Test-Path -LiteralPath (Join-Path $claudeSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Claude skill output.'
 
-        & $renderCodexCompatibilityScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        & $runtimeBinaryPath runtime render-provider-surfaces --repo-root $tempRepoRoot --catalog-path $providerSurfaceCatalogPath --renderer-id codex-compatibility-surfaces | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'render-codex-compatibility-surfaces smoke test failed.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex MCP README.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex config template.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex VS Code template.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'render-vscode-mcp.ps1') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex wrapper surface.'
+        Assert-True ($exitCode -eq 0) 'runtime render-provider-surfaces codex-compatibility smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'README.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex scripts README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex MCP README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex config template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex VS Code template.'
+        Remove-Item -LiteralPath $codexScriptsOutputRoot -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $codexMcpOutputRoot -Recurse -Force -ErrorAction SilentlyContinue
 
-        $wrapperRenderOutputPath = Join-Path $tempRepoRoot '.temp\wrapper-vscode-mcp.json'
-        $wrapperConfigOutputPath = Join-Path $tempRepoRoot '.temp\wrapper-config.toml'
-        & (Join-Path $codexScriptsOutputRoot 'render-vscode-mcp.ps1') -OutputPath $wrapperRenderOutputPath | Out-Null
-        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'Projected render-vscode-mcp wrapper smoke test failed.'
-        Assert-True (Test-Path -LiteralPath $wrapperRenderOutputPath -PathType Leaf) 'Projected render-vscode-mcp wrapper did not forward to the canonical runtime script.'
+        $previousRuntimeBinaryOverride = $env:CODEX_NTK_RUNTIME_BIN_PATH
+        try {
+            $env:CODEX_NTK_RUNTIME_BIN_PATH = $runtimeBinaryPath
+            . $providerSurfaceCatalogHelperPath
+            $projectionCatalog = Read-ProviderSurfaceProjectionCatalog -RepoRoot $tempRepoRoot -CatalogPath $providerSurfaceCatalogPath
+            $renderResults = Invoke-ProviderSurfaceProjectionRenderers -RepoRoot $tempRepoRoot -Catalog $projectionCatalog.Catalog -CatalogPath $projectionCatalog.Path -RendererIds @('codex-compatibility-surfaces')
+            Assert-True (@($renderResults).Count -eq 1) 'provider-surface-catalog helper should dispatch exactly one Codex compatibility renderer.'
+            Assert-True ($renderResults[0].DispatchKind -eq 'native-runtime') 'provider-surface-catalog helper should dispatch the Codex compatibility renderer through the native runtime command.'
+        }
+        finally {
+            if ($null -eq $previousRuntimeBinaryOverride) {
+                Remove-Item Env:CODEX_NTK_RUNTIME_BIN_PATH -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:CODEX_NTK_RUNTIME_BIN_PATH = $previousRuntimeBinaryOverride
+            }
+        }
 
-        & (Join-Path $codexScriptsOutputRoot 'sync-mcp-to-codex-config.ps1') -TargetConfigPath $wrapperConfigOutputPath | Out-Null
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'README.md') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex scripts README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex MCP README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex config template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex VS Code template.'
+        Set-Content -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.tamplate.jsonc') -Value '{ "inputs": [], "servers": {} }' -Encoding UTF8 -NoNewline
+        & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'Projected sync-mcp-to-codex-config wrapper smoke test failed.'
-        Assert-True (Test-Path -LiteralPath $wrapperConfigOutputPath -PathType Leaf) 'Projected sync-mcp-to-codex-config wrapper did not forward to the canonical runtime script.'
+        Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'settings.json') -PathType Leaf) 'runtime apply-vscode-templates did not write settings.json.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.json') -PathType Leaf) 'runtime apply-vscode-templates did not write mcp.json.'
+        $renderedMcpDocument = Get-Content -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.json') -Raw
+        Assert-True ($renderedMcpDocument -match 'servers') 'runtime apply-vscode-templates should emit the MCP server block.'
 
         & $renderVscodeProfilesScriptPath -RepoRoot $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
@@ -671,19 +686,19 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'settings.tamplate.jsonc') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected settings template.'
         Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'snippets\demo.tamplate.code-snippets') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected snippets surface.'
 
-        & $renderCodexOrchestrationScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        & $runtimeBinaryPath runtime render-provider-surfaces --repo-root $tempRepoRoot --catalog-path $providerSurfaceCatalogPath --renderer-id codex-orchestration-surfaces | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'render-codex-orchestration-surfaces smoke test failed.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'README.md') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected orchestration README.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'prompts\super-agent-intake-stage.prompt.md') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected prompts surface.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'templates\run-artifact.template.json') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected templates surface.'
+        Assert-True ($exitCode -eq 0) 'runtime render-provider-surfaces codex-orchestration smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'README.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected orchestration README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'prompts\super-agent-intake-stage.prompt.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected prompts surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'templates\run-artifact.template.json') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected templates surface.'
 
         & $renderClaudeRuntimeScriptPath -RepoRoot $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'render-claude-runtime-surfaces smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $claudeRuntimeOutputRoot 'settings.json') -PathType Leaf) 'render-claude-runtime-surfaces did not write the projected Claude settings.'
 
-        & $renderProviderSurfacesScriptPath -RepoRoot $resolvedRepoRoot -ConsumerName bootstrap -EnableCodexRuntime -EnableClaudeRuntime -SummaryOnly | Out-Null
+        & $runtimeBinaryPath runtime render-provider-surfaces --repo-root $resolvedRepoRoot --consumer-name bootstrap --enable-codex-runtime --enable-claude-runtime --summary-only | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'render-provider-surfaces bootstrap summary smoke test failed.'
 
@@ -701,8 +716,6 @@ try {
     $tempRepoRoot = Join-Path $tempRoot 'repo'
     $catalogRoot = Join-Path $tempRepoRoot '.github\governance'
     $scriptsRoot = Join-Path $tempRepoRoot 'scripts\runtime'
-    $updateIndexScriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
-    $queryIndexScriptPath = Join-Path $runtimeScriptRoot 'query-local-context-index.ps1'
     try {
         New-Item -ItemType Directory -Path $catalogRoot -Force | Out-Null
         New-Item -ItemType Directory -Path $scriptsRoot -Force | Out-Null
@@ -723,7 +736,7 @@ try {
         Set-Content -LiteralPath (Join-Path $tempRepoRoot '.github\AGENTS.md') -Value "# Demo Agents`n`nUse the Super Agent lifecycle." -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $scriptsRoot 'demo.ps1') -Value "Write-Output 'context compaction continuity'" -Encoding UTF8 -NoNewline
 
-        & $updateIndexScriptPath -RepoRoot $tempRepoRoot -DetailedOutput | Out-Null
+        & $runtimeBinaryPath runtime update-local-context-index --repo-root $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'update-local-context-index smoke test failed.'
 
@@ -732,7 +745,7 @@ try {
         $indexDocument = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json -Depth 100
         Assert-True (@($indexDocument.files).Count -gt 0) 'update-local-context-index should index at least one file.'
 
-        $queryJson = & $queryIndexScriptPath -RepoRoot $tempRepoRoot -QueryText 'context continuity' -JsonOutput
+        $queryJson = & $runtimeBinaryPath runtime query-local-context-index --repo-root $tempRepoRoot --query-text 'context continuity' --json-output
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'query-local-context-index smoke test failed.'
         $queryResult = $queryJson | ConvertFrom-Json -Depth 100
@@ -779,7 +792,7 @@ try {
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $targetCodexSkills 'super-agent'))) 'bootstrap did not remove duplicate repo-managed super-agent from .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodexSkills '.system\SKILL.md') -PathType Leaf) 'bootstrap should preserve unmanaged/system skills in .codex/skills.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts') -PathType Container) 'bootstrap did not sync shared-scripts folder.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts\maintenance\trim-trailing-blank-lines.ps1') -PathType Leaf) 'bootstrap did not project maintenance trim script into shared-scripts.'
+        Assert-True (Test-Path -LiteralPath (Join-Path (Join-Path $targetCodex 'bin') (Get-RuntimeBinaryFileName)) -PathType Leaf) 'bootstrap did not project the managed ntk runtime binary into the Codex runtime.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -814,8 +827,6 @@ try {
     }
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
-    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
-    $updateIndexScriptPath = Join-Path $runtimeScriptRoot 'update-local-context-index.ps1'
     try {
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.github\governance') -Force | Out-Null
@@ -864,17 +875,18 @@ try {
             'This file documents cleanup regression handling and planning-anchored continuity recovery.'
         )
 
-        & $updateIndexScriptPath -RepoRoot $tempRoot | Out-Null
+        & $runtimeBinaryPath runtime update-local-context-index --repo-root $tempRoot | Out-Null
 
-        $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
+        $summary = & $runtimeBinaryPath runtime export-planning-summary --repo-root $tempRoot --print-only
+        $summaryText = ($summary | Out-String)
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'export-planning-summary smoke test failed.'
-        Assert-True ($summary -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
-        Assert-True ($summary -match 'finish cleanup regression safely') 'export-planning-summary did not include the concise current focus.'
-        Assert-True ($summary -match 'Example Spec') 'export-planning-summary did not include the active spec title.'
-        Assert-True ($summary -match 'Suggested Local References') 'export-planning-summary should include suggested indexed references when a local context index exists.'
-        Assert-True ($summary -match 'README\.md') 'export-planning-summary should reference indexed repository files outside the active plan/spec when available.'
-        Assert-True ($summary -notmatch 'Full plan content') 'export-planning-summary should stay concise instead of embedding full plan content.'
+        Assert-True ($summaryText -match 'Example Plan') 'export-planning-summary did not include the active plan title.'
+        Assert-True ($summaryText -match 'finish cleanup regression safely') 'export-planning-summary did not include the concise current focus.'
+        Assert-True ($summaryText -match 'Example Spec') 'export-planning-summary did not include the active spec title.'
+        Assert-True ($summaryText -match 'Suggested Local References') 'export-planning-summary should include suggested indexed references when a local context index exists.'
+        Assert-True ($summaryText -match 'README\.md') 'export-planning-summary should reference indexed repository files outside the active plan/spec when available.'
+        Assert-True ($summaryText -notmatch 'Full plan content') 'export-planning-summary should stay concise instead of embedding full plan content.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -883,7 +895,6 @@ try {
     }
 
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
-    $scriptPath = Join-Path $runtimeScriptRoot 'export-planning-summary.ps1'
     try {
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.build\super-agent\planning\active') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $tempRoot '.build\super-agent\specs\active') -Force | Out-Null
@@ -901,12 +912,13 @@ try {
             'Recover continuity in global-runtime mode.'
         )
 
-        $summary = & $scriptPath -RepoRoot $tempRoot -PrintOnly
+        $summary = & $runtimeBinaryPath runtime export-planning-summary --repo-root $tempRoot --print-only
+        $summaryText = ($summary | Out-String)
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'export-planning-summary .build fallback smoke test failed.'
-        Assert-True ($summary -match 'Global Runtime Plan') 'export-planning-summary should include the .build active plan title.'
-        Assert-True ($summary -match 'Global Runtime Spec') 'export-planning-summary should include the .build active spec title.'
-        Assert-True ($summary -match '\.build/super-agent/planning/active') 'export-planning-summary should describe the .build planning surface when no workspace planning exists.'
+        Assert-True ($summaryText -match 'Global Runtime Plan') 'export-planning-summary should include the .build active plan title.'
+        Assert-True ($summaryText -match 'Global Runtime Spec') 'export-planning-summary should include the .build active spec title.'
+        Assert-True ($summaryText -match '\.build/super-agent/planning/active') 'export-planning-summary should describe the .build planning surface when no workspace planning exists.'
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -1030,7 +1042,7 @@ try {
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'bootstrap codex-profile smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $targetAgentsSkills 'super-agent\SKILL.md') -PathType Leaf) 'bootstrap codex profile must project picker-visible skills.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $targetCodex 'shared-scripts\maintenance\trim-trailing-blank-lines.ps1') -PathType Leaf) 'bootstrap codex profile must project Codex shared scripts.'
+        Assert-True (Test-Path -LiteralPath (Join-Path (Join-Path $targetCodex 'bin') (Get-RuntimeBinaryFileName)) -PathType Leaf) 'bootstrap codex profile must project the managed ntk runtime binary.'
         Assert-True (-not (Test-Path -LiteralPath $targetGithub)) 'bootstrap codex profile must not project the GitHub runtime root.'
         Assert-True (-not (Test-Path -LiteralPath $targetCopilotSkills)) 'bootstrap codex profile must not project native Copilot skills.'
     }

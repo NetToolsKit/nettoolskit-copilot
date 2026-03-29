@@ -99,7 +99,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
 $script:IsVerboseEnabled = [bool] $DetailedOutput
 
 # Builds a checksum-bearing artifact descriptor for the stage manifest.
@@ -217,11 +217,13 @@ function Test-IsDeferredValidationCommand {
 
     $normalized = ($CommandText ?? '').Trim().ToLowerInvariant()
     $deferredPatterns = @(
-        'scripts/validation/validate-runtime-script-tests.ps1',
-        'scripts/validation/validate-all.ps1',
+        'ntk validation agent-hooks',
+        'ntk validation shell-hooks',
+        'ntk validation runtime-script-tests',
+        'ntk validation all',
         'scripts/tests/runtime/agent-orchestration-engine.tests.ps1',
         'scripts/runtime/run-agent-pipeline.ps1',
-        'scripts/runtime/healthcheck.ps1'
+        'ntk runtime healthcheck'
     )
 
     foreach ($pattern in $deferredPatterns) {
@@ -238,6 +240,7 @@ function Invoke-ValidationScript {
     param(
         [string] $Name,
         [string] $ScriptPath,
+        [hashtable] $Arguments,
         [string] $Root
     )
 
@@ -247,7 +250,7 @@ function Invoke-ValidationScript {
     $errorMessage = $null
 
     try {
-        & $ScriptPath -RepoRoot $Root | Out-Host
+        & $ScriptPath @Arguments | Out-Host
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         if ($exitCode -eq 0) {
             $status = 'passed'
@@ -262,6 +265,87 @@ function Invoke-ValidationScript {
     return [pscustomobject]@{
         name = $Name
         script = (Convert-ToRelativeRepoPath -Root $Root -Path $ScriptPath)
+        status = $status
+        exitCode = $exitCode
+        startedAt = $startedAt.ToString('o')
+        finishedAt = $finishedAt.ToString('o')
+        durationMs = [int] ($finishedAt - $startedAt).TotalMilliseconds
+        error = $errorMessage
+    }
+}
+
+function Convert-ValidationParameterNameToCliOption {
+    param([string] $Name)
+
+    $kebab = [regex]::Replace($Name, '([a-z0-9])([A-Z])', '$1-$2').ToLowerInvariant()
+    return "--$kebab"
+}
+
+function Convert-ValidationArgumentsToCliArguments {
+    param([hashtable] $Arguments)
+
+    $cliArguments = New-Object System.Collections.Generic.List[string]
+    if ($null -eq $Arguments) {
+        return @()
+    }
+
+    foreach ($entry in ($Arguments.GetEnumerator() | Sort-Object -Property Name)) {
+        $value = $entry.Value
+        if ($null -eq $value) {
+            continue
+        }
+
+        $optionName = Convert-ValidationParameterNameToCliOption -Name ([string] $entry.Key)
+        if ($value -is [bool]) {
+            $cliArguments.Add($optionName)
+            $cliArguments.Add(([string] $value).ToLowerInvariant())
+            continue
+        }
+
+        $stringValue = [string] $value
+        if ([string]::IsNullOrWhiteSpace($stringValue)) {
+            continue
+        }
+
+        $cliArguments.Add($optionName)
+        $cliArguments.Add($stringValue)
+    }
+
+    return @($cliArguments)
+}
+
+function Invoke-NativeValidationCommand {
+    param(
+        [string] $Name,
+        [string] $SurfaceId,
+        [string[]] $CommandSegments,
+        [hashtable] $Arguments,
+        [string] $Root
+    )
+
+    $startedAt = Get-Date
+    $status = 'failed'
+    $exitCode = 1
+    $errorMessage = $null
+
+    try {
+        $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $Root -RuntimePreference github
+        $cliArguments = Convert-ValidationArgumentsToCliArguments -Arguments $Arguments
+        & $runtimeBinaryPath @CommandSegments @cliArguments | Out-Host
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        if ($exitCode -eq 0) {
+            $status = 'passed'
+        }
+    }
+    catch {
+        $exitCode = 1
+        $errorMessage = $_.Exception.Message
+    }
+
+    $finishedAt = Get-Date
+    return [pscustomobject]@{
+        name = $Name
+        script = $SurfaceId
         status = $status
         exitCode = $exitCode
         startedAt = $startedAt.ToString('o')
@@ -384,11 +468,11 @@ if ($null -ne $taskPlanData) {
 }
 
 $validationScripts = @(
-    [ordered]@{ Name = 'validate-instructions'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-instructions.ps1') },
-    [ordered]@{ Name = 'validate-policy'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-policy.ps1') },
-    [ordered]@{ Name = 'validate-agent-orchestration'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-agent-orchestration.ps1') },
-    [ordered]@{ Name = 'validate-planning-structure'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-planning-structure.ps1') },
-    [ordered]@{ Name = 'validate-release-governance'; Path = (Join-Path $resolvedRepoRoot 'scripts/validation/validate-release-governance.ps1') }
+    [ordered]@{ Name = 'validate-instructions'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-instructions'; Command = @('validation', 'instructions'); Arguments = @{ RepoRoot = $resolvedRepoRoot; WarningOnly = $false } },
+    [ordered]@{ Name = 'validate-policy'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-policy'; Command = @('validation', 'policy'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
+    [ordered]@{ Name = 'validate-agent-orchestration'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-agent-orchestration'; Command = @('validation', 'agent-orchestration'); Arguments = @{ RepoRoot = $resolvedRepoRoot } },
+    [ordered]@{ Name = 'validate-planning-structure'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-planning-structure'; Command = @('validation', 'planning-structure'); Arguments = @{ RepoRoot = $resolvedRepoRoot; WarningOnly = $false } },
+    [ordered]@{ Name = 'validate-release-governance'; Runner = 'native'; SurfaceId = 'rust:nettoolskit-validation::validate-release-governance'; Command = @('validation', 'release-governance'); Arguments = @{ RepoRoot = $resolvedRepoRoot; WarningOnly = $false } }
 )
 
 $results = New-Object System.Collections.Generic.List[object]
@@ -396,21 +480,26 @@ foreach ($plannedCheck in $plannedChecks) {
     $results.Add((Invoke-PlannedCommandCheck -Name ([string] $plannedCheck.name) -CommandText ([string] $plannedCheck.command) -ExpectedOutcome ([string] $plannedCheck.expectedOutcome) -Root $resolvedRepoRoot)) | Out-Null
 }
 foreach ($scriptEntry in $validationScripts) {
-    if (-not (Test-Path -LiteralPath $scriptEntry.Path -PathType Leaf)) {
-        $results.Add([pscustomobject]@{
-            name = $scriptEntry.Name
-            script = (Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $scriptEntry.Path)
-            status = 'failed'
-            exitCode = 1
-            startedAt = (Get-Date).ToString('o')
-            finishedAt = (Get-Date).ToString('o')
-            durationMs = 0
-            error = 'Validation script not found.'
-        }) | Out-Null
-        continue
+    if ([string] $scriptEntry.Runner -eq 'native') {
+        $results.Add((Invoke-NativeValidationCommand -Name $scriptEntry.Name -SurfaceId $scriptEntry.SurfaceId -CommandSegments @($scriptEntry.Command) -Arguments $scriptEntry.Arguments -Root $resolvedRepoRoot)) | Out-Null
     }
+    else {
+        if (-not (Test-Path -LiteralPath $scriptEntry.Path -PathType Leaf)) {
+            $results.Add([pscustomobject]@{
+                name = $scriptEntry.Name
+                script = (Convert-ToRelativeRepoPath -Root $resolvedRepoRoot -Path $scriptEntry.Path)
+                status = 'failed'
+                exitCode = 1
+                startedAt = (Get-Date).ToString('o')
+                finishedAt = (Get-Date).ToString('o')
+                durationMs = 0
+                error = 'Validation script not found.'
+            }) | Out-Null
+            continue
+        }
 
-    $results.Add((Invoke-ValidationScript -Name $scriptEntry.Name -ScriptPath $scriptEntry.Path -Root $resolvedRepoRoot)) | Out-Null
+        $results.Add((Invoke-ValidationScript -Name $scriptEntry.Name -ScriptPath $scriptEntry.Path -Arguments $scriptEntry.Arguments -Root $resolvedRepoRoot)) | Out-Null
+    }
 }
 
 $failedChecks = @($results | Where-Object { @('failed', 'blocked') -contains [string] $_.status }).Count

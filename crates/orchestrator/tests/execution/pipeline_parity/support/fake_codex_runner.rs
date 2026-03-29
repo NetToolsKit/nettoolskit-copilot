@@ -99,7 +99,7 @@ end {
                     commands = @(
                         [ordered]@{
                             purpose = 'targeted validation'
-                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            command = 'ntk validation runtime-script-tests --repo-root . --warning-only false'
                             expectedOutcome = 'Runtime tests pass after the first task.'
                         }
                     )
@@ -112,7 +112,7 @@ end {
                         [ordered]@{
                             name = 'first-task-green'
                             expectedOutcome = 'expected-pass'
-                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            command = 'ntk validation runtime-script-tests --repo-root . --warning-only false'
                             evidence = 'Runtime tests pass after the first task.'
                         }
                     )
@@ -135,7 +135,7 @@ end {
                     commands = @(
                         [ordered]@{
                             purpose = 'targeted validation'
-                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            command = 'ntk validation runtime-script-tests --repo-root . --warning-only false'
                             expectedOutcome = 'Runtime tests pass after the second task.'
                         }
                     )
@@ -148,7 +148,7 @@ end {
                         [ordered]@{
                             name = 'second-task-green'
                             expectedOutcome = 'expected-pass'
-                            command = 'pwsh -File scripts/validation/validate-runtime-script-tests.ps1 -RepoRoot . -WarningOnly:$false'
+                            command = 'ntk validation runtime-script-tests --repo-root . --warning-only false'
                             evidence = 'Runtime tests pass after the second task.'
                         }
                     )

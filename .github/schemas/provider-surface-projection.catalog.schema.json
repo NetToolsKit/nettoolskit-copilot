@@ -60,6 +60,17 @@
         ]
       }
     },
+    "nativeProviderSurfaceCommand": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["ntk-runtime-render-provider-surfaces"]
+        }
+      }
+    },
     "rendererConsumers": {
       "type": "object",
       "required": ["bootstrap", "direct"],
@@ -72,11 +83,16 @@
     },
     "renderer": {
       "type": "object",
-      "required": ["id", "scriptPath", "description", "consumers"],
+      "required": ["id", "description", "consumers"],
       "additionalProperties": false,
+      "anyOf": [
+        { "required": ["scriptPath"] },
+        { "required": ["nativeCommand"] }
+      ],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "scriptPath": { "type": "string", "minLength": 1 },
+        "nativeCommand": { "$ref": "#/$defs/nativeProviderSurfaceCommand" },
         "description": { "type": "string", "minLength": 1 },
         "defaultArgs": { "$ref": "#/$defs/rendererArgs" },
         "consumers": { "$ref": "#/$defs/rendererConsumers" }

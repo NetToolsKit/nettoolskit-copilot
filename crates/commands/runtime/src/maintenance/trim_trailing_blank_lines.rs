@@ -2,7 +2,9 @@
 
 use anyhow::{anyhow, Context};
 use nettoolskit_core::editorconfig::resolve_insert_final_newline_policy;
-use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_repository_root};
+use nettoolskit_core::path_utils::repository::{
+    resolve_full_path, resolve_git_root_or_current_path,
+};
 use std::env;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
@@ -82,7 +84,7 @@ pub fn invoke_trim_trailing_blank_lines(
             source: source.into(),
         }
     })?;
-    let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
+    let repo_root = resolve_git_root_or_current_path(request.repo_root.as_deref(), &current_dir)
         .map_err(
             |source| RuntimeTrimTrailingBlankLinesCommandError::ResolveWorkspaceRoot { source },
         )?;

@@ -2,26 +2,26 @@
 
 ## Scope
 
-Use this runbook when one or more validation scripts report failures or warnings that need triage.
+Use this runbook when one or more validation checks report failures or warnings that need triage.
 
 ## Triage
 
 1. Run full suite with current profile:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-all.ps1
+ntk validation all --repo-root . --validation-profile dev
 ```
 
 2. Run with release profile for full diagnostics:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
+ntk validation all --repo-root . --validation-profile release
 ```
 
 3. Export evidence:
 
 ```powershell
-pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile release
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release --output-path .temp/audit-report.json --log-path .temp/logs/audit-report.log
 ```
 
 ## Classify Findings
@@ -45,8 +45,8 @@ pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile relea
 ## Recovery
 
 1. Apply targeted fixes.
-2. Re-run failing scripts individually.
-3. Re-run `validate-all`.
+2. Re-run failing checks individually through `ntk validation <check>` when a native command exists, or through the remaining PowerShell entrypoint when the check is still script-owned.
+3. Re-run `ntk validation all`.
 4. Generate updated audit report.
 
 ## Escalation

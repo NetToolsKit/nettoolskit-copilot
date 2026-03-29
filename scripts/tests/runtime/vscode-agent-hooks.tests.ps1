@@ -37,7 +37,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
     param(
@@ -72,14 +72,16 @@ $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $sessionStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/session-start.ps1'
 $preToolUseScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/pre-tool-use.ps1'
 $subagentStartScript = Join-Path $resolvedRepoRoot '.github/hooks/scripts/subagent-start.ps1'
-$updateLocalContextIndexScript = Join-Path $resolvedRepoRoot 'scripts/runtime/update-local-context-index.ps1'
+$runtimeBinaryOverride = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 $workspacePath = New-TemporaryWorkspacePath
 $globalWorkspacePath = New-TemporaryWorkspacePath
 $housekeepingStatePath = Join-Path $workspacePath '.temp\housekeeping-state.json'
 $housekeepingRecordPath = Join-Path $workspacePath '.temp\housekeeping-record.json'
+$previousRuntimeBinaryOverride = $env:CODEX_NTK_RUNTIME_BIN_PATH
 
 try {
+    $env:CODEX_NTK_RUNTIME_BIN_PATH = $runtimeBinaryOverride
     New-Item -ItemType Directory -Path (Join-Path $workspacePath '.github\prompts') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $workspacePath 'planning\active') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $workspacePath 'planning\specs\active') -Force | Out-Null
@@ -140,7 +142,7 @@ try {
     Set-Content -LiteralPath (Join-Path $workspacePath 'README.md') -Value (
         "# temp workspace`n`nThis workspace explains how to finish cleanup regression safely and recover continuity through a local context index."
     ) -NoNewline
-    & $updateLocalContextIndexScript -RepoRoot $workspacePath | Out-Null
+    & $runtimeBinaryOverride runtime update-local-context-index --repo-root $workspacePath | Out-Null
 
     [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath '.build\super-agent\planning\active') -Force)
     [void] (New-Item -ItemType Directory -Path (Join-Path $globalWorkspacePath '.build\super-agent\specs\active') -Force)
@@ -308,6 +310,13 @@ try {
     Assert-True ([string] $globalSubagentResult.hookSpecificOutput.additionalContext -match 'plan-global-housekeeping\.md') 'SubagentStart hook should explain the .build continuity source in global-runtime mode.'
 }
 finally {
+    if ($null -eq $previousRuntimeBinaryOverride) {
+        Remove-Item Env:CODEX_NTK_RUNTIME_BIN_PATH -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:CODEX_NTK_RUNTIME_BIN_PATH = $previousRuntimeBinaryOverride
+    }
+
     [Environment]::SetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_FOREGROUND', $null, 'Process')
     [Environment]::SetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_STATE_PATH', $null, 'Process')
     [Environment]::SetEnvironmentVariable('SUPER_AGENT_HOUSEKEEPING_RECORD_ONLY_PATH', $null, 'Process')

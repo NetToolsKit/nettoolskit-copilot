@@ -3,7 +3,7 @@
 ## Scope
 
 This repository uses local-first governance for instruction and runtime assets.
-Validation is deterministic and runs from scripts under `scripts/validation` and `scripts/runtime`.
+Validation is deterministic and runs through the native `ntk validation` surface plus the remaining scripted runtime entrypoints under `scripts/runtime`.
 
 ## Branch Protection
 
@@ -23,8 +23,8 @@ Notes:
 ## CODEOWNERS
 
 `CODEOWNERS` is mandatory and validated by:
-- `scripts/validation/validate-policy.ps1` (file presence)
-- `scripts/validation/validate-release-governance.ps1` (rule quality checks)
+- `ntk validation policy` (file presence)
+- `ntk validation release-governance --warning-only false` (rule quality checks)
 
 At minimum:
 - Catch-all owner rule (`* owner`)
@@ -42,24 +42,26 @@ These files are validated through the governance and provenance baselines so onb
 ## Release Checklist
 
 1. Run baseline validations:
-   - `pwsh -File .\scripts\validation\validate-instructions.ps1`
-   - `pwsh -File .\scripts\validation\validate-policy.ps1`
-   - `pwsh -File .\scripts\validation\validate-security-baseline.ps1`
-   - `pwsh -File .\scripts\validation\validate-agent-permissions.ps1`
-   - `pwsh -File .\scripts\validation\validate-supply-chain.ps1`
-   - `pwsh -File .\scripts\validation\validate-warning-baseline.ps1`
-   - `pwsh -File .\scripts\validation\validate-agent-orchestration.ps1`
-   - `pwsh -File .\scripts\validation\validate-agent-hooks.ps1 -WarningOnly:$false`
-   - `pwsh -File .\scripts\validation\validate-release-governance.ps1`
-   - `pwsh -File .\scripts\validation\validate-release-provenance.ps1`
-   - `pwsh -File .\scripts\validation\validate-audit-ledger.ps1`
-   - `pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release`
+   - `ntk validation instructions --repo-root . --warning-only false`
+   - `ntk validation policy`
+   - `ntk validation security-baseline --warning-only false`
+   - `ntk validation agent-permissions --warning-only false`
+   - `ntk validation supply-chain --warning-only false`
+   - `ntk validation warning-baseline --warning-only false`
+   - `ntk validation agent-orchestration`
+   - `ntk validation agent-hooks --repo-root . --warning-only false`
+   - `ntk validation shell-hooks --repo-root . --warning-only false`
+   - `ntk validation runtime-script-tests --repo-root . --warning-only false`
+   - `ntk validation release-governance --warning-only false`
+   - `ntk validation release-provenance --warning-only false`
+   - `ntk validation audit-ledger --warning-only false`
+   - `ntk validation all --repo-root . --validation-profile release`
 2. Confirm branch protection drift is zero:
    - `pwsh -File .\scripts\governance\set-branch-protection.ps1`
 3. Update `CHANGELOG.md` with semantic version entry `[X.Y.Z] - YYYY-MM-DD`.
 4. Create tag `copilot-vX.Y.Z` after merge to default branch.
 5. Export audit package:
-   - `pwsh -File .\scripts\validation\export-audit-report.ps1 -StrictExtras`
+   - `ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release --strict-extras --output-path .temp/audit-report.json --log-path .temp/logs/audit-report.log`
 
 ## Rollback
 

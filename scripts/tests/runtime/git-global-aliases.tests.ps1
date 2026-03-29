@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Verifies that the global `git trim-eof` alias can be configured against an
-    isolated global Git config, points at the runtime-synced trim script, and
+    isolated global Git config, points at the managed `ntk` runtime binary, and
     successfully trims changed files in a temporary Git repository.
 
 .PARAMETER RepoRoot
@@ -109,7 +109,10 @@ try {
 
         $configuredAlias = & git config --global --get alias.trim-eof
         Assert-True (-not [string]::IsNullOrWhiteSpace([string] $configuredAlias)) 'Global trim-eof alias must be configured.'
-        Assert-True ($configuredAlias -match 'trim-trailing-blank-lines\.ps1') 'Global trim-eof alias must point at the runtime-synced trim script.'
+        Assert-True ($configuredAlias -match 'ntk(\.exe)?') 'Global trim-eof alias must point at the managed ntk runtime binary.'
+        Assert-True ($configuredAlias -match 'runtime trim-trailing-blank-lines') 'Global trim-eof alias must invoke the Rust trim command.'
+        Assert-True ($configuredAlias -match '--repo-root') 'Global trim-eof alias must resolve the checkout root explicitly.'
+        Assert-True ($configuredAlias -match '--git-changed-only') 'Global trim-eof alias must run in git-changed-only mode.'
 
         New-Item -ItemType Directory -Path $gitRepoRoot -Force | Out-Null
         & git -C $gitRepoRoot init | Out-Null

@@ -28,7 +28,7 @@
           },
           {
             "type": "command",
-            "command": "pwsh -NoLogo -NoProfile -Command \"$exportScript = Join-Path $PWD 'scripts/runtime/export-planning-summary.ps1'; $activePlans = @(Get-ChildItem 'planning/active/*.md' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch 'README' }); if ((Test-Path $exportScript -PathType Leaf) -and $activePlans.Count -gt 0) { Write-Host '' ; Write-Host '--- Active Planning Context ---' -ForegroundColor Cyan; & $exportScript -PrintOnly }\""
+            "command": "pwsh -NoLogo -NoProfile -Command \"$activePlans = @(Get-ChildItem 'planning/active/*.md' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch 'README' }); if ($activePlans.Count -gt 0) { $ntk = if (Test-Path '.github/bin/ntk.exe') { '.github/bin/ntk.exe' } elseif (Test-Path '.github/bin/ntk') { '.github/bin/ntk' } elseif (Test-Path '.build/target/debug/ntk.exe') { '.build/target/debug/ntk.exe' } elseif (Test-Path '.build/target/debug/ntk') { '.build/target/debug/ntk' } else { 'ntk' }; Write-Host '' ; Write-Host '--- Active Planning Context ---' -ForegroundColor Cyan; & $ntk runtime export-planning-summary --print-only }\""
           }
         ]
       }

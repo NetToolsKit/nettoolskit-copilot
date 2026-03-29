@@ -29,6 +29,6 @@ description: Design and enforce privacy and data protection controls across appl
 ## Validation examples
 
 ```powershell
-pwsh -File ./scripts/validation/validate-security-baseline.ps1
-pwsh -File ./scripts/validation/validate-release-provenance.ps1
+ntk validation security-baseline --warning-only false
+ntk validation release-provenance --warning-only false
 ```

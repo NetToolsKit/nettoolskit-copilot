@@ -12,7 +12,7 @@
     ".github/ISSUE_TEMPLATE/runtime-sync-problem.yml",
     ".github/ISSUE_TEMPLATE/validation-gap.yml",
     ".github/governance/release-governance.md",
-    "scripts/validation/validate-release-governance.ps1",
+    "crates/commands/validation/src/release/release_governance.rs",
     ".github/workflows/validate-release-governance.yml",
     "scripts/runtime/install.ps1"
   ],
