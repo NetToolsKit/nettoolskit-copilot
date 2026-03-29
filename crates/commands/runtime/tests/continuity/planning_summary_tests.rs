@@ -2,6 +2,7 @@
 
 use nettoolskit_core::local_context::build_local_context_index;
 use nettoolskit_runtime::{export_planning_summary, ExportPlanningSummaryRequest};
+use rusqlite::Connection;
 use std::fs;
 use tempfile::TempDir;
 
@@ -73,6 +74,17 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
             || result.document.contains("`scripts/runtime/demo.ps1`")
     );
     assert!(result.document.contains("## Resume Instructions"));
+
+    let connection = Connection::open(repo.path().join(".temp/context-memory/context.db"))
+        .expect("sqlite memory store should open");
+    let event_count = connection
+        .query_row(
+            "SELECT COUNT(*) FROM events WHERE source_kind = 'planning-summary'",
+            [],
+            |row| row.get::<_, i64>(0),
+        )
+        .expect("planning summary event count should load");
+    assert_eq!(event_count, 1);
 }
 
 #[test]

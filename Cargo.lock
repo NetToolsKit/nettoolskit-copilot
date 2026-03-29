@@ -2079,6 +2079,7 @@ dependencies = [
  "nettoolskit-core",
  "nettoolskit-validation",
  "regex",
+ "rusqlite",
  "serde",
  "serde_json",
  "sha2",

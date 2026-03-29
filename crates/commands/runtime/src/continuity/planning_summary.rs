@@ -3,9 +3,11 @@
 use anyhow::{Context, Result};
 use nettoolskit_core::local_context::{
     read_local_context_index_catalog, read_local_context_index_document,
-    resolve_local_context_index_root, search_local_context_index_document,
+    record_local_context_memory_event, resolve_local_context_index_root,
+    search_local_context_index_document, LocalContextMemoryEventRecord,
 };
 use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_workspace_root};
+use serde_json::json;
 use std::collections::BTreeSet;
 use std::env;
 use std::fs;
@@ -56,6 +58,21 @@ struct PlanningArtifactMeta {
     relative_path: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct PlanningSummaryLocalReferences {
+    markdown_lines: Vec<String>,
+    reference_paths: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct RenderedPlanningSummary {
+    document: String,
+    active_plan_titles: Vec<String>,
+    active_spec_titles: Vec<String>,
+    suggested_reference_paths: Vec<String>,
+    generated_at_unix_ms: u64,
+}
+
 /// Export a planning summary document and optionally persist it to disk.
 ///
 /// # Errors
@@ -72,7 +89,7 @@ pub fn export_planning_summary(
     let repo_root = resolve_workspace_root(request.repo_root.as_deref(), Some(&current_dir))
         .map_err(|source| PlanningSummaryCommandError::ResolveWorkspaceRoot { source })?;
     let planning_surface = resolve_planning_surface(&repo_root);
-    let document = render_planning_summary_document(&repo_root, &planning_surface)
+    let rendered = render_planning_summary_document(&repo_root, &planning_surface)
         .map_err(|source| PlanningSummaryCommandError::RenderDocument { source })?;
 
     let output_path = if request.print_only {
@@ -92,17 +109,19 @@ pub fn export_planning_summary(
                 .map_err(|source| PlanningSummaryCommandError::WriteOutput { source })?;
         }
 
-        fs::write(&output_path, &document)
+        fs::write(&output_path, &rendered.document)
             .with_context(|| format!("failed to write '{}'", output_path.display()))
             .map_err(|source| PlanningSummaryCommandError::WriteOutput { source })?;
         Some(output_path)
     };
+    persist_planning_summary_memory_event(&repo_root, &planning_surface, &rendered)
+        .map_err(|source| PlanningSummaryCommandError::RenderDocument { source })?;
 
     Ok(ExportPlanningSummaryResult {
         repo_root,
         plan_root: planning_surface.plan_root.to_string(),
         spec_root: planning_surface.spec_root.to_string(),
-        document,
+        document: rendered.document,
         output_path,
     })
 }
@@ -110,13 +129,22 @@ pub fn export_planning_summary(
 fn render_planning_summary_document(
     repo_root: &Path,
     planning_surface: &PlanningSurface,
-) -> Result<String> {
+) -> Result<RenderedPlanningSummary> {
     let active_plan_metas = collect_planning_artifact_metas(repo_root, planning_surface.plan_root)?;
     let active_spec_metas = collect_planning_artifact_metas(repo_root, planning_surface.spec_root)?;
     let recent_commits = recent_git_commits(repo_root)?;
     let suggested_local_references =
         planning_summary_local_references(repo_root, &active_plan_metas, &active_spec_metas)?;
-    let generated_at = current_timestamp_string()?;
+    let generated_at_unix_ms = current_timestamp_ms()?;
+    let generated_at = generated_at_unix_ms.to_string();
+    let active_plan_titles = active_plan_metas
+        .iter()
+        .map(|meta| meta.title.clone())
+        .collect::<Vec<_>>();
+    let active_spec_titles = active_spec_metas
+        .iter()
+        .map(|meta| meta.title.clone())
+        .collect::<Vec<_>>();
 
     let mut lines = Vec::new();
     lines.push("# Context Handoff Summary".to_string());
@@ -177,7 +205,7 @@ fn render_planning_summary_document(
 
     lines.push("---".to_string());
     lines.push(String::new());
-    lines.extend(suggested_local_references);
+    lines.extend(suggested_local_references.markdown_lines.iter().cloned());
     lines.push("## Recent Commits".to_string());
     lines.push(String::new());
     if recent_commits.is_empty() {
@@ -208,7 +236,13 @@ fn render_planning_summary_document(
     ));
     lines.push("5. Resume from the last completed task in the active plan".to_string());
 
-    Ok(lines.join("\n"))
+    Ok(RenderedPlanningSummary {
+        document: lines.join("\n"),
+        active_plan_titles,
+        active_spec_titles,
+        suggested_reference_paths: suggested_local_references.reference_paths,
+        generated_at_unix_ms,
+    })
 }
 
 fn resolve_planning_surface(repo_root: &Path) -> PlanningSurface {
@@ -351,7 +385,7 @@ fn planning_summary_local_references(
     repo_root: &Path,
     plan_artifacts: &[PlanningArtifactMeta],
     spec_artifacts: &[PlanningArtifactMeta],
-) -> Result<Vec<String>> {
+) -> Result<PlanningSummaryLocalReferences> {
     let mut query_segments = BTreeSet::new();
     let mut exclude_paths = Vec::new();
 
@@ -369,16 +403,27 @@ fn planning_summary_local_references(
     }
 
     if query_segments.is_empty() {
-        return Ok(Vec::new());
+        return Ok(PlanningSummaryLocalReferences {
+            markdown_lines: Vec::new(),
+            reference_paths: Vec::new(),
+        });
     }
 
     let catalog_info = match read_local_context_index_catalog(repo_root, None) {
         Ok(catalog_info) => catalog_info,
-        Err(_) => return Ok(Vec::new()),
+        Err(_) => {
+            return Ok(PlanningSummaryLocalReferences {
+                markdown_lines: Vec::new(),
+                reference_paths: Vec::new(),
+            });
+        }
     };
     let index_root = resolve_local_context_index_root(repo_root, &catalog_info.catalog, None);
     let Some(index_document) = read_local_context_index_document(&index_root)? else {
-        return Ok(Vec::new());
+        return Ok(PlanningSummaryLocalReferences {
+            markdown_lines: Vec::new(),
+            reference_paths: Vec::new(),
+        });
     };
 
     let hits = search_local_context_index_document(
@@ -388,11 +433,15 @@ fn planning_summary_local_references(
         &exclude_paths,
     );
     if hits.is_empty() {
-        return Ok(Vec::new());
+        return Ok(PlanningSummaryLocalReferences {
+            markdown_lines: Vec::new(),
+            reference_paths: Vec::new(),
+        });
     }
 
     let mut seen_paths = BTreeSet::new();
     let mut references = Vec::new();
+    let mut reference_paths = Vec::new();
     for hit in hits {
         if hit.path.starts_with("planning/") || hit.path.starts_with(".build/super-agent/") {
             continue;
@@ -401,6 +450,7 @@ fn planning_summary_local_references(
         if !seen_paths.insert(hit.path.clone()) {
             continue;
         }
+        reference_paths.push(hit.path.clone());
 
         let mut reference_line = format!("- `{}`", hit.path);
         if let Some(heading) = hit.heading.filter(|heading| !heading.trim().is_empty()) {
@@ -414,7 +464,10 @@ fn planning_summary_local_references(
     }
 
     if references.is_empty() {
-        return Ok(Vec::new());
+        return Ok(PlanningSummaryLocalReferences {
+            markdown_lines: Vec::new(),
+            reference_paths: Vec::new(),
+        });
     }
 
     let mut lines = vec![
@@ -427,7 +480,10 @@ fn planning_summary_local_references(
     lines.push(String::new());
     lines.push("---".to_string());
     lines.push(String::new());
-    Ok(lines)
+    Ok(PlanningSummaryLocalReferences {
+        markdown_lines: lines,
+        reference_paths,
+    })
 }
 
 fn recent_git_commits(repo_root: &Path) -> Result<Vec<String>> {
@@ -467,16 +523,47 @@ fn resolve_planning_summary_output_path(
     }
 }
 
-fn current_timestamp_string() -> Result<String> {
-    let duration = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .context("failed to compute current timestamp")?;
-    Ok(duration.as_secs().to_string())
-}
-
 fn current_timestamp_token() -> Result<String> {
     let duration = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .context("failed to compute current timestamp token")?;
     Ok(duration.as_secs().to_string())
+}
+
+fn current_timestamp_ms() -> Result<u64> {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .context("failed to compute current timestamp ms")?
+        .as_millis()
+        .try_into()
+        .context("planning summary timestamp exceeds u64")
+}
+
+fn persist_planning_summary_memory_event(
+    repo_root: &Path,
+    planning_surface: &PlanningSurface,
+    rendered: &RenderedPlanningSummary,
+) -> Result<()> {
+    let event_id = format!("planning-summary:{}", rendered.generated_at_unix_ms);
+    let payload = json!({
+        "generatedAtUnixMs": rendered.generated_at_unix_ms,
+        "planRoot": planning_surface.plan_root,
+        "specRoot": planning_surface.spec_root,
+        "activePlans": rendered.active_plan_titles,
+        "activeSpecs": rendered.active_spec_titles,
+        "suggestedReferences": rendered.suggested_reference_paths,
+    });
+    record_local_context_memory_event(
+        repo_root,
+        None,
+        &LocalContextMemoryEventRecord {
+            event_id,
+            session_id: None,
+            source_kind: "planning-summary".to_string(),
+            payload_json: serde_json::to_string(&payload)
+                .context("failed to serialize planning summary continuity payload")?,
+            created_at_unix_ms: rendered.generated_at_unix_ms,
+            expires_at_unix_ms: Some(rendered.generated_at_unix_ms + 14 * 24 * 60 * 60 * 1000),
+        },
+    )
 }
