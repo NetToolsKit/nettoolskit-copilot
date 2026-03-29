@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Syncs repository-managed .github and .codex assets into the local runtime folders.
+    Compatibility wrapper that syncs repository-managed .github and .codex assets into the local runtime folders.
 
 .DESCRIPTION
     Detects the repository root, renders projected provider surfaces from the
@@ -11,6 +11,10 @@
     - <user-home>/.codex/shared-mcp
     - <user-home>/.codex/shared-scripts
     - <user-home>/.codex/shared-orchestration
+
+    This is the PowerShell compatibility entrypoint for the Rust-owned runtime
+    bootstrap flow. Prefer the Rust boundary for implementation work and use
+    this wrapper when shell invocation is required.
 
     Runtime .github/scripts are synchronized from:
     - scripts (repository root scripts)
@@ -60,17 +64,20 @@
     Shows detailed sync diagnostics.
 
 .EXAMPLE
+    # Compatibility wrapper invocation
     pwsh -File ./scripts/runtime/bootstrap.ps1
 
 .EXAMPLE
+    # Compatibility wrapper invocation with mirror mode
     pwsh -File ./scripts/runtime/bootstrap.ps1 -Mirror
 
 .EXAMPLE
+    # Compatibility wrapper invocation with MCP application
     pwsh -File ./scripts/runtime/bootstrap.ps1 -ApplyMcpConfig -BackupConfig
 
 .NOTES
     Version: 1.4
-    Requirements: PowerShell 7+.
+    Requirements: PowerShell 7+ for the compatibility wrapper.
 #>
 
 param(

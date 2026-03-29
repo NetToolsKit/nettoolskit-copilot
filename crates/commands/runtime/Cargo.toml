@@ -1,0 +1,31 @@
+[package]
+name = "nettoolskit-runtime"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Runtime migration command contracts for NetToolsKit"
+repository = "https://github.com/ThiagoGuislotti/NetToolsKit"
+readme = "README.md"
+keywords = ["runtime", "commands", "migration"]
+categories = ["command-line-utilities", "development-tools"]
+
+[lib]
+name = "nettoolskit_runtime"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+nettoolskit-core = { path = "../../core" }
+nettoolskit-validation = { path = "../validation" }
+regex = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+walkdir = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

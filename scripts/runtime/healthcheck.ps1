@@ -1,12 +1,16 @@
 <#
 .SYNOPSIS
-    Runs end-to-end health checks for repository validation and runtime drift.
+    Compatibility wrapper that runs end-to-end health checks for repository validation and runtime drift.
 
 .DESCRIPTION
     Executes:
     - optional runtime bootstrap sync
     - validation suite (`scripts/validation/validate-all.ps1`)
     - runtime drift doctor (`scripts/runtime/doctor.ps1`)
+
+    This is the PowerShell compatibility entrypoint for the Rust-owned health
+    and validation flow. Prefer the Rust boundaries for implementation work
+    and use this wrapper when shell invocation is required.
 
     Produces:
     - console summary
@@ -66,17 +70,20 @@
     Shows detailed diagnostics.
 
 .EXAMPLE
+    # Compatibility wrapper invocation
     pwsh -File scripts/runtime/healthcheck.ps1
 
 .EXAMPLE
+    # Compatibility wrapper invocation with runtime sync
     pwsh -File scripts/runtime/healthcheck.ps1 -SyncRuntime -Mirror -ValidationProfile release
 
 .EXAMPLE
+    # Compatibility wrapper invocation with strict failure handling
     pwsh -File scripts/runtime/healthcheck.ps1 -WarningOnly:$false -TreatRuntimeDriftAsWarning:$false
 
 .NOTES
     Version: 2.1
-    Requirements: PowerShell 7+.
+    Requirements: PowerShell 7+ for the compatibility wrapper.
 #>
 
 param(

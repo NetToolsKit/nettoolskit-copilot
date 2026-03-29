@@ -89,6 +89,7 @@ function Initialize-GitRepository {
     )
 
     & git -C $Path init | Out-Null
+    & git -C $Path config core.autocrlf false | Out-Null
     & git -C $Path config user.name 'Test User' | Out-Null
     & git -C $Path config user.email 'test@example.com' | Out-Null
 }
@@ -121,6 +122,15 @@ function New-MinimalHookTestRepository {
     New-Item -ItemType Directory -Path $TargetRepoRoot -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $TargetRepoRoot '.github') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $TargetRepoRoot '.codex') -Force | Out-Null
+    Write-TextFile -Path (Join-Path $TargetRepoRoot '.editorconfig') -Content @"
+root = true
+
+[*]
+insert_final_newline = false
+
+[*.{rs,toml,lock}]
+insert_final_newline = true
+"@
 
     foreach ($relativePath in @(
         '.github\governance\git-hook-eof-modes.json',
@@ -220,6 +230,23 @@ try {
         Assert-Equal -Actual ([System.IO.File]::ReadAllText($autofixFile)) -Expected 'public sealed class Autofix { public int Value => 1; }' -Message 'Autofix mode must trim trailing EOF blank lines from safe staged files.'
         Assert-True -Condition ((@($autofixRun.Output) -join "`n") -match 'EOF autofix completed') -Message 'Autofix mode should report successful staged-file cleanup.'
         Assert-True -Condition ((@(& git -C $autofixRepoRoot diff --cached --name-only)) -contains 'autofix.cs') -Message 'Autofix mode must re-stage the trimmed file.'
+
+        $rustAutofixFile = Join-Path $autofixRepoRoot 'lib.rs'
+        Write-TextFile -Path $rustAutofixFile -Content 'pub fn sample() {}'
+        & git -C $autofixRepoRoot add lib.rs | Out-Null
+        & git -C $autofixRepoRoot commit -m 'rust initial' | Out-Null
+
+        Write-TextFile -Path $rustAutofixFile -Content "pub fn sample() {}`n`n"
+        & git -C $autofixRepoRoot add lib.rs | Out-Null
+
+        $rustAutofixRun = Invoke-PowerShellScript -ScriptPath $runnerScriptPath -Arguments @('-RepoRoot', $autofixRepoRoot)
+        Assert-Equal -Actual $rustAutofixRun.ExitCode -Expected 0 -Message 'Autofix mode must allow safe Rust staged-file trimming.'
+        $rustAutofixText = [System.IO.File]::ReadAllText($rustAutofixFile)
+        Assert-Equal -Actual ($rustAutofixText -replace "`r`n", "`n") -Expected "pub fn sample() {}`n" -Message 'Autofix mode must keep one final newline for Rust files when .editorconfig requires it.'
+        Assert-True -Condition $rustAutofixText.EndsWith("`n") -Message 'Autofix mode must leave the Rust file with a terminal newline.'
+        $rustWorkingTreeHash = (& git -C $autofixRepoRoot hash-object lib.rs).Trim()
+        $rustIndexHash = (& git -C $autofixRepoRoot rev-parse :lib.rs).Trim()
+        Assert-Equal -Actual $rustIndexHash -Expected $rustWorkingTreeHash -Message 'Autofix mode must re-stage the Rust file with the required final newline.'
 
         $mixedRepoRoot = Join-Path $tempRoot 'mixed-repo'
         New-MinimalHookTestRepository -SourceRepoRoot $resolvedRepoRoot -TargetRepoRoot $mixedRepoRoot

@@ -18,6 +18,8 @@ path = "lib.rs"
 # Command implementations
 nettoolskit-help = { path = "help" }
 nettoolskit-manifest = { path = "manifest" }
+nettoolskit-runtime = { path = "runtime" }
+nettoolskit-validation = { path = "validation" }
 
 [dev-dependencies]
 tempfile = "3.27"

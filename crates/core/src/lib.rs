@@ -18,11 +18,27 @@ pub mod features;
 /// User configuration with layered loading (file → env → defaults)
 pub mod config;
 
+/// Minimal `.editorconfig` policy resolution helpers.
+pub mod editorconfig;
+
 /// AI workspace-context collection and redaction utilities
 pub mod ai_context;
 
+/// Repository-owned local context indexing utilities.
+#[path = "local-context/lib.rs"]
+pub mod local_context;
+
 /// Shared runtime contracts for CLI and background-service execution modes.
 pub mod runtime;
+
+/// Runtime execution context shared by bootstrap, doctor, and health flows.
+pub mod runtime_execution;
+
+/// Runtime install profile catalog helpers.
+pub mod runtime_install_profiles;
+
+/// Runtime location catalog and user-path utilities.
+pub mod runtime_locations;
 
 /// String manipulation utilities
 #[path = "string-utils/lib.rs"]

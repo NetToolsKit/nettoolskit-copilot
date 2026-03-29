@@ -5,7 +5,7 @@
 .DESCRIPTION
     Verifies that the maintenance script:
     - removes trailing blank lines for default text files without adding a final newline
-    - applies the same no-final-newline policy to Rust files
+    - keeps a final newline for Rust files when the workspace `.editorconfig` requires it
     - can limit trimming to files currently reported as changed by Git
 
 .PARAMETER RepoRoot
@@ -97,6 +97,16 @@ $scriptPath = Join-Path $resolvedRepoRoot 'scripts/maintenance/trim-trailing-bla
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     try {
+        Write-TextFile -Path (Join-Path $tempRoot '.editorconfig') -Content @"
+root = true
+
+[*]
+insert_final_newline = false
+
+[*.{rs,toml,lock}]
+insert_final_newline = true
+"@
+
         $dotnetFile = Join-Path $tempRoot 'sample.cs'
         Write-TextFile -Path $dotnetFile -Content "public sealed class Sample { }`n`n"
 
@@ -109,8 +119,8 @@ try {
 
         & $scriptPath -Path $rustFile | Out-Null
         $rustText = [System.IO.File]::ReadAllText($rustFile)
-        Assert-Equal -Actual $rustText -Expected 'pub fn sample() {}' -Message 'Rust files must end on the last content character with no final newline.'
-        Assert-True -Condition (-not $rustText.EndsWith("`n")) -Message 'Rust files must not keep a final newline under the repository policy.'
+        Assert-Equal -Actual $rustText -Expected "pub fn sample() {}`n" -Message 'Rust files must keep one final newline when the workspace .editorconfig requires it.'
+        Assert-True -Condition $rustText.EndsWith("`n") -Message 'Rust files must keep a final newline when .editorconfig sets insert_final_newline = true.'
 
         $gitRepoRoot = Join-Path $tempRoot 'git-repo'
         [void] (New-Item -ItemType Directory -Path $gitRepoRoot -Force)

@@ -36,6 +36,14 @@ jobs:
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      - name: Release governance gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_release_governance_
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_release_provenance_
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_compatibility_lifecycle_policy_
+
   # ─── Security Audit ────────────────────────────────────────────
   audit:
     name: Security Audit

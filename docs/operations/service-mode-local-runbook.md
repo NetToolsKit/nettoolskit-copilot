@@ -257,4 +257,5 @@ Rate-limit auto-tuning behavior:
 
 - CI dual-runtime gate validates service mode plus ChatOps VPS smoke flow:
   - `cargo test -p nettoolskit-orchestrator --test test_suite chatops_vps_smoke_profile_`
+- CI cutover-governance gate validates release governance, provenance, and compatibility policy through the Rust validation crate.
 - Manual release verification workflow now performs packaged-binary service startup and `/health` smoke checks on Linux, Windows, and macOS.

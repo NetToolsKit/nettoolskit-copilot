@@ -36,6 +36,8 @@ toml = { workspace = true }
 # Enum utilities
 strum = { workspace = true }
 strum_macros = { workspace = true }
+regex = { workspace = true }
+sha2 = { workspace = true }
 
 # Async utilities (from async-utils)
 tokio = { workspace = true }

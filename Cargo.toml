@@ -10,6 +10,8 @@ members = [
     "crates/commands/templating",
     "crates/commands/manifest",
     "crates/commands/help",
+    "crates/commands/runtime",
+    "crates/commands/validation",
     "benchmarks",
 ]
 resolver = "2"
@@ -29,6 +31,7 @@ clap_complete = "4.6"
 tokio = { version = "1.50", features = ["rt-multi-thread", "macros", "time", "net", "io-util", "sync"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+roxmltree = "0.20"
 
 # Terminal dependencies
 crossterm = "0.29"
@@ -50,6 +53,7 @@ rustyline = "17.0"
 futures = "0.3"
 futures-util = "0.3"
 regex = "1.12"
+fancy-regex = "0.14"
 pulldown-cmark = "0.13"
 arboard = "3.4"
 axum = "0.8"
@@ -75,6 +79,7 @@ toml = "1.1"
 walkdir = "2.4"
 ignore = "0.4"
 globset = "0.4"
+sha2 = "0.10"
 
 # HTTP client
 reqwest = { version = "0.11", features = ["json"] }

@@ -59,6 +59,13 @@ jobs:
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Run release governance smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_release_governance_
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_release_provenance_
+          cargo test -p nettoolskit-validation --test test_suite test_invoke_validate_compatibility_lifecycle_policy_
       - name: Validate compatibility policy document
         shell: bash
         run: |
@@ -85,7 +92,7 @@ jobs:
             echo "::error::COMPATIBILITY.md is missing the EOL table header."
             exit 1
           }
-      - name: Validate compatibility lifecycle semantics
+      - name: Validate compatibility lifecycle semantics locally
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -93,22 +100,6 @@ jobs:
           if (-not (Test-Path -LiteralPath $compatibilityFile -PathType Leaf)) {
             throw "COMPATIBILITY.md not found."
           }
-
-          $sharedRepoPath = ".build/copilot-instructions"
-          if (-not (Test-Path -LiteralPath $sharedRepoPath)) {
-            git clone --depth 1 https://github.com/ThiagoGuislotti/copilot-instructions.git $sharedRepoPath
-          }
-          $sharedValidator = Join-Path $sharedRepoPath "scripts/validation/validate-compatibility-lifecycle-policy.ps1"
-          if (Test-Path -LiteralPath $sharedValidator -PathType Leaf) {
-            Write-Host "Using shared compatibility lifecycle validator from copilot-instructions repository."
-            & $sharedValidator -RepoRoot $PWD -CompatibilityFile $compatibilityFile
-            if ($LASTEXITCODE -ne 0) {
-              throw "Shared compatibility lifecycle validator failed."
-            }
-            exit 0
-          }
-
-          Write-Host "Shared compatibility lifecycle validator not found. Falling back to inline PowerShell validation."
 
           $content = Get-Content -Path $compatibilityFile -Raw -Encoding UTF8
           $lines = @($content -split "`r?`n")

@@ -185,14 +185,11 @@ function Get-ManagedGlobalPreCommitHookContent {
         [Parameter(Mandatory = $true)]
         [string] $RunnerPath,
         [Parameter(Mandatory = $true)]
-        [string] $CatalogPath,
-        [Parameter(Mandatory = $true)]
-        [string] $TrimScriptPath
+        [string] $CatalogPath
     )
 
     $runnerShellPath = Convert-ToShellPath -Path $RunnerPath
     $catalogShellPath = Convert-ToShellPath -Path $CatalogPath
-    $trimShellPath = Convert-ToShellPath -Path $TrimScriptPath
 
     return (@'
 #!/usr/bin/env sh
@@ -202,7 +199,6 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$REPO_ROOT"
 
 export CODEX_GIT_HOOK_EOF_CATALOG_PATH='{1}'
-export CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH='{2}'
 
 if command -v pwsh >/dev/null 2>&1; then
   if ! pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{0}' -RepoRoot "$REPO_ROOT"; then
@@ -222,7 +218,7 @@ fi
 
 echo "[pre-commit] Warning: PowerShell not found. EOF hygiene skipped." >&2
 exit 0
-'@ -f $runnerShellPath, $catalogShellPath, $trimShellPath)
+'@ -f $runnerShellPath, $catalogShellPath)
 }
 
 # Writes the managed global pre-commit hook into the configured global hooks path.
@@ -239,7 +235,7 @@ function Install-ManagedGlobalGitHooks {
 
     New-Item -ItemType Directory -Path $managedPaths.GlobalHooksPath -Force | Out-Null
     $preCommitPath = Join-Path $managedPaths.GlobalHooksPath 'pre-commit'
-    [System.IO.File]::WriteAllText($preCommitPath, (Get-ManagedGlobalPreCommitHookContent -RunnerPath $managedPaths.RunnerPath -CatalogPath $managedPaths.CatalogPath -TrimScriptPath $managedPaths.TrimScriptPath), [System.Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText($preCommitPath, (Get-ManagedGlobalPreCommitHookContent -RunnerPath $managedPaths.RunnerPath -CatalogPath $managedPaths.CatalogPath), [System.Text.UTF8Encoding]::new($false))
     Invoke-HookExecutabilityUpdate -HookPaths @($preCommitPath)
 
     return [pscustomobject]@{

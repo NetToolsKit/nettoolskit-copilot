@@ -86,7 +86,7 @@ const AI_CONTEXT_DEFAULT_ALLOWLIST: &[&str] = &[
     "Cargo.toml",
     "README.md",
     "CHANGELOG.md",
-    "planning/active/plan-repository-operations-hygiene.md",
+    "planning/completed/plan-repository-operations-hygiene.md",
 ];
 const AI_SESSION_CONTEXT_MESSAGE_LIMIT: usize = 12;
 const DEFAULT_AI_RATE_LIMIT_REQUESTS: usize = 30;
@@ -6467,14 +6467,14 @@ mod tests {
     #[test]
     fn parse_ai_context_paths_supports_comma_and_semicolon() {
         let paths = parse_ai_context_paths(
-            "Cargo.toml, README.md; planning/active/plan-repository-operations-hygiene.md",
+            "Cargo.toml, README.md; planning/completed/plan-repository-operations-hygiene.md",
         );
         assert_eq!(paths.len(), 3);
         assert_eq!(paths[0], PathBuf::from("Cargo.toml"));
         assert_eq!(paths[1], PathBuf::from("README.md"));
         assert_eq!(
             paths[2],
-            PathBuf::from("planning/active/plan-repository-operations-hygiene.md")
+            PathBuf::from("planning/completed/plan-repository-operations-hygiene.md")
         );
     }
 

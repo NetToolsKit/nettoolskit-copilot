@@ -127,20 +127,62 @@ function Resolve-HooksRootPath {
     throw ("Unable to resolve hooks root from '{0}'." -f $PSScriptRoot)
 }
 
-# Resolves the repository default insert_final_newline policy from the workspace .editorconfig.
-function Get-WorkspaceInsertFinalNewlinePolicy {
+# Expands one EditorConfig glob pattern with optional `{a,b}` alternatives.
+function Expand-EditorConfigGlobPattern {
+    param(
+        [string] $Pattern
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Pattern)) {
+        return @()
+    }
+
+    $match = [System.Text.RegularExpressions.Regex]::Match($Pattern, '\{([^{}]+)\}')
+    if (-not $match.Success) {
+        return @($Pattern)
+    }
+
+    $prefix = $Pattern.Substring(0, $match.Index)
+    $suffix = $Pattern.Substring($match.Index + $match.Length)
+    $expandedPatterns = New-Object System.Collections.Generic.List[string]
+
+    foreach ($option in ($match.Groups[1].Value -split ',')) {
+        foreach ($expandedPattern in (Expand-EditorConfigGlobPattern -Pattern ($prefix + $option.Trim() + $suffix))) {
+            $expandedPatterns.Add($expandedPattern) | Out-Null
+        }
+    }
+
+    return $expandedPatterns.ToArray()
+}
+
+# Returns a parsed summary of insert_final_newline rules from the workspace .editorconfig.
+function Get-WorkspaceInsertFinalNewlinePolicySummary {
     param(
         [string] $WorkspacePath
     )
 
     if ([string]::IsNullOrWhiteSpace($WorkspacePath)) {
-        return $null
+        return [pscustomobject]@{
+            DefaultPolicy = $null
+            HasMixedPolicy = $false
+            Rules = @()
+        }
     }
 
     $editorConfigPath = Join-Path $WorkspacePath '.editorconfig'
     if (-not (Test-Path -LiteralPath $editorConfigPath -PathType Leaf)) {
-        return $null
+        return [pscustomobject]@{
+            DefaultPolicy = $null
+            HasMixedPolicy = $false
+            Rules = @()
+        }
     }
+
+    $rules = New-Object System.Collections.Generic.List[object]
+    $currentPatterns = @('*')
+    $defaultPolicy = $null
+    $hasTrueRule = $false
+    $hasFalseRule = $false
 
     foreach ($line in (Get-Content -LiteralPath $editorConfigPath)) {
         $trimmed = [string] $line
@@ -154,12 +196,126 @@ function Get-WorkspaceInsertFinalNewlinePolicy {
             continue
         }
 
+        if ($trimmed -match '^\[(.+)\]$') {
+            $currentPatterns = @([string] $Matches[1].Trim())
+            if ($currentPatterns.Count -eq 0) {
+                $currentPatterns = @('*')
+            }
+            continue
+        }
+
         if ($trimmed -match '^insert_final_newline\s*=\s*(true|false)$') {
-            return [System.Convert]::ToBoolean($Matches[1])
+            $policy = [System.Convert]::ToBoolean($Matches[1])
+            if ($policy) {
+                $hasTrueRule = $true
+            }
+            else {
+                $hasFalseRule = $true
+            }
+
+            $expandedPatterns = New-Object System.Collections.Generic.List[string]
+            foreach ($pattern in $currentPatterns) {
+                foreach ($expandedPattern in (Expand-EditorConfigGlobPattern -Pattern $pattern)) {
+                    $expandedPatterns.Add($expandedPattern) | Out-Null
+                }
+            }
+
+            if ($expandedPatterns.Count -eq 1 -and $expandedPatterns[0] -eq '*') {
+                $defaultPolicy = $policy
+            }
+
+            $rules.Add([pscustomobject]@{
+                Patterns = $expandedPatterns.ToArray()
+                Policy = $policy
+            }) | Out-Null
         }
     }
 
-    return $null
+    return [pscustomobject]@{
+        DefaultPolicy = $defaultPolicy
+        HasMixedPolicy = ($hasTrueRule -and $hasFalseRule)
+        Rules = $rules.ToArray()
+    }
+}
+
+# Returns true when an EditorConfig glob pattern matches the supplied file path.
+function Test-EditorConfigPatternMatch {
+    param(
+        [string] $RelativePath,
+        [string] $Pattern
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Pattern)) {
+        return $false
+    }
+
+    if ($Pattern -eq '*') {
+        return $true
+    }
+
+    $normalizedRelativePath = ([string] $RelativePath).Replace('\', '/')
+    $fileName = [System.IO.Path]::GetFileName($normalizedRelativePath)
+    $matcher = [System.Management.Automation.WildcardPattern]::new(
+        $Pattern,
+        [System.Management.Automation.WildcardOptions]::IgnoreCase
+    )
+
+    return ($matcher.IsMatch($normalizedRelativePath) -or $matcher.IsMatch($fileName))
+}
+
+# Resolves the effective insert_final_newline policy for one workspace-managed file.
+function Get-WorkspaceInsertFinalNewlinePolicyForFile {
+    param(
+        [string] $WorkspacePath,
+        [string] $FilePath
+    )
+
+    $summary = Get-WorkspaceInsertFinalNewlinePolicySummary -WorkspacePath $WorkspacePath
+    $effectivePolicy = $summary.DefaultPolicy
+
+    if ([string]::IsNullOrWhiteSpace($WorkspacePath) -or [string]::IsNullOrWhiteSpace($FilePath)) {
+        return $effectivePolicy
+    }
+
+    try {
+        $resolvedWorkspacePath = [System.IO.Path]::GetFullPath($WorkspacePath)
+        $resolvedFilePath = if ([System.IO.Path]::IsPathRooted($FilePath)) {
+            [System.IO.Path]::GetFullPath($FilePath)
+        }
+        else {
+            [System.IO.Path]::GetFullPath((Join-Path $resolvedWorkspacePath $FilePath))
+        }
+    }
+    catch {
+        return $effectivePolicy
+    }
+
+    $relativePath = try {
+        [System.IO.Path]::GetRelativePath($resolvedWorkspacePath, $resolvedFilePath)
+    }
+    catch {
+        [System.IO.Path]::GetFileName($resolvedFilePath)
+    }
+
+    foreach ($rule in @($summary.Rules)) {
+        foreach ($pattern in @($rule.Patterns)) {
+            if (Test-EditorConfigPatternMatch -RelativePath $relativePath -Pattern ([string] $pattern)) {
+                $effectivePolicy = [bool] $rule.Policy
+                break
+            }
+        }
+    }
+
+    return $effectivePolicy
+}
+
+# Resolves the repository default insert_final_newline policy from the workspace .editorconfig.
+function Get-WorkspaceInsertFinalNewlinePolicy {
+    param(
+        [string] $WorkspacePath
+    )
+
+    return (Get-WorkspaceInsertFinalNewlinePolicySummary -WorkspacePath $WorkspacePath).DefaultPolicy
 }
 
 # Detects whether the current workspace provides a local Super Agent adapter surface.
@@ -551,7 +707,20 @@ function Get-WorkspaceEofPolicyMessage {
         [string] $WorkspacePath
     )
 
-    $insertFinalNewline = Get-WorkspaceInsertFinalNewlinePolicy -WorkspacePath $WorkspacePath
+    $policySummary = Get-WorkspaceInsertFinalNewlinePolicySummary -WorkspacePath $WorkspacePath
+    $insertFinalNewline = $policySummary.DefaultPolicy
+    if ($policySummary.HasMixedPolicy) {
+        if ($insertFinalNewline -eq $false) {
+            return 'Workspace EOF policy: preserve exact file EOF. The repository default uses insert_final_newline = false, and narrower .editorconfig overrides may require a terminal newline for specific file types.'
+        }
+
+        if ($insertFinalNewline -eq $true) {
+            return 'Workspace EOF policy: preserve exact file EOF. The repository default uses insert_final_newline = true, and narrower .editorconfig overrides may omit the terminal newline for specific file types.'
+        }
+
+        return 'Workspace EOF policy: preserve exact file EOF. The workspace uses mixed .editorconfig insert_final_newline rules, so keep the file-specific terminal newline behavior.'
+    }
+
     if ($insertFinalNewline -eq $false) {
         return 'Workspace EOF policy: preserve exact file EOF, and do not append a terminal newline because .editorconfig uses insert_final_newline = false.'
     }
@@ -629,11 +798,6 @@ function Get-EofNormalizedToolInput {
         [object] $ToolInput
     )
 
-    $insertFinalNewline = Get-WorkspaceInsertFinalNewlinePolicy -WorkspacePath $WorkspacePath
-    if ($insertFinalNewline -ne $false) {
-        return $null
-    }
-
     $updatedInput = Copy-ToolInputObject -ToolInput $ToolInput
     if ($null -eq $updatedInput) {
         return $null
@@ -643,7 +807,9 @@ function Get-EofNormalizedToolInput {
 
     switch ($ToolName) {
         'createFile' {
-            if (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $updatedInput.filePath)) {
+            $targetFilePath = [string] $updatedInput.filePath
+            if ((Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -and
+                ((Get-WorkspaceInsertFinalNewlinePolicyForFile -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -eq $false)) {
                 $normalizedContent = Remove-TerminalNewline -Text ([string] $updatedInput.content)
                 if ($normalizedContent -cne [string] $updatedInput.content) {
                     $updatedInput.content = $normalizedContent
@@ -652,7 +818,9 @@ function Get-EofNormalizedToolInput {
             }
         }
         'insertEdit' {
-            if (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $updatedInput.filePath)) {
+            $targetFilePath = [string] $updatedInput.filePath
+            if ((Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -and
+                ((Get-WorkspaceInsertFinalNewlinePolicyForFile -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -eq $false)) {
                 $normalizedCode = Remove-TerminalNewline -Text ([string] $updatedInput.code)
                 if ($normalizedCode -cne [string] $updatedInput.code) {
                     $updatedInput.code = $normalizedCode
@@ -661,7 +829,9 @@ function Get-EofNormalizedToolInput {
             }
         }
         'replaceString' {
-            if (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $updatedInput.filePath)) {
+            $targetFilePath = [string] $updatedInput.filePath
+            if ((Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -and
+                ((Get-WorkspaceInsertFinalNewlinePolicyForFile -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -eq $false)) {
                 $normalizedNewString = Remove-TerminalNewline -Text ([string] $updatedInput.newString)
                 if ($normalizedNewString -cne [string] $updatedInput.newString) {
                     $updatedInput.newString = $normalizedNewString
@@ -671,7 +841,12 @@ function Get-EofNormalizedToolInput {
         }
         'multiReplaceString' {
             foreach ($replacement in @($updatedInput.replacements)) {
-                if (-not (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath ([string] $replacement.filePath))) {
+                $targetFilePath = [string] $replacement.filePath
+                if (-not (Test-WorkspaceManagedFilePath -WorkspacePath $WorkspacePath -FilePath $targetFilePath)) {
+                    continue
+                }
+
+                if ((Get-WorkspaceInsertFinalNewlinePolicyForFile -WorkspacePath $WorkspacePath -FilePath $targetFilePath) -ne $false) {
                     continue
                 }
 
