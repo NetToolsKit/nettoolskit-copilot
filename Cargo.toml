@@ -35,7 +35,7 @@ crossterm = "0.28"
 
 # String manipulation
 strum = { version = "0.26", features = ["derive"] }
-strum_macros = "0.26"
+strum_macros = "0.28"
 heck = "0.5"
 
 # Color support
