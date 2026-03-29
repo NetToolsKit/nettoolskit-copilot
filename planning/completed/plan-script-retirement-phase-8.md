@@ -8,7 +8,7 @@ Generated: 2026-03-28 21:06
 - Objective: retire the next low-fanout validation wrappers by exposing native `ntk validation` executable boundaries for repository policy and agent alignment/permission checks, then deleting the local PowerShell leaves only after compatibility and governance surfaces stop requiring their paths.
 - Normalized Request: continue deleting local PowerShell scripts in favor of Rust-native behavior, keep planning current, and commit each stable retirement phase.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
-- Spec Path: `planning/specs/active/spec-script-retirement-phase-8.md`
+- Spec Path: `planning/specs/completed/spec-script-retirement-phase-8.md`
 - Inputs:
   - `planning/completed/plan-script-retirement-phase-7.md`
   - `planning/specs/completed/spec-script-retirement-phase-7.md`
@@ -93,10 +93,6 @@ Status: `[x]` Completed
 - Focused `validate-all` proof for this phase produced:
   - warning-only: passed
   - enforcing: failed only on pre-existing repository policy debt in `.github/policies`, not on the Phase 8 cutover itself
-
-- Run the relevant CLI, validation crate, compatibility wrapper, planning, and security validations.
-- Record both warning-only proof and enforcing proof for the focused `validate-all` phase profile.
-- Move the phase plan/spec to `completed` only when the slice is stable and the worktree returns clean.
 
 ## Validation Checklist
 
