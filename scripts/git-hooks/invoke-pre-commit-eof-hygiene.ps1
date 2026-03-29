@@ -95,32 +95,6 @@ function Get-UnsafeMixedStageFileList {
     return @($unsafeFiles)
 }
 
-# Resolves the trim script path from explicit override, repo-local source, or shared runtime.
-function Resolve-EofTrimScriptPath {
-    param(
-        [string] $ResolvedRepoRoot
-    )
-
-    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH)) {
-        $overridePath = [System.IO.Path]::GetFullPath($env:CODEX_GIT_HOOK_EOF_TRIM_SCRIPT_PATH)
-        if (Test-Path -LiteralPath $overridePath -PathType Leaf) {
-            return $overridePath
-        }
-    }
-
-    $repoLocalTrimPath = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot 'scripts') 'maintenance') 'trim-trailing-blank-lines.ps1'
-    if (Test-Path -LiteralPath $repoLocalTrimPath -PathType Leaf) {
-        return $repoLocalTrimPath
-    }
-
-    $runtimeTrimPath = Join-Path (Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance') 'trim-trailing-blank-lines.ps1'
-    if (Test-Path -LiteralPath $runtimeTrimPath -PathType Leaf) {
-        return $runtimeTrimPath
-    }
-
-    throw "Missing trim script required by EOF autofix. Checked repo-local and runtime paths."
-}
-
 $resolvedRepoRoot = Resolve-ExplicitOrGitRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 $effectiveMode = Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
@@ -160,12 +134,16 @@ if ($unsafeFiles.Count -gt 0) {
     exit 1
 }
 
-$trimScriptPath = Resolve-EofTrimScriptPath -ResolvedRepoRoot $resolvedRepoRoot
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 Write-StyledOutput ('[pre-commit] EOF autofix mode active. Checking {0} staged file(s)...' -f $stagedFiles.Count)
-& $trimScriptPath -LiteralPaths $stagedFiles
+$trimArguments = @('runtime', 'trim-trailing-blank-lines', '--repo-root', $resolvedRepoRoot)
+foreach ($stagedFile in $stagedFiles) {
+    $trimArguments += @('--literal-path', $stagedFile)
+}
+& $runtimeBinaryPath @trimArguments
 if ($LASTEXITCODE -ne 0) {
-    throw "EOF autofix failed while trimming staged files (exit code: $LASTEXITCODE)"
+    throw "EOF autofix failed while trimming staged files through the managed ntk runtime boundary (exit code: $LASTEXITCODE)"
 }
 
 foreach ($stagedFile in $stagedFiles) {

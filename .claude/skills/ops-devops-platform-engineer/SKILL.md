@@ -42,5 +42,5 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 ```powershell
 docker build -f Dockerfile .
 kubectl apply --dry-run=client -f k8s/
-pwsh -File ./scripts/validation/validate-all.ps1 -Profile release
+ntk validation all --repo-root . --validation-profile release
 ```

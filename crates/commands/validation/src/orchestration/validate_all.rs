@@ -49,7 +49,9 @@ const DEFAULT_LEDGER_PATH: &str = ".temp/audit/validation-ledger.jsonl";
 const DEFAULT_OUTPUT_PATH: &str = ".temp/audit/validate-all.latest.json";
 const ZERO_LEDGER_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
-const DEFAULT_CHECK_ORDER: &[&str] = &[
+/// Default native `validate-all` check order used when no profile overrides
+/// the orchestration sequence explicitly.
+pub const DEFAULT_VALIDATE_ALL_CHECK_ORDER: &[&str] = &[
     "validate-instructions",
     "validate-policy",
     "validate-security-baseline",
@@ -561,7 +563,7 @@ fn resolve_check_order(selected_profile: Option<&ValidationProfile>) -> Vec<Stri
         }
     }
 
-    DEFAULT_CHECK_ORDER
+    DEFAULT_VALIDATE_ALL_CHECK_ORDER
         .iter()
         .map(|entry| (*entry).to_string())
         .collect()

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Runtime tests for EOF normalization in trim-trailing-blank-lines.ps1.
+    Runtime tests for EOF normalization through the native `ntk runtime trim-trailing-blank-lines` surface.
 
 .DESCRIPTION
     Verifies that the maintenance script:
@@ -37,7 +37,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
     param(
@@ -91,12 +91,23 @@ function Initialize-GitRepository {
     & git -C $Path config user.email 'test@example.com' | Out-Null
 }
 
+# Creates the minimal runtime markers required by the Rust trim command.
+function Initialize-RuntimeRepoRoot {
+    param(
+        [string] $Path
+    )
+
+    New-Item -ItemType Directory -Path (Join-Path $Path '.github') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $Path '.codex') -Force | Out-Null
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot 'scripts/maintenance/trim-trailing-blank-lines.ps1'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference codex
 
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     try {
+        Initialize-RuntimeRepoRoot -Path $tempRoot
         Write-TextFile -Path (Join-Path $tempRoot '.editorconfig') -Content @"
 root = true
 
@@ -110,20 +121,21 @@ insert_final_newline = true
         $dotnetFile = Join-Path $tempRoot 'sample.cs'
         Write-TextFile -Path $dotnetFile -Content "public sealed class Sample { }`n`n"
 
-        & $scriptPath -Path $dotnetFile | Out-Null
+        & $runtimeBinaryPath runtime trim-trailing-blank-lines --repo-root $tempRoot --path $dotnetFile | Out-Null
         $dotnetText = [System.IO.File]::ReadAllText($dotnetFile)
         Assert-Equal -Actual $dotnetText -Expected 'public sealed class Sample { }' -Message 'Default files must end on the last content character with no final newline.'
 
         $rustFile = Join-Path $tempRoot 'lib.rs'
         Write-TextFile -Path $rustFile -Content "pub fn sample() {}`n`n"
 
-        & $scriptPath -Path $rustFile | Out-Null
+        & $runtimeBinaryPath runtime trim-trailing-blank-lines --repo-root $tempRoot --path $rustFile | Out-Null
         $rustText = [System.IO.File]::ReadAllText($rustFile)
         Assert-Equal -Actual $rustText -Expected "pub fn sample() {}`n" -Message 'Rust files must keep one final newline when the workspace .editorconfig requires it.'
         Assert-True -Condition $rustText.EndsWith("`n") -Message 'Rust files must keep a final newline when .editorconfig sets insert_final_newline = true.'
 
         $gitRepoRoot = Join-Path $tempRoot 'git-repo'
         [void] (New-Item -ItemType Directory -Path $gitRepoRoot -Force)
+        Initialize-RuntimeRepoRoot -Path $gitRepoRoot
         Initialize-GitRepository -Path $gitRepoRoot
 
         $changedFile = Join-Path $gitRepoRoot 'changed.cs'
@@ -138,7 +150,7 @@ insert_final_newline = true
         Write-TextFile -Path $changedFile -Content "public sealed class Changed { }`n`n"
         Write-TextFile -Path $untrackedChangedFile -Content "# new file`n`n"
 
-        $gitModeOutput = & $scriptPath -Path $gitRepoRoot -GitChangedOnly
+        $gitModeOutput = & $runtimeBinaryPath runtime trim-trailing-blank-lines --repo-root $gitRepoRoot --git-changed-only
         $changedText = [System.IO.File]::ReadAllText($changedFile)
         $cleanTrackedText = [System.IO.File]::ReadAllText($cleanTrackedFile)
         $untrackedChangedText = [System.IO.File]::ReadAllText($untrackedChangedFile)
@@ -153,6 +165,7 @@ insert_final_newline = true
 
         $singleChangeRepoRoot = Join-Path $tempRoot 'single-change-git-repo'
         [void] (New-Item -ItemType Directory -Path $singleChangeRepoRoot -Force)
+        Initialize-RuntimeRepoRoot -Path $singleChangeRepoRoot
         Initialize-GitRepository -Path $singleChangeRepoRoot
 
         $singleChangedFile = Join-Path $singleChangeRepoRoot 'single.cs'
@@ -162,7 +175,7 @@ insert_final_newline = true
 
         Write-TextFile -Path $singleChangedFile -Content "public sealed class Single { }`n`n"
 
-        $singleGitModeOutput = & $scriptPath -Path $singleChangeRepoRoot -GitChangedOnly
+        $singleGitModeOutput = & $runtimeBinaryPath runtime trim-trailing-blank-lines --repo-root $singleChangeRepoRoot --git-changed-only
         $singleChangedText = [System.IO.File]::ReadAllText($singleChangedFile)
 
         Assert-Equal -Actual $singleChangedText -Expected 'public sealed class Single { }' -Message 'GitChangedOnly mode must trim a single modified tracked file without failing scalar Count access.'

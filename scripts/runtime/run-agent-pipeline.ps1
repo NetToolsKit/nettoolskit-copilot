@@ -140,7 +140,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'agent-runtime-hardening')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'agent-runtime-hardening')
 $script:ScriptRoot = Split-Path -Path $PSCommandPath -Parent
 $script:IsVerboseEnabled = [bool] $DetailedOutput
 # Reads and parses JSON from path.
@@ -381,6 +381,24 @@ function Convert-ManifestToArtifactMap {
     return $map
 }
 
+# Runs the native agent orchestration validator through the managed runtime binary.
+function Invoke-AgentOrchestrationValidation {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Root
+    )
+
+    $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $Root -RuntimePreference codex
+    & $runtimeBinaryPath validation agent-orchestration --repo-root $Root | Out-Host
+
+    $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
+    if ($null -eq $lastExitCodeVariable) {
+        return 0
+    }
+
+    return [int] $lastExitCodeVariable.Value
+}
+
 # Returns clarification metadata from the intake-report artifact when present.
 function Get-IntakeClarificationDetails {
     param(
@@ -545,13 +563,8 @@ Start-ExecutionSession `
         }) `
     -IncludeMetadataInDefaultOutput | Out-Null
 
-$validationScriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-agent-orchestration.ps1'
-if (-not (Test-Path -LiteralPath $validationScriptPath -PathType Leaf)) {
-    throw "Required validator not found: $validationScriptPath"
-}
-
-& $validationScriptPath -RepoRoot $resolvedRepoRoot
-if ($LASTEXITCODE -ne 0) {
+$validationExitCode = Invoke-AgentOrchestrationValidation -Root $resolvedRepoRoot
+if ($validationExitCode -ne 0) {
     if ($WarningOnly) {
         Write-StyledOutput '[WARN] Agent orchestration validation failed. Continuing due warning-only mode.'
     }

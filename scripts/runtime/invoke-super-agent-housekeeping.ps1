@@ -83,7 +83,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths')
 
 $script:IsDetailedOutputEnabled = [bool] $DetailedOutput
 
@@ -293,16 +293,15 @@ if (-not [string]::IsNullOrWhiteSpace($RecordOnlyPath)) {
     exit 0
 }
 
-$updateLocalIndexScript = Resolve-RuntimeScriptPath -ScriptName 'update-local-context-index.ps1'
-$exportScript = Resolve-RuntimeScriptPath -ScriptName 'export-planning-summary.ps1'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 $cleanCodexScript = Resolve-RuntimeScriptPath -ScriptName 'clean-codex-runtime.ps1'
 $cleanVscodeScript = Resolve-RuntimeScriptPath -ScriptName 'clean-vscode-user-runtime.ps1'
 
 Write-DetailedLog 'Refreshing local context index.'
-& $updateLocalIndexScript -RepoRoot $resolvedRepoRoot -DetailedOutput:$DetailedOutput | Out-Host
+& $runtimeBinaryPath runtime update-local-context-index --repo-root $resolvedRepoRoot | Out-Host
 
 Write-StyledOutput 'Exporting planning handoff summary before housekeeping cleanup...'
-& $exportScript -RepoRoot $resolvedRepoRoot | Out-Host
+& $runtimeBinaryPath runtime export-planning-summary --repo-root $resolvedRepoRoot | Out-Host
 
 Write-DetailedLog 'Running Codex runtime cleanup.'
 if ($Apply) {

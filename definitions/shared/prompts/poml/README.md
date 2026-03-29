@@ -32,9 +32,9 @@ prompt surface used by the repository tooling and provider workflows.
 
 ## References
 
-- [Shared Prompt Assets](../README.md)
-- [Shared Definitions](../../README.md)
-- [Projected Prompt Surface](../../../../.github/prompts/poml/)
+- Shared Prompt Assets: `definitions/shared/prompts/README.md`
+- Shared Definitions: `definitions/shared/README.md`
+- Projected Prompt Surface: `.github/prompts/poml/`
 
 ---
 

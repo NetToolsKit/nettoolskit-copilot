@@ -3,8 +3,8 @@
     Runtime tests for authoritative source policy validation without external frameworks.
 
 .DESCRIPTION
-    Covers success, failure, and warning-only duplication behavior for
-    `validate-authoritative-source-policy.ps1`.
+    Covers success, failure, and warning-only duplication behavior for the
+    native `ntk validation authoritative-source-policy` contract.
 
 .PARAMETER RepoRoot
     Optional repository root. If omitted, auto-detects a root containing .github and .codex.
@@ -35,7 +35,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 # Fails the current runtime test when the exit code differs from the expected value.
 function Assert-ExitCode {
     param(
@@ -65,12 +65,12 @@ function Write-TextFile {
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-authoritative-source-policy.ps1'
+$runtimeBinaryPath = Resolve-RepositoryRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot
 
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     try {
-        & $scriptPath -RepoRoot $resolvedRepoRoot -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'authoritative-source-policy' '--repo-root' $resolvedRepoRoot '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Repository authoritative source policy should pass.'
 
@@ -91,7 +91,7 @@ try {
   ]
 }
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -SourceMapPath $invalidMapPath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'authoritative-source-policy' '--repo-root' $resolvedRepoRoot '--source-map-path' $invalidMapPath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Invalid authoritative source map should fail.'
         Remove-Item -LiteralPath $invalidMapPath -Force
@@ -102,7 +102,7 @@ try {
 
 - This file intentionally omits the authoritative source instruction reference.
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -AgentsPath $invalidAgentsPath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'authoritative-source-policy' '--repo-root' $resolvedRepoRoot '--agents-path' $invalidAgentsPath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing AGENTS reference should fail.'
         Remove-Item -LiteralPath $invalidAgentsPath -Force
@@ -117,11 +117,12 @@ priority: medium
 
 Use learn.microsoft.com for .NET lookups in this temporary duplicate file.
 '@
-        & $scriptPath `
-            -RepoRoot $resolvedRepoRoot `
-            -InstructionSearchRoot $instructionRoot `
-            -WarningOnly:$false `
-            -DetailedOutput | Out-Null
+        & $runtimeBinaryPath `
+            'validation' `
+            'authoritative-source-policy' `
+            '--repo-root' $resolvedRepoRoot `
+            '--instruction-search-root' $instructionRoot `
+            '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Duplicate instruction domains should warn but not fail.'
     }

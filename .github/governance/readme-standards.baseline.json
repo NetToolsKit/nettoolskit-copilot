@@ -62,6 +62,78 @@
         "Introduction",
         "Features",
         "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/shared/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/shared/prompts/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/shared/prompts/poml/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": "definitions/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
         "References",
         "License"
       ],

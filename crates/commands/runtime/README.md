@@ -13,7 +13,7 @@
 ## Features
 
 - ✅ Locked migration contracts for `54` legacy scripts across runtime, hook, maintenance, and git-hook surfaces
-- ✅ Local context index update and query commands for repository navigation
+- ✅ Local context index compatibility commands plus SQLite local-memory update/query commands for repository navigation
 - ✅ Planning summary export for handoff and execution reviews
 - ✅ Bootstrap projection for `.github/`, `.codex/`, `.claude/`, and runtime templates
 - ✅ Drift diagnosis, healthcheck orchestration, and self-heal repair flows
@@ -91,12 +91,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```rust
 use nettoolskit_runtime::{
-    query_local_context_index, update_local_context_index, QueryLocalContextIndexRequest,
-    UpdateLocalContextIndexRequest,
+    query_local_context_index, update_local_memory, QueryLocalContextIndexRequest,
+    UpdateLocalMemoryRequest,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let update = update_local_context_index(&UpdateLocalContextIndexRequest {
+    let update = update_local_memory(&UpdateLocalMemoryRequest {
         force_full_rebuild: false,
         ..Default::default()
     })?;
@@ -108,9 +108,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         output_root: None,
         top: Some(5),
         exclude_paths: Vec::new(),
+        path_prefix: Some("planning/".to_string()),
+        heading_contains: None,
+        use_json_index: false,
     })?;
 
-    println!("indexed files: {}", update.indexed_file_count);
+    println!("backend: {}", query.backend.as_str());
+    println!("memory db: {}", update.memory_db_path.display());
     println!("query hits: {}", query.result_count);
     Ok(())
 }
@@ -184,6 +188,20 @@ pub struct QueryLocalContextIndexRequest {
     pub output_root: Option<std::path::PathBuf>,
     pub top: Option<usize>,
     pub exclude_paths: Vec<String>,
+    pub path_prefix: Option<String>,
+    pub heading_contains: Option<String>,
+    pub use_json_index: bool,
+}
+
+pub struct QueryLocalMemoryRequest {
+    pub repo_root: Option<std::path::PathBuf>,
+    pub query_text: String,
+    pub catalog_path: Option<std::path::PathBuf>,
+    pub output_root: Option<std::path::PathBuf>,
+    pub top: Option<usize>,
+    pub exclude_paths: Vec<String>,
+    pub path_prefix: Option<String>,
+    pub heading_contains: Option<String>,
 }
 
 pub struct ExportPlanningSummaryRequest {
@@ -198,6 +216,12 @@ pub fn update_local_context_index(
 pub fn query_local_context_index(
     request: &QueryLocalContextIndexRequest,
 ) -> Result<QueryLocalContextIndexResult, LocalContextCommandError>;
+pub fn update_local_memory(
+    request: &UpdateLocalMemoryRequest,
+) -> Result<UpdateLocalMemoryResult, LocalContextCommandError>;
+pub fn query_local_memory(
+    request: &QueryLocalMemoryRequest,
+) -> Result<QueryLocalMemoryResult, LocalContextCommandError>;
 pub fn export_planning_summary(
     request: &ExportPlanningSummaryRequest,
 ) -> Result<ExportPlanningSummaryResult, PlanningSummaryCommandError>;
@@ -305,6 +329,9 @@ pub fn invoke_runtime_self_heal(
 | `RuntimeBootstrapRequest` | `backup_config` | Create a backup before MCP config application. | `false` |
 | `QueryLocalContextIndexRequest` | `query_text` | Search text used against the local context index. | `"planning"` |
 | `QueryLocalContextIndexRequest` | `top` | Maximum number of hits to return. | `5` |
+| `QueryLocalContextIndexRequest` | `use_json_index` | Force the legacy JSON compatibility fallback instead of the default SQLite recall path. | `false` |
+| `QueryLocalMemoryRequest` | `path_prefix` | Optional repository-relative prefix filter applied to SQLite recall. | `"planning/"` |
+| `QueryLocalMemoryRequest` | `heading_contains` | Optional heading substring filter applied to SQLite recall. | `"wave"` |
 | `RuntimeHealthcheckRequest` | `validation_profile` | Validation profile passed into `validate-all`. | `"dev"` |
 | `RuntimeHealthcheckRequest` | `sync_runtime` | Run bootstrap before the rest of the healthcheck. | `true` |
 | `RuntimeSelfHealRequest` | `apply_vscode_templates` | Apply VS Code templates before the follow-up healthcheck. | `true` |

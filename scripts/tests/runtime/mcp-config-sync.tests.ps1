@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Runtime regression tests for mixed MCP manifest rendering and canonical
-    catalog-driven Codex projections.
+    Runtime regression tests for mixed MCP catalog rendering and native
+    VS Code template application.
 
 .DESCRIPTION
-    Verifies that `scripts/runtime/sync-codex-mcp-config.ps1` can render a
-    mixed manifest containing `stdio` and `http` servers without requiring
-    every optional property to exist on every server entry.
+    Verifies that the shared MCP catalog helpers can render a mixed catalog
+    containing `stdio` and `http` servers and that the native runtime command
+    can apply the resulting VS Code templates without any retired wrapper path.
 
 .PARAMETER RepoRoot
     Optional repository root. If omitted, auto-detects a root containing .github and .codex.
@@ -37,7 +37,8 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
+. "$PSScriptRoot\..\..\common\mcp-runtime-catalog.ps1"
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
     param(
@@ -64,116 +65,121 @@ function Assert-ContainsText {
 }
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot 'scripts/runtime/sync-codex-mcp-config.ps1'
+$runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
-$manifestPath = Join-Path $tempRoot 'servers.manifest.json'
-$catalogPath = Join-Path $tempRoot 'mcp-runtime.catalog.json'
-$configPath = Join-Path $tempRoot 'config.toml'
+$workspaceRoot = Join-Path $tempRoot 'repo'
+$vscodeRoot = Join-Path $workspaceRoot '.vscode'
+$githubRoot = Join-Path $workspaceRoot '.github'
+$codexRoot = Join-Path $workspaceRoot '.codex'
 
 try {
-    New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
+    New-Item -ItemType Directory -Path $vscodeRoot -Force | Out-Null
+    New-Item -ItemType Directory -Path $githubRoot -Force | Out-Null
+    New-Item -ItemType Directory -Path $codexRoot -Force | Out-Null
 
-    @'
-{
-  "version": 1,
-  "servers": [
-    {
-      "name": "playwright",
-      "type": "stdio",
-      "command": "npx",
-      "args": ["@playwright/mcp@latest"]
-    },
-    {
-      "name": "microsoftdocs",
-      "type": "http",
-      "url": "https://learn.microsoft.com/api/mcp"
+    $mixedCatalog = [pscustomobject]@{
+        inputs = @(
+            [pscustomobject]@{
+                id = 'github-token'
+                type = 'promptString'
+                description = 'GitHub token'
+                password = $true
+            }
+        )
+        servers = @(
+            [pscustomobject]@{
+                id = 'microsoftdocs/mcp'
+                codexName = 'microsoftdocs'
+                targets = [pscustomobject]@{
+                    vscode = [pscustomobject]@{
+                        include = $true
+                        enabledByDefault = $true
+                    }
+                    codex = [pscustomobject]@{
+                        include = $true
+                    }
+                }
+                definition = [pscustomobject]@{
+                    type = 'http'
+                    url = 'https://learn.microsoft.com/api/mcp'
+                }
+            }
+            [pscustomobject]@{
+                id = 'microsoft/playwright-mcp'
+                codexName = 'playwright'
+                targets = [pscustomobject]@{
+                    vscode = [pscustomobject]@{
+                        include = $true
+                        enabledByDefault = $false
+                    }
+                    codex = [pscustomobject]@{
+                        include = $true
+                    }
+                }
+                definition = [pscustomobject]@{
+                    type = 'stdio'
+                    command = 'npx'
+                    args = @('@playwright/mcp@latest')
+                }
+            }
+            [pscustomobject]@{
+                id = 'vscode-only/example'
+                targets = [pscustomobject]@{
+                    vscode = [pscustomobject]@{
+                        include = $true
+                        enabledByDefault = $false
+                    }
+                }
+                definition = [pscustomobject]@{
+                    type = 'http'
+                    url = 'https://example.invalid/vscode-only'
+                }
+            }
+        )
     }
-  ]
-}
-'@ | Set-Content -LiteralPath $manifestPath
 
-    @'
-model = "gpt-5"
+    $catalogPath = Join-Path $githubRoot 'governance\mcp-runtime.catalog.json'
+    $manifestPath = Join-Path $codexRoot 'mcp\servers.manifest.json'
+    $targetConfigPath = Join-Path $codexRoot 'config.toml'
+    New-Item -ItemType Directory -Path (Split-Path -Path $catalogPath -Parent) -Force | Out-Null
+    New-Item -ItemType Directory -Path (Split-Path -Path $manifestPath -Parent) -Force | Out-Null
+    $mixedCatalog | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $catalogPath -Encoding UTF8 -NoNewline
+    Set-Content -LiteralPath (Join-Path $vscodeRoot 'settings.tamplate.jsonc') -Value '{ "editor.tabSize": 4 }' -Encoding UTF8 -NoNewline
+    Set-Content -LiteralPath $targetConfigPath -Value "# local codex config`n[features]`nexperimental_windows_sandbox = true" -Encoding UTF8 -NoNewline
 
-[tools]
-search = true
-'@ | Set-Content -LiteralPath $configPath
+    & $runtimeBinaryPath runtime render-vscode-mcp-template --repo-root $workspaceRoot --catalog-path $catalogPath | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True -Condition ($exitCode -eq 0) -Message 'runtime render-vscode-mcp-template should succeed for a mixed MCP catalog.'
 
-    & $scriptPath -ManifestPath $manifestPath -TargetConfigPath $configPath -CreateBackup | Out-Null
-    $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
-    $exitCode = if ($null -eq $lastExitCodeVariable) { 0 } else { [int] $lastExitCodeVariable.Value }
-    Assert-True -Condition ($exitCode -eq 0) -Message 'sync-codex-mcp-config should succeed for mixed stdio/http manifests.'
+    & $runtimeBinaryPath runtime render-mcp-runtime-artifacts --repo-root $workspaceRoot --catalog-path $catalogPath --vscode-output-path (Join-Path $vscodeRoot 'mcp.tamplate.jsonc') --codex-output-path $manifestPath | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True -Condition ($exitCode -eq 0) -Message 'runtime render-mcp-runtime-artifacts should succeed for a mixed MCP catalog.'
 
-    $content = Get-Content -LiteralPath $configPath -Raw
-    Assert-ContainsText -Content $content -ExpectedText '[mcp_servers.playwright]' -Message 'Rendered config must include the stdio MCP server block.'
-    Assert-ContainsText -Content $content -ExpectedText 'command = "npx"' -Message 'Rendered config must include the stdio command.'
-    Assert-ContainsText -Content $content -ExpectedText '[mcp_servers.microsoftdocs]' -Message 'Rendered config must include the http MCP server block.'
-    Assert-ContainsText -Content $content -ExpectedText 'url = "https://learn.microsoft.com/api/mcp"' -Message 'Rendered config must include the http URL.'
+    & $runtimeBinaryPath runtime sync-codex-mcp-config --repo-root $workspaceRoot --catalog-path $catalogPath --target-config-path $targetConfigPath --create-backup | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True -Condition ($exitCode -eq 0) -Message 'runtime sync-codex-mcp-config should succeed for a mixed MCP catalog.'
 
-    $backupFiles = @(Get-ChildItem -LiteralPath $tempRoot -Filter 'config.toml.bak.*' -File)
-    Assert-True -Condition ($backupFiles.Count -eq 1) -Message 'sync-codex-mcp-config should create one backup when -CreateBackup is specified.'
+    & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $workspaceRoot | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True -Condition ($exitCode -eq 0) -Message 'runtime apply-vscode-templates should succeed for rendered MCP templates.'
 
-    @'
-{
-  "version": 1,
-  "inputs": [],
-  "servers": [
-    {
-      "id": "microsoftdocs/mcp",
-      "codexName": "microsoftdocs",
-      "targets": {
-        "vscode": { "include": true, "enabledByDefault": true },
-        "codex": { "include": true }
-      },
-      "definition": {
-        "type": "http",
-        "url": "https://learn.microsoft.com/api/mcp",
-        "gallery": "https://example.invalid/gallery",
-        "version": "1.0.0"
-      }
-    },
-    {
-      "id": "microsoft/playwright-mcp",
-      "codexName": "playwright",
-      "targets": {
-        "codex": { "include": true }
-      },
-      "definition": {
-        "type": "stdio",
-        "command": "npx",
-        "args": ["@playwright/mcp@latest"]
-      }
-    },
-    {
-      "id": "vscode-only/example",
-      "targets": {
-        "vscode": { "include": true, "enabledByDefault": false }
-      },
-      "definition": {
-        "type": "http",
-        "url": "https://example.invalid/vscode-only"
-      }
-    }
-  ]
-}
-'@ | Set-Content -LiteralPath $catalogPath
+    $renderedSettings = Join-Path $vscodeRoot 'settings.json'
+    $renderedMcp = Join-Path $vscodeRoot 'mcp.json'
+    Assert-True -Condition (Test-Path -LiteralPath $renderedSettings -PathType Leaf) -Message 'runtime apply-vscode-templates did not write settings.json.'
+    Assert-True -Condition (Test-Path -LiteralPath $renderedMcp -PathType Leaf) -Message 'runtime apply-vscode-templates did not write mcp.json.'
+    Assert-True -Condition (Test-Path -LiteralPath $manifestPath -PathType Leaf) -Message 'runtime render-mcp-runtime-artifacts did not write the Codex manifest.'
+    Assert-True -Condition (@(Get-ChildItem -LiteralPath $codexRoot -Filter 'config.toml.bak.*' -File).Count -eq 1) -Message 'runtime sync-codex-mcp-config should create one backup when --create-backup is used.'
 
-    @'
-model = "gpt-5"
-
-[tools]
-search = true
-'@ | Set-Content -LiteralPath $configPath
-
-    & $scriptPath -RepoRoot $resolvedRepoRoot -CatalogPath $catalogPath -TargetConfigPath $configPath | Out-Null
-    $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
-    $exitCode = if ($null -eq $lastExitCodeVariable) { 0 } else { [int] $lastExitCodeVariable.Value }
-    Assert-True -Condition ($exitCode -eq 0) -Message 'sync-codex-mcp-config should succeed for canonical catalog input.'
-
-    $content = Get-Content -LiteralPath $configPath -Raw
-    Assert-ContainsText -Content $content -ExpectedText '[mcp_servers.microsoftdocs]' -Message 'Catalog-driven sync must include the codex-enabled http server block.'
-    Assert-ContainsText -Content $content -ExpectedText '[mcp_servers.playwright]' -Message 'Catalog-driven sync must include the codex-enabled stdio server block.'
-    Assert-True -Condition (-not $content.Contains('vscode-only')) -Message 'Catalog-driven sync must exclude VS Code-only servers from Codex config.'
+    $content = Get-Content -LiteralPath $renderedMcp -Raw
+    $manifestContent = Get-Content -LiteralPath $manifestPath -Raw
+    $configContent = Get-Content -LiteralPath $targetConfigPath -Raw
+    Assert-ContainsText -Content $content -ExpectedText 'microsoftdocs' -Message 'Rendered MCP output must include the HTTP server.'
+    Assert-ContainsText -Content $content -ExpectedText 'playwright' -Message 'Rendered MCP output must include the stdio server.'
+    Assert-ContainsText -Content $content -ExpectedText 'disabled' -Message 'Rendered MCP output must preserve disabled-by-default server state.'
+    Assert-ContainsText -Content $manifestContent -ExpectedText 'microsoftdocs' -Message 'Rendered Codex manifest must include the HTTP server.'
+    Assert-ContainsText -Content $manifestContent -ExpectedText 'playwright' -Message 'Rendered Codex manifest must include the stdio server.'
+    Assert-ContainsText -Content $configContent -ExpectedText '[mcp_servers.microsoftdocs]' -Message 'Codex config must include the HTTP server block.'
+    Assert-ContainsText -Content $configContent -ExpectedText '[mcp_servers.playwright]' -Message 'Codex config must include the stdio server block.'
 
     Write-Host '[OK] MCP config sync tests passed.'
     exit 0

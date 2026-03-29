@@ -589,13 +589,17 @@ if ($IncludeSessions) {
 }
 
 if ($ExportPlanningSummary) {
-    $exportScript = Join-Path $PSScriptRoot 'export-planning-summary.ps1'
-    if (Test-Path -LiteralPath $exportScript -PathType Leaf) {
-        $exportRoot = if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) { $RepoRoot } else { Split-Path (Split-Path $PSScriptRoot -Parent) -Parent }
+    $exportRoot = if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) { $RepoRoot } else { Split-Path (Split-Path $PSScriptRoot -Parent) -Parent }
+    try {
+        $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $exportRoot -RuntimePreference github
         Write-StyledOutput 'Exporting planning handoff summary before cleanup...'
-        & $exportScript -RepoRoot $exportRoot
-    } else {
-        Write-Warning 'export-planning-summary.ps1 not found — skipping planning export.'
+        & $runtimeBinaryPath runtime export-planning-summary --repo-root $exportRoot | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning 'ntk runtime export-planning-summary failed — skipping planning export.'
+        }
+    }
+    catch {
+        Write-Warning ("Unable to export planning summary through ntk runtime — skipping planning export. {0}" -f $_.Exception.Message)
     }
 }
 

@@ -27,7 +27,7 @@
     ".github/schemas/agent.stage-implementation-result.schema.json",
     ".github/schemas/agent.stage-review-result.schema.json",
     ".github/schemas/agent.stage-closeout-result.schema.json",
-    "scripts/validation/validate-agent-orchestration.ps1",
+    "crates/commands/validation/src/agent_orchestration/orchestration_integrity.rs",
     "scripts/runtime/run-agent-pipeline.ps1",
     "scripts/orchestration/engine/invoke-codex-dispatch.ps1",
     "scripts/orchestration/stages/intake-stage.ps1",

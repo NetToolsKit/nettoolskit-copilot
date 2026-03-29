@@ -10,6 +10,8 @@
 
 The rendered repository surface lives under `.vscode/profiles/`, and `scripts/runtime/setup-vscode-profiles.ps1` is the operator entrypoint that applies a selected profile set and can drive MCP enablement.
 
+Profiles are where the repository chooses which MCP servers should stay enabled for the current VS Code setup. The canonical MCP template still lives in `.vscode/mcp.tamplate.jsonc`, but each profile can override server enablement through its `mcp.servers.<name>.enabled` map.
+
 ---
 
 ## Features
@@ -18,6 +20,7 @@ The rendered repository surface lives under `.vscode/profiles/`, and `scripts/ru
 - ✅ Profile-aware MCP enable and disable mapping
 - ✅ Rendered repository surface under `.vscode/profiles/`
 - ✅ Operator entrypoint for listing, previewing, and applying profiles
+- ✅ Deterministic MCP selection without hand-editing the base template
 
 ---
 
@@ -27,6 +30,8 @@ The rendered repository surface lives under `.vscode/profiles/`, and `scripts/ru
 - [Features](#features)
 - [Contents](#contents)
 - [Quick Start](#quick-start)
+- [MCP Behavior](#mcp-behavior)
+- [Profile Schema](#profile-schema)
 - [References](#references)
 - [License](#license)
 
@@ -48,8 +53,41 @@ pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -DryRun -ProfileName "Bac
 
 Apply one profile and back up the MCP selection:
 
-```powershell
-pwsh -File .\scripts\runtime\setup-vscode-profiles.ps1 -ProfileName Frontend -CreateMcpBackup
+## MCP Behavior
+
+The setup flow delegates MCP sync to `scripts/runtime/sync-vscode-global-mcp.ps1`.
+
+That means:
+
+- `%APPDATA%\Code\User\mcp.json` is regenerated from the tracked MCP template
+- `.vscode/mcp-vscode-global.json` is refreshed as the ignored local helper mirror
+- the selected profile can enable or disable MCP servers without changing the base template
+- stable `${input:...}` auth ids let VS Code reuse securely stored credentials after the first prompt
+
+If multiple profiles are selected and no explicit `-McpProfileName` is supplied, MCP sync is skipped because the choice is ambiguous.
+
+---
+
+## Profile Schema
+
+Minimal shape:
+
+```json
+{
+  "name": "Frontend",
+  "description": "Vue and browser tooling profile.",
+  "extends": "Base",
+  "extensions": [
+    "vue.volar"
+  ],
+  "mcp": {
+    "servers": {
+      "io.github.github/github-mcp-server": { "enabled": true },
+      "microsoft/playwright-mcp": { "enabled": true },
+      "com.microsoft/azure": { "enabled": false }
+    }
+  }
+}
 ```
 
 ---

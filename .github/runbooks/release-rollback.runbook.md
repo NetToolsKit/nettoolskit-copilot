@@ -26,13 +26,13 @@ git revert <commit-hash>
 3. Run release profile validations:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
+ntk validation all --repo-root . --validation-profile release
 ```
 
 4. Generate audit evidence:
 
 ```powershell
-pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile release
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release --output-path .temp/audit-report.json --log-path .temp/logs/audit-report.log
 ```
 
 5. Update `CHANGELOG.md` with rollback entry.
@@ -48,7 +48,7 @@ pwsh -File .\scripts\runtime\bootstrap.ps1 -Mirror
 2. Re-run healthcheck:
 
 ```powershell
-pwsh -File .\scripts\runtime\healthcheck.ps1
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release
 ```
 
 3. Attach audit artifacts to release notes.

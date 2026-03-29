@@ -9,8 +9,10 @@ pub mod maintenance;
 pub mod sync;
 
 pub use continuity::local_context::{
-    query_local_context_index, update_local_context_index, QueryLocalContextIndexRequest,
-    QueryLocalContextIndexResult, UpdateLocalContextIndexRequest, UpdateLocalContextIndexResult,
+    query_local_context_index, query_local_memory, update_local_context_index, update_local_memory,
+    LocalContextQueryBackend, QueryLocalContextIndexRequest, QueryLocalContextIndexResult,
+    QueryLocalMemoryRequest, QueryLocalMemoryResult, UpdateLocalContextIndexRequest,
+    UpdateLocalContextIndexResult, UpdateLocalMemoryRequest, UpdateLocalMemoryResult,
 };
 pub use continuity::planning_summary::{
     export_planning_summary, ExportPlanningSummaryRequest, ExportPlanningSummaryResult,
@@ -23,6 +25,10 @@ pub use diagnostics::doctor::{
     invoke_runtime_doctor, RuntimeDoctorMappingReport, RuntimeDoctorRequest, RuntimeDoctorResult,
     RuntimeDoctorStatus,
 };
+pub use diagnostics::enterprise_trends::{
+    invoke_export_enterprise_trends, RuntimeExportEnterpriseTrendsRequest,
+    RuntimeExportEnterpriseTrendsResult,
+};
 pub use diagnostics::healthcheck::{
     invoke_runtime_healthcheck, RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest,
     RuntimeHealthcheckResult, RuntimeHealthcheckStatus,
@@ -34,12 +40,14 @@ pub use diagnostics::self_heal::{
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeCleanBuildArtifactsCommandError,
-    RuntimeDoctorCommandError, RuntimeFixRegionSpacingCommandError,
-    RuntimeFixVersionRangesCommandError, RuntimeHealthcheckCommandError,
-    RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
+    RuntimeDoctorCommandError, RuntimeExportEnterpriseTrendsCommandError,
+    RuntimeFixRegionSpacingCommandError, RuntimeFixVersionRangesCommandError,
+    RuntimeHealthcheckCommandError, RuntimePreCommitEofHygieneCommandError,
+    RuntimePreToolUseCommandError, RuntimeRenderMcpRuntimeArtifactsCommandError,
+    RuntimeRenderProviderSurfacesCommandError, RuntimeRenderVscodeMcpTemplateCommandError,
     RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
     RuntimeSetupGlobalGitAliasesCommandError, RuntimeSurfaceError,
-    RuntimeTrimTrailingBlankLinesCommandError,
+    RuntimeSyncCodexMcpConfigCommandError, RuntimeTrimTrailingBlankLinesCommandError,
 };
 pub use hooks::pre_commit_eof_hygiene::{
     invoke_pre_commit_eof_hygiene, RuntimePreCommitEofHygieneRequest,
@@ -78,6 +86,18 @@ pub use sync::apply_vscode_templates::{
 };
 pub use sync::bootstrap::{
     invoke_runtime_bootstrap, RuntimeBootstrapRequest, RuntimeBootstrapResult,
+};
+pub use sync::mcp_config::{
+    invoke_sync_codex_mcp_config, RuntimeSyncCodexMcpConfigRequest, RuntimeSyncCodexMcpConfigResult,
+};
+pub use sync::mcp_runtime_artifacts::{
+    invoke_render_mcp_runtime_artifacts, invoke_render_vscode_mcp_template,
+    RuntimeRenderMcpRuntimeArtifactsRequest, RuntimeRenderMcpRuntimeArtifactsResult,
+    RuntimeRenderVscodeMcpTemplateRequest, RuntimeRenderVscodeMcpTemplateResult,
+};
+pub use sync::provider_surfaces::{
+    invoke_render_provider_surfaces, RuntimeRenderProviderSurfacesRequest,
+    RuntimeRenderProviderSurfacesResult,
 };
 
 /// Require a registered runtime surface contract.

@@ -40,7 +40,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
 
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
@@ -137,8 +137,8 @@ insert_final_newline = true
         'scripts\common\common-bootstrap.ps1',
         'scripts\common\console-style.ps1',
         'scripts\common\repository-paths.ps1',
+        'scripts\common\runtime-paths.ps1',
         'scripts\common\git-hook-eof-settings.ps1',
-        'scripts\maintenance\trim-trailing-blank-lines.ps1',
         'scripts\git-hooks\setup-git-hooks.ps1',
         'scripts\git-hooks\invoke-pre-commit-eof-hygiene.ps1'
     )) {
@@ -174,15 +174,18 @@ function Invoke-PowerShellScript {
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $setupScriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/setup-git-hooks.ps1'
 $runnerScriptPath = Join-Path $resolvedRepoRoot 'scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1'
+$runtimeBinaryOverride = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     $previousGlobalSettingsOverride = $env:CODEX_GIT_HOOK_EOF_SETTINGS_PATH
     $previousGlobalHooksPathOverride = $env:CODEX_GIT_HOOKS_PATH
+    $previousRuntimeBinaryOverride = $env:CODEX_NTK_RUNTIME_BIN_PATH
     $previousGitConfigGlobal = $env:GIT_CONFIG_GLOBAL
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'global') -Force | Out-Null
     $env:CODEX_GIT_HOOK_EOF_SETTINGS_PATH = Join-Path $tempRoot 'global\git-hook-eof-settings.json'
     $env:CODEX_GIT_HOOKS_PATH = Join-Path $tempRoot 'global-hooks'
+    $env:CODEX_NTK_RUNTIME_BIN_PATH = $runtimeBinaryOverride
     $env:GIT_CONFIG_GLOBAL = Join-Path $tempRoot 'global\.gitconfig'
     try {
         $manualRepoRoot = Join-Path $tempRoot 'manual-repo'
@@ -344,6 +347,13 @@ try {
         }
         else {
             $env:GIT_CONFIG_GLOBAL = $previousGitConfigGlobal
+        }
+
+        if ([string]::IsNullOrWhiteSpace($previousRuntimeBinaryOverride)) {
+            Remove-Item Env:CODEX_NTK_RUNTIME_BIN_PATH -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:CODEX_NTK_RUNTIME_BIN_PATH = $previousRuntimeBinaryOverride
         }
 
         if (Test-Path -LiteralPath $tempRoot) {

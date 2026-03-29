@@ -15,6 +15,14 @@ fn write_file(path: &std::path::Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn runtime_binary_name() -> &'static str {
+    if cfg!(windows) {
+        "ntk.exe"
+    } else {
+        "ntk"
+    }
+}
+
 fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
     write_file(
         &repo_root.join(".github/governance/runtime-install-profiles.json"),
@@ -25,6 +33,8 @@ fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
 fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
+    fs::create_dir_all(repo_root.join(".github/bin"))
+        .expect("github runtime bin directory should be created");
     fs::create_dir_all(repo_root.join("scripts/runtime"))
         .expect("runtime directory should be created");
     fs::create_dir_all(repo_root.join("scripts/common"))
@@ -33,6 +43,10 @@ fn initialize_repo_layout(repo_root: &std::path::Path) {
         .expect("security directory should be created");
     fs::create_dir_all(repo_root.join("scripts/maintenance"))
         .expect("maintenance directory should be created");
+    write_file(
+        &repo_root.join(".github/bin").join(runtime_binary_name()),
+        "binary",
+    );
     write_runtime_install_profile_catalog(repo_root);
     initialize_minimal_provider_surface_projection(repo_root);
 }
@@ -42,12 +56,6 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
-    write_file(
-        &repo
-            .path()
-            .join("scripts/runtime/query-local-context-index.ps1"),
-        "Write-Output 'query'",
-    );
 
     let target_github = repo.path().join(".runtime/github");
     let target_copilot = repo.path().join(".runtime/copilot-skills");
@@ -88,7 +96,8 @@ fn test_invoke_runtime_bootstrap_syncs_github_runtime_and_removes_legacy_duplica
     assert!(!repo.path().join(".claude/settings.json").exists());
     assert!(target_github.join("AGENTS.md").is_file());
     assert!(target_github
-        .join("scripts/runtime/query-local-context-index.ps1")
+        .join("bin")
+        .join(runtime_binary_name())
         .is_file());
     assert!(!target_github.join("skills/super-agent").exists());
     assert!(!target_copilot.join("using-super-agent").exists());
@@ -195,12 +204,6 @@ fn test_invoke_runtime_bootstrap_mirror_mode_removes_extra_files() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(&repo.path().join(".github/AGENTS.md"), "# Agents");
-    write_file(
-        &repo
-            .path()
-            .join("scripts/runtime/query-local-context-index.ps1"),
-        "Write-Output 'query'",
-    );
 
     let target_github = repo.path().join(".runtime/github");
     write_file(&target_github.join("extra-file.md"), "extra");

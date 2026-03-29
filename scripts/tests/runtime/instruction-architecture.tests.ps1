@@ -1,10 +1,11 @@
 <#
 .SYNOPSIS
-    Runtime tests for instruction architecture validation without external frameworks.
+    Runtime tests for the native `ntk validation instruction-architecture`
+    surface without external frameworks.
 
 .DESCRIPTION
     Covers success, failure, and warning-only ownership-marker behavior for
-    `validate-instruction-architecture.ps1`.
+    instruction architecture validation.
 
 .PARAMETER RepoRoot
     Optional repository root. If omitted, auto-detects a root containing .github and .codex.
@@ -35,8 +36,8 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
-. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths')
-# Fails the current runtime test when the exit code differs from the expected value.
+. $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
+
 function Assert-ExitCode {
     param(
         [int] $ExitCode,
@@ -49,7 +50,6 @@ function Assert-ExitCode {
     }
 }
 
-# Writes deterministic UTF-8 test content to disk.
 function Write-TextFile {
     param(
         [string] $Path,
@@ -64,13 +64,210 @@ function Write-TextFile {
     Set-Content -LiteralPath $Path -Value $Content
 }
 
+function Initialize-ValidInstructionArchitectureRepo {
+    param(
+        [string] $Root
+    )
+
+    Write-TextFile -Path (Join-Path $Root '.github/governance/instruction-ownership.manifest.json') -Content @'
+{
+  "version": 1,
+  "intentionalGlobalExceptions": [
+    {
+      "concern": "Global context must remain visible.",
+      "ownedBy": "global-core"
+    }
+  ],
+  "architectureConstraints": {
+    "globalCoreMaxChars": {
+      "AGENTS.md": 14000,
+      "copilot-instructions.md": 14000
+    },
+    "routing": {
+      "maxAlwaysFiles": 10,
+      "maxSelectedFiles": 5,
+      "requiredAlwaysPaths": [
+        "AGENTS.md",
+        "copilot-instructions.md",
+        "instructions/super-agent.instructions.md",
+        "instructions/repository-operating-model.instructions.md",
+        "instructions/artifact-layout.instructions.md",
+        "instructions/subagent-planning-workflow.instructions.md",
+        "instructions/workflow-optimization.instructions.md",
+        "instructions/authoritative-sources.instructions.md",
+        "instructions/powershell-execution.instructions.md",
+        "instructions/feedback-changelog.instructions.md"
+      ]
+    }
+  },
+  "layers": [
+    {
+      "id": "global-core",
+      "pathPatterns": [
+        ".github/AGENTS.md",
+        ".github/copilot-instructions.md"
+      ]
+    },
+    {
+      "id": "repository-operating-model",
+      "pathPatterns": [
+        ".github/instructions/repository-operating-model.instructions.md"
+      ]
+    },
+    {
+      "id": "cross-cutting-policies",
+      "pathPatterns": [
+        ".github/instructions/super-agent.instructions.md",
+        ".github/instructions/authoritative-sources.instructions.md",
+        ".github/governance/*",
+        ".github/policies/*"
+      ]
+    },
+    {
+      "id": "domain-instructions",
+      "pathPatterns": [
+        ".github/instructions/*.instructions.md"
+      ],
+      "excludePatterns": [
+        ".github/instructions/authoritative-sources.instructions.md",
+        ".github/instructions/super-agent.instructions.md",
+        ".github/instructions/repository-operating-model.instructions.md"
+      ]
+    },
+    {
+      "id": "prompts",
+      "pathPatterns": [
+        ".github/prompts/*"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here",
+        "always applied"
+      ]
+    },
+    {
+      "id": "templates",
+      "pathPatterns": [
+        ".github/templates/*",
+        ".vscode/*.tamplate.jsonc"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here",
+        "always applied"
+      ]
+    },
+    {
+      "id": "codex-skills",
+      "pathPatterns": [
+        ".codex/skills/*/SKILL.md"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here"
+      ]
+    },
+    {
+      "id": "orchestration",
+      "pathPatterns": [
+        "scripts/orchestration/*"
+      ]
+    },
+    {
+      "id": "runtime-projection",
+      "pathPatterns": [
+        "scripts/runtime/*"
+      ]
+    }
+  ]
+}
+'@
+    Write-TextFile -Path (Join-Path $Root '.github/AGENTS.md') -Content @'
+# AGENTS
+
+Use `instructions/repository-operating-model.instructions.md`.
+Use `instructions/authoritative-sources.instructions.md`.
+'@
+    Write-TextFile -Path (Join-Path $Root '.github/copilot-instructions.md') -Content @'
+# Global Instructions
+
+Use `instructions/repository-operating-model.instructions.md`.
+Use `instructions/authoritative-sources.instructions.md`.
+'@
+    Write-TextFile -Path (Join-Path $Root '.github/instruction-routing.catalog.yml') -Content @'
+always:
+  - path: AGENTS.md
+  - path: copilot-instructions.md
+  - path: instructions/super-agent.instructions.md
+  - path: instructions/repository-operating-model.instructions.md
+  - path: instructions/artifact-layout.instructions.md
+  - path: instructions/subagent-planning-workflow.instructions.md
+  - path: instructions/workflow-optimization.instructions.md
+  - path: instructions/authoritative-sources.instructions.md
+  - path: instructions/powershell-execution.instructions.md
+  - path: instructions/feedback-changelog.instructions.md
+'@
+    Write-TextFile -Path (Join-Path $Root '.github/prompts/route-instructions.prompt.md') -Content @'
+---
+description: Route a request
+mode: ask
+tools: ['readFile']
+---
+
+# Route Instructions
+
+Hard cap: at most 5 selected instruction files (excluding mandatory).
+'@
+    Write-TextFile -Path (Join-Path $Root '.github/prompts/example.prompt.md') -Content @'
+---
+description: Example prompt
+mode: ask
+tools: ['readFile']
+---
+
+# Example Prompt
+
+Use the routing catalog.
+'@
+    Write-TextFile -Path (Join-Path $Root '.github/templates/example.md') -Content "# Example Template`n`nUse this as a reusable artifact."
+    Write-TextFile -Path (Join-Path $Root '.github/policies/example.policy.md') -Content '# Example Policy'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/repository-operating-model.instructions.md') -Content '# Repository Operating Model'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/authoritative-sources.instructions.md') -Content '# Authoritative Sources'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/super-agent.instructions.md') -Content '# Super Agent'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/artifact-layout.instructions.md') -Content '# Artifact Layout'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/workflow-optimization.instructions.md') -Content '# Workflow Optimization'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/powershell-execution.instructions.md') -Content '# PowerShell Execution'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/feedback-changelog.instructions.md') -Content '# Feedback Changelog'
+    Write-TextFile -Path (Join-Path $Root '.codex/skills/sample/agents/openai.yaml') -Content @'
+display_name: Sample Skill
+short_description: Example
+default_prompt: $sample
+'@
+    Write-TextFile -Path (Join-Path $Root '.codex/skills/sample/SKILL.md') -Content @'
+---
+name: sample
+description: sample skill
+---
+
+# Sample Skill
+
+Load `repository-operating-model.instructions.md`.
+'@
+    Write-TextFile -Path (Join-Path $Root 'scripts/orchestration/example.ps1') -Content "Write-Host 'orchestration'"
+    Write-TextFile -Path (Join-Path $Root 'scripts/runtime/bootstrap.ps1') -Content "Write-Host 'runtime'"
+}
+
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
-$scriptPath = Join-Path $resolvedRepoRoot 'scripts/validation/validate-instruction-architecture.ps1'
+$runtimeBinaryPath = Resolve-RepositoryRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot
 
 try {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
     try {
-        & $scriptPath -RepoRoot $resolvedRepoRoot -WarningOnly:$false | Out-Null
+        $fixtureRepoRoot = Join-Path $tempRoot 'instruction-architecture-fixture'
+        Initialize-ValidInstructionArchitectureRepo -Root $fixtureRepoRoot
+
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Repository instruction architecture should pass.'
 
@@ -87,7 +284,7 @@ try {
   ]
 }
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -ManifestPath $invalidManifestPath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--manifest-path' $invalidManifestPath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Manifest missing required layers should fail.'
         Remove-Item -LiteralPath $invalidManifestPath -Force
@@ -98,7 +295,7 @@ try {
 
 - This file intentionally omits repository-operating-model reference.
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -AgentsPath $invalidAgentsPath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--agents-path' $invalidAgentsPath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing global core architecture reference should fail.'
         Remove-Item -LiteralPath $invalidAgentsPath -Force
@@ -115,7 +312,7 @@ description: temporary skill without canonical repo-operating reference
 
 Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -SkillRoot $skillRoot -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--skill-root' $skillRoot '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing skill canonical repository-operating reference should fail.'
 
@@ -126,7 +323,7 @@ Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
 
 This prompt claims to be the single source of truth for the whole repository.
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -PromptRoot $promptRoot -WarningOnly:$false -DetailedOutput | Out-Null
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--prompt-root' $promptRoot '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Prompt ownership markers should warn but not fail.'
 
@@ -142,7 +339,7 @@ tools: ['readFile']
 
 Use the routing catalog and return JSON.
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -RoutePromptPath $routePromptPath -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--route-prompt-path' $routePromptPath '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Route prompt without deterministic hard cap should fail.'
         Remove-Item -LiteralPath $routePromptPath -Force
@@ -154,7 +351,7 @@ Use the routing catalog and return JSON.
   "//": "temporary template that wrongly claims to be the single source of truth"
 }
 '@
-        & $scriptPath -RepoRoot $resolvedRepoRoot -TemplateRoot $templateRoot -WarningOnly:$false | Out-Null
+        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--template-root' $templateRoot '--warning-only' 'false' | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Template ownership markers should warn but not fail.'
     }
@@ -163,7 +360,11 @@ Use the routing catalog and return JSON.
             Remove-Item -LiteralPath $tempRoot -Recurse -Force
         }
     }
+
+    Write-Host '[OK] instruction architecture tests passed.'
+    exit 0
 }
-finally {
-    Set-Location -Path $resolvedRepoRoot
+catch {
+    Write-Host ("[FAIL] instruction architecture tests failed: {0}" -f $_.Exception.Message)
+    exit 1
 }

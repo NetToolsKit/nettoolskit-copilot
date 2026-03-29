@@ -25,7 +25,7 @@ priority: high
 
 # Required Quality and Validation Coverage
 - Every validation-oriented workflow must include:
-- Build/Validation gate: run deterministic repository validation (`scripts/validation/validate-all.ps1` with selected profile).
+- Build/Validation gate: run deterministic repository validation (`ntk validation all` with the selected profile).
 - Test gate: run unit/integration/E2E checks relevant to the stack.
 - Security gate: run baseline security checks and dependency vulnerability checks.
 - Code-quality gate: run static analysis and style/lint checks.
@@ -141,11 +141,11 @@ jobs:
       - name: Validate all (warning-only)
         shell: pwsh
         run: |
-          pwsh -NoLogo -NoProfile -File ./scripts/validation/validate-all.ps1 `
-            -RepoRoot $PWD `
-            -ValidationProfile release `
-            -WarningOnly:$true `
-            -OutputPath ./.temp/audit/validate-all.latest.json
+          ntk validation all `
+            --repo-root . `
+            --validation-profile release `
+            --warning-only true `
+            --output-path ./.temp/audit/validate-all.latest.json
 
       - name: Security gate (warning-only)
         shell: pwsh

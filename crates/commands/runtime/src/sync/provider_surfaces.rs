@@ -1,11 +1,105 @@
-//! Provider surface rendering for bootstrap-owned runtime projections.
+//! Provider surface rendering for native runtime projections.
 
 use anyhow::{anyhow, Context, Result};
+use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_repository_root};
 use serde_json::Value;
+use std::env;
 use std::ffi::OsStr;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
+
+use crate::error::RuntimeRenderProviderSurfacesCommandError;
+
+use super::mcp_runtime_artifacts::{
+    invoke_render_mcp_runtime_artifacts, RuntimeRenderMcpRuntimeArtifactsRequest,
+};
+
+/// Request payload for `render-provider-surfaces`.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct RuntimeRenderProviderSurfacesRequest {
+    /// Optional explicit repository root.
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit provider-surface projection catalog path.
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit renderer ids to invoke directly.
+    pub renderer_ids: Vec<String>,
+    /// Optional explicit consumer name. Defaults to `direct`.
+    pub consumer_name: Option<String>,
+    /// Include Codex-gated bootstrap renderers.
+    pub enable_codex_runtime: bool,
+    /// Include Claude-gated bootstrap renderers.
+    pub enable_claude_runtime: bool,
+    /// Print the selected renderer ids without invoking them.
+    pub summary_only: bool,
+}
+
+/// Result payload for `render-provider-surfaces`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeRenderProviderSurfacesResult {
+    /// Resolved repository root.
+    pub repo_root: PathBuf,
+    /// Resolved provider-surface projection catalog path.
+    pub catalog_path: PathBuf,
+    /// Effective consumer selection.
+    pub consumer_name: String,
+    /// Renderer ids selected after consumer filtering.
+    pub selected_renderer_ids: Vec<String>,
+    /// Number of renderer ids actually invoked.
+    pub rendered_count: usize,
+    /// Whether this invocation ran in summary-only mode.
+    pub summary_only: bool,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ProviderSurfaceRenderOptions<'a> {
+    requested_renderer_ids: &'a [String],
+    consumer_name: &'a str,
+    enable_codex_runtime: bool,
+    enable_claude_runtime: bool,
+    summary_only: bool,
+}
+
+/// Render tracked provider surfaces selected by the canonical projection
+/// catalog.
+///
+/// # Errors
+///
+/// Returns [`RuntimeRenderProviderSurfacesCommandError`] when workspace
+/// resolution, catalog loading, or renderer dispatch fails.
+pub fn invoke_render_provider_surfaces(
+    request: &RuntimeRenderProviderSurfacesRequest,
+) -> Result<RuntimeRenderProviderSurfacesResult, RuntimeRenderProviderSurfacesCommandError> {
+    let current_dir = env::current_dir().map_err(|source| {
+        RuntimeRenderProviderSurfacesCommandError::ResolveWorkspaceRoot {
+            source: source.into(),
+        }
+    })?;
+    let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
+        .map_err(
+            |source| RuntimeRenderProviderSurfacesCommandError::ResolveWorkspaceRoot { source },
+        )?;
+
+    let consumer_name = normalize_consumer_name(request.consumer_name.as_deref());
+    let catalog_path =
+        resolve_provider_surface_catalog_path(&repo_root, request.catalog_path.as_deref());
+    let catalog = read_provider_surface_catalog(&catalog_path)
+        .map_err(|source| RuntimeRenderProviderSurfacesCommandError::ReadCatalog { source })?;
+
+    render_provider_surfaces_from_catalog(
+        &repo_root,
+        catalog_path,
+        &catalog,
+        ProviderSurfaceRenderOptions {
+            requested_renderer_ids: &request.renderer_ids,
+            consumer_name: &consumer_name,
+            enable_codex_runtime: request.enable_codex_runtime,
+            enable_claude_runtime: request.enable_claude_runtime,
+            summary_only: request.summary_only,
+        },
+    )
+    .map_err(|source| RuntimeRenderProviderSurfacesCommandError::RenderSurfaces { source })
+}
 
 /// Render repository-owned provider surfaces selected for the bootstrap
 /// consumer.
@@ -20,40 +114,76 @@ pub(crate) fn render_provider_surfaces_for_bootstrap(
     enable_codex_runtime: bool,
     enable_claude_runtime: bool,
 ) -> Result<()> {
-    let renderer_ids =
-        select_bootstrap_renderer_ids(repo_root, enable_codex_runtime, enable_claude_runtime)?;
-
-    for renderer_id in renderer_ids {
-        match renderer_id.as_str() {
-            "github-instruction-surfaces" => render_github_instruction_surfaces(repo_root)?,
-            "vscode-profile-surfaces" => render_vscode_profile_surfaces(repo_root)?,
-            "vscode-workspace-surfaces" => render_vscode_workspace_surfaces(repo_root)?,
-            "codex-compatibility-surfaces" => render_codex_compatibility_surfaces(repo_root)?,
-            "codex-skill-surfaces" => render_provider_skill_surfaces(repo_root, &["codex"])?,
-            "codex-orchestration-surfaces" => render_codex_orchestration_surfaces(repo_root)?,
-            "claude-runtime-surfaces" => render_claude_runtime_surfaces(repo_root)?,
-            "claude-skill-surfaces" => render_provider_skill_surfaces(repo_root, &["claude"])?,
-            unsupported => {
-                return Err(anyhow!(
-                    "unsupported provider surface renderer for Rust bootstrap path: {unsupported}"
-                ));
-            }
-        }
-    }
-
+    let catalog_path = resolve_provider_surface_catalog_path(repo_root, None);
+    let catalog = read_provider_surface_catalog(&catalog_path)?;
+    render_provider_surfaces_from_catalog(
+        repo_root,
+        catalog_path,
+        &catalog,
+        ProviderSurfaceRenderOptions {
+            requested_renderer_ids: &[],
+            consumer_name: "bootstrap",
+            enable_codex_runtime,
+            enable_claude_runtime,
+            summary_only: false,
+        },
+    )?;
     Ok(())
 }
 
-fn select_bootstrap_renderer_ids(
+fn render_provider_surfaces_from_catalog(
     repo_root: &Path,
-    enable_codex_runtime: bool,
-    enable_claude_runtime: bool,
-) -> Result<Vec<String>> {
-    let catalog_path = repo_root
-        .join(".github")
-        .join("governance")
-        .join("provider-surface-projection.catalog.json");
-    let catalog_document = fs::read_to_string(&catalog_path)
+    catalog_path: PathBuf,
+    catalog: &Value,
+    options: ProviderSurfaceRenderOptions<'_>,
+) -> Result<RuntimeRenderProviderSurfacesResult> {
+    let renderer_ids = select_renderer_ids(
+        catalog,
+        options.requested_renderer_ids,
+        options.consumer_name,
+        options.enable_codex_runtime,
+        options.enable_claude_runtime,
+    )?;
+
+    if !options.summary_only {
+        render_selected_renderer_ids(repo_root, &renderer_ids)?;
+    }
+
+    Ok(RuntimeRenderProviderSurfacesResult {
+        repo_root: repo_root.to_path_buf(),
+        catalog_path,
+        consumer_name: options.consumer_name.to_string(),
+        selected_renderer_ids: renderer_ids.clone(),
+        rendered_count: if options.summary_only {
+            0
+        } else {
+            renderer_ids.len()
+        },
+        summary_only: options.summary_only,
+    })
+}
+
+fn normalize_consumer_name(requested_consumer_name: Option<&str>) -> String {
+    requested_consumer_name
+        .map(str::trim)
+        .filter(|consumer_name| !consumer_name.is_empty())
+        .unwrap_or("direct")
+        .to_string()
+}
+
+fn resolve_provider_surface_catalog_path(
+    repo_root: &Path,
+    requested_catalog_path: Option<&Path>,
+) -> PathBuf {
+    match requested_catalog_path {
+        Some(path) if path.is_absolute() => path.to_path_buf(),
+        Some(path) => resolve_full_path(repo_root, path),
+        None => repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
+    }
+}
+
+fn read_provider_surface_catalog(catalog_path: &Path) -> Result<Value> {
+    let catalog_document = fs::read_to_string(catalog_path)
         .with_context(|| format!("failed to read '{}'", catalog_path.display()))?;
     let catalog: Value = serde_json::from_str(&catalog_document).with_context(|| {
         format!(
@@ -61,23 +191,50 @@ fn select_bootstrap_renderer_ids(
             catalog_path.display()
         )
     })?;
+    if catalog
+        .get("renderers")
+        .and_then(Value::as_array)
+        .is_none_or(|renderers| renderers.is_empty())
+    {
+        return Err(anyhow!(
+            "provider surface projection catalog has no renderers"
+        ));
+    }
+
+    Ok(catalog)
+}
+
+fn select_renderer_ids(
+    catalog: &Value,
+    requested_renderer_ids: &[String],
+    consumer_name: &str,
+    enable_codex_runtime: bool,
+    enable_claude_runtime: bool,
+) -> Result<Vec<String>> {
     let renderers = catalog
         .get("renderers")
         .and_then(Value::as_array)
         .ok_or_else(|| anyhow!("provider surface projection catalog has no renderers"))?;
-
     let mut selected = Vec::new();
     for renderer in renderers {
         let renderer_id = renderer.get("id").and_then(Value::as_str).ok_or_else(|| {
             anyhow!("provider surface projection catalog renderer is missing 'id'")
         })?;
-        let bootstrap_consumer = renderer
+        if !requested_renderer_ids.is_empty()
+            && !requested_renderer_ids
+                .iter()
+                .any(|requested_renderer_id| requested_renderer_id == renderer_id)
+        {
+            continue;
+        }
+
+        let consumer = renderer
             .get("consumers")
-            .and_then(|consumers| consumers.get("bootstrap"));
-        let Some(bootstrap_consumer) = bootstrap_consumer else {
+            .and_then(|consumers| consumers.get(consumer_name));
+        let Some(consumer) = consumer else {
             continue;
         };
-        let enabled = bootstrap_consumer
+        let enabled = consumer
             .get("enabled")
             .and_then(Value::as_bool)
             .unwrap_or(false);
@@ -85,7 +242,7 @@ fn select_bootstrap_renderer_ids(
             continue;
         }
 
-        let condition = bootstrap_consumer
+        let condition = consumer
             .get("condition")
             .and_then(Value::as_str)
             .unwrap_or("always");
@@ -93,10 +250,7 @@ fn select_bootstrap_renderer_ids(
             continue;
         }
 
-        let order = bootstrap_consumer
-            .get("order")
-            .and_then(Value::as_u64)
-            .unwrap_or(0);
+        let order = consumer.get("order").and_then(Value::as_u64).unwrap_or(0);
         selected.push((order, renderer_id.to_string()));
     }
 
@@ -116,6 +270,35 @@ fn bootstrap_condition_is_enabled(
         "never" => false,
         _ => false,
     }
+}
+
+fn render_selected_renderer_ids(repo_root: &Path, renderer_ids: &[String]) -> Result<()> {
+    for renderer_id in renderer_ids {
+        match renderer_id.as_str() {
+            "github-instruction-surfaces" => render_github_instruction_surfaces(repo_root)?,
+            "vscode-profile-surfaces" => render_vscode_profile_surfaces(repo_root)?,
+            "vscode-workspace-surfaces" => render_vscode_workspace_surfaces(repo_root)?,
+            "codex-compatibility-surfaces" => render_codex_compatibility_surfaces(repo_root)?,
+            "codex-skill-surfaces" => render_provider_skill_surfaces(repo_root, &["codex"])?,
+            "codex-orchestration-surfaces" => render_codex_orchestration_surfaces(repo_root)?,
+            "claude-runtime-surfaces" => render_claude_runtime_surfaces(repo_root)?,
+            "claude-skill-surfaces" => render_provider_skill_surfaces(repo_root, &["claude"])?,
+            "mcp-runtime-artifacts" => {
+                invoke_render_mcp_runtime_artifacts(&RuntimeRenderMcpRuntimeArtifactsRequest {
+                    repo_root: Some(repo_root.to_path_buf()),
+                    ..RuntimeRenderMcpRuntimeArtifactsRequest::default()
+                })
+                .map(|_| ())?
+            }
+            unsupported => {
+                return Err(anyhow!(
+                    "unsupported provider surface renderer for Rust runtime path: {unsupported}"
+                ));
+            }
+        }
+    }
+
+    Ok(())
 }
 
 fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
