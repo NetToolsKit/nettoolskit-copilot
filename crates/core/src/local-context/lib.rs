@@ -24,7 +24,8 @@ pub use search::{search_local_context_index_document, LocalContextSearchHit};
 pub use sqlite::{
     initialize_local_context_memory_store, resolve_local_context_memory_db_path,
     resolve_local_context_memory_paths, resolve_local_context_memory_root,
-    write_local_context_sqlite_index, LocalContextMemoryPaths, LocalContextMemorySchemaReport,
-    LocalContextSqliteWriteReport, LOCAL_CONTEXT_MEMORY_DB_FILE_NAME,
-    LOCAL_CONTEXT_MEMORY_DIR_NAME, LOCAL_CONTEXT_MEMORY_SCHEMA_VERSION,
+    search_local_context_sqlite_index, write_local_context_sqlite_index, LocalContextMemoryPaths,
+    LocalContextMemorySchemaReport, LocalContextSqliteQueryRequest, LocalContextSqliteWriteReport,
+    LOCAL_CONTEXT_MEMORY_DB_FILE_NAME, LOCAL_CONTEXT_MEMORY_DIR_NAME,
+    LOCAL_CONTEXT_MEMORY_SCHEMA_VERSION,
 };

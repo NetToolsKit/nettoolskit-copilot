@@ -54,6 +54,19 @@ pub enum LocalContextCommandError {
         #[source]
         source: AnyhowError,
     },
+    /// The persisted SQLite memory store does not exist yet.
+    #[error("local memory store not found: {db_path}")]
+    MemoryNotFound {
+        /// Resolved SQLite memory path expected by the command.
+        db_path: String,
+    },
+    /// Persisted SQLite memory loading failed.
+    #[error("failed to read local memory store")]
+    ReadMemory {
+        /// Underlying SQLite loading failure.
+        #[source]
+        source: AnyhowError,
+    },
 }
 
 /// Errors raised by runtime planning-summary commands.

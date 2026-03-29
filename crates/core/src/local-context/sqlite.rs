@@ -1,11 +1,14 @@
 //! SQLite-backed local memory foundations for repository continuity.
 
 use anyhow::{Context, Result};
-use rusqlite::{params, Connection};
+use regex::Regex;
+use rusqlite::{params, params_from_iter, types::Value, Connection};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
 
 use super::document::LocalContextIndexDocument;
+use super::search::LocalContextSearchHit;
 use crate::path_utils::repository::resolve_full_path;
 
 /// Relative directory used by the repository-local SQLite memory store.
@@ -141,6 +144,21 @@ pub struct LocalContextSqliteWriteReport {
     pub file_count: usize,
     /// Number of chunks mirrored into SQLite.
     pub chunk_count: usize,
+}
+
+/// Request payload for querying the repository-local SQLite memory store.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LocalContextSqliteQueryRequest {
+    /// Query text executed against the SQLite memory store.
+    pub query_text: String,
+    /// Maximum number of hits to return.
+    pub top: usize,
+    /// Repository-relative paths excluded from ranking.
+    pub exclude_paths: Vec<String>,
+    /// Optional repository-relative path prefix filter.
+    pub path_prefix: Option<String>,
+    /// Optional heading substring filter.
+    pub heading_contains: Option<String>,
 }
 
 /// Resolve the repository-local SQLite memory root.
@@ -345,6 +363,109 @@ pub fn write_local_context_sqlite_index(
     })
 }
 
+/// Query the repository-local SQLite memory snapshot when it exists.
+///
+/// # Errors
+///
+/// Returns an error when the SQLite database cannot be opened or queried.
+pub fn search_local_context_sqlite_index(
+    repo_root: &Path,
+    output_root: Option<&Path>,
+    request: &LocalContextSqliteQueryRequest,
+) -> Result<Option<Vec<LocalContextSearchHit>>> {
+    let paths = resolve_local_context_memory_paths(repo_root, output_root);
+    if !paths.db_path.is_file() {
+        return Ok(None);
+    }
+
+    let connection = Connection::open(&paths.db_path).with_context(|| {
+        format!(
+            "failed to open local memory database '{}'",
+            paths.db_path.display()
+        )
+    })?;
+    connection
+        .execute_batch("PRAGMA foreign_keys = ON;")
+        .context("failed to configure local memory SQLite session")?;
+
+    let match_expression = build_local_context_match_expression(&request.query_text);
+    if match_expression.is_empty() {
+        return Ok(Some(Vec::new()));
+    }
+
+    let effective_top = request.top.max(1);
+    let mut sql = String::from(
+        r#"
+        SELECT
+            chunks.chunk_id,
+            chunks.path,
+            chunks.heading,
+            chunks.text
+        FROM chunk_fts
+        INNER JOIN chunks ON chunks.chunk_id = chunk_fts.chunk_id
+        WHERE chunk_fts MATCH ?
+        "#,
+    );
+
+    let mut parameters = vec![Value::from(match_expression)];
+    if let Some(path_prefix) = request
+        .path_prefix
+        .as_ref()
+        .filter(|value| !value.trim().is_empty())
+    {
+        sql.push_str(" AND chunks.path LIKE ?");
+        parameters.push(Value::from(format!(
+            "{}%",
+            normalize_local_context_path(path_prefix)
+        )));
+    }
+    if let Some(heading_contains) = request
+        .heading_contains
+        .as_ref()
+        .filter(|value| !value.trim().is_empty())
+    {
+        sql.push_str(" AND COALESCE(chunks.heading, '') LIKE ?");
+        parameters.push(Value::from(format!("%{}%", heading_contains.trim())));
+    }
+    for excluded_path in request
+        .exclude_paths
+        .iter()
+        .map(|path| normalize_local_context_path(path))
+    {
+        sql.push_str(" AND chunks.path <> ?");
+        parameters.push(Value::from(excluded_path));
+    }
+    sql.push_str(" ORDER BY bm25(chunk_fts), chunks.path, chunks.chunk_id LIMIT ?");
+    parameters.push(Value::from(
+        i64::try_from(effective_top).context("local memory top exceeds i64 range")?,
+    ));
+
+    let mut statement = connection
+        .prepare(&sql)
+        .context("failed to prepare local memory SQLite query")?;
+    let rows = statement
+        .query_map(params_from_iter(parameters), |row| {
+            Ok(LocalContextSearchHit {
+                id: row.get(0)?,
+                path: row.get(1)?,
+                heading: row.get(2)?,
+                score: 0,
+                excerpt: row.get(3)?,
+            })
+        })
+        .context("failed to execute local memory SQLite query")?;
+
+    let mut hits = rows
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .context("failed to map local memory SQLite hits")?;
+    let total_hits = i32::try_from(hits.len()).unwrap_or(i32::MAX);
+    for (index, hit) in hits.iter_mut().enumerate() {
+        hit.score = total_hits.saturating_sub(i32::try_from(index).unwrap_or(i32::MAX));
+    }
+
+    Ok(Some(hits))
+}
+
 fn open_local_context_memory_connection(paths: &LocalContextMemoryPaths) -> Result<Connection> {
     if let Some(parent) = paths.db_path.parent() {
         fs::create_dir_all(parent).with_context(|| {
@@ -382,4 +503,29 @@ fn build_local_context_document_id(document: &LocalContextIndexDocument) -> Stri
         "local-context:{}:{}",
         document.version, document.generated_at
     )
+}
+
+fn build_local_context_match_expression(query_text: &str) -> String {
+    let terms = local_context_query_terms(query_text)
+        .into_iter()
+        .map(|term| format!("\"{}\"", term.replace('"', "\"\"")))
+        .collect::<Vec<_>>();
+    terms.join(" OR ")
+}
+
+fn local_context_query_terms(text: &str) -> Vec<String> {
+    static TOKEN_REGEX: OnceLock<Regex> = OnceLock::new();
+
+    TOKEN_REGEX
+        .get_or_init(|| {
+            Regex::new(r"[a-z0-9][a-z0-9._/-]{1,63}")
+                .expect("local context SQLite token regex should be valid")
+        })
+        .find_iter(&text.to_ascii_lowercase())
+        .map(|capture| capture.as_str().to_string())
+        .collect()
+}
+
+fn normalize_local_context_path(path: &str) -> String {
+    path.replace('\\', "/")
 }

@@ -8,16 +8,17 @@ use nettoolskit_runtime::{
     invoke_render_provider_surfaces, invoke_render_vscode_mcp_template, invoke_runtime_doctor,
     invoke_runtime_healthcheck, invoke_runtime_self_heal, invoke_setup_git_hooks,
     invoke_setup_global_git_aliases, invoke_sync_codex_mcp_config,
-    invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
-    ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
-    RuntimeApplyVscodeTemplatesRequest, RuntimeDoctorRequest, RuntimeDoctorStatus,
-    RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
-    RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus, RuntimePreToolUseRequest,
+    invoke_trim_trailing_blank_lines, query_local_context_index, query_local_memory,
+    update_local_context_index, update_local_memory, ExportPlanningSummaryRequest,
+    QueryLocalContextIndexRequest, QueryLocalMemoryRequest, RuntimeApplyVscodeTemplatesRequest,
+    RuntimeDoctorRequest, RuntimeDoctorStatus, RuntimeExportEnterpriseTrendsRequest,
+    RuntimeHealthcheckRequest, RuntimeHealthcheckStatus, RuntimePreCommitEofHygieneRequest,
+    RuntimePreCommitEofHygieneStatus, RuntimePreToolUseRequest,
     RuntimeRenderMcpRuntimeArtifactsRequest, RuntimeRenderProviderSurfacesRequest,
     RuntimeRenderVscodeMcpTemplateRequest, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
     RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
     RuntimeSyncCodexMcpConfigRequest, RuntimeTrimTrailingBlankLinesRequest,
-    UpdateLocalContextIndexRequest,
+    UpdateLocalContextIndexRequest, UpdateLocalMemoryRequest,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -39,6 +40,10 @@ pub enum RuntimeCommand {
     UpdateLocalContextIndex(RuntimeUpdateLocalContextIndexArgs),
     /// Query the repository-owned local context index.
     QueryLocalContextIndex(RuntimeQueryLocalContextIndexArgs),
+    /// Build or refresh the repository-owned SQLite local memory snapshot.
+    UpdateLocalMemory(RuntimeUpdateLocalMemoryArgs),
+    /// Query the repository-owned SQLite local memory snapshot.
+    QueryLocalMemory(RuntimeQueryLocalMemoryArgs),
     /// Export a context handoff summary from active planning artifacts.
     ExportPlanningSummary(RuntimeExportPlanningSummaryArgs),
     /// Export enterprise validation and vulnerability trends.
@@ -246,6 +251,55 @@ pub struct RuntimeQueryLocalContextIndexArgs {
     /// Maximum number of hits to return.
     #[clap(long)]
     pub top: Option<usize>,
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
+}
+
+/// CLI arguments for `runtime update-local-memory`.
+#[derive(Debug, Args)]
+pub struct RuntimeUpdateLocalMemoryArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit catalog path.
+    #[clap(long)]
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit output directory.
+    #[clap(long)]
+    pub output_root: Option<PathBuf>,
+    /// Rebuild every file even when a persisted index already exists.
+    #[clap(long)]
+    pub force_full_rebuild: bool,
+}
+
+/// CLI arguments for `runtime query-local-memory`.
+#[derive(Debug, Args)]
+pub struct RuntimeQueryLocalMemoryArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Search query executed against the local SQLite memory store.
+    #[clap(long)]
+    pub query_text: String,
+    /// Optional explicit catalog path.
+    #[clap(long)]
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit output directory.
+    #[clap(long)]
+    pub output_root: Option<PathBuf>,
+    /// Maximum number of hits to return.
+    #[clap(long)]
+    pub top: Option<usize>,
+    /// Optional repository-relative path prefix filter.
+    #[clap(long)]
+    pub path_prefix: Option<String>,
+    /// Optional case-insensitive heading substring filter.
+    #[clap(long)]
+    pub heading_contains: Option<String>,
+    /// Repository-relative paths excluded from ranking.
+    #[clap(long = "exclude-path")]
+    pub exclude_paths: Vec<String>,
     /// Emit JSON instead of the default human-readable summary.
     #[clap(long)]
     pub json_output: bool,
@@ -474,6 +528,8 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         RuntimeCommand::QueryLocalContextIndex(arguments) => {
             execute_query_local_context_index(arguments)
         }
+        RuntimeCommand::UpdateLocalMemory(arguments) => execute_update_local_memory(arguments),
+        RuntimeCommand::QueryLocalMemory(arguments) => execute_query_local_memory(arguments),
         RuntimeCommand::ExportPlanningSummary(arguments) => {
             execute_export_planning_summary(arguments)
         }
@@ -702,6 +758,10 @@ fn execute_update_local_context_index(arguments: RuntimeUpdateLocalContextIndexA
         "Local context index updated: {}",
         result.index_path.to_string_lossy()
     );
+    println!(
+        "Local memory store updated: {}",
+        result.memory_db_path.to_string_lossy()
+    );
     println!("Files indexed: {}", result.indexed_file_count);
     println!("Files rebuilt: {}", result.rebuilt_file_count);
     println!("Files reused: {}", result.reused_file_count);
@@ -747,6 +807,90 @@ fn execute_query_local_context_index(arguments: RuntimeQueryLocalContextIndexArg
 
     println!("Local context index query: {}", result.query);
     println!("Index: {}", result.index_path.to_string_lossy());
+    println!("Hits: {}", result.result_count);
+    for hit in &result.hits {
+        println!();
+        println!("- [{}] {}", hit.score, hit.path);
+        if let Some(heading) = &hit.heading {
+            if !heading.trim().is_empty() {
+                println!("  heading: {heading}");
+            }
+        }
+        println!("  excerpt: {}", hit.excerpt);
+    }
+
+    ExitStatus::Success
+}
+
+fn execute_update_local_memory(arguments: RuntimeUpdateLocalMemoryArgs) -> ExitStatus {
+    let result = match update_local_memory(&UpdateLocalMemoryRequest {
+        repo_root: arguments.repo_root,
+        catalog_path: arguments.catalog_path,
+        output_root: arguments.output_root,
+        force_full_rebuild: arguments.force_full_rebuild,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!(
+        "Local memory store updated: {}",
+        result.memory_db_path.to_string_lossy()
+    );
+    println!(
+        "Compatibility index: {}",
+        result.index_path.to_string_lossy()
+    );
+    println!("Files indexed: {}", result.indexed_file_count);
+    println!("Files rebuilt: {}", result.rebuilt_file_count);
+    println!("Files reused: {}", result.reused_file_count);
+    println!("Chunks total: {}", result.chunk_count);
+    ExitStatus::Success
+}
+
+fn execute_query_local_memory(arguments: RuntimeQueryLocalMemoryArgs) -> ExitStatus {
+    let result = match query_local_memory(&QueryLocalMemoryRequest {
+        repo_root: arguments.repo_root,
+        query_text: arguments.query_text,
+        catalog_path: arguments.catalog_path,
+        output_root: arguments.output_root,
+        top: arguments.top,
+        exclude_paths: arguments.exclude_paths,
+        path_prefix: arguments.path_prefix,
+        heading_contains: arguments.heading_contains,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    if arguments.json_output {
+        let payload = json!({
+            "query": result.query,
+            "top": result.top,
+            "memoryDbPath": result.memory_db_path,
+            "resultCount": result.result_count,
+            "hits": result.hits.iter().map(|hit| {
+                json!({
+                    "id": hit.id,
+                    "path": hit.path,
+                    "heading": hit.heading,
+                    "score": hit.score,
+                    "excerpt": hit.excerpt,
+                })
+            }).collect::<Vec<_>>()
+        });
+        println!("{payload}");
+        return ExitStatus::Success;
+    }
+
+    println!("Local memory query: {}", result.query);
+    println!("Memory DB: {}", result.memory_db_path.to_string_lossy());
     println!("Hits: {}", result.result_count);
     for hit in &result.hits {
         println!();

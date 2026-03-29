@@ -362,6 +362,73 @@ fn test_runtime_query_local_context_index_supports_json_output() {
 }
 
 #[test]
+fn test_runtime_update_local_memory_builds_sqlite_store() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_local_context_catalog(repo.path());
+    write_file(
+        &repo.path().join("README.md"),
+        "# Demo\n\nSQLite local memory continuity summary.",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "update-local-memory"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Local memory store updated:"))
+        .stdout(predicate::str::contains("Compatibility index:"));
+
+    assert!(repo
+        .path()
+        .join(".temp/context-memory/context.db")
+        .is_file());
+    assert!(repo.path().join(".temp/context-index/index.json").is_file());
+}
+
+#[test]
+fn test_runtime_query_local_memory_supports_filters_and_json_output() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_local_context_catalog(repo.path());
+    write_file(
+        &repo.path().join("README.md"),
+        "# Demo\n\nSQLite local memory continuity summary.",
+    );
+    write_file(
+        &repo.path().join("planning/active/plan.md"),
+        "# Wave 1\n\nSQLite memory for continuity routing.",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "update-local-memory"])
+        .assert()
+        .success();
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "query-local-memory",
+            "--query-text",
+            "sqlite memory",
+            "--path-prefix",
+            "planning/",
+            "--heading-contains",
+            "wave",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""resultCount":1"#))
+        .stdout(predicate::str::contains(
+            r#""path":"planning/active/plan.md""#,
+        ))
+        .stdout(predicate::str::contains(r#""memoryDbPath":"#));
+}
+
+#[test]
 fn test_runtime_export_planning_summary_prints_active_plan_context() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_runtime_repo_root(repo.path());

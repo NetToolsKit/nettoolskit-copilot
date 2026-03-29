@@ -1,13 +1,50 @@
 //! Tests for repository-local SQLite memory foundations.
 
 use nettoolskit_core::local_context::{
-    initialize_local_context_memory_store, resolve_local_context_memory_db_path,
-    resolve_local_context_memory_paths, resolve_local_context_memory_root,
-    LOCAL_CONTEXT_MEMORY_DB_FILE_NAME, LOCAL_CONTEXT_MEMORY_DIR_NAME,
-    LOCAL_CONTEXT_MEMORY_SCHEMA_VERSION,
+    build_local_context_index, initialize_local_context_memory_store,
+    resolve_local_context_memory_db_path, resolve_local_context_memory_paths,
+    resolve_local_context_memory_root, search_local_context_sqlite_index, LocalContextIndexCatalog,
+    LocalContextIndexCatalogInfo, LocalContextIndexChunking, LocalContextIndexQueryDefaults,
+    LocalContextSqliteQueryRequest, LOCAL_CONTEXT_MEMORY_DB_FILE_NAME,
+    LOCAL_CONTEXT_MEMORY_DIR_NAME, LOCAL_CONTEXT_MEMORY_SCHEMA_VERSION,
 };
 use rusqlite::Connection;
+use std::fs;
 use tempfile::TempDir;
+
+fn sample_catalog() -> LocalContextIndexCatalog {
+    LocalContextIndexCatalog {
+        version: 1,
+        index_root: ".temp/context-index".to_string(),
+        max_file_size_kb: 32,
+        chunking: LocalContextIndexChunking {
+            max_chars: 160,
+            max_lines: 6,
+        },
+        query_defaults: LocalContextIndexQueryDefaults { top: 5 },
+        include_globs: vec![
+            "planning/**/*.md".to_string(),
+            "scripts/**/*.ps1".to_string(),
+        ],
+        exclude_globs: vec![".temp/**".to_string()],
+    }
+}
+
+fn write_catalog(repo_root: &std::path::Path) -> LocalContextIndexCatalogInfo {
+    let catalog_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&catalog_dir).expect("catalog directory should be created");
+    let catalog_path = catalog_dir.join("local-context-index.catalog.json");
+    fs::write(
+        &catalog_path,
+        r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":32,"chunking":{"maxChars":160,"maxLines":6},"queryDefaults":{"top":5},"includeGlobs":["planning/**/*.md","scripts/**/*.ps1"],"excludeGlobs":[".temp/**"]}"#,
+    )
+    .expect("catalog file should be written");
+
+    LocalContextIndexCatalogInfo {
+        path: catalog_path,
+        catalog: sample_catalog(),
+    }
+}
 
 #[test]
 fn test_resolve_local_context_memory_paths_uses_repo_temp_by_default() {
@@ -115,4 +152,84 @@ fn test_initialize_local_context_memory_store_is_idempotent() {
     assert_eq!(first.memory_root, second.memory_root);
     assert_eq!(first.db_path, second.db_path);
     assert_eq!(first.schema_version, second.schema_version);
+}
+
+#[test]
+fn test_search_local_context_sqlite_index_returns_ranked_hits() {
+    let repo_root = TempDir::new().expect("temporary directory should be created");
+    let catalog_info = write_catalog(repo_root.path());
+    fs::create_dir_all(repo_root.path().join("planning/active"))
+        .expect("planning directory should be created");
+    fs::create_dir_all(repo_root.path().join("scripts/runtime"))
+        .expect("runtime directory should be created");
+    fs::write(
+        repo_root.path().join("planning/active/plan.md"),
+        "# Rust migration\n\nSQLite local memory replaces JSON-only recall.",
+    )
+    .expect("plan file should be written");
+    fs::write(
+        repo_root.path().join("scripts/runtime/demo.ps1"),
+        "Write-Output 'local memory sqlite recall'",
+    )
+    .expect("script file should be written");
+
+    build_local_context_index(repo_root.path(), &catalog_info, None, false)
+        .expect("local context build should succeed");
+
+    let hits = search_local_context_sqlite_index(
+        repo_root.path(),
+        None,
+        &LocalContextSqliteQueryRequest {
+            query_text: "rust migration".to_string(),
+            top: 5,
+            exclude_paths: Vec::new(),
+            path_prefix: None,
+            heading_contains: None,
+        },
+    )
+    .expect("sqlite query should succeed")
+    .expect("sqlite memory store should exist");
+
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].path, "planning/active/plan.md");
+    assert_eq!(hits[0].heading.as_deref(), Some("Rust migration"));
+}
+
+#[test]
+fn test_search_local_context_sqlite_index_honors_filters() {
+    let repo_root = TempDir::new().expect("temporary directory should be created");
+    let catalog_info = write_catalog(repo_root.path());
+    fs::create_dir_all(repo_root.path().join("planning/active"))
+        .expect("planning directory should be created");
+    fs::write(
+        repo_root.path().join("planning/active/plan.md"),
+        "# Wave one\n\nSQLite local memory query command.",
+    )
+    .expect("plan file should be written");
+    fs::write(
+        repo_root.path().join("planning/active/notes.md"),
+        "# Backlog\n\nSQLite local memory future events.",
+    )
+    .expect("notes file should be written");
+
+    build_local_context_index(repo_root.path(), &catalog_info, None, false)
+        .expect("local context build should succeed");
+
+    let hits = search_local_context_sqlite_index(
+        repo_root.path(),
+        None,
+        &LocalContextSqliteQueryRequest {
+            query_text: "sqlite local memory".to_string(),
+            top: 5,
+            exclude_paths: vec!["planning/active/notes.md".to_string()],
+            path_prefix: Some("planning/active/".to_string()),
+            heading_contains: Some("wave".to_string()),
+        },
+    )
+    .expect("sqlite query should succeed")
+    .expect("sqlite memory store should exist");
+
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].path, "planning/active/plan.md");
+    assert_eq!(hits[0].heading.as_deref(), Some("Wave one"));
 }

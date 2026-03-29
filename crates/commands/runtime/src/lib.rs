@@ -9,8 +9,10 @@ pub mod maintenance;
 pub mod sync;
 
 pub use continuity::local_context::{
-    query_local_context_index, update_local_context_index, QueryLocalContextIndexRequest,
-    QueryLocalContextIndexResult, UpdateLocalContextIndexRequest, UpdateLocalContextIndexResult,
+    query_local_context_index, query_local_memory, update_local_context_index, update_local_memory,
+    QueryLocalContextIndexRequest, QueryLocalContextIndexResult, QueryLocalMemoryRequest,
+    QueryLocalMemoryResult, UpdateLocalContextIndexRequest, UpdateLocalContextIndexResult,
+    UpdateLocalMemoryRequest, UpdateLocalMemoryResult,
 };
 pub use continuity::planning_summary::{
     export_planning_summary, ExportPlanningSummaryRequest, ExportPlanningSummaryResult,
