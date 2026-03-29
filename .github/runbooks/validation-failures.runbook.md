@@ -21,7 +21,7 @@ ntk validation all --repo-root . --validation-profile release
 3. Export evidence:
 
 ```powershell
-pwsh -File .\scripts\validation\export-audit-report.ps1 -ValidationProfile release
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release --output-path .temp/audit-report.json --log-path .temp/logs/audit-report.log
 ```
 
 ## Classify Findings

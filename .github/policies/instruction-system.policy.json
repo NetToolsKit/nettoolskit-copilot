@@ -63,7 +63,7 @@
     "crates/commands/validation/src/workspace/workspace_efficiency.rs",
     "crates/commands/validation/src/agent_orchestration/orchestration_integrity.rs",
     "crates/commands/validation/src/release/release_provenance.rs",
-    "scripts/validation/export-audit-report.ps1",
+    "crates/commands/runtime/src/diagnostics/healthcheck.rs",
     "scripts/orchestration/engine/invoke-task-worker.ps1",
     "scripts/runtime/new-super-agent-worktree.ps1",
     "scripts/runtime/invoke-super-agent-brainstorm.ps1",

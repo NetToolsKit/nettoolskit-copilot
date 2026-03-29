@@ -61,7 +61,7 @@ These files are validated through the governance and provenance baselines so onb
 3. Update `CHANGELOG.md` with semantic version entry `[X.Y.Z] - YYYY-MM-DD`.
 4. Create tag `copilot-vX.Y.Z` after merge to default branch.
 5. Export audit package:
-   - `pwsh -File .\scripts\validation\export-audit-report.ps1 -StrictExtras`
+   - `ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release --strict-extras --output-path .temp/audit-report.json --log-path .temp/logs/audit-report.log`
 
 ## Rollback
 

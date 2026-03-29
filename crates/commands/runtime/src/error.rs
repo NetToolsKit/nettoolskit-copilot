@@ -188,6 +188,32 @@ pub enum RuntimeHealthcheckCommandError {
     },
 }
 
+/// Errors raised by enterprise-trends export commands.
+#[derive(Debug, Error)]
+pub enum RuntimeExportEnterpriseTrendsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime enterprise-trends workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output artifact preparation failed.
+    #[error("failed to prepare runtime enterprise-trends artifacts")]
+    PrepareArtifacts {
+        /// Underlying filesystem or path resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output serialization or write failed.
+    #[error("failed to write runtime enterprise-trends output")]
+    WriteOutput {
+        /// Underlying serialization or I/O failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime clean-build-artifacts commands.
 #[derive(Debug, Error)]
 pub enum RuntimeCleanBuildArtifactsCommandError {

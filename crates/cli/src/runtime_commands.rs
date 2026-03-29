@@ -1,16 +1,18 @@
-//! Executable runtime command surfaces for hook, continuity, and maintenance migration.
+//! Executable runtime command surfaces for hook, continuity, maintenance, and diagnostics migration.
 
-use clap::{Args, Subcommand};
+use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
-    export_planning_summary, invoke_apply_vscode_templates, invoke_pre_commit_eof_hygiene,
-    invoke_pre_tool_use, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
-    invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
-    ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
-    RuntimeApplyVscodeTemplatesRequest, RuntimePreCommitEofHygieneRequest,
-    RuntimePreCommitEofHygieneStatus, RuntimePreToolUseRequest,
-    RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
-    RuntimeTrimTrailingBlankLinesRequest, UpdateLocalContextIndexRequest,
+    export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
+    invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_healthcheck,
+    invoke_setup_git_hooks, invoke_setup_global_git_aliases, invoke_trim_trailing_blank_lines,
+    query_local_context_index, update_local_context_index, ExportPlanningSummaryRequest,
+    QueryLocalContextIndexRequest, RuntimeApplyVscodeTemplatesRequest,
+    RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
+    RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
+    RuntimePreToolUseRequest, RuntimeSetupGitHooksRequest,
+    RuntimeSetupGlobalGitAliasesRequest, RuntimeTrimTrailingBlankLinesRequest,
+    UpdateLocalContextIndexRequest,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -22,12 +24,17 @@ use std::path::{Path, PathBuf};
 pub enum RuntimeCommand {
     /// Normalize hook payloads for VS Code `PreToolUse`.
     PreToolUse,
+    /// Run the native runtime healthcheck workflow.
+    Healthcheck(RuntimeHealthcheckArgs),
     /// Build or refresh the repository-owned local context index.
     UpdateLocalContextIndex(RuntimeUpdateLocalContextIndexArgs),
     /// Query the repository-owned local context index.
     QueryLocalContextIndex(RuntimeQueryLocalContextIndexArgs),
     /// Export a context handoff summary from active planning artifacts.
     ExportPlanningSummary(RuntimeExportPlanningSummaryArgs),
+    /// Export enterprise validation and vulnerability trends.
+    #[command(name = "export-enterprise-trends")]
+    ExportEnterpriseTrends(RuntimeExportEnterpriseTrendsArgs),
     /// Apply tracked VS Code template files into active workspace files.
     ApplyVscodeTemplates(RuntimeApplyVscodeTemplatesArgs),
     /// Trim trailing whitespace and blank lines from text files.
@@ -38,6 +45,53 @@ pub enum RuntimeCommand {
     SetupGitHooks(RuntimeSetupGitHooksArgs),
     /// Configure managed global Git aliases.
     SetupGlobalGitAliases(RuntimeSetupGlobalGitAliasesArgs),
+}
+
+/// CLI arguments for `runtime healthcheck`.
+#[derive(Debug, Args)]
+pub struct RuntimeHealthcheckArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit GitHub runtime target path.
+    #[clap(long)]
+    pub target_github_path: Option<PathBuf>,
+    /// Optional explicit Codex runtime target path.
+    #[clap(long)]
+    pub target_codex_path: Option<PathBuf>,
+    /// Optional explicit picker-visible agent skills path.
+    #[clap(long)]
+    pub target_agents_skills_path: Option<PathBuf>,
+    /// Optional explicit Copilot native skills path.
+    #[clap(long)]
+    pub target_copilot_skills_path: Option<PathBuf>,
+    /// Optional explicit runtime profile name.
+    #[clap(long)]
+    pub runtime_profile: Option<String>,
+    /// Run bootstrap before the remaining checks.
+    #[clap(long)]
+    pub sync_runtime: bool,
+    /// Use mirror mode when bootstrap sync is enabled.
+    #[clap(long)]
+    pub mirror: bool,
+    /// Fail runtime doctor on extra files.
+    #[clap(long)]
+    pub strict_extras: bool,
+    /// Validation profile passed to `validate-all`.
+    #[clap(long, default_value = "dev")]
+    pub validation_profile: String,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+    /// Convert runtime drift failures into warnings.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub treat_runtime_drift_as_warning: bool,
+    /// Optional explicit report output path.
+    #[clap(long)]
+    pub output_path: Option<PathBuf>,
+    /// Optional explicit plain-text log path.
+    #[clap(long)]
+    pub log_path: Option<PathBuf>,
 }
 
 /// CLI arguments for `runtime trim-trailing-blank-lines`.
@@ -112,6 +166,35 @@ pub struct RuntimeExportPlanningSummaryArgs {
     /// Render to stdout only without creating a file.
     #[clap(long)]
     pub print_only: bool,
+}
+
+/// CLI arguments for `runtime export-enterprise-trends`.
+#[derive(Debug, Args)]
+pub struct RuntimeExportEnterpriseTrendsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit validation ledger path.
+    #[clap(long)]
+    pub ledger_path: Option<PathBuf>,
+    /// Optional explicit validation report path.
+    #[clap(long)]
+    pub validation_report_path: Option<PathBuf>,
+    /// Optional explicit vulnerability summary path.
+    #[clap(long)]
+    pub vulnerability_summary_path: Option<PathBuf>,
+    /// Optional explicit JSON output path.
+    #[clap(long)]
+    pub output_path: Option<PathBuf>,
+    /// Optional explicit Markdown summary path.
+    #[clap(long)]
+    pub summary_path: Option<PathBuf>,
+    /// Maximum number of historical entries included in the trend history.
+    #[clap(long, default_value_t = 30)]
+    pub max_entries: usize,
+    /// Preserve warning-only compatibility semantics.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
 }
 
 /// CLI arguments for `runtime apply-vscode-templates`.
@@ -205,14 +288,22 @@ struct PreToolUsePayload {
 pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
     match command {
         RuntimeCommand::PreToolUse => execute_pre_tool_use(),
+        RuntimeCommand::Healthcheck(arguments) => execute_runtime_healthcheck(arguments),
         RuntimeCommand::UpdateLocalContextIndex(arguments) => {
             execute_update_local_context_index(arguments)
         }
-        RuntimeCommand::QueryLocalContextIndex(arguments) => execute_query_local_context_index(arguments),
+        RuntimeCommand::QueryLocalContextIndex(arguments) => {
+            execute_query_local_context_index(arguments)
+        }
         RuntimeCommand::ExportPlanningSummary(arguments) => {
             execute_export_planning_summary(arguments)
         }
-        RuntimeCommand::ApplyVscodeTemplates(arguments) => execute_apply_vscode_templates(arguments),
+        RuntimeCommand::ExportEnterpriseTrends(arguments) => {
+            execute_export_enterprise_trends(arguments)
+        }
+        RuntimeCommand::ApplyVscodeTemplates(arguments) => {
+            execute_apply_vscode_templates(arguments)
+        }
         RuntimeCommand::TrimTrailingBlankLines(arguments) => {
             execute_trim_trailing_blank_lines(arguments)
         }
@@ -260,11 +351,50 @@ fn execute_pre_tool_use() -> ExitStatus {
         hook_specific_output.insert("updatedInput".to_string(), updated_input);
     }
 
-    println!(
-        "{}",
-        json!({ "hookSpecificOutput": hook_specific_output })
-    );
+    println!("{}", json!({ "hookSpecificOutput": hook_specific_output }));
     ExitStatus::Success
+}
+
+fn execute_runtime_healthcheck(arguments: RuntimeHealthcheckArgs) -> ExitStatus {
+    let result = match invoke_runtime_healthcheck(&RuntimeHealthcheckRequest {
+        repo_root: arguments.repo_root,
+        target_github_path: arguments.target_github_path,
+        target_codex_path: arguments.target_codex_path,
+        target_agents_skills_path: arguments.target_agents_skills_path,
+        target_copilot_skills_path: arguments.target_copilot_skills_path,
+        runtime_profile: arguments.runtime_profile,
+        sync_runtime: arguments.sync_runtime,
+        mirror: arguments.mirror,
+        strict_extras: arguments.strict_extras,
+        validation_profile: arguments.validation_profile,
+        warning_only: arguments.warning_only,
+        treat_runtime_drift_as_warning: arguments.treat_runtime_drift_as_warning,
+        output_path: arguments.output_path,
+        log_path: arguments.log_path,
+        ..RuntimeHealthcheckRequest::default()
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", healthcheck_status_label(result.overall_status));
+    println!("Runtime profile: {}", result.runtime_profile_name);
+    println!("Validation profile: {}", result.validation_profile);
+    println!("Output path: {}", result.output_path.display());
+    println!("Log path: {}", result.log_path.display());
+    println!("Total checks: {}", result.total_checks);
+    println!("Passed checks: {}", result.passed_checks);
+    println!("Warning checks: {}", result.warning_checks);
+    println!("Failed checks: {}", result.failed_checks);
+
+    if result.exit_code == 0 {
+        ExitStatus::Success
+    } else {
+        ExitStatus::Error
+    }
 }
 
 fn execute_update_local_context_index(arguments: RuntimeUpdateLocalContextIndexArgs) -> ExitStatus {
@@ -375,6 +505,37 @@ fn execute_export_planning_summary(arguments: RuntimeExportPlanningSummaryArgs) 
     }
 }
 
+fn execute_export_enterprise_trends(arguments: RuntimeExportEnterpriseTrendsArgs) -> ExitStatus {
+    let result = match invoke_export_enterprise_trends(&RuntimeExportEnterpriseTrendsRequest {
+        repo_root: arguments.repo_root,
+        ledger_path: arguments.ledger_path,
+        validation_report_path: arguments.validation_report_path,
+        vulnerability_summary_path: arguments.vulnerability_summary_path,
+        output_path: arguments.output_path,
+        summary_path: arguments.summary_path,
+        max_entries: arguments.max_entries,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!(
+        "Enterprise trends JSON written: {}",
+        result.output_path.display()
+    );
+    println!(
+        "Enterprise trends summary written: {}",
+        result.summary_path.display()
+    );
+    println!("Trend history entries: {}", result.history_entries);
+    println!("Warnings: {}", result.warnings.len());
+    ExitStatus::Success
+}
+
 fn execute_apply_vscode_templates(arguments: RuntimeApplyVscodeTemplatesArgs) -> ExitStatus {
     let result = match invoke_apply_vscode_templates(&RuntimeApplyVscodeTemplatesRequest {
         repo_root: arguments.repo_root,
@@ -432,7 +593,10 @@ fn execute_trim_trailing_blank_lines(arguments: RuntimeTrimTrailingBlankLinesArg
     }
     println!("Files found: {}", result.discovered_files.len());
     for file_path in &result.discovered_files {
-        println!("{}", display_repo_relative_path(&result.repo_root, file_path));
+        println!(
+            "{}",
+            display_repo_relative_path(&result.repo_root, file_path)
+        );
     }
 
     if result.exit_code == 0 {
@@ -540,4 +704,12 @@ fn display_repo_relative_path(repo_root: &Path, path: &Path) -> String {
         .unwrap_or(path)
         .to_string_lossy()
         .replace('\\', "/")
+}
+
+fn healthcheck_status_label(status: RuntimeHealthcheckStatus) -> &'static str {
+    match status {
+        RuntimeHealthcheckStatus::Passed => "passed",
+        RuntimeHealthcheckStatus::Warning => "warning",
+        RuntimeHealthcheckStatus::Failed => "failed",
+    }
 }

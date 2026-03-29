@@ -34,6 +34,32 @@ fn initialize_runtime_repo_root(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex")).expect(".codex should be created");
 }
 
+fn write_runtime_install_profile_catalog(repo_root: &Path) {
+    write_file(
+        &repo_root.join(".github/governance/runtime-install-profiles.json"),
+        r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}}}}"#,
+    );
+}
+
+fn write_validation_profile_catalog(repo_root: &Path) {
+    write_file(
+        &repo_root.join(".github/governance/validation-profiles.json"),
+        r#"{"version":1,"defaultProfile":"dev","profiles":[{"id":"dev","warningOnly":false,"checkOrder":["validate-planning-structure"]}]}"#,
+    );
+}
+
+fn initialize_runtime_health_repo(repo_root: &Path) {
+    initialize_runtime_repo_root(repo_root);
+    fs::create_dir_all(repo_root.join("scripts/runtime"))
+        .expect("runtime directory should be created");
+    fs::create_dir_all(repo_root.join("scripts/validation"))
+        .expect("validation directory should be created");
+    write_file(&repo_root.join("planning/README.md"), "# planning\n");
+    write_file(&repo_root.join("planning/specs/README.md"), "# specs\n");
+    write_runtime_install_profile_catalog(repo_root);
+    write_validation_profile_catalog(repo_root);
+}
+
 fn write_local_context_catalog(repo_root: &Path) {
     write_file(
         &repo_root.join(".github/governance/local-context-index.catalog.json"),
@@ -62,8 +88,12 @@ fn test_runtime_pre_tool_use_emits_hook_specific_output_json() {
         .write_stdin(payload.to_string())
         .assert()
         .success()
-        .stdout(predicate::str::contains(r##""hookEventName":"PreToolUse""##))
-        .stdout(predicate::str::contains(r##""updatedInput":{"content":"# Title""##))
+        .stdout(predicate::str::contains(
+            r##""hookEventName":"PreToolUse""##,
+        ))
+        .stdout(predicate::str::contains(
+            r##""updatedInput":{"content":"# Title""##,
+        ))
         .stdout(predicate::str::contains(r##""filePath":"README.md""##));
 }
 
@@ -76,7 +106,10 @@ fn test_runtime_trim_trailing_blank_lines_reports_git_changed_only_files() {
         "root = true\n\n[*]\ninsert_final_newline = false\n",
     );
     initialize_git_repo(repo.path());
-    write_file(&repo.path().join("changed.cs"), "public sealed class Changed { }\n\n");
+    write_file(
+        &repo.path().join("changed.cs"),
+        "public sealed class Changed { }\n\n",
+    );
 
     ntk()
         .current_dir(repo.path())
@@ -89,7 +122,8 @@ fn test_runtime_trim_trailing_blank_lines_reports_git_changed_only_files() {
         .stdout(predicate::str::contains("changed.cs"));
 
     assert_eq!(
-        fs::read_to_string(repo.path().join("changed.cs")).expect("changed file should be readable"),
+        fs::read_to_string(repo.path().join("changed.cs"))
+            .expect("changed file should be readable"),
         "public sealed class Changed { }"
     );
 }
@@ -102,7 +136,10 @@ fn test_runtime_trim_trailing_blank_lines_supports_plain_git_repos_without_runti
         "root = true\n\n[*]\ninsert_final_newline = false\n",
     );
     initialize_git_repo(repo.path());
-    write_file(&repo.path().join("changed.cs"), "public sealed class Changed { }\n\n");
+    write_file(
+        &repo.path().join("changed.cs"),
+        "public sealed class Changed { }\n\n",
+    );
 
     ntk()
         .current_dir(repo.path())
@@ -114,7 +151,8 @@ fn test_runtime_trim_trailing_blank_lines_supports_plain_git_repos_without_runti
         .stdout(predicate::str::contains("changed.cs"));
 
     assert_eq!(
-        fs::read_to_string(repo.path().join("changed.cs")).expect("changed file should be readable"),
+        fs::read_to_string(repo.path().join("changed.cs"))
+            .expect("changed file should be readable"),
         "public sealed class Changed { }"
     );
 }
@@ -228,4 +266,63 @@ fn test_runtime_apply_vscode_templates_copies_workspace_templates() {
 
     assert!(repo.path().join(".vscode/settings.json").is_file());
     assert!(repo.path().join(".vscode/mcp.json").is_file());
+}
+
+#[test]
+fn test_runtime_healthcheck_cli_writes_report_to_requested_output_path() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_health_repo(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "healthcheck",
+            "--runtime-profile",
+            "none",
+            "--validation-profile",
+            "dev",
+            "--warning-only",
+            "false",
+            "--output-path",
+            ".temp/audit-report.json",
+            "--log-path",
+            ".temp/logs/audit-report.log",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Output path:"));
+
+    assert!(repo.path().join(".temp/audit-report.json").is_file());
+    assert!(repo.path().join(".temp/logs/audit-report.log").is_file());
+}
+
+#[test]
+fn test_runtime_export_enterprise_trends_cli_writes_dashboard_outputs() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_file(
+        &repo.path().join(".temp/audit/validation-ledger.jsonl"),
+        "{\"generatedAt\":\"2026-03-29T01:00:00Z\",\"profile\":\"release\",\"warningOnly\":true,\"payloadJson\":\"{\\\"summary\\\":{\\\"totalChecks\\\":4,\\\"passed\\\":3,\\\"warnings\\\":1,\\\"failed\\\":0},\\\"checks\\\":[{\\\"durationMs\\\":5},{\\\"durationMs\\\":7}]}\"}\n",
+    );
+    write_file(
+        &repo.path().join(".temp/audit/validate-all.latest.json"),
+        r#"{"profile":"release","summary":{"totalChecks":4,"passed":3,"warnings":1,"failed":0,"suiteWarnings":0},"performance":{"totalDurationMs":12,"averageCheckDurationMs":6.0}}"#,
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "export-enterprise-trends"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Enterprise trends JSON written:",
+        ))
+        .stdout(predicate::str::contains(
+            "Enterprise trends summary written:",
+        ));
+
+    assert!(repo.path().join(".temp/audit/enterprise-trends.latest.json").is_file());
+    assert!(repo.path().join(".temp/audit/enterprise-trends.latest.md").is_file());
 }

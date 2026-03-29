@@ -23,6 +23,10 @@ pub use diagnostics::doctor::{
     invoke_runtime_doctor, RuntimeDoctorMappingReport, RuntimeDoctorRequest, RuntimeDoctorResult,
     RuntimeDoctorStatus,
 };
+pub use diagnostics::enterprise_trends::{
+    invoke_export_enterprise_trends, RuntimeExportEnterpriseTrendsRequest,
+    RuntimeExportEnterpriseTrendsResult,
+};
 pub use diagnostics::healthcheck::{
     invoke_runtime_healthcheck, RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest,
     RuntimeHealthcheckResult, RuntimeHealthcheckStatus,
@@ -34,7 +38,8 @@ pub use diagnostics::self_heal::{
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeCleanBuildArtifactsCommandError,
-    RuntimeDoctorCommandError, RuntimeFixRegionSpacingCommandError,
+    RuntimeDoctorCommandError, RuntimeExportEnterpriseTrendsCommandError,
+    RuntimeFixRegionSpacingCommandError,
     RuntimeFixVersionRangesCommandError, RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
     RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,

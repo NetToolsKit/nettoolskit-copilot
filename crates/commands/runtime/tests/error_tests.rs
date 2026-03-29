@@ -4,7 +4,8 @@ use anyhow::anyhow;
 use nettoolskit_runtime::{
     require_runtime_surface_contract, LocalContextCommandError, PlanningSummaryCommandError,
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
-    RuntimeDoctorCommandError, RuntimeHealthcheckCommandError,
+    RuntimeDoctorCommandError, RuntimeExportEnterpriseTrendsCommandError,
+    RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
     RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
     RuntimeSetupGlobalGitAliasesCommandError,
@@ -129,6 +130,25 @@ fn test_runtime_healthcheck_error_display_is_stable() {
     assert_eq!(
         error.to_string(),
         "failed to write runtime healthcheck output"
+    );
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "disk full"
+    );
+}
+
+#[test]
+fn test_runtime_export_enterprise_trends_error_display_is_stable() {
+    let error = RuntimeExportEnterpriseTrendsCommandError::WriteOutput {
+        source: anyhow!("disk full"),
+    };
+
+    assert_eq!(
+        error.to_string(),
+        "failed to write runtime enterprise-trends output"
     );
     assert_eq!(
         error
