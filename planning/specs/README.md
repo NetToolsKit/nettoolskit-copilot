@@ -52,6 +52,7 @@ planning/
 ## Active Specs
 
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
+- [planning/specs/active/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md](planning/specs/active/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md)
 
 ---
 
