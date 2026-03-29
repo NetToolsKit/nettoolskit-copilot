@@ -52,7 +52,7 @@ planning/
 
 ## Active Workstreams
 
-- [planning/active/plan-script-retirement-phase-14.md](planning/active/plan-script-retirement-phase-14.md)
+- None.
 
 ---
 
@@ -83,6 +83,7 @@ planning/
 - [planning/completed/plan-script-retirement-phase-11.md](planning/completed/plan-script-retirement-phase-11.md)
 - [planning/completed/plan-script-retirement-phase-12.md](planning/completed/plan-script-retirement-phase-12.md)
 - [planning/completed/plan-script-retirement-phase-13.md](planning/completed/plan-script-retirement-phase-13.md)
+- [planning/completed/plan-script-retirement-phase-14.md](planning/completed/plan-script-retirement-phase-14.md)
 - [planning/completed/script-retirement-safety-matrix.md](planning/completed/script-retirement-safety-matrix.md)
 - [planning/completed/plan-readme-standards-repository-normalization.md](planning/completed/plan-readme-standards-repository-normalization.md)
 - [planning/completed/plan-repository-operations-hygiene.md](planning/completed/plan-repository-operations-hygiene.md)
@@ -103,6 +104,7 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-10.md](planning/specs/completed/spec-script-retirement-phase-10.md)
 - [planning/specs/completed/spec-script-retirement-phase-11.md](planning/specs/completed/spec-script-retirement-phase-11.md)
 - [planning/specs/completed/spec-script-retirement-phase-12.md](planning/specs/completed/spec-script-retirement-phase-12.md)
+- [planning/specs/completed/spec-script-retirement-phase-14.md](planning/specs/completed/spec-script-retirement-phase-14.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)

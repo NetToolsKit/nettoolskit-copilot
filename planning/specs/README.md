@@ -51,7 +51,7 @@ planning/
 
 ## Active Specs
 
-- [planning/specs/active/spec-script-retirement-phase-14.md](planning/specs/active/spec-script-retirement-phase-14.md)
+- None.
 
 ---
 
@@ -81,6 +81,7 @@ planning/
 - [planning/specs/completed/spec-script-retirement-phase-11.md](planning/specs/completed/spec-script-retirement-phase-11.md)
 - [planning/specs/completed/spec-script-retirement-phase-12.md](planning/specs/completed/spec-script-retirement-phase-12.md)
 - [planning/specs/completed/spec-script-retirement-phase-13.md](planning/specs/completed/spec-script-retirement-phase-13.md)
+- [planning/specs/completed/spec-script-retirement-phase-14.md](planning/specs/completed/spec-script-retirement-phase-14.md)
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
