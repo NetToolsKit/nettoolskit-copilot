@@ -375,6 +375,32 @@ pub enum RuntimeRenderVscodeMcpTemplateCommandError {
     },
 }
 
+/// Errors raised by provider-surface render commands.
+#[derive(Debug, Error)]
+pub enum RuntimeRenderProviderSurfacesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime provider-surface workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Provider-surface catalog loading failed.
+    #[error("failed to read runtime provider-surface catalog")]
+    ReadCatalog {
+        /// Underlying catalog load failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Provider-surface rendering failed.
+    #[error("failed to render runtime provider surfaces")]
+    RenderSurfaces {
+        /// Underlying render failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by tracked MCP artifact render commands.
 #[derive(Debug, Error)]
 pub enum RuntimeRenderMcpRuntimeArtifactsCommandError {

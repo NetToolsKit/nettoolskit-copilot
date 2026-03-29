@@ -6,6 +6,7 @@ use nettoolskit_runtime::{
     RuntimeApplyVscodeTemplatesCommandError, RuntimeBootstrapCommandError,
     RuntimeDoctorCommandError, RuntimeExportEnterpriseTrendsCommandError,
     RuntimeHealthcheckCommandError,
+    RuntimeRenderProviderSurfacesCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
     RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
     RuntimeSetupGlobalGitAliasesCommandError,
@@ -175,6 +176,22 @@ fn test_runtime_apply_vscode_templates_error_display_is_stable() {
             .expect("source should be preserved")
             .to_string(),
         "missing template"
+    );
+}
+
+#[test]
+fn test_runtime_render_provider_surfaces_error_display_is_stable() {
+    let error = RuntimeRenderProviderSurfacesCommandError::RenderSurfaces {
+        source: anyhow!("unsupported renderer"),
+    };
+
+    assert_eq!(error.to_string(), "failed to render runtime provider surfaces");
+    assert_eq!(
+        error
+            .source()
+            .expect("source should be preserved")
+            .to_string(),
+        "unsupported renderer"
     );
 }
 

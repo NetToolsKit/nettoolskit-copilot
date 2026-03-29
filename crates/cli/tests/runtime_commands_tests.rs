@@ -95,7 +95,7 @@ fn write_mcp_runtime_catalog(repo_root: &Path) {
 fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
     write_file(
         &repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
-        r#"{"version":1,"renderers":[{"id":"github-instruction-surfaces","consumers":{"bootstrap":{"enabled":true,"order":10,"condition":"always"}}},{"id":"vscode-profile-surfaces","consumers":{"bootstrap":{"enabled":true,"order":20,"condition":"always"}}},{"id":"vscode-workspace-surfaces","consumers":{"bootstrap":{"enabled":true,"order":30,"condition":"always"}}},{"id":"codex-compatibility-surfaces","consumers":{"bootstrap":{"enabled":true,"order":40,"condition":"codex"}}},{"id":"codex-skill-surfaces","consumers":{"bootstrap":{"enabled":true,"order":50,"condition":"codex"}}},{"id":"codex-orchestration-surfaces","consumers":{"bootstrap":{"enabled":true,"order":60,"condition":"codex"}}},{"id":"claude-runtime-surfaces","consumers":{"bootstrap":{"enabled":true,"order":70,"condition":"claude"}}},{"id":"claude-skill-surfaces","consumers":{"bootstrap":{"enabled":false,"order":80,"condition":"claude"}}}]}"#,
+        r#"{"version":1,"renderers":[{"id":"github-instruction-surfaces","consumers":{"bootstrap":{"enabled":true,"order":10,"condition":"always"},"direct":{"enabled":true,"order":10}}},{"id":"vscode-profile-surfaces","consumers":{"bootstrap":{"enabled":true,"order":20,"condition":"always"},"direct":{"enabled":true,"order":20}}},{"id":"vscode-workspace-surfaces","consumers":{"bootstrap":{"enabled":true,"order":30,"condition":"always"},"direct":{"enabled":true,"order":30}}},{"id":"codex-compatibility-surfaces","consumers":{"bootstrap":{"enabled":true,"order":40,"condition":"codex"},"direct":{"enabled":true,"order":40}}},{"id":"codex-skill-surfaces","consumers":{"bootstrap":{"enabled":true,"order":50,"condition":"codex"},"direct":{"enabled":true,"order":50}}},{"id":"codex-orchestration-surfaces","consumers":{"bootstrap":{"enabled":true,"order":60,"condition":"codex"},"direct":{"enabled":true,"order":60}}},{"id":"claude-runtime-surfaces","consumers":{"bootstrap":{"enabled":true,"order":70,"condition":"claude"},"direct":{"enabled":true,"order":70}}},{"id":"claude-skill-surfaces","consumers":{"bootstrap":{"enabled":false,"order":80,"condition":"claude"},"direct":{"enabled":true,"order":80},"claudeSkillSync":{"enabled":true,"order":10}}},{"id":"mcp-runtime-artifacts","consumers":{"bootstrap":{"enabled":false,"order":90,"condition":"never"},"direct":{"enabled":true,"order":90}}}]}"#,
     );
 
     write_file(
@@ -440,6 +440,53 @@ fn test_runtime_render_vscode_mcp_template_cli_writes_requested_output_path() {
         .stdout(predicate::str::contains("Servers rendered: 2"));
 
     assert!(repo.path().join(".temp/vscode.mcp.generated.json").is_file());
+}
+
+#[test]
+fn test_runtime_render_provider_surfaces_cli_supports_summary_only() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    initialize_minimal_provider_surface_projection(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "render-provider-surfaces", "--summary-only"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Provider surface render selection",
+        ))
+        .stdout(predicate::str::contains("Consumer: direct"))
+        .stdout(predicate::str::contains("Selected renderers: 9"))
+        .stdout(predicate::str::contains("github-instruction-surfaces"));
+
+    assert!(!repo.path().join(".github/AGENTS.md").exists());
+}
+
+#[test]
+fn test_runtime_render_provider_surfaces_cli_renders_requested_renderer() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    initialize_minimal_provider_surface_projection(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "render-provider-surfaces",
+            "--renderer-id",
+            "github-instruction-surfaces",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Renderers invoked: 1"))
+        .stdout(predicate::str::contains("github-instruction-surfaces"));
+
+    assert!(repo.path().join(".github/AGENTS.md").is_file());
+    assert!(repo
+        .path()
+        .join(".github/instructions/super-agent.instructions.md")
+        .is_file());
 }
 
 #[test]

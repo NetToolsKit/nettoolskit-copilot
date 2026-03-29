@@ -5,7 +5,8 @@ use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
     export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
     invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_doctor,
-    invoke_render_mcp_runtime_artifacts, invoke_render_vscode_mcp_template,
+    invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
+    invoke_render_vscode_mcp_template,
     invoke_runtime_healthcheck, invoke_runtime_self_heal, invoke_setup_git_hooks,
     invoke_setup_global_git_aliases, invoke_sync_codex_mcp_config,
     invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
@@ -14,6 +15,7 @@ use nettoolskit_runtime::{
     RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
     RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
     RuntimePreToolUseRequest, RuntimeRenderMcpRuntimeArtifactsRequest,
+    RuntimeRenderProviderSurfacesRequest,
     RuntimeRenderVscodeMcpTemplateRequest, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
     RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
     RuntimeSyncCodexMcpConfigRequest, RuntimeTrimTrailingBlankLinesRequest,
@@ -49,6 +51,9 @@ pub enum RuntimeCommand {
     /// Render the tracked VS Code MCP template from the canonical catalog.
     #[command(name = "render-vscode-mcp-template")]
     RenderVscodeMcpTemplate(RuntimeRenderVscodeMcpTemplateArgs),
+    /// Render tracked provider surfaces from the canonical projection catalog.
+    #[command(name = "render-provider-surfaces")]
+    RenderProviderSurfaces(RuntimeRenderProviderSurfacesArgs),
     /// Render the tracked VS Code and Codex MCP artifacts from the canonical catalog.
     #[command(name = "render-mcp-runtime-artifacts")]
     RenderMcpRuntimeArtifacts(RuntimeRenderMcpRuntimeArtifactsArgs),
@@ -325,6 +330,32 @@ pub struct RuntimeRenderVscodeMcpTemplateArgs {
     pub output_path: Option<PathBuf>,
 }
 
+/// CLI arguments for `runtime render-provider-surfaces`.
+#[derive(Debug, Args)]
+pub struct RuntimeRenderProviderSurfacesArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit provider-surface projection catalog path.
+    #[clap(long)]
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit renderer ids to invoke directly.
+    #[clap(long = "renderer-id")]
+    pub renderer_ids: Vec<String>,
+    /// Optional explicit consumer selection. Defaults to `direct`.
+    #[clap(long)]
+    pub consumer_name: Option<String>,
+    /// Include Codex-gated bootstrap renderers.
+    #[clap(long)]
+    pub enable_codex_runtime: bool,
+    /// Include Claude-gated bootstrap renderers.
+    #[clap(long)]
+    pub enable_claude_runtime: bool,
+    /// Print the selected renderer ids without invoking them.
+    #[clap(long)]
+    pub summary_only: bool,
+}
+
 /// CLI arguments for `runtime render-mcp-runtime-artifacts`.
 #[derive(Debug, Args)]
 pub struct RuntimeRenderMcpRuntimeArtifactsArgs {
@@ -456,6 +487,9 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         }
         RuntimeCommand::RenderVscodeMcpTemplate(arguments) => {
             execute_render_vscode_mcp_template(arguments)
+        }
+        RuntimeCommand::RenderProviderSurfaces(arguments) => {
+            execute_render_provider_surfaces(arguments)
         }
         RuntimeCommand::RenderMcpRuntimeArtifacts(arguments) => {
             execute_render_mcp_runtime_artifacts(arguments)
@@ -845,6 +879,43 @@ fn execute_render_vscode_mcp_template(
     println!("Generated: {}", result.output_path.display());
     println!("Catalog: {}", result.catalog_path.display());
     println!("Servers rendered: {}", result.server_count);
+    ExitStatus::Success
+}
+
+fn execute_render_provider_surfaces(arguments: RuntimeRenderProviderSurfacesArgs) -> ExitStatus {
+    let result = match invoke_render_provider_surfaces(&RuntimeRenderProviderSurfacesRequest {
+        repo_root: arguments.repo_root,
+        catalog_path: arguments.catalog_path,
+        renderer_ids: arguments.renderer_ids,
+        consumer_name: arguments.consumer_name,
+        enable_codex_runtime: arguments.enable_codex_runtime,
+        enable_claude_runtime: arguments.enable_claude_runtime,
+        summary_only: arguments.summary_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Provider surface render selection");
+    println!("  Catalog: {}", result.catalog_path.display());
+    println!("  Consumer: {}", result.consumer_name);
+    println!("  Selected renderers: {}", result.selected_renderer_ids.len());
+    for renderer_id in &result.selected_renderer_ids {
+        println!("  - {renderer_id}");
+    }
+
+    if result.summary_only {
+        return ExitStatus::Success;
+    }
+
+    println!();
+    println!("Provider surface render summary");
+    println!("  Catalog: {}", result.catalog_path.display());
+    println!("  Consumer: {}", result.consumer_name);
+    println!("  Renderers invoked: {}", result.rendered_count);
     ExitStatus::Success
 }
 
