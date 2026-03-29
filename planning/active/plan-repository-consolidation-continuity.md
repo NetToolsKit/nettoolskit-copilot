@@ -4,14 +4,14 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29
+- LastUpdated: 2026-03-29 08:26
 - Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-17 domain consumer migration that will retire the remaining 69 `retain until` scripts.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
 - Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
-- Dependency: `planning/active/plan-script-retirement-phase-17.md` must complete before Workstream W5 begins; all other workstreams can proceed in parallel with Phase 17.
+- Dependency: `planning/completed/plan-script-retirement-phase-17.md` is now complete; Workstream W5 can begin from the closed 102-script baseline.
 - Inputs:
-  - `planning/active/plan-script-retirement-phase-17.md`
+  - `planning/completed/plan-script-retirement-phase-17.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
@@ -41,7 +41,7 @@ This plan coordinates six workstreams:
 | W5 | Post-Phase-17 domain consumer migration (Phases 18–21) | `nettoolskit-copilot` | 🟠 Planned | W1 complete |
 | W6 | `copilot-instructions` Phase 8 Rust directives | `copilot-instructions` | 🟡 High | — |
 
-This plan does not replace `plan-script-retirement-phase-17.md`; it runs alongside it and depends on it for W5.
+This plan does not replace `plan-script-retirement-phase-17.md`; Phase 17 is now archived and this plan inherits its closed baseline for W5.
 
 ---
 
@@ -51,17 +51,17 @@ This plan does not replace `plan-script-retirement-phase-17.md`; it runs alongsi
 
 ### Workstream W1 — Phase 17 Reference (active sibling plan)
 
-Status: `[ ]` Pending (Phase 17 plan active and independent)
+Status: `[x]` Completed (Phase 17 archived and consumer-sweep baseline unlocked)
 
-This workstream is tracked entirely in `planning/active/plan-script-retirement-phase-17.md`.
-It targets `scripts/runtime/doctor.ps1` and `scripts/runtime/healthcheck.ps1` and reduces
+This workstream is tracked entirely in `planning/completed/plan-script-retirement-phase-17.md`.
+It targeted `scripts/runtime/doctor.ps1` and `scripts/runtime/healthcheck.ps1` and reduced
 the live script estate from 104 to 102.
 
 **This plan's only dependency on W1:**
-- W5 cannot begin until Phase 17 is archived and the safety matrix reflects 102 scripts.
+- W5 now starts from the archived Phase 17 result with the safety matrix reflecting 102 scripts.
 
 **Checkpoint: Phase 17 Complete**
-- `planning/active/plan-script-retirement-phase-17.md` moved to `planning/completed/`
+- `planning/completed/plan-script-retirement-phase-17.md` archived with executed result
 - `planning/completed/script-retirement-safety-matrix.md` reflects live estate of 102
 - `planning/completed/rust-script-parity-ledger.md` records both `doctor` and `healthcheck` as `retired locally`
 
@@ -419,9 +419,9 @@ Status: `[ ]` Pending
 
 ### Workstream W5 — Post-Phase-17 Domain Consumer Migration (Phases 18–21)
 
-Status: `[ ]` Pending (blocked on W1 complete)
+Status: `[ ]` Pending
 
-**Pre-condition:** `plan-script-retirement-phase-17.md` must be in `planning/completed/` before any Phase 18 task begins. Starting consumer sweeps while Phase 17 is open would produce consumer evidence against a still-changing script estate.
+**Pre-condition:** satisfied. `plan-script-retirement-phase-17.md` is now in `planning/completed/`, so future Phase 18 consumer sweeps can start from a stable script estate.
 
 **Script estate after Phase 17:** 102 total (33 retained by policy + 69 `retain until consumer migration`).
 
@@ -430,7 +430,7 @@ The 69 `retain until` scripts are distributed:
 | Domain | Count | Safety Matrix Status |
 |---|---:|---|
 | `scripts/common/*.ps1` | 15 | `retain until consumer migration completes` |
-| `scripts/runtime/*.ps1` excl. hooks and Phase 17 retirees | 34 | `retain until consumer migration completes` |
+| `scripts/runtime/*.ps1` excl. hooks and Phase 17 retirees | 36 | `retain until consumer migration completes` |
 | `scripts/security/*.ps1` | 6 | `retain until consumer migration completes` |
 | `scripts/governance/*.ps1` | 2 | `retain until consumer migration completes` |
 | `scripts/orchestration/**/*.ps1` | 10 | `retain until consumer migration completes` |
@@ -475,14 +475,14 @@ Status: `[ ]` Pending (blocked on Phase 18 plan creation)
 - Commit checkpoint:
   - `chore(scripts): Phase 18 — retire confirmed-zero-consumer scripts/common scripts`
 
-#### Task W5.3: Create Phase 19 Plan — `scripts/runtime/*.ps1` Excluding Hooks (34)
+#### Task W5.3: Create Phase 19 Plan — `scripts/runtime/*.ps1` Excluding Hooks (36)
 
 Status: `[ ]` Pending (blocked on Phase 18 complete)
 
-- This is the largest single domain: 34 scripts after Phase 17 removes `doctor.ps1` and `healthcheck.ps1`.
+- This is the largest single domain: 36 scripts after Phase 17 removes `doctor.ps1` and `healthcheck.ps1`.
 - Create `planning/specs/active/spec-script-retirement-phase-19.md` with:
-  - Problem: 34 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
-  - Group the 34 scripts into sub-slices by functional surface to enable incremental deletion:
+  - Problem: 36 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
+  - Group the 36 scripts into sub-slices by functional surface to enable incremental deletion:
     - Sub-slice A: sync/render scripts (`render-*.ps1`, `sync-*.ps1`, `setup-*.ps1`) — likely consumed only by CI/docs
     - Sub-slice B: invoke/pipeline scripts (`invoke-*.ps1`, `run-*.ps1`, `replay-*.ps1`, `resume-*.ps1`, `evaluate-*.ps1`) — likely consumed by orchestration and CI
     - Sub-slice C: install/bootstrap/clean scripts (`bootstrap.ps1`, `install.ps1`, `clean-*.ps1`, `self-heal.ps1`, `set-*.ps1`, `doctor.ps1` already gone by Phase 17)

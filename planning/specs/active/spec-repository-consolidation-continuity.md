@@ -4,12 +4,12 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29
+- LastUpdated: 2026-03-29 08:26
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
 - Source Inputs:
-  - `planning/active/plan-script-retirement-phase-17.md` (active sibling)
+  - `planning/completed/plan-script-retirement-phase-17.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `.github/instructions/repository-operating-model.instructions.md`
@@ -88,7 +88,7 @@ For `crates/cli/README.md`, the existing 3-feature bullet list is too shallow. E
 Consumer sweeps are executed in domain order, smallest-first, with parity requirement: each domain must prove zero local non-self consumers before being treated as a deletion candidate. The sequence is:
 
 - Phase 18: `scripts/common/*.ps1` (15) — shared helpers; high risk of implicit consumers in every other domain.
-- Phase 19: `scripts/runtime/*.ps1` excluding hooks (34 after Phase 17) — largest single domain; planned as one grouped sweep, may split into sub-phases.
+- Phase 19: `scripts/runtime/*.ps1` excluding hooks (36 after Phase 17) — largest single domain; planned as one grouped sweep, may split into sub-phases.
 - Phase 20: `scripts/security/*.ps1` (6) + `scripts/governance/*.ps1` (2) — governance surface; `shared-script-checksums.manifest.json` is the key blocker to repoint.
 - Phase 21: `scripts/orchestration/**/*.ps1` (10) — staged execution; depends on orchestrator parity being proven end-to-end.
 
