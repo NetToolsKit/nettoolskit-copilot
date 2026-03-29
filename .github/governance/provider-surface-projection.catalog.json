@@ -31,7 +31,9 @@
     },
     {
       "id": "codex-compatibility-surfaces",
-      "scriptPath": "scripts/runtime/render-codex-compatibility-surfaces.ps1",
+      "nativeCommand": {
+        "kind": "ntk-runtime-render-provider-surfaces"
+      },
       "description": "Render authored Codex compatibility docs/templates/wrappers from definitions.",
       "consumers": {
         "bootstrap": { "enabled": true, "order": 40, "condition": "codex" },

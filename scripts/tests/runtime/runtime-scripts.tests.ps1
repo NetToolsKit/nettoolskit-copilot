@@ -309,14 +309,6 @@ try {
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-workspace-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-workspace-surfaces missing OutputRoot parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-compatibility-surfaces.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-codex-compatibility-surfaces missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-codex-compatibility-surfaces missing SourceRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'ScriptsOutputRoot' -Message 'render-codex-compatibility-surfaces missing ScriptsOutputRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'McpOutputRoot' -Message 'render-codex-compatibility-surfaces missing McpOutputRoot parameter.'
-
     $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
@@ -542,10 +534,11 @@ try {
         $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
         $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
         $renderVscodeWorkspaceScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
-        $renderCodexCompatibilityScriptPath = Join-Path $runtimeScriptRoot 'render-codex-compatibility-surfaces.ps1'
         $renderCodexOrchestrationScriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
         $renderClaudeRuntimeScriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
+        $providerSurfaceCatalogHelperPath = Join-Path $resolvedRepoRoot 'scripts\common\provider-surface-catalog.ps1'
+        $providerSurfaceCatalogPath = Join-Path $resolvedRepoRoot '.github\governance\provider-surface-projection.catalog.json'
         $sharedDefinitionRoot = Join-Path $tempRepoRoot 'definitions\shared'
         $sharedPomlSourceRoot = Join-Path $sharedDefinitionRoot 'prompts\poml'
         $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
@@ -559,6 +552,7 @@ try {
         $claudeRuntimeSourceRoot = Join-Path $providerSourceRoot 'claude\runtime'
         $vscodeWorkspaceSourceRoot = Join-Path $providerSourceRoot 'vscode\workspace'
         $codexSkillOutput = Join-Path $tempRepoRoot '.codex\skills'
+        $codexScriptsOutputRoot = Join-Path $tempRepoRoot '.codex\scripts'
         $codexMcpOutputRoot = Join-Path $tempRepoRoot '.codex\mcp'
         $claudeSkillOutput = Join-Path $tempRepoRoot '.claude\skills'
         $codexOrchestrationOutputRoot = Join-Path $tempRepoRoot '.codex\orchestration'
@@ -634,12 +628,38 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $codexSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Codex skill output.'
         Assert-True (Test-Path -LiteralPath (Join-Path $claudeSkillOutput 'demo-skill\SKILL.md') -PathType Leaf) 'render-provider-skill-surfaces did not write Claude skill output.'
 
-        & $renderCodexCompatibilityScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        & $runtimeBinaryPath runtime render-provider-surfaces --repo-root $tempRepoRoot --catalog-path $providerSurfaceCatalogPath --renderer-id codex-compatibility-surfaces | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'render-codex-compatibility-surfaces smoke test failed.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex MCP README.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex config template.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex VS Code template.'
+        Assert-True ($exitCode -eq 0) 'runtime render-provider-surfaces codex-compatibility smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'README.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex scripts README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex MCP README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex config template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected Codex VS Code template.'
+        Remove-Item -LiteralPath $codexScriptsOutputRoot -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $codexMcpOutputRoot -Recurse -Force -ErrorAction SilentlyContinue
+
+        $previousRuntimeBinaryOverride = $env:CODEX_NTK_RUNTIME_BIN_PATH
+        try {
+            $env:CODEX_NTK_RUNTIME_BIN_PATH = $runtimeBinaryPath
+            . $providerSurfaceCatalogHelperPath
+            $projectionCatalog = Read-ProviderSurfaceProjectionCatalog -RepoRoot $tempRepoRoot -CatalogPath $providerSurfaceCatalogPath
+            $renderResults = Invoke-ProviderSurfaceProjectionRenderers -RepoRoot $tempRepoRoot -Catalog $projectionCatalog.Catalog -CatalogPath $projectionCatalog.Path -RendererIds @('codex-compatibility-surfaces')
+            Assert-True (@($renderResults).Count -eq 1) 'provider-surface-catalog helper should dispatch exactly one Codex compatibility renderer.'
+            Assert-True ($renderResults[0].DispatchKind -eq 'native-runtime') 'provider-surface-catalog helper should dispatch the Codex compatibility renderer through the native runtime command.'
+        }
+        finally {
+            if ($null -eq $previousRuntimeBinaryOverride) {
+                Remove-Item Env:CODEX_NTK_RUNTIME_BIN_PATH -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:CODEX_NTK_RUNTIME_BIN_PATH = $previousRuntimeBinaryOverride
+            }
+        }
+
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'README.md') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex scripts README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex MCP README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex config template.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'provider-surface-catalog helper did not write the projected Codex VS Code template.'
         Set-Content -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.tamplate.jsonc') -Value '{ "inputs": [], "servers": {} }' -Encoding UTF8 -NoNewline
         & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
