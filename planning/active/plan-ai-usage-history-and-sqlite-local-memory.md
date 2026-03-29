@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 18:11
+- LastUpdated: 2026-03-29 20:41
 - Objective: plan the implementation of persisted weekly AI usage history and the migration from the current JSON-backed local context index to a SQLite-backed local RAG/CAG memory system.
 - Normalized Request: create a planning workstream for weekly limit-consumption history and create a planning workstream for a local SQLite-based RAG/CAG system similar in spirit to `context-mode`, while keeping the repository operating model and current local-context behavior intact.
 - Active Branch: `feature/ai-usage-history-ledger`
@@ -265,7 +265,7 @@ Status: `[x]` Complete
 
 #### Task U2.5: Add Continuity Event Ingestion
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Add bounded event ingestion into the SQLite memory store for:
   - planning summary references
@@ -273,8 +273,14 @@ Status: `[ ]` Pending
   - selected runtime task transitions/failures
 - Do not ingest raw large outputs.
 - Add pruning/TTL policy for events.
+- Delivered in this checkpoint:
+  - `nettoolskit-core` now exposes bounded continuity writes for `events` and `sessions` in the repository-local SQLite memory store
+  - `export-planning-summary` now records a bounded `planning-summary` event with active plan/spec titles and suggested reference paths
+  - the orchestrator now persists bounded `ai-session-checkpoint` session summaries plus selected `runtime-task-audit` events into the same repo-local memory store
+  - repository-root detection for orchestrator ingestion now resolves the actual NTK repository root instead of trusting the raw process working directory
+  - event retention remains bounded by explicit TTL and expired rows are pruned during event writes
 - Checkpoint commit:
-  - `feat(runtime): add bounded local continuity event memory`
+  - `feat(runtime): ingest planning, session, and task continuity events`
 
 #### Task U2.6: Cut Over the Default Retrieval Path
 
@@ -329,6 +335,16 @@ Status: `[ ]` Pending
   - `cargo test -p nettoolskit-cli --test test_suite ai_usage --quiet` ✅
   - `cargo check -p nettoolskit-orchestrator` ✅
   - `cargo check -p nettoolskit-cli` ✅
+- Checkpoint validation executed for the SQLite continuity-ingestion slice:
+  - `cargo fmt --all -- --check` ✅
+  - `cargo check -p nettoolskit-core` ✅
+  - `cargo check -p nettoolskit-runtime` ✅
+  - `cargo check -p nettoolskit-orchestrator` ✅
+  - `cargo test -p nettoolskit-core --test test_suite local_context::sqlite_tests --quiet` ✅
+  - `cargo test -p nettoolskit-runtime --test test_suite continuity::planning_summary_tests --quiet` ✅
+  - `cargo test -p nettoolskit-orchestrator persist_local_memory_ --quiet` ✅
+  - `cargo clippy -p nettoolskit-core -p nettoolskit-runtime -p nettoolskit-orchestrator --all-targets -- -D warnings` ✅
+  - `git diff --check` ✅
 
 ---
 

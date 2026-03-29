@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 18:11
+- LastUpdated: 2026-03-29 20:41
 - Objective: define the design intent, boundaries, and rollout strategy for two related capabilities: persisted weekly AI usage history and a SQLite-backed local RAG/CAG memory system that supersedes the current JSON-only local context index.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-ai-usage-history-and-sqlite-local-memory.md`
@@ -115,10 +115,13 @@ Current implementation checkpoint:
 - the repository-local SQLite store now boots under `.temp/context-memory/context.db`
 - schema bootstrap provisions `schema_metadata`, `documents`, `files`, `chunks`, `chunk_fts`, `events`, `sessions`, and `artifacts`
 - `build_local_context_index(...)` now dual-writes the JSON compatibility document and the SQLite snapshot in one pass
-- the first SQLite slice mirrors only catalog/document/file/chunk state; continuity-event ingestion remains a later bounded phase
+- the first SQLite slice mirrored catalog/document/file/chunk state before continuity ingestion; that additive continuity phase is now live
 - build/test evidence now proves path resolution, schema initialization, idempotent bootstrap, repeated rebuilds, and JSON/SQLite count parity
 - native command surfaces now include `ntk runtime update-local-memory` and `ntk runtime query-local-memory`
 - the SQLite query path is now live with FTS-backed recall plus deterministic `path_prefix`, `heading_contains`, and `exclude_paths` filters while the legacy JSON query remains available for compatibility
+- planning-summary exports now persist bounded `planning-summary` events into the repository-local memory store
+- orchestrator AI session checkpoints now persist bounded `sessions` rows plus `ai-session-checkpoint` events into the repository-local memory store
+- selected queued/failure/cancelled task audit transitions now persist bounded `runtime-task-audit` events using resolved repository-root detection
 
 ### 4. Weekly Usage History Must Record Both Actual and Estimated Values
 
@@ -162,6 +165,11 @@ Allowed memory classes in the first implementation:
 - planning summaries and active-plan/spec references
 - AI session checkpoints and compressed exchanges
 - selected runtime events: task id, intent, status transition, failure summary, chosen file refs
+
+Current implementation checkpoint:
+- planning-summary persistence stores bounded JSON metadata with active titles and suggested references instead of full markdown handoff bodies
+- AI session checkpoints store compressed summaries of the most recent exchanges instead of raw full prompt/response transcripts
+- runtime task audit persistence is intentionally limited to the initial queued submission and failure/cancelled transitions, not the full in-memory task audit stream
 
 Rejected for first release:
 - raw large tool outputs
