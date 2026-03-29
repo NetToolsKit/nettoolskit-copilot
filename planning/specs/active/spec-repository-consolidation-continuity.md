@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 13:35
+- LastUpdated: 2026-03-29 22:02
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
@@ -64,6 +64,11 @@ The authoritative source for `repository-operating-model.instructions.md` is `de
 3. Validate with `ntk validation instructions --repo-root . --warning-only false`.
 
 Changing only the `.github/` projection without updating the authoritative source is rejected because the next render pass would overwrite the fix.
+
+Current execution checkpoint:
+- the authoritative `definitions/shared/instructions/repository-operating-model.instructions.md` has now been rewritten to the Rust workspace topology and command model
+- the `.github/instructions/` projection has been re-rendered from that authoritative source
+- native validation confirmed the operating-model update without reopening planning-structure drift
 
 ### W3: CI PowerShell Test Coverage
 

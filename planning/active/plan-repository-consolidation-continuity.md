@@ -4,10 +4,10 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 13:35
+- LastUpdated: 2026-03-29 22:02
 - Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-20f Codex orchestration renderer consumer migration that will retire the remaining 63 `retain until` scripts.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29.
-- Active Branch: `feature/instruction-runtime-retirement-audit`
+- Active Branch: `docs/repository-operating-model-alignment`
 - Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
 - Dependency: `planning/completed/plan-script-retirement-phase-18.md`, `planning/completed/plan-script-retirement-phase-19.md`, `planning/completed/plan-script-retirement-phase-20c-self-heal.md`, `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`, `planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`, and `planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md` are now complete; Workstream W5 now continues from the closed 96-script baseline.
 - Inputs:
@@ -76,7 +76,7 @@ the live script estate from 104 to 100.
 
 ### Workstream W2 — Repository Operating Model Alignment
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 **Problem being fixed:**
 `repository-operating-model.instructions.md` describes a .NET/Clean Architecture monorepo with
@@ -86,7 +86,7 @@ commands, wrong topology, and wrong test filters.
 
 #### Task W2.1: Verify Authoritative Source Location
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Confirm whether `definitions/shared/instructions/repository-operating-model.instructions.md` exists.
 - If it exists, the authoritative source is `definitions/shared/instructions/` and the `.github/instructions/` copy is a projection.
@@ -100,7 +100,7 @@ Status: `[ ]` Pending
 
 #### Task W2.2: Rewrite Repository Topology Section
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Replace the current .NET topology description with the correct Rust workspace topology.
 - Target: the `## Repository Topology` block.
@@ -133,7 +133,7 @@ Status: `[ ]` Pending
 
 #### Task W2.3: Rewrite Build, Test, and Run Section
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Replace the current `dotnet build` / `dotnet test` block with Rust workspace commands.
 - Target: the `## Build, Test, and Run` block.
@@ -155,7 +155,7 @@ Status: `[ ]` Pending
 
 #### Task W2.4: Update Style, UI/API, and Testing Sections
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Target: `## Style and Artifact Hygiene`, `## UI, API, and Database Conventions`, `## Testing Expectations`.
 - Changes:
@@ -169,7 +169,7 @@ Status: `[ ]` Pending
 
 #### Task W2.5: Update Domain Instruction Map Section
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Target: `## Domain Instruction Map`.
 - The current map includes Vue/Quasar, ORM/EF Core, Docker/K8s, .NET-specific entries.
@@ -204,7 +204,7 @@ Status: `[ ]` Pending
 
 #### Task W2.6: Re-render Projection and Validate
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - If `definitions/shared/instructions/` was the authoritative source, trigger a re-render so `.github/instructions/` reflects the new content:
   - `ntk runtime bootstrap --repo-root . --mirror` or the equivalent `scripts/runtime/render-github-instruction-surfaces.ps1` invocation
@@ -214,6 +214,17 @@ Status: `[ ]` Pending
   - `git diff --check`
 - Commit checkpoint (after re-render):
   - `docs(instructions): re-render github instruction surfaces with updated operating model`
+
+**Checkpoint: W2 Operating Model Alignment Complete**
+- authoritative source confirmed at `definitions/shared/instructions/repository-operating-model.instructions.md`
+- projected GitHub copy re-rendered into `.github/instructions/repository-operating-model.instructions.md`
+- repository topology now describes the Rust multi-crate workspace instead of the old .NET monorepo layout
+- build/test/run guidance now points to `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt`, native `ntk validation`, runtime continuity commands, and the Rust vulnerability audit
+- style, testing, workflow patterns, and domain instruction map now align to the actual Rust workspace and retained PowerShell compatibility model
+- validation evidence:
+  - `cargo run -p nettoolskit-cli -- validation instructions --repo-root . --warning-only false` ✅
+  - `cargo run -p nettoolskit-cli -- validation planning-structure --repo-root . --warning-only false` ✅
+  - `git diff --check` ✅
 
 ---
 
