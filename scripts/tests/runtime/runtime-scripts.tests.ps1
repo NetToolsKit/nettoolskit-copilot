@@ -36,6 +36,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
     throw "Missing shared common bootstrap helper: $script:CommonBootstrapPath"
 }
 . $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('repository-paths', 'runtime-paths')
+. "$PSScriptRoot\..\..\common\mcp-runtime-catalog.ps1"
 # Fails the current runtime test when the supplied condition is false.
 function Assert-True {
     param(
@@ -115,6 +116,44 @@ try {
     Assert-True ($healthcheckHelpText -match '--target-agents-skills-path') 'runtime healthcheck help must expose --target-agents-skills-path.'
     Assert-True ($healthcheckHelpText -match '--target-copilot-skills-path') 'runtime healthcheck help must expose --target-copilot-skills-path.'
     Assert-True ($healthcheckHelpText -match '--runtime-profile') 'runtime healthcheck help must expose --runtime-profile.'
+
+    $applyTemplatesHelp = & $runtimeBinaryPath runtime apply-vscode-templates --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates help smoke test failed.'
+    $applyTemplatesHelpText = ($applyTemplatesHelp | Out-String)
+    Assert-True ($applyTemplatesHelpText -match '--repo-root') 'runtime apply-vscode-templates help must expose --repo-root.'
+    Assert-True ($applyTemplatesHelpText -match '--vscode-path') 'runtime apply-vscode-templates help must expose --vscode-path.'
+    Assert-True ($applyTemplatesHelpText -match '--force') 'runtime apply-vscode-templates help must expose --force.'
+    Assert-True ($applyTemplatesHelpText -match '--skip-settings') 'runtime apply-vscode-templates help must expose --skip-settings.'
+    Assert-True ($applyTemplatesHelpText -match '--skip-mcp') 'runtime apply-vscode-templates help must expose --skip-mcp.'
+
+    $renderVscodeMcpHelp = & $runtimeBinaryPath runtime render-vscode-mcp-template --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime render-vscode-mcp-template help smoke test failed.'
+    $renderVscodeMcpHelpText = ($renderVscodeMcpHelp | Out-String)
+    Assert-True ($renderVscodeMcpHelpText -match '--repo-root') 'runtime render-vscode-mcp-template help must expose --repo-root.'
+    Assert-True ($renderVscodeMcpHelpText -match '--catalog-path') 'runtime render-vscode-mcp-template help must expose --catalog-path.'
+    Assert-True ($renderVscodeMcpHelpText -match '--output-path') 'runtime render-vscode-mcp-template help must expose --output-path.'
+
+    $renderMcpArtifactsHelp = & $runtimeBinaryPath runtime render-mcp-runtime-artifacts --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime render-mcp-runtime-artifacts help smoke test failed.'
+    $renderMcpArtifactsHelpText = ($renderMcpArtifactsHelp | Out-String)
+    Assert-True ($renderMcpArtifactsHelpText -match '--repo-root') 'runtime render-mcp-runtime-artifacts help must expose --repo-root.'
+    Assert-True ($renderMcpArtifactsHelpText -match '--catalog-path') 'runtime render-mcp-runtime-artifacts help must expose --catalog-path.'
+    Assert-True ($renderMcpArtifactsHelpText -match '--vscode-output-path') 'runtime render-mcp-runtime-artifacts help must expose --vscode-output-path.'
+    Assert-True ($renderMcpArtifactsHelpText -match '--codex-output-path') 'runtime render-mcp-runtime-artifacts help must expose --codex-output-path.'
+
+    $syncCodexMcpHelp = & $runtimeBinaryPath runtime sync-codex-mcp-config --help
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    Assert-True ($exitCode -eq 0) 'runtime sync-codex-mcp-config help smoke test failed.'
+    $syncCodexMcpHelpText = ($syncCodexMcpHelp | Out-String)
+    Assert-True ($syncCodexMcpHelpText -match '--repo-root') 'runtime sync-codex-mcp-config help must expose --repo-root.'
+    Assert-True ($syncCodexMcpHelpText -match '--catalog-path') 'runtime sync-codex-mcp-config help must expose --catalog-path.'
+    Assert-True ($syncCodexMcpHelpText -match '--manifest-path') 'runtime sync-codex-mcp-config help must expose --manifest-path.'
+    Assert-True ($syncCodexMcpHelpText -match '--target-config-path') 'runtime sync-codex-mcp-config help must expose --target-config-path.'
+    Assert-True ($syncCodexMcpHelpText -match '--create-backup') 'runtime sync-codex-mcp-config help must expose --create-backup.'
+    Assert-True ($syncCodexMcpHelpText -match '--dry-run') 'runtime sync-codex-mcp-config help must expose --dry-run.'
 
     $scriptPath = Join-Path $runtimeScriptRoot 'self-heal.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
@@ -199,28 +238,29 @@ try {
     Assert-Contains -Collection $keys -Value 'SharedRoot' -Message 'render-github-instruction-surfaces missing SharedRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-github-instruction-surfaces missing OutputRoot parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-mcp-runtime-artifacts.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-mcp-runtime-artifacts missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-mcp-runtime-artifacts missing CatalogPath parameter.'
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('N'))
+    $tempRepoRoot = Join-Path $tempRoot 'repo'
+    $workspaceVscode = Join-Path $tempRepoRoot '.vscode'
+    $githubRoot = Join-Path $tempRepoRoot '.github'
+    $codexRoot = Join-Path $tempRepoRoot '.codex'
+    try {
+        New-Item -ItemType Directory -Path $workspaceVscode -Force | Out-Null
+        New-Item -ItemType Directory -Path $githubRoot -Force | Out-Null
+        New-Item -ItemType Directory -Path $codexRoot -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $workspaceVscode 'settings.tamplate.jsonc') -Value '{ "editor.tabSize": 4 }' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $workspaceVscode 'mcp.tamplate.jsonc') -Value '{ "servers": [] }' -Encoding UTF8 -NoNewline
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-vscode-mcp-template.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-vscode-mcp-template missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'render-vscode-mcp-template missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputPath' -Message 'render-vscode-mcp-template missing OutputPath parameter.'
-
-    $scriptPath = Join-Path $runtimeScriptRoot 'sync-codex-mcp-config.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'sync-codex-mcp-config missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'CatalogPath' -Message 'sync-codex-mcp-config missing CatalogPath parameter.'
-    Assert-Contains -Collection $keys -Value 'ManifestPath' -Message 'sync-codex-mcp-config missing ManifestPath parameter.'
-    Assert-Contains -Collection $keys -Value 'TargetConfigPath' -Message 'sync-codex-mcp-config missing TargetConfigPath parameter.'
-    Assert-Contains -Collection $keys -Value 'CreateBackup' -Message 'sync-codex-mcp-config missing CreateBackup parameter.'
-    Assert-Contains -Collection $keys -Value 'DryRun' -Message 'sync-codex-mcp-config missing DryRun parameter.'
+        & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'settings.json') -PathType Leaf) 'runtime apply-vscode-templates did not write settings.json.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'mcp.json') -PathType Leaf) 'runtime apply-vscode-templates did not write mcp.json.'
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempRoot) {
+            Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
 
     foreach ($hookScriptName in @('common.ps1', 'session-start.ps1', 'subagent-start.ps1')) {
         $scriptPath = Join-Path $runtimeScriptRoot ('hooks\' + $hookScriptName)
@@ -382,7 +422,6 @@ try {
     $workspaceHelperPath = Join-Path $workspaceVscode 'mcp-vscode-global.json'
     $profilePath = Join-Path $workspaceVscode 'profiles\profile-frontend.json'
     $scriptPath = Join-Path $runtimeScriptRoot 'sync-vscode-global-mcp.ps1'
-    $renderScriptPath = Join-Path $runtimeScriptRoot 'render-mcp-runtime-artifacts.ps1'
     try {
         New-Item -ItemType Directory -Path $workspaceVscode -Force | Out-Null
         New-Item -ItemType Directory -Path $codexRoot -Force | Out-Null
@@ -469,15 +508,27 @@ try {
         Assert-True (($renderedDocument.servers.'enabled/by-default'.disabled -eq $true)) 'sync-vscode-global-mcp did not disable a server rejected by the profile.'
         Assert-True ($renderedGlobalMcp -eq $renderedHelper) 'sync-vscode-global-mcp did not keep the workspace helper aligned with the global MCP output.'
 
-        & $renderScriptPath -RepoRoot $tempRepoRoot -CatalogPath $catalogPath | Out-Null
-        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'render-mcp-runtime-artifacts smoke test failed.'
+        $renderedCatalog = Read-McpRuntimeCatalog -RepoRoot $tempRepoRoot -CatalogPath $catalogPath
+        $renderedVscodeDocument = Convert-McpRuntimeCatalogToVscodeDocument -Catalog $renderedCatalog.Catalog
+        $renderedManifest = Convert-McpRuntimeCatalogToCodexManifest -Catalog $renderedCatalog.Catalog
         $renderedTemplatePath = Join-Path $workspaceVscode 'mcp.tamplate.jsonc'
         $renderedManifestPath = Join-Path $tempRepoRoot '.codex\mcp\servers.manifest.json'
-        Assert-True (Test-Path -LiteralPath $renderedTemplatePath -PathType Leaf) 'render-mcp-runtime-artifacts did not write the VS Code template.'
-        Assert-True (Test-Path -LiteralPath $renderedManifestPath -PathType Leaf) 'render-mcp-runtime-artifacts did not write the Codex manifest.'
-        $renderedManifest = Get-Content -LiteralPath $renderedManifestPath -Raw | ConvertFrom-Json -Depth 100
-        Assert-True (@($renderedManifest.servers).Count -gt 0) 'render-mcp-runtime-artifacts should emit manifest servers.'
+        New-Item -ItemType Directory -Path (Split-Path -Path $renderedManifestPath -Parent) -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $workspaceVscode 'settings.tamplate.jsonc') -Value '{ "editor.tabSize": 4 }' -Encoding UTF8 -NoNewline
+        $renderedVscodeDocument | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $renderedTemplatePath -Encoding UTF8 -NoNewline
+        $renderedManifest | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $renderedManifestPath -Encoding UTF8 -NoNewline
+        Assert-True (@($renderedVscodeDocument.inputs).Count -gt 0) 'Rendered MCP VS Code document should emit inputs.'
+        Assert-True (@($renderedVscodeDocument.servers).Count -gt 0) 'Rendered MCP VS Code document should emit servers.'
+
+        & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+        Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'settings.json') -PathType Leaf) 'runtime apply-vscode-templates did not write settings.json.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $workspaceVscode 'mcp.json') -PathType Leaf) 'runtime apply-vscode-templates did not write mcp.json.'
+        Assert-True (Test-Path -LiteralPath $renderedTemplatePath -PathType Leaf) 'rendered MCP VS Code template was not written.'
+        Assert-True (Test-Path -LiteralPath $renderedManifestPath -PathType Leaf) 'rendered MCP Codex manifest was not written.'
+        $renderedManifestDocument = Get-Content -LiteralPath $renderedManifestPath -Raw | ConvertFrom-Json -Depth 100
+        Assert-True (@($renderedManifestDocument.servers).Count -gt 0) 'Rendered Codex manifest should emit servers.'
 
         $renderProviderSkillsScriptPath = Join-Path $runtimeScriptRoot 'render-provider-skill-surfaces.ps1'
         $renderProviderSurfacesScriptPath = Join-Path $runtimeScriptRoot 'render-provider-surfaces.ps1'
@@ -502,7 +553,6 @@ try {
         $vscodeWorkspaceSourceRoot = Join-Path $providerSourceRoot 'vscode\workspace'
         $codexSkillOutput = Join-Path $tempRepoRoot '.codex\skills'
         $codexMcpOutputRoot = Join-Path $tempRepoRoot '.codex\mcp'
-        $codexScriptsOutputRoot = Join-Path $tempRepoRoot '.codex\scripts'
         $claudeSkillOutput = Join-Path $tempRepoRoot '.claude\skills'
         $codexOrchestrationOutputRoot = Join-Path $tempRepoRoot '.codex\orchestration'
         $claudeRuntimeOutputRoot = Join-Path $tempRepoRoot '.claude'
@@ -530,35 +580,12 @@ try {
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'chatmodes') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $tempRepoRoot 'scripts\runtime') -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'README.md') -Value '# Demo Codex MCP' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'codex.config.template.toml') -Value '[mcp_servers.demo]' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'vscode.mcp.template.json') -Value '{ "servers": {} }' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'README.md') -Value '# Demo Codex Scripts' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'render-vscode-mcp.ps1') -Value @(
-            "[CmdletBinding()]",
-            "param([string] `$OutputPath)",
-            "`$ErrorActionPreference = 'Stop'",
-            "function Resolve-CanonicalRuntimeScriptPath {",
-            "    param([Parameter(Mandatory = `$true)][string] `$ScriptName)",
-            "    return [System.IO.Path]::GetFullPath((Join-Path `$PSScriptRoot (Join-Path '..\\..\\scripts\\runtime' `$ScriptName)))",
-            "}",
-            "& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'render-vscode-mcp-template.ps1') @PSBoundParameters",
-            "exit `$LASTEXITCODE"
-        ) -Encoding UTF8
-        Set-Content -LiteralPath (Join-Path $codexScriptsSourceRoot 'sync-mcp-to-codex-config.ps1') -Value @(
-            "[CmdletBinding()]",
-            "param([string] `$TargetConfigPath)",
-            "`$ErrorActionPreference = 'Stop'",
-            "function Resolve-CanonicalRuntimeScriptPath {",
-            "    param([Parameter(Mandatory = `$true)][string] `$ScriptName)",
-            "    return [System.IO.Path]::GetFullPath((Join-Path `$PSScriptRoot (Join-Path '..\\..\\scripts\\runtime' `$ScriptName)))",
-            "}",
-            "& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'sync-codex-mcp-config.ps1') @PSBoundParameters",
-            "exit `$LASTEXITCODE"
-        ) -Encoding UTF8
         Set-Content -LiteralPath (Join-Path $claudeSkillSource 'SKILL.md') -Value '# Demo Claude Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'README.md') -Value '# Demo Codex Orchestration' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexOrchestrationSourceRoot 'agents.manifest.json') -Value '{ "agents": [] }' -Encoding UTF8 -NoNewline
@@ -593,16 +620,6 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'templates\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\render-vscode-mcp-template.ps1') -Value @(
-            "param([string] `$OutputPath)",
-            "New-Item -ItemType Directory -Path (Split-Path -Path `$OutputPath -Parent) -Force | Out-Null",
-            'Set-Content -LiteralPath $OutputPath -Value ''{ "demo": true }'' -Encoding UTF8 -NoNewline'
-        ) -Encoding UTF8
-        Set-Content -LiteralPath (Join-Path $tempRepoRoot 'scripts\runtime\sync-codex-mcp-config.ps1') -Value @(
-            "param([string] `$TargetConfigPath)",
-            "New-Item -ItemType Directory -Path (Split-Path -Path `$TargetConfigPath -Parent) -Force | Out-Null",
-            "Set-Content -LiteralPath `$TargetConfigPath -Value '[mcp_servers.demo]' -Encoding UTF8 -NoNewline"
-        ) -Encoding UTF8
 
         & $renderProviderSkillsScriptPath -RepoRoot $tempRepoRoot -Provider codex,claude | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
@@ -616,19 +633,14 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'README.md') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex MCP README.'
         Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'codex.config.template.toml') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex config template.'
         Assert-True (Test-Path -LiteralPath (Join-Path $codexMcpOutputRoot 'vscode.mcp.template.json') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex VS Code template.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexScriptsOutputRoot 'render-vscode-mcp.ps1') -PathType Leaf) 'render-codex-compatibility-surfaces did not write the projected Codex wrapper surface.'
-
-        $wrapperRenderOutputPath = Join-Path $tempRepoRoot '.temp\wrapper-vscode-mcp.json'
-        $wrapperConfigOutputPath = Join-Path $tempRepoRoot '.temp\wrapper-config.toml'
-        & (Join-Path $codexScriptsOutputRoot 'render-vscode-mcp.ps1') -OutputPath $wrapperRenderOutputPath | Out-Null
+        Set-Content -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.tamplate.jsonc') -Value '{ "inputs": [], "servers": {} }' -Encoding UTF8 -NoNewline
+        & $runtimeBinaryPath runtime apply-vscode-templates --repo-root $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'Projected render-vscode-mcp wrapper smoke test failed.'
-        Assert-True (Test-Path -LiteralPath $wrapperRenderOutputPath -PathType Leaf) 'Projected render-vscode-mcp wrapper did not forward to the canonical runtime script.'
-
-        & (Join-Path $codexScriptsOutputRoot 'sync-mcp-to-codex-config.ps1') -TargetConfigPath $wrapperConfigOutputPath | Out-Null
-        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'Projected sync-mcp-to-codex-config wrapper smoke test failed.'
-        Assert-True (Test-Path -LiteralPath $wrapperConfigOutputPath -PathType Leaf) 'Projected sync-mcp-to-codex-config wrapper did not forward to the canonical runtime script.'
+        Assert-True ($exitCode -eq 0) 'runtime apply-vscode-templates smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'settings.json') -PathType Leaf) 'runtime apply-vscode-templates did not write settings.json.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.json') -PathType Leaf) 'runtime apply-vscode-templates did not write mcp.json.'
+        $renderedMcpDocument = Get-Content -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'mcp.json') -Raw
+        Assert-True ($renderedMcpDocument -match 'servers') 'runtime apply-vscode-templates should emit the MCP server block.'
 
         & $renderVscodeProfilesScriptPath -RepoRoot $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }

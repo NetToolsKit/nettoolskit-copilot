@@ -342,6 +342,125 @@ pub enum RuntimeApplyVscodeTemplatesCommandError {
     },
 }
 
+/// Errors raised by runtime VS Code MCP template render commands.
+#[derive(Debug, Error)]
+pub enum RuntimeRenderVscodeMcpTemplateCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime vscode mcp workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Catalog loading failed.
+    #[error("failed to read runtime vscode mcp catalog")]
+    ReadCatalog {
+        /// Underlying catalog load failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Document rendering failed.
+    #[error("failed to render runtime vscode mcp document")]
+    RenderDocument {
+        /// Underlying serialization failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output writing failed.
+    #[error("failed to write runtime vscode mcp output")]
+    WriteOutput {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by tracked MCP artifact render commands.
+#[derive(Debug, Error)]
+pub enum RuntimeRenderMcpRuntimeArtifactsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime mcp artifact workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Catalog loading failed.
+    #[error("failed to read runtime mcp artifact catalog")]
+    ReadCatalog {
+        /// Underlying catalog load failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Artifact rendering failed.
+    #[error("failed to render runtime mcp artifacts")]
+    RenderDocument {
+        /// Underlying render or serialization failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output writing failed.
+    #[error("failed to write runtime mcp artifact output")]
+    WriteOutput {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by Codex MCP config sync commands.
+#[derive(Debug, Error)]
+pub enum RuntimeSyncCodexMcpConfigCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime codex mcp workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target config path does not exist.
+    #[error("target Codex config not found: {target_config_path}")]
+    TargetConfigNotFound {
+        /// Resolved target config path expected by the command.
+        target_config_path: String,
+    },
+    /// Server source resolution failed.
+    #[error("failed to resolve runtime codex mcp server source")]
+    ResolveServers {
+        /// Underlying catalog or manifest failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target config loading failed.
+    #[error("failed to read runtime codex mcp target config")]
+    ReadTargetConfig {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// TOML rendering failed.
+    #[error("failed to render runtime codex mcp config")]
+    RenderConfig {
+        /// Underlying render failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Backup creation failed.
+    #[error("failed to create runtime codex mcp config backup")]
+    CreateBackup {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output writing failed.
+    #[error("failed to write runtime codex mcp config")]
+    WriteOutput {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime global Git alias commands.
 #[derive(Debug, Error)]
 pub enum RuntimeSetupGlobalGitAliasesCommandError {

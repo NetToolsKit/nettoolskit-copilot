@@ -5,15 +5,17 @@ use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
     export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
     invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_runtime_doctor,
+    invoke_render_mcp_runtime_artifacts, invoke_render_vscode_mcp_template,
     invoke_runtime_healthcheck, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
-    invoke_trim_trailing_blank_lines, query_local_context_index, update_local_context_index,
-    ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
+    invoke_sync_codex_mcp_config, invoke_trim_trailing_blank_lines, query_local_context_index,
+    update_local_context_index, ExportPlanningSummaryRequest, QueryLocalContextIndexRequest,
     RuntimeApplyVscodeTemplatesRequest, RuntimeDoctorRequest, RuntimeDoctorStatus,
     RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
     RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
-    RuntimePreToolUseRequest, RuntimeSetupGitHooksRequest,
-    RuntimeSetupGlobalGitAliasesRequest, RuntimeTrimTrailingBlankLinesRequest,
-    UpdateLocalContextIndexRequest,
+    RuntimePreToolUseRequest, RuntimeRenderMcpRuntimeArtifactsRequest,
+    RuntimeRenderVscodeMcpTemplateRequest, RuntimeSetupGitHooksRequest,
+    RuntimeSetupGlobalGitAliasesRequest, RuntimeSyncCodexMcpConfigRequest,
+    RuntimeTrimTrailingBlankLinesRequest, UpdateLocalContextIndexRequest,
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -40,6 +42,15 @@ pub enum RuntimeCommand {
     ExportEnterpriseTrends(RuntimeExportEnterpriseTrendsArgs),
     /// Apply tracked VS Code template files into active workspace files.
     ApplyVscodeTemplates(RuntimeApplyVscodeTemplatesArgs),
+    /// Render the tracked VS Code MCP template from the canonical catalog.
+    #[command(name = "render-vscode-mcp-template")]
+    RenderVscodeMcpTemplate(RuntimeRenderVscodeMcpTemplateArgs),
+    /// Render the tracked VS Code and Codex MCP artifacts from the canonical catalog.
+    #[command(name = "render-mcp-runtime-artifacts")]
+    RenderMcpRuntimeArtifacts(RuntimeRenderMcpRuntimeArtifactsArgs),
+    /// Apply MCP server definitions into the local Codex config.toml.
+    #[command(name = "sync-codex-mcp-config")]
+    SyncCodexMcpConfig(RuntimeSyncCodexMcpConfigArgs),
     /// Trim trailing whitespace and blank lines from text files.
     TrimTrailingBlankLines(RuntimeTrimTrailingBlankLinesArgs),
     /// Apply staged-file EOF hygiene for repository pre-commit flows.
@@ -252,6 +263,60 @@ pub struct RuntimeApplyVscodeTemplatesArgs {
     pub skip_mcp: bool,
 }
 
+/// CLI arguments for `runtime render-vscode-mcp-template`.
+#[derive(Debug, Args)]
+pub struct RuntimeRenderVscodeMcpTemplateArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit MCP runtime catalog path.
+    #[clap(long)]
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit output path.
+    #[clap(long)]
+    pub output_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `runtime render-mcp-runtime-artifacts`.
+#[derive(Debug, Args)]
+pub struct RuntimeRenderMcpRuntimeArtifactsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit MCP runtime catalog path.
+    #[clap(long)]
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit VS Code output path.
+    #[clap(long)]
+    pub vscode_output_path: Option<PathBuf>,
+    /// Optional explicit Codex manifest output path.
+    #[clap(long)]
+    pub codex_output_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `runtime sync-codex-mcp-config`.
+#[derive(Debug, Args)]
+pub struct RuntimeSyncCodexMcpConfigArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit MCP runtime catalog path.
+    #[clap(long)]
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit generated Codex manifest path.
+    #[clap(long)]
+    pub manifest_path: Option<PathBuf>,
+    /// Optional explicit target Codex config path.
+    #[clap(long)]
+    pub target_config_path: Option<PathBuf>,
+    /// Create a timestamped backup before writing.
+    #[clap(long)]
+    pub create_backup: bool,
+    /// Print the rendered document without writing it.
+    #[clap(long)]
+    pub dry_run: bool,
+}
+
 /// CLI arguments for `runtime pre-commit-eof-hygiene`.
 #[derive(Debug, Args)]
 pub struct RuntimePreCommitEofHygieneArgs {
@@ -339,6 +404,15 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         }
         RuntimeCommand::ApplyVscodeTemplates(arguments) => {
             execute_apply_vscode_templates(arguments)
+        }
+        RuntimeCommand::RenderVscodeMcpTemplate(arguments) => {
+            execute_render_vscode_mcp_template(arguments)
+        }
+        RuntimeCommand::RenderMcpRuntimeArtifacts(arguments) => {
+            execute_render_mcp_runtime_artifacts(arguments)
+        }
+        RuntimeCommand::SyncCodexMcpConfig(arguments) => {
+            execute_sync_codex_mcp_config(arguments)
         }
         RuntimeCommand::TrimTrailingBlankLines(arguments) => {
             execute_trim_trailing_blank_lines(arguments)
@@ -662,6 +736,87 @@ fn execute_apply_vscode_templates(arguments: RuntimeApplyVscodeTemplatesArgs) ->
     println!("VS Code template apply summary");
     println!("  applied: {}", result.applied_count);
     println!("  skipped: {}", result.skipped_count);
+    ExitStatus::Success
+}
+
+fn execute_render_vscode_mcp_template(
+    arguments: RuntimeRenderVscodeMcpTemplateArgs,
+) -> ExitStatus {
+    let result = match invoke_render_vscode_mcp_template(&RuntimeRenderVscodeMcpTemplateRequest {
+        repo_root: arguments.repo_root,
+        catalog_path: arguments.catalog_path,
+        output_path: arguments.output_path,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Generated: {}", result.output_path.display());
+    println!("Catalog: {}", result.catalog_path.display());
+    println!("Servers rendered: {}", result.server_count);
+    ExitStatus::Success
+}
+
+fn execute_render_mcp_runtime_artifacts(
+    arguments: RuntimeRenderMcpRuntimeArtifactsArgs,
+) -> ExitStatus {
+    let result = match invoke_render_mcp_runtime_artifacts(
+        &RuntimeRenderMcpRuntimeArtifactsRequest {
+            repo_root: arguments.repo_root,
+            catalog_path: arguments.catalog_path,
+            vscode_output_path: arguments.vscode_output_path,
+            codex_output_path: arguments.codex_output_path,
+        },
+    ) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!();
+    println!("MCP runtime render summary");
+    println!("  Catalog: {}", result.catalog_path.display());
+    println!("  VS Code template: {}", result.vscode_output_path.display());
+    println!("  Codex manifest: {}", result.codex_output_path.display());
+    println!("  VS Code servers: {}", result.vscode_server_count);
+    println!("  Codex servers: {}", result.codex_server_count);
+    ExitStatus::Success
+}
+
+fn execute_sync_codex_mcp_config(arguments: RuntimeSyncCodexMcpConfigArgs) -> ExitStatus {
+    let result = match invoke_sync_codex_mcp_config(&RuntimeSyncCodexMcpConfigRequest {
+        repo_root: arguments.repo_root,
+        catalog_path: arguments.catalog_path,
+        manifest_path: arguments.manifest_path,
+        target_config_path: arguments.target_config_path,
+        create_backup: arguments.create_backup,
+        dry_run: arguments.dry_run,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    if let Some(backup_path) = &result.backup_path {
+        println!("Backup: {}", backup_path.display());
+    }
+
+    if result.dry_run {
+        println!("{}", result.rendered_document);
+        println!();
+        println!("Dry-run only. No file changes were written.");
+    } else {
+        println!("Updated: {}", result.target_config_path.display());
+        println!("Servers applied: {}", result.servers_applied);
+    }
+
     ExitStatus::Success
 }
 

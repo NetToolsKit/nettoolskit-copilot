@@ -48,6 +48,50 @@ fn write_validation_profile_catalog(repo_root: &Path) {
     );
 }
 
+fn write_mcp_runtime_catalog(repo_root: &Path) {
+    write_file(
+        &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+        r#"{
+  "version": 1,
+  "inputs": [
+    {
+      "id": "Authorization",
+      "type": "promptString",
+      "description": "Token",
+      "password": true
+    }
+  ],
+  "servers": [
+    {
+      "id": "microsoft/playwright-mcp",
+      "codexName": "playwright",
+      "targets": {
+        "vscode": { "include": true, "enabledByDefault": true },
+        "codex": { "include": true }
+      },
+      "definition": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["@playwright/mcp@latest"]
+      }
+    },
+    {
+      "id": "microsoftdocs/mcp",
+      "codexName": "microsoftdocs",
+      "targets": {
+        "vscode": { "include": true, "enabledByDefault": false },
+        "codex": { "include": true }
+      },
+      "definition": {
+        "type": "http",
+        "url": "https://learn.microsoft.com/api/mcp"
+      }
+    }
+  ]
+}"#,
+    );
+}
+
 fn initialize_runtime_health_repo(repo_root: &Path) {
     initialize_runtime_repo_root(repo_root);
     fs::create_dir_all(repo_root.join("scripts/runtime"))
@@ -266,6 +310,93 @@ fn test_runtime_apply_vscode_templates_copies_workspace_templates() {
 
     assert!(repo.path().join(".vscode/settings.json").is_file());
     assert!(repo.path().join(".vscode/mcp.json").is_file());
+}
+
+#[test]
+fn test_runtime_render_vscode_mcp_template_cli_writes_requested_output_path() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_mcp_runtime_catalog(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "render-vscode-mcp-template",
+            "--output-path",
+            ".temp/vscode.mcp.generated.json",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Generated:"))
+        .stdout(predicate::str::contains("Servers rendered: 2"));
+
+    assert!(repo.path().join(".temp/vscode.mcp.generated.json").is_file());
+}
+
+#[test]
+fn test_runtime_render_mcp_runtime_artifacts_cli_writes_tracked_outputs() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_mcp_runtime_catalog(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "render-mcp-runtime-artifacts"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("MCP runtime render summary"))
+        .stdout(predicate::str::contains("Codex servers: 2"));
+
+    assert!(repo.path().join(".vscode/mcp.tamplate.jsonc").is_file());
+    assert!(repo.path().join(".codex/mcp/servers.manifest.json").is_file());
+}
+
+#[test]
+fn test_runtime_sync_codex_mcp_config_cli_supports_manifest_dry_run() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    let manifest_path = repo.path().join("servers.manifest.json");
+    let config_path = repo.path().join("config.toml");
+
+    write_file(
+        &manifest_path,
+        r#"{
+  "version": 1,
+  "servers": [
+    {
+      "name": "playwright",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  ]
+}"#,
+    );
+    write_file(&config_path, "model = \"gpt-5\"\n");
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "sync-codex-mcp-config",
+            "--manifest-path",
+            "servers.manifest.json",
+            "--target-config-path",
+            "config.toml",
+            "--create-backup",
+            "--dry-run",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("[mcp_servers.playwright]"))
+        .stdout(predicate::str::contains("Dry-run only. No file changes were written."));
+
+    assert_eq!(
+        fs::read_to_string(repo.path().join("config.toml"))
+            .expect("config should be readable"),
+        "model = \"gpt-5\"\n"
+    );
 }
 
 #[test]

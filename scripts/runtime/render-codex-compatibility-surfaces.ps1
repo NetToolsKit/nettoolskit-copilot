@@ -8,9 +8,11 @@
     - `.codex/scripts/**`
     - selected authored files in `.codex/mcp/`
 
-    The generated `.codex/mcp/servers.manifest.json` remains owned by
-    `scripts/runtime/render-mcp-runtime-artifacts.ps1` and is intentionally left
-    untouched by this renderer.
+    The generated `.codex/mcp/servers.manifest.json` remains owned by the native
+    `ntk runtime render-mcp-runtime-artifacts` command. The local
+    `scripts/runtime/render-mcp-runtime-artifacts.ps1` leaf is still retained
+    temporarily because the provider-surface projection catalog currently
+    requires a path-backed renderer.
 
 .PARAMETER RepoRoot
     Optional repository root. Auto-detected when omitted.

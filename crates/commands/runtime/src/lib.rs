@@ -39,7 +39,8 @@ pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
     RuntimeBootstrapCommandError, RuntimeCleanBuildArtifactsCommandError,
     RuntimeDoctorCommandError, RuntimeExportEnterpriseTrendsCommandError,
-    RuntimeFixRegionSpacingCommandError,
+    RuntimeFixRegionSpacingCommandError, RuntimeRenderMcpRuntimeArtifactsCommandError,
+    RuntimeRenderVscodeMcpTemplateCommandError, RuntimeSyncCodexMcpConfigCommandError,
     RuntimeFixVersionRangesCommandError, RuntimeHealthcheckCommandError,
     RuntimePreCommitEofHygieneCommandError, RuntimePreToolUseCommandError,
     RuntimeSelfHealCommandError, RuntimeSetupGitHooksCommandError,
@@ -83,6 +84,15 @@ pub use sync::apply_vscode_templates::{
 };
 pub use sync::bootstrap::{
     invoke_runtime_bootstrap, RuntimeBootstrapRequest, RuntimeBootstrapResult,
+};
+pub use sync::mcp_config::{
+    invoke_sync_codex_mcp_config, RuntimeSyncCodexMcpConfigRequest,
+    RuntimeSyncCodexMcpConfigResult,
+};
+pub use sync::mcp_runtime_artifacts::{
+    invoke_render_mcp_runtime_artifacts, invoke_render_vscode_mcp_template,
+    RuntimeRenderMcpRuntimeArtifactsRequest, RuntimeRenderMcpRuntimeArtifactsResult,
+    RuntimeRenderVscodeMcpTemplateRequest, RuntimeRenderVscodeMcpTemplateResult,
 };
 
 /// Require a registered runtime surface contract.

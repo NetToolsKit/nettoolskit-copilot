@@ -1,185 +1,201 @@
-//! Canonical Codex MCP config application for bootstrap-owned runtime sync.
+//! Canonical Codex MCP config application for runtime sync and CLI surfaces.
 
 use anyhow::{anyhow, Context, Result};
-use serde_json::{Map, Value};
+use nettoolskit_core::{
+    path_utils::repository::{resolve_full_path, resolve_repository_root},
+    runtime_locations::resolve_codex_runtime_path,
+};
+use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::error::RuntimeSyncCodexMcpConfigCommandError;
+
+use super::mcp_catalog::{
+    convert_catalog_to_codex_manifest, read_codex_manifest, read_runtime_catalog,
+    CodexManifestServer,
+};
+
+/// Request payload for `sync-codex-mcp-config`.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct RuntimeSyncCodexMcpConfigRequest {
+    /// Optional explicit repository root.
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit MCP runtime catalog path.
+    pub catalog_path: Option<PathBuf>,
+    /// Optional explicit generated Codex manifest path.
+    pub manifest_path: Option<PathBuf>,
+    /// Optional explicit target Codex config path.
+    pub target_config_path: Option<PathBuf>,
+    /// Create a timestamped backup before writing.
+    pub create_backup: bool,
+    /// Print the rendered document without writing it.
+    pub dry_run: bool,
+}
+
+/// Result payload for `sync-codex-mcp-config`.
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct CodexManifestServer {
-    name: String,
-    command: Option<String>,
-    args: Vec<String>,
-    url: Option<String>,
-    headers: Vec<(String, String)>,
-    env: Vec<(String, String)>,
+pub struct RuntimeSyncCodexMcpConfigResult {
+    /// Resolved repository root.
+    pub repo_root: PathBuf,
+    /// Resolved target Codex config path.
+    pub target_config_path: PathBuf,
+    /// Number of MCP servers applied.
+    pub servers_applied: usize,
+    /// Optional backup path created before writing.
+    pub backup_path: Option<PathBuf>,
+    /// Rendered output document.
+    pub rendered_document: String,
+    /// Whether the command ran in dry-run mode.
+    pub dry_run: bool,
 }
 
 /// Apply the canonical MCP runtime catalog into a target Codex `config.toml`.
 ///
 /// # Errors
 ///
-/// Returns an error when the canonical catalog or target config is missing,
-/// when the catalog is invalid for Codex projection, or when the target file
-/// cannot be rewritten safely.
-pub(crate) fn apply_mcp_runtime_catalog_to_codex_config(
-    repo_root: &Path,
-    codex_path: &Path,
-    backup_config: bool,
-) -> Result<()> {
-    let catalog_path = repo_root.join(".github/governance/mcp-runtime.catalog.json");
-    let target_config = codex_path.join("config.toml");
+/// Returns [`RuntimeSyncCodexMcpConfigCommandError`] when repository
+/// resolution, catalog or manifest loading, target config loading, TOML
+/// rendering, backup creation, or writing fails.
+pub fn invoke_sync_codex_mcp_config(
+    request: &RuntimeSyncCodexMcpConfigRequest,
+) -> Result<RuntimeSyncCodexMcpConfigResult, RuntimeSyncCodexMcpConfigCommandError> {
+    let current_dir = env::current_dir().map_err(|source| {
+        RuntimeSyncCodexMcpConfigCommandError::ResolveWorkspaceRoot {
+            source: source.into(),
+        }
+    })?;
+    let repo_root = resolve_repository_root(request.repo_root.as_deref(), None, &current_dir)
+        .map_err(|source| {
+            RuntimeSyncCodexMcpConfigCommandError::ResolveWorkspaceRoot { source }
+        })?;
+    let target_config_path =
+        resolve_target_config_path(&repo_root, request.target_config_path.as_deref());
 
-    if !catalog_path.is_file() {
-        return Err(anyhow!(
-            "MCP runtime catalog missing: {}",
-            catalog_path.display()
-        ));
-    }
-    if !target_config.is_file() {
-        return Err(anyhow!(
-            "target Codex config missing: {}",
-            target_config.display()
-        ));
+    if !target_config_path.is_file() {
+        return Err(RuntimeSyncCodexMcpConfigCommandError::TargetConfigNotFound {
+            target_config_path: target_config_path.display().to_string(),
+        });
     }
 
-    let catalog_document = fs::read_to_string(&catalog_path)
-        .with_context(|| format!("failed to read '{}'", catalog_path.display()))?;
-    let catalog: Value = serde_json::from_str(&catalog_document)
-        .with_context(|| format!("invalid MCP runtime catalog '{}'", catalog_path.display()))?;
-    let servers = convert_catalog_to_codex_servers(&catalog)?;
-    let original_document = fs::read_to_string(&target_config)
-        .with_context(|| format!("failed to read '{}'", target_config.display()))?;
+    let servers = resolve_manifest_servers(
+        &repo_root,
+        request.catalog_path.as_deref(),
+        request.manifest_path.as_deref(),
+    )
+    .map_err(|source| RuntimeSyncCodexMcpConfigCommandError::ResolveServers { source })?;
+    let original_document = fs::read_to_string(&target_config_path).map_err(|source| {
+        RuntimeSyncCodexMcpConfigCommandError::ReadTargetConfig {
+            source: source.into(),
+        }
+    })?;
     let base_lines = remove_mcp_sections(&original_document);
-    let rendered_mcp_lines = render_mcp_toml(&servers)?;
+    let rendered_mcp_lines = render_mcp_toml(&servers).map_err(|source| {
+        RuntimeSyncCodexMcpConfigCommandError::RenderConfig { source }
+    })?;
 
     let mut output_lines = base_lines;
     if !output_lines.is_empty() {
         output_lines.push(String::new());
     }
     output_lines.extend(rendered_mcp_lines);
-    let output_document = output_lines.join("\n");
+    let rendered_document = output_lines.join("\n");
 
-    if backup_config {
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map(|duration| duration.as_secs())
-            .unwrap_or(0);
-        let backup_path = target_config.with_file_name(format!(
-            "{}.bak.{}",
-            target_config
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or("config.toml"),
-            timestamp
-        ));
-        fs::copy(&target_config, &backup_path).with_context(|| {
-            format!(
-                "failed to create MCP config backup '{}' from '{}'",
-                backup_path.display(),
-                target_config.display()
-            )
+    let backup_path = if request.create_backup {
+        Some(
+            create_backup(&target_config_path).map_err(|source| {
+                RuntimeSyncCodexMcpConfigCommandError::CreateBackup { source }
+            })?,
+        )
+    } else {
+        None
+    };
+
+    if !request.dry_run {
+        fs::write(&target_config_path, &rendered_document).map_err(|source| {
+            RuntimeSyncCodexMcpConfigCommandError::WriteOutput {
+                source: source.into(),
+            }
         })?;
     }
 
-    fs::write(&target_config, output_document)
-        .with_context(|| format!("failed to write '{}'", target_config.display()))?;
-    Ok(())
+    Ok(RuntimeSyncCodexMcpConfigResult {
+        repo_root,
+        target_config_path,
+        servers_applied: servers.len(),
+        backup_path,
+        rendered_document,
+        dry_run: request.dry_run,
+    })
 }
 
-fn convert_catalog_to_codex_servers(catalog: &Value) -> Result<Vec<CodexManifestServer>> {
-    let servers = catalog
-        .get("servers")
-        .and_then(Value::as_array)
-        .ok_or_else(|| anyhow!("MCP runtime catalog has no servers"))?;
-    let mut result = Vec::new();
+/// Apply the canonical MCP runtime catalog into the default Codex config path.
+///
+/// # Errors
+///
+/// Returns an error when the runtime catalog or target config cannot be loaded
+/// or rewritten safely.
+pub(crate) fn apply_mcp_runtime_catalog_to_codex_config(
+    repo_root: &Path,
+    codex_path: &Path,
+    backup_config: bool,
+) -> Result<()> {
+    let target_config = codex_path.join("config.toml");
+    invoke_sync_codex_mcp_config(&RuntimeSyncCodexMcpConfigRequest {
+        repo_root: Some(repo_root.to_path_buf()),
+        target_config_path: Some(target_config),
+        create_backup: backup_config,
+        dry_run: false,
+        ..RuntimeSyncCodexMcpConfigRequest::default()
+    })
+    .map(|_| ())
+    .map_err(|error| anyhow!(error.to_string()))
+}
 
-    for server in servers {
-        let include_codex = server
-            .get("targets")
-            .and_then(|targets| targets.get("codex"))
-            .and_then(|target| target.get("include"))
-            .and_then(Value::as_bool)
-            .unwrap_or(false);
-        if !include_codex {
-            continue;
-        }
+fn resolve_target_config_path(repo_root: &Path, target_config_path: Option<&Path>) -> PathBuf {
+    match target_config_path {
+        Some(path) if path.is_absolute() => path.to_path_buf(),
+        Some(path) => resolve_full_path(repo_root, path),
+        None => resolve_codex_runtime_path().join("config.toml"),
+    }
+}
 
-        let codex_name = server
-            .get("codexName")
-            .and_then(Value::as_str)
-            .ok_or_else(|| {
-                anyhow!(
-                    "MCP runtime catalog server '{}' is missing codexName.",
-                    server
-                        .get("id")
-                        .and_then(Value::as_str)
-                        .unwrap_or("unknown")
-                )
-            })?;
-        let definition = server
-            .get("definition")
-            .and_then(Value::as_object)
-            .ok_or_else(|| {
-                anyhow!(
-                    "MCP runtime catalog server '{}' is missing definition.",
-                    server
-                        .get("id")
-                        .and_then(Value::as_str)
-                        .unwrap_or("unknown")
-                )
-            })?;
-
-        result.push(CodexManifestServer {
-            name: codex_name.to_string(),
-            command: optional_string(definition, "command"),
-            args: optional_string_array(definition, "args"),
-            url: optional_string(definition, "url"),
-            headers: optional_string_map(definition, "headers"),
-            env: optional_string_map(definition, "env"),
-        });
+fn resolve_manifest_servers(
+    repo_root: &Path,
+    catalog_path: Option<&Path>,
+    manifest_path: Option<&Path>,
+) -> Result<Vec<CodexManifestServer>> {
+    if let Some(manifest_path) = manifest_path {
+        let (_, manifest) = read_codex_manifest(repo_root, manifest_path)?;
+        return Ok(manifest.servers);
     }
 
-    if result.is_empty() {
-        return Err(anyhow!("MCP runtime catalog has no Codex servers"));
-    }
-
-    Ok(result)
+    let (_, catalog) = read_runtime_catalog(repo_root, catalog_path)?;
+    Ok(convert_catalog_to_codex_manifest(&catalog)?.servers)
 }
 
-fn optional_string(object: &Map<String, Value>, key: &str) -> Option<String> {
-    object.get(key).and_then(Value::as_str).map(str::to_string)
-}
-
-fn optional_string_array(object: &Map<String, Value>, key: &str) -> Vec<String> {
-    object
-        .get(key)
-        .and_then(Value::as_array)
-        .map(|items| {
-            items
-                .iter()
-                .filter_map(Value::as_str)
-                .map(str::to_string)
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
-fn optional_string_map(object: &Map<String, Value>, key: &str) -> Vec<(String, String)> {
-    object
-        .get(key)
-        .and_then(Value::as_object)
-        .map(|map| {
-            map.iter()
-                .filter_map(|(map_key, map_value)| {
-                    map_value
-                        .as_str()
-                        .map(|value| (map_key.to_string(), value.to_string()))
-                })
-                .collect()
-        })
-        .unwrap_or_default()
+fn create_backup(target_config_path: &Path) -> Result<PathBuf> {
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_secs())
+        .unwrap_or(0);
+    let backup_path = target_config_path.with_file_name(format!(
+        "{}.bak.{}",
+        target_config_path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("config.toml"),
+        timestamp
+    ));
+    fs::copy(target_config_path, &backup_path).with_context(|| {
+        format!(
+            "failed to create MCP config backup '{}' from '{}'",
+            backup_path.display(),
+            target_config_path.display()
+        )
+    })?;
+    Ok(backup_path)
 }
 
 fn remove_mcp_sections(document: &str) -> Vec<String> {

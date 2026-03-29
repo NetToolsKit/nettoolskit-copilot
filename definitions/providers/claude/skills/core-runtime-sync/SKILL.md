@@ -37,13 +37,13 @@ pwsh -File scripts/runtime/install.ps1 -RuntimeProfile claude
 ## Apply MCP servers to Codex
 
 ```powershell
-pwsh -File scripts/runtime/sync-codex-mcp-config.ps1 -CreateBackup
+ntk runtime sync-codex-mcp-config --create-backup
 ```
 
 ## Render VS Code MCP from the canonical runtime catalog
 
 ```powershell
-pwsh -File scripts/runtime/render-vscode-mcp-template.ps1 -OutputPath .vscode/mcp.tamplate.jsonc
+ntk runtime render-vscode-mcp-template --output-path .vscode/mcp.tamplate.jsonc
 ```
 
 ## Source of truth

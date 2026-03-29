@@ -337,24 +337,29 @@ function Invoke-McpConfigApply {
         [switch] $CreateBackup
     )
 
-    $syncScript = Join-Path $ResolvedRepoRoot 'scripts\runtime\sync-codex-mcp-config.ps1'
     $catalog = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot '.github') 'governance') 'mcp-runtime.catalog.json'
     $targetConfig = Join-Path $CodexPath 'config.toml'
+    $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot -RuntimePreference github
 
-    Assert-PathPresent -Path $syncScript -Label 'MCP sync script'
     Assert-PathPresent -Path $catalog -Label 'MCP runtime catalog'
     Assert-PathPresent -Path $targetConfig -Label 'target Codex config'
+    Assert-PathPresent -Path $runtimeBinaryPath -Label 'managed runtime binary'
 
-    $syncArgs = @{
-        CatalogPath = $catalog
-        TargetConfigPath = $targetConfig
+    $syncArgs = @(
+        'runtime',
+        'sync-codex-mcp-config',
+        '--repo-root', $ResolvedRepoRoot,
+        '--catalog-path', $catalog,
+        '--target-config-path', $targetConfig
+    )
+    if ($CreateBackup.IsPresent) {
+        $syncArgs += '--create-backup'
     }
 
-    if ($CreateBackup) {
-        $syncArgs.CreateBackup = $true
+    & $runtimeBinaryPath @syncArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "MCP config apply failed with exit code $LASTEXITCODE."
     }
-
-    & $syncScript @syncArgs
 }
 
 # Renders repository-owned projected provider surfaces selected by the

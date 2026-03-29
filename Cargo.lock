@@ -1984,6 +1984,7 @@ dependencies = [
  "nettoolskit-core",
  "nettoolskit-validation",
  "regex",
+ "serde",
  "serde_json",
  "sha2",
  "tempfile",

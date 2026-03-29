@@ -8,7 +8,7 @@
 
 `definitions/providers/codex/mcp/` stores the authoritative support files for the shared Codex MCP runtime surface.
 
-The rendered `.codex/mcp/` surface is projected from that tree. The canonical server definitions live in `.github/governance/mcp-runtime.catalog.json`, and the render/apply scripts keep Codex and VS Code MCP setups aligned without making the Codex subset the primary source of truth.
+The rendered `.codex/mcp/` surface is projected from that tree. The canonical server definitions live in `.github/governance/mcp-runtime.catalog.json`, and the native `ntk runtime render-mcp-runtime-artifacts` plus `ntk runtime sync-codex-mcp-config` commands keep Codex and VS Code MCP setups aligned without making the Codex subset the primary source of truth.
 
 ---
 
@@ -40,15 +40,15 @@ The rendered `.codex/mcp/` surface is projected from that tree. The canonical se
 
 ## Installation
 
-No package installation is required. Edit the canonical catalog and run the canonical scripts from `scripts/runtime/`.
+No package installation is required. Edit the canonical catalog and run the native `ntk runtime` commands.
 
 ---
 
 ## Quick Start
 
 ```powershell
-pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -CreateBackup
+ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
+ntk runtime sync-codex-mcp-config --create-backup
 ```
 
 ---
@@ -58,13 +58,13 @@ pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -CreateBackup
 ### Example 1: Generate VS Code MCP output
 
 ```powershell
-pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
+ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
 ```
 
 ### Example 2: Update local Codex MCP servers
 
 ```powershell
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -TargetConfigPath "$env:USERPROFILE\.codex\config.toml" -CreateBackup
+ntk runtime sync-codex-mcp-config --target-config-path "$env:USERPROFILE\.codex\config.toml" --create-backup
 ```
 
 ---
@@ -80,17 +80,17 @@ pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -TargetConfigPath "$env:U
 
 ### Runtime Entry Points
 
-- `scripts/runtime/render-mcp-runtime-artifacts.ps1`: re-renders the tracked Codex MCP support surface
-- `scripts/runtime/render-vscode-mcp-template.ps1`: generates the VS Code MCP projection from the canonical runtime catalog
-- `scripts/runtime/sync-codex-mcp-config.ps1`: rewrites only the `[mcp_servers.*]` sections in the local Codex TOML config
+- `ntk runtime render-mcp-runtime-artifacts`: re-renders the tracked Codex MCP support surface
+- `ntk runtime render-vscode-mcp-template`: generates the VS Code MCP projection from the canonical runtime catalog
+- `ntk runtime sync-codex-mcp-config`: rewrites only the `[mcp_servers.*]` sections in the local Codex TOML config
 
 ---
 
 ## Build and Tests
 
 ```powershell
-pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.temp\vscode.mcp.generated.json
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
+ntk runtime render-vscode-mcp-template --output-path .\.temp\vscode.mcp.generated.json
+ntk runtime sync-codex-mcp-config --dry-run
 ```
 
 ---
@@ -100,7 +100,7 @@ pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 - Add or update servers only in `.github/governance/mcp-runtime.catalog.json`.
 - Keep backward-compatible field names unless migration is documented.
 - Edit support docs and templates in `definitions/providers/codex/mcp/`, not directly in the projected `.codex/mcp/` copies.
-- Regenerate both runtime projections after catalog changes with `pwsh -File scripts/runtime/render-mcp-runtime-artifacts.ps1`.
+- Regenerate both runtime projections after catalog changes with `ntk runtime render-mcp-runtime-artifacts`.
 
 ---
 
@@ -115,9 +115,9 @@ pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 
 - `.github/governance/mcp-runtime.catalog.json`
 - `definitions/providers/codex/mcp/`
-- `scripts/runtime/render-mcp-runtime-artifacts.ps1`
-- `scripts/runtime/render-vscode-mcp-template.ps1`
-- `scripts/runtime/sync-codex-mcp-config.ps1`
+- `ntk runtime render-mcp-runtime-artifacts`
+- `ntk runtime render-vscode-mcp-template`
+- `ntk runtime sync-codex-mcp-config`
 - `.codex/mcp/servers.manifest.json`
 
 ---

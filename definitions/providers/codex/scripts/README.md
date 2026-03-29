@@ -8,7 +8,7 @@
 
 `definitions/providers/codex/scripts/` stores the authoritative wrapper documentation for the rendered Codex script surface.
 
-`scripts/runtime/bootstrap.ps1` composes `~/.codex/shared-scripts` from `.codex/scripts/`, `scripts/common/`, `scripts/security/`, and `scripts/maintenance/`. The `.codex/scripts/` files remain compatibility wrappers only.
+`scripts/runtime/bootstrap.ps1` composes `~/.codex/shared-scripts` from `.codex/scripts/`, `scripts/common/`, `scripts/security/`, and `scripts/maintenance/`. The `.codex/scripts/` files remain compatibility wrappers only, but the MCP entrypoints now delegate to native `ntk runtime` commands.
 
 ---
 
@@ -47,8 +47,8 @@ No additional installation is required beyond PowerShell.
 ## Quick Start
 
 ```powershell
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -CreateBackup
-pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
+ntk runtime sync-codex-mcp-config --create-backup
+ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
 pwsh -File .\scripts\runtime\bootstrap.ps1
 ```
 
@@ -59,19 +59,19 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 ### Example 1: Preview Codex MCP changes
 
 ```powershell
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
+ntk runtime sync-codex-mcp-config --dry-run
 ```
 
 ### Example 2: Apply MCP config with backup
 
 ```powershell
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -TargetConfigPath "$env:USERPROFILE\.codex\config.toml" -CreateBackup
+ntk runtime sync-codex-mcp-config --target-config-path "$env:USERPROFILE\.codex\config.toml" --create-backup
 ```
 
 ### Example 3: Render VS Code MCP output
 
 ```powershell
-pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscode\mcp.tamplate.jsonc
+ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
 ```
 
 ---
@@ -80,8 +80,8 @@ pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscod
 
 ### Runtime Entry Points
 
-- `scripts/runtime/sync-codex-mcp-config.ps1`: applies the Codex MCP subset into the local Codex config
-- `scripts/runtime/render-vscode-mcp-template.ps1`: renders the VS Code MCP projection from the canonical runtime catalog
+- `ntk runtime sync-codex-mcp-config`: applies the Codex MCP subset into the local Codex config
+- `ntk runtime render-vscode-mcp-template`: renders the VS Code MCP projection from the canonical runtime catalog
 - `scripts/runtime/bootstrap.ps1`: composes the shared Codex script runtime
 
 ### Shared Security Gates
@@ -97,8 +97,8 @@ pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.vscod
 ## Build and Tests
 
 ```powershell
-pwsh -File .\scripts\runtime\render-vscode-mcp-template.ps1 -OutputPath .\.temp\vscode.mcp.generated.json
-pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
+ntk runtime render-vscode-mcp-template --output-path .\.temp\vscode.mcp.generated.json
+ntk runtime sync-codex-mcp-config --dry-run
 ```
 
 ---
@@ -125,8 +125,8 @@ pwsh -File .\scripts\runtime\sync-codex-mcp-config.ps1 -DryRun
 - `definitions/providers/codex/scripts/`
 - `.codex/mcp/README.md`
 - `scripts/runtime/bootstrap.ps1`
-- `scripts/runtime/render-vscode-mcp-template.ps1`
-- `scripts/runtime/sync-codex-mcp-config.ps1`
+- `ntk runtime render-vscode-mcp-template`
+- `ntk runtime sync-codex-mcp-config`
 - `ntk validation shell-hooks --repo-root .`
 
 ---
