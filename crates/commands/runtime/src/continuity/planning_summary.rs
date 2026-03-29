@@ -2,9 +2,8 @@
 
 use anyhow::{Context, Result};
 use nettoolskit_core::local_context::{
-    read_local_context_index_catalog, read_local_context_index_document,
-    record_local_context_memory_event, resolve_local_context_index_root,
-    search_local_context_index_document, LocalContextMemoryEventRecord,
+    read_local_context_index_catalog, record_local_context_memory_event,
+    LocalContextMemoryEventRecord,
 };
 use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_workspace_root};
 use serde_json::json;
@@ -15,6 +14,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use super::local_context::{query_local_context_index, QueryLocalContextIndexRequest};
 use crate::error::PlanningSummaryCommandError;
 
 /// Request payload for `export-planning-summary`.
@@ -409,8 +409,25 @@ fn planning_summary_local_references(
         });
     }
 
-    let catalog_info = match read_local_context_index_catalog(repo_root, None) {
-        Ok(catalog_info) => catalog_info,
+    if read_local_context_index_catalog(repo_root, None).is_err() {
+        return Ok(PlanningSummaryLocalReferences {
+            markdown_lines: Vec::new(),
+            reference_paths: Vec::new(),
+        });
+    }
+
+    let hits = match query_local_context_index(&QueryLocalContextIndexRequest {
+        repo_root: Some(repo_root.to_path_buf()),
+        query_text: query_segments.into_iter().collect::<Vec<_>>().join(" "),
+        catalog_path: None,
+        output_root: None,
+        top: Some(6),
+        exclude_paths,
+        path_prefix: None,
+        heading_contains: None,
+        use_json_index: false,
+    }) {
+        Ok(result) => result.hits,
         Err(_) => {
             return Ok(PlanningSummaryLocalReferences {
                 markdown_lines: Vec::new(),
@@ -418,20 +435,6 @@ fn planning_summary_local_references(
             });
         }
     };
-    let index_root = resolve_local_context_index_root(repo_root, &catalog_info.catalog, None);
-    let Some(index_document) = read_local_context_index_document(&index_root)? else {
-        return Ok(PlanningSummaryLocalReferences {
-            markdown_lines: Vec::new(),
-            reference_paths: Vec::new(),
-        });
-    };
-
-    let hits = search_local_context_index_document(
-        &query_segments.into_iter().collect::<Vec<_>>().join(" "),
-        &index_document,
-        6,
-        &exclude_paths,
-    );
     if hits.is_empty() {
         return Ok(PlanningSummaryLocalReferences {
             markdown_lines: Vec::new(),

@@ -65,17 +65,47 @@ pub struct QueryLocalContextIndexRequest {
     pub top: Option<usize>,
     /// Repository-relative paths excluded from ranking.
     pub exclude_paths: Vec<String>,
+    /// Optional repository-relative path prefix filter.
+    pub path_prefix: Option<String>,
+    /// Optional heading substring filter.
+    pub heading_contains: Option<String>,
+    /// Force the legacy JSON compatibility path instead of the default SQLite recall path.
+    pub use_json_index: bool,
+}
+
+/// Retrieval backend used for `query-local-context-index`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LocalContextQueryBackend {
+    /// Default SQLite-backed repo-local memory recall.
+    SqliteDefault,
+    /// Explicit JSON compatibility fallback.
+    JsonCompatibility,
+}
+
+impl LocalContextQueryBackend {
+    /// Stable user-facing label for CLI/reporting output.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::SqliteDefault => "sqlite-default",
+            Self::JsonCompatibility => "json-compatibility",
+        }
+    }
 }
 
 /// Result payload for `query-local-context-index`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryLocalContextIndexResult {
+    /// Retrieval backend that answered the query.
+    pub backend: LocalContextQueryBackend,
     /// Query text executed against the index.
     pub query: String,
     /// Effective top limit used by the query.
     pub top: usize,
     /// Persisted document path.
     pub index_path: PathBuf,
+    /// Resolved SQLite memory database path.
+    pub memory_db_path: PathBuf,
     /// Number of ranked hits returned.
     pub result_count: usize,
     /// Ranked search hits.
@@ -204,27 +234,53 @@ pub fn query_local_context_index(
         request.output_root.as_deref(),
     );
     let index_path = index_root.join("index.json");
-    let index_document = read_local_context_index_document(&index_root)
-        .map_err(|source| LocalContextCommandError::ReadIndex { source })?
-        .ok_or_else(|| LocalContextCommandError::IndexNotFound {
-            index_path: index_path.display().to_string(),
-        })?;
-
     let effective_top = request
         .top
         .unwrap_or(catalog_info.catalog.query_defaults.top)
         .max(1);
-    let hits = search_local_context_index_document(
-        &request.query_text,
-        &index_document,
-        effective_top,
-        &request.exclude_paths,
-    );
+    let memory_db_path =
+        resolve_local_context_memory_db_path(&repo_root, request.output_root.as_deref());
+
+    let (backend, hits) = if request.use_json_index {
+        let index_document = read_local_context_index_document(&index_root)
+            .map_err(|source| LocalContextCommandError::ReadIndex { source })?
+            .ok_or_else(|| LocalContextCommandError::IndexNotFound {
+                index_path: index_path.display().to_string(),
+            })?;
+        (
+            LocalContextQueryBackend::JsonCompatibility,
+            search_local_context_index_document(
+                &request.query_text,
+                &index_document,
+                effective_top,
+                &request.exclude_paths,
+            ),
+        )
+    } else {
+        let hits = search_local_context_sqlite_index(
+            &repo_root,
+            request.output_root.as_deref(),
+            &LocalContextSqliteQueryRequest {
+                query_text: request.query_text.clone(),
+                top: effective_top,
+                exclude_paths: request.exclude_paths.clone(),
+                path_prefix: request.path_prefix.clone(),
+                heading_contains: request.heading_contains.clone(),
+            },
+        )
+        .map_err(|source| LocalContextCommandError::ReadMemory { source })?
+        .ok_or_else(|| LocalContextCommandError::MemoryNotFound {
+            db_path: memory_db_path.display().to_string(),
+        })?;
+        (LocalContextQueryBackend::SqliteDefault, hits)
+    };
 
     Ok(QueryLocalContextIndexResult {
+        backend,
         query: request.query_text.clone(),
         top: effective_top,
         index_path,
+        memory_db_path,
         result_count: hits.len(),
         hits,
     })

@@ -91,7 +91,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```rust
 use nettoolskit_runtime::{
-    query_local_memory, update_local_memory, QueryLocalMemoryRequest, UpdateLocalMemoryRequest,
+    query_local_context_index, update_local_memory, QueryLocalContextIndexRequest,
+    UpdateLocalMemoryRequest,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -100,7 +101,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ..Default::default()
     })?;
 
-    let query = query_local_memory(&QueryLocalMemoryRequest {
+    let query = query_local_context_index(&QueryLocalContextIndexRequest {
         repo_root: None,
         query_text: "planning".to_string(),
         catalog_path: None,
@@ -109,8 +110,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         exclude_paths: Vec::new(),
         path_prefix: Some("planning/".to_string()),
         heading_contains: None,
+        use_json_index: false,
     })?;
 
+    println!("backend: {}", query.backend.as_str());
     println!("memory db: {}", update.memory_db_path.display());
     println!("query hits: {}", query.result_count);
     Ok(())
@@ -185,6 +188,9 @@ pub struct QueryLocalContextIndexRequest {
     pub output_root: Option<std::path::PathBuf>,
     pub top: Option<usize>,
     pub exclude_paths: Vec<String>,
+    pub path_prefix: Option<String>,
+    pub heading_contains: Option<String>,
+    pub use_json_index: bool,
 }
 
 pub struct QueryLocalMemoryRequest {
@@ -323,6 +329,7 @@ pub fn invoke_runtime_self_heal(
 | `RuntimeBootstrapRequest` | `backup_config` | Create a backup before MCP config application. | `false` |
 | `QueryLocalContextIndexRequest` | `query_text` | Search text used against the local context index. | `"planning"` |
 | `QueryLocalContextIndexRequest` | `top` | Maximum number of hits to return. | `5` |
+| `QueryLocalContextIndexRequest` | `use_json_index` | Force the legacy JSON compatibility fallback instead of the default SQLite recall path. | `false` |
 | `QueryLocalMemoryRequest` | `path_prefix` | Optional repository-relative prefix filter applied to SQLite recall. | `"planning/"` |
 | `QueryLocalMemoryRequest` | `heading_contains` | Optional heading substring filter applied to SQLite recall. | `"wave"` |
 | `RuntimeHealthcheckRequest` | `validation_profile` | Validation profile passed into `validate-all`. | `"dev"` |

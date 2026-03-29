@@ -251,6 +251,18 @@ pub struct RuntimeQueryLocalContextIndexArgs {
     /// Maximum number of hits to return.
     #[clap(long)]
     pub top: Option<usize>,
+    /// Repository-relative paths excluded from ranking.
+    #[clap(long = "exclude-path")]
+    pub exclude_paths: Vec<String>,
+    /// Optional repository-relative path prefix filter.
+    #[clap(long)]
+    pub path_prefix: Option<String>,
+    /// Optional case-insensitive heading substring filter.
+    #[clap(long)]
+    pub heading_contains: Option<String>,
+    /// Force the legacy JSON compatibility query path instead of the default SQLite recall path.
+    #[clap(long = "use-json-index", alias = "compatibility-json")]
+    pub use_json_index: bool,
     /// Emit JSON instead of the default human-readable summary.
     #[clap(long)]
     pub json_output: bool,
@@ -776,7 +788,10 @@ fn execute_query_local_context_index(arguments: RuntimeQueryLocalContextIndexArg
         catalog_path: arguments.catalog_path,
         output_root: arguments.output_root,
         top: arguments.top,
-        exclude_paths: Vec::new(),
+        exclude_paths: arguments.exclude_paths,
+        path_prefix: arguments.path_prefix,
+        heading_contains: arguments.heading_contains,
+        use_json_index: arguments.use_json_index,
     }) {
         Ok(result) => result,
         Err(error) => {
@@ -787,9 +802,11 @@ fn execute_query_local_context_index(arguments: RuntimeQueryLocalContextIndexArg
 
     if arguments.json_output {
         let payload = json!({
+            "backend": result.backend.as_str(),
             "query": result.query,
             "top": result.top,
             "indexPath": result.index_path,
+            "memoryDbPath": result.memory_db_path,
             "resultCount": result.result_count,
             "hits": result.hits.iter().map(|hit| {
                 json!({
@@ -806,7 +823,9 @@ fn execute_query_local_context_index(arguments: RuntimeQueryLocalContextIndexArg
     }
 
     println!("Local context index query: {}", result.query);
+    println!("Backend: {}", result.backend.as_str());
     println!("Index: {}", result.index_path.to_string_lossy());
+    println!("Memory DB: {}", result.memory_db_path.to_string_lossy());
     println!("Hits: {}", result.result_count);
     for hit in &result.hits {
         println!();

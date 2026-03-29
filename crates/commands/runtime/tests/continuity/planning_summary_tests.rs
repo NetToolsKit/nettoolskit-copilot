@@ -88,6 +88,44 @@ fn test_export_planning_summary_renders_workspace_planning_surface_and_reference
 }
 
 #[test]
+fn test_export_planning_summary_uses_sqlite_default_recall_when_json_index_is_missing() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    write_local_context_catalog(repo.path());
+    fs::create_dir_all(repo.path().join("planning/active"))
+        .expect("active planning directory should be created");
+    fs::create_dir_all(repo.path().join("planning/specs/active"))
+        .expect("active spec directory should be created");
+
+    fs::write(
+        repo.path().join("planning/active/plan-wave1.md"),
+        "# Wave 1 Plan\n\n- Status: in progress\n- Current focus: sqlite recall cutover\n",
+    )
+    .expect("plan file should be written");
+    fs::write(
+        repo.path().join("README.md"),
+        "# SQLite Recall\nThis repository uses sqlite recall for planning references.\n",
+    )
+    .expect("readme should be written");
+
+    let catalog_info =
+        nettoolskit_core::local_context::read_local_context_index_catalog(repo.path(), None)
+            .expect("catalog should be readable");
+    let report = build_local_context_index(repo.path(), &catalog_info, None, false)
+        .expect("index should be built");
+    fs::remove_file(&report.index_path).expect("compatibility index should be removable");
+
+    let result = export_planning_summary(&ExportPlanningSummaryRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        output_path: None,
+        print_only: true,
+    })
+    .expect("planning summary should render from sqlite recall");
+
+    assert!(result.document.contains("## Suggested Local References"));
+    assert!(result.document.contains("`README.md`"));
+}
+
+#[test]
 fn test_export_planning_summary_uses_build_fallback_when_workspace_planning_is_missing() {
     let repo = TempDir::new().expect("temporary repository should be created");
     fs::create_dir_all(repo.path().join(".build/super-agent/planning/active"))

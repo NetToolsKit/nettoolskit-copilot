@@ -186,7 +186,7 @@ ntk runtime update-local-memory --repo-root .
 ntk runtime query-local-memory --repo-root . --query-text "planning wave" --path-prefix "planning/" --json-output
 ```
 
-The compatibility JSON index remains available during migration, but the SQLite-backed `local-memory` commands are the forward path for bounded repo-local RAG/CAG recall.
+Default recall has now moved to the SQLite-backed store, including `ntk runtime query-local-context-index`. Use `--use-json-index` only when you explicitly need the legacy JSON compatibility path for debugging or parity checks.
 
 ---
 

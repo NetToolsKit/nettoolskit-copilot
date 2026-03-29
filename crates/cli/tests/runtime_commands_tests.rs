@@ -353,10 +353,52 @@ fn test_runtime_query_local_context_index_supports_json_output() {
             "query-local-context-index",
             "--query-text",
             "continuity summary",
+            "--path-prefix",
+            "README",
             "--json-output",
         ])
         .assert()
         .success()
+        .stdout(predicate::str::contains(r#""backend":"sqlite-default""#))
+        .stdout(predicate::str::contains(r#""resultCount":1"#))
+        .stdout(predicate::str::contains(r#""path":"README.md""#))
+        .stdout(predicate::str::contains(r#""memoryDbPath":"#));
+}
+
+#[test]
+fn test_runtime_query_local_context_index_supports_compatibility_json_flag() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    write_local_context_catalog(repo.path());
+    write_file(
+        &repo.path().join("README.md"),
+        "# Demo\n\nCompatibility JSON fallback remains available.",
+    );
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "update-local-context-index"])
+        .assert()
+        .success();
+
+    fs::remove_file(repo.path().join(".temp/context-memory/context.db"))
+        .expect("sqlite memory db should be removable");
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "query-local-context-index",
+            "--query-text",
+            "compatibility fallback",
+            "--use-json-index",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            r#""backend":"json-compatibility""#,
+        ))
         .stdout(predicate::str::contains(r#""resultCount":1"#))
         .stdout(predicate::str::contains(r#""path":"README.md""#));
 }
