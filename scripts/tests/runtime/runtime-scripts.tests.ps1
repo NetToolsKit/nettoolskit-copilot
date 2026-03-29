@@ -309,13 +309,6 @@ try {
     Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-vscode-workspace-surfaces missing SourceRoot parameter.'
     Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-vscode-workspace-surfaces missing OutputRoot parameter.'
 
-    $scriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
-    $command = Get-Command -Name $scriptPath -ErrorAction Stop
-    $keys = @($command.Parameters.Keys)
-    Assert-Contains -Collection $keys -Value 'RepoRoot' -Message 'render-codex-orchestration-surfaces missing RepoRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'SourceRoot' -Message 'render-codex-orchestration-surfaces missing SourceRoot parameter.'
-    Assert-Contains -Collection $keys -Value 'OutputRoot' -Message 'render-codex-orchestration-surfaces missing OutputRoot parameter.'
-
     $scriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
     $command = Get-Command -Name $scriptPath -ErrorAction Stop
     $keys = @($command.Parameters.Keys)
@@ -534,7 +527,6 @@ try {
         $renderGithubInstructionScriptPath = Join-Path $runtimeScriptRoot 'render-github-instruction-surfaces.ps1'
         $renderVscodeProfilesScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-profile-surfaces.ps1'
         $renderVscodeWorkspaceScriptPath = Join-Path $runtimeScriptRoot 'render-vscode-workspace-surfaces.ps1'
-        $renderCodexOrchestrationScriptPath = Join-Path $runtimeScriptRoot 'render-codex-orchestration-surfaces.ps1'
         $renderClaudeRuntimeScriptPath = Join-Path $runtimeScriptRoot 'render-claude-runtime-surfaces.ps1'
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
         $providerSurfaceCatalogHelperPath = Join-Path $resolvedRepoRoot 'scripts\common\provider-surface-catalog.ps1'
@@ -694,12 +686,12 @@ try {
         Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'settings.tamplate.jsonc') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected settings template.'
         Assert-True (Test-Path -LiteralPath (Join-Path $vscodeWorkspaceOutputRoot 'snippets\demo.tamplate.code-snippets') -PathType Leaf) 'render-vscode-workspace-surfaces did not write the projected snippets surface.'
 
-        & $renderCodexOrchestrationScriptPath -RepoRoot $tempRepoRoot | Out-Null
+        & $runtimeBinaryPath runtime render-provider-surfaces --repo-root $tempRepoRoot --catalog-path $providerSurfaceCatalogPath --renderer-id codex-orchestration-surfaces | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
-        Assert-True ($exitCode -eq 0) 'render-codex-orchestration-surfaces smoke test failed.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'README.md') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected orchestration README.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'prompts\super-agent-intake-stage.prompt.md') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected prompts surface.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'templates\run-artifact.template.json') -PathType Leaf) 'render-codex-orchestration-surfaces did not write the projected templates surface.'
+        Assert-True ($exitCode -eq 0) 'runtime render-provider-surfaces codex-orchestration smoke test failed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'README.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected orchestration README.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'prompts\super-agent-intake-stage.prompt.md') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected prompts surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $codexOrchestrationOutputRoot 'templates\run-artifact.template.json') -PathType Leaf) 'runtime render-provider-surfaces did not write the projected templates surface.'
 
         & $renderClaudeRuntimeScriptPath -RepoRoot $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }

@@ -49,7 +49,7 @@ No additional package installation is required. Use PowerShell 7+ and run comman
 
 ```powershell
 ntk validation agent-orchestration
-pwsh -File .\scripts\runtime\render-codex-orchestration-surfaces.ps1 -RepoRoot .
+ntk runtime render-provider-surfaces --repo-root . --renderer-id codex-orchestration-surfaces
 pwsh -File .\scripts\runtime\run-agent-pipeline.ps1 -RequestText "Run orchestration smoke test" -ExecutionBackend codex-exec
 ```
 
