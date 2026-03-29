@@ -165,17 +165,14 @@ function Get-ManagedGlobalGitHookPaths {
     $runtimeGithubPath = Resolve-GithubRuntimePath
     $runtimeRunnerPath = Join-Path (Join-Path (Join-Path $runtimeGithubPath 'scripts') 'git-hooks') 'invoke-pre-commit-eof-hygiene.ps1'
     $runtimeCatalogPath = Join-Path (Join-Path $runtimeGithubPath 'governance') 'git-hook-eof-modes.json'
-    $runtimeTrimScriptPath = Join-Path (Join-Path (Resolve-CodexSharedScriptsPath) 'maintenance') 'trim-trailing-blank-lines.ps1'
 
     $repoRunnerPath = Join-Path (Join-Path (Join-Path $SourceRepoRoot 'scripts') 'git-hooks') 'invoke-pre-commit-eof-hygiene.ps1'
     $repoCatalogPath = Join-Path (Join-Path $SourceRepoRoot '.github') 'governance/git-hook-eof-modes.json'
-    $repoTrimScriptPath = Join-Path (Join-Path (Join-Path $SourceRepoRoot 'scripts') 'maintenance') 'trim-trailing-blank-lines.ps1'
 
     return [pscustomobject]@{
         GlobalHooksPath = $globalHooksPath
         RunnerPath = if (Test-Path -LiteralPath $runtimeRunnerPath -PathType Leaf) { $runtimeRunnerPath } else { $repoRunnerPath }
         CatalogPath = if (Test-Path -LiteralPath $runtimeCatalogPath -PathType Leaf) { $runtimeCatalogPath } else { $repoCatalogPath }
-        TrimScriptPath = if (Test-Path -LiteralPath $runtimeTrimScriptPath -PathType Leaf) { $runtimeTrimScriptPath } else { $repoTrimScriptPath }
     }
 }
 
@@ -231,7 +228,6 @@ function Install-ManagedGlobalGitHooks {
     $managedPaths = Get-ManagedGlobalGitHookPaths -SourceRepoRoot $SourceRepoRoot
     Assert-PathPresent -Path $managedPaths.RunnerPath -Label 'managed global pre-commit runner'
     Assert-PathPresent -Path $managedPaths.CatalogPath -Label 'managed global EOF mode catalog'
-    Assert-PathPresent -Path $managedPaths.TrimScriptPath -Label 'managed global trim script'
 
     New-Item -ItemType Directory -Path $managedPaths.GlobalHooksPath -Force | Out-Null
     $preCommitPath = Join-Path $managedPaths.GlobalHooksPath 'pre-commit'
@@ -243,7 +239,6 @@ function Install-ManagedGlobalGitHooks {
         PreCommitPath = $preCommitPath
         RunnerPath = $managedPaths.RunnerPath
         CatalogPath = $managedPaths.CatalogPath
-        TrimScriptPath = $managedPaths.TrimScriptPath
     }
 }
 

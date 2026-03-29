@@ -151,6 +151,9 @@ function Invoke-GithubPromptSurfaceRender {
 
     $pomlDestinationPath = Join-Path $DestinationPath 'poml'
     New-Item -ItemType Directory -Path $pomlDestinationPath -Force | Out-Null
+    Get-ChildItem -LiteralPath $pomlDestinationPath -Force -ErrorAction SilentlyContinue | ForEach-Object {
+        Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction Stop
+    }
     Get-ChildItem -LiteralPath $SharedPomlSourcePath -Force -ErrorAction Stop | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination $pomlDestinationPath -Recurse -Force
     }

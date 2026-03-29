@@ -205,6 +205,20 @@ description: sample skill
 Load `repository-operating-model.instructions.md`.
 "#,
     );
+    write_file(
+        &repo_root.join("scripts/validation/fixtures/routing-golden-tests.json"),
+        r#"{
+  "cases": [
+    {
+      "id": "repository-operating-model",
+      "expected_route_ids": ["repo-guidance"],
+      "expected_selected_paths": [
+        "instructions/repository-operating-model.instructions.md"
+      ]
+    }
+  ]
+}"#,
+    );
 }
 
 pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
@@ -354,6 +368,13 @@ Use `instructions/authoritative-sources.instructions.md`.
   - path: instructions/authoritative-sources.instructions.md
   - path: instructions/powershell-execution.instructions.md
   - path: instructions/feedback-changelog.instructions.md
+routing:
+  - id: repo-guidance
+    triggers:
+      - repository
+      - operating model
+    include:
+      - path: instructions/repository-operating-model.instructions.md
 "#,
     );
     write_file(
@@ -429,7 +450,7 @@ Use the routing catalog.
     write_file(
         &repo_root.join(".codex/skills/sample/SKILL.md"),
         r#"---
-name: sample-skill
+name: sample
 description: sample skill
 ---
 

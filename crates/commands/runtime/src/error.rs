@@ -54,6 +54,19 @@ pub enum LocalContextCommandError {
         #[source]
         source: AnyhowError,
     },
+    /// The persisted SQLite memory store does not exist yet.
+    #[error("local memory store not found: {db_path}")]
+    MemoryNotFound {
+        /// Resolved SQLite memory path expected by the command.
+        db_path: String,
+    },
+    /// Persisted SQLite memory loading failed.
+    #[error("failed to read local memory store")]
+    ReadMemory {
+        /// Underlying SQLite loading failure.
+        #[source]
+        source: AnyhowError,
+    },
 }
 
 /// Errors raised by runtime planning-summary commands.
@@ -188,6 +201,32 @@ pub enum RuntimeHealthcheckCommandError {
     },
 }
 
+/// Errors raised by enterprise-trends export commands.
+#[derive(Debug, Error)]
+pub enum RuntimeExportEnterpriseTrendsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime enterprise-trends workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output artifact preparation failed.
+    #[error("failed to prepare runtime enterprise-trends artifacts")]
+    PrepareArtifacts {
+        /// Underlying filesystem or path resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output serialization or write failed.
+    #[error("failed to write runtime enterprise-trends output")]
+    WriteOutput {
+        /// Underlying serialization or I/O failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
 /// Errors raised by runtime clean-build-artifacts commands.
 #[derive(Debug, Error)]
 pub enum RuntimeCleanBuildArtifactsCommandError {
@@ -310,6 +349,151 @@ pub enum RuntimeApplyVscodeTemplatesCommandError {
     /// Template application failed.
     #[error("failed to apply runtime vscode templates")]
     ApplyTemplates {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by runtime VS Code MCP template render commands.
+#[derive(Debug, Error)]
+pub enum RuntimeRenderVscodeMcpTemplateCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime vscode mcp workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Catalog loading failed.
+    #[error("failed to read runtime vscode mcp catalog")]
+    ReadCatalog {
+        /// Underlying catalog load failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Document rendering failed.
+    #[error("failed to render runtime vscode mcp document")]
+    RenderDocument {
+        /// Underlying serialization failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output writing failed.
+    #[error("failed to write runtime vscode mcp output")]
+    WriteOutput {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by provider-surface render commands.
+#[derive(Debug, Error)]
+pub enum RuntimeRenderProviderSurfacesCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime provider-surface workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Provider-surface catalog loading failed.
+    #[error("failed to read runtime provider-surface catalog")]
+    ReadCatalog {
+        /// Underlying catalog load failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Provider-surface rendering failed.
+    #[error("failed to render runtime provider surfaces")]
+    RenderSurfaces {
+        /// Underlying render failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by tracked MCP artifact render commands.
+#[derive(Debug, Error)]
+pub enum RuntimeRenderMcpRuntimeArtifactsCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime mcp artifact workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Catalog loading failed.
+    #[error("failed to read runtime mcp artifact catalog")]
+    ReadCatalog {
+        /// Underlying catalog load failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Artifact rendering failed.
+    #[error("failed to render runtime mcp artifacts")]
+    RenderDocument {
+        /// Underlying render or serialization failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output writing failed.
+    #[error("failed to write runtime mcp artifact output")]
+    WriteOutput {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+}
+
+/// Errors raised by Codex MCP config sync commands.
+#[derive(Debug, Error)]
+pub enum RuntimeSyncCodexMcpConfigCommandError {
+    /// Workspace root resolution failed.
+    #[error("failed to resolve runtime codex mcp workspace root")]
+    ResolveWorkspaceRoot {
+        /// Underlying resolution failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target config path does not exist.
+    #[error("target Codex config not found: {target_config_path}")]
+    TargetConfigNotFound {
+        /// Resolved target config path expected by the command.
+        target_config_path: String,
+    },
+    /// Server source resolution failed.
+    #[error("failed to resolve runtime codex mcp server source")]
+    ResolveServers {
+        /// Underlying catalog or manifest failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Target config loading failed.
+    #[error("failed to read runtime codex mcp target config")]
+    ReadTargetConfig {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// TOML rendering failed.
+    #[error("failed to render runtime codex mcp config")]
+    RenderConfig {
+        /// Underlying render failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Backup creation failed.
+    #[error("failed to create runtime codex mcp config backup")]
+    CreateBackup {
+        /// Underlying filesystem failure.
+        #[source]
+        source: AnyhowError,
+    },
+    /// Output writing failed.
+    #[error("failed to write runtime codex mcp config")]
+    WriteOutput {
         /// Underlying filesystem failure.
         #[source]
         source: AnyhowError,

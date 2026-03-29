@@ -169,13 +169,25 @@ function New-InstallStep {
     param(
         [string] $Name,
         [string] $ScriptPath,
-        [hashtable] $Arguments
+        [hashtable] $Arguments,
+        [string] $RuntimeBinaryPath,
+        [string[]] $ArgumentList
     )
+
+    $stepKind = if (-not [string]::IsNullOrWhiteSpace($RuntimeBinaryPath)) {
+        'runtime-binary'
+    }
+    else {
+        'script'
+    }
 
     return [pscustomobject]@{
         name = $Name
+        kind = $stepKind
         scriptPath = $ScriptPath
         arguments = $Arguments
+        runtimeBinaryPath = $RuntimeBinaryPath
+        argumentList = @($ArgumentList)
     }
 }
 
@@ -197,12 +209,17 @@ function Invoke-InstallStep {
         Write-StyledOutput ("[STEP] {0}" -f $Step.name) | Out-Host
         Write-ExecutionLog -Level 'INFO' -Message ("Starting install step: {0}" -f $Step.name)
         try {
-            $stepArguments = @{}
-            foreach ($property in $Step.arguments.GetEnumerator()) {
-                $stepArguments[$property.Key] = $property.Value
+            if ($Step.kind -eq 'runtime-binary') {
+                & $Step.runtimeBinaryPath @($Step.argumentList) | Out-Null
             }
+            else {
+                $stepArguments = @{}
+                foreach ($property in $Step.arguments.GetEnumerator()) {
+                    $stepArguments[$property.Key] = $property.Value
+                }
 
-            & $Step.scriptPath @stepArguments | Out-Null
+                & $Step.scriptPath @stepArguments | Out-Null
+            }
             $stepExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
             if ($stepExitCode -eq 0) {
                 $status = 'passed'
@@ -226,12 +243,41 @@ function Invoke-InstallStep {
 
     return [pscustomobject]@{
         name = $Step.name
-        scriptPath = $Step.scriptPath
+        scriptPath = $(if ($Step.kind -eq 'runtime-binary') { $Step.runtimeBinaryPath } else { $Step.scriptPath })
         status = $status
         startedAt = $startedAt.ToString('o')
         completedAt = (Get-Date).ToString('o')
         error = $errorMessage
     }
+}
+
+function Convert-InstallArgumentsToCliArgumentList {
+    param([hashtable] $Arguments)
+
+    $argumentList = New-Object System.Collections.Generic.List[string]
+    if ($null -eq $Arguments) {
+        return @()
+    }
+
+    foreach ($entry in ($Arguments.GetEnumerator() | Sort-Object -Property Name)) {
+        if ($null -eq $entry.Value) {
+            continue
+        }
+
+        $optionName = '--' + ([regex]::Replace([string] $entry.Key, '([a-z0-9])([A-Z])', '$1-$2').ToLowerInvariant())
+        $argumentList.Add($optionName) | Out-Null
+        if ($entry.Value -is [bool]) {
+            $argumentList.Add(([string] $entry.Value).ToLowerInvariant()) | Out-Null
+            continue
+        }
+
+        $stringValue = [string] $entry.Value
+        if (-not [string]::IsNullOrWhiteSpace($stringValue)) {
+            $argumentList.Add($stringValue) | Out-Null
+        }
+    }
+
+    return @($argumentList.ToArray())
 }
 
 # Prompts the operator for the desired EOF hook scope when needed.
@@ -415,8 +461,10 @@ if ($resolvedRuntimeProfile.InstallHealthcheck -and -not $SkipHealthcheck) {
     $healthcheckArguments = New-RuntimeTargetArgumentMap -Context $runtimeContext -IncludeRepoRoot -IncludeRuntimeProfile
     $healthcheckArguments.ValidationProfile = $ValidationProfile
     $healthcheckArguments.WarningOnly = $true
+    $healthcheckArgumentList = @('runtime', 'healthcheck') + @(Convert-InstallArgumentsToCliArgumentList -Arguments $healthcheckArguments)
+    $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
-    $steps.Add((New-InstallStep -Name 'Run repository healthcheck' -ScriptPath (Resolve-RepoPath -Root $resolvedRepoRoot -Path 'scripts/runtime/healthcheck.ps1') -Arguments $healthcheckArguments)) | Out-Null
+    $steps.Add((New-InstallStep -Name 'Run repository healthcheck' -RuntimeBinaryPath $runtimeBinaryPath -ArgumentList $healthcheckArgumentList)) | Out-Null
 }
 
 Start-ExecutionSession `

@@ -22,7 +22,6 @@ const DEFAULT_GLOBAL_HOOKS_RELATIVE_PATH: &str = ".codex/git-hooks";
 const CATALOG_RELATIVE_PATH: &str = ".github/governance/git-hook-eof-modes.json";
 const PRE_COMMIT_FILE_NAME: &str = "pre-commit";
 const PRE_COMMIT_RUNNER_RELATIVE_PATH: &str = "scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1";
-const TRIM_SCRIPT_RELATIVE_PATH: &str = "scripts/maintenance/trim-trailing-blank-lines.ps1";
 
 /// Request payload for `setup-git-hooks`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -365,14 +364,6 @@ fn resolve_global_hook_support_paths(
         ));
     }
 
-    let trim_script_path = repo_root.join(TRIM_SCRIPT_RELATIVE_PATH);
-    if !trim_script_path.is_file() {
-        return Err(anyhow!(
-            "missing global hook trim script '{}'",
-            trim_script_path.display()
-        ));
-    }
-
     Ok(GlobalHookSupportPaths {
         runner_path,
         catalog_path,
@@ -381,10 +372,9 @@ fn resolve_global_hook_support_paths(
 
 fn build_managed_global_pre_commit_hook_content(runner_path: &Path, catalog_path: &Path) -> String {
     format!(
-        "#!/usr/bin/env sh\nset -eu\n\nREPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"\ncd \"$REPO_ROOT\"\n\nexport CODEX_GIT_HOOK_EOF_CATALOG_PATH='{}'\n\nif command -v pwsh >/dev/null 2>&1; then\n  if ! pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\nif command -v powershell >/dev/null 2>&1; then\n  if ! powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\necho \"[pre-commit] Warning: PowerShell not found. EOF hygiene skipped.\" >&2\nexit 0\n",
-        normalize_shell_path(catalog_path),
+        "#!/usr/bin/env sh\nset -eu\n\nREPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"\ncd \"$REPO_ROOT\"\n\nexport CODEX_GIT_HOOK_EOF_CATALOG_PATH='{1}'\n\nif command -v pwsh >/dev/null 2>&1; then\n  if ! pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{0}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\nif command -v powershell >/dev/null 2>&1; then\n  if ! powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File '{0}' -RepoRoot \"$REPO_ROOT\"; then\n    echo \"[pre-commit] Error: EOF hygiene hook failed.\" >&2\n    exit 1\n  fi\n  exit 0\nfi\n\necho \"[pre-commit] Warning: PowerShell not found. EOF hygiene skipped.\" >&2\nexit 0\n",
         normalize_shell_path(runner_path),
-        normalize_shell_path(runner_path)
+        normalize_shell_path(catalog_path),
     )
 }
 

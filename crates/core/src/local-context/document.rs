@@ -11,6 +11,7 @@ use super::catalog::{
     local_context_index_file_candidates, resolve_local_context_index_root,
     LocalContextIndexCatalog, LocalContextIndexCatalogInfo,
 };
+use super::sqlite::write_local_context_sqlite_index;
 
 /// Indexed file metadata persisted in the local context document.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -86,6 +87,10 @@ pub struct LocalContextIndexBuildReport {
     pub index_root: PathBuf,
     /// Resolved persisted document path.
     pub index_path: PathBuf,
+    /// Resolved SQLite local memory root directory.
+    pub memory_root: PathBuf,
+    /// Resolved SQLite local memory DB path.
+    pub memory_db_path: PathBuf,
     /// Freshly built document.
     pub document: LocalContextIndexDocument,
     /// Total indexed files.
@@ -256,10 +261,13 @@ pub fn build_local_context_index(
         chunks: chunk_entries,
     };
     let index_path = write_local_context_index_document(&index_root, &document)?;
+    let memory_report = write_local_context_sqlite_index(&repo_root, output_root, &document)?;
 
     Ok(LocalContextIndexBuildReport {
         index_root,
         index_path,
+        memory_root: memory_report.memory_root,
+        memory_db_path: memory_report.db_path,
         indexed_file_count: document.files.len(),
         rebuilt_file_count,
         reused_file_count,

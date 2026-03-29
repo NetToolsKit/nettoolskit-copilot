@@ -86,7 +86,7 @@ pub use operational_hygiene::{
 };
 pub use orchestration::{
     invoke_validate_all, ValidateAllRequest, ValidateAllResult, ValidationCheckResult,
-    ValidationCheckStatus,
+    ValidationCheckStatus, DEFAULT_VALIDATE_ALL_CHECK_ORDER,
 };
 pub use policy::{
     invoke_validate_compatibility_lifecycle_policy, invoke_validate_policy,

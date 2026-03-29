@@ -285,6 +285,50 @@ function Remove-ManagedCodexSkillDuplicates {
     }
 }
 
+# Resolves the managed `ntk` runtime binary, building it locally when needed.
+function Resolve-OrBuild-NtkRuntimeBinaryPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    $repoBinaryPath = Resolve-RepositoryRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot
+    if (Test-Path -LiteralPath $repoBinaryPath -PathType Leaf) {
+        return $repoBinaryPath
+    }
+
+    $cargoCommand = Get-Command cargo -ErrorAction SilentlyContinue
+    if ($null -eq $cargoCommand) {
+        throw 'Managed ntk runtime binary missing and cargo is not available. Run `cargo build -p nettoolskit-cli` or set CODEX_NTK_RUNTIME_BIN_PATH.'
+    }
+
+    & $cargoCommand.Source build -p nettoolskit-cli | Out-Null
+    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        throw ("Failed to build managed ntk runtime binary. ExitCode={0}" -f $exitCode)
+    }
+
+    if (-not (Test-Path -LiteralPath $repoBinaryPath -PathType Leaf)) {
+        throw ("Managed ntk runtime binary not found after build: {0}" -f $repoBinaryPath)
+    }
+
+    return $repoBinaryPath
+}
+
+# Copies the managed `ntk` runtime binary into one runtime root under `bin/`.
+function Sync-RuntimeBinary {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $SourceBinaryPath,
+        [Parameter(Mandatory = $true)]
+        [string] $TargetRuntimeRoot
+    )
+
+    $targetBinRoot = Join-Path $TargetRuntimeRoot 'bin'
+    New-Item -ItemType Directory -Path $targetBinRoot -Force | Out-Null
+    Copy-Item -LiteralPath $SourceBinaryPath -Destination (Join-Path $targetBinRoot (Get-RuntimeBinaryFileName)) -Force
+}
+
 # Applies canonical MCP runtime catalog settings to target Codex config.toml.
 function Invoke-McpConfigApply {
     param(
@@ -293,24 +337,29 @@ function Invoke-McpConfigApply {
         [switch] $CreateBackup
     )
 
-    $syncScript = Join-Path $ResolvedRepoRoot 'scripts\runtime\sync-codex-mcp-config.ps1'
     $catalog = Join-Path (Join-Path (Join-Path $ResolvedRepoRoot '.github') 'governance') 'mcp-runtime.catalog.json'
     $targetConfig = Join-Path $CodexPath 'config.toml'
+    $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot -RuntimePreference github
 
-    Assert-PathPresent -Path $syncScript -Label 'MCP sync script'
     Assert-PathPresent -Path $catalog -Label 'MCP runtime catalog'
     Assert-PathPresent -Path $targetConfig -Label 'target Codex config'
+    Assert-PathPresent -Path $runtimeBinaryPath -Label 'managed runtime binary'
 
-    $syncArgs = @{
-        CatalogPath = $catalog
-        TargetConfigPath = $targetConfig
+    $syncArgs = @(
+        'runtime',
+        'sync-codex-mcp-config',
+        '--repo-root', $ResolvedRepoRoot,
+        '--catalog-path', $catalog,
+        '--target-config-path', $targetConfig
+    )
+    if ($CreateBackup.IsPresent) {
+        $syncArgs += '--create-backup'
     }
 
-    if ($CreateBackup) {
-        $syncArgs.CreateBackup = $true
+    & $runtimeBinaryPath @syncArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "MCP config apply failed with exit code $LASTEXITCODE."
     }
-
-    & $syncScript @syncArgs
 }
 
 # Renders repository-owned projected provider surfaces selected by the
@@ -323,15 +372,23 @@ function Invoke-ProviderSurfaceBootstrapRender {
         [bool] $EnableClaudeRuntime = $false
     )
 
-    $renderScriptPath = Join-Path $ResolvedRepoRoot 'scripts\runtime\render-provider-surfaces.ps1'
-    Assert-PathPresent -Path $renderScriptPath -Label 'provider surface render dispatcher'
+    $runtimeBinaryPath = Resolve-OrBuild-NtkRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot
+    Assert-PathPresent -Path $runtimeBinaryPath -Label 'managed runtime binary'
 
-    & $renderScriptPath `
-        -RepoRoot $ResolvedRepoRoot `
-        -ConsumerName bootstrap `
-        -EnableCodexRuntime:$EnableCodexRuntime `
-        -EnableClaudeRuntime:$EnableClaudeRuntime `
-        -Verbose:$script:IsVerboseEnabled | Out-Null
+    $renderArgs = @(
+        'runtime',
+        'render-provider-surfaces',
+        '--repo-root', $ResolvedRepoRoot,
+        '--consumer-name', 'bootstrap'
+    )
+    if ($EnableCodexRuntime) {
+        $renderArgs += '--enable-codex-runtime'
+    }
+    if ($EnableClaudeRuntime) {
+        $renderArgs += '--enable-claude-runtime'
+    }
+
+    & $runtimeBinaryPath @renderArgs | Out-Null
     $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
     if ($exitCode -ne 0) {
         throw ("Provider surface render dispatch failed before bootstrap sync. ExitCode={0}" -f $exitCode)
@@ -380,6 +437,13 @@ Assert-PathPresent -Path $sourceGithub -Label 'source .github folder'
 Assert-PathPresent -Path $sourceCodex -Label 'source .codex folder'
 Assert-PathPresent -Path $sourceScripts -Label 'source scripts folder'
 
+$managedRuntimeBinaryPath = if ($resolvedRuntimeProfile.EnableGithubRuntime -or $resolvedRuntimeProfile.EnableCodexRuntime) {
+    Resolve-OrBuild-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot
+}
+else {
+    $null
+}
+
 Invoke-ProviderSurfaceBootstrapRender `
     -ResolvedRepoRoot $resolvedRepoRoot `
     -EnableCodexRuntime:$resolvedRuntimeProfile.EnableCodexRuntime `
@@ -418,6 +482,7 @@ function Remove-LegacyStarterSkillDuplicates {
 if ($resolvedRuntimeProfile.EnableGithubRuntime) {
     Invoke-DirectorySync -Source $sourceGithub -Destination $TargetGithubPath -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceScripts -Destination (Join-Path $TargetGithubPath 'scripts') -MirrorMode:$Mirror
+    Sync-RuntimeBinary -SourceBinaryPath $managedRuntimeBinaryPath -TargetRuntimeRoot $TargetGithubPath
     Remove-LegacyStarterSkillDuplicates -SkillRoots @(
         (Join-Path $TargetGithubPath 'skills'),
         $TargetCopilotSkillsPath
@@ -436,6 +501,7 @@ if ($resolvedRuntimeProfile.EnableCodexRuntime) {
     Invoke-DirectorySync -Source $sourceSecurityScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'security') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $sourceMaintenanceScripts -Destination (Join-Path (Join-Path $TargetCodexPath 'shared-scripts') 'maintenance') -MirrorMode:$Mirror
     Invoke-DirectorySync -Source $runtimeContext.Sources.CodexOrchestrationRoot -Destination (Join-Path $TargetCodexPath 'shared-orchestration') -MirrorMode:$Mirror
+    Sync-RuntimeBinary -SourceBinaryPath $managedRuntimeBinaryPath -TargetRuntimeRoot $TargetCodexPath
 }
 else {
     Write-VerboseColor ("Skipping Codex runtime projection for profile '{0}'." -f $resolvedRuntimeProfile.Name) 'Yellow'
@@ -455,6 +521,7 @@ Write-StyledOutput ("  runtime location overrides: {0}" -f ($(if ($effectiveRunt
 if ($resolvedRuntimeProfile.EnableGithubRuntime) {
     Write-StyledOutput ("  .github -> {0}" -f $TargetGithubPath)
     Write-StyledOutput ("  scripts -> {0}" -f (Join-Path $TargetGithubPath 'scripts'))
+    Write-StyledOutput ("  ntk runtime binary -> {0}" -f (Join-Path $TargetGithubPath 'bin'))
     Write-StyledOutput ("  runtime legacy starter cleanup -> {0}, {1}" -f (Join-Path $TargetGithubPath 'skills'), $TargetCopilotSkillsPath)
 }
 else {
@@ -467,6 +534,7 @@ if ($resolvedRuntimeProfile.EnableCodexRuntime) {
     Write-StyledOutput ("  definitions/providers/codex/mcp + catalog-generated manifest -> rendered .codex/mcp -> {0}" -f (Join-Path $TargetCodexPath 'shared-mcp'))
     Write-StyledOutput ("  definitions/providers/codex/scripts + scripts/common + scripts/security + scripts/maintenance -> rendered .codex/scripts -> {0}" -f (Join-Path $TargetCodexPath 'shared-scripts'))
     Write-StyledOutput ("  .codex/orchestration -> {0}" -f (Join-Path $TargetCodexPath 'shared-orchestration'))
+    Write-StyledOutput ("  ntk runtime binary -> {0}" -f (Join-Path $TargetCodexPath 'bin'))
 }
 else {
     Write-StyledOutput '  Codex runtime surface: skipped'

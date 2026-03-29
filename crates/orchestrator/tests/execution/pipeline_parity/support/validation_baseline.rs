@@ -300,11 +300,12 @@ fn scripts_readme_contents() -> &'static str {
 - [AGENTS](../.github/AGENTS.md)
 - [Copilot Instructions](../.github/copilot-instructions.md)
 - [Bootstrap](runtime/bootstrap.ps1)
-- [Render Provider Surfaces](runtime/render-provider-surfaces.ps1)
-- [Healthcheck](runtime/healthcheck.ps1)
-- [Self-Heal](runtime/self-heal.ps1)
-- [Validate All](validation/validate-all.ps1)
-- [Validate README Standards](validation/validate-readme-standards.ps1)
+- `ntk runtime render-provider-surfaces --repo-root .`
+- Native Runtime Doctor: `ntk runtime doctor --repo-root . --detailed`
+- Native Healthcheck: `ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release`
+- `ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras`
+- Native Validate All: `ntk validation all --repo-root . --validation-profile release`
+- Native README Standards Check: `ntk validation readme-standards --repo-root .`
 
 ---
 

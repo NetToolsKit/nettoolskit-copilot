@@ -30,6 +30,9 @@ tokio = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+chrono = { workspace = true }
+rusqlite = { workspace = true }
+toml = { workspace = true }
 
 # Menu and utilities
 strum = { workspace = true }

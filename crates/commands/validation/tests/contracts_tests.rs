@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 #[test]
 fn test_validation_surface_total_matches_locked_inventory() {
-    assert_eq!(validation_surface_script_total(), 43);
+    assert_eq!(validation_surface_script_total(), 39);
 }
 
 #[test]
@@ -40,34 +40,27 @@ fn test_validation_surface_category_counts_match_matrix() {
         .iter()
         .find(|contract| contract.kind == ValidationSurfaceKind::ValidationCommands)
         .expect("validation surface should exist");
+    let security_commands = VALIDATION_SURFACE_CONTRACTS
+        .iter()
+        .find(|contract| contract.kind == ValidationSurfaceKind::SecurityCommands)
+        .expect("security surface should exist");
     let governance_commands = VALIDATION_SURFACE_CONTRACTS
         .iter()
         .find(|contract| contract.kind == ValidationSurfaceKind::GovernanceCommands)
         .expect("governance surface should exist");
-    let test_automation_commands = VALIDATION_SURFACE_CONTRACTS
+    let documentation_commands = VALIDATION_SURFACE_CONTRACTS
         .iter()
-        .find(|contract| contract.kind == ValidationSurfaceKind::TestAutomationCommands)
-        .expect("test automation surface should exist");
+        .find(|contract| contract.kind == ValidationSurfaceKind::DocumentationCommands)
+        .expect("documentation surface should exist");
     let deploy_commands = VALIDATION_SURFACE_CONTRACTS
         .iter()
         .find(|contract| contract.kind == ValidationSurfaceKind::DeployCommands)
         .expect("deploy surface should exist");
-    let test_refactor_commands = VALIDATION_SURFACE_CONTRACTS
-        .iter()
-        .find(|contract| contract.surface_id == "test-refactor-commands")
-        .expect("test refactor surface should exist");
 
-    assert_eq!(validation_commands.legacy_script_count, 31);
+    assert_eq!(validation_commands.legacy_script_count, 29);
+    assert_eq!(security_commands.legacy_script_count, 6);
     assert_eq!(governance_commands.legacy_script_count, 2);
-    assert_eq!(test_automation_commands.legacy_script_count, 1);
-    assert_eq!(
-        test_automation_commands.legacy_root,
-        "scripts/tests/check-test-naming.ps1"
-    );
-    assert_eq!(test_refactor_commands.legacy_script_count, 1);
-    assert_eq!(
-        test_refactor_commands.legacy_root,
-        "scripts/tests/refactor_tests_to_aaa.ps1"
-    );
+    assert_eq!(documentation_commands.legacy_script_count, 1);
+    assert_eq!(documentation_commands.legacy_root, "scripts/doc");
     assert_eq!(deploy_commands.legacy_script_count, 1);
 }

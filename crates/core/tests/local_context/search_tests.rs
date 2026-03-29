@@ -20,15 +20,19 @@ fn sample_document() -> LocalContextIndexDocument {
                 kind: LocalContextChunkKind::Markdown,
                 heading: Some("Rust migration plan".to_string()),
                 text: "The runtime rewrite tracks wave one and query contracts.".to_string(),
-                search_text: "rust migration plan the runtime rewrite tracks wave one and query contracts".to_string(),
+                search_text:
+                    "rust migration plan the runtime rewrite tracks wave one and query contracts"
+                        .to_string(),
             },
             LocalContextChunk {
-                id: "scripts/runtime/query-local-context-index.ps1::0".to_string(),
-                path: "scripts/runtime/query-local-context-index.ps1".to_string(),
+                id: "scripts/runtime/demo.ps1::0".to_string(),
+                path: "scripts/runtime/demo.ps1".to_string(),
                 kind: LocalContextChunkKind::Text,
                 heading: None,
                 text: "Query the local context index and emit json output.".to_string(),
-                search_text: "scripts/runtime/query-local-context-index.ps1 query the local context index and emit json output".to_string(),
+                search_text:
+                    "scripts/runtime/demo.ps1 query the local context index and emit json output"
+                        .to_string(),
             },
         ],
     }
@@ -49,7 +53,7 @@ fn test_search_local_context_index_document_honors_excluded_paths() {
         "local context index",
         &sample_document(),
         5,
-        &["scripts/runtime/query-local-context-index.ps1".to_string()],
+        &["scripts/runtime/demo.ps1".to_string()],
     );
 
     assert!(hits.is_empty());

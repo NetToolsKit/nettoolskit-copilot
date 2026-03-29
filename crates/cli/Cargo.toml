@@ -33,6 +33,8 @@ nettoolskit-orchestrator = { path = "../orchestrator" }
 nettoolskit-ui = { path = "../ui" }
 nettoolskit-core = { path = "../core" }
 nettoolskit-otel = { path = "../otel" }
+nettoolskit-runtime = { path = "../commands/runtime" }
+nettoolskit-validation = { path = "../commands/validation" }
 
 # Async and standard dependencies
 clap = { workspace = true }

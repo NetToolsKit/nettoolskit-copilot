@@ -311,6 +311,85 @@ function Resolve-CodexSharedScriptsPath {
     return Join-PathSegments -BasePath (Resolve-CodexRuntimePath) -Segments @('shared-scripts')
 }
 
+# Returns the platform-specific runtime binary file name.
+function Get-RuntimeBinaryFileName {
+    if ($IsWindows) {
+        return 'ntk.exe'
+    }
+
+    return 'ntk'
+}
+
+# Resolves the shared `.github/bin` runtime directory.
+function Resolve-GithubRuntimeBinPath {
+    return Join-PathSegments -BasePath (Resolve-GithubRuntimePath) -Segments @('bin')
+}
+
+# Resolves the shared `.codex/bin` runtime directory.
+function Resolve-CodexRuntimeBinPath {
+    return Join-PathSegments -BasePath (Resolve-CodexRuntimePath) -Segments @('bin')
+}
+
+# Resolves the repository-local built `ntk` binary path.
+function Resolve-RepositoryRuntimeBinaryPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot
+    )
+
+    return Join-PathSegments -BasePath $ResolvedRepoRoot -Segments @('.build', 'target', 'debug', (Get-RuntimeBinaryFileName))
+}
+
+# Resolves the best available `ntk` runtime binary path.
+function Resolve-NtkRuntimeBinaryPath {
+    param(
+        [string] $ResolvedRepoRoot,
+        [ValidateSet('github', 'codex')]
+        [string] $RuntimePreference = 'github'
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_NTK_RUNTIME_BIN_PATH)) {
+        $overridePath = [System.IO.Path]::GetFullPath($env:CODEX_NTK_RUNTIME_BIN_PATH)
+        if (Test-Path -LiteralPath $overridePath -PathType Leaf) {
+            return $overridePath
+        }
+    }
+
+    $runtimeFileName = Get-RuntimeBinaryFileName
+    $preferredCandidates = if ($RuntimePreference -eq 'codex') {
+        @(
+            (Join-Path (Resolve-CodexRuntimeBinPath) $runtimeFileName),
+            (Join-Path (Resolve-GithubRuntimeBinPath) $runtimeFileName)
+        )
+    }
+    else {
+        @(
+            (Join-Path (Resolve-GithubRuntimeBinPath) $runtimeFileName),
+            (Join-Path (Resolve-CodexRuntimeBinPath) $runtimeFileName)
+        )
+    }
+
+    foreach ($candidatePath in $preferredCandidates) {
+        if (Test-Path -LiteralPath $candidatePath -PathType Leaf) {
+            return [System.IO.Path]::GetFullPath($candidatePath)
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($ResolvedRepoRoot)) {
+        $repoBinaryPath = Resolve-RepositoryRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot
+        if (Test-Path -LiteralPath $repoBinaryPath -PathType Leaf) {
+            return [System.IO.Path]::GetFullPath($repoBinaryPath)
+        }
+    }
+
+    $ntkCommand = Get-Command ntk -ErrorAction SilentlyContinue
+    if ($null -ne $ntkCommand -and -not [string]::IsNullOrWhiteSpace([string] $ntkCommand.Source)) {
+        return [System.IO.Path]::GetFullPath([string] $ntkCommand.Source)
+    }
+
+    throw 'Unable to resolve the managed ntk runtime binary. Run scripts/runtime/bootstrap.ps1 first or set CODEX_NTK_RUNTIME_BIN_PATH.'
+}
+
 # Returns the effective runtime locations for diagnostics and orchestration output.
 function Get-EffectiveRuntimeLocations {
     $catalog = Get-RuntimeLocationCatalog

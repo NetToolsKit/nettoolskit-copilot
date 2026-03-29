@@ -7,22 +7,16 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Resolve-CanonicalRuntimeScriptPath {
-    param([Parameter(Mandatory = $true)][string] $ScriptName)
-
-    $candidatePaths = @(
-        (Join-Path $PSScriptRoot (Join-Path '..\..\scripts\runtime' $ScriptName)),
-        (Join-Path $PSScriptRoot (Join-Path '..\..\.github\scripts\runtime' $ScriptName))
-    )
-
-    foreach ($candidatePath in $candidatePaths) {
-        if (Test-Path -LiteralPath $candidatePath -PathType Leaf) {
-            return [System.IO.Path]::GetFullPath($candidatePath)
-        }
-    }
-
-    throw ("Unable to locate canonical runtime script '{0}' from '{1}'." -f $ScriptName, $PSScriptRoot)
+$nativeArgs = @('runtime', 'render-vscode-mcp-template')
+if ($PSBoundParameters.ContainsKey('RepoRoot') -and -not [string]::IsNullOrWhiteSpace($RepoRoot)) {
+    $nativeArgs += @('--repo-root', $RepoRoot)
+}
+if ($PSBoundParameters.ContainsKey('CatalogPath') -and -not [string]::IsNullOrWhiteSpace($CatalogPath)) {
+    $nativeArgs += @('--catalog-path', $CatalogPath)
+}
+if ($PSBoundParameters.ContainsKey('OutputPath') -and -not [string]::IsNullOrWhiteSpace($OutputPath)) {
+    $nativeArgs += @('--output-path', $OutputPath)
 }
 
-& (Resolve-CanonicalRuntimeScriptPath -ScriptName 'render-vscode-mcp-template.ps1') @PSBoundParameters
+& ntk @nativeArgs
 exit $LASTEXITCODE

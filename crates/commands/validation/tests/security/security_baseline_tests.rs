@@ -22,7 +22,7 @@ fn test_invoke_validate_security_baseline_passes_for_valid_assets() {
     .expect("security baseline validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Passed);
-    assert_eq!(result.files_scanned, 4);
+    assert_eq!(result.files_scanned, 3);
 }
 
 #[test]
@@ -108,4 +108,28 @@ fn test_invoke_validate_security_baseline_honors_allowed_content_patterns() {
     .expect("security baseline validation should execute");
 
     assert_eq!(result.status, ValidationCheckStatus::Passed);
+}
+
+#[test]
+fn test_invoke_validate_security_baseline_scans_past_allowlisted_match() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_security_repo(repo.path());
+    write_repo_file(
+        repo.path(),
+        "docs/notes.md",
+        "password = \"example-password\"\npassword = \"supersecret1\"\n",
+    );
+
+    let result = invoke_validate_security_baseline(&ValidateSecurityBaselineRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        warning_only: false,
+        ..ValidateSecurityBaselineRequest::default()
+    })
+    .expect("security baseline validation should execute");
+
+    assert_eq!(result.status, ValidationCheckStatus::Warning);
+    assert!(result
+        .warnings
+        .iter()
+        .any(|message| message.contains("supersecret1")));
 }

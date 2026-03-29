@@ -1,12 +1,12 @@
 # Scripts
 
-> Repository-owned compatibility wrappers for bootstrap, projection, validation, health, and maintenance.
+> Repository-owned runtime commands for bootstrap, projection, validation, diagnostics, and maintenance.
 
 ---
 
 ## Introduction
 
-`scripts/` is the compatibility layer for repository operations. It renders projected surfaces, applies runtime configuration, validates policy and docs, and keeps maintenance tasks deterministic. The Rust crates own the primary implementation surfaces; these wrappers remain for shell-based entrypoints and fallback.
+`scripts/` is the runtime surface for repository operations. It renders projected surfaces, applies runtime configuration, validates policy and docs, and keeps maintenance tasks deterministic. The Rust crates own the primary implementation surfaces and the native `ntk runtime` / `ntk validation` commands are the preferred operator contracts.
 
 Authoritative non-code assets live under `definitions/`. Provider and runtime folders such as `.github/`, `.codex/`, `.claude/`, and `.vscode/` are generated surfaces that these scripts render, sync, and validate.
 
@@ -14,11 +14,11 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 
 ## Features
 
-- Bootstrap and sync repository runtime surfaces from versioned assets through compatibility wrappers.
-- Render projected provider and editor surfaces from canonical definitions.
-- Validate README, instruction, policy, and workspace standards with the Rust validation boundary.
-- Run health, remediation, security, and maintenance wrappers when shell invocation is required.
-- Keep operational commands deterministic and script-driven.
+- ✅ Bootstrap and sync repository runtime surfaces from versioned assets through native runtime commands and targeted wrapper launchers where needed.
+- ✅ Render projected provider and editor surfaces from canonical definitions.
+- ✅ Validate README, instruction, policy, and workspace standards with the Rust validation boundary.
+- ✅ Run health, remediation, security, and maintenance entrypoints through native commands where available.
+- ✅ Keep operational commands deterministic and script-driven.
 
 ---
 
@@ -37,10 +37,14 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 ## Quick Start
 
 ```powershell
-pwsh -File .\scripts\runtime\bootstrap.ps1
-pwsh -File .\scripts\runtime\healthcheck.ps1 -StrictExtras
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile dev
-pwsh -File .\scripts\validation\validate-readme-standards.ps1
+ntk runtime doctor --repo-root . --detailed
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile dev
+ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras
+ntk runtime render-mcp-runtime-artifacts
+ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
+ntk runtime sync-codex-mcp-config --dry-run
+ntk validation all --repo-root . --validation-profile dev
+ntk validation readme-standards --repo-root .
 ```
 
 ---
@@ -49,10 +53,13 @@ pwsh -File .\scripts\validation\validate-readme-standards.ps1
 
 ```powershell
 pwsh -File .\scripts\runtime\bootstrap.ps1
-pwsh -File .\scripts\runtime\render-provider-surfaces.ps1 -RepoRoot .
-pwsh -File .\scripts\runtime\self-heal.ps1 -StrictExtras
-pwsh -File .\scripts\validation\validate-all.ps1 -ValidationProfile release
-pwsh -File .\scripts\validation\validate-readme-standards.ps1
+ntk runtime render-mcp-runtime-artifacts
+ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
+ntk runtime sync-codex-mcp-config --dry-run
+ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras
+ntk runtime doctor --repo-root . --detailed
+ntk validation all --repo-root . --validation-profile release
+ntk validation readme-standards --repo-root .
 ```
 
 ---
@@ -65,11 +72,15 @@ pwsh -File .\scripts\validation\validate-readme-standards.ps1
 - [AGENTS](../.github/AGENTS.md)
 - [Copilot Instructions](../.github/copilot-instructions.md)
 - [Bootstrap](runtime/bootstrap.ps1)
-- [Render Provider Surfaces](runtime/render-provider-surfaces.ps1)
-- [Healthcheck](runtime/healthcheck.ps1)
-- [Self-Heal](runtime/self-heal.ps1)
-- [Validate All](validation/validate-all.ps1)
-- [Validate README Standards](validation/validate-readme-standards.ps1)
+- `ntk runtime render-mcp-runtime-artifacts`
+- `ntk runtime render-mcp-runtime-artifacts`
+- `ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc`
+- `ntk runtime sync-codex-mcp-config --dry-run`
+- `ntk runtime doctor --repo-root . --detailed`
+- `ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release`
+- `ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras`
+- Native Validate All: `ntk validation all --repo-root . --validation-profile release`
+- Native README Standards Check: `ntk validation readme-standards --repo-root .`
 
 ---
 

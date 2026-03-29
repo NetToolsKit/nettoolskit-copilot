@@ -1,5 +1,4 @@
 //! Command processor implementation
-
 use crate::execution::ai::{
     AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, MockAiProvider,
     OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
@@ -9,6 +8,7 @@ use crate::execution::ai_session::{
     LocalAiSessionState, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
     NTK_AI_SESSION_COMPRESSION_MODE_ENV, NTK_AI_SESSION_DELTA_MIN_SHARED_PREFIX_CHARS_ENV,
 };
+use crate::execution::ai_usage::{record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource};
 use crate::execution::approval::{request_approval, ApprovalDecision, ApprovalRequest};
 use crate::execution::cache::{CacheKey, CacheStats, CacheTtl, CacheValue, CommandResultCache};
 use crate::execution::executor::{AsyncCommandExecutor, CommandProgress, ProgressSender};
@@ -23,6 +23,11 @@ use nettoolskit_core::ai_context::{
     collect_workspace_context, render_context_system_message, AiContextBudget,
 };
 use nettoolskit_core::file_search::{search_files, SearchConfig};
+use nettoolskit_core::local_context::{
+    record_local_context_memory_event, upsert_local_context_memory_session,
+    LocalContextMemoryEventRecord, LocalContextMemorySessionRecord,
+};
+use nettoolskit_core::path_utils::repository::resolve_repository_root;
 use nettoolskit_core::{
     AppConfig, ApprovalState, ColorMode, CommandEntry, ControlEnvelope, ControlPolicyContext,
     IngressTransport, OperatorContext, OperatorKind, RuntimeMode, SessionContext, SessionKind,
@@ -106,6 +111,7 @@ const DEFAULT_AI_SLO_MAX_P95_LATENCY_MS: f64 = 30_000.0;
 const DEFAULT_AI_SLO_MIN_SUCCESS_RATE_PCT: f64 = 95.0;
 const DEFAULT_AI_SLO_MAX_TOKENS_PER_TASK: f64 = 20_000.0;
 const DEFAULT_AI_SLO_MAX_COST_USD_PER_TASK: f64 = 1.0;
+const LOCAL_CONTEXT_MEMORY_EVENT_TTL_MS: u64 = 14 * 24 * 60 * 60 * 1000;
 const NTK_AI_TOKEN_BUDGET_INPUT_PER_REQUEST_ENV: &str = "NTK_AI_TOKEN_BUDGET_INPUT_PER_REQUEST";
 const NTK_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST_ENV: &str = "NTK_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST";
 const NTK_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST_ENV: &str = "NTK_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST";
@@ -1129,6 +1135,7 @@ fn append_task_audit_event(
     if let Some(control) = task_control_envelope(task_id) {
         event = event.with_control_envelope(control);
     }
+    let event_for_local_memory = event.clone();
     with_task_audit_registry(|registry| {
         let events = registry.entry(task_id.to_string()).or_default();
         events.push(event);
@@ -1137,6 +1144,9 @@ fn append_task_audit_event(
             events.drain(0..extra);
         }
     });
+    if should_persist_local_memory_task_audit_event(&event_for_local_memory) {
+        persist_local_memory_task_audit_event_if_possible(&event_for_local_memory);
+    }
 }
 
 fn list_task_audit_events(task_id: &str) -> Vec<TaskAuditEvent> {
@@ -2412,6 +2422,50 @@ fn record_ai_usage_estimates(metrics: &Metrics, request: &AiRequest, output: &st
     );
 }
 
+struct AiUsageEventContext<'a> {
+    intent: AiIntent,
+    provider_id: &'a str,
+    session_id: &'a str,
+    event_source: AiUsageEventSource,
+    billable: bool,
+    timestamp_unix_ms: u64,
+}
+
+fn persist_ai_usage_event(request: &AiRequest, output: &str, context: AiUsageEventContext<'_>) {
+    let input_tokens_estimated = estimate_request_input_tokens(request);
+    let output_tokens_estimated = estimate_token_count(output);
+    let estimated_cost_usd =
+        estimate_ai_request_cost_usd(input_tokens_estimated, output_tokens_estimated);
+    let repo_root = std::env::current_dir().ok();
+    let record = AiUsageEventRecord {
+        timestamp_unix_ms: context.timestamp_unix_ms,
+        provider: context.provider_id.to_string(),
+        model: request.model.clone(),
+        intent: context.intent.as_label().to_string(),
+        repo_root,
+        session_id: context.session_id.to_string(),
+        event_source: context.event_source,
+        billable: context.billable,
+        input_tokens_estimated,
+        output_tokens_estimated,
+        input_tokens_actual: None,
+        output_tokens_actual: None,
+        estimated_cost_usd,
+        actual_cost_usd: None,
+        status: "success".to_string(),
+    };
+
+    if let Err(error) = record_ai_usage_event(&record) {
+        warn!(
+            provider = context.provider_id,
+            intent = context.intent.as_label(),
+            source = context.event_source.as_str(),
+            error = %error,
+            "failed to persist local AI usage event"
+        );
+    }
+}
+
 fn ai_error_guidance_message(error: &AiProviderError) -> Option<&'static str> {
     match error {
         AiProviderError::Timeout { .. } => Some(
@@ -2938,6 +2992,166 @@ fn persist_ai_session_exchange(
             ));
         }
     }
+
+    persist_local_memory_ai_session_checkpoint_if_possible(&session);
+}
+
+fn persist_local_memory_ai_session_checkpoint_if_possible(session: &LocalAiSessionState) {
+    let Some(repo_root) = resolve_local_memory_repo_root() else {
+        return;
+    };
+    if let Err(error) = persist_local_memory_ai_session_checkpoint_for_repo(&repo_root, session) {
+        warn!(
+            session_id = session.id,
+            error = %error,
+            "Failed to persist local memory AI session checkpoint"
+        );
+    }
+}
+
+fn persist_local_memory_ai_session_checkpoint_for_repo(
+    repo_root: &Path,
+    session: &LocalAiSessionState,
+) -> std::result::Result<(), String> {
+    let summary = summarize_local_memory_ai_session(session);
+    upsert_local_context_memory_session(
+        repo_root,
+        None,
+        &LocalContextMemorySessionRecord {
+            session_id: session.id.clone(),
+            session_kind: "ai-session".to_string(),
+            summary: Some(summary.clone()),
+            created_at_unix_ms: session.started_at_ms,
+            updated_at_unix_ms: session.last_activity_ms,
+        },
+    )
+    .map_err(|error| error.to_string())?;
+    let payload = serde_json::json!({
+        "sessionId": session.id,
+        "exchangeCount": session.exchanges.len(),
+        "startedAtUnixMs": session.started_at_ms,
+        "updatedAtUnixMs": session.last_activity_ms,
+        "summary": summary,
+    });
+    record_local_context_memory_event(
+        repo_root,
+        None,
+        &LocalContextMemoryEventRecord {
+            event_id: format!(
+                "ai-session-checkpoint:{}:{}",
+                session.id, session.last_activity_ms
+            ),
+            session_id: Some(session.id.clone()),
+            source_kind: "ai-session-checkpoint".to_string(),
+            payload_json: serde_json::to_string(&payload).map_err(|error| {
+                format!("failed to serialize AI session checkpoint payload: {error}")
+            })?,
+            created_at_unix_ms: session.last_activity_ms,
+            expires_at_unix_ms: Some(session.last_activity_ms + LOCAL_CONTEXT_MEMORY_EVENT_TTL_MS),
+        },
+    )
+    .map_err(|error| error.to_string())?;
+    Ok(())
+}
+
+fn summarize_local_memory_ai_session(session: &LocalAiSessionState) -> String {
+    let recent = session
+        .exchanges
+        .iter()
+        .rev()
+        .take(3)
+        .collect::<Vec<_>>()
+        .into_iter()
+        .rev()
+        .map(|exchange| {
+            format!(
+                "{} via {} | prompt: {} | response: {}",
+                exchange.intent,
+                exchange.provider,
+                truncate_local_memory_summary_field(&exchange.user_prompt, 80),
+                truncate_local_memory_summary_field(&exchange.assistant_response, 120)
+            )
+        })
+        .collect::<Vec<_>>();
+
+    if recent.is_empty() {
+        "AI session has no exchanges yet.".to_string()
+    } else {
+        recent.join(" || ")
+    }
+}
+
+fn truncate_local_memory_summary_field(value: &str, max_chars: usize) -> String {
+    let normalized = value.split_whitespace().collect::<Vec<_>>().join(" ");
+    let mut truncated = normalized.chars().take(max_chars).collect::<String>();
+    if normalized.chars().count() > max_chars {
+        truncated.push_str("...");
+    }
+    truncated
+}
+
+fn should_persist_local_memory_task_audit_event(event: &TaskAuditEvent) -> bool {
+    matches!(
+        event.status,
+        TaskExecutionStatus::Failed | TaskExecutionStatus::Cancelled
+    ) || (event.status == TaskExecutionStatus::Queued && event.message.contains("Task submitted"))
+}
+
+fn persist_local_memory_task_audit_event_if_possible(event: &TaskAuditEvent) {
+    let Some(repo_root) = resolve_local_memory_repo_root() else {
+        return;
+    };
+    if let Err(error) = persist_local_memory_task_audit_event_for_repo(&repo_root, event) {
+        warn!(
+            task_id = event.task_id,
+            status = task_status_label(event.status),
+            error = %error,
+            "Failed to persist local memory task audit event"
+        );
+    }
+}
+
+fn persist_local_memory_task_audit_event_for_repo(
+    repo_root: &Path,
+    event: &TaskAuditEvent,
+) -> std::result::Result<(), String> {
+    let payload = serde_json::json!({
+        "taskId": event.task_id,
+        "runtimeMode": event.runtime_mode.to_string(),
+        "status": task_status_label(event.status),
+        "message": event.message,
+        "control": event.control,
+        "timestampUnixMs": event.timestamp_unix_ms,
+    });
+    record_local_context_memory_event(
+        repo_root,
+        None,
+        &LocalContextMemoryEventRecord {
+            event_id: format!(
+                "runtime-task:{}:{}:{}",
+                event.task_id,
+                task_status_label(event.status),
+                event.timestamp_unix_ms
+            ),
+            session_id: event
+                .control
+                .as_ref()
+                .map(|control| control.session.id.clone()),
+            source_kind: "runtime-task-audit".to_string(),
+            payload_json: serde_json::to_string(&payload).map_err(|error| {
+                format!("failed to serialize runtime task audit payload: {error}")
+            })?,
+            created_at_unix_ms: event.timestamp_unix_ms,
+            expires_at_unix_ms: Some(event.timestamp_unix_ms + LOCAL_CONTEXT_MEMORY_EVENT_TTL_MS),
+        },
+    )
+    .map_err(|error| error.to_string())?;
+    Ok(())
+}
+
+fn resolve_local_memory_repo_root() -> Option<PathBuf> {
+    let current_dir = std::env::current_dir().ok()?;
+    resolve_repository_root(None, None, &current_dir).ok()
 }
 
 fn handle_ai_resume_subcommand(parts: &[&str]) -> ExitStatus {
@@ -3361,6 +3575,7 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
     if token_policy.cache_first_enabled {
         match with_command_cache(|cache| cache.get(&ai_cache_key)) {
             Some(CacheValue::AiResponseText(cached_output)) => {
+                let cache_hit_timestamp_unix_ms = current_unix_timestamp_ms();
                 ai_metrics.increment_counter("runtime_ai_cache_hits_total");
                 ai_metrics.increment_counter(format!(
                     "runtime_ai_intent_{}_cache_hits_total",
@@ -3390,6 +3605,18 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
                     println!();
                 }
                 persist_ai_session_exchange(&session_id, intent, "cache", &prompt, &cached_output);
+                persist_ai_usage_event(
+                    &request,
+                    &cached_output,
+                    AiUsageEventContext {
+                        intent,
+                        provider_id: "cache",
+                        session_id: &session_id,
+                        event_source: AiUsageEventSource::Cache,
+                        billable: false,
+                        timestamp_unix_ms: cache_hit_timestamp_unix_ms,
+                    },
+                );
                 let _ = nettoolskit_ui::append_footer_log("ai: cache hit");
                 return ExitStatus::Success;
             }
@@ -3438,6 +3665,7 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
     .await
     {
         Ok(routed) => {
+            let completed_at_unix_ms = current_unix_timestamp_ms();
             let provider_id = routed.provider_id.as_str();
             let provider_metric = sanitize_metric_component(provider_id);
             ai_metrics.record_timing("runtime_ai_request_latency", request_started.elapsed());
@@ -3509,6 +3737,18 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
 
             persist_ai_session_exchange(&session_id, intent, provider_id, &prompt, &output);
             record_ai_usage_estimates(&ai_metrics, &request, &output);
+            persist_ai_usage_event(
+                &request,
+                &output,
+                AiUsageEventContext {
+                    intent,
+                    provider_id,
+                    session_id: &session_id,
+                    event_source: AiUsageEventSource::Provider,
+                    billable: true,
+                    timestamp_unix_ms: completed_at_unix_ms,
+                },
+            );
             ai_metrics.increment_counter("runtime_ai_requests_success_total");
             ai_metrics.increment_counter(format!(
                 "runtime_ai_provider_{}_success_total",
@@ -8135,6 +8375,68 @@ mod tests {
         let parts = vec!["/task", "watch"];
         let status = process_task_command(&parts).await;
         assert_eq!(status, ExitStatus::Error);
+    }
+
+    #[test]
+    fn persist_local_memory_ai_session_checkpoint_for_repo_writes_session_and_event_rows() {
+        let repo = tempfile::tempdir().expect("temp repo should be created");
+        let mut session = LocalAiSessionState::new("session-local-memory");
+        assert!(session.append_exchange(
+            "plan",
+            "mock",
+            "Summarize the migration checkpoint",
+            "The checkpoint recorded SQLite local memory state."
+        ));
+
+        persist_local_memory_ai_session_checkpoint_for_repo(repo.path(), &session)
+            .expect("AI session checkpoint should persist");
+
+        let connection =
+            rusqlite::Connection::open(repo.path().join(".temp/context-memory/context.db"))
+                .expect("sqlite database should open");
+        let session_count = connection
+            .query_row("SELECT COUNT(*) FROM sessions", [], |row| {
+                row.get::<_, i64>(0)
+            })
+            .expect("session count should load");
+        let event_count = connection
+            .query_row(
+                "SELECT COUNT(*) FROM events WHERE source_kind = 'ai-session-checkpoint'",
+                [],
+                |row| row.get::<_, i64>(0),
+            )
+            .expect("event count should load");
+
+        assert_eq!(session_count, 1);
+        assert_eq!(event_count, 1);
+    }
+
+    #[test]
+    fn persist_local_memory_task_audit_event_for_repo_writes_failure_event() {
+        let repo = tempfile::tempdir().expect("temp repo should be created");
+        let event = TaskAuditEvent::new(
+            "task-123",
+            RuntimeMode::Cli,
+            TaskExecutionStatus::Failed,
+            "Runtime pipeline failed",
+            current_unix_timestamp_ms(),
+        );
+
+        persist_local_memory_task_audit_event_for_repo(repo.path(), &event)
+            .expect("task audit event should persist");
+
+        let connection =
+            rusqlite::Connection::open(repo.path().join(".temp/context-memory/context.db"))
+                .expect("sqlite database should open");
+        let source_kind: String = connection
+            .query_row(
+                "SELECT source_kind FROM events WHERE event_id LIKE 'runtime-task:%'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("task audit event should load");
+
+        assert_eq!(source_kind, "runtime-task-audit");
     }
 
     #[test]

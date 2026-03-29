@@ -69,8 +69,8 @@ No installation is required. Runbooks are markdown procedures.
 Runbooks are validated indirectly by:
 
 ```powershell
-pwsh -File .\scripts\validation\validate-instructions.ps1
-pwsh -File .\scripts\validation\validate-all.ps1
+ntk validation instructions --repo-root . --warning-only false
+ntk validation all --repo-root . --validation-profile dev
 ```
 
 ---

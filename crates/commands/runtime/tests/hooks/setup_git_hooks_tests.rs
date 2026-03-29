@@ -59,10 +59,6 @@ fn initialize_hook_support_tree(repo_root: &Path) {
         &repo_root.join("scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1"),
         "Write-Output 'hook'",
     );
-    write_file(
-        &repo_root.join("scripts/maintenance/trim-trailing-blank-lines.ps1"),
-        "Write-Output 'trim'",
-    );
 }
 
 fn local_settings_path(repo_root: &Path) -> PathBuf {

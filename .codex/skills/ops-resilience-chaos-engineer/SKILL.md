@@ -29,6 +29,7 @@ description: Improve platform resilience with timeout/retry/circuit-breaker stra
 ## Validation examples
 
 ```powershell
-pwsh -File ./scripts/validation/validate-all.ps1 -ValidationProfile release
-pwsh -File ./scripts/runtime/healthcheck.ps1 -ValidationProfile release -StrictExtras
+ntk validation all --repo-root . --validation-profile release
+ntk runtime doctor --repo-root . --detailed
+ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile release
 ```

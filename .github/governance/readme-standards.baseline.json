@@ -57,6 +57,78 @@
       "allowIntroductionPreamble": false
     },
     {
+      "path": ".codex/mcp/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": ".codex/scripts/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": ".codex/orchestration/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
+      "path": ".codex/skills/README.md",
+      "requiredSections": [
+        "Introduction",
+        "Features",
+        "Contents",
+        "Installation",
+        "Quick Start",
+        "Usage Examples",
+        "API Reference",
+        "Build and Tests",
+        "Contributing",
+        "Dependencies",
+        "References",
+        "License"
+      ],
+      "allowIntroductionPreamble": false
+    },
+    {
       "path": "definitions/README.md",
       "requiredSections": [
         "Introduction",

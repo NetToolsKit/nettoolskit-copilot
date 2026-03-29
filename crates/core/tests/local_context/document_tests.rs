@@ -6,6 +6,7 @@ use nettoolskit_core::local_context::{
     LocalContextIndexCatalog, LocalContextIndexCatalogInfo, LocalContextIndexChunking,
     LocalContextIndexDocument, LocalContextIndexQueryDefaults,
 };
+use rusqlite::Connection;
 use std::fs;
 use tempfile::TempDir;
 
@@ -25,6 +26,26 @@ fn sample_catalog() -> LocalContextIndexCatalog {
         ],
         exclude_globs: vec![".temp/**".to_string()],
     }
+}
+
+fn sqlite_counts(path: &std::path::Path) -> (u64, u64, u64) {
+    let connection = Connection::open(path).expect("sqlite memory store should open");
+    let document_count = connection
+        .query_row("SELECT COUNT(*) FROM documents", [], |row| {
+            row.get::<_, u64>(0)
+        })
+        .expect("document count should load");
+    let chunk_count = connection
+        .query_row("SELECT COUNT(*) FROM chunks", [], |row| {
+            row.get::<_, u64>(0)
+        })
+        .expect("chunk count should load");
+    let fts_count = connection
+        .query_row("SELECT COUNT(*) FROM chunk_fts", [], |row| {
+            row.get::<_, u64>(0)
+        })
+        .expect("fts count should load");
+    (document_count, chunk_count, fts_count)
 }
 
 #[test]
@@ -87,6 +108,14 @@ fn test_build_local_context_index_reuses_unchanged_files() {
         second_report.document.chunk_count,
         second_report.document.chunks.len()
     );
+    assert!(second_report.memory_db_path.is_file());
+    let (document_count, chunk_count, fts_count) = sqlite_counts(&second_report.memory_db_path);
+    assert_eq!(document_count, 1);
+    assert_eq!(
+        usize::try_from(chunk_count).expect("chunk count should fit"),
+        second_report.document.chunk_count
+    );
+    assert_eq!(chunk_count, fts_count);
 }
 
 #[test]

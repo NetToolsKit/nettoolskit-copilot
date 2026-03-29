@@ -3,12 +3,12 @@
     Configures global Git aliases for repository-owned helper tools.
 
 .DESCRIPTION
-    Registers manual global Git aliases that point at runtime-synced helper
-    scripts under the local Codex shared-scripts path.
+    Registers manual global Git aliases that point at the managed `ntk`
+    runtime binary projected into the local Codex runtime path.
 
     Current aliases:
-    - `trim-eof` -> runs the runtime-synced trim script in `-GitChangedOnly`
-      mode so changed files can be normalized manually before `git add`
+    - `trim-eof` -> runs `ntk runtime trim-trailing-blank-lines --repo-root <git-top-level> --git-changed-only`
+      so changed files can be normalized manually before `git add`
 
     This script does not install any automatic cleanup hook.
 
@@ -71,25 +71,29 @@ function Assert-CommandAvailable {
 # Builds the managed global Git alias map for the current platform/runtime.
 function Get-ManagedGlobalGitAliases {
     param(
+        [string] $ResolvedRepoRoot,
         [string] $CodexRuntimeRoot
     )
 
-    $sharedScriptsPath = Join-Path $CodexRuntimeRoot 'shared-scripts'
-    $trimScriptPath = Join-Path (Join-Path $sharedScriptsPath 'maintenance') 'trim-trailing-blank-lines.ps1'
-
-    if (-not (Test-Path -LiteralPath $trimScriptPath -PathType Leaf)) {
-        throw ("Missing runtime-synced trim script: {0}. Run scripts/runtime/bootstrap.ps1 first." -f $trimScriptPath)
+    $runtimeBinaryPath = if (-not [string]::IsNullOrWhiteSpace($CodexRuntimeRoot)) {
+        Join-Path (Join-Path $CodexRuntimeRoot 'bin') (Get-RuntimeBinaryFileName)
+    }
+    else {
+        Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $ResolvedRepoRoot -RuntimePreference codex
     }
 
-    $trimScriptShellPath = $trimScriptPath.Replace('\', '/')
-    $trimAliasCommand = ('!pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ''{0}'' -GitChangedOnly' -f $trimScriptShellPath)
+    if (-not (Test-Path -LiteralPath $runtimeBinaryPath -PathType Leaf)) {
+        throw ("Missing managed ntk runtime binary: {0}. Run scripts/runtime/bootstrap.ps1 first." -f $runtimeBinaryPath)
+    }
+
+    $runtimeBinaryShellPath = $runtimeBinaryPath.Replace('\', '/')
+    $trimAliasCommand = ('!''{0}'' runtime trim-trailing-blank-lines --repo-root "$(git rev-parse --show-toplevel 2>/dev/null || pwd)" --git-changed-only' -f $runtimeBinaryShellPath)
 
     return [ordered]@{
         'trim-eof' = $trimAliasCommand
     }
 }
 
-$null = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 Assert-CommandAvailable -CommandName 'git'
 Start-ExecutionSession `
     -Name 'setup-global-git-aliases' `
@@ -102,7 +106,8 @@ if ([string]::IsNullOrWhiteSpace($TargetCodexPath)) {
     $TargetCodexPath = Resolve-CodexRuntimePath
 }
 
-$aliasMap = Get-ManagedGlobalGitAliases -CodexRuntimeRoot $TargetCodexPath
+$resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
+$aliasMap = Get-ManagedGlobalGitAliases -ResolvedRepoRoot $resolvedRepoRoot -CodexRuntimeRoot $TargetCodexPath
 
 if ($Uninstall) {
     foreach ($aliasName in $aliasMap.Keys) {
