@@ -53,6 +53,7 @@ planning/
 ## Active Workstreams
 
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
+- [planning/active/plan-script-retirement-phase-20f-codex-orchestration-renderer.md](planning/active/plan-script-retirement-phase-20f-codex-orchestration-renderer.md)
 
 ---
 

@@ -52,6 +52,7 @@ planning/
 ## Active Specs
 
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
+- [planning/specs/active/spec-script-retirement-phase-20f-codex-orchestration-renderer.md](planning/specs/active/spec-script-retirement-phase-20f-codex-orchestration-renderer.md)
 
 ---
 
