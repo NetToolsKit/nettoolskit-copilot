@@ -4,14 +4,14 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-03-29 08:26
+- LastUpdated: 2026-03-29 09:21
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
-- Live Inventory After Executed Slice: `102`
+- Live Inventory After Executed Slice: `100`
 - Current Classification Totals:
-  - `retired in this workstream`: `45`
+  - `retired in this workstream`: `47`
   - `retain wrapper intentionally`: `33`
-  - `retain until consumer migration completes`: `69`
+  - `retain until consumer migration completes`: `67`
 - Decision Rule:
   - `remove-now candidate` means Rust parity exists and no blocking local consumer remains after same-slice doc cleanup.
   - `retain wrapper intentionally` means the script stays by policy even when Rust owns the underlying behavior.
@@ -43,6 +43,7 @@ Generated: 2026-03-28 19:39
 | `scripts/validation/validate-all.ps1` | 1 | `crates/commands/validation + crates/cli` | The remaining blockers were runtime/orchestration fallbacks, runbooks, governance/policy baselines, projected skill surfaces, and a shell-hook regression fixture that still encoded the local wrapper path. | Repointed the live consumer chain and governance evidence to `ntk validation all`, replaced the shell-hook regression example with a semantically equivalent native path, deleted the wrapper, and archived Phase 15. | retired |
 | `scripts/validation/export-audit-report.ps1`, `scripts/validation/export-enterprise-trends.ps1` | 2 | `crates/commands/runtime + crates/cli` | The remaining blockers were the missing native reporting entrypoints plus runbook/governance/policy evidence that still treated the validation-folder reporting wrappers as canonical operator surfaces. | Reused `ntk runtime healthcheck` as the canonical audit-report export path, added native `ntk runtime export-enterprise-trends`, repointed runbooks/governance/policy evidence to the runtime diagnostics owners, deleted both wrappers, and archived Phase 16. | retired |
 | `scripts/runtime/doctor.ps1`, `scripts/runtime/healthcheck.ps1` | 2 | `crates/commands/runtime + crates/cli` | The remaining blockers were the missing native `doctor` CLI surface plus runtime-script, orchestration-stage, and operator compatibility consumers that still depended on the local wrapper paths. | Added the native `ntk runtime doctor` entrypoint, repointed install/self-heal/validate-stage and retained runtime parity tests to the managed binary contract, deleted both local wrappers, and archived Phase 17. | retired |
+| `scripts/runtime/sync-codex-mcp-config.ps1`, `scripts/runtime/render-vscode-mcp-template.ps1` | 2 | `crates/commands/runtime + crates/cli` | The remaining blockers were the missing native MCP CLI surfaces plus bootstrap/docs/projected wrappers and runtime parity tests that still treated the local wrapper paths as canonical. | Added native `ntk runtime` MCP entrypoints, repointed bootstrap, MCP docs, projected Codex wrappers, and runtime parity tests to the managed binary contract, deleted the two local wrappers, and archived Phase 18 while retaining `render-mcp-runtime-artifacts.ps1` temporarily for the path-backed provider-surface catalog. | retired |
 
 ## Retained Wrappers By Policy
 
@@ -60,7 +61,7 @@ Generated: 2026-03-28 19:39
 | Scope | Count | Blocking Reason | Blocking Evidence |
 | --- | ---: | --- | --- |
 | `scripts/common/*.ps1` | 15 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/runtime/*.ps1` excluding hooks | 36 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
+| `scripts/runtime/*.ps1` excluding hooks | 34 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain; `render-mcp-runtime-artifacts.ps1` remains a temporary retained renderer because the provider-surface projection catalog still requires a path-backed script | requires follow-up consumer sweep before deletion |
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
@@ -96,5 +97,6 @@ Generated: 2026-03-28 19:39
 - The fifteenth execution slice retired `validate-all`, reducing the live local estate from `107` to `106` and the validation-folder estate from `3` to `2`.
 - The sixteenth execution slice retired `export-audit-report` and `export-enterprise-trends`, reducing the live local estate from `106` to `104` and the validation-folder estate from `2` to `0`.
 - The seventeenth execution slice retired `doctor` and `healthcheck`, reducing the live local estate from `104` to `102`.
+- The eighteenth execution slice retired `sync-codex-mcp-config` and `render-vscode-mcp-template`, reducing the live local estate from `102` to `100`.
 - No domain should move from `retain until consumer migration completes` to `remove-now candidate` without the same kind of exact local consumer evidence used above.
 - The remaining backlog is intentionally left for future domain-level consumer-migration workstreams rather than being forced into this audit closeout.

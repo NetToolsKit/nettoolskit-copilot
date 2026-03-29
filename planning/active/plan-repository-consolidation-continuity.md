@@ -4,14 +4,15 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 08:26
-- Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-17 domain consumer migration that will retire the remaining 69 `retain until` scripts.
+- LastUpdated: 2026-03-29 09:21
+- Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-18 domain consumer migration that will retire the remaining 67 `retain until` scripts.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29.
 - Active Branch: `feature/instruction-runtime-retirement-audit`
 - Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
-- Dependency: `planning/completed/plan-script-retirement-phase-17.md` is now complete; Workstream W5 can begin from the closed 102-script baseline.
+- Dependency: `planning/completed/plan-script-retirement-phase-18.md` is now complete; Workstream W5 now continues from the closed 100-script baseline.
 - Inputs:
   - `planning/completed/plan-script-retirement-phase-17.md`
+  - `planning/completed/plan-script-retirement-phase-18.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
@@ -38,10 +39,10 @@ This plan coordinates six workstreams:
 | W2 | Repository operating model alignment | `nettoolskit-copilot` | 🔴 Immediate | — |
 | W3 | CI PowerShell parity test coverage | `nettoolskit-copilot` | 🟡 High | — |
 | W4 | CLI surface documentation | `nettoolskit-copilot` | 🟡 High | — |
-| W5 | Post-Phase-17 domain consumer migration (Phases 18–21) | `nettoolskit-copilot` | 🟠 Planned | W1 complete |
+| W5 | Post-Phase-18 domain consumer migration (Phases 19–22) | `nettoolskit-copilot` | 🟠 Planned | W1 complete |
 | W6 | `copilot-instructions` Phase 8 Rust directives | `copilot-instructions` | 🟡 High | — |
 
-This plan does not replace `plan-script-retirement-phase-17.md`; Phase 17 is now archived and this plan inherits its closed baseline for W5.
+This plan does not replace the tactical phase plans; Phases 17 and 18 are now archived and this plan inherits their closed baseline for W5.
 
 ---
 
@@ -49,21 +50,23 @@ This plan does not replace `plan-script-retirement-phase-17.md`; Phase 17 is now
 
 ---
 
-### Workstream W1 — Phase 17 Reference (active sibling plan)
+### Workstream W1 — Phase 17/18 Reference (archived sibling plans)
 
-Status: `[x]` Completed (Phase 17 archived and consumer-sweep baseline unlocked)
+Status: `[x]` Completed (Phases 17 and 18 archived and consumer-sweep baseline unlocked)
 
-This workstream is tracked entirely in `planning/completed/plan-script-retirement-phase-17.md`.
-It targeted `scripts/runtime/doctor.ps1` and `scripts/runtime/healthcheck.ps1` and reduced
-the live script estate from 104 to 102.
+This workstream is tracked in `planning/completed/plan-script-retirement-phase-17.md`
+and `planning/completed/plan-script-retirement-phase-18.md`.
+Together they targeted the runtime diagnostics and MCP wrapper slices and reduced
+the live script estate from 104 to 100.
 
 **This plan's only dependency on W1:**
-- W5 now starts from the archived Phase 17 result with the safety matrix reflecting 102 scripts.
+- W5 now starts from the archived Phase 18 result with the safety matrix reflecting 100 scripts.
 
-**Checkpoint: Phase 17 Complete**
+**Checkpoint: Phases 17 and 18 Complete**
 - `planning/completed/plan-script-retirement-phase-17.md` archived with executed result
-- `planning/completed/script-retirement-safety-matrix.md` reflects live estate of 102
-- `planning/completed/rust-script-parity-ledger.md` records both `doctor` and `healthcheck` as `retired locally`
+- `planning/completed/plan-script-retirement-phase-18.md` archived with executed result
+- `planning/completed/script-retirement-safety-matrix.md` reflects live estate of 100
+- `planning/completed/rust-script-parity-ledger.md` records `doctor`, `healthcheck`, `sync-codex-mcp-config`, and `render-vscode-mcp-template` as `retired locally`
 
 ---
 
@@ -417,32 +420,32 @@ Status: `[ ]` Pending
 
 ---
 
-### Workstream W5 — Post-Phase-17 Domain Consumer Migration (Phases 18–21)
+### Workstream W5 — Post-Phase-18 Domain Consumer Migration (Phases 19–22)
 
 Status: `[ ]` Pending
 
-**Pre-condition:** satisfied. `plan-script-retirement-phase-17.md` is now in `planning/completed/`, so future Phase 18 consumer sweeps can start from a stable script estate.
+**Pre-condition:** satisfied. `plan-script-retirement-phase-17.md` and `plan-script-retirement-phase-18.md` are now in `planning/completed/`, so future consumer sweeps can start from a stable script estate.
 
-**Script estate after Phase 17:** 102 total (33 retained by policy + 69 `retain until consumer migration`).
+**Script estate after Phase 18:** 100 total (33 retained by policy + 67 `retain until consumer migration`).
 
-The 69 `retain until` scripts are distributed:
+The 67 `retain until` scripts are distributed:
 
 | Domain | Count | Safety Matrix Status |
 |---|---:|---|
 | `scripts/common/*.ps1` | 15 | `retain until consumer migration completes` |
-| `scripts/runtime/*.ps1` excl. hooks and Phase 17 retirees | 36 | `retain until consumer migration completes` |
+| `scripts/runtime/*.ps1` excl. hooks and Phases 17–18 retirees | 34 | `retain until consumer migration completes` |
 | `scripts/security/*.ps1` | 6 | `retain until consumer migration completes` |
 | `scripts/governance/*.ps1` | 2 | `retain until consumer migration completes` |
 | `scripts/orchestration/**/*.ps1` | 10 | `retain until consumer migration completes` |
 
-This workstream creates four sub-phase plans (Phase 18–21). Each sub-phase plan follows the same
-pattern as Phase 17: it is created as an active plan, executed, then archived to completed.
+This workstream creates four sub-phase plans (Phase 19–22). Each sub-phase plan follows the same
+    pattern as Phase 17 and Phase 18: it is created as an active plan, executed, then archived to completed.
 
-#### Task W5.1: Create Phase 18 Plan — `scripts/common/*.ps1` (15)
+#### Task W5.1: Create Phase 19 Plan — `scripts/common/*.ps1` (15)
 
 Status: `[ ]` Pending (blocked on W1)
 
-- Create `planning/specs/active/spec-script-retirement-phase-18.md` with:
+- Create `planning/specs/active/spec-script-retirement-phase-19.md` with:
   - Problem: 15 shared helper scripts have confirmed Rust owner in `crates/core` but no zero-consumer proof.
   - Desired outcome: each of the 15 scripts either deleted (if zero consumers proved) or moved to `retain wrapper intentionally` (if a real, narrow consumer is found).
   - Consumer sweep approach: use `rg --include="*.ps1" --include="*.yml" --include="*.md" --include="*.json" "scripts/common/<filename>" .` for each script.
@@ -452,20 +455,20 @@ Status: `[ ]` Pending (blocked on W1)
 - Commands for consumer sweep:
   - `Get-ChildItem scripts\common -Filter "*.ps1" | ForEach-Object { Write-Host "=== $($_.Name) ==="; rg $_.Name scripts --type ps1 --count; rg $_.Name .github --count; rg $_.Name definitions --count }`
 - Commit checkpoint (plan creation only):
-  - `docs(planning): register Phase 18 plan for scripts/common consumer sweep`
+  - `docs(planning): register Phase 19 plan for scripts/common consumer sweep`
 
-#### Task W5.2: Execute Phase 18 Consumer Sweep
+#### Task W5.2: Execute Phase 19 Consumer Sweep
 
-Status: `[ ]` Pending (blocked on Phase 18 plan creation)
+Status: `[ ]` Pending (blocked on Phase 19 plan creation)
 
-- Run the consumer sweep commands defined in the Phase 18 plan.
+- Run the consumer sweep commands defined in the Phase 19 plan.
 - For each script where consumer count is zero (non-self): add to deletion candidates.
 - For each script where a consumer is found: add to `retain wrapper intentionally` with the consumer documented.
 - Execute deletion in the same PR: delete confirmed zero-consumer scripts.
 - Update:
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
-- Archive Phase 18 plan/spec to `planning/completed/`.
+- Archive Phase 19 plan/spec to `planning/completed/`.
 - Validation checklist:
   - `cargo test -p nettoolskit-core --quiet`
   - `cargo test -p nettoolskit-cli --test test_suite --quiet`
@@ -473,51 +476,51 @@ Status: `[ ]` Pending (blocked on Phase 18 plan creation)
   - `pwsh -NoProfile -File scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
   - `git diff --check`
 - Commit checkpoint:
-  - `chore(scripts): Phase 18 — retire confirmed-zero-consumer scripts/common scripts`
+  - `chore(scripts): Phase 19 — retire confirmed-zero-consumer scripts/common scripts`
 
-#### Task W5.3: Create Phase 19 Plan — `scripts/runtime/*.ps1` Excluding Hooks (36)
+#### Task W5.3: Create Phase 20 Plan — `scripts/runtime/*.ps1` Excluding Hooks (34)
 
-Status: `[ ]` Pending (blocked on Phase 18 complete)
+Status: `[ ]` Pending (blocked on Phase 19 complete)
 
-- This is the largest single domain: 36 scripts after Phase 17 removes `doctor.ps1` and `healthcheck.ps1`.
-- Create `planning/specs/active/spec-script-retirement-phase-19.md` with:
-  - Problem: 36 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
+- This is the largest single domain: 34 scripts after Phases 17 and 18 remove `doctor.ps1`, `healthcheck.ps1`, `sync-codex-mcp-config.ps1`, and `render-vscode-mcp-template.ps1`.
+- Create `planning/specs/active/spec-script-retirement-phase-20.md` with:
+    - Problem: 34 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
   - Group the 36 scripts into sub-slices by functional surface to enable incremental deletion:
     - Sub-slice A: sync/render scripts (`render-*.ps1`, `sync-*.ps1`, `setup-*.ps1`) — likely consumed only by CI/docs
     - Sub-slice B: invoke/pipeline scripts (`invoke-*.ps1`, `run-*.ps1`, `replay-*.ps1`, `resume-*.ps1`, `evaluate-*.ps1`) — likely consumed by orchestration and CI
-    - Sub-slice C: install/bootstrap/clean scripts (`bootstrap.ps1`, `install.ps1`, `clean-*.ps1`, `self-heal.ps1`, `set-*.ps1`, `doctor.ps1` already gone by Phase 17)
-  - Decision: each sub-slice gets its own Phase 19a/19b/19c consumer sweep so the safety matrix stays accurate.
-- This task creates `planning/specs/active/spec-script-retirement-phase-19.md` and `planning/active/plan-script-retirement-phase-19.md`.
+    - Sub-slice C: install/bootstrap/clean scripts (`bootstrap.ps1`, `install.ps1`, `clean-*.ps1`, `self-heal.ps1`, `set-*.ps1`, diagnostics and the two safe MCP wrappers already gone by Phases 17 and 18)
+    - Decision: each sub-slice gets its own Phase 20a/20b/20c consumer sweep so the safety matrix stays accurate.
+- This task creates `planning/specs/active/spec-script-retirement-phase-20.md` and `planning/active/plan-script-retirement-phase-20.md`.
 - Commit checkpoint:
-  - `docs(planning): register Phase 19 plan for scripts/runtime consumer sweep`
+  - `docs(planning): register Phase 20 plan for scripts/runtime consumer sweep`
 
-#### Task W5.4: Execute Phase 19 Consumer Sweep (Sub-slices A, B, C)
+#### Task W5.4: Execute Phase 20 Consumer Sweep (Sub-slices A, B, C)
 
-Status: `[ ]` Pending (blocked on Phase 19 plan creation)
+Status: `[ ]` Pending (blocked on Phase 20 plan creation)
 
 - Run consumer sweeps for each sub-slice.
 - For each zero-consumer script: delete it.
 - For each retained: document the retaining consumer.
 - After each sub-slice:
   - Update safety matrix and parity ledger.
-  - Run the Phase 19 validation checklist.
-- Archive Phase 19 plan/spec to completed only when all sub-slices are done.
+  - Run the Phase 20 validation checklist.
+- Archive Phase 20 plan/spec to completed only when all sub-slices are done.
 - Validation checklist:
   - `cargo test -p nettoolskit-runtime --quiet`
   - `cargo test -p nettoolskit-cli --test test_suite runtime_commands_tests --quiet`
   - `& .\.build\target\debug\ntk.exe validation all --repo-root . --warning-only false`
   - `git diff --check`
 - Commit checkpoint (one per sub-slice):
-  - `chore(scripts): Phase 19a — retire confirmed-zero-consumer scripts/runtime/render-* scripts`
-  - `chore(scripts): Phase 19b — retire confirmed-zero-consumer scripts/runtime/invoke-* and pipeline scripts`
-  - `chore(scripts): Phase 19c — retire confirmed-zero-consumer scripts/runtime/bootstrap and clean scripts`
+  - `chore(scripts): Phase 20a — retire confirmed-zero-consumer scripts/runtime/render-* scripts`
+  - `chore(scripts): Phase 20b — retire confirmed-zero-consumer scripts/runtime/invoke-* and pipeline scripts`
+  - `chore(scripts): Phase 20c — retire confirmed-zero-consumer scripts/runtime/bootstrap and clean scripts`
 
-#### Task W5.5: Create and Execute Phase 20 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
+#### Task W5.5: Create and Execute Phase 21 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
 
-Status: `[ ]` Pending (blocked on Phase 19 complete)
+Status: `[ ]` Pending (blocked on Phase 20 complete)
 
-- Create `planning/specs/active/spec-script-retirement-phase-20.md` and `planning/active/plan-script-retirement-phase-20.md`.
-- Special constraint for `scripts/security/*.ps1` (6): `.github/governance/shared-script-checksums.manifest.json` explicitly tracks this domain. The Phase 20 plan must include a task to update the checksums manifest before deleting any security scripts.
+- Create `planning/specs/active/spec-script-retirement-phase-21.md` and `planning/active/plan-script-retirement-phase-21.md`.
+- Special constraint for `scripts/security/*.ps1` (6): `.github/governance/shared-script-checksums.manifest.json` explicitly tracks this domain. The Phase 21 plan must include a task to update the checksums manifest before deleting any security scripts.
 - Consumer sweep commands:
   - `Get-ChildItem scripts\security, scripts\governance -Filter "*.ps1" | ForEach-Object { rg $_.Name .github\governance, scripts --type ps1 --count }`
 - After sweep:
@@ -528,13 +531,13 @@ Status: `[ ]` Pending (blocked on Phase 19 complete)
   - `& .\.build\target\debug\ntk.exe validation all --repo-root . --warning-only false`
   - `git diff --check`
 - Commit checkpoint:
-  - `chore(scripts): Phase 20 — retire confirmed-zero-consumer scripts/security and scripts/governance scripts`
+  - `chore(scripts): Phase 21 — retire confirmed-zero-consumer scripts/security and scripts/governance scripts`
 
-#### Task W5.6: Create and Execute Phase 21 — `scripts/orchestration/**/*.ps1` (10)
+#### Task W5.6: Create and Execute Phase 22 — `scripts/orchestration/**/*.ps1` (10)
 
-Status: `[ ]` Pending (blocked on Phase 20 complete)
+Status: `[ ]` Pending (blocked on Phase 21 complete)
 
-- Create `planning/specs/active/spec-script-retirement-phase-21.md` and `planning/active/plan-script-retirement-phase-21.md`.
+- Create `planning/specs/active/spec-script-retirement-phase-22.md` and `planning/active/plan-script-retirement-phase-22.md`.
 - The 10 orchestration scripts are staged-execution wrappers (`intake-stage.ps1`, `plan-stage.ps1`, `spec-stage.ps1`, `implement-stage.ps1`, `review-stage.ps1`, `validate-stage.ps1`, `closeout-stage.ps1`, `route-stage.ps1`, `invoke-codex-dispatch.ps1`, `invoke-task-worker.ps1`).
 - Consumer sweep commands:
   - `Get-ChildItem scripts\orchestration -Filter "*.ps1" -Recurse | ForEach-Object { rg $_.Name scripts, definitions, .github --count }`
@@ -549,13 +552,13 @@ Status: `[ ]` Pending (blocked on Phase 20 complete)
   - `pwsh -NoProfile -File scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
   - `git diff --check`
 - Commit checkpoint:
-  - `chore(scripts): Phase 21 — retire confirmed-zero-consumer scripts/orchestration stage scripts`
+  - `chore(scripts): Phase 22 — retire confirmed-zero-consumer scripts/orchestration stage scripts`
 
-#### Task W5.7: Post-Phase-21 Retention Audit
+#### Task W5.7: Post-Phase-22 Retention Audit
 
-Status: `[ ]` Pending (blocked on Phase 21 complete)
+Status: `[ ]` Pending (blocked on Phase 22 complete)
 
-- After Phases 18–21, the live estate should be at or near the `retain wrapper intentionally` floor of 33 scripts.
+- After Phases 19–22, the live estate should be at or near the `retain wrapper intentionally` floor of 33 scripts.
 - Print the remaining live estate: `(Get-ChildItem scripts -Filter "*.ps1" -Recurse).Count`
 - Compare to the expected floor.
 - For each script still present:
@@ -563,7 +566,7 @@ Status: `[ ]` Pending (blocked on Phase 21 complete)
   - If any script is not in that table, it is either a missed deletion candidate or a new addition that escaped the safety matrix — investigate and resolve.
 - Update `script-retirement-safety-matrix.md` and `rust-script-parity-ledger.md` to close this workstream.
 - Commit checkpoint:
-  - `docs(planning): Phase 21 retention audit — confirm floor and close consumer migration workstream`
+  - `docs(planning): Phase 22 retention audit — confirm floor and close consumer migration workstream`
 
 ---
 
@@ -698,21 +701,21 @@ For W6 (cross-repo, `copilot-instructions`):
 ## Execution Order and Parallelism
 
 ```
-Phase 17 (W1)     ──────────────────────────────── MUST COMPLETE first ─────────────────────┐
+Phases 17-18 (W1) ─────────────────────────────── MUST COMPLETE first ─────────────────────┐
                                                                                               │
 W2 (op model)     ── start immediately ──────────── parallel ────────────────────────── W2 done
 W3 (CI parity)    ── start immediately ──────────── parallel ────────────────────────── W3 done
 W4 (CLI docs)     ── start immediately ──────────── parallel ────────────────────────── W4 done
 W6 (cross-repo)   ── start independently ────────── parallel (different repo) ─────── W6 done
                                                                                               │
-W5.1 Phase 18     ──────────────────────────────────── after W1 ──────────────────────── Ph18 done
-W5.3 Phase 19     ─────────────────────────────────────────────── after Ph18 ─────── Ph19 done
-W5.5 Phase 20     ──────────────────────────────────────────────────────── after Ph19 ─ Ph20 done
-W5.6 Phase 21     ─────────────────────────────────────────────────────────────────────── Ph21 done
+W5.1 Phase 19     ──────────────────────────────────── after W1 ──────────────────────── Ph19 done
+W5.3 Phase 20     ─────────────────────────────────────────────── after Ph19 ─────── Ph20 done
+W5.5 Phase 21     ──────────────────────────────────────────────────────── after Ph20 ─ Ph21 done
+W5.6 Phase 22     ─────────────────────────────────────────────────────────────────────── Ph22 done
 ```
 
-W2, W3, W4, and W6 can be executed in any order relative to each other and do not need Phase 17 to complete first.
-W5 phases must be sequential and depend on Phase 17 closing.
+W2, W3, W4, and W6 can be executed in any order relative to each other and do not need the tactical retirement phases to complete first.
+W5 phases must be sequential and depend on Phases 17 and 18 closing.
 
 ---
 
@@ -722,9 +725,9 @@ W5 phases must be sequential and depend on Phase 17 closing.
 |---|---|---|
 | R1 | Editing `definitions/shared/instructions/` triggers a cascade re-render that breaks unrelated surfaces | Run `ntk validation all` in warning-only mode first; verify diff before committing |
 | R2 | `pwsh-parity` CI job fails on first run due to environment differences | Use `continue-on-error: true` for the initial merge; switch to `false` after baseline is stable |
-| R3 | Phase 18 common-script consumer sweep finds 12+ blockers | Accept a partial Phase 18 that deletes only zero-consumer scripts; document retained ones explicitly |
-| R4 | Phase 19 is too large for one PR review | Split into 19a/19b/19c sub-phases; each sub-phase has its own commit checkpoint |
-| R5 | Phase 20 security script deletion requires updating `shared-script-checksums.manifest.json` in a separate PR | Create the manifest update as a prerequisite commit before the deletion PR |
+| R3 | Phase 19 common-script consumer sweep finds 12+ blockers | Accept a partial Phase 19 that deletes only zero-consumer scripts; document retained ones explicitly |
+| R4 | Phase 20 is too large for one PR review | Split into 20a/20b/20c sub-phases; each sub-phase has its own commit checkpoint |
+| R5 | Phase 21 security script deletion requires updating `shared-script-checksums.manifest.json` in a separate PR | Create the manifest update as a prerequisite commit before the deletion PR |
 | R6 | `copilot-instructions` Phase 8 scaffold breaks the existing PowerShell validation in that repo | Add `cargo build` after workspace creation; if `validate-planning-structure.ps1` fails, debug before proceeding |
 | R7 | `definitions/shared/instructions/repository-operating-model.instructions.md` does not exist (no `definitions/` source) | Apply the fix directly to `.github/instructions/` and skip W2.6 re-render step |
 

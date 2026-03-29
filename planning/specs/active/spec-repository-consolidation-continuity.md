@@ -4,12 +4,13 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 08:26
+- LastUpdated: 2026-03-29 09:21
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
 - Source Inputs:
   - `planning/completed/plan-script-retirement-phase-17.md`
+  - `planning/completed/plan-script-retirement-phase-18.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `.github/instructions/repository-operating-model.instructions.md`
@@ -31,7 +32,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 3. **CI gap for PowerShell parity tests**: The 23 `scripts/tests/runtime/*.ps1` files are classified as `compatibility wrapper retained intentionally` in the safety matrix and described as the canonical parity harness. However, `ci.yml` contains zero PowerShell test invocations — these scripts run only on developer machines. If they regress silently, the parity evidence base becomes stale.
 
-4. **Post-Phase-17 domain consumer migration**: After Phase 17 closes, 69 scripts remain in the `retain until consumer migration completes` bucket across five domains (`scripts/common/`, `scripts/runtime/` excl. hooks, `scripts/security/`, `scripts/governance/`, `scripts/orchestration/`). Each domain has confirmed Rust ownership but no exact local-consumer proof. Without planned consumer sweeps, these scripts will remain indefinitely even though deletions are safe once consumer evidence is collected.
+4. **Post-Phase-18 domain consumer migration**: After Phases 17 and 18 close, 67 scripts remain in the `retain until consumer migration completes` bucket across five domains (`scripts/common/`, `scripts/runtime/` excl. hooks, `scripts/security/`, `scripts/governance/`, `scripts/orchestration/`). Each domain has confirmed Rust ownership but no exact local-consumer proof. Without planned consumer sweeps, these scripts will remain indefinitely even though deletions are safe once consumer evidence is collected.
 
 5. **`copilot-instructions` Phase 8 awaiting directives**: The `copilot-instructions` repo has a planning-ready spec (`spec-rust-runtime-engine-foundation-phase-8.md`) that is blocked on user-provided Rust directives. The spec defines the compatibility-first migration contract but does not create any Cargo files until directives arrive. Starting this migration would bring the instruction runtime into the same Rust-native model that `nettoolskit-copilot` already operates with.
 
@@ -44,7 +45,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 - Every AI agent that routes through `repository-operating-model.instructions.md` receives correct Rust workspace commands, correct topology, and correct domain instruction references.
 - Root `README.md` and `crates/cli/README.md` document the full `ntk` CLI surface with named subcommands, so feature discoverability matches implementation reality.
 - The 23 PowerShell parity tests either run in CI with an explicit gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
-- Phase 18 through Phase 21 have concrete consumer-sweep plans so the remaining 69 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
+- Phase 19 through Phase 22 have concrete consumer-sweep plans so the remaining 67 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
 - `definitions/shared/instructions/repository-operating-model.instructions.md` stays in sync with the `.github/instructions/` projection after every update.
 
@@ -87,10 +88,10 @@ For `crates/cli/README.md`, the existing 3-feature bullet list is too shallow. E
 
 Consumer sweeps are executed in domain order, smallest-first, with parity requirement: each domain must prove zero local non-self consumers before being treated as a deletion candidate. The sequence is:
 
-- Phase 18: `scripts/common/*.ps1` (15) — shared helpers; high risk of implicit consumers in every other domain.
-- Phase 19: `scripts/runtime/*.ps1` excluding hooks (36 after Phase 17) — largest single domain; planned as one grouped sweep, may split into sub-phases.
-- Phase 20: `scripts/security/*.ps1` (6) + `scripts/governance/*.ps1` (2) — governance surface; `shared-script-checksums.manifest.json` is the key blocker to repoint.
-- Phase 21: `scripts/orchestration/**/*.ps1` (10) — staged execution; depends on orchestrator parity being proven end-to-end.
+- Phase 19: `scripts/common/*.ps1` (15) — shared helpers; high risk of implicit consumers in every other domain.
+- Phase 20: `scripts/runtime/*.ps1` excluding hooks (34 after Phase 18) — largest single domain; planned as one grouped sweep, may split into sub-phases.
+- Phase 21: `scripts/security/*.ps1` (6) + `scripts/governance/*.ps1` (2) — governance surface; `shared-script-checksums.manifest.json` is the key blocker to repoint.
+- Phase 22: `scripts/orchestration/**/*.ps1` (10) — staged execution; depends on orchestrator parity being proven end-to-end.
 
 No domain moves to deletion without the same exact consumer-proof standard used in Phases 1–16.
 
@@ -119,7 +120,7 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 1. Remove the 23 parity tests entirely since their surface is proven in Rust
    - Rejected: the cutover map explicitly marks `scripts/tests/runtime/*.ps1` as `compatibility wrapper retained intentionally`. Removing them without completing the domain consumer sweeps removes evidence.
 2. Move the 23 tests to `crates/` as Rust integration tests
-   - Deferred: this is the right long-term outcome but requires rewriting 23 test files; scope it as a follow-up for Phase 19 when the runtime domain consumer sweep is complete.
+   - Deferred: this is the right long-term outcome but requires rewriting 23 test files; scope it as a follow-up for Phase 20 when the runtime domain consumer sweep is complete.
 
 ### W5 alternatives
 
@@ -143,8 +144,8 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 |---|---|---|---|
 | R1 | Editing the authoritative `definitions/shared/instructions/` file triggers a provider surface re-render that breaks unrelated instruction surfaces | Medium | Run `ntk validation instructions` and `ntk validation agent-hooks` before committing the re-render |
 | R2 | Adding a Windows CI job for PowerShell parity tests increases CI cost and may fail due to environment differences | Low | Pin Pester version; use `continue-on-error: false` only after a trial run confirms stability; allow `warning-only` mode for first merge |
-| R3 | Phase 18 common-script consumer sweep finds unexpected consumers in test crates that re-lock deletion | Medium | Map all consumers with `rg` before touching any file; document blockers explicitly rather than forcing deletions |
-| R4 | Phase 19 runtime-script consumer sweep is too large for one PR; may need to split into 3–4 sub-phases | Low | Define sub-phase boundaries in the Phase 19 plan; each sub-phase closes its own consumer evidence set |
+| R3 | Phase 19 common-script consumer sweep finds unexpected consumers in test crates that re-lock deletion | Medium | Map all consumers with `rg` before touching any file; document blockers explicitly rather than forcing deletions |
+| R4 | Phase 20 runtime-script consumer sweep is too large for one PR; may need to split into 3–4 sub-phases | Low | Define sub-phase boundaries in the Phase 20 plan; each sub-phase closes its own consumer evidence set |
 | R5 | `copilot-instructions` Phase 8 diverges from `nettoolskit-copilot` Rust conventions mid-implementation | Medium | Lock a shared Rust edition, MSRV, deny list, and clippy flags between both repos before Phase 8 starts |
 | R6 | `definitions/shared/instructions/` file does not exist (the operating model file is native to `.github/instructions/` only) | High | Verified before plan execution; if no `definitions/` source exists, the authoritative source is `.github/instructions/` and the fix applies there directly |
 
@@ -167,8 +168,8 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 - `ntk service` and `ntk completions` are documented.
 - All changes pass `ntk validation readme-standards --repo-root .`.
 
-### W5: Post-Phase-17 Domain Consumer Migration
-- Phases 18–21 each have their own active plan before execution begins.
+### W5: Post-Phase-18 Domain Consumer Migration
+- Phases 19–22 each have their own active plan before execution begins.
 - Each phase's consumer evidence collected via `rg` proves zero non-self consumers before deletion.
 - Safety matrix and parity ledger are updated after each phase.
 
