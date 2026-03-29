@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 17:59
+- LastUpdated: 2026-03-29 18:11
 - Objective: plan the implementation of persisted weekly AI usage history and the migration from the current JSON-backed local context index to a SQLite-backed local RAG/CAG memory system.
 - Normalized Request: create a planning workstream for weekly limit-consumption history and create a planning workstream for a local SQLite-based RAG/CAG system similar in spirit to `context-mode`, while keeping the repository operating model and current local-context behavior intact.
 - Active Branch: `feature/ai-usage-history-ledger`
@@ -243,7 +243,7 @@ Status: `[x]` Complete
 
 #### Task U2.4: Implement SQLite Query Boundary
 
-Status: `[ ]` Pending
+Status: `[x]` Complete
 
 - Add a native query path for the SQLite memory store.
 - New runtime command surfaces:
@@ -255,6 +255,11 @@ Status: `[ ]` Pending
   - excluded paths
   - top-k behavior
   - heading/path filters
+- Delivered in this checkpoint:
+  - `nettoolskit-core` now exposes a native SQLite query path over `chunk_fts` with deterministic path/id tie-breaking
+  - `nettoolskit-runtime` now exposes `update-local-memory` and `query-local-memory` while keeping the legacy JSON commands alive
+  - the SQLite query surface supports `top`, `exclude_paths`, `path_prefix`, and `heading_contains`
+  - CLI coverage now proves the new `ntk runtime update-local-memory` and `ntk runtime query-local-memory --json-output` flows
 - Checkpoint commit:
   - `feat(runtime): add sqlite local memory query commands`
 
@@ -300,6 +305,17 @@ Status: `[ ]` Pending
   - `cargo check -p nettoolskit-core` ✅
   - `cargo test -p nettoolskit-core --test test_suite local_context::sqlite_tests --quiet` ✅
   - `cargo test -p nettoolskit-core --test test_suite local_context::document_tests --quiet` ✅
+- Checkpoint validation executed for the SQLite local-memory query slice:
+  - `cargo fmt --all -- --check` ✅
+  - `cargo check -p nettoolskit-core` ✅
+  - `cargo check -p nettoolskit-runtime` ✅
+  - `cargo check -p nettoolskit-cli` ✅
+  - `cargo test -p nettoolskit-core --test test_suite local_context::sqlite_tests --quiet` ✅
+  - `cargo test -p nettoolskit-runtime --test test_suite continuity::local_context_tests --quiet` ✅
+  - `cargo test -p nettoolskit-cli --test test_suite runtime_commands_tests --quiet` ✅
+  - `cargo clippy -p nettoolskit-core --all-targets -- -D warnings` ✅
+  - `cargo clippy -p nettoolskit-runtime --all-targets -- -D warnings` ⚠️ initially blocked by pre-existing `provider_surfaces.rs` warnings outside the local-memory slice; fixed in a separate hygiene commit during this execution
+  - `cargo clippy -p nettoolskit-cli --all-targets -- -D warnings` ⚠️ initially blocked by the same pre-existing runtime warning set; fixed in a separate hygiene commit during this execution
 - Checkpoint validation executed for this slice:
   - `cargo fmt --all -- --check` ✅
   - `cargo test -p nettoolskit-orchestrator --test test_suite ai_usage --quiet` ✅

@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 17:59
+- LastUpdated: 2026-03-29 18:11
 - Objective: define the design intent, boundaries, and rollout strategy for two related capabilities: persisted weekly AI usage history and a SQLite-backed local RAG/CAG memory system that supersedes the current JSON-only local context index.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-ai-usage-history-and-sqlite-local-memory.md`
@@ -117,6 +117,8 @@ Current implementation checkpoint:
 - `build_local_context_index(...)` now dual-writes the JSON compatibility document and the SQLite snapshot in one pass
 - the first SQLite slice mirrors only catalog/document/file/chunk state; continuity-event ingestion remains a later bounded phase
 - build/test evidence now proves path resolution, schema initialization, idempotent bootstrap, repeated rebuilds, and JSON/SQLite count parity
+- native command surfaces now include `ntk runtime update-local-memory` and `ntk runtime query-local-memory`
+- the SQLite query path is now live with FTS-backed recall plus deterministic `path_prefix`, `heading_contains`, and `exclude_paths` filters while the legacy JSON query remains available for compatibility
 
 ### 4. Weekly Usage History Must Record Both Actual and Estimated Values
 

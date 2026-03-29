@@ -30,6 +30,7 @@ It owns the `ntk` binary entry point, wires terminal input and layout, and deleg
   - [Example 1: Launch interactive mode with telemetry](#example-1-launch-interactive-mode-with-telemetry)
   - [Example 2: Tune attention and session retention](#example-2-tune-attention-and-session-retention)
 - [AI Usage History](#ai-usage-history)
+- [Runtime Continuity Utilities](#runtime-continuity-utilities)
 - [API Reference](#api-reference)
   - [Interactive Options](#interactive-options)
   - [Entry Point](#entry-point)
@@ -166,6 +167,26 @@ costBudgetUsdTotal = 25.0
 ```
 
 Use `NTK_AI_USAGE_DB_PATH`, `NTK_AI_USAGE_BUDGET_CONFIG_PATH`, and `NTK_AI_WEEKLY_BUDGET_PROFILE` when you need non-default local paths or profile selection.
+
+---
+
+## Runtime Continuity Utilities
+
+`ntk` also exposes repository-local continuity utilities through `runtime`:
+
+- `ntk runtime update-local-context-index`
+- `ntk runtime query-local-context-index`
+- `ntk runtime update-local-memory`
+- `ntk runtime query-local-memory`
+
+Example SQLite-backed recall flow:
+
+```powershell
+ntk runtime update-local-memory --repo-root .
+ntk runtime query-local-memory --repo-root . --query-text "planning wave" --path-prefix "planning/" --json-output
+```
+
+The compatibility JSON index remains available during migration, but the SQLite-backed `local-memory` commands are the forward path for bounded repo-local RAG/CAG recall.
 
 ---
 
