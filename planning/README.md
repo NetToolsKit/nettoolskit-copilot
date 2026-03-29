@@ -53,6 +53,7 @@ planning/
 ## Active Workstreams
 
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
+- [planning/active/plan-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/active/plan-script-retirement-phase-20d-provider-surface-dispatcher.md)
 
 ---
 
