@@ -22,6 +22,14 @@ pub use execution::{
         LOCAL_AI_SESSIONS_DIR_NAME, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
         NTK_AI_SESSION_COMPRESSION_MODE_ENV, NTK_AI_SESSION_DELTA_MIN_SHARED_PREFIX_CHARS_ENV,
     },
+    ai_usage::{
+        current_ai_usage_iso_week, query_weekly_ai_usage_summary, record_ai_usage_event,
+        AiUsageEventRecord, AiUsageEventSource, AiUsageIsoWeek, AiUsageLedgerError,
+        AiUsageWeeklyBudgetStatus, AiUsageWeeklyProviderTotal, AiUsageWeeklyReport,
+        AiUsageWeeklyReportRequest, LOCAL_AI_USAGE_DB_FILE_NAME, LOCAL_AI_USAGE_DIR_NAME,
+        NTK_AI_USAGE_DB_PATH_ENV, NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV,
+        NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
+    },
     approval::{
         evaluate_approval, request_approval, ApprovalActionKind, ApprovalDecision, ApprovalRequest,
     },

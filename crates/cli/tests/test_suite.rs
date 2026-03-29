@@ -17,6 +17,9 @@ mod input_tests;
 #[path = "error_tests.rs"]
 mod error_tests;
 
+#[path = "ai_commands_tests.rs"]
+mod ai_commands_tests;
+
 #[path = "runtime_commands_tests.rs"]
 mod runtime_commands_tests;
 

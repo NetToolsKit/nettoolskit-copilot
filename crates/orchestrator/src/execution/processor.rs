@@ -9,6 +9,7 @@ use crate::execution::ai_session::{
     LocalAiSessionState, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
     NTK_AI_SESSION_COMPRESSION_MODE_ENV, NTK_AI_SESSION_DELTA_MIN_SHARED_PREFIX_CHARS_ENV,
 };
+use crate::execution::ai_usage::{record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource};
 use crate::execution::approval::{request_approval, ApprovalDecision, ApprovalRequest};
 use crate::execution::cache::{CacheKey, CacheStats, CacheTtl, CacheValue, CommandResultCache};
 use crate::execution::executor::{AsyncCommandExecutor, CommandProgress, ProgressSender};
@@ -2412,6 +2413,50 @@ fn record_ai_usage_estimates(metrics: &Metrics, request: &AiRequest, output: &st
     );
 }
 
+struct AiUsageEventContext<'a> {
+    intent: AiIntent,
+    provider_id: &'a str,
+    session_id: &'a str,
+    event_source: AiUsageEventSource,
+    billable: bool,
+    timestamp_unix_ms: u64,
+}
+
+fn persist_ai_usage_event(request: &AiRequest, output: &str, context: AiUsageEventContext<'_>) {
+    let input_tokens_estimated = estimate_request_input_tokens(request);
+    let output_tokens_estimated = estimate_token_count(output);
+    let estimated_cost_usd =
+        estimate_ai_request_cost_usd(input_tokens_estimated, output_tokens_estimated);
+    let repo_root = std::env::current_dir().ok();
+    let record = AiUsageEventRecord {
+        timestamp_unix_ms: context.timestamp_unix_ms,
+        provider: context.provider_id.to_string(),
+        model: request.model.clone(),
+        intent: context.intent.as_label().to_string(),
+        repo_root,
+        session_id: context.session_id.to_string(),
+        event_source: context.event_source,
+        billable: context.billable,
+        input_tokens_estimated,
+        output_tokens_estimated,
+        input_tokens_actual: None,
+        output_tokens_actual: None,
+        estimated_cost_usd,
+        actual_cost_usd: None,
+        status: "success".to_string(),
+    };
+
+    if let Err(error) = record_ai_usage_event(&record) {
+        warn!(
+            provider = context.provider_id,
+            intent = context.intent.as_label(),
+            source = context.event_source.as_str(),
+            error = %error,
+            "failed to persist local AI usage event"
+        );
+    }
+}
+
 fn ai_error_guidance_message(error: &AiProviderError) -> Option<&'static str> {
     match error {
         AiProviderError::Timeout { .. } => Some(
@@ -3361,6 +3406,7 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
     if token_policy.cache_first_enabled {
         match with_command_cache(|cache| cache.get(&ai_cache_key)) {
             Some(CacheValue::AiResponseText(cached_output)) => {
+                let cache_hit_timestamp_unix_ms = current_unix_timestamp_ms();
                 ai_metrics.increment_counter("runtime_ai_cache_hits_total");
                 ai_metrics.increment_counter(format!(
                     "runtime_ai_intent_{}_cache_hits_total",
@@ -3390,6 +3436,18 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
                     println!();
                 }
                 persist_ai_session_exchange(&session_id, intent, "cache", &prompt, &cached_output);
+                persist_ai_usage_event(
+                    &request,
+                    &cached_output,
+                    AiUsageEventContext {
+                        intent,
+                        provider_id: "cache",
+                        session_id: &session_id,
+                        event_source: AiUsageEventSource::Cache,
+                        billable: false,
+                        timestamp_unix_ms: cache_hit_timestamp_unix_ms,
+                    },
+                );
                 let _ = nettoolskit_ui::append_footer_log("ai: cache hit");
                 return ExitStatus::Success;
             }
@@ -3438,6 +3496,7 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
     .await
     {
         Ok(routed) => {
+            let completed_at_unix_ms = current_unix_timestamp_ms();
             let provider_id = routed.provider_id.as_str();
             let provider_metric = sanitize_metric_component(provider_id);
             ai_metrics.record_timing("runtime_ai_request_latency", request_started.elapsed());
@@ -3509,6 +3568,18 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
 
             persist_ai_session_exchange(&session_id, intent, provider_id, &prompt, &output);
             record_ai_usage_estimates(&ai_metrics, &request, &output);
+            persist_ai_usage_event(
+                &request,
+                &output,
+                AiUsageEventContext {
+                    intent,
+                    provider_id,
+                    session_id: &session_id,
+                    event_source: AiUsageEventSource::Provider,
+                    billable: true,
+                    timestamp_unix_ms: completed_at_unix_ms,
+                },
+            );
             ai_metrics.increment_counter("runtime_ai_requests_success_total");
             ai_metrics.increment_counter(format!(
                 "runtime_ai_provider_{}_success_total",
