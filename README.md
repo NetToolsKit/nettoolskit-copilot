@@ -41,7 +41,7 @@ It is organized to keep implementation, orchestration, planning, and reference d
 - `cargo test --workspace`
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace -- -D warnings`
-- `pwsh -File .\scripts\validation\validate-readme-standards.ps1` for the repository validation wrapper
+- `ntk validation readme-standards --repo-root .` for the native repository README validation surface
 
 ---
 

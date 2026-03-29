@@ -51,7 +51,7 @@
         "\\.github/copilot-instructions\\.md",
         "README\\.md",
         "CHANGELOG\\.md",
-        "validate-instruction-metadata\\.ps1",
+        "ntk validation instruction-metadata --repo-root \\.",
         "validate-instructions\\.ps1",
         "## Change Notes"
       ],
@@ -60,7 +60,6 @@
         "Checklist:\\s+\\.github Change"
       ],
       "requiredPathReferences": [
-        "scripts/validation/validate-instruction-metadata.ps1",
         "scripts/validation/validate-instructions.ps1",
         ".github/copilot-instructions.md",
         "README.md",

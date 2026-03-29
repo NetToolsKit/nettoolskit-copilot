@@ -7,20 +7,26 @@ use nettoolskit_validation::{
     invoke_validate_agent_skill_alignment, invoke_validate_architecture_boundaries,
     invoke_validate_audit_ledger, invoke_validate_authoritative_source_policy,
     invoke_validate_compatibility_lifecycle_policy, invoke_validate_dotnet_standards,
-    invoke_validate_instruction_architecture, invoke_validate_policy,
-    invoke_validate_powershell_standards, invoke_validate_release_governance,
-    invoke_validate_release_provenance, invoke_validate_routing_coverage,
-    invoke_validate_security_baseline, invoke_validate_shared_script_checksums,
-    invoke_validate_supply_chain, invoke_validate_warning_baseline,
+    invoke_validate_instruction_architecture, invoke_validate_instruction_metadata,
+    invoke_validate_planning_structure, invoke_validate_policy,
+    invoke_validate_powershell_standards, invoke_validate_readme_standards,
+    invoke_validate_release_governance, invoke_validate_release_provenance,
+    invoke_validate_routing_coverage, invoke_validate_security_baseline,
+    invoke_validate_shared_script_checksums, invoke_validate_supply_chain,
+    invoke_validate_template_standards, invoke_validate_warning_baseline,
+    invoke_validate_workspace_efficiency,
     ValidateAgentOrchestrationRequest, ValidateAgentPermissionsRequest,
     ValidateAgentSkillAlignmentRequest, ValidateArchitectureBoundariesRequest,
     ValidateAuditLedgerRequest, ValidateAuthoritativeSourcePolicyRequest,
     ValidateCompatibilityLifecyclePolicyRequest, ValidateDotnetStandardsRequest,
-    ValidateInstructionArchitectureRequest, ValidatePolicyRequest,
-    ValidatePowerShellStandardsRequest, ValidateReleaseGovernanceRequest,
-    ValidateReleaseProvenanceRequest, ValidateRoutingCoverageRequest,
-    ValidateSecurityBaselineRequest, ValidateSharedScriptChecksumsRequest,
-    ValidateSupplyChainRequest, ValidateWarningBaselineRequest, ValidationCheckStatus,
+    ValidateInstructionArchitectureRequest, ValidateInstructionMetadataRequest,
+    ValidatePlanningStructureRequest, ValidatePolicyRequest,
+    ValidatePowerShellStandardsRequest, ValidateReadmeStandardsRequest,
+    ValidateReleaseGovernanceRequest, ValidateReleaseProvenanceRequest,
+    ValidateRoutingCoverageRequest, ValidateSecurityBaselineRequest,
+    ValidateSharedScriptChecksumsRequest, ValidateSupplyChainRequest,
+    ValidateTemplateStandardsRequest, ValidateWarningBaselineRequest,
+    ValidateWorkspaceEfficiencyRequest, ValidationCheckStatus,
 };
 use std::path::PathBuf;
 
@@ -46,6 +52,9 @@ pub enum ValidationCommand {
     /// Validate instruction architecture ownership and boundary rules.
     #[command(name = "instruction-architecture")]
     InstructionArchitecture(ValidationInstructionArchitectureArgs),
+    /// Validate instruction, prompt, and chat mode frontmatter metadata.
+    #[command(name = "instruction-metadata")]
+    InstructionMetadata(ValidationInstructionMetadataArgs),
     /// Validate COMPATIBILITY lifecycle and EOL policy semantics.
     #[command(name = "compatibility-lifecycle-policy")]
     CompatibilityLifecyclePolicy(ValidationCompatibilityLifecyclePolicyArgs),
@@ -54,9 +63,15 @@ pub enum ValidationCommand {
     DotnetStandards(ValidationDotnetStandardsArgs),
     /// Validate repository policy contracts under `.github/policies`.
     Policy(ValidationPolicyArgs),
+    /// Validate versioned planning workspace structure.
+    #[command(name = "planning-structure")]
+    PlanningStructure(ValidationPlanningStructureArgs),
     /// Validate PowerShell script standards across repository scripts.
     #[command(name = "powershell-standards")]
     PowershellStandards(ValidationPowerShellStandardsArgs),
+    /// Validate README files against repository standards.
+    #[command(name = "readme-standards")]
+    ReadmeStandards(ValidationReadmeStandardsArgs),
     /// Validate routing catalog coverage against golden fixtures.
     RoutingCoverage(ValidationRoutingCoverageArgs),
     /// Validate repository security baseline contracts.
@@ -68,6 +83,9 @@ pub enum ValidationCommand {
     /// Validate local supply-chain baseline and export SBOM evidence.
     #[command(name = "supply-chain")]
     SupplyChain(ValidationSupplyChainArgs),
+    /// Validate shared repository template standards.
+    #[command(name = "template-standards")]
+    TemplateStandards(ValidationTemplateStandardsArgs),
     /// Validate release governance contracts and release guardrails.
     #[command(name = "release-governance")]
     ReleaseGovernance(ValidationReleaseGovernanceArgs),
@@ -77,6 +95,9 @@ pub enum ValidationCommand {
     /// Validate analyzer warning volume against the warning baseline.
     #[command(name = "warning-baseline")]
     WarningBaseline(ValidationWarningBaselineArgs),
+    /// Validate VS Code workspace efficiency and configuration hygiene.
+    #[command(name = "workspace-efficiency")]
+    WorkspaceEfficiency(ValidationWorkspaceEfficiencyArgs),
 }
 
 /// CLI arguments for `validation agent-orchestration`.
@@ -222,6 +243,17 @@ pub struct ValidationInstructionArchitectureArgs {
     pub detailed_output: bool,
 }
 
+/// CLI arguments for `validation instruction-metadata`.
+#[derive(Debug, Args)]
+pub struct ValidationInstructionMetadataArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// CLI arguments for `validation compatibility-lifecycle-policy`.
 #[derive(Debug, Args)]
 pub struct ValidationCompatibilityLifecyclePolicyArgs {
@@ -292,6 +324,17 @@ pub struct ValidationPolicyArgs {
     pub policy_directory: Option<PathBuf>,
 }
 
+/// CLI arguments for `validation planning-structure`.
+#[derive(Debug, Args)]
+pub struct ValidationPlanningStructureArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// CLI arguments for `validation powershell-standards`.
 #[derive(Debug, Args)]
 pub struct ValidationPowerShellStandardsArgs {
@@ -310,6 +353,20 @@ pub struct ValidationPowerShellStandardsArgs {
     /// Skip optional PSScriptAnalyzer execution.
     #[clap(long, action = ArgAction::SetTrue)]
     pub skip_script_analyzer: bool,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
+/// CLI arguments for `validation readme-standards`.
+#[derive(Debug, Args)]
+pub struct ValidationReadmeStandardsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit baseline path.
+    #[clap(long)]
+    pub baseline_path: Option<PathBuf>,
     /// Convert required findings to warnings instead of failures.
     #[clap(long, action = ArgAction::Set, default_value_t = true)]
     pub warning_only: bool,
@@ -341,6 +398,23 @@ pub struct ValidationSupplyChainArgs {
     /// Optional explicit baseline path.
     #[clap(long)]
     pub baseline_path: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
+/// CLI arguments for `validation template-standards`.
+#[derive(Debug, Args)]
+pub struct ValidationTemplateStandardsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit baseline path.
+    #[clap(long)]
+    pub baseline_path: Option<PathBuf>,
+    /// Optional explicit template directory path.
+    #[clap(long)]
+    pub template_directory: Option<PathBuf>,
     /// Convert required findings to warnings instead of failures.
     #[clap(long, action = ArgAction::Set, default_value_t = true)]
     pub warning_only: bool,
@@ -409,6 +483,26 @@ pub struct ValidationWarningBaselineArgs {
     pub warning_only: bool,
 }
 
+/// CLI arguments for `validation workspace-efficiency`.
+#[derive(Debug, Args)]
+pub struct ValidationWorkspaceEfficiencyArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional explicit baseline path.
+    #[clap(long)]
+    pub baseline_path: Option<PathBuf>,
+    /// Optional explicit settings template path.
+    #[clap(long)]
+    pub settings_template_path: Option<PathBuf>,
+    /// Optional explicit workspace search root.
+    #[clap(long)]
+    pub workspace_search_root: Option<PathBuf>,
+    /// Convert required findings to warnings instead of failures.
+    #[clap(long, action = ArgAction::Set, default_value_t = true)]
+    pub warning_only: bool,
+}
+
 /// Execute one validation command through the `ntk` binary.
 pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
     match command {
@@ -427,23 +521,32 @@ pub fn execute_validation_command(command: ValidationCommand) -> ExitStatus {
         ValidationCommand::InstructionArchitecture(arguments) => {
             execute_instruction_architecture(arguments)
         }
+        ValidationCommand::InstructionMetadata(arguments) => {
+            execute_instruction_metadata(arguments)
+        }
         ValidationCommand::CompatibilityLifecyclePolicy(arguments) => {
             execute_compatibility_lifecycle_policy(arguments)
         }
         ValidationCommand::DotnetStandards(arguments) => execute_dotnet_standards(arguments),
         ValidationCommand::Policy(arguments) => execute_policy(arguments),
+        ValidationCommand::PlanningStructure(arguments) => execute_planning_structure(arguments),
         ValidationCommand::PowershellStandards(arguments) => {
             execute_powershell_standards(arguments)
         }
+        ValidationCommand::ReadmeStandards(arguments) => execute_readme_standards(arguments),
         ValidationCommand::RoutingCoverage(arguments) => execute_routing_coverage(arguments),
         ValidationCommand::SecurityBaseline(arguments) => execute_security_baseline(arguments),
         ValidationCommand::SharedScriptChecksums(arguments) => {
             execute_shared_script_checksums(arguments)
         }
         ValidationCommand::SupplyChain(arguments) => execute_supply_chain(arguments),
+        ValidationCommand::TemplateStandards(arguments) => execute_template_standards(arguments),
         ValidationCommand::ReleaseGovernance(arguments) => execute_release_governance(arguments),
         ValidationCommand::ReleaseProvenance(arguments) => execute_release_provenance(arguments),
         ValidationCommand::WarningBaseline(arguments) => execute_warning_baseline(arguments),
+        ValidationCommand::WorkspaceEfficiency(arguments) => {
+            execute_workspace_efficiency(arguments)
+        }
     }
 }
 
@@ -680,6 +783,29 @@ fn execute_instruction_architecture(
     exit_status_from_code(result.exit_code)
 }
 
+fn execute_instruction_metadata(arguments: ValidationInstructionMetadataArgs) -> ExitStatus {
+    let result = match invoke_validate_instruction_metadata(&ValidateInstructionMetadataRequest {
+        repo_root: arguments.repo_root,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Instruction files: {}", result.instruction_files);
+    println!("Prompt files: {}", result.prompt_files);
+    println!("Chat mode files: {}", result.chat_mode_files);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
 fn execute_compatibility_lifecycle_policy(
     arguments: ValidationCompatibilityLifecyclePolicyArgs,
 ) -> ExitStatus {
@@ -761,6 +887,39 @@ fn execute_policy(arguments: ValidationPolicyArgs) -> ExitStatus {
     exit_status_from_code(result.exit_code)
 }
 
+fn execute_planning_structure(arguments: ValidationPlanningStructureArgs) -> ExitStatus {
+    let result = match invoke_validate_planning_structure(&ValidatePlanningStructureRequest {
+        repo_root: arguments.repo_root,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Missing required files: {}", result.missing_required_files.len());
+    println!(
+        "Missing required directories: {}",
+        result.missing_required_directories.len()
+    );
+    println!(
+        "Missing optional directories: {}",
+        result.missing_optional_directories.len()
+    );
+    println!(
+        "Legacy .temp/planning detected: {}",
+        result.legacy_temp_planning_detected
+    );
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
 fn execute_routing_coverage(arguments: ValidationRoutingCoverageArgs) -> ExitStatus {
     let result = match invoke_validate_routing_coverage(&ValidateRoutingCoverageRequest {
         repo_root: arguments.repo_root,
@@ -780,6 +939,29 @@ fn execute_routing_coverage(arguments: ValidationRoutingCoverageArgs) -> ExitSta
     println!("Fixture path: {}", result.fixture_path.display());
     println!("Routes checked: {}", result.routes_checked);
     println!("Cases checked: {}", result.cases_checked);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_readme_standards(arguments: ValidationReadmeStandardsArgs) -> ExitStatus {
+    let result = match invoke_validate_readme_standards(&ValidateReadmeStandardsRequest {
+        repo_root: arguments.repo_root,
+        baseline_path: arguments.baseline_path,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!("Files checked: {}", result.files_checked);
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 
@@ -863,6 +1045,32 @@ fn execute_shared_script_checksums(arguments: ValidationSharedScriptChecksumsArg
     exit_status_from_code(result.exit_code)
 }
 
+fn execute_template_standards(arguments: ValidationTemplateStandardsArgs) -> ExitStatus {
+    let result = match invoke_validate_template_standards(&ValidateTemplateStandardsRequest {
+        repo_root: arguments.repo_root,
+        baseline_path: arguments.baseline_path,
+        template_directory: arguments.template_directory,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!("Template directory: {}", result.template_directory.display());
+    println!("Templates checked: {}", result.templates_checked);
+    println!("Rules checked: {}", result.rules_checked);
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
 fn execute_warning_baseline(arguments: ValidationWarningBaselineArgs) -> ExitStatus {
     let result = match invoke_validate_warning_baseline(&ValidateWarningBaselineRequest {
         repo_root: arguments.repo_root,
@@ -882,6 +1090,39 @@ fn execute_warning_baseline(arguments: ValidationWarningBaselineArgs) -> ExitSta
     println!("Baseline path: {}", result.baseline_path.display());
     println!("Total warnings: {}", result.total_warnings);
     println!("Report path: {}", result.report_path.display());
+    print_messages("Warnings", &result.warnings);
+    print_messages("Failures", &result.failures);
+
+    exit_status_from_code(result.exit_code)
+}
+
+fn execute_workspace_efficiency(arguments: ValidationWorkspaceEfficiencyArgs) -> ExitStatus {
+    let result = match invoke_validate_workspace_efficiency(&ValidateWorkspaceEfficiencyRequest {
+        repo_root: arguments.repo_root,
+        baseline_path: arguments.baseline_path,
+        settings_template_path: arguments.settings_template_path,
+        workspace_search_root: arguments.workspace_search_root,
+        warning_only: arguments.warning_only,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!("Status: {}", status_label(result.status));
+    println!("Warning only: {}", result.warning_only);
+    println!("Baseline path: {}", result.baseline_path.display());
+    println!(
+        "Settings template path: {}",
+        result.settings_template_path.display()
+    );
+    println!(
+        "Workspace search root: {}",
+        result.workspace_search_root.display()
+    );
+    println!("Workspace files checked: {}", result.workspace_files_checked);
     print_messages("Warnings", &result.warnings);
     print_messages("Failures", &result.failures);
 

@@ -712,6 +712,207 @@ Load `repository-operating-model.instructions.md`.
     );
 }
 
+fn initialize_planning_structure_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    fs::create_dir_all(repo_root.join("planning/active")).expect("planning/active should exist");
+    fs::create_dir_all(repo_root.join("planning/completed"))
+        .expect("planning/completed should exist");
+    fs::create_dir_all(repo_root.join("planning/specs/active"))
+        .expect("planning/specs/active should exist");
+    fs::create_dir_all(repo_root.join("planning/specs/completed"))
+        .expect("planning/specs/completed should exist");
+    write_file(&repo_root.join("planning/README.md"), "# Planning\n");
+    write_file(&repo_root.join("planning/specs/README.md"), "# Planning Specs\n");
+}
+
+fn initialize_readme_standards_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/governance/readme-standards.baseline.json"),
+        r#"{
+  "global": {
+    "requireFeaturesCheckmarks": false,
+    "requireCodeFences": false,
+    "requireTocLinks": false,
+    "requireHorizontalSeparators": false
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "requiredSections": ["Contents", "License"],
+      "allowIntroductionPreamble": false
+    }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join("README.md"),
+        "# Example Repo\n\n## Contents\n- [License](#license)\n\n## License\nMIT\n",
+    );
+}
+
+fn initialize_template_standards_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(&repo_root.join("README.md"), "# Repo\n");
+    write_file(
+        &repo_root.join(".github/governance/template-standards.baseline.json"),
+        r#"{
+  "requiredFiles": [
+    ".github/templates/example-template.md"
+  ],
+  "templateRules": [
+    {
+      "path": ".github/templates/example-template.md",
+      "requiredPatterns": ["^# Example Template"],
+      "forbiddenPatterns": ["forbidden-token"],
+      "requiredPathReferences": ["README.md"]
+    }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(".github/templates/example-template.md"),
+        "# Example Template\n\nReference README.md.\n",
+    );
+}
+
+fn initialize_workspace_efficiency_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+        r#"{
+  "templateWorkspacePaths": [],
+  "allowedWorkspaceOverrideSettings": ["chat.agent.maxRequests"],
+  "requiredSettings": {},
+  "forbiddenSettings": {},
+  "recommendedSettings": {},
+  "recommendedNumericUpperBounds": {},
+  "heuristics": {}
+}"#,
+    );
+    write_file(&repo_root.join(".vscode/settings.tamplate.jsonc"), "{}\n");
+    write_file(
+        &repo_root.join("example.code-workspace"),
+        r#"{
+  "folders": [
+    { "path": "App" }
+  ],
+  "settings": {
+    "chat.agent.maxRequests": 80
+  }
+}"#,
+    );
+}
+
+fn initialize_instruction_metadata_repo_root(repo_root: &Path) {
+    initialize_validation_repo_root(repo_root);
+    write_file(
+        &repo_root.join(".github/instructions/example.instructions.md"),
+        r#"---
+applyTo: "src/**/*.rs"
+priority: high
+---
+
+# Example Instruction
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/prompts/example.prompt.md"),
+        r#"---
+description: Example prompt
+mode: ask
+tools: ['readFile']
+---
+
+# Example Prompt
+"#,
+    );
+    write_file(
+        &repo_root.join(".github/chatmodes/example.chatmode.md"),
+        r#"---
+description: Example chat mode
+tools: ['readFile']
+---
+
+# Example Chat Mode
+"#,
+    );
+}
+
+#[test]
+fn test_validation_planning_structure_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_planning_structure_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "planning-structure", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Missing required files: 0"))
+        .stdout(predicate::str::contains("Missing required directories: 0"));
+}
+
+#[test]
+fn test_validation_readme_standards_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_readme_standards_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "readme-standards", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Files checked: 1"));
+}
+
+#[test]
+fn test_validation_template_standards_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_template_standards_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "template-standards", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Templates checked: 1"))
+        .stdout(predicate::str::contains("Rules checked: 1"));
+}
+
+#[test]
+fn test_validation_workspace_efficiency_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_workspace_efficiency_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "workspace-efficiency", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Workspace files checked: 1"));
+}
+
+#[test]
+fn test_validation_instruction_metadata_reports_pass_for_valid_assets() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_instruction_metadata_repo_root(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["validation", "instruction-metadata", "--warning-only", "false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Instruction files: 1"))
+        .stdout(predicate::str::contains("Prompt files: 1"))
+        .stdout(predicate::str::contains("Chat mode files: 1"));
+}
+
 #[allow(dead_code)]
 fn initialize_git_repository(repo_root: &Path) -> String {
     run_git(repo_root, &["init", "-b", "main"]);

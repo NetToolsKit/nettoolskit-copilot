@@ -304,7 +304,7 @@ fn scripts_readme_contents() -> &'static str {
 - [Healthcheck](runtime/healthcheck.ps1)
 - [Self-Heal](runtime/self-heal.ps1)
 - [Validate All](validation/validate-all.ps1)
-- [Validate README Standards](validation/validate-readme-standards.ps1)
+- Native README Standards Check: `ntk validation readme-standards --repo-root .`
 
 ---
 

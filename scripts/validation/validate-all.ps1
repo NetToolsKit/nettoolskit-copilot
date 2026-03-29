@@ -837,7 +837,11 @@ $baseCheckDefinitions['validate-agent-permissions'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-planning-structure'] = [pscustomobject]@{
     name = 'validate-planning-structure'
-    script = 'scripts/validation/validate-planning-structure.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-planning-structure'
+    command = @('validation', 'planning-structure')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-routing-coverage'] = [pscustomobject]@{
@@ -869,17 +873,29 @@ $baseCheckDefinitions['validate-instruction-architecture'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-readme-standards'] = [pscustomobject]@{
     name = 'validate-readme-standards'
-    script = 'scripts/validation/validate-readme-standards.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-readme-standards'
+    command = @('validation', 'readme-standards')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-template-standards'] = [pscustomobject]@{
     name = 'validate-template-standards'
-    script = 'scripts/validation/validate-template-standards.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-template-standards'
+    command = @('validation', 'template-standards')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-workspace-efficiency'] = [pscustomobject]@{
     name = 'validate-workspace-efficiency'
-    script = 'scripts/validation/validate-workspace-efficiency.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-workspace-efficiency'
+    command = @('validation', 'workspace-efficiency')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-compatibility-lifecycle-policy'] = [pscustomobject]@{
@@ -955,7 +971,11 @@ $baseCheckDefinitions['validate-architecture-boundaries'] = [pscustomobject]@{
 }
 $baseCheckDefinitions['validate-instruction-metadata'] = [pscustomobject]@{
     name = 'validate-instruction-metadata'
-    script = 'scripts/validation/validate-instruction-metadata.ps1'
+    runner = 'native'
+    surfaceId = 'rust:nettoolskit-validation::validate-instruction-metadata'
+    command = @('validation', 'instruction-metadata')
+    warningOnlyArgumentNames = @('WarningOnly')
+    supportsWarningOnly = $true
     args = @{ RepoRoot = $resolvedRepoRoot }
 }
 $baseCheckDefinitions['validate-supply-chain'] = [pscustomobject]@{

@@ -16,7 +16,7 @@
 - [ ] Cross-references and links were verified
 
 ## Validation
-- [ ] `pwsh -File scripts/validation/validate-instruction-metadata.ps1 -RepoRoot .`
+- [ ] `ntk validation instruction-metadata --repo-root .`
 - [ ] `pwsh -File scripts/validation/validate-instructions.ps1 -RepoRoot .`
 - [ ] Additional targeted validation was executed when the change affected scripts, templates, routing, or governance artifacts
 - [ ] EOF and trailing-whitespace rules were verified
