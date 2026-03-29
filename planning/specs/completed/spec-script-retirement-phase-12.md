@@ -4,10 +4,10 @@ Generated: 2026-03-28 23:05
 
 ## Status
 
-- LastUpdated: 2026-03-28 23:05
+- LastUpdated: 2026-03-28 23:20
 - Objective: define the design intent and acceptance criteria for retiring the remaining documentation and planning-structure validation wrappers.
-- Planning Readiness: ready-for-implementation
-- Related Plan: `planning/active/plan-script-retirement-phase-12.md`
+- Planning Readiness: executed-and-completed
+- Related Plan: `planning/completed/plan-script-retirement-phase-12.md`
 - Source Inputs:
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
@@ -58,3 +58,7 @@ Use the existing validation crate implementations as the source of truth and clo
 - `validate-instructions.ps1`, `validate-stage.ps1`, runtime parity tests, and authored checklist guidance no longer require the deleted wrapper paths.
 - The five wrapper files are deleted only after the above conditions are met.
 - The completed safety matrix and parity ledger record the phase-12 result and the inventory reduction from `117` to `112` overall scripts and from `13` to `8` validation wrappers.
+
+## Executed Result
+
+All five validation wrappers were retired after the native CLI contract, the `validate-all` consumer chain, `validate-stage.ps1`, runtime parity tests, authored README/checklist guidance, and the governance baselines were updated in the same slice. The focused phase-12 `validate-all` proof passed in warning-only and enforcing modes with all five checks routed through the native executable contract, and the GitHub instruction surfaces were re-rendered after the shared checklist template changed.
