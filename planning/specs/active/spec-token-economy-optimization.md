@@ -9,6 +9,7 @@ Generated: 2026-03-30 07:31
 - Normalized Request: plan a token-economy workstream that uses the existing usage ledger and runtime policies to reduce spend.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Planning Path: `planning/active/plan-token-economy-optimization.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---
 

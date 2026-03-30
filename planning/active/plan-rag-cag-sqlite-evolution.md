@@ -9,6 +9,7 @@ Generated: 2026-03-30 07:31
 - Normalized Request: create a planning workstream for the local SQLite memory system so it can grow beyond the current JSON baseline and support better session recall.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-rag-cag-sqlite-evolution.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Inputs:
   - `crates/core/src/local-context/catalog.rs`
   - `crates/core/src/local-context/document.rs`

@@ -9,6 +9,7 @@ Generated: 2026-03-30 07:31
 - Normalized Request: create a planning workstream for the remaining script retirement tail so the repository can eventually delete the last `.ps1` leaves safely.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-script-retirement-tail-cutover.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Inputs:
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`

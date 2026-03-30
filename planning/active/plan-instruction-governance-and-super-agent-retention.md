@@ -9,6 +9,8 @@ Generated: 2026-03-30 07:31
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-instruction-governance-and-super-agent-retention.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Dependency: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
 - Inputs:
   - `definitions/shared/instructions/repository-operating-model.instructions.md`
   - `.github/instructions/repository-operating-model.instructions.md`

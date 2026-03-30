@@ -43,6 +43,8 @@ This folder is part of the repository operating model, not disposable scratch st
 
 ## Active Workstreams
 
+- [planning/active/plan-spec-driven-development-operating-model.md](planning/active/plan-spec-driven-development-operating-model.md)
+- [planning/active/plan-instruction-rules-board-and-surface-layout.md](planning/active/plan-instruction-rules-board-and-surface-layout.md)
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
 - [planning/active/plan-token-economy-optimization.md](planning/active/plan-token-economy-optimization.md)
 - [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)

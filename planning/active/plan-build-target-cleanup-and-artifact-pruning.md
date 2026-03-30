@@ -9,6 +9,7 @@ Generated: 2026-03-30 07:31
 - Normalized Request: create a planning workstream for cargo target cleanup and generated-artifact pruning so the repository stops accumulating multi-gigabyte build state.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Inputs:
   - `.cargo/config.toml`
   - `.gitignore`

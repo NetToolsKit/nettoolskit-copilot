@@ -42,6 +42,8 @@ This workspace separates design intent from execution planning so non-trivial wo
 
 ## Active Specs
 
+- [planning/specs/active/spec-spec-driven-development-operating-model.md](planning/specs/active/spec-spec-driven-development-operating-model.md)
+- [planning/specs/active/spec-instruction-rules-board-and-surface-layout.md](planning/specs/active/spec-instruction-rules-board-and-surface-layout.md)
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
 - [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
 - [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)

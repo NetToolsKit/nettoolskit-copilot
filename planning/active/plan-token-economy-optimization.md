@@ -9,6 +9,7 @@ Generated: 2026-03-30 07:31
 - Normalized Request: create a planning workstream for token economy so the repository can actively reduce token burn instead of only measuring it.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-token-economy-optimization.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Inputs:
   - `crates/orchestrator/src/execution/processor.rs`
   - `crates/orchestrator/src/execution/ai.rs`

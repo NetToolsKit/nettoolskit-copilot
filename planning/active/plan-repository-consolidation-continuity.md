@@ -9,6 +9,7 @@ Generated: 2026-03-29
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependency: `planning/completed/plan-script-retirement-phase-18.md`, `planning/completed/plan-script-retirement-phase-19.md`, `planning/completed/plan-script-retirement-phase-20c-self-heal.md`, `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`, `planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`, and `planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md` are now complete; Workstream W5 now continues from the closed 96-script baseline.
 - Inputs:
   - `planning/completed/plan-script-retirement-phase-17.md`

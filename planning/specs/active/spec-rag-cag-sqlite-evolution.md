@@ -9,6 +9,7 @@ Generated: 2026-03-30 07:31
 - Normalized Request: plan a local SQLite RAG/CAG system similar in spirit to `context-mode`, but shaped for this repository's deterministic operator and agent workflows.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Planning Path: `planning/active/plan-rag-cag-sqlite-evolution.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---
 

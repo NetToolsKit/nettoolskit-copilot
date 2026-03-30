@@ -9,6 +9,8 @@ Generated: 2026-03-30 07:31
 - Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `main` (planning only; implementation branches TBD)
 - Planning Path: `planning/active/plan-instruction-governance-and-super-agent-retention.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Related Workstream: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
 
 ---
 
