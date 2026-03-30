@@ -43,6 +43,11 @@ This workspace separates design intent from execution planning so non-trivial wo
 ## Active Specs
 
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
+- [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
+- [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)
+- [planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md)
+- [planning/specs/active/spec-instruction-governance-and-super-agent-retention.md](planning/specs/active/spec-instruction-governance-and-super-agent-retention.md)
+- [planning/specs/active/spec-script-retirement-tail-cutover.md](planning/specs/active/spec-script-retirement-tail-cutover.md)
 
 ---
 
