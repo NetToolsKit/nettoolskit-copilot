@@ -43,15 +43,18 @@ This workspace separates design intent from execution planning so non-trivial wo
 ## Active Specs
 
 - [planning/specs/active/spec-spec-driven-development-operating-model.md](planning/specs/active/spec-spec-driven-development-operating-model.md)
+- [planning/specs/active/spec-agent-runtime-comparison-and-improvement-matrix.md](planning/specs/active/spec-agent-runtime-comparison-and-improvement-matrix.md)
 - [planning/specs/active/spec-instruction-rules-board-and-surface-layout.md](planning/specs/active/spec-instruction-rules-board-and-surface-layout.md)
 - [planning/specs/active/spec-agentic-surface-boundary-separation.md](planning/specs/active/spec-agentic-surface-boundary-separation.md)
 - [planning/specs/active/spec-cli-fast-path-and-startup-decomposition.md](planning/specs/active/spec-cli-fast-path-and-startup-decomposition.md)
 - [planning/specs/active/spec-mcp-transport-auth-and-session-resilience.md](planning/specs/active/spec-mcp-transport-auth-and-session-resilience.md)
 - [planning/specs/active/spec-memory-file-layering-and-operational-recall.md](planning/specs/active/spec-memory-file-layering-and-operational-recall.md)
+- [planning/specs/active/spec-plugin-skill-extensibility-and-runtime-governance.md](planning/specs/active/spec-plugin-skill-extensibility-and-runtime-governance.md)
 - [planning/specs/active/spec-context-selection-reranking-and-budgeted-recall.md](planning/specs/active/spec-context-selection-reranking-and-budgeted-recall.md)
 - [planning/specs/active/spec-task-output-spill-to-disk-and-retention-control.md](planning/specs/active/spec-task-output-spill-to-disk-and-retention-control.md)
 - [planning/specs/active/spec-sdk-control-plane-schemas-and-runtime-introspection.md](planning/specs/active/spec-sdk-control-plane-schemas-and-runtime-introspection.md)
 - [planning/specs/active/spec-multi-agent-runtime-lineage-and-a2a-readiness.md](planning/specs/active/spec-multi-agent-runtime-lineage-and-a2a-readiness.md)
+- [planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md](planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md)
 - [planning/specs/active/spec-free-llm-provider-test-matrix.md](planning/specs/active/spec-free-llm-provider-test-matrix.md)
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
 - [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
