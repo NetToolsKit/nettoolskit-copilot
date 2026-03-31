@@ -4,12 +4,13 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-03-31 11:06
 - Objective: define the design intent for separating MCP, A2A, RAG, and CAG responsibilities into explicit repository boundaries that are easier to maintain and reason about.
 - Normalized Request: open a planning workstream to improve the current agentic-code boundaries so the repository keeps MCP, A2A, RAG, and CAG distinct and SOLID-aligned.
 - Active Branch: `docs/planning-gap-workstreams` (planning only; implementation branches TBD)
 - Planning Path: `planning/active/plan-agentic-surface-boundary-separation.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Current Slice: local context assembly and token-economy policy have already been extracted from `processor.rs` into dedicated execution boundaries.
 
 ---
 
@@ -27,6 +28,7 @@ The repository already documents MCP, A2A, RAG, and CAG as distinct concepts, bu
 - Reserve A2A as a separate interoperability boundary without coupling it to local recall or MCP projection.
 - Reduce cross-cutting logic inside orchestrator and runtime bootstrap paths.
 - Improve code clarity by aligning boundaries with single responsibility and dependency inversion.
+- Current implementation checkpoint: `ai_request_context` now owns local context assembly/session replay injection, and `ai_token_economy` now owns prompt compaction and token policy.
 
 ---
 

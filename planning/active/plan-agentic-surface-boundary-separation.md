@@ -4,12 +4,13 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-03-31 11:06
 - Objective: separate MCP, A2A, RAG, and CAG into explicit repository boundaries so the agentic stack is easier to maintain, test, and extend without accidental coupling.
 - Normalized Request: create a planning workstream to improve the current agentic-code boundaries and keep each technology in the right layer.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-agentic-surface-boundary-separation.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Current Slice: local context assembly and token-economy policy have been extracted from `processor.rs` into dedicated execution boundaries.
 - Inputs:
   - `README.md`
   - `.github/instructions/readme.instructions.md`
@@ -60,6 +61,7 @@ This workstream focuses on code separation and maintenance clarity. It does not 
 - Keep `crates/core/src/ai_context.rs` focused on context collection and rendering helpers.
 - Keep `crates/orchestrator/src/execution/ai_session.rs` focused on session persistence and compression policy.
 - Add or expand tests that prove the extraction does not change AI request behavior.
+- Completed slice: `crates/orchestrator/src/execution/ai_request_context.rs` now owns local context assembly and session replay injection, and `crates/orchestrator/src/execution/ai_token_economy.rs` now owns prompt compaction/token policy.
 - Target paths:
   - `crates/orchestrator/src/execution/processor.rs`
   - `crates/core/src/ai_context.rs`
