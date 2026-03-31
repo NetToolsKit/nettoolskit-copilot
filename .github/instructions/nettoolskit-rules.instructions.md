@@ -17,14 +17,24 @@ Do not restate generic README rules here.
   - Introduction
   - Features
   - Contents
+  - Architecture
+  - Control Plane Model
+  - Crates
+  - Compatibility and Support
+  - Operations
+  - Planning
+  - Governance and Security
   - Build and Tests
   - Contributing
   - Dependencies
   - References
   - License
+- When the workspace has a meaningful boundary to show, include a `### Architecture` subsection directly after `Contents` and prefer Mermaid for the diagram.
+- When the repository model includes agentic technologies, add a `### Agentic Surfaces` subsection under `Architecture` that separates MCP, A2A, RAG, and CAG with repo entry points and support status.
 - Do not include code examples in the root README.
 - Do not include Installation, Quick Start, Usage Examples, or API Reference in the root README.
-- The root `References` section must list every package README under `src/*`.
+- The root `Crates` section must list every package README under `crates/*`.
+- The root `References` section should focus on supporting docs, policies, and external references.
 
 ## Package README Override (`src/*`)
 - Keep only these sections, in this order:

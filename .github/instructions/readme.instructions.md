@@ -26,6 +26,10 @@ If a section does not apply, remove it instead of filling it with weak placehold
 - Table of Contents or Contents links the main sections that actually exist in the file.
 - When stable subsections exist under a section, `Contents` must include nested anchor links for those subsection entries in the same order.
 - The default README template must keep nested `Contents` items for `Usage Examples` and `API Reference` subsections unless those subsections are intentionally removed from the document.
+- When a repository README has a meaningful multi-crate, runtime, or control-plane boundary, add a `### Architecture` subsection immediately after `Contents`.
+- Prefer a Mermaid diagram in `Architecture` that shows the top-level components and ownership boundaries instead of ASCII art.
+- Keep `Architecture` concise and source-aligned; do not invent layers that do not exist in the repository.
+- When a repository uses multiple agentic technologies, separate them in a dedicated subsection under `Architecture` with clear roles, entry points, and support status. Prefer naming the subsection `### Agentic Surfaces` and cover MCP, A2A, RAG, and CAG explicitly when they are part of the repo model.
 - Installation shows real setup commands and package references.
 - Quick Start stays minimal and runnable.
 - Usage Examples cover typical and advanced scenarios with real code.
