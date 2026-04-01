@@ -39,7 +39,7 @@ roxmltree = "0.21"
 crossterm = "0.29"
 
 # String manipulation
-strum = { version = "0.26", features = ["derive"] }
+strum = { version = "0.28", features = ["derive"] }
 strum_macros = "0.28"
 heck = "0.5"
 
