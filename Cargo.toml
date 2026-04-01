@@ -81,7 +81,7 @@ toml = "1.1"
 walkdir = "2.4"
 ignore = "0.4"
 globset = "0.4"
-sha2 = "0.10"
+sha2 = "0.11"
 
 # HTTP client
 reqwest = { version = "0.11", features = ["json"] }
