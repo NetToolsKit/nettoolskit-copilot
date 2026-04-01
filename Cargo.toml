@@ -26,7 +26,7 @@ license = "MIT"
 # Core dependencies
 anyhow = "1.0"
 thiserror = "2.0"
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.6", features = ["derive"] }
 clap_complete = "4.6"
 tokio = { version = "1.50", features = ["rt-multi-thread", "macros", "time", "net", "io-util", "sync"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -93,7 +93,7 @@ handlebars = "6.4"
 
 # Testing
 serial_test = "3.2"
-insta = "1.41"
+insta = "1.47"
 assert_cmd = "2.2"
 predicates = "3.1"
 criterion = { version = "0.8", features = ["html_reports"] }
