@@ -8,6 +8,12 @@ use crate::execution::ai_session::{
     LocalAiSessionState, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
     NTK_AI_SESSION_COMPRESSION_MODE_ENV, NTK_AI_SESSION_DELTA_MIN_SHARED_PREFIX_CHARS_ENV,
 };
+use crate::execution::ai_token_economy::{
+    ai_token_economy_policy_from_env, apply_ai_prompt_compaction, AiTokenEconomyPolicy,
+    NTK_AI_COST_BUDGET_USD_PER_REQUEST_ENV, NTK_AI_TOKEN_BUDGET_INPUT_PER_REQUEST_ENV,
+    NTK_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST_ENV, NTK_AI_TOKEN_BUDGET_SESSION_TOTAL_ENV,
+    NTK_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST_ENV,
+};
 use crate::execution::ai_usage::{record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource};
 use crate::execution::approval::{request_approval, ApprovalDecision, ApprovalRequest};
 use crate::execution::cache::{CacheKey, CacheStats, CacheTtl, CacheValue, CommandResultCache};
@@ -100,11 +106,6 @@ const DEFAULT_AI_MAX_RETRIES: usize = 2;
 const DEFAULT_AI_RETRY_BASE_DELAY_MS: u64 = 250;
 const DEFAULT_AI_RETRY_MAX_DELAY_MS: u64 = 2_000;
 const DEFAULT_AI_REQUEST_TIMEOUT_MS: u64 = 45_000;
-const DEFAULT_AI_TOKEN_BUDGET_INPUT_PER_REQUEST: u64 = 10_000;
-const DEFAULT_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST: u64 = 2_000;
-const DEFAULT_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST: u64 = 12_000;
-const DEFAULT_AI_TOKEN_BUDGET_SESSION_TOTAL: u64 = 60_000;
-const DEFAULT_AI_COST_BUDGET_USD_PER_REQUEST: f64 = 0.25;
 const DEFAULT_AI_MODEL_SELECTION_CHEAP_COST_MULTIPLIER: f64 = 1.0;
 const DEFAULT_AI_MODEL_SELECTION_REASONING_COST_MULTIPLIER: f64 = 1.2;
 const DEFAULT_AI_SLO_MAX_P95_LATENCY_MS: f64 = 30_000.0;
@@ -112,13 +113,6 @@ const DEFAULT_AI_SLO_MIN_SUCCESS_RATE_PCT: f64 = 95.0;
 const DEFAULT_AI_SLO_MAX_TOKENS_PER_TASK: f64 = 20_000.0;
 const DEFAULT_AI_SLO_MAX_COST_USD_PER_TASK: f64 = 1.0;
 const LOCAL_CONTEXT_MEMORY_EVENT_TTL_MS: u64 = 14 * 24 * 60 * 60 * 1000;
-const NTK_AI_TOKEN_BUDGET_INPUT_PER_REQUEST_ENV: &str = "NTK_AI_TOKEN_BUDGET_INPUT_PER_REQUEST";
-const NTK_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST_ENV: &str = "NTK_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST";
-const NTK_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST_ENV: &str = "NTK_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST";
-const NTK_AI_TOKEN_BUDGET_SESSION_TOTAL_ENV: &str = "NTK_AI_TOKEN_BUDGET_SESSION_TOTAL";
-const NTK_AI_COST_BUDGET_USD_PER_REQUEST_ENV: &str = "NTK_AI_COST_BUDGET_USD_PER_REQUEST";
-const NTK_AI_PROMPT_COMPACTION_TIER_ENV: &str = "NTK_AI_PROMPT_COMPACTION_TIER";
-const NTK_AI_CACHE_FIRST_ENABLED_ENV: &str = "NTK_AI_CACHE_FIRST_ENABLED";
 const NTK_AI_MODEL_SELECTION_ENABLED_ENV: &str = "NTK_AI_MODEL_SELECTION_ENABLED";
 const NTK_AI_MODEL_SELECTION_CHEAP_MODEL_ENV: &str = "NTK_AI_MODEL_SELECTION_CHEAP_MODEL";
 const NTK_AI_MODEL_SELECTION_REASONING_MODEL_ENV: &str = "NTK_AI_MODEL_SELECTION_REASONING_MODEL";
@@ -174,49 +168,6 @@ impl Default for AiRetryPolicy {
             base_delay: Duration::from_millis(DEFAULT_AI_RETRY_BASE_DELAY_MS),
             max_delay: Duration::from_millis(DEFAULT_AI_RETRY_MAX_DELAY_MS),
             request_timeout: Duration::from_millis(DEFAULT_AI_REQUEST_TIMEOUT_MS),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum AiPromptCompactionTier {
-    Off,
-    Balanced,
-    Aggressive,
-}
-
-impl AiPromptCompactionTier {
-    fn parse(value: &str) -> Option<Self> {
-        match value.trim().to_ascii_lowercase().as_str() {
-            "off" | "none" | "disabled" => Some(Self::Off),
-            "balanced" | "default" => Some(Self::Balanced),
-            "aggressive" | "high" => Some(Self::Aggressive),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-struct AiTokenEconomyPolicy {
-    max_input_tokens_per_request: u64,
-    max_output_tokens_per_request: u64,
-    max_total_tokens_per_request: u64,
-    max_session_tokens_total: u64,
-    max_cost_usd_per_request: f64,
-    prompt_compaction_tier: AiPromptCompactionTier,
-    cache_first_enabled: bool,
-}
-
-impl Default for AiTokenEconomyPolicy {
-    fn default() -> Self {
-        Self {
-            max_input_tokens_per_request: DEFAULT_AI_TOKEN_BUDGET_INPUT_PER_REQUEST,
-            max_output_tokens_per_request: DEFAULT_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST,
-            max_total_tokens_per_request: DEFAULT_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST,
-            max_session_tokens_total: DEFAULT_AI_TOKEN_BUDGET_SESSION_TOTAL,
-            max_cost_usd_per_request: DEFAULT_AI_COST_BUDGET_USD_PER_REQUEST,
-            prompt_compaction_tier: AiPromptCompactionTier::Balanced,
-            cache_first_enabled: true,
         }
     }
 }
@@ -1606,59 +1557,6 @@ fn parse_positive_f64(value: &str) -> Option<f64> {
     (parsed > 0.0).then_some(parsed)
 }
 
-fn parse_nonzero_u64(value: &str) -> Option<u64> {
-    let parsed = value.trim().parse::<u64>().ok()?;
-    (parsed > 0).then_some(parsed)
-}
-
-fn ai_token_economy_policy_from_env() -> AiTokenEconomyPolicy {
-    let mut policy = AiTokenEconomyPolicy::default();
-
-    if let Ok(value) = std::env::var(NTK_AI_TOKEN_BUDGET_INPUT_PER_REQUEST_ENV) {
-        if let Some(parsed) = parse_nonzero_u64(&value) {
-            policy.max_input_tokens_per_request = parsed;
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_TOKEN_BUDGET_OUTPUT_PER_REQUEST_ENV) {
-        if let Some(parsed) = parse_nonzero_u64(&value) {
-            policy.max_output_tokens_per_request = parsed;
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_TOKEN_BUDGET_TOTAL_PER_REQUEST_ENV) {
-        if let Some(parsed) = parse_nonzero_u64(&value) {
-            policy.max_total_tokens_per_request = parsed;
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_TOKEN_BUDGET_SESSION_TOTAL_ENV) {
-        if let Some(parsed) = parse_nonzero_u64(&value) {
-            policy.max_session_tokens_total = parsed;
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_COST_BUDGET_USD_PER_REQUEST_ENV) {
-        if let Some(parsed) = parse_positive_f64(&value) {
-            policy.max_cost_usd_per_request = parsed;
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_PROMPT_COMPACTION_TIER_ENV) {
-        if let Some(parsed) = AiPromptCompactionTier::parse(&value) {
-            policy.prompt_compaction_tier = parsed;
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_CACHE_FIRST_ENABLED_ENV) {
-        if let Some(parsed) = parse_bool(&value) {
-            policy.cache_first_enabled = parsed;
-        }
-    }
-
-    policy
-}
-
 fn ai_slo_policy_from_env() -> AiSloPolicy {
     let mut policy = AiSloPolicy::default();
 
@@ -2115,7 +2013,7 @@ fn estimate_token_count(text: &str) -> u64 {
     chars.div_ceil(4).max(1)
 }
 
-fn estimate_request_input_tokens(request: &AiRequest) -> u64 {
+pub(super) fn estimate_request_input_tokens(request: &AiRequest) -> u64 {
     request
         .messages
         .iter()
@@ -2211,92 +2109,6 @@ fn estimate_ai_session_tokens(session: &LocalAiSessionState) -> u64 {
                 .saturating_add(estimate_token_count(&exchange.assistant_response))
         })
         .sum()
-}
-
-fn truncate_text_chars(value: &str, max_chars: usize) -> String {
-    if value.chars().count() <= max_chars {
-        return value.to_string();
-    }
-
-    let marker = "... [compacted]";
-    let available = max_chars.saturating_sub(marker.chars().count());
-    let mut output = value.chars().take(available).collect::<String>();
-    output.push_str(marker);
-    output
-}
-
-fn apply_ai_prompt_compaction(
-    request: &mut AiRequest,
-    policy: AiTokenEconomyPolicy,
-    metrics: &Metrics,
-) {
-    if matches!(policy.prompt_compaction_tier, AiPromptCompactionTier::Off) {
-        return;
-    }
-
-    let mut removed_messages = 0_u64;
-    let mut truncated_user_prompt = false;
-
-    loop {
-        let input_tokens = estimate_request_input_tokens(request);
-        if input_tokens <= policy.max_input_tokens_per_request {
-            break;
-        }
-
-        let user_index = request.messages.len().saturating_sub(1);
-        let removable_index = match policy.prompt_compaction_tier {
-            AiPromptCompactionTier::Off => None,
-            AiPromptCompactionTier::Balanced => (1..user_index)
-                .find(|index| request.messages[*index].role != AiRole::System)
-                .or_else(|| (1..user_index).next()),
-            AiPromptCompactionTier::Aggressive => (1..user_index).next(),
-        };
-
-        if let Some(index) = removable_index {
-            request.messages.remove(index);
-            removed_messages = removed_messages.saturating_add(1);
-            continue;
-        }
-
-        if matches!(
-            policy.prompt_compaction_tier,
-            AiPromptCompactionTier::Aggressive
-        ) {
-            if let Some(user_message) = request.messages.last_mut() {
-                if user_message.role == AiRole::User {
-                    let max_chars = policy
-                        .max_input_tokens_per_request
-                        .saturating_mul(4)
-                        .max(128) as usize;
-                    if user_message.content.chars().count() > max_chars {
-                        user_message.content =
-                            truncate_text_chars(&user_message.content, max_chars);
-                        truncated_user_prompt = true;
-                        continue;
-                    }
-                }
-            }
-        }
-
-        break;
-    }
-
-    metrics.set_gauge(
-        "runtime_ai_prompt_compaction_removed_messages",
-        removed_messages as f64,
-    );
-    metrics.set_gauge(
-        "runtime_ai_prompt_compaction_input_tokens",
-        estimate_request_input_tokens(request) as f64,
-    );
-    metrics.set_gauge(
-        "runtime_ai_prompt_compaction_user_prompt_truncated",
-        if truncated_user_prompt { 1.0 } else { 0.0 },
-    );
-
-    if removed_messages > 0 || truncated_user_prompt {
-        metrics.increment_counter("runtime_ai_prompt_compaction_applied_total");
-    }
 }
 
 fn evaluate_ai_request_budget(
@@ -6513,6 +6325,9 @@ pub async fn process_text(text: &str) -> ExitStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::execution::ai_token_economy::{
+        AiPromptCompactionTier, NTK_AI_CACHE_FIRST_ENABLED_ENV, NTK_AI_PROMPT_COMPACTION_TIER_ENV,
+    };
     use nettoolskit_core::{
         ApprovalState, ControlEnvelope, ControlPolicyContext, IngressTransport, OperatorContext,
         OperatorKind, SessionContext, SessionKind,

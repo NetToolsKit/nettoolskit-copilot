@@ -8,6 +8,7 @@ Generated: 2026-03-29
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Source Inputs:
   - `planning/completed/plan-script-retirement-phase-17.md`
   - `planning/completed/plan-script-retirement-phase-18.md`

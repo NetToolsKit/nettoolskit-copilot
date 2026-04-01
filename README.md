@@ -1,14 +1,19 @@
-# NetToolsKit Workspace
+# NetToolsKit Copilot Workspace
 
-> Rust workspace, compatibility wrappers, and versioned projection assets for the NetToolsKit toolchain.
+> Rust workspace for the NetToolsKit Copilot toolchain, combining CLI commands, runtime orchestration, compatibility wrappers, projected provider surfaces, and versioned planning/spec governance.
 
 ---
 
 ## Introduction
 
-NetToolsKit is a multi-crate workspace that combines Rust command boundaries, repository-owned compatibility wrappers, and versioned definitions that project into provider and editor surfaces.
+NetToolsKit Copilot is a multi-crate Rust workspace that centralizes command boundaries, repository-managed runtime surfaces, and versioned governance artifacts. It is designed to keep orchestration, validation, documentation, and projected editor/provider surfaces aligned while the workspace migrates from PowerShell-first compatibility wrappers to native Rust command surfaces.
 
-It is organized to keep implementation, orchestration, planning, and reference documentation separate while still making the full workspace easy to navigate.
+Objectives:
+
+- Provide a single Rust workspace for CLI, runtime, validation, orchestration, and support surfaces
+- Keep repository automation deterministic through versioned projections and planning artifacts
+- Preserve local-first operation while supporting projected MCP and editor surfaces
+- Retire PowerShell wrappers only when the Rust command boundary is complete and validated
 
 ---
 
@@ -16,9 +21,11 @@ It is organized to keep implementation, orchestration, planning, and reference d
 
 - ✅ Rust crates for CLI entry points, orchestration, commands, telemetry, runtime validation, and UI boundaries
 - ✅ Versioned projection model for `.github/`, `.codex/`, `.claude/`, and `.vscode/`
+- ✅ Native MCP runtime projection and Codex config application from a canonical catalog
+- ✅ Local RAG/CAG context index and weekly AI usage ledger for deterministic repo recall
+- ✅ Explicit agentic surface separation for MCP, A2A, RAG, and CAG
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
-- ✅ Compatibility wrappers for bootstrap, sync, validation, health, and maintenance flows
-- ✅ Workspace documentation that keeps crate and support surfaces discoverable
+- ✅ Compatibility wrappers retained only where they still provide operator entry points
 
 ---
 
@@ -27,6 +34,13 @@ It is organized to keep implementation, orchestration, planning, and reference d
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
+  - [Architecture](#architecture)
+  - [Control Plane Model](#control-plane-model)
+  - [Crates](#crates)
+  - [Compatibility and Support](#compatibility-and-support)
+  - [Operations](#operations)
+  - [Planning](#planning)
+  - [Governance and Security](#governance-and-security)
 - [Build and Tests](#build-and-tests)
 - [Contributing](#contributing)
 - [Dependencies](#dependencies)
@@ -35,49 +49,218 @@ It is organized to keep implementation, orchestration, planning, and reference d
 
 ---
 
+### Architecture
+
+```mermaid
+flowchart TD
+    CLI["cli<br/>(ntk binary)"]
+    ORCH["orchestrator"]
+    CMDS["commands"]
+    CORE["core"]
+    UI["ui"]
+    OTEL["otel"]
+    WORKER["task-worker"]
+
+    CLI --> ORCH
+    CLI --> CMDS
+    CLI --> CORE
+    CLI --> UI
+    ORCH --> CMDS
+    ORCH --> OTEL
+    ORCH --> WORKER
+    CMDS --> CORE
+    CMDS --> UI
+    CMDS --> OTEL
+    CMDS --> WORKER
+
+    subgraph "commands"
+        HELP["help"]
+        MANIFEST["manifest"]
+        RUNTIME["runtime"]
+        TEMPLATING["templating"]
+        VALIDATION["validation"]
+    end
+
+    CMDS --> HELP
+    CMDS --> MANIFEST
+    CMDS --> RUNTIME
+    CMDS --> TEMPLATING
+    CMDS --> VALIDATION
+```
+
+### Agentic Surfaces
+
+This workspace separates agentic capabilities by responsibility so each technology has a clear maintenance boundary.
+
+| Surface | Role | Current repo entry points | Status |
+| --- | --- | --- | --- |
+| MCP | Tool projection and runtime configuration for Codex and editor surfaces | `.github/`, `.codex/`, `crates/commands/runtime/src/sync/mcp_config.rs`, `crates/commands/runtime/src/sync/mcp_runtime_artifacts.rs` | Supported |
+| A2A | Agent-to-agent interoperability and horizontal task delegation | Planning only; no dedicated runtime surface yet | Planned |
+| RAG | Repo-local retrieval for instructions, plans, and source context | `crates/core/src/local-context/`, `scripts/common/local-context-index.ps1` | Supported |
+| CAG | Context-augmented generation, compaction, and token-budget aware prompting | `crates/core/src/ai_context.rs`, `crates/orchestrator/src/execution/ai_usage.rs`, `scripts/runtime/invoke-super-agent-housekeeping.ps1` | Supported / evolving |
+
+MCP owns tool and provider projection, RAG owns deterministic recall, CAG owns prompt shaping and budget-aware context assembly, and A2A remains the future boundary for agent-to-agent interoperability.
+
+---
+
+### Control Plane Model
+
+Formal control-plane, session, and operator contracts are documented in:
+
+- [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
+
+This document defines the current local-first runtime boundary and the target contract for future gateway/operator expansion. Local CLI `/task submit`, HTTP `/task/submit`, and ChatOps task commands derive the same typed control-plane metadata, with normalized request, operator, session, and audit attribution across submit and non-submit ingress paths.
+
+---
+
+### Crates
+
+This workspace is organized as a multi-crate Rust project. Each crate has its own README with scoped documentation.
+
+| Crate | Description | README |
+| --- | --- | --- |
+| `cli` | Interactive entry point, top-level command routing, and CLI UX | [crates/cli/README.md](crates/cli/README.md) |
+| `core` | Shared domain types, configuration, path resolution, local context, and common utilities | [crates/core/README.md](crates/core/README.md) |
+| `ui` | Terminal UI primitives, color/unicode detection, and rendering helpers | [crates/ui/README.md](crates/ui/README.md) |
+| `otel` | Local observability, metrics, timers, and telemetry helpers | [crates/otel/README.md](crates/otel/README.md) |
+| `orchestrator` | AI orchestration, ChatOps, repo workflow handling, and usage history | [crates/orchestrator/README.md](crates/orchestrator/README.md) |
+| `commands` | Command boundary and feature crate grouping | [crates/commands/README.md](crates/commands/README.md) |
+| `help` | Help discovery and manifest listing | [crates/commands/help/README.md](crates/commands/help/README.md) |
+| `manifest` | Manifest parsing, validation, and apply/render helpers | [crates/commands/manifest/README.md](crates/commands/manifest/README.md) |
+| `runtime` | Runtime bootstrap, drift diagnosis, self-heal, continuity, and maintenance surfaces | [crates/commands/runtime/README.md](crates/commands/runtime/README.md) |
+| `templating` | Handlebars template rendering | [crates/commands/templating/README.md](crates/commands/templating/README.md) |
+| `validation` | Native validation orchestration and repository policy checks | [crates/commands/validation/README.md](crates/commands/validation/README.md) |
+| `task-worker` | Background task execution worker for orchestrated flows | [crates/task-worker/README.md](crates/task-worker/README.md) |
+
+---
+
+### Compatibility and Support
+
+Official platform compatibility tiers and support commitments are defined in:
+
+- [Compatibility Matrix and Support Policy](COMPATIBILITY.md)
+
+This document includes the support lifecycle and release policy by minor version. The runtime currently projects MCP-based surfaces and repo-local RAG/CAG recall; A2A is tracked as a future interoperability boundary and ACP is not yet a dedicated first-class repository surface.
+
+---
+
+### Operations
+
+Operational runbooks and incident procedures:
+
+- [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
+- [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
+- [Local Service Mode Runbook](docs/operations/service-mode-local-runbook.md)
+- [ChatOps Agent VPS Profile](docs/operations/chatops-agent-vps-profile.md)
+- [ChatOps Reverse Proxy Profiles](docs/operations/chatops-reverse-proxy-profiles.md)
+- [TUI UX Guidelines](docs/ui/tui-ux-guidelines.md)
+
+---
+
+### Planning
+
+Canonical planning documents live in:
+
+- [Planning Index](planning/README.md)
+- [Planning Specs Index](planning/specs/README.md)
+
+Active workstreams are kept under `planning/active/`, and completed workstreams move to `planning/completed/` after implementation, validation, and closeout.
+
+---
+
+### Governance and Security
+
+- [License](LICENSE)
+- [Security Policy](SECURITY.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Code Ownership](.github/CODEOWNERS)
+- [Changelog](CHANGELOG.md)
+
+Security issues should use the private disclosure path documented in `SECURITY.md`.
+
+---
+
 ## Build and Tests
 
-- `cargo build --workspace`
-- `cargo test --workspace`
-- `cargo fmt --all -- --check`
-- `cargo clippy --workspace -- -D warnings`
-- `ntk validation readme-standards --repo-root .` for the native repository README validation surface
+This repository uses standard Cargo workflows for building, testing, formatting, linting, and validation.
+
+Workspace build and validation artifacts are centralized through `.cargo/config.toml` and CI/runtime path conventions under:
+
+- `./.build/cargo-target`
+- `./.build/coverage`
+- `./.deployment/local/service-data`
+
+```bash
+cargo build --workspace
+cargo test --workspace
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+ntk validation all --repo-root . --warning-only false
+pwsh -NoProfile -File scripts/security/Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High
+```
 
 ---
 
 ## Contributing
 
-- Keep README content in English.
-- Preserve the allowed root section order.
-- Update crate and support README links when workspace structure changes.
-- Run workspace validation before committing documentation updates.
+We follow semantic versioning and conventional commits. Please ensure your contributions:
+
+1. Follow Git Flow by creating feature branches from `main`
+2. Update planning/specs for non-trivial changes before implementation
+3. Write tests for new behavior and keep existing coverage stable
+4. Use semantic commits such as `feat:`, `fix:`, `docs:`, or `refactor:`
+5. Keep the README and linked docs current when workspace structure changes
+6. Pass CI-level validation before merging
 
 ---
 
 ## Dependencies
 
-- Rust toolchain and Cargo for workspace builds and tests.
-- PowerShell 7+ for repository compatibility wrappers and validation entrypoints.
-- GitHub Copilot / Codex runtime assets when working on projected surfaces.
+### Runtime
+
+| Area | Examples | Purpose |
+| --- | --- | --- |
+| CLI/runtime | `tokio`, `clap`, `crossterm`, `serde`, `tracing` | Async execution, command parsing, terminal handling, serialization, structured logs |
+| Rendering/templates | `handlebars`, `owo-colors`, `supports-color` | Template rendering and terminal output styling |
+| Networking | `reqwest`, `url` | HTTP clients and endpoint handling |
+| Local memory | SQLite-backed context and usage stores | RAG/CAG recall and AI usage history |
+| Compatibility | PowerShell 7+ | Retained wrapper entrypoints and operator surfaces |
+
+### Development
+
+| Area | Examples | Purpose |
+| --- | --- | --- |
+| Testing | `insta`, `assert_cmd`, `tempfile`, `serial_test` | Snapshots, CLI integration tests, fixtures, serialized execution |
+| Quality | Cargo fmt, Cargo clippy, Cargo test | Build, lint, and test gates |
+| Runtime assets | Codex/Copilot projection files and MCP catalogs | Projected provider surfaces and local runtime sync |
 
 ---
 
 ## References
 
-| Area | README |
-| --- | --- |
-| Workspace crate | [crates/cli/README.md](crates/cli/README.md) |
-| Workspace crate | [crates/core/README.md](crates/core/README.md) |
-| Workspace crate | [crates/ui/README.md](crates/ui/README.md) |
-| Workspace crate | [crates/otel/README.md](crates/otel/README.md) |
-| Workspace crate | [crates/orchestrator/README.md](crates/orchestrator/README.md) |
-| Command boundary | [crates/commands/README.md](crates/commands/README.md) |
-| Command package | [crates/commands/help/README.md](crates/commands/help/README.md) |
-| Command package | [crates/commands/manifest/README.md](crates/commands/manifest/README.md) |
-| Command package | [crates/commands/runtime/README.md](crates/commands/runtime/README.md) |
-| Command package | [crates/commands/templating/README.md](crates/commands/templating/README.md) |
-| Command package | [crates/commands/validation/README.md](crates/commands/validation/README.md) |
-| Workspace crate | [crates/task-worker/README.md](crates/task-worker/README.md) |
+### Workspace Docs
+
+- [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
+- [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
+- [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
+- [Local Service Mode Runbook](docs/operations/service-mode-local-runbook.md)
+- [ChatOps Agent VPS Profile](docs/operations/chatops-agent-vps-profile.md)
+- [ChatOps Reverse Proxy Profiles](docs/operations/chatops-reverse-proxy-profiles.md)
+- [TUI UX Guidelines](docs/ui/tui-ux-guidelines.md)
+- [Compatibility Matrix and Support Policy](COMPATIBILITY.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Planning Index](planning/README.md)
+- [Planning Specs Index](planning/specs/README.md)
+
+### External References
+
+- [Rust Async Book](https://rust-lang.github.io/async-book/)
+- [Clap CLI Framework](https://docs.rs/clap/latest/clap/)
+- [Tokio Async Runtime](https://tokio.rs/tokio/tutorial)
+- [Handlebars Template Engine](https://docs.rs/handlebars/latest/handlebars/)
+- [Crossterm Terminal Library](https://docs.rs/crossterm/latest/crossterm/)
+- [OpenAI Codex](https://github.com/openai/codex)
 
 ---
 

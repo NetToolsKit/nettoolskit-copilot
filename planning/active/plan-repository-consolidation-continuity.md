@@ -4,11 +4,12 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 22:02
-- Objective: execute the six consolidation workstreams identified in the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`; close the CI gap, align the AI instruction routing model, document the full CLI surface, and plan the post-Phase-20f Codex orchestration renderer consumer migration that will retire the remaining 63 `retain until` scripts.
-- Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29.
-- Active Branch: `docs/repository-operating-model-alignment`
+- LastUpdated: 2026-03-30 07:31
+- Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
+- Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
+- Active Branch: `main` (planning only; follow-on implementation branches TBD)
 - Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
+- SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependency: `planning/completed/plan-script-retirement-phase-18.md`, `planning/completed/plan-script-retirement-phase-19.md`, `planning/completed/plan-script-retirement-phase-20c-self-heal.md`, `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`, `planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`, and `planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md` are now complete; Workstream W5 now continues from the closed 96-script baseline.
 - Inputs:
   - `planning/completed/plan-script-retirement-phase-17.md`

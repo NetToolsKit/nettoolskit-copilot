@@ -43,7 +43,26 @@ This folder is part of the repository operating model, not disposable scratch st
 
 ## Active Workstreams
 
+- [planning/active/plan-spec-driven-development-operating-model.md](planning/active/plan-spec-driven-development-operating-model.md)
+- [planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md](planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md)
+- [planning/active/plan-instruction-rules-board-and-surface-layout.md](planning/active/plan-instruction-rules-board-and-surface-layout.md)
+- [planning/active/plan-agentic-surface-boundary-separation.md](planning/active/plan-agentic-surface-boundary-separation.md)
+- [planning/active/plan-cli-fast-path-and-startup-decomposition.md](planning/active/plan-cli-fast-path-and-startup-decomposition.md)
+- [planning/active/plan-mcp-transport-auth-and-session-resilience.md](planning/active/plan-mcp-transport-auth-and-session-resilience.md)
+- [planning/active/plan-memory-file-layering-and-operational-recall.md](planning/active/plan-memory-file-layering-and-operational-recall.md)
+- [planning/active/plan-plugin-skill-extensibility-and-runtime-governance.md](planning/active/plan-plugin-skill-extensibility-and-runtime-governance.md)
+- [planning/active/plan-context-selection-reranking-and-budgeted-recall.md](planning/active/plan-context-selection-reranking-and-budgeted-recall.md)
+- [planning/active/plan-task-output-spill-to-disk-and-retention-control.md](planning/active/plan-task-output-spill-to-disk-and-retention-control.md)
+- [planning/active/plan-sdk-control-plane-schemas-and-runtime-introspection.md](planning/active/plan-sdk-control-plane-schemas-and-runtime-introspection.md)
+- [planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md](planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md)
+- [planning/active/plan-runtime-operational-diagnostics-and-observability.md](planning/active/plan-runtime-operational-diagnostics-and-observability.md)
+- [planning/active/plan-free-llm-provider-test-matrix.md](planning/active/plan-free-llm-provider-test-matrix.md)
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
+- [planning/active/plan-token-economy-optimization.md](planning/active/plan-token-economy-optimization.md)
+- [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)
+- [planning/active/plan-build-target-cleanup-and-artifact-pruning.md](planning/active/plan-build-target-cleanup-and-artifact-pruning.md)
+- [planning/active/plan-instruction-governance-and-super-agent-retention.md](planning/active/plan-instruction-governance-and-super-agent-retention.md)
+- [planning/active/plan-script-retirement-tail-cutover.md](planning/active/plan-script-retirement-tail-cutover.md)
 
 ---
 

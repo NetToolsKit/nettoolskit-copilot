@@ -6,6 +6,8 @@
 pub mod ai;
 /// Local AI session persistence and resume primitives.
 pub mod ai_session;
+/// AI token economy policy, budget estimation, and prompt compaction.
+pub mod ai_token_economy;
 /// Local AI usage ledger persistence and weekly reporting.
 pub mod ai_usage;
 /// Approval gateway for AI side-effect operations.
