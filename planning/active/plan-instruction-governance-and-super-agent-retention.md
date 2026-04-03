@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 16:05
+- LastUpdated: 2026-04-03 17:10
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -31,6 +31,7 @@ This plan coordinates four governance slices:
 | G2 | Super-agent retention | local and projected instruction surfaces | ✅ Done | G1 |
 | G3 | Routing and precedence clarity | catalog + operating model docs | ✅ Done | G1 |
 | G4 | Drift monitoring and sync rules | instructions projections and planning docs | ✅ Done | G2, G3 |
+| G5 | Domain consolidation | semantic instruction domains with reduced repetition | 🟡 In progress | G2, G3, G4 |
 
 The `ntk` CLI prefix is already in place and is not a new implementation gap.
 
@@ -75,6 +76,20 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - complete; the instruction ownership manifest and repository operating model now define canonical root, projected root, provider roots, and drift rules
 - Commit checkpoint:
   - `docs(planning): define instruction drift monitoring and sync policy`
+
+### [2026-04-03 17:10] Task G5: Consolidate Semantic Instruction Domains
+
+- Reduce repeated guidance inside semantic instruction folders without collapsing distinct responsibilities.
+- Keep canonical authority in `definitions/shared/instructions/` and project identical copies into `.github/instructions/`.
+- Clarify the separation between:
+  - architecture invariants
+  - platform/runtime behavior
+  - language/framework specifics
+- Start with `architecture/backend/`, then continue with frontend, agentic, runtime-ops, and data-security slices.
+- Status:
+  - backend slice complete; `ntk-backend-architecture-core`, `ntk-backend-architecture-platform`, and `ntk-backend-dotnet-csharp` now have narrower scopes and less repeated policy
+- Commit checkpoint:
+  - `docs(instructions): narrow backend instruction responsibilities`
 
 ---
 

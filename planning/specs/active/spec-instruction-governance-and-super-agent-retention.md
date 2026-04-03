@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 16:05
+- LastUpdated: 2026-04-03 17:10
 - Objective: define the design intent for keeping repository instructions authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -26,6 +26,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Keep the external `copilot-instructions` repository as a reference baseline, not as a live write target.
 - Make routing and precedence rules explicit so the `ntk` prefix and instruction surfaces stay stable.
 - Keep semantic folder taxonomy and stable `ntk-*` filenames as part of the governance contract.
+- Reduce repeated policy across semantic domains so backend, frontend, agentic, runtime-ops, and data-security instructions each keep a clear responsibility boundary.
 
 ---
 
@@ -45,6 +46,7 @@ The repository already has a rich instruction and routing system, but it must st
 - `AGENTS.md` and `copilot-instructions.md` remain the mandatory context entry points.
 - `ntk-core-super-agent.instructions.md` remains the workflow controller contract.
 - `ntk-core-repository-operating-model.instructions.md` remains the repo-local source of truth for workspace behavior.
+- Semantic domain folders remain stable, but each file inside them must keep a narrow responsibility and avoid restating adjacent instruction files without need.
 
 ---
 
@@ -55,6 +57,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Repo-owned instruction changes can be distinguished from baseline reference drift.
 - `ntk` surfaces remain documented and canonical.
 - Canonical source, projected runtime surface, and provider consumers are explicitly documented.
+- Repeated backend guidance is reduced by separating architecture core, platform/runtime behavior, and stack-specific implementation rules.
 
 ---
 
@@ -62,3 +65,8 @@ The repository already has a rich instruction and routing system, but it must st
 
 - The spec is implementation-ready for governance/documentation slices because precedence, projection, and drift rules are now being applied incrementally.
 - Follow-up parity audit against the external baseline can remain staged because instruction projections affect both docs and operator workflows.
+- The next consolidation slices should follow the same pattern used for backend:
+  - preserve semantic taxonomy
+  - narrow each instruction file to one responsibility
+  - update the canonical shared source first
+  - keep `.github/instructions/` synchronized with the canonical copy

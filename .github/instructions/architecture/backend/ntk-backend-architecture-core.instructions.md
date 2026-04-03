@@ -3,149 +3,68 @@ applyTo: "**/*.{cs,ts,js,go,rs,java,py}"
 priority: high
 ---
 
-# Clean Architecture principles
-- Domain-driven design with domain at the center
-- Application layer coordinates use cases
-- Infrastructure isolated from domain
-- Presentation depends only on application
-- Strict dependency inversion
-- Business rules in domain without external dependencies
-```csharp
-// Domain: entities, value objects, domain services, interfaces
-// Application: use cases, application services, DTOs, ports
-// Infrastructure: repositories, external services, frameworks
-// Presentation: controllers, views, CLI, APIs
-```
+# Backend Architecture Core
 
-# SOLID principles
-- Strict Single Responsibility
-- Open/Closed via abstractions
-- Liskov Substitution respected
-- Interface Segregation with focused contracts
-- Dependency Inversion with stable abstractions
-```csharp
-// Interface with single method for segregation
-public interface IOrderValidator { bool IsValid(Order order); }
-```
+Use this instruction for backend architecture invariants that must remain true
+regardless of language or framework. Keep platform/runtime specifics in
+`ntk-backend-architecture-platform.instructions.md` and language/framework rules
+in the corresponding stack-specific file.
 
-# Domain modeling
-- Entities with identity
-- Immutable value objects
-- Aggregates as consistency boundaries
-- Domain events for communication
-- Consistent ubiquitous language
-- Business rules encapsulated
-```csharp
-public class Order : AggregateRoot
-{
-    public Guid Id { get; private set; }
-    // Value Object
-    public Money Amount { get; private set; }
-    // Domain Event
-    public void RaiseEvent(OrderCreatedEvent e) { /* ... */ }
-}
-```
+## Core Principles
 
-# Use case design
-- Application services coordinate
-- Command/query separation
-- Input/output DTOs
-- Validation in application layer
-- Authorization separated from business logic
-- Clear transactional boundaries
-```csharp
-public class CreateOrderUseCase
-{
-    public async Task Execute(CreateOrderDto dto) { /* validate, authorize, transact */ }
-}
-```
+- Domain rules stay at the center of the system.
+- Application/use-case layers coordinate work and enforce workflow boundaries.
+- Infrastructure adapts external systems and must not own business policy.
+- Presentation layers expose contracts and delegate behavior inward.
+- Dependencies must always point toward stable abstractions and domain intent.
+- Prefer simple, explicit boundaries before adding advanced patterns.
 
-# Dependency management
-- Abstractions in domain
-- Implementations in infrastructure
-- Dependency injection container
-- Externalized configuration
-- Environment-specific settings
-- Feature toggles when appropriate
-```csharp
-// DI
-services.AddScoped<IOrderRepository, SqlOrderRepository>();
-```
+## SOLID Baseline
 
-# Testing strategy
-- Isolated unit tests for domain
-- Integration tests for infrastructure
-- Acceptance tests for use cases
-- Test doubles for dependencies
-- Consistent AAA pattern
-- Deterministic tests
-```csharp
-[Fact]
-public void Should_CreateOrder()
-{
-    // Arrange
-    var mockRepo = new Mock<IOrderRepository>();
-    // Act
-    var result = useCase.Execute(dto);
-    // Assert
-    Assert.NotNull(result);
-}
-```
+- Single responsibility per component or module.
+- Open/closed extension through stable abstractions instead of conditional sprawl.
+- Liskov substitution for implementations behind shared contracts.
+- Interface segregation with narrow, purpose-built contracts.
+- Dependency inversion so domain and application logic depend on abstractions.
 
-# Error handling
-- Domain exceptions for business rules
-- Application exceptions for coordination
-- Wrap infrastructure exceptions
-- Consistent error codes
-- Structured logging
-- Correlation IDs for tracing
-```csharp
-throw new DomainException("Invalid order status");
-logger.LogError("Error {CorrelationId}", correlationId);
-```
+## Domain Modeling
 
-# Data flow
-- Commands modify state
-- Queries return read models
-- Events communicate changes
-- Saga for distributed transactions
-- Eventual consistency acceptable
-- Idempotency ensured
-```csharp
-public class GetOrderQuery { public OrderDto Execute(Guid id) { /* ... */ } }
-```
+- Model entities with identity and lifecycle.
+- Keep value objects immutable and behavior-rich.
+- Use aggregates as consistency and transaction boundaries.
+- Raise domain events when business facts must be communicated.
+- Keep ubiquitous language consistent across domain, application, and contracts.
+- Encapsulate invariants close to the domain type that owns them.
 
-# Code organization
-- Feature-based folders when appropriate
-- Shared kernel for common concepts
-- Well-defined bounded contexts
-- Anti-corruption layers for external systems
-- Hexagonal architecture principles
-```csharp
-// Features/Orders/Domain/Order.cs
-// Features/Orders/Application/CreateOrderUseCase.cs
-// SharedKernel/ValueObjects/Money.cs
-```
+## Use-Case Design
 
-# Performance
-- Lazy loading when appropriate
-- Caching in infrastructure
-- Bulk operations
-- Async/await for I/O
-- Mindful memory usage
-- Regular profiling
-```csharp
-var cached = cache.GetOrCreate("key", entry => { /* load */ });
-```
+- Model application workflows as commands, queries, or explicit use cases.
+- Keep authorization separate from core business decisions.
+- Perform validation at the correct boundary before side effects occur.
+- Make transaction boundaries explicit and tied to the use case.
+- Use input/output DTOs only where they improve boundary clarity.
+- Keep orchestration thin; business decisions belong in domain/application logic.
 
-# Security
-- Separate authentication from authorization
-- Encryption in infrastructure
-- Input sanitization
-- Output encoding
-- Audit logging
-- Least privilege
-```csharp
-[Authorize(Roles = "Admin")]
-public IActionResult AdminAction() { /* ... */ }
-```
+## Code Organization
+
+- Organize by bounded context, feature, or cohesive business capability.
+- Keep shared-kernel types intentionally small and reusable.
+- Add anti-corruption layers when external systems leak foreign concepts inward.
+- Avoid god modules, broad service classes, and mixed read/write responsibilities.
+- Prefer clear module ownership over deep inheritance trees.
+
+## Testing Boundaries
+
+- Domain rules require isolated unit tests.
+- Application workflows require focused orchestration tests.
+- Infrastructure adapters require integration tests against real dependencies or faithful harnesses.
+- Contract or end-to-end tests should target only critical external behavior.
+- Keep tests deterministic, explicit, and easy to diagnose.
+
+## Anti-Patterns To Avoid
+
+- Business rules in controllers, transport handlers, or repository adapters.
+- Domain models coupled directly to ORM, HTTP, queue, or UI frameworks.
+- Broad service classes that mix policy, persistence, transport, and mapping.
+- Pattern-heavy architectures with no operational or domain justification.
+- Abstractions introduced before a real boundary or substitution need exists.

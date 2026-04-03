@@ -3,144 +3,74 @@ applyTo: "**/*.{cs,js,ts,py,java,go,rs}"
 priority: medium
 ---
 
-# Clean Architecture
-- Pure Domain rules
-- Application orchestrates
-- Infrastructure adapts
-- API exposes
-- Simplicity first
-- Avoid over-engineering
-```csharp
-// Domain → OrderService validates business rules
-// Application → OrderHandler orchestrates
-// Infrastructure → OrderRepository persists
-// API → OrdersController exposes endpoint
-```
+# Backend Architecture Platform
 
-# CQRS
-- Separate read/write
-- Cohesive handlers
-- Idempotency when needed
-- Apply only when complexity justifies
-```csharp
-// Command → CreateOrderHandler
-// Query → GetOrderByIdHandler
-```
+Use this instruction for backend platform behavior that sits above the clean
+architecture core and below language/framework implementation details.
 
-# Events
-- Domain/integration events + Outbox
-- Idempotent consumers
-- DLQ for queues
-- Avoid unnecessary event sourcing
-```csharp
-// OrderCreatedEvent stored in Outbox
-// Consumer with retry + DLQ
-```
+## Scope
 
-# Contracts/Errors
-- Versioned REST
-- Consistent paging/filters
-- RFC 7807 (ProblemDetails) with correlationId
-```json
-{
-  "type": "about:blank",
-  "title": "Invalid request",
-  "status": 400,
-  "detail": "name is required",
-  "instance": "/v1/orders",
-  "extensions": { "correlationId": "<uuid>" }
-}
-```
+- API and service contracts
+- backend runtime resilience
+- persistence and consistency rules
+- events and integration boundaries
+- security, observability, and release-facing quality expectations
 
-# Resilience
-- HTTP with timeout, retry (jitter), circuit breaker, bulkhead
-- Always CancellationToken (or equivalent)
-- Implement gradually as needed
-```csharp
-// HttpClientFactory with Polly AddTransientHttpErrorPolicy → WaitAndRetryAsync with jitter
-```
+Keep core architecture invariants in
+`ntk-backend-architecture-core.instructions.md`. Keep language/framework rules in
+stack-specific instructions such as `ntk-backend-dotnet-csharp.instructions.md`.
 
-# Data
-- Transactions per use case
-- Repositories via interfaces
-- Projections
-- Indexes/constraints
-- Cache with clear invalidation
-```csharp
-// IOrderRepository.SaveAsync() with TransactionScope
-// Unique index on Email
-// Redis cache with explicit expiration
-```
+## Contracts And Error Semantics
 
-# Security
-- Input validation
-- JWT/OIDC
-- Policies/roles
-- Minimal CORS
-- Secrets in secure store
-```csharp
-// [Authorize(Policy="Admin")] on Controller
-// Secret loaded from AWS Secrets Manager or Azure Key Vault
-```
+- Prefer explicit, versionable service contracts.
+- Keep paging, filters, and mutation semantics consistent across endpoints.
+- Return structured error payloads with traceable correlation identifiers.
+- Make validation failures, authorization failures, and business-rule failures distinguishable.
+- Preserve backward compatibility unless the change is intentionally versioned.
 
-# Observability
-- OpenTelemetry (traces/metrics/logs)
-- Structured logs
-- Health checks
-- Readiness/liveness probes
-```csharp
-// ActivitySource for OrderService
-// HealthCheck endpoints "/health/ready" and "/health/live"
-```
+## Events And Integration
 
-# Performance
-- Async all the way
-- Pooling
-- Batch/bulk where it fits
-- Bounded I/O concurrency
-- Optimize only identified bottlenecks
-```csharp
-// await dbContext.Orders.ToListAsync()
-// SqlBulkCopy for batch import
-```
+- Distinguish domain events from integration events.
+- Use outbox or equivalent reliability patterns when persistence and messaging must stay aligned.
+- Keep consumers idempotent and retry-safe.
+- Prefer dead-letter handling and operator visibility for poison messages.
+- Do not adopt event sourcing unless the business need justifies the complexity.
 
-# API
-- Rate limiting/quotas on sensitive endpoints
-```http
-X-RateLimit-Limit:100
-X-RateLimit-Remaining:42
-Retry-After:30
-```
+## Resilience
 
-# Testing
-- Domain (unit)
-- Integrations (DB/HTTP)
-- Contract (OpenAPI/Pact)
-- Critical E2E
-- Testcontainers/localstack
-```csharp
-// xUnit for domain logic
-// Pact tests against partner API
-// Testcontainers for local SQL Server
-```
+- Define timeouts, retries, and cancellation behavior for external I/O.
+- Use circuit breakers, bulkheads, or quotas where failure isolation matters.
+- Bound concurrency for expensive or remote operations.
+- Prefer graceful degradation over cascading failure when possible.
+- Make retry policies observable and intentionally scoped.
 
-# CI/CD
-- Build/test/scan (SAST/secrets)
-- Immutable artifacts
-- Automatable migrations
-- Feature flags
-```yaml
-# Pipeline → dotnet build; dotnet test; trivy scan
-# Generate immutable Docker image
-# Apply EF Core migrations automatically on deploy
-```
+## Data And Consistency
 
-# Anti-patterns
-- Avoid complex patterns without justification
-- YAGNI
-- Start simple and evolve
-- Refactor when real pain emerges
-```csharp
-// Do not implement Event Sourcing if simple CRUD suffices
-// Introduce only when a real requirement emerges
-```
+- Tie persistence boundaries to the use case, not the transport layer.
+- Keep indexes, constraints, and projections aligned with actual read/write paths.
+- Use caches only with explicit invalidation or freshness rules.
+- Prefer idempotent write semantics for externally triggered operations.
+- Make eventual consistency an intentional design choice, not an accident.
+
+## Security
+
+- Validate input at the service boundary and sanitize where needed.
+- Keep authentication and authorization explicit and independently testable.
+- Load secrets from secure stores or managed runtime configuration.
+- Enforce least privilege for data stores, queues, and external integrations.
+- Keep audit-relevant events and security failures observable.
+
+## Observability
+
+- Emit structured logs with correlation/session/request identifiers.
+- Expose health, readiness, and liveness signals appropriate to the runtime.
+- Instrument critical paths with traces, metrics, or equivalent telemetry.
+- Keep operator-facing diagnostics actionable and low-noise.
+- Measure real bottlenecks before tuning or scaling.
+
+## Delivery Expectations
+
+- Build, test, and scan backend artifacts in CI.
+- Keep deployable artifacts immutable and reproducible.
+- Treat migrations and schema changes as controlled delivery steps.
+- Use feature flags or staged rollout controls when behavior risk is material.
