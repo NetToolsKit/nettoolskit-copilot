@@ -26,6 +26,18 @@ priority: high
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
+## Instruction Source Of Truth And Projection
+- `definitions/shared/instructions/` is the canonical instruction content for repo-owned guidance.
+- `.github/instructions/` is the projected runtime surface consumed by local agents, editors, and validation gates.
+- `definitions/providers/github/root/`, `definitions/providers/vscode/workspace/`, `definitions/providers/codex/`, and `definitions/providers/claude/` are provider-specific consumers of the canonical taxonomy.
+- Keep semantic folder names and stable `ntk-*` filenames aligned across canonical and projected surfaces.
+- Do not use numeric directory prefixes to imply precedence or execution order; precedence is explicit in `AGENTS.md`, `copilot-instructions.md`, and the instruction ownership manifest.
+- When drift is found:
+  - review canonical shared content first
+  - update projected `.github/instructions/` to match canonical intent
+  - update provider surfaces only after canonical and projected paths are stable
+  - treat `C:\Users\tguis\copilot-instructions` as a comparison baseline, never as a blind overwrite source for this repository
+
 ## Repository Topology
 - Rust workspace that unifies the `ntk` CLI product, repository-managed AI runtime surfaces, validation gates, orchestration flows, and compatibility wrapper retirement program.
 - Main layout:
@@ -226,5 +238,3 @@ priority: high
   - `instructions/process/ntk-process-worktree-isolation.instructions.md`
   - `instructions/process/ntk-process-tdd-verification.instructions.md`
   - `instructions/process/ntk-process-pr.instructions.md`
-
-

@@ -40,6 +40,27 @@
       ]
     }
   },
+  "projectionContract": {
+    "canonicalInstructionRoot": "definitions/shared/instructions",
+    "projectedInstructionRoot": ".github/instructions",
+    "providerRoots": [
+      "definitions/providers/github/root",
+      "definitions/providers/vscode/workspace",
+      "definitions/providers/codex",
+      "definitions/providers/claude"
+    ],
+    "naming": {
+      "folderPolicy": "semantic-domain-folders",
+      "disallowNumericPrefixes": true,
+      "filePrefix": "ntk-"
+    },
+    "driftRules": [
+      "Treat definitions/shared/instructions as the canonical instruction content for repo-owned guidance.",
+      "Treat .github/instructions as the projected runtime surface; keep folder taxonomy and filenames aligned with canonical content.",
+      "Update provider surfaces only after canonical and projected instruction paths are stable.",
+      "Do not sync from the external copilot-instructions repository by blind overwrite; review drift explicitly and record intentional divergences."
+    ]
+  },
   "layers": [
     {
       "id": "global-core",

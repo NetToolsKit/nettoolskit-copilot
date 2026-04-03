@@ -4,10 +4,10 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
+- LastUpdated: 2026-04-03 16:05
 - Objective: define the design intent for keeping repository instructions authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
-- Active Branch: `main` (planning only; implementation branches TBD)
+- Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-instruction-governance-and-super-agent-retention.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstream: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
@@ -25,6 +25,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Preserve repository-owned instruction files as the source of truth for this workspace.
 - Keep the external `copilot-instructions` repository as a reference baseline, not as a live write target.
 - Make routing and precedence rules explicit so the `ntk` prefix and instruction surfaces stay stable.
+- Keep semantic folder taxonomy and stable `ntk-*` filenames as part of the governance contract.
 
 ---
 
@@ -53,10 +54,11 @@ The repository already has a rich instruction and routing system, but it must st
 - The instruction routing catalog stays aligned with the actual workspace.
 - Repo-owned instruction changes can be distinguished from baseline reference drift.
 - `ntk` surfaces remain documented and canonical.
+- Canonical source, projected runtime surface, and provider consumers are explicitly documented.
 
 ---
 
 ## Planning Readiness
 
-- The spec is planning-ready once the parity baseline and sync rules are written into the active plan.
-- Implementation should be staged because instruction projections affect both docs and operator workflows.
+- The spec is implementation-ready for governance/documentation slices because precedence, projection, and drift rules are now being applied incrementally.
+- Follow-up parity audit against the external baseline can remain staged because instruction projections affect both docs and operator workflows.

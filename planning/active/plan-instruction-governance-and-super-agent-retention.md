@@ -4,10 +4,10 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
+- LastUpdated: 2026-04-03 16:05
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
-- Active Branch: `main` (planning only; implementation branches TBD)
+- Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-governance-and-super-agent-retention.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependency: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
@@ -28,9 +28,9 @@ This plan coordinates four governance slices:
 | ID | Slice | Target | Priority | Dependency |
 |---|---|---|---|---|
 | G1 | Instruction parity audit | repo vs external reference | 🔴 Immediate | none |
-| G2 | Super-agent retention | local and projected instruction surfaces | 🔴 Immediate | G1 |
-| G3 | Routing and precedence clarity | catalog + operating model docs | 🟠 High | G1 |
-| G4 | Drift monitoring and sync rules | instructions projections and planning docs | 🟠 High | G2, G3 |
+| G2 | Super-agent retention | local and projected instruction surfaces | ✅ Done | G1 |
+| G3 | Routing and precedence clarity | catalog + operating model docs | ✅ Done | G1 |
+| G4 | Drift monitoring and sync rules | instructions projections and planning docs | ✅ Done | G2, G3 |
 
 The `ntk` CLI prefix is already in place and is not a new implementation gap.
 
@@ -51,6 +51,8 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 - Keep the `super-agent` workflow visible in the repo-owned instruction set.
 - Make sure instruction projections do not overwrite the canonical guidance with a stale copy.
 - Confirm the repo still routes work through the same lifecycle contract.
+- Status:
+  - complete; `super-agent` remains in the `core/` lane and the rules board now keeps it globally visible with semantic taxonomy
 - Commit checkpoint:
   - `docs(instructions): reinforce super agent canonical routing`
 
@@ -59,6 +61,8 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 - Ensure the routing catalog and operating model remain consistent with the actual workspace.
 - Keep `ntk` and instruction-file guidance aligned for operators and agents.
 - Document how the repository keeps command surfaces and instruction surfaces in sync.
+- Status:
+  - complete; precedence and semantic-folder routing are now documented in `AGENTS.md`, instruction READMEs, and governance metadata
 - Commit checkpoint:
   - `docs(instructions): clarify routing and precedence for repository guidance`
 
@@ -67,6 +71,8 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 - Add the ongoing rule for syncing from the external baseline without losing repo-owned changes.
 - Document how to detect and review drift before it becomes a branch or PR problem.
 - Keep the guidance about `ntk` prefix usage and the `super-agent` lifecycle intact.
+- Status:
+  - complete; the instruction ownership manifest and repository operating model now define canonical root, projected root, provider roots, and drift rules
 - Commit checkpoint:
   - `docs(planning): define instruction drift monitoring and sync policy`
 
