@@ -17,8 +17,8 @@ Generated: 2026-03-29
   - `crates/core/src/local-context/search.rs`
   - `crates/commands/runtime/src/continuity/local_context.rs`
   - `crates/commands/runtime/src/diagnostics/enterprise_trends.rs`
-  - `.github/instructions/super-agent.instructions.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
+  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `planning/active/plan-repository-consolidation-continuity.md`
   - User reference: `https://github.com/mksglu/context-mode`
 

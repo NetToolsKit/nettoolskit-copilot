@@ -16,4 +16,4 @@ Canonical commands are English. Portuguese aliases are accepted as convenience s
 ## Usage Notes
 - English commands are the repository standard; use them in code, docs, and instruction files.
 - PT-BR aliases work identically — they are convenience shortcuts for chat sessions, not the canonical form.
-- See `.github/instructions/context-economy-checkpoint.instructions.md` for the full protocol.
+- See `.github/instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md` for the full protocol.

@@ -7,7 +7,7 @@ priority: high
 Split large tasks into manageable steps; avoid hard token limits; split by functional domain when possible.
 
 # Planning and Routing
-- For non-trivial work, route first and then follow `instructions/subagent-planning-workflow.instructions.md`.
+- For non-trivial work, route first and then follow `instructions/process/ntk-process-subagent-planning-workflow.instructions.md`.
 - Treat `planning/README.md`, `planning/active/`, and `planning/completed/` as the versioned planning workspace.
 - Keep the context pack minimal, but do not omit mandatory instruction files or the planning workflow when the task needs staging.
 
@@ -40,7 +40,7 @@ Include relevant context gathering; avoid repeating already provided information
 - Never cut required working context by default just to save tokens; do that only with explicit proof that quality is preserved
 
 ## Context Economy and Checkpoint
-Full protocol, compression triggers, six-block state model, CHECKPOINT format, and user commands: `instructions/context-economy-checkpoint.instructions.md`.
+Full protocol, compression triggers, six-block state model, CHECKPOINT format, and user commands: `instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`.
 
 User commands: `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary` (PT-BR aliases in `.github/COMMANDS.md`).
 

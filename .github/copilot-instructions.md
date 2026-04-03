@@ -24,7 +24,7 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 - `global-runtime` mode:
   - active when the target workspace lacks that local adapter
   - use the mirrored runtime baseline under `%USERPROFILE%\\.github`
-  - do not assume the runtime repository routing catalog or `instructions/repository-operating-model.instructions.md` applies to the target workspace
+  - do not assume the runtime repository routing catalog or `instructions/core/ntk-core-repository-operating-model.instructions.md` applies to the target workspace
   - use `.build/super-agent/planning/` and `.build/super-agent/specs/` for transient orchestration artifacts when the workspace does not provide versioned planning folders
 
 # Language Policy
@@ -35,12 +35,12 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 # Hierarchy and Scope
 - Global rules live here and are always applied.
-- The Super Agent lifecycle lives in `instructions/super-agent.instructions.md` and is always applied for change-bearing work.
-- The canonical non-versioned artifact layout lives in `instructions/artifact-layout.instructions.md`.
-- Non-trivial design-bearing work also uses `instructions/brainstorm-spec-workflow.instructions.md` before execution planning.
-- Risky execution may use `instructions/worktree-isolation.instructions.md`.
-- Code-bearing work also uses `instructions/tdd-verification.instructions.md`.
-- Repository-specific operating rules live in `instructions/repository-operating-model.instructions.md`.
+- The Super Agent lifecycle lives in `instructions/core/ntk-core-super-agent.instructions.md` and is always applied for change-bearing work.
+- The canonical non-versioned artifact layout lives in `instructions/core/ntk-core-artifact-layout.instructions.md`.
+- Non-trivial design-bearing work also uses `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md` before execution planning.
+- Risky execution may use `instructions/process/ntk-process-worktree-isolation.instructions.md`.
+- Code-bearing work also uses `instructions/process/ntk-process-tdd-verification.instructions.md`.
+- Repository-specific operating rules live in `instructions/core/ntk-core-repository-operating-model.instructions.md`.
 - Domain instruction files extend these rules; do not duplicate globals.
 - Prefer the most specific domain rule when conflicts occur.
 - Map and reference new instruction files here.
@@ -80,7 +80,7 @@ Follow this order of operations on every task:
 - User prompt (explicit constraints)
 - `AGENTS.md` + this file
 - Domain instruction files under `instructions/` (pick by language/folder)
-- Any additional, file-scoped instructions (e.g., `instructions/copilot-instruction-creation.instructions.md` when editing `instructions/*`)
+- Any additional, file-scoped instructions (e.g., `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md` when editing `instructions/*`)
 
 3) Resolve conflicts
 - More specific scope wins (narrower `applyTo` beats broader)
@@ -89,7 +89,7 @@ Follow this order of operations on every task:
 # Workflow
 
 ## Super Agent Lifecycle
-- Treat `instructions/super-agent.instructions.md` as the mandatory controller contract for change-bearing work.
+- Treat `instructions/core/ntk-core-super-agent.instructions.md` as the mandatory controller contract for change-bearing work.
 - Default lifecycle:
   1. Super Agent intake
      - ask up to 3 concise clarification questions and stop before spec/planning when ambiguity would materially change scope, architecture, runtime behavior, validation, or safety
@@ -108,12 +108,12 @@ Follow this order of operations on every task:
 ## How to use
 - Start with AGENTS.md for solution-specific details (stack, folders, commands).
 - Use this file for global rules, precedence, and always-applied policies.
-- Use `instructions/repository-operating-model.instructions.md` only when the target workspace provides a local repo adapter and repo-specific operating model.
+- Use `instructions/core/ntk-core-repository-operating-model.instructions.md` only when the target workspace provides a local repo adapter and repo-specific operating model.
 - Follow domain-specific files in instructions/*.md for technical details.
 
 # Authoritative Sources Policy
 - Use repository context first for project-specific behavior, architecture, scripts, templates, and conventions.
-- For external platform, framework, SDK, API, CLI, or tool behavior, follow `instructions/authoritative-sources.instructions.md`.
+- For external platform, framework, SDK, API, CLI, or tool behavior, follow `instructions/core/ntk-core-authoritative-sources.instructions.md`.
 - Use `.github/governance/authoritative-source-map.json` as the single source of truth for stack-specific official documentation domains.
 - Do not duplicate official domain lists across domain instruction files.
 
@@ -153,31 +153,31 @@ Follow this order of operations on every task:
 
 ## Always Applied
 - AGENTS.md (agents and context policy)
-- instructions/super-agent.instructions.md
-- instructions/brainstorm-spec-workflow.instructions.md
-- instructions/artifact-layout.instructions.md
-- instructions/subagent-planning-workflow.instructions.md
-- instructions/worktree-isolation.instructions.md
-- instructions/tdd-verification.instructions.md
-- instructions/authoritative-sources.instructions.md
-- instructions/workflow-optimization.instructions.md
-- instructions/powershell-execution.instructions.md
-- instructions/feedback-changelog.instructions.md
+- instructions/core/ntk-core-super-agent.instructions.md
+- instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md
+- instructions/core/ntk-core-artifact-layout.instructions.md
+- instructions/process/ntk-process-subagent-planning-workflow.instructions.md
+- instructions/process/ntk-process-worktree-isolation.instructions.md
+- instructions/process/ntk-process-tdd-verification.instructions.md
+- instructions/core/ntk-core-authoritative-sources.instructions.md
+- instructions/process/ntk-process-workflow-optimization.instructions.md
+- instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md
+- instructions/process/ntk-process-feedback-changelog.instructions.md
 
 ## Only for Workspace-Adapter Mode
-- instructions/repository-operating-model.instructions.md
+- instructions/core/ntk-core-repository-operating-model.instructions.md
 
 ## Only for .github Changes
-- instructions/copilot-instruction-creation.instructions.md
+- instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md
 
 # Repository and Domain Rules
-- In `workspace-adapter` mode, repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/repository-operating-model.instructions.md`.
+- In `workspace-adapter` mode, repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/core/ntk-core-repository-operating-model.instructions.md`.
 - In `global-runtime` mode, infer repo topology and local commands from the target workspace itself; do not import the `copilot-instructions` repo topology into an unrelated client repository.
-- Change-bearing work must start with `instructions/super-agent.instructions.md` before planning and implementation.
-- Non-trivial tasks must also follow `instructions/subagent-planning-workflow.instructions.md` and the workspace planning surface under `planning/` when it exists, otherwise the fallback under `.build/super-agent/`.
+- Change-bearing work must start with `instructions/core/ntk-core-super-agent.instructions.md` before planning and implementation.
+- Non-trivial tasks must also follow `instructions/process/ntk-process-subagent-planning-workflow.instructions.md` and the workspace planning surface under `planning/` when it exists, otherwise the fallback under `.build/super-agent/`.
 - When the work is non-trivial and design-bearing, create or update a spec under `planning/specs/` when available, otherwise under `.build/super-agent/specs/`, and do not continue to planning until that spec is planning-ready.
 - Use domain instructions from that map according to the active route and file scope.
-- For generated build or deployment outputs, use `.build/` and `.deployment/` according to `instructions/artifact-layout.instructions.md`.
+- For generated build or deployment outputs, use `.build/` and `.deployment/` according to `instructions/core/ntk-core-artifact-layout.instructions.md`.
 
 # Transparency
 
@@ -195,4 +195,4 @@ Follow this order of operations on every task:
 - For large tasks, surface stable intermediate commit checkpoints as soon as they are reached.
 
 # Repository Style, Security, and Release
-- Follow `instructions/repository-operating-model.instructions.md` for style, EOF policy, security handling, commit/PR expectations, and changelog rules.
+- Follow `instructions/core/ntk-core-repository-operating-model.instructions.md` for style, EOF policy, security handling, commit/PR expectations, and changelog rules.

@@ -7,16 +7,16 @@ description: Design and implement observability and SRE controls including SLO/S
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml`.
 3. Keep only mandatory files plus observability and impacted domain packs.
 
 ## Observability instruction pack
 
-- `.github/instructions/observability-sre.instructions.md`
-- `.github/instructions/backend.instructions.md` (when API/backend runtime is in scope)
-- `.github/instructions/microservices-performance.instructions.md` (for distributed systems or scaling paths)
-- `.github/instructions/ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
+- `.github/instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
+- `.github/instructions/data-security/ntk-data-orm.instructions.md` (when API/backend runtime is in scope)
+- `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md` (for distributed systems or scaling paths)
+- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
 
 ## Execution workflow
 

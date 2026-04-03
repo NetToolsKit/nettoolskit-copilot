@@ -5,7 +5,7 @@ priority: high
 
 # NetToolsKit README Overrides
 
-Purpose: apply only the NetToolsKit-specific deltas that override the generic baseline in `.github/instructions/readme.instructions.md`.
+Purpose: apply only the NetToolsKit-specific deltas that override the generic baseline in `.github/instructions/docs/ntk-docs-readme.instructions.md`.
 Do not restate generic README rules here.
 
 ## Language Override
@@ -72,7 +72,7 @@ Do not restate generic README rules here.
 ## Guardrails
 - Documentation updates only; do not change or invent library behavior.
 - Examples must match the current source code, namespaces, and public API.
-- Keep this file focused on overrides; generic README guidance belongs in `readme.instructions.md`.
+- Keep this file focused on overrides; generic README guidance belongs in `ntk-docs-readme.instructions.md`.
 
 ## Verification Checklist
 - [ ] English-only content (text and example comments)
@@ -89,3 +89,5 @@ Do not restate generic README rules here.
 - [ ] Features bullets use `- ✅ ...`
 - [ ] Horizontal rules (`---`) are present between major sections
 - [ ] License section matches the required template
+
+

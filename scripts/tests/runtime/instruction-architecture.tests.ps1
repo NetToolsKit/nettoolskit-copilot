@@ -89,14 +89,14 @@ function Initialize-ValidInstructionArchitectureRepo {
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/super-agent.instructions.md",
-        "instructions/repository-operating-model.instructions.md",
-        "instructions/artifact-layout.instructions.md",
-        "instructions/subagent-planning-workflow.instructions.md",
-        "instructions/workflow-optimization.instructions.md",
-        "instructions/authoritative-sources.instructions.md",
-        "instructions/powershell-execution.instructions.md",
-        "instructions/feedback-changelog.instructions.md"
+        "instructions/core/ntk-core-super-agent.instructions.md",
+        "instructions/core/ntk-core-repository-operating-model.instructions.md",
+        "instructions/core/ntk-core-artifact-layout.instructions.md",
+        "instructions/process/ntk-process-subagent-planning-workflow.instructions.md",
+        "instructions/process/ntk-process-workflow-optimization.instructions.md",
+        "instructions/core/ntk-core-authoritative-sources.instructions.md",
+        "instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md",
+        "instructions/process/ntk-process-feedback-changelog.instructions.md"
       ]
     }
   },
@@ -111,14 +111,14 @@ function Initialize-ValidInstructionArchitectureRepo {
     {
       "id": "repository-operating-model",
       "pathPatterns": [
-        ".github/instructions/repository-operating-model.instructions.md"
+        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "cross-cutting-policies",
       "pathPatterns": [
-        ".github/instructions/super-agent.instructions.md",
-        ".github/instructions/authoritative-sources.instructions.md",
+        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
       ]
@@ -129,9 +129,9 @@ function Initialize-ValidInstructionArchitectureRepo {
         ".github/instructions/*.instructions.md"
       ],
       "excludePatterns": [
-        ".github/instructions/authoritative-sources.instructions.md",
-        ".github/instructions/super-agent.instructions.md",
-        ".github/instructions/repository-operating-model.instructions.md"
+        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
+        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
     {
@@ -185,27 +185,27 @@ function Initialize-ValidInstructionArchitectureRepo {
     Write-TextFile -Path (Join-Path $Root '.github/AGENTS.md') -Content @'
 # AGENTS
 
-Use `instructions/repository-operating-model.instructions.md`.
-Use `instructions/authoritative-sources.instructions.md`.
+Use `instructions/core/ntk-core-repository-operating-model.instructions.md`.
+Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
 '@
     Write-TextFile -Path (Join-Path $Root '.github/copilot-instructions.md') -Content @'
 # Global Instructions
 
-Use `instructions/repository-operating-model.instructions.md`.
-Use `instructions/authoritative-sources.instructions.md`.
+Use `instructions/core/ntk-core-repository-operating-model.instructions.md`.
+Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
 '@
     Write-TextFile -Path (Join-Path $Root '.github/instruction-routing.catalog.yml') -Content @'
 always:
   - path: AGENTS.md
   - path: copilot-instructions.md
-  - path: instructions/super-agent.instructions.md
-  - path: instructions/repository-operating-model.instructions.md
-  - path: instructions/artifact-layout.instructions.md
-  - path: instructions/subagent-planning-workflow.instructions.md
-  - path: instructions/workflow-optimization.instructions.md
-  - path: instructions/authoritative-sources.instructions.md
-  - path: instructions/powershell-execution.instructions.md
-  - path: instructions/feedback-changelog.instructions.md
+  - path: instructions/core/ntk-core-super-agent.instructions.md
+  - path: instructions/core/ntk-core-repository-operating-model.instructions.md
+  - path: instructions/core/ntk-core-artifact-layout.instructions.md
+  - path: instructions/process/ntk-process-subagent-planning-workflow.instructions.md
+  - path: instructions/process/ntk-process-workflow-optimization.instructions.md
+  - path: instructions/core/ntk-core-authoritative-sources.instructions.md
+  - path: instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md
+  - path: instructions/process/ntk-process-feedback-changelog.instructions.md
 '@
     Write-TextFile -Path (Join-Path $Root '.github/prompts/route-instructions.prompt.md') -Content @'
 ---
@@ -231,14 +231,14 @@ Use the routing catalog.
 '@
     Write-TextFile -Path (Join-Path $Root '.github/templates/example.md') -Content "# Example Template`n`nUse this as a reusable artifact."
     Write-TextFile -Path (Join-Path $Root '.github/policies/example.policy.md') -Content '# Example Policy'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/repository-operating-model.instructions.md') -Content '# Repository Operating Model'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/authoritative-sources.instructions.md') -Content '# Authoritative Sources'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/super-agent.instructions.md') -Content '# Super Agent'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/artifact-layout.instructions.md') -Content '# Artifact Layout'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/workflow-optimization.instructions.md') -Content '# Workflow Optimization'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/powershell-execution.instructions.md') -Content '# PowerShell Execution'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/feedback-changelog.instructions.md') -Content '# Feedback Changelog'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-repository-operating-model.instructions.md') -Content '# Repository Operating Model'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-authoritative-sources.instructions.md') -Content '# Authoritative Sources'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-super-agent.instructions.md') -Content '# Super Agent'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-artifact-layout.instructions.md') -Content '# Artifact Layout'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/ntk-process-workflow-optimization.instructions.md') -Content '# Workflow Optimization'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md') -Content '# PowerShell Execution'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/ntk-process-feedback-changelog.instructions.md') -Content '# Feedback Changelog'
     Write-TextFile -Path (Join-Path $Root '.codex/skills/sample/agents/openai.yaml') -Content @'
 display_name: Sample Skill
 short_description: Example
@@ -252,7 +252,7 @@ description: sample skill
 
 # Sample Skill
 
-Load `repository-operating-model.instructions.md`.
+Load `ntk-core-repository-operating-model.instructions.md`.
 '@
     Write-TextFile -Path (Join-Path $Root 'scripts/orchestration/example.ps1') -Content "Write-Host 'orchestration'"
     Write-TextFile -Path (Join-Path $Root 'scripts/runtime/bootstrap.ps1') -Content "Write-Host 'runtime'"

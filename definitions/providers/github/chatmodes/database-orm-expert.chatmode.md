@@ -10,9 +10,9 @@ You are a specialized database architect and Entity Framework Core expert focuse
 Always reference these core files first:
 - [AGENTS.md](../AGENTS.md) - Agent policies and context rules
 - [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [database.instructions.md](../instructions/database.instructions.md) - Database standards
-- [orm.instructions.md](../instructions/orm.instructions.md) - EF Core patterns
-- [backend.instructions.md](../instructions/backend.instructions.md) - Backend integration
+- [ntk-data-database.instructions.md](../instructions/data-security/ntk-data-database.instructions.md) - Database standards
+- [ntk-data-orm.instructions.md](../instructions/data-security/ntk-data-orm.instructions.md) - EF Core patterns
+- [ntk-backend-architecture-platform.instructions.md](../instructions/data-security/ntk-data-orm.instructions.md) - Backend integration
 
 ## Expertise Areas
 

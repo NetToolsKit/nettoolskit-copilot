@@ -20,7 +20,7 @@
 - `global-runtime` mode:
   - active when the target workspace does not provide the local adapter files above
   - use the mirrored runtime baseline under `%USERPROFILE%\\.github`
-  - do not assume the runtime repository routing catalog or `instructions/repository-operating-model.instructions.md` applies to the target workspace
+  - do not assume the runtime repository routing catalog or `instructions/core/ntk-core-repository-operating-model.instructions.md` applies to the target workspace
   - build a minimal local context pack manually from the target repo structure
   - keep transient orchestration artifacts under `.build/super-agent/planning/` and `.build/super-agent/specs/`
 
@@ -60,9 +60,9 @@ Baseline workflow when the target workspace provides a local adapter and routing
 Use the **Mandatory Context Files** list above.
 
 2) Then select additional instruction files based on what you are changing
-- If editing `.github/**`: include `instructions/pr.instructions.md` and `instructions/prompt-templates.instructions.md` when relevant.
-- If editing `instructions/**`: include `instructions/copilot-instruction-creation.instructions.md`.
-- If editing code: select the domain instruction file(s) under `instructions/` that match the language/folder (e.g., `instructions/dotnet-csharp.instructions.md`, `backend.instructions.md`, `database.instructions.md`, etc).
+- If editing `.github/**`: include `instructions/process/ntk-process-pr.instructions.md` and `instructions/docs/ntk-docs-prompt-templates.instructions.md` when relevant.
+- If editing `instructions/**`: include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.
+- If editing code: select the domain instruction file(s) under `instructions/` that match the language/folder (e.g., `instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`, `backend.instructions.md`, `database.instructions.md`, etc).
 
 3) Precedence rules when instructions conflict
 - Follow the user prompt first.
@@ -97,7 +97,7 @@ Use the **Mandatory Context Files** list above.
   - `show status` — output the Current state block only
   - `show progress` — output Completed + Next step blocks
   - `resume from summary` — drop raw history, resume from last checkpoint
-- See `instructions/context-economy-checkpoint.instructions.md` for the full protocol.
+- See `instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md` for the full protocol.
 
 # Context Preservation & Execution Patterns
 
@@ -133,11 +133,11 @@ Use the **Mandatory Context Files** list above.
   7. reviewer
   8. release-closeout
   9. planning update
-- Follow `instructions/subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
-- Follow `instructions/worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
-- Follow `instructions/tdd-verification.instructions.md` for code-bearing work that needs explicit verification evidence.
-- Follow `instructions/super-agent.instructions.md` for the mandatory lifecycle contract.
-- Follow `instructions/brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
+- Follow `instructions/process/ntk-process-subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
+- Follow `instructions/process/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Follow `instructions/process/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification evidence.
+- Follow `instructions/core/ntk-core-super-agent.instructions.md` for the mandatory lifecycle contract.
+- Follow `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
 
 ### For Multi-Task Requests
 - Apply Task-Based Execution Methodology (see below)
@@ -185,19 +185,19 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 # Repository Operating Model
 - In `workspace-adapter` mode, repo-specific topology, commands, style, release process, and domain instruction map live in:
   - `copilot-instructions.md`
-  - `instructions/repository-operating-model.instructions.md`
+  - `instructions/core/ntk-core-repository-operating-model.instructions.md`
 - Universal Super Agent instructions that still apply in `global-runtime` mode are:
-  - `instructions/super-agent.instructions.md`
-  - `instructions/brainstorm-spec-workflow.instructions.md`
-  - `instructions/artifact-layout.instructions.md`
-  - `instructions/authoritative-sources.instructions.md`
-  - `instructions/subagent-planning-workflow.instructions.md`
-  - `instructions/worktree-isolation.instructions.md`
-  - `instructions/tdd-verification.instructions.md`
-  - `instructions/workflow-optimization.instructions.md`
-  - `instructions/powershell-execution.instructions.md`
-  - `instructions/feedback-changelog.instructions.md`
-- `instructions/repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
+  - `instructions/core/ntk-core-super-agent.instructions.md`
+  - `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `instructions/core/ntk-core-artifact-layout.instructions.md`
+  - `instructions/core/ntk-core-authoritative-sources.instructions.md`
+  - `instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
+  - `instructions/process/ntk-process-worktree-isolation.instructions.md`
+  - `instructions/process/ntk-process-tdd-verification.instructions.md`
+  - `instructions/process/ntk-process-workflow-optimization.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
+  - `instructions/process/ntk-process-feedback-changelog.instructions.md`
+- `instructions/core/ntk-core-repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
 - Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
 - Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
-- For `.github` authoring, include `instructions/copilot-instruction-creation.instructions.md`.
+- For `.github` authoring, include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.

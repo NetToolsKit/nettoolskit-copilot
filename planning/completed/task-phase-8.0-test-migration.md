@@ -60,7 +60,7 @@ Additionally, comprehensive test expansion was performed across the entire works
 2. **Templating**: Expanded from 44 to 70 tests (+59%) - added error_tests.rs (20 tests)
 3. **Overall Growth**: 134 → 443 tests (+231%, +309 tests)
 4. **Error Testing**: All 3 crates with custom errors now have error_tests.rs
-5. **Quality Standards**: All tests follow .github/instructions/rust-testing.instructions.md
+5. **Quality Standards**: All tests follow .github/instructions/process/ntk-process-rust-testing.instructions.md
 
 ### ● Migration Highlights
 
@@ -389,7 +389,7 @@ cargo test --workspace 2>&1 | Select-String "test result:"
 
 ### Test Standards Compliance Audit
 
-Comprehensive audit performed on 2025-11-11 against `.github/instructions/rust-testing.instructions.md`.
+Comprehensive audit performed on 2025-11-11 against `.github/instructions/process/ntk-process-rust-testing.instructions.md`.
 
 #### Compliance Summary
 
@@ -489,7 +489,7 @@ Comprehensive audit performed on 2025-11-11 against `.github/instructions/rust-t
 
 - **Test Standards**: See `.docs/planning/test-standards-analysis.md`
 - **Test Templates**: See `.docs/planning/test-templates.md`
-- **Testing Instructions**: See `.github/instructions/rust-testing.instructions.md`
+- **Testing Instructions**: See `.github/instructions/process/ntk-process-rust-testing.instructions.md`
 - **Test Templates**: See `.github/templates/*.rs`
 
 ---

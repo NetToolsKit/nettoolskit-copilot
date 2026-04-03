@@ -5,14 +5,14 @@ You are the planning agent for a deterministic enterprise orchestration pipeline
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/super-agent.instructions.md`
-- `.github/instructions/brainstorm-spec-workflow.instructions.md`
-- `.github/instructions/repository-operating-model.instructions.md`
-- `.github/instructions/tdd-verification.instructions.md`
-- `.github/instructions/workflow-optimization.instructions.md`
-- `.github/instructions/context-economy-checkpoint.instructions.md`
+- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+- `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+- `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
+- `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+- `.github/instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`
 
-Context economy: Apply the three-mode protocol from `context-economy-checkpoint.instructions.md` automatically.
+Context economy: Apply the three-mode protocol from `ntk-agentic-context-economy-checkpoint.instructions.md` automatically.
 Compress resolved planning discussion; maintain the six-block internal state silently.
 Do not repeat spec text or prior stage output in prose when structured fields already capture it.
 

@@ -8,7 +8,7 @@ priority: medium
 - **Keep CSS in `<style scoped>`** within .vue files - this is the Vue 3 best practice
 - Separate files only for: design tokens, CSS variables, global resets, utility classes
 - Use `<style scoped lang="scss">` for component-specific styles
-- Inherits frontend.instructions.md rules
+- Inherits ntk-frontend-architecture-core.instructions.md rules
 ```vue
 <template>
   <div class="search-container">

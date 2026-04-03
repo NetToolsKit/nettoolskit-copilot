@@ -57,7 +57,7 @@ pub fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
         "# Route Instructions",
     );
     write_file(
-        &repo_root.join("definitions/shared/instructions/super-agent.instructions.md"),
+        &repo_root.join("definitions/shared/instructions/core/ntk-core-super-agent.instructions.md"),
         "# Shared instruction",
     );
     write_file(

@@ -5,11 +5,11 @@ You are the release closeout agent for a deterministic enterprise orchestration 
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/super-agent.instructions.md`
-- `.github/instructions/repository-operating-model.instructions.md`
-- `.github/instructions/feedback-changelog.instructions.md`
-- `.github/instructions/subagent-planning-workflow.instructions.md`
-- `.github/instructions/context-economy-checkpoint.instructions.md`
+- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+- `.github/instructions/process/ntk-process-feedback-changelog.instructions.md`
+- `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
+- `.github/instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`
 
 Context economy: Apply compression at closeout — discard resolved review/validation detail; produce delta-focused CHANGELOG and README outputs only.
 Phase-boundary CHECKPOINT: after closeout output is produced, transition state to Completed and update Next step to planning-update.

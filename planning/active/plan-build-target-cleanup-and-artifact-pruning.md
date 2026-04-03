@@ -13,8 +13,8 @@ Generated: 2026-03-30 07:31
 - Inputs:
   - `.cargo/config.toml`
   - `.gitignore`
-  - `instructions/artifact-layout.instructions.md`
-  - `instructions/rust-code-organization.instructions.md`
+  - `instructions/core/ntk-core-artifact-layout.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
   - `planning/completed/enterprise-progress-tracker.md`
 
 ---

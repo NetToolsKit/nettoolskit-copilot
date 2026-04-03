@@ -10,7 +10,7 @@ Generate comprehensive unit tests for .NET classes following this repository's t
 ## Instructions
 Generate unit tests based on:
 - [dotnet-unit-test-template.cs](../templates/dotnet-unit-test-template.cs)
-- [dotnet-csharp.instructions.md](../instructions/dotnet-csharp.instructions.md)
+- [dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md)
 - Testing best practices for Clean Architecture
 
 Requirements:

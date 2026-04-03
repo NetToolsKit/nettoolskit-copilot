@@ -1937,7 +1937,7 @@ After completing Phase 5 (Commands Dispatcher) and reviewing the entire codebase
 ### Phase 8 – Testing & QA (2-3 days) [🔄 In Progress - 7/16]
 - [x] ✅ Apply AAA pattern to all test files (Phase 8.2 - 100% complete)
   - 32/32 files migrated (375 tests)
-  - Updated rust-testing.instructions.md and e2e-testing.instructions.md
+  - Updated ntk-process-rust-testing.instructions.md and ntk-process-e2e-testing.instructions.md
   - All tests passing with AAA pattern
 - [x] ✅ Update testing documentation and instructions
 - [x] ✅ Verify all existing tests pass after AAA migration

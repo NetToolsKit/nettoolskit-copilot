@@ -9,9 +9,9 @@ description: Close out a completed workstream by updating README artifacts when 
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/super-agent.instructions.md`
-4. `.github/instructions/feedback-changelog.instructions.md`
-5. `.github/instructions/readme.instructions.md` (when README files are in scope)
+3. `.github/instructions/core/ntk-core-super-agent.instructions.md`
+4. `.github/instructions/process/ntk-process-feedback-changelog.instructions.md`
+5. `.github/instructions/docs/ntk-docs-readme.instructions.md` (when README files are in scope)
 6. Active plan from `planning/active/`
 
 ## Claude-native execution

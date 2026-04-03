@@ -13,8 +13,8 @@ Normalize every `README.md` in the repository to the repository-owned standard, 
 
 ## Source Of Truth
 
-- `.github/instructions/nettoolskit-rules.instructions.md`
-- `.github/instructions/readme.instructions.md`
+- `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
+- `.github/instructions/docs/ntk-docs-readme.instructions.md`
 - `.github/templates/readme-template.md`
 - `.github/governance/readme-standards.baseline.json`
 - `planning/specs/completed/spec-readme-standards-repository-normalization.md`

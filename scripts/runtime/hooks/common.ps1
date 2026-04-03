@@ -357,7 +357,7 @@ function Get-SuperAgentWorkspaceSurface {
         'Routing mode: no local static routing surface detected; build a minimal context pack from the workspace files you are touching.'
     }
     else {
-        'Routing mode: global-runtime. Do not assume the runtime repository routing catalog or repository-operating-model.instructions.md applies to this workspace; build a minimal local context pack from the target repo.'
+        'Routing mode: global-runtime. Do not assume the runtime repository routing catalog or ntk-core-repository-operating-model.instructions.md applies to this workspace; build a minimal local context pack from the target repo.'
     }
 
     $closeoutMessage = if ($workspaceMode -eq 'workspace-adapter') {

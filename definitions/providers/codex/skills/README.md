@@ -137,7 +137,7 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 - `.codex/skills/core-context-router/SKILL.md`
 - `.codex/skills/core-runtime-sync/SKILL.md`
 - `.github/instruction-routing.catalog.yml`
-- `.github/instructions/nettoolskit-rules.instructions.md`
+- `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
 - `scripts/runtime/bootstrap.ps1`
 - `scripts/runtime/render-provider-skill-surfaces.ps1`
 

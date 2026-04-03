@@ -910,8 +910,8 @@ fn test_global_core_references(
     failures: &mut Vec<String>,
 ) {
     for pattern in [
-        r"instructions/repository-operating-model\.instructions\.md",
-        r"instructions/authoritative-sources\.instructions\.md",
+        r"instructions/core/ntk-core-repository-operating-model\.instructions\.md",
+        r"instructions/core/ntk-core-authoritative-sources\.instructions\.md",
     ] {
         test_required_pattern(
             agents_content,
@@ -1148,7 +1148,8 @@ fn test_skill_canonical_references(
         return;
     }
 
-    let required_regex = RegexBuilder::new(r"repository-operating-model\.instructions\.md")
+    let required_regex =
+        RegexBuilder::new(r"ntk-core-repository-operating-model\.instructions\.md")
         .case_insensitive(true)
         .build()
         .expect("skill canonical reference regex should compile");

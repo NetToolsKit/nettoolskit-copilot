@@ -9,7 +9,7 @@ description: Mandatory final risk-focused review for any repository change. Chec
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/super-agent.instructions.md`
+3. `.github/instructions/core/ntk-core-super-agent.instructions.md`
 4. Active plan from `planning/active/`
 
 ## Claude-native execution

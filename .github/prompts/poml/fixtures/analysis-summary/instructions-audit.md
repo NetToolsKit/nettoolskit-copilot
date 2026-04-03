@@ -14,7 +14,7 @@
 - **Ação sugerida:** manter execução (tools/runner) fora do roteamento; roteador só escolhe contexto mínimo e, quando o ambiente não suportar um fluxo, registrar a decisão no checklist/saída.
 
 ### 2. Template inexistente referenciado
-- **Origem:** `.github/instructions/dotnet-csharp.instructions.md` (seções Background Services e XML docs)
+- **Origem:** `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md` (seções Background Services e XML docs)
 - **Problema:** referencia `.github/templates/background-service-template.cs`, porém arquivo não existe em `templates/`.
 - **Impacto:** gera erros de documentação e quebra fluxo "usar template".
 - **Ação sugerida:** criar template correspondente ou ajustar instrução removendo referência/indicando alternativa.

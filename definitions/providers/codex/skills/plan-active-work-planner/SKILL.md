@@ -10,9 +10,9 @@ description: Create or update active planning documents under `planning/active`,
 1. Load `.github/AGENTS.md`.
 2. Load `.github/copilot-instructions.md`.
 3. Load `.github/instruction-routing.catalog.yml`.
-4. Load `.github/instructions/repository-operating-model.instructions.md`.
-5. Load `.github/instructions/super-agent.instructions.md`.
-6. Load `.github/instructions/subagent-planning-workflow.instructions.md`.
+4. Load `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
+5. Load `.github/instructions/core/ntk-core-super-agent.instructions.md`.
+6. Load `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`.
 7. Reuse the shared `$plan-task-planner` skill for plan quality and validation discipline.
 
 ## Responsibilities

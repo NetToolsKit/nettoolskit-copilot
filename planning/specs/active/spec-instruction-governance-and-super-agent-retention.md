@@ -42,8 +42,8 @@ The repository already has a rich instruction and routing system, but it must st
 ## Proposed Boundaries
 
 - `AGENTS.md` and `copilot-instructions.md` remain the mandatory context entry points.
-- `super-agent.instructions.md` remains the workflow controller contract.
-- `repository-operating-model.instructions.md` remains the repo-local source of truth for workspace behavior.
+- `ntk-core-super-agent.instructions.md` remains the workflow controller contract.
+- `ntk-core-repository-operating-model.instructions.md` remains the repo-local source of truth for workspace behavior.
 
 ---
 

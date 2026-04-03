@@ -9,8 +9,8 @@ description: Creates or updates the active planning artifact under planning/acti
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/super-agent.instructions.md`
-4. `.github/instructions/subagent-planning-workflow.instructions.md`
+3. `.github/instructions/core/ntk-core-super-agent.instructions.md`
+4. `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
 5. `planning/README.md`
 6. Active spec from `planning/specs/active/` when one exists
 

@@ -294,7 +294,7 @@ function New-FallbackPlanResult {
         contextPaths = @(
             '.github/AGENTS.md',
             '.github/copilot-instructions.md',
-            '.github/instructions/repository-operating-model.instructions.md'
+            '.github/instructions/core/ntk-core-repository-operating-model.instructions.md'
         )
         validations = @(
             'Run focused validation for the changed scope.',

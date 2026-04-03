@@ -29,13 +29,13 @@ fn test_invoke_validate_routing_coverage_passes_for_valid_catalog_and_fixtures()
 routing:
   - id: docs
     include:
-      - path: instructions/readme.instructions.md
+      - path: instructions/docs/ntk-docs-readme.instructions.md
 "#,
     );
     write_file(
         &repo
             .path()
-            .join(".github/instructions/readme.instructions.md"),
+            .join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
         "# readme",
     );
     write_file(
@@ -47,7 +47,7 @@ routing:
     {
       "id": "docs-route",
       "expected_route_ids": ["docs"],
-      "expected_selected_paths": ["instructions/readme.instructions.md"]
+      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
     }
   ]
 }"#,
@@ -76,7 +76,7 @@ fn test_invoke_validate_routing_coverage_reports_missing_coverage_and_unknown_ro
 routing:
   - id: docs
     include:
-      - path: instructions/readme.instructions.md
+      - path: instructions/docs/ntk-docs-readme.instructions.md
   - id: rust
     include:
       - path: instructions/rust.instructions.md
@@ -85,7 +85,7 @@ routing:
     write_file(
         &repo
             .path()
-            .join(".github/instructions/readme.instructions.md"),
+            .join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
         "# readme",
     );
     write_file(
@@ -103,7 +103,7 @@ routing:
     {
       "id": "broken-route",
       "expected_route_ids": ["missing"],
-      "expected_selected_paths": ["instructions/readme.instructions.md"]
+      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
     }
   ]
 }"#,
@@ -138,13 +138,13 @@ fn test_invoke_validate_routing_coverage_converts_required_findings_to_warnings(
 routing:
   - id: docs
     include:
-      - path: instructions/readme.instructions.md
+      - path: instructions/docs/ntk-docs-readme.instructions.md
 "#,
     );
     write_file(
         &repo
             .path()
-            .join(".github/instructions/readme.instructions.md"),
+            .join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
         "# readme",
     );
     write_file(
@@ -156,7 +156,7 @@ routing:
     {
       "id": "no-routes",
       "expected_route_ids": [],
-      "expected_selected_paths": ["instructions/readme.instructions.md"]
+      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
     }
   ]
 }"#,

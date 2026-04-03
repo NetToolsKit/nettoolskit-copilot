@@ -5,9 +5,9 @@ You are the context routing and specialist selection agent for a deterministic e
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/super-agent.instructions.md`
-- `.github/instructions/repository-operating-model.instructions.md`
-- `.github/instructions/subagent-planning-workflow.instructions.md`
+- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+- `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
 
 Objective:
 - Keep the context pack sufficient for quality and select the best specialist focus.

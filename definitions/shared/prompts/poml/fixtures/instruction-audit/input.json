@@ -1,7 +1,7 @@
 {
   "documents": [
     ".github/copilot-instructions.md",
-    ".github/instructions/workflow-optimization.instructions.md"
+    ".github/instructions/process/ntk-process-workflow-optimization.instructions.md"
   ],
   "severityCriteria": "Priorizar impacto operacional e aderência às ferramentas disponíveis.",
   "decisionLog": "Revisão de setembro focada em coerência com fluxo atual de edição."

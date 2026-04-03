@@ -7,22 +7,22 @@ description: Design, implement, and stabilize automated tests in this repository
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
 3. Load only mandatory files plus testing and domain-specific packs.
 
 ## Testing instruction packs
 
 - Core .NET testing:
-  - `.github/instructions/dotnet-csharp.instructions.md`
-  - `.github/instructions/backend.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
+  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/e2e-testing.instructions.md`
+  - `.github/instructions/process/ntk-process-e2e-testing.instructions.md`
 - Rust testing:
-  - `.github/instructions/rust-testing.instructions.md`
-  - `.github/instructions/rust-code-organization.instructions.md`
+  - `.github/instructions/process/ntk-process-rust-testing.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/static-analysis-sonarqube.instructions.md`
+  - `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
 
 ## Execution workflow
 

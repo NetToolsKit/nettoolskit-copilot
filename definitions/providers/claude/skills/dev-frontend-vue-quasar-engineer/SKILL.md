@@ -9,14 +9,14 @@ description: Implement and refactor frontend features using Vue and Quasar with 
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Frontend instruction pack
 
-- `.github/instructions/frontend.instructions.md`
-- `.github/instructions/vue-quasar.instructions.md`
-- `.github/instructions/vue-quasar-architecture.instructions.md`
-- `.github/instructions/ui-ux.instructions.md`
+- `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
+- `.github/instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`
+- `.github/instructions/architecture/frontend/ntk-frontend-vue-quasar-architecture.instructions.md`
+- `.github/instructions/architecture/frontend/ntk-frontend-ui-ux.instructions.md`
 
 ## Claude-native execution
 

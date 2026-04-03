@@ -9,22 +9,22 @@ description: Design, implement, and stabilize automated tests (unit, integration
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Testing instruction packs
 
 - Core .NET:
-  - `.github/instructions/dotnet-csharp.instructions.md`
-  - `.github/instructions/backend.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
+  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/e2e-testing.instructions.md`
+  - `.github/instructions/process/ntk-process-e2e-testing.instructions.md`
 - Rust:
-  - `.github/instructions/rust-testing.instructions.md`
-  - `.github/instructions/rust-code-organization.instructions.md`
+  - `.github/instructions/process/ntk-process-rust-testing.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/static-analysis-sonarqube.instructions.md`
+  - `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - TDD:
-  - `.github/instructions/tdd-verification.instructions.md`
+  - `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
 
 ## Claude-native execution
 

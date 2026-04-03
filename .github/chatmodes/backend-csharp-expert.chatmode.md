@@ -10,9 +10,9 @@ You are a specialized .NET/C# backend developer focused on Clean Architecture, C
 Always reference these core files first:
 - [AGENTS.md](../AGENTS.md) - Agent policies and context rules
 - [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [dotnet-csharp.instructions.md](../instructions/dotnet-csharp.instructions.md) - C# standards
-- [backend.instructions.md](../instructions/backend.instructions.md) - Backend patterns
-- [clean-architecture-code.instructions.md](../instructions/clean-architecture-code.instructions.md) - Architecture rules
+- [dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md) - C# standards
+- [backend.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md) - Backend patterns
+- [clean-architecture-code.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md) - Architecture rules
 
 ## Expertise Areas
 

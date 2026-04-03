@@ -7,8 +7,8 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
-2. Load `.github/instructions/pr.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
+2. Load `.github/instructions/process/ntk-process-pr.instructions.md`.
 3. Route additional domain instructions with `.github/instruction-routing.catalog.yml` based on changed files.
 
 ## Review order
@@ -27,9 +27,9 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 
 ## Useful references
 
-- `.github/instructions/clean-architecture-code.instructions.md`
-- `.github/instructions/backend.instructions.md`
-- `.github/instructions/frontend.instructions.md`
-- `.github/instructions/database.instructions.md`
-- `.github/instructions/ci-cd-devops.instructions.md`
+- `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
+- `.github/instructions/data-security/ntk-data-orm.instructions.md`
+- `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
+- `.github/instructions/data-security/ntk-data-database.instructions.md`
+- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
 - `.github/chatmodes/clean-architecture-review.chatmode.md`

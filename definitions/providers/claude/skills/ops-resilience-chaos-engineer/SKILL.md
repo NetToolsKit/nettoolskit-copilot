@@ -9,14 +9,14 @@ description: Improve platform resilience with timeout/retry/circuit-breaker stra
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Instruction pack
 
-- `.github/instructions/platform-reliability-resilience.instructions.md`
-- `.github/instructions/microservices-performance.instructions.md`
-- `.github/instructions/ci-cd-devops.instructions.md`
-- `.github/instructions/k8s.instructions.md` (when workload orchestration is in scope)
+- `.github/instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md`
+- `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
+- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
+- `.github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md` (when workload orchestration is in scope)
 
 ## Claude-native execution
 

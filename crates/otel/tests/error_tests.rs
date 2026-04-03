@@ -1,6 +1,6 @@
 //! Error Handling Tests
 //!
-//! This file exists per .github/instructions/rust-testing.instructions.md
+//! This file exists per .github/instructions/process/ntk-process-rust-testing.instructions.md
 //! The otel crate provides OpenTelemetry utilities and does not define custom error types.
 //! This file serves as:
 //! 1. A compliance checkpoint for error handling standards

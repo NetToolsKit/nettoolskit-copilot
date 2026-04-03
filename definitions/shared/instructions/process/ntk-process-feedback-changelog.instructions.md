@@ -19,7 +19,7 @@ Do not assemble a final CHANGELOG entry directly from this instruction file; use
 ## [2.0.1] - 2025-09-03
 
 ### Fixed
-- .github/instructions/frontend.instructions.md handleApiError(): automatic retry added
+- .github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md handleApiError(): automatic retry added
 - LoadingButton: improved loading state
 
 ### Feedback Integration
@@ -48,3 +48,4 @@ NEVER leave empty lines at end of CHANGELOG files; remove trailing newlines; end
 
 # Feedback Tracking Format
 File | context | problem | solution | workspace-impact within CHANGELOG entries.
+

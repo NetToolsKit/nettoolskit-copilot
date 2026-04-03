@@ -16,7 +16,7 @@ Generated: 2026-03-29
   - `planning/completed/plan-script-retirement-phase-20c-self-heal.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.github/workflows/ci.yml`
   - `crates/cli/src/main.rs`
   - `crates/cli/src/runtime_commands.rs`
@@ -29,7 +29,7 @@ Generated: 2026-03-29
 
 The triangulation analysis revealed six distinct consolidation concerns that are not covered by the current Phase 17 tactical plan:
 
-1. **Operating model desalignment**: `.github/instructions/repository-operating-model.instructions.md` still describes a .NET monorepo with `src/`, `modules/`, `samples/src/Rent.Service.*`, `dotnet build`, and `dotnet test` topology. The actual workspace is a Rust multi-crate layout with `crates/{cli,core,ui,otel,orchestrator,commands,task-worker}` and `cargo build --workspace`. Every AI agent routing instruction that hits this file receives wrong build commands, wrong topology, and wrong domain instruction map references. This is the highest-priority correctness risk in the repository.
+1. **Operating model desalignment**: `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` still describes a .NET monorepo with `src/`, `modules/`, `samples/src/Rent.Service.*`, `dotnet build`, and `dotnet test` topology. The actual workspace is a Rust multi-crate layout with `crates/{cli,core,ui,otel,orchestrator,commands,task-worker}` and `cargo build --workspace`. Every AI agent routing instruction that hits this file receives wrong build commands, wrong topology, and wrong domain instruction map references. This is the highest-priority correctness risk in the repository.
 
 2. **CLI surface documentation gap**: The `ntk` binary now exposes 12 `runtime` subcommands, 29 `validation` subcommands, `manifest` submenu, `service` mode (Axum HTTP + ChatOps), and `completions` (bash/zsh/fish/powershell). None of these surfaces are documented in the root `README.md` or `crates/cli/README.md`. The existing docs describe either the original interactive TUI model or just 3 bullet features.
 
@@ -39,18 +39,18 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 5. **`copilot-instructions` Phase 8 awaiting directives**: The `copilot-instructions` repo has a planning-ready spec (`spec-rust-runtime-engine-foundation-phase-8.md`) that is blocked on user-provided Rust directives. The spec defines the compatibility-first migration contract but does not create any Cargo files until directives arrive. Starting this migration would bring the instruction runtime into the same Rust-native model that `nettoolskit-copilot` already operates with.
 
-6. **`definitions/shared/instructions/` mirror synchronization**: The `repository-operating-model.instructions.md` exists in both `.github/instructions/` and `definitions/shared/instructions/`. Both copies must be updated together; updating only the `.github/` projection while leaving the authoritative `definitions/` source stale would cause the rendering pipeline to revert the fix on the next sync.
+6. **`definitions/shared/instructions/` mirror synchronization**: The `ntk-core-repository-operating-model.instructions.md` exists in both `.github/instructions/` and `definitions/shared/instructions/`. Both copies must be updated together; updating only the `.github/` projection while leaving the authoritative `definitions/` source stale would cause the rendering pipeline to revert the fix on the next sync.
 
 ---
 
 ## Desired Outcome
 
-- Every AI agent that routes through `repository-operating-model.instructions.md` receives correct Rust workspace commands, correct topology, and correct domain instruction references.
+- Every AI agent that routes through `ntk-core-repository-operating-model.instructions.md` receives correct Rust workspace commands, correct topology, and correct domain instruction references.
 - Root `README.md` and `crates/cli/README.md` document the full `ntk` CLI surface with named subcommands, so feature discoverability matches implementation reality.
 - The 23 PowerShell parity tests either run in CI with an explicit gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
 - Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 63 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
-- `definitions/shared/instructions/repository-operating-model.instructions.md` stays in sync with the `.github/instructions/` projection after every update.
+- `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` stays in sync with the `.github/instructions/` projection after every update.
 
 ---
 
@@ -58,16 +58,16 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 ### W2: Operating Model Alignment
 
-The authoritative source for `repository-operating-model.instructions.md` is `definitions/shared/instructions/`. The file in `.github/instructions/` is a projected copy. The correct fix sequence is:
+The authoritative source for `ntk-core-repository-operating-model.instructions.md` is `definitions/shared/instructions/`. The file in `.github/instructions/` is a projected copy. The correct fix sequence is:
 
-1. Edit `definitions/shared/instructions/repository-operating-model.instructions.md` as the single authoritative change.
-2. Re-render `.github/instructions/repository-operating-model.instructions.md` using the GitHub instruction surface renderer (`scripts/runtime/render-github-instruction-surfaces.ps1` or `ntk runtime bootstrap`).
+1. Edit `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` as the single authoritative change.
+2. Re-render `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` using the GitHub instruction surface renderer (`scripts/runtime/render-github-instruction-surfaces.ps1` or `ntk runtime bootstrap`).
 3. Validate with `ntk validation instructions --repo-root . --warning-only false`.
 
 Changing only the `.github/` projection without updating the authoritative source is rejected because the next render pass would overwrite the fix.
 
 Current execution checkpoint:
-- the authoritative `definitions/shared/instructions/repository-operating-model.instructions.md` has now been rewritten to the Rust workspace topology and command model
+- the authoritative `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` has now been rewritten to the Rust workspace topology and command model
 - the `.github/instructions/` projection has been re-rendered from that authoritative source
 - native validation confirmed the operating-model update without reopening planning-structure drift
 
@@ -118,7 +118,7 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 
 ### W2 alternatives
 
-1. Edit only `.github/instructions/repository-operating-model.instructions.md` directly
+1. Edit only `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` directly
    - Rejected: the rendering pipeline would overwrite the fix on the next sync.
 2. Delete the file and inherit only from the global `%USERPROFILE%\.github` mirror
    - Rejected: would break workspace-adapter routing that depends on local override.
@@ -162,7 +162,7 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 ## Acceptance Criteria
 
 ### W2: Operating Model Alignment
-- `repository-operating-model.instructions.md` describes the Rust workspace topology (`crates/`, `scripts/`, `definitions/`, `deployments/`) with correct build and test commands (`cargo build --workspace`, `cargo test --workspace`).
+- `ntk-core-repository-operating-model.instructions.md` describes the Rust workspace topology (`crates/`, `scripts/`, `definitions/`, `deployments/`) with correct build and test commands (`cargo build --workspace`, `cargo test --workspace`).
 - The domain instruction map reflects Rust-applicable facts; .NET-specific entries are removed or scoped to a separate future workstream.
 - `ntk validation instructions --repo-root .` passes after the update.
 

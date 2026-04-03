@@ -9,9 +9,9 @@ Analyze existing code and refactor to Clean Architecture following SOLID princip
 
 ## Instructions
 Refactor code based on:
-- [clean-architecture-code.instructions.md](../instructions/clean-architecture-code.instructions.md)
-- [backend.instructions.md](../instructions/backend.instructions.md)
-- [dotnet-csharp.instructions.md](../instructions/dotnet-csharp.instructions.md)
+- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
+- [ntk-backend-architecture-platform.instructions.md](../instructions/data-security/ntk-data-orm.instructions.md)
+- [ntk-backend-dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md)
 
 ## Input Variables
 - `${input:targetPath:Path to code to refactor}` - File or directory path

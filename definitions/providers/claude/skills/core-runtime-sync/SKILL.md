@@ -9,7 +9,7 @@ description: Sync shared repo assets into local ~/.github, ~/.codex, and ~/.clau
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Claude-native execution
 

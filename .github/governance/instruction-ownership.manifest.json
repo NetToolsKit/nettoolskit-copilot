@@ -29,14 +29,14 @@
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/super-agent.instructions.md",
-        "instructions/repository-operating-model.instructions.md",
-        "instructions/artifact-layout.instructions.md",
-        "instructions/subagent-planning-workflow.instructions.md",
-        "instructions/workflow-optimization.instructions.md",
-        "instructions/authoritative-sources.instructions.md",
-        "instructions/powershell-execution.instructions.md",
-        "instructions/feedback-changelog.instructions.md"
+        "instructions/core/ntk-core-super-agent.instructions.md",
+        "instructions/core/ntk-core-repository-operating-model.instructions.md",
+        "instructions/core/ntk-core-artifact-layout.instructions.md",
+        "instructions/process/ntk-process-subagent-planning-workflow.instructions.md",
+        "instructions/process/ntk-process-workflow-optimization.instructions.md",
+        "instructions/core/ntk-core-authoritative-sources.instructions.md",
+        "instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md",
+        "instructions/process/ntk-process-feedback-changelog.instructions.md"
       ]
     }
   },
@@ -49,24 +49,24 @@
         ".github/copilot-instructions.md"
       ],
       "mustReference": [
-        "instructions/repository-operating-model.instructions.md",
-        "instructions/authoritative-sources.instructions.md",
-        "instructions/artifact-layout.instructions.md"
+        "instructions/core/ntk-core-repository-operating-model.instructions.md",
+        "instructions/core/ntk-core-authoritative-sources.instructions.md",
+        "instructions/core/ntk-core-artifact-layout.instructions.md"
       ]
     },
     {
       "id": "repository-operating-model",
       "description": "Repository-specific operational rules, commands, style, release, and domain instruction map.",
       "pathPatterns": [
-        ".github/instructions/repository-operating-model.instructions.md"
+        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "cross-cutting-policies",
       "description": "Policies, maps, and baselines that apply across domains.",
       "pathPatterns": [
-        ".github/instructions/super-agent.instructions.md",
-        ".github/instructions/authoritative-sources.instructions.md",
+        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
       ]
@@ -78,9 +78,9 @@
         ".github/instructions/*.instructions.md"
       ],
       "excludePatterns": [
-        ".github/instructions/authoritative-sources.instructions.md",
-        ".github/instructions/super-agent.instructions.md",
-        ".github/instructions/repository-operating-model.instructions.md"
+        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
+        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
     {

@@ -469,7 +469,7 @@ Before completing ANY test-related work, verify:
 - **Templates:** `.github/templates/*_template.rs`
 - **Full Guide:** `tools/nettoolskit-cli/docs/test-templates.md`
 - **Standards Analysis:** `tools/nettoolskit-cli/docs/test-standards-analysis.md`
-- **Official External Docs:** use `instructions/authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
+- **Official External Docs:** use `instructions/core/ntk-core-authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
 
 ## Enforcement
 
@@ -487,3 +487,5 @@ Refer to:
 1. Templates in `.github/templates/`
 2. Full documentation in `tools/nettoolskit-cli/docs/`
 3. Existing tests in `crates/commands/tests/` (best practices)
+
+

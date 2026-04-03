@@ -16,13 +16,13 @@
 
 ## Testing Instructions Updated
 
-- ✅ `.github/instructions/rust-testing.instructions.md`
+- ✅ `.github/instructions/process/ntk-process-rust-testing.instructions.md`
   - Added AAA pattern section with rules
   - Added example with explanatory comments
   - Documented when to add comments below AAA markers
   - Removed decorative separator examples
 
-- ✅ `.github/instructions/e2e-testing.instructions.md`
+- ✅ `.github/instructions/process/ntk-process-e2e-testing.instructions.md`
   - Added universal AAA pattern rules (all languages)
   - C# and TypeScript examples
   - Explanatory comment examples
@@ -455,8 +455,8 @@
 ## Execution Plan
 
 ### ✅ Phase 1: Instructions (COMPLETE)
-- ✅ Update rust-testing.instructions.md
-- ✅ Update e2e-testing.instructions.md
+- ✅ Update ntk-process-rust-testing.instructions.md
+- ✅ Update ntk-process-e2e-testing.instructions.md
 - ✅ Document AAA rules and examples
 
 ### ✅ Phase 2: Core & Foundation (COMPLETE - 14/14 files)

@@ -39,7 +39,7 @@ tracked workspace surfaces.
 
 - [definitions/shared/prompts/README.md](prompts/README.md)
 - [definitions/shared/prompts/poml/README.md](prompts/poml/README.md)
-- [Repository README Rules](../../.github/instructions/nettoolskit-rules.instructions.md)
+- [Repository README Rules](../../.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md)
 - [README Template](../../.github/templates/readme-template.md)
 
 ---

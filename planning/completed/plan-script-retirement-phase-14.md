@@ -68,8 +68,8 @@ Status: `[x]` Completed
   - `definitions/providers/vscode/workspace/README.md`
   - `definitions/shared/templates/github-change-checklist-template.md`
   - `.github/templates/github-change-checklist-template.md`
-  - `definitions/shared/instructions/copilot-instruction-creation.instructions.md`
-  - `.github/instructions/copilot-instruction-creation.instructions.md`
+  - `definitions/shared/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
+  - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
   - `.github/runbooks/README.md`
   - `.github/governance/release-governance.md`
   - `.github/policies/instruction-system.policy.json`
@@ -98,8 +98,8 @@ Status: `[x]` Completed
   - `definitions/providers/vscode/workspace/README.md`
   - `definitions/shared/templates/github-change-checklist-template.md`
   - `.github/templates/github-change-checklist-template.md`
-  - `definitions/shared/instructions/copilot-instruction-creation.instructions.md`
-  - `.github/instructions/copilot-instruction-creation.instructions.md`
+  - `definitions/shared/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
+  - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
   - `.github/runbooks/README.md`
   - `.github/governance/release-governance.md`
   - `.github/policies/instruction-system.policy.json`

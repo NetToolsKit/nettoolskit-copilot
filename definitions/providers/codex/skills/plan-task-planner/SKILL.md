@@ -7,16 +7,16 @@ description: Plan and sequence complex implementation work into deterministic, t
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
 3. Load only planning/process files plus the domain packs needed by the plan.
 
 ## Planning instruction pack
 
-- `.github/instructions/workflow-optimization.instructions.md`
-- `.github/instructions/effort-estimation-ucp.instructions.md`
-- `.github/instructions/pr.instructions.md` (when output is PR-oriented)
-- `.github/instructions/feedback-changelog.instructions.md` (when release/change log impact exists)
+- `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+- `.github/instructions/process/ntk-process-effort-estimation-ucp.instructions.md`
+- `.github/instructions/process/ntk-process-pr.instructions.md` (when output is PR-oriented)
+- `.github/instructions/process/ntk-process-feedback-changelog.instructions.md` (when release/change log impact exists)
 
 ## Planning workflow
 

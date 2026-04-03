@@ -1,6 +1,6 @@
 //! Error Handling Tests
 //!
-//! This file exists per .github/instructions/rust-testing.instructions.md
+//! This file exists per .github/instructions/process/ntk-process-rust-testing.instructions.md
 //! Tests error handling for orchestrator types, particularly ExitStatus.
 
 use nettoolskit_orchestrator::ExitStatus;

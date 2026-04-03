@@ -108,8 +108,8 @@ This workstream treats OpenCode.ai as an orchestration/control-plane surface, no
 - Keep the README summary short and defer detail to the planning/spec docs.
 - Target paths:
   - `README.md`
-  - `.github/instructions/readme.instructions.md`
-  - `.github/instructions/nettoolskit-rules.instructions.md`
+  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
+  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - Commit checkpoint:

@@ -601,7 +601,7 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\copilot-instructions.md') -Value '# Demo Instructions' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\instruction-routing.catalog.yml') -Value 'routes: []' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'agents\super-agent.agent.md') -Value '# Agent' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'instructions\super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'instructions\\core\\ntk-core-super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'prompts\route-instructions.prompt.md') -Value '# Prompt' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $sharedPomlSourceRoot 'prompt-engineering-poml.md') -Value '# POML Guide' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $sharedPomlSourceRoot 'templates\changelog-entry.poml') -Value '<poml />' -Encoding UTF8 -NoNewline
@@ -670,7 +670,7 @@ try {
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'render-github-instruction-surfaces smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'AGENTS.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub root files.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\super-agent.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\\core\\ntk-core-super-agent.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'chatmodes\demo.chatmode.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub chatmode surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'prompts\route-instructions.prompt.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub prompt entrypoint surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'prompts\poml\prompt-engineering-poml.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected shared POML guide.'

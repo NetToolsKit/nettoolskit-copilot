@@ -5,8 +5,8 @@
 The repository currently has `27` `README.md` files spread across root, `crates/`, `crates/commands/`, `planning/`, `scripts/`, and `definitions/`.
 The authoritative README guidance already exists, but it is incomplete for the repository's real topology:
 
-- `.github/instructions/nettoolskit-rules.instructions.md`
-- `.github/instructions/readme.instructions.md`
+- `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
+- `.github/instructions/docs/ntk-docs-readme.instructions.md`
 - `.github/templates/readme-template.md`
 - `.github/governance/readme-standards.baseline.json`
 

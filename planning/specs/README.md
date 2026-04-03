@@ -105,9 +105,9 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md](planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
-- [super-agent.instructions.md](../../.github/instructions/super-agent.instructions.md)
-- [brainstorm-spec-workflow.instructions.md](../../.github/instructions/brainstorm-spec-workflow.instructions.md)
-- [subagent-planning-workflow.instructions.md](../../.github/instructions/subagent-planning-workflow.instructions.md)
+- [ntk-core-super-agent.instructions.md](../../.github/instructions/core/ntk-core-super-agent.instructions.md)
+- [ntk-process-brainstorm-spec-workflow.instructions.md](../../.github/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md)
+- [ntk-process-subagent-planning-workflow.instructions.md](../../.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md)
 
 ---
 

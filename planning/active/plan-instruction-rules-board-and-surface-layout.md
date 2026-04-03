@@ -16,8 +16,8 @@ Generated: 2026-03-30 08:59
   - `.github/AGENTS.md`
   - `.github/copilot-instructions.md`
   - `.github/instruction-routing.catalog.yml`
-  - `.github/instructions/super-agent.instructions.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
+  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/README.md`
   - `definitions/README.md`
 

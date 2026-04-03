@@ -12,12 +12,12 @@ description: Extend dev-software-engineer with .NET/C# backend specialization fo
 
 ## Domain instruction delta
 
-- `.github/instructions/dotnet-csharp.instructions.md`
-- `.github/instructions/clean-architecture-code.instructions.md`
-- `.github/instructions/backend.instructions.md`
-- `.github/instructions/database.instructions.md`
-- `.github/instructions/orm.instructions.md`
-- `.github/instructions/microservices-performance.instructions.md` (when applicable)
+- `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
+- `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
+- `.github/instructions/data-security/ntk-data-orm.instructions.md`
+- `.github/instructions/data-security/ntk-data-database.instructions.md`
+- `.github/instructions/data-security/ntk-data-orm.instructions.md`
+- `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md` (when applicable)
 
 ## Claude-native execution
 

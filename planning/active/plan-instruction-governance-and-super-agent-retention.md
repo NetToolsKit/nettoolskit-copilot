@@ -12,9 +12,9 @@ Generated: 2026-03-30 07:31
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependency: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
 - Inputs:
-  - `definitions/shared/instructions/repository-operating-model.instructions.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
-  - `.github/instructions/super-agent.instructions.md`
+  - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
   - `.github/instruction-routing.catalog.yml`
   - `C:\Users\tguis\copilot-instructions\`
   - `planning/completed/plan-instruction-parity-and-script-retirement.md`

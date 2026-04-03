@@ -9,17 +9,17 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Infrastructure instruction packs
 
-- CI/CD: `.github/instructions/ci-cd-devops.instructions.md`
-- Containers: `.github/instructions/docker.instructions.md`
-- Kubernetes: `.github/instructions/k8s.instructions.md`
-- Quality gates: `.github/instructions/static-analysis-sonarqube.instructions.md`
+- CI/CD: `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
+- Containers: `.github/instructions/runtime-ops/ntk-runtime-docker.instructions.md`
+- Kubernetes: `.github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md`
+- Quality gates: `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - Performance (when needed):
-  - `.github/instructions/workflow-optimization.instructions.md`
-  - `.github/instructions/microservices-performance.instructions.md`
+  - `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+  - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
 
 ## Claude-native execution
 

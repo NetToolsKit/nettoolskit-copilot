@@ -7,21 +7,21 @@ description: Produce and maintain repository documentation and release artifacts
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml`.
 3. Load documentation/process packs based on target file type.
 
 ## Documentation instruction packs
 
 - README documentation:
-  - `.github/instructions/readme.instructions.md`
-  - `.github/instructions/nettoolskit-rules.instructions.md`
+  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
+  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
 - PR and release communication:
-  - `.github/instructions/pr.instructions.md`
-  - `.github/instructions/feedback-changelog.instructions.md`
+  - `.github/instructions/process/ntk-process-pr.instructions.md`
+  - `.github/instructions/process/ntk-process-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
-  - `.github/instructions/prompt-templates.instructions.md`
-  - `.github/instructions/copilot-instruction-creation.instructions.md`
+  - `.github/instructions/docs/ntk-docs-prompt-templates.instructions.md`
+  - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
 
 ## Execution workflow
 

@@ -19,8 +19,8 @@ Generated: 2026-03-29
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
-  - `definitions/shared/instructions/repository-operating-model.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.github/workflows/ci.yml`
   - `crates/cli/src/main.rs`
   - `crates/cli/src/runtime_commands.rs`
@@ -80,7 +80,7 @@ the live script estate from 104 to 100.
 Status: `[x]` Completed
 
 **Problem being fixed:**
-`repository-operating-model.instructions.md` describes a .NET/Clean Architecture monorepo with
+`ntk-core-repository-operating-model.instructions.md` describes a .NET/Clean Architecture monorepo with
 `src/`, `modules/`, `samples/src/Rent.Service.*`, `dotnet build`, and `dotnet test`. The actual
 workspace is a Rust multi-crate layout. Every AI agent consuming this file receives wrong build
 commands, wrong topology, and wrong test filters.
@@ -89,14 +89,14 @@ commands, wrong topology, and wrong test filters.
 
 Status: `[x]` Completed
 
-- Confirm whether `definitions/shared/instructions/repository-operating-model.instructions.md` exists.
+- Confirm whether `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` exists.
 - If it exists, the authoritative source is `definitions/shared/instructions/` and the `.github/instructions/` copy is a projection.
 - If it does not exist, the authoritative source is `.github/instructions/` directly.
 - Commands:
-  - `Test-Path definitions\shared\instructions\repository-operating-model.instructions.md`
+  - `Test-Path definitions\\shared\\instructions\\core\\ntk-core-repository-operating-model.instructions.md`
 - Target paths confirmed post-check:
-  - `definitions/shared/instructions/repository-operating-model.instructions.md` (if it exists — authoritative source)
-  - `.github/instructions/repository-operating-model.instructions.md` (projection or direct if no definitions source)
+  - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` (if it exists — authoritative source)
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` (projection or direct if no definitions source)
 - Checkpoint: source of truth identified.
 
 #### Task W2.2: Rewrite Repository Topology Section
@@ -176,28 +176,28 @@ Status: `[x]` Completed
 - The current map includes Vue/Quasar, ORM/EF Core, Docker/K8s, .NET-specific entries.
 - New correct map for this workspace:
   - Development (Rust):
-    - `instructions/rust-code-organization.instructions.md`
-    - `instructions/rust-testing.instructions.md`
-    - `instructions/clean-architecture-code.instructions.md`
-    - `instructions/backend.instructions.md`
-    - `instructions/api-high-performance-security.instructions.md`
+    - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+    - `instructions/process/ntk-process-rust-testing.instructions.md`
+    - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
+    - `instructions/data-security/ntk-data-orm.instructions.md`
+    - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
   - Infrastructure:
-    - `instructions/docker.instructions.md`
-    - `instructions/ci-cd-devops.instructions.md`
-    - `instructions/workflow-generation.instructions.md`
-    - `instructions/observability-sre.instructions.md`
-    - `instructions/platform-reliability-resilience.instructions.md`
-    - `instructions/powershell-script-creation.instructions.md`
-    - `instructions/powershell-execution.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-docker.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
   - Security:
-    - `instructions/security-vulnerabilities.instructions.md`
-    - `instructions/api-high-performance-security.instructions.md`
-    - `instructions/data-privacy-compliance.instructions.md`
+    - `instructions/data-security/ntk-security-vulnerabilities.instructions.md`
+    - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
+    - `instructions/data-security/ntk-security-data-privacy-compliance.instructions.md`
   - Testing:
-    - `instructions/rust-testing.instructions.md`
-    - `instructions/tdd-verification.instructions.md`
-    - `instructions/e2e-testing.instructions.md`
-    - `instructions/static-analysis-sonarqube.instructions.md`
+    - `instructions/process/ntk-process-rust-testing.instructions.md`
+    - `instructions/process/ntk-process-tdd-verification.instructions.md`
+    - `instructions/process/ntk-process-e2e-testing.instructions.md`
+    - `instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
   - Documentation and process: keep as-is (shared lifecycle files apply generically).
   - Remove: `dotnet-csharp`, `orm`, `database`, `database-configuration-operations`, `vue-quasar`, `vue-quasar-architecture`, `frontend`, `ui-ux`, `microservices-performance`.
 - Commit checkpoint:
@@ -217,8 +217,8 @@ Status: `[x]` Completed
   - `docs(instructions): re-render github instruction surfaces with updated operating model`
 
 **Checkpoint: W2 Operating Model Alignment Complete**
-- authoritative source confirmed at `definitions/shared/instructions/repository-operating-model.instructions.md`
-- projected GitHub copy re-rendered into `.github/instructions/repository-operating-model.instructions.md`
+- authoritative source confirmed at `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
+- projected GitHub copy re-rendered into `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 - repository topology now describes the Rust multi-crate workspace instead of the old .NET monorepo layout
 - build/test/run guidance now points to `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt`, native `ntk validation`, runtime continuity commands, and the Rust vulnerability audit
 - style, testing, workflow patterns, and domain instruction map now align to the actual Rust workspace and retained PowerShell compatibility model
@@ -732,7 +732,7 @@ W5 phases must be sequential and depend on Phases 17 and 18 closing.
 | R4 | Phase 20 is too large for one PR review | Split into 20a/20b/20c sub-phases; each sub-phase has its own commit checkpoint |
 | R5 | Phase 21 security script deletion requires updating `shared-script-checksums.manifest.json` in a separate PR | Create the manifest update as a prerequisite commit before the deletion PR |
 | R6 | `copilot-instructions` Phase 8 scaffold breaks the existing PowerShell validation in that repo | Add `cargo build` after workspace creation; if `validate-planning-structure.ps1` fails, debug before proceeding |
-| R7 | `definitions/shared/instructions/repository-operating-model.instructions.md` does not exist (no `definitions/` source) | Apply the fix directly to `.github/instructions/` and skip W2.6 re-render step |
+| R7 | `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` does not exist (no `definitions/` source) | Apply the fix directly to `.github/instructions/` and skip W2.6 re-render step |
 
 ---
 

@@ -13,29 +13,29 @@ description: Base implementation skill for this repository across .NET/C#, backe
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
 3. Keep only mandatory files plus the selected domain pack.
 
 ## Select domain instruction pack
 
 - .NET and backend:
-  - `.github/instructions/dotnet-csharp.instructions.md`
-  - `.github/instructions/clean-architecture-code.instructions.md`
-  - `.github/instructions/backend.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
+  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
 - Database and ORM:
-  - `.github/instructions/database.instructions.md`
-  - `.github/instructions/orm.instructions.md`
+  - `.github/instructions/data-security/ntk-data-database.instructions.md`
+  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
 - Frontend Vue/Quasar:
-  - `.github/instructions/frontend.instructions.md`
-  - `.github/instructions/vue-quasar.instructions.md`
-  - `.github/instructions/vue-quasar-architecture.instructions.md`
-  - `.github/instructions/ui-ux.instructions.md`
+  - `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
+  - `.github/instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`
+  - `.github/instructions/architecture/frontend/ntk-frontend-vue-quasar-architecture.instructions.md`
+  - `.github/instructions/architecture/frontend/ntk-frontend-ui-ux.instructions.md`
 - Rust:
-  - `.github/instructions/rust-code-organization.instructions.md`
-  - `.github/instructions/rust-testing.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+  - `.github/instructions/process/ntk-process-rust-testing.instructions.md`
 - Performance/microservices (when applicable):
-  - `.github/instructions/microservices-performance.instructions.md`
+  - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
 
 ## Execution workflow
 

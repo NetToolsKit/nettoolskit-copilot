@@ -10,8 +10,8 @@ You are a specialized Rust developer focused on memory safety, zero-cost abstrac
 Always reference these core files first:
 - [AGENTS.md](../AGENTS.md) - Agent policies and context rules
 - [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [rust-code-organization.instructions.md](../instructions/rust-code-organization.instructions.md) - Code structure
-- [rust-testing.instructions.md](../instructions/rust-testing.instructions.md) - Testing standards
+- [rust-code-organization.instructions.md](../instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md) - Code structure
+- [rust-testing.instructions.md](../instructions/process/ntk-process-rust-testing.instructions.md) - Testing standards
 
 ## Expertise Areas
 

@@ -12,9 +12,9 @@ Generated: 2026-03-30 08:59
 - Dependencies:
   - `planning/README.md`
   - `planning/specs/README.md`
-  - `definitions/shared/instructions/brainstorm-spec-workflow.instructions.md`
-  - `.github/instructions/super-agent.instructions.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
+  - `definitions/shared/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
   - `.codex/skills/core-context-router/SKILL.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -47,9 +47,9 @@ This workstream does not implement product behavior. It defines the planning dis
 - Inventory the current spec-first tooling and docs:
   - `planning/specs/README.md`
   - `planning/README.md`
-  - `definitions/shared/instructions/brainstorm-spec-workflow.instructions.md`
-  - `.github/instructions/super-agent.instructions.md`
-  - `.github/instructions/repository-operating-model.instructions.md`
+  - `definitions/shared/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
   - `.codex/skills/core-context-router/SKILL.md`
 - Record the current planning and spec surfaces that already support SDD.

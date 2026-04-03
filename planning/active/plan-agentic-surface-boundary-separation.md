@@ -13,8 +13,8 @@ Generated: 2026-03-31 00:00
 - Current Slice: local context assembly and token-economy policy have been extracted from `processor.rs` into dedicated execution boundaries.
 - Inputs:
   - `README.md`
-  - `.github/instructions/readme.instructions.md`
-  - `.github/instructions/nettoolskit-rules.instructions.md`
+  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
+  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
   - `crates/orchestrator/src/execution/processor.rs`
   - `crates/orchestrator/src/execution/ai_session.rs`
   - `crates/core/src/ai_context.rs`
@@ -92,8 +92,8 @@ This workstream focuses on code separation and maintenance clarity. It does not 
 - Update the README and instruction guidance so future work does not drift A2A concerns into unrelated boundaries.
 - Target paths:
   - `README.md`
-  - `.github/instructions/readme.instructions.md`
-  - `.github/instructions/nettoolskit-rules.instructions.md`
+  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
+  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
   - `planning/active/plan-agentic-surface-boundary-separation.md`
   - `planning/specs/active/spec-agentic-surface-boundary-separation.md`
 - Commit checkpoint:

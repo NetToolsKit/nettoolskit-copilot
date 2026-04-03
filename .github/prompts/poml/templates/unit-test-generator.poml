@@ -140,8 +140,8 @@ public class OrderService
   <cp caption="References" class="documentation-refs">
     <list>
       <item>.github/templates/dotnet-unit-test-template.cs</item>
-      <item>.github/instructions/dotnet-csharp.instructions.md</item>
-      <item>.github/instructions/clean-architecture-code.instructions.md</item>
+      <item>.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md</item>
+      <item>.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md</item>
     </list>
   </cp>
 </poml>

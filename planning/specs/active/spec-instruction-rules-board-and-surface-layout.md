@@ -52,7 +52,7 @@ The repository already has the real ingredients of the reference architecture: a
 
 - No instruction content is being changed by this spec.
 - The repo already has enough surfaces to map into the board model.
-- The board must not compete with `AGENTS.md`, `copilot-instructions.md`, or `super-agent.instructions.md`.
+- The board must not compete with `AGENTS.md`, `copilot-instructions.md`, or `ntk-core-super-agent.instructions.md`.
 - The external `copilot-instructions` repository remains a comparison baseline, not a live sync target.
 
 ---

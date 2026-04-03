@@ -9,19 +9,19 @@ description: Produce and maintain repository documentation and release artifacts
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Documentation instruction packs
 
 - README:
-  - `.github/instructions/readme.instructions.md`
-  - `.github/instructions/nettoolskit-rules.instructions.md`
+  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
+  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
 - PR and release:
-  - `.github/instructions/pr.instructions.md`
-  - `.github/instructions/feedback-changelog.instructions.md`
+  - `.github/instructions/process/ntk-process-pr.instructions.md`
+  - `.github/instructions/process/ntk-process-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
-  - `.github/instructions/prompt-templates.instructions.md`
-  - `.github/instructions/copilot-instruction-creation.instructions.md`
+  - `.github/instructions/docs/ntk-docs-prompt-templates.instructions.md`
+  - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
 
 ## Claude-native execution
 

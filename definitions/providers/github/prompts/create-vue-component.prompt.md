@@ -9,10 +9,10 @@ Generate a Vue 3 component following repository standards with Composition API, 
 
 ## Instructions
 Create a new Vue component based on:
-- [vue-quasar.instructions.md](../instructions/vue-quasar.instructions.md)
-- [vue-quasar-architecture.instructions.md](../instructions/vue-quasar-architecture.instructions.md)
-- [frontend.instructions.md](../instructions/frontend.instructions.md)
-- [ui-ux.instructions.md](../instructions/ui-ux.instructions.md)
+- [ntk-frontend-vue-quasar.instructions.md](../instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md)
+- [ntk-frontend-vue-quasar-architecture.instructions.md](../instructions/architecture/frontend/ntk-frontend-vue-quasar-architecture.instructions.md)
+- [ntk-frontend-architecture-core.instructions.md](../instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md)
+- [ntk-frontend-ui-ux.instructions.md](../instructions/architecture/frontend/ntk-frontend-ui-ux.instructions.md)
 
 ## Input Variables
 - `${input:componentName:Component name (PascalCase)}` - Component name

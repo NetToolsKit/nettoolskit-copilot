@@ -49,7 +49,7 @@ fn write_valid_source_map(repo_root: &std::path::Path) {
 
 fn write_valid_instruction_assets(repo_root: &std::path::Path) {
     write_file(
-        &repo_root.join(".github/instructions/authoritative-sources.instructions.md"),
+        &repo_root.join(".github/instructions/core/ntk-core-authoritative-sources.instructions.md"),
         r#"# Authoritative Sources
 
 Use `.github/governance/authoritative-source-map.json`.
@@ -62,7 +62,7 @@ Use community sources only as fallback.
         &repo_root.join(".github/AGENTS.md"),
         r#"# AGENTS
 
-Use `instructions/authoritative-sources.instructions.md`.
+Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
 Use `.github/governance/authoritative-source-map.json`.
 "#,
     );
@@ -70,13 +70,13 @@ Use `.github/governance/authoritative-source-map.json`.
         &repo_root.join(".github/copilot-instructions.md"),
         r#"# Global Instructions
 
-Use `instructions/authoritative-sources.instructions.md`.
+Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
 Use `.github/governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
         &repo_root.join(".github/instruction-routing.catalog.yml"),
-        "always:\n  - path: instructions/authoritative-sources.instructions.md\n",
+        "always:\n  - path: instructions/core/ntk-core-authoritative-sources.instructions.md\n",
     );
 }
 

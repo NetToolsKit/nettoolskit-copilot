@@ -26,7 +26,7 @@ Context (what/why); Changes (what changed at code/infra level); Rationale (why t
 ```markdown
 Context: users face transient 502/504
 Changes: add Polly WaitAndRetry with jitter to HttpClientFactory
-Rationale: improve resilience per backend.instructions.md
+Rationale: improve resilience per ntk-backend-architecture-platform.instructions.md
 Risks: excessive retries mitigated by maxAttempts=3 and timeout
 Testing: unit tests added + integration smoke
 Docs: CHANGELOG updated
@@ -35,12 +35,12 @@ Migration: none
 ```
 
 # Applied Instructions
-List paths like .github/instructions/backend.instructions.md; .github/instructions/dotnet-csharp.instructions.md; summarize how each was applied; include any deviations and justification.
+List paths like .github/instructions/data-security/ntk-data-orm.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; summarize how each was applied; include any deviations and justification.
 ```markdown
 Applied instructions:
-- .github/instructions/backend.instructions.md
-- .github/instructions/dotnet-csharp.instructions.md
-- .github/instructions/ci-cd-devops.instructions.md
+- .github/instructions/data-security/ntk-data-orm.instructions.md
+- .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
+- .github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
 Applied: resilience (retry/jitter), CancellationToken, tests and pipeline gates
 Deviations: none
 ```
@@ -67,3 +67,5 @@ Milestone: 2025-Q1
 CI: green
 Artifacts: test results attached
 ```
+
+

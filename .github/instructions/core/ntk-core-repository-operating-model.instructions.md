@@ -15,14 +15,14 @@ priority: high
   - `AGENTS.md`
   - `copilot-instructions.md`
 - Cross-cutting policies remain centralized:
-  - `instructions/authoritative-sources.instructions.md`
-  - `instructions/artifact-layout.instructions.md`
+  - `instructions/core/ntk-core-authoritative-sources.instructions.md`
+  - `instructions/core/ntk-core-artifact-layout.instructions.md`
   - `.github/governance/authoritative-source-map.json`
-- Planning lifecycle rules are centralized in `instructions/subagent-planning-workflow.instructions.md` and `planning/README.md`.
-- Brainstorm/spec rules are centralized in `instructions/brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
-- Super Agent lifecycle rules are centralized in `instructions/super-agent.instructions.md`.
-- Worktree isolation rules are centralized in `instructions/worktree-isolation.instructions.md`.
-- TDD and verification rules are centralized in `instructions/tdd-verification.instructions.md`.
+- Planning lifecycle rules are centralized in `instructions/process/ntk-process-subagent-planning-workflow.instructions.md` and `planning/README.md`.
+- Brainstorm/spec rules are centralized in `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
+- Super Agent lifecycle rules are centralized in `instructions/core/ntk-core-super-agent.instructions.md`.
+- Worktree isolation rules are centralized in `instructions/process/ntk-process-worktree-isolation.instructions.md`.
+- TDD and verification rules are centralized in `instructions/process/ntk-process-tdd-verification.instructions.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
@@ -54,11 +54,11 @@ priority: high
   - `planning/specs/` versioned design/spec workspace with `active/` and `completed/`
 
 ## Planning Workspace
-- Use `instructions/super-agent.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
-- Use `instructions/brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
-- Use `instructions/subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
-- Use `instructions/worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
-- Use `instructions/tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
+- Use `instructions/core/ntk-core-super-agent.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
+- Use `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
+- Use `instructions/process/ntk-process-subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
+- Use `instructions/process/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Use `instructions/process/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
 - Active plans live in `planning/active/`.
 - Completed plans move to `planning/completed/` only after implementation, validation, review, and release closeout are materially complete.
 - Active specs live in `planning/specs/active/`.
@@ -193,36 +193,36 @@ priority: high
 
 ## Domain Instruction Map
 - Development:
-  - `instructions/clean-architecture-code.instructions.md`
-  - `instructions/rust-code-organization.instructions.md`
-  - `instructions/rust-testing.instructions.md`
-  - `instructions/backend.instructions.md`
-  - `instructions/api-high-performance-security.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+  - `instructions/process/ntk-process-rust-testing.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md`
+  - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
 - Infrastructure:
-  - `instructions/docker.instructions.md`
-  - `instructions/ci-cd-devops.instructions.md`
-  - `instructions/workflow-generation.instructions.md`
-  - `instructions/observability-sre.instructions.md`
-  - `instructions/platform-reliability-resilience.instructions.md`
-  - `instructions/powershell-script-creation.instructions.md`
-  - `instructions/powershell-execution.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-docker.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
 - Security:
-  - `instructions/security-vulnerabilities.instructions.md`
-  - `instructions/api-high-performance-security.instructions.md`
-  - `instructions/data-privacy-compliance.instructions.md`
+  - `instructions/data-security/ntk-security-vulnerabilities.instructions.md`
+  - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
+  - `instructions/data-security/ntk-security-data-privacy-compliance.instructions.md`
 - Testing:
-  - `instructions/e2e-testing.instructions.md`
-  - `instructions/rust-code-organization.instructions.md`
-  - `instructions/rust-testing.instructions.md`
-  - `instructions/static-analysis-sonarqube.instructions.md`
-  - `instructions/tdd-verification.instructions.md`
+  - `instructions/process/ntk-process-e2e-testing.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+  - `instructions/process/ntk-process-rust-testing.instructions.md`
+  - `instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
+  - `instructions/process/ntk-process-tdd-verification.instructions.md`
 - Documentation and process:
-  - `instructions/readme.instructions.md`
-  - `instructions/prompt-templates.instructions.md`
-  - `instructions/effort-estimation-ucp.instructions.md`
-  - `instructions/brainstorm-spec-workflow.instructions.md`
-  - `instructions/subagent-planning-workflow.instructions.md`
-  - `instructions/super-agent.instructions.md`
-  - `instructions/worktree-isolation.instructions.md`
-  - `instructions/tdd-verification.instructions.md`
-  - `instructions/pr.instructions.md`
+  - `instructions/docs/ntk-docs-readme.instructions.md`
+  - `instructions/docs/ntk-docs-prompt-templates.instructions.md`
+  - `instructions/process/ntk-process-effort-estimation-ucp.instructions.md`
+  - `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
+  - `instructions/core/ntk-core-super-agent.instructions.md`
+  - `instructions/process/ntk-process-worktree-isolation.instructions.md`
+  - `instructions/process/ntk-process-tdd-verification.instructions.md`
+  - `instructions/process/ntk-process-pr.instructions.md`
