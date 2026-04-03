@@ -67,12 +67,15 @@ ntk validation readme-standards --repo-root .
 ## References
 
 - [Repository README](../README.md)
+- [Rust Crates Workspace](../crates/README.md)
 - [Planning README](../planning/README.md)
 - [Definitions README](../definitions/README.md)
+- [Deployment Assets](../deployments/README.md)
+- [Documentation Tree](../docs/README.md)
+- [Template Assets](../templates/README.md)
 - [AGENTS](../.github/AGENTS.md)
 - [Copilot Instructions](../.github/copilot-instructions.md)
 - [Bootstrap](runtime/bootstrap.ps1)
-- `ntk runtime render-mcp-runtime-artifacts`
 - `ntk runtime render-mcp-runtime-artifacts`
 - `ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc`
 - `ntk runtime sync-codex-mcp-config --dry-run`

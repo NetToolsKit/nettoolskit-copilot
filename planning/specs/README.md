@@ -36,10 +36,6 @@ This workspace separates design intent from execution planning so non-trivial wo
 
 ---
 
-`planning/specs/` stores the active and completed specifications that define design intent before implementation planning begins.
-
----
-
 ## Active Specs
 
 - [planning/specs/active/spec-spec-driven-development-operating-model.md](planning/specs/active/spec-spec-driven-development-operating-model.md)
@@ -62,6 +58,17 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md)
 - [planning/specs/active/spec-instruction-governance-and-super-agent-retention.md](planning/specs/active/spec-instruction-governance-and-super-agent-retention.md)
 - [planning/specs/active/spec-script-retirement-tail-cutover.md](planning/specs/active/spec-script-retirement-tail-cutover.md)
+
+---
+
+## Structure
+
+- `planning/specs/active/` holds design intent for in-flight workstreams.
+- `planning/specs/completed/` preserves design decisions after workstreams finish.
+- Specs define intent, decisions, alternatives, and acceptance criteria.
+- Plans under `planning/active/` define execution slices after the spec is ready.
+
+Use `planning/specs/` to lock architecture and behavior intent before implementation planning begins.
 
 ---
 
@@ -105,6 +112,7 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md](planning/specs/completed/spec-ai-usage-history-and-sqlite-local-memory.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
+- [planning/README.md](../README.md)
 - [ntk-core-super-agent.instructions.md](../../.github/instructions/core/ntk-core-super-agent.instructions.md)
 - [ntk-process-brainstorm-spec-workflow.instructions.md](../../.github/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md)
 - [ntk-process-subagent-planning-workflow.instructions.md](../../.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md)

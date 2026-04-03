@@ -132,6 +132,10 @@ This workspace is organized as a multi-crate Rust project. Each crate has its ow
 | `validation` | Native validation orchestration and repository policy checks | [crates/commands/validation/README.md](crates/commands/validation/README.md) |
 | `task-worker` | Background task execution worker for orchestrated flows | [crates/task-worker/README.md](crates/task-worker/README.md) |
 
+Workspace boundary overview:
+
+- [Rust Crates Workspace](crates/README.md)
+
 ---
 
 ### Compatibility and Support
@@ -148,6 +152,7 @@ This document includes the support lifecycle and release policy by minor version
 
 Operational runbooks and incident procedures:
 
+- [Documentation Tree](docs/README.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
 - [Local Service Mode Runbook](docs/operations/service-mode-local-runbook.md)
@@ -163,6 +168,7 @@ Canonical planning documents live in:
 
 - [Planning Index](planning/README.md)
 - [Planning Specs Index](planning/specs/README.md)
+- [Definitions Tree](definitions/README.md)
 
 Active workstreams are kept under `planning/active/`, and completed workstreams move to `planning/completed/` after implementation, validation, and closeout.
 
@@ -240,6 +246,14 @@ We follow semantic versioning and conventional commits. Please ensure your contr
 
 ### Workspace Docs
 
+- [Rust Crates Workspace](crates/README.md)
+- [Definitions Tree](definitions/README.md)
+- [Provider Definitions](definitions/providers/README.md)
+- [Shared Definitions](definitions/shared/README.md)
+- [Deployment Assets](deployments/README.md)
+- [Documentation Tree](docs/README.md)
+- [Scripts](scripts/README.md)
+- [Template Assets](templates/README.md)
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)

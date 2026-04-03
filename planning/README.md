@@ -37,10 +37,6 @@ This folder is part of the repository operating model, not disposable scratch st
 
 ---
 
-`planning/` stores the active and completed plans that guide non-trivial repository work. It keeps execution planning versioned, discoverable, and separate from temporary runtime state.
-
----
-
 ## Active Workstreams
 
 - [planning/active/plan-spec-driven-development-operating-model.md](planning/active/plan-spec-driven-development-operating-model.md)
@@ -63,6 +59,17 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/active/plan-build-target-cleanup-and-artifact-pruning.md](planning/active/plan-build-target-cleanup-and-artifact-pruning.md)
 - [planning/active/plan-instruction-governance-and-super-agent-retention.md](planning/active/plan-instruction-governance-and-super-agent-retention.md)
 - [planning/active/plan-script-retirement-tail-cutover.md](planning/active/plan-script-retirement-tail-cutover.md)
+
+---
+
+## Structure
+
+- `planning/active/` holds the current execution workstreams.
+- `planning/completed/` preserves closed workstreams and operational history.
+- `planning/specs/active/` holds active design intent that must exist before non-trivial implementation planning.
+- `planning/specs/completed/` preserves design history after workstreams close.
+
+Use `planning/` for versioned workstream control, not for transient scratch output.
 
 ---
 
@@ -112,6 +119,7 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/completed/rust-script-cutover-default-map.md](planning/completed/rust-script-cutover-default-map.md)
 - [planning/completed/rust-script-parity-ledger.md](planning/completed/rust-script-parity-ledger.md)
 - [planning/completed/rust-script-transcription-ownership-matrix.md](planning/completed/rust-script-transcription-ownership-matrix.md)
+- [planning/specs/README.md](specs/README.md)
 - [planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md](planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md)
 - [planning/specs/completed/spec-script-retirement-phase-2.md](planning/specs/completed/spec-script-retirement-phase-2.md)
 - [planning/specs/completed/spec-script-retirement-phase-3.md](planning/specs/completed/spec-script-retirement-phase-3.md)
