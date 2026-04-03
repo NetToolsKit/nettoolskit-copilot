@@ -73,9 +73,15 @@
     },
     {
       "id": "domain-instructions",
-      "description": "Technical stack/domain rules.",
+      "description": "Semantic domain rules grouped by responsibility instead of flat or numbered ordering.",
       "pathPatterns": [
-        ".github/instructions/*.instructions.md"
+        ".github/instructions/process/*.instructions.md",
+        ".github/instructions/architecture/backend/*.instructions.md",
+        ".github/instructions/architecture/frontend/*.instructions.md",
+        ".github/instructions/architecture/agentic/*.instructions.md",
+        ".github/instructions/runtime-ops/*.instructions.md",
+        ".github/instructions/data-security/*.instructions.md",
+        ".github/instructions/docs/*.instructions.md"
       ],
       "excludePatterns": [
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",

@@ -2,6 +2,30 @@
 
 `.github/instructions/` is the projected runtime surface used by local agents and provider integrations.
 
+## Rules Board
+
+The instruction tree acts as a semantic rules board for the runtime.
+
+- `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules loaded first.
+- `process/`: planning, verification, PR, worktree, and workflow execution rules.
+- `architecture/backend/`: backend platform, language, and architecture rules.
+- `architecture/frontend/`: frontend stack, UX, and component architecture rules.
+- `architecture/agentic/`: context economy and agentic-surface rules.
+- `runtime-ops/`: runtime, automation, observability, resilience, and infrastructure execution rules.
+- `data-security/`: data, privacy, security, and ORM/database rules.
+- `docs/`: README, instruction-authoring, and prompt-template rules.
+
+## Precedence
+
+When multiple surfaces apply, use this order:
+
+1. user prompt
+2. `.github/AGENTS.md`
+3. `.github/copilot-instructions.md`
+4. `core/`
+5. the narrowest matching domain folder under `process/`, `architecture/`, `runtime-ops/`, `data-security/`, or `docs/`
+6. prompts, templates, snippets, and projected surfaces as non-authoritative helpers
+
 ## Structure
 
 This folder mirrors the semantic taxonomy from `definitions/shared/instructions/`.

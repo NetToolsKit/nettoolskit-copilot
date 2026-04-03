@@ -2,6 +2,29 @@
 
 `definitions/shared/instructions/` is the canonical source for repository instruction content.
 
+## Rules Board
+
+The canonical tree is organized as a semantic rules board.
+
+- `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules.
+- `process/`: planning, verification, PR, worktree, and workflow execution rules.
+- `architecture/backend/`: backend platform, language, and architecture rules.
+- `architecture/frontend/`: frontend stack, UX, and component architecture rules.
+- `architecture/agentic/`: context economy and agentic-surface rules.
+- `runtime-ops/`: runtime, automation, observability, resilience, and infrastructure execution rules.
+- `data-security/`: data, privacy, security, and ORM/database rules.
+- `docs/`: README, instruction-authoring, and prompt-template rules.
+
+## Precedence
+
+The shared source is designed for projection into runtime surfaces with this authority model:
+
+1. direct user request
+2. global runtime entry files such as `AGENTS.md` and `copilot-instructions.md`
+3. `core/`
+4. the narrowest matching domain folder under `process/`, `architecture/`, `runtime-ops/`, `data-security/`, or `docs/`
+5. prompts, templates, snippets, and other projected helpers as non-authoritative consumers
+
 ## Structure
 
 The instruction tree is grouped by semantic domain, not numeric prefixes. Directory order is not part of the contract; agents should route by path and file purpose instead of lexical ordering.

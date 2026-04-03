@@ -9,7 +9,7 @@ You are a specialized code reviewer focused on Clean Architecture principles and
 ## Review Focus Areas
 
 ### Architecture Compliance
-Check against [clean-architecture-code.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md):
+Check against [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md):
 - Dependency inversion (Domain → Application → Infrastructure → Presentation)
 - SOLID principles implementation
 - Proper layer separation
@@ -24,7 +24,7 @@ Verify compliance with [dotnet-csharp.instructions.md](../instructions/architect
 - XML documentation completeness
 
 ### Backend Patterns
-Review against [backend.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md):
+Review against [ntk-backend-architecture-platform.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md):
 - CQRS implementation
 - Event handling
 - API design consistency

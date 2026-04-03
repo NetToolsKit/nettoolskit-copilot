@@ -111,5 +111,5 @@ The CHECKPOINT is an in-session working memory tool; the plan is the durable art
 
 ## Relationship to Other Instructions
 - **`super-agent.instructions.md`** owns planning-first continuity, session boundary handling, cleanup scripts, and planning artifact management. This file owns in-session compression and the checkpoint state model.
-- **`workflow-optimization.instructions.md`** owns output token efficiency rules, task breakdown, and code-diff output economy. This file owns compression triggers, six-block state structure, and command vocabulary.
+- **`ntk-process-workflow-optimization.instructions.md`** owns output token efficiency rules, task breakdown, and code-diff output economy. This file owns compression triggers, six-block state structure, and command vocabulary.
 - Do not duplicate rules from this file in either of those files; use a short summary paragraph pointing here.

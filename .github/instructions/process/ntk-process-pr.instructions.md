@@ -26,7 +26,7 @@ Context (what/why); Changes (what changed at code/infra level); Rationale (why t
 ```markdown
 Context: users face transient 502/504
 Changes: add Polly WaitAndRetry with jitter to HttpClientFactory
-Rationale: improve resilience per backend.instructions.md
+Rationale: improve resilience per ntk-backend-architecture-platform.instructions.md
 Risks: excessive retries mitigated by maxAttempts=3 and timeout
 Testing: unit tests added + integration smoke
 Docs: CHANGELOG updated

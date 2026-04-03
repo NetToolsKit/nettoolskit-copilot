@@ -4,9 +4,9 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-03-30 08:59
+- LastUpdated: 2026-04-03 15:40
 - Objective: define the design intent for a repo-native rules board that makes instruction configuration, rules, commands, and skills easier to discover, route, and keep in sync.
-- Normalized Request: compare the architecture in the reference image against the current repository structure and capture the useful improvements as a planning-only workstream.
+- Normalized Request: compare the architecture in the reference image against the current repository structure and capture the useful improvements as a repo-native rules board with explicit precedence and semantic taxonomy.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -25,6 +25,7 @@ The repository already has the real ingredients of the reference architecture: a
 - Define the board as a governance and discoverability layer, not as a second instruction tree.
 - Group surfaces by responsibility so the loading path is obvious and token-efficient.
 - Preserve `super-agent` and the repo operating model as the highest-precedence contracts.
+- Keep semantic domain folders and stable `ntk-*` file names; do not use numeric directory prefixes.
 
 ---
 
@@ -34,6 +35,7 @@ The repository already has the real ingredients of the reference architecture: a
 - [2026-03-30 08:59] Keep the board informational and governance-oriented so it cannot drift from the canonical instruction tree.
 - [2026-03-30 08:59] Use the board to improve discoverability and token efficiency, not to create another source of truth.
 - [2026-03-30 08:59] Keep the repository-owned instruction surfaces canonical and treat the external `copilot-instructions` repo as a parity reference.
+- [2026-04-03 15:40] The board must document precedence explicitly in README and governance surfaces, not rely on folder order.
 
 ---
 
@@ -50,7 +52,7 @@ The repository already has the real ingredients of the reference architecture: a
 
 ## Assumptions And Constraints
 
-- No instruction content is being changed by this spec.
+- The board may update documentation, governance metadata, and projection comments, but must not create a competing instruction tree.
 - The repo already has enough surfaces to map into the board model.
 - The board must not compete with `AGENTS.md`, `copilot-instructions.md`, or `ntk-core-super-agent.instructions.md`.
 - The external `copilot-instructions` repository remains a comparison baseline, not a live sync target.
@@ -67,16 +69,17 @@ The repository already has the real ingredients of the reference architecture: a
 
 ## Acceptance Criteria
 
-- The repo has a planning-only board spec and plan that classify instruction surfaces by function.
+- The repo has a board spec and plan that classify instruction surfaces by function.
 - The board clearly distinguishes configuration, rules, commands, and skills.
 - The current repo layout is mapped to the board without copying the reference image verbatim.
-- No instruction files or code files are changed as part of this planning-only workstream.
+- README and governance surfaces make the semantic taxonomy and precedence explicit.
+- The taxonomy explicitly documents that numeric directory prefixes are not part of the contract.
 
 ---
 
 ## Planning Readiness
 
-- Updated: 2026-03-30 08:59 — ready for planning-only alignment; implementation should wait until the board model is accepted and placed under the SDD baseline.
+- Updated: 2026-04-03 15:40 — semantic taxonomy and board precedence are implemented at the documentation/governance layer; remaining work is drift cleanup and helper-surface normalization.
 
 ---
 

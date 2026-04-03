@@ -9,9 +9,9 @@ Generate a comprehensive Pull Request description following repository standards
 
 ## Instructions
 Create PR description based on:
-- [pr.instructions.md](../instructions/process/ntk-process-pr.instructions.md)
-- [feedback-changelog.instructions.md](../instructions/process/ntk-process-feedback-changelog.instructions.md)
-- [clean-architecture-code.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
+- [ntk-process-pr.instructions.md](../instructions/process/ntk-process-pr.instructions.md)
+- [ntk-process-feedback-changelog.instructions.md](../instructions/process/ntk-process-feedback-changelog.instructions.md)
+- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
 
 ## Input Variables
 - `${input:prType:PR type (feature/bugfix/refactor/docs)}` - Type of change
@@ -260,8 +260,8 @@ Implements ECF (Escrituração Contábil Fiscal) declaration generation with SPE
 - ✅ Infrastructure Layer - `EcfFileGenerator` service
 
 ### Applied Instructions
-- `clean-architecture-code.instructions.md`
-- `backend.instructions.md`
+- `ntk-backend-architecture-core.instructions.md`
+- `ntk-backend-architecture-platform.instructions.md`
 - `dotnet-csharp.instructions.md`
 
 ### Test Coverage

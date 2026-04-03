@@ -159,7 +159,7 @@ applyTo: "**/*"
 - Use descriptive names that clearly indicate scope
 ```markdown
 Examples:
-- clean-architecture-code.instructions.md
+- ntk-backend-architecture-core.instructions.md
 - dotnet-csharp.instructions.md
 - microservices-performance.instructions.md
 ```

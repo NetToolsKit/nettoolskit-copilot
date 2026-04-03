@@ -72,7 +72,7 @@ Do not restate generic README rules here.
 ## Guardrails
 - Documentation updates only; do not change or invent library behavior.
 - Examples must match the current source code, namespaces, and public API.
-- Keep this file focused on overrides; generic README guidance belongs in `readme.instructions.md`.
+- Keep this file focused on overrides; generic README guidance belongs in `ntk-docs-readme.instructions.md`.
 
 ## Verification Checklist
 - [ ] English-only content (text and example comments)

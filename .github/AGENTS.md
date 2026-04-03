@@ -62,7 +62,20 @@ Use the **Mandatory Context Files** list above.
 2) Then select additional instruction files based on what you are changing
 - If editing `.github/**`: include `instructions/process/ntk-process-pr.instructions.md` and `instructions/docs/ntk-docs-prompt-templates.instructions.md` when relevant.
 - If editing `instructions/**`: include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.
-- If editing code: select the domain instruction file(s) under `instructions/` that match the language/folder (e.g., `instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`, `backend.instructions.md`, `database.instructions.md`, etc).
+- If editing code: select the domain instruction file(s) under `instructions/` that match the semantic folder and runtime/catalog route.
+  - backend examples:
+    - `instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
+    - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
+    - `instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md`
+  - frontend examples:
+    - `instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
+    - `instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`
+  - data/security examples:
+    - `instructions/data-security/ntk-data-database.instructions.md`
+    - `instructions/data-security/ntk-data-orm.instructions.md`
+  - runtime/process examples:
+    - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
+    - `instructions/process/ntk-process-rust-testing.instructions.md`
 
 3) Precedence rules when instructions conflict
 - Follow the user prompt first.
@@ -201,3 +214,17 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
 - Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
 - For `.github` authoring, include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.
+
+# Instruction Rules Board
+- Treat the instruction tree as a semantic rules board, not a lexically ordered checklist.
+- Folder order is not part of the contract. The runtime selects by route metadata, scope, and precedence.
+- Current board lanes:
+  - `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules
+  - `process/`: planning, verification, PR, worktree, and workflow execution rules
+  - `architecture/backend/`: backend platform, language, and architecture rules
+  - `architecture/frontend/`: frontend stack, UX, and component architecture rules
+  - `architecture/agentic/`: context economy and agentic-surface rules
+  - `runtime-ops/`: runtime, automation, observability, resilience, and infra execution rules
+  - `data-security/`: data, privacy, security, and ORM/database rules
+  - `docs/`: README, instruction-authoring, and prompt-template rules
+- The taxonomy intentionally avoids numeric directory prefixes. Use semantic folders plus stable `ntk-*` file names.

@@ -11,8 +11,8 @@ Always reference these core files first:
 - [AGENTS.md](../AGENTS.md) - Agent policies and context rules
 - [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
 - [dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md) - C# standards
-- [backend.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md) - Backend patterns
-- [clean-architecture-code.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md) - Architecture rules
+- [ntk-backend-architecture-platform.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md) - Backend patterns
+- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md) - Architecture rules
 
 ## Expertise Areas
 

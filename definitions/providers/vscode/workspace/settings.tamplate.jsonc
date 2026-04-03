@@ -21,7 +21,7 @@
 //   ├── AGENTS.md
 //   ├── copilot-instructions.md
 //   ├── chatmodes\*.chatmode.md
-//   └── instructions\*.instructions.md
+//   └── instructions\<domain>\ntk-*.instructions.md
 //   %USERPROFILE%\.codex\skills\
 //   └── <skill-name>\SKILL.md
 //
