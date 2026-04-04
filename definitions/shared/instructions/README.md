@@ -13,7 +13,7 @@ The canonical tree is organized as a semantic rules board.
 - `architecture/agentic/`: context economy and agentic-surface rules.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data/`: schema design, query policy, database operations, and ORM/database rules.
-- `security/`: API security, privacy/compliance, vulnerability, and hardening rules.
+- `security/`: API security, privacy/compliance, vulnerability, hardening, and CI/CD supply-chain rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
 ## Precedence
@@ -61,7 +61,7 @@ execution wiring in the CI/CD and workflow-generation instructions.
   `ntk-data-database.instructions.md`, keep connection/failover/backup and DB
   operations in `ntk-data-database-configuration-operations.instructions.md`,
   and keep ORM/repository mapping rules in `ntk-data-orm.instructions.md`.
-- `security/`: API security, privacy/compliance, and vulnerability guidance.
+- `security/`: API security, privacy/compliance, vulnerability, and CI/CD supply-chain guidance.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
 
 ## Naming

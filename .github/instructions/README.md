@@ -13,7 +13,7 @@ The instruction tree acts as a semantic rules board for the runtime.
 - `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data/`: schema design, query policy, database operations, and ORM/database rules.
-- `security/`: API security, privacy/compliance, vulnerability, and hardening rules.
+- `security/`: API security, privacy/compliance, vulnerability, hardening, and CI/CD supply-chain rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
 ## Precedence

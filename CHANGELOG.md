@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added dedicated CI/CD supply-chain hardening instruction covering trusted workflow boundaries, immutable action pinning, OIDC, runner isolation, SBOM, and provenance policy for GitHub Actions.
 - Decision log centralized in `CHANGELOG.md` as the single source of truth for architecture/engineering decisions.
 - Added `COMPATIBILITY.md` as the official compatibility matrix and support policy for release artifacts.
 - Added release verification runbook (`docs/operations/release-artifact-verification.md`) for checksum and keyless cosign validation of published artifacts.

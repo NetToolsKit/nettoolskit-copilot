@@ -7,6 +7,9 @@ priority: high
 
 Use this instruction for GitHub Actions workflow authoring. General CI/CD stage
 and promotion guidance belongs in `ntk-runtime-ci-cd-devops.instructions.md`.
+Use `ntk-security-cicd-supply-chain-hardening.instructions.md` for trusted
+workflow boundaries, `pull_request_target` restrictions, immutable action
+pinning, OIDC, runner isolation, SBOM, and provenance controls.
 
 ## Purpose
 

@@ -135,6 +135,19 @@
       ]
     },
     {
+      "id": "cicd-supply-chain-hardening-route",
+      "request": "Harden pull_request_target usage, pin third-party actions by immutable SHA, emit SBOM and provenance, and isolate runners.",
+      "expected_route_ids": [
+        "cicd-supply-chain-hardening"
+      ],
+      "expected_selected_paths": [
+        "instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md",
+        "instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md",
+        "instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md",
+        "instructions/security/ntk-security-vulnerabilities.instructions.md"
+      ]
+    },
+    {
       "id": "observability-sre-route",
       "request": "Define SLO and SLI with OpenTelemetry and burn rate alerts for incident response.",
       "expected_route_ids": [

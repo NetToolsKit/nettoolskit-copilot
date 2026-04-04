@@ -7,6 +7,9 @@ priority: high
 - Use this instruction for API, frontend, backend, and database security decisions.
 - Prioritize prevention of OWASP Top 10 and API Top 10 classes of vulnerabilities.
 - Treat this as a secure-by-default baseline, then add domain-specific controls as needed.
+- Use `ntk-security-cicd-supply-chain-hardening.instructions.md` for workflow trust,
+  GitHub Actions hardening, runner isolation, SBOM, provenance, and release
+  supply-chain controls.
 
 # Current Reference Standards
 - OWASP ASVS 5.0.0 as the application security verification baseline.

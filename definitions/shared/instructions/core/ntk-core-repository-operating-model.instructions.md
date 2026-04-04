@@ -219,6 +219,7 @@ priority: high
   - `instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
   - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
 - Security:
+  - `instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md`
   - `instructions/security/ntk-security-vulnerabilities.instructions.md`
   - `instructions/security/ntk-security-api-high-performance.instructions.md`
   - `instructions/security/ntk-security-data-privacy-compliance.instructions.md`

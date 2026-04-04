@@ -8,7 +8,10 @@ priority: medium
 Use this instruction for pipeline architecture, stage boundaries, promotion
 flows, artifact handling, and delivery strategy across CI/CD systems. Use
 `ntk-runtime-workflow-generation.instructions.md` for GitHub Actions-specific
-workflow authoring requirements.
+workflow authoring requirements, and use
+`ntk-security-cicd-supply-chain-hardening.instructions.md` for trusted
+workflow boundaries, action pinning, OIDC, runner isolation, and provenance
+controls.
 
 ## Pipeline Structure
 

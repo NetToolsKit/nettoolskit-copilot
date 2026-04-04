@@ -387,6 +387,29 @@ routing:
       - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Cross-layer vulnerability prevention and security hardening baseline
 
+  - id: cicd-supply-chain-hardening
+    tags: [security, supply-chain, cicd, github-actions, provenance, sbom, oidc, runner-hardening]
+    triggers:
+      - "pull_request_target"
+      - "action pinning"
+      - "workflow trust"
+      - "supply chain"
+      - "runner hardening"
+      - "immutable action sha"
+      - "sbom"
+      - "provenance"
+      - "artifact attestation"
+      - "oidc"
+    include:
+      - path: instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md
+        reason: Trusted workflow boundaries, action pinning, runner isolation, SBOM, provenance, and OIDC baseline
+      - path: instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md
+        reason: GitHub Actions authoring details that must follow the hardening baseline
+      - path: instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
+        reason: CI/CD stage boundaries, promotion, and delivery controls around the hardened workflow
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
+        reason: Cross-layer security baseline that complements supply-chain controls
+
   - id: observability-sre
     tags: [observability, sre, telemetry, slo, sli, o11y]
     triggers:
