@@ -4,9 +4,9 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-04 02:20
-- Objective: define the design intent for a repo-native rules board that makes instruction configuration, rules, commands, and skills easier to discover, route, and keep in sync.
-- Normalized Request: compare the architecture in the reference image against the current repository structure and capture the useful improvements as a repo-native rules board with explicit precedence and semantic taxonomy.
+- LastUpdated: 2026-04-04 10:30
+- Objective: define the design intent for a repo-native rules board that makes repository instructions, agents, skills, and hooks easier to discover, route, and keep in sync.
+- Normalized Request: compare the architecture in the reference image against the current repository structure and capture the useful improvements as a repo-native rules board with explicit precedence and shallow shared roots.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -23,9 +23,13 @@ The repository already has the real ingredients of the reference architecture: a
 
 - Keep the current repo-owned sources of truth unchanged.
 - Define the board as a governance and discoverability layer, not as a second instruction tree.
-- Group surfaces by responsibility so the loading path is obvious and token-efficient.
-- Preserve `super-agent` under the dedicated `agents/` lane and the repo operating model under `core/` as the highest-precedence contracts.
-- Keep semantic domain folders and stable `ntk-*` file names; do not use numeric directory prefixes.
+- Group surfaces under four shallow roots so the loading path is obvious and token-efficient:
+  - `instructions/`
+  - `agents/`
+  - `skills/`
+  - `hooks/`
+- Preserve `super-agent` under the dedicated `agents/` root and keep repository operating-model guidance canonical.
+- Keep stable `ntk-*` file names; do not use numeric directory prefixes or another deep semantic folder layer under `instructions/`.
 
 ---
 
@@ -36,6 +40,7 @@ The repository already has the real ingredients of the reference architecture: a
 - [2026-03-30 08:59] Use the board to improve discoverability and token efficiency, not to create another source of truth.
 - [2026-03-30 08:59] Keep the repository-owned instruction surfaces canonical and treat the external `copilot-instructions` repo as a parity reference.
 - [2026-04-03 15:40] The board must document precedence explicitly in README and governance surfaces, not rely on folder order.
+- [2026-04-04 10:30] The board must use shallow shared roots; `instructions/` is limited to five first-level categories and narrower specialization should move into file names instead of deeper folder trees.
 
 ---
 
@@ -70,10 +75,12 @@ The repository already has the real ingredients of the reference architecture: a
 ## Acceptance Criteria
 
 - The repo has a board spec and plan that classify instruction surfaces by function.
-- The board clearly distinguishes configuration, rules, commands, and skills.
+- The board clearly distinguishes `instructions`, `agents`, `skills`, and `hooks`.
 - The current repo layout is mapped to the board without copying the reference image verbatim.
 - README and governance surfaces make the semantic taxonomy and precedence explicit.
 - The taxonomy explicitly documents that numeric directory prefixes are not part of the contract.
+- `instructions/` is explicitly limited to the five first-level categories `governance`, `development`, `operations`, `security`, and `data`.
+- The board documents that narrower specialization should prefer file names over deeper nested instruction folders.
 
 ---
 

@@ -4,9 +4,9 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 02:20
-- Objective: define the design intent for keeping repository instructions authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
-- Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
+- LastUpdated: 2026-04-04 10:30
+- Objective: define the design intent for keeping repository instructions, agents, skills, and hooks authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
+- Normalized Request: plan how to preserve and sync the repository control-surface system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-instruction-governance-and-super-agent-retention.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -22,11 +22,18 @@ The repository already has a rich instruction and routing system, but it must st
 
 ## Design Intent
 
-- Preserve repository-owned instruction files as the source of truth for this workspace.
+- Preserve repository-owned shared surfaces as the source of truth for this workspace.
 - Keep the external `copilot-instructions` repository as a reference baseline, not as a live write target.
 - Make routing and precedence rules explicit so the `ntk` prefix and instruction surfaces stay stable.
-- Keep semantic folder taxonomy and stable `ntk-*` filenames as part of the governance contract.
-- Reduce repeated policy across semantic domains so agents, backend, frontend, operations, data, and security instructions each keep a clear responsibility boundary.
+- Keep stable `ntk-*` filenames as part of the governance contract.
+- Keep `instructions/` limited to five first-level categories:
+  - `governance`
+  - `development`
+  - `operations`
+  - `security`
+  - `data`
+- Keep `agents/`, `skills/`, and `hooks/` as separate shared roots instead of overloading the instruction tree.
+- Reduce repeated policy across semantic domains by sharpening file ownership inside those roots instead of adding more nested folder layers.
 
 ---
 
@@ -44,9 +51,13 @@ The repository already has a rich instruction and routing system, but it must st
 ## Proposed Boundaries
 
 - `AGENTS.md` and `copilot-instructions.md` remain the mandatory context entry points.
-- `ntk-agents-super-agent.instructions.md` remains the workflow controller contract under a dedicated `agents/` lane.
+- `definitions/shared/instructions/` remains the canonical root for repository instructions.
+- `definitions/shared/agents/` remains the canonical root for agent lifecycle and role contracts.
+- `definitions/shared/skills/` remains the canonical root for reusable specialist playbooks.
+- `definitions/shared/hooks/` remains the canonical root for lifecycle automation hooks.
+- `ntk-agents-super-agent.instructions.md` remains the workflow controller contract under the dedicated `agents/` root.
 - `ntk-core-repository-operating-model.instructions.md` remains the repo-local source of truth for workspace behavior.
-- Semantic domain folders remain stable, but each file inside them must keep a narrow responsibility and avoid restating adjacent instruction files without need.
+- Each instruction file must keep a narrow responsibility and avoid restating adjacent files without need.
 
 ---
 
@@ -57,6 +68,8 @@ The repository already has a rich instruction and routing system, but it must st
 - Repo-owned instruction changes can be distinguished from baseline reference drift.
 - `ntk` surfaces remain documented and canonical.
 - Canonical source, projected runtime surface, and provider consumers are explicitly documented.
+- The canonical shared layout is documented as `instructions/`, `agents/`, `skills/`, and `hooks/`.
+- `instructions/` is documented as a five-category first-level tree and does not grow another permanent nested taxonomy.
 - Repeated backend guidance is reduced by separating architecture core, platform/runtime behavior, and stack-specific implementation rules.
 - Repeated frontend guidance is reduced by separating frontend architecture, Vue/Quasar structure, Vue/Quasar implementation, and UI/UX system guidance.
 - Repeated agentic guidance is reduced by separating architectural surface ownership from the checkpoint/compression protocol.

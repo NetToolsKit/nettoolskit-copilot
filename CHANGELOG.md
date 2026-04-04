@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added planning baseline for a shallow shared control-surface taxonomy rooted in `instructions/`, `agents/`, `skills/`, and `hooks/`, with `instructions/` limited to five first-level categories and narrower specialization carried by file names.
 - Added batched staged-file dispatch to the managed pre-commit EOF hygiene hook so large Windows commits do not fail when hundreds of explicit file paths are staged at once.
 - Added a dedicated `agents/` instruction lane so `ntk-agents-super-agent.instructions.md` no longer shares the `core/` lane with repository invariants.
 - Added planning workstream for a development-focused AI agent orchestrator covering provider profiles, runtime doctor/report surfaces, smart routing, normalized provider adapters, operator playbook guidance, and agent-to-model routing.

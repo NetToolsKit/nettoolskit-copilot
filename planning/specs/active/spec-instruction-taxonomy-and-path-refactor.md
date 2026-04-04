@@ -4,9 +4,9 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 02:20
-- Objective: refactor the repository instruction system into a clearer folder taxonomy with stable `ntk-*` naming, explicit authority rules, and reduced duplication/divergence across projected and shared instruction surfaces.
-- Normalized Request: reorganize the instruction system so instructions are grouped by concern, use stable prefixed names, and reduce repetition and drift while the repository is still in development.
+- LastUpdated: 2026-04-04 10:30
+- Objective: refactor the repository instruction system into a shallow root taxonomy that separates `instructions/`, `agents/`, `skills/`, and `hooks/`, keeps `instructions/` limited to five first-level categories, and carries specialization mainly through stable file names instead of deep folder nesting.
+- Normalized Request: reorganize the instruction system so it stays predictable across projects, uses four shallow shared roots, and separates repository instructions from agent, skill, and hook surfaces.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-instruction-taxonomy-and-path-refactor.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -21,19 +21,26 @@ The repository already separates shared instruction sources under `definitions/s
 
 ## Design Intent
 
-- Organize instructions by concern using subfolders instead of one flat directory.
+- Organize the shared control surface under four stable roots:
+  - `instructions/`
+  - `agents/`
+  - `skills/`
+  - `hooks/`
+- Keep each root shallow, with no more than one semantic folder below the root unless a later spec explicitly reopens that decision.
 - Use stable repository-owned `ntk-*` prefixes for instruction filenames.
 - Keep `definitions/shared/instructions/` as the canonical editable source and `.github/instructions/` as the projected mirror.
-- Reduce content overlap by sharpening file ownership:
-  - backend architecture
-  - backend stack-specific
-  - frontend architecture
-  - frontend stack-specific
-  - agentic/runtime architecture
-  - process/workflow
-  - docs/readme
-  - security/privacy
-  - infrastructure/operations
+- Limit `instructions/` to five first-level categories:
+  - `governance`
+  - `development`
+  - `operations`
+  - `security`
+  - `data`
+- Carry narrower ownership inside those folders through file names such as:
+  - `ntk-governance-*`
+  - `ntk-development-*`
+  - `ntk-operations-*`
+  - `ntk-security-*`
+  - `ntk-data-*`
 - Preserve routing, prompts, skills, governance manifests, and README references through path updates.
 
 ---
@@ -51,61 +58,35 @@ The repository already separates shared instruction sources under `definitions/s
 
 ## Proposed Taxonomy
 
-- `instructions/agents/`
-  - super-agent lifecycle
-- `instructions/core/`
-  - repository operating model
-  - authoritative sources
-  - artifact layout
-- `instructions/process/`
-  - `planning/`
-    - planning/spec workflows
-    - effort estimation
-    - workflow optimization
-  - `collaboration/`
-    - PR collaboration
-    - worktree isolation
-  - `delivery/`
-    - TDD/verification
-    - changelog/closeout feedback
-- `instructions/architecture/backend/`
-  - backend architecture baseline
-  - backend stack-specific guidance
-- `instructions/architecture/frontend/`
-  - frontend architecture baseline
-  - Vue/Quasar stack guidance
-  - UI/UX rules
-- `instructions/architecture/agentic/`
-  - agentic surface model
-  - context economy / RAG/CAG
-- `instructions/operations/devops/`
-  - CI/CD platform policy
-  - workflow generation
-- `instructions/operations/automation/`
-  - PowerShell execution/creation
-  - runtime/editor efficiency
-- `instructions/operations/containers/`
-  - Docker
-  - Kubernetes
-- `instructions/operations/reliability/`
-  - observability/SRE
-  - resilience
-  - microservices/runtime performance
-- `instructions/operations/quality/`
-  - static analysis and quality gates
-- `instructions/data/`
+- `instructions/governance/`
+  - repository invariants, workflow guidance, README/changelog policy, and collaboration rules live here as `ntk-governance-*` files.
+- `instructions/development/`
+  - architecture, backend, frontend, persistence, and testing guidance live here as `ntk-development-*` files.
+- `instructions/operations/`
+  - DevOps, platform, reliability, workspace, and local runtime operations live here as `ntk-operations-*` files.
 - `instructions/security/`
-- Keep data and security as separate semantic lanes so database/ORM guidance does not drift into vulnerability, privacy, or API-security policy.
-  - database/ORM
-  - privacy/compliance
-  - security vulnerabilities
-  - API performance/security
-- `instructions/docs/`
-  - README
-  - repo-specific README overrides
-  - prompt template authoring
+  - application hardening, supply-chain trust, and secret-handling guidance live here as `ntk-security-*` files.
+- `instructions/data/`
+  - database and privacy guidance live here as `ntk-data-*` files.
+- `agents/`
+  - `super-agent/`
+  - `planner/`
+  - `reviewer/`
+  - `implementer/`
+- `skills/`
+  - `dev-backend/`
+  - `dev-frontend/`
+  - `dev-rust/`
+  - `test/`
+  - `security/`
+  - `docs/`
+- `hooks/`
+  - `session-start/`
+  - `pre-tool-use/`
+  - `subagent-start/`
+  - `stop/`
 
-The exact numbering may adjust, but the architecture/process/operations/docs separation must remain explicit and generic buckets must keep shrinking over time.
+This structure is the target contract for the next refactor. Instructions must stay within the five semantic instruction categories; agents, skills, and hooks must not be forced back into the instruction tree; specialization should prefer file names over deeper nested folders.
 
 ---
 
@@ -116,9 +97,10 @@ The exact numbering may adjust, but the architecture/process/operations/docs sep
 - Routing catalog, prompts, skills, manifests, plans, and README references point to the new paths.
 - README policy and repo override files no longer drift between shared and projected copies.
 - The most overlapping backend/frontend instruction surfaces have sharper ownership after the refactor.
-- The generic `runtime-ops/` lane is replaced by narrower `operations/*` subfolders so DevOps, automation, containers, reliability, and quality guidance are not mixed in one bucket.
-- The flat `process/` lane is replaced by `process/planning`, `process/collaboration`, and `process/delivery` so planning, PR/worktree coordination, and verification/closeout are not mixed in one folder.
-- The `super-agent` controller is separated from `core/` into `agents/` so repository invariants and agent-orchestration policy do not share the same lane.
+- The instruction tree is limited to the five semantic categories `governance`, `development`, `operations`, `security`, and `data`.
+- `agents/`, `skills/`, and `hooks/` become distinct shared roots instead of being nested under `instructions/`.
+- The taxonomy stays shallow and avoids reintroducing another semantic folder layer below those first-level category and role folders.
+- `super-agent` no longer competes with repository invariants inside the instruction tree; it belongs to the `agents/` root.
 
 ---
 

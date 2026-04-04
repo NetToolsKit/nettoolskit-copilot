@@ -4,9 +4,9 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-04 02:20
-- Objective: evaluate and define a repo-native rules board that groups instruction surfaces by responsibility so agents can load config, rules, commands, and skills with less ambiguity and less context waste.
-- Normalized Request: compare the board-style agent architecture against the current repository instruction layout and plan the improvements that would make it more discoverable, token-efficient, and SDD-friendly.
+- LastUpdated: 2026-04-04 10:30
+- Objective: evaluate and define a repo-native rules board that groups shared surfaces into `instructions/`, `agents/`, `skills/`, and `hooks/` so agents can load the right control surface with less ambiguity and less context waste.
+- Normalized Request: compare the board-style agent architecture against the current repository layout and plan the improvements that would make the shared roots more discoverable, token-efficient, and SDD-friendly.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-rules-board-and-surface-layout.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -29,9 +29,9 @@ This plan coordinates four layout slices:
 
 | ID | Slice | Priority | Dependency |
 |---|---|---|---|
-| B1 | Inventory current instruction surfaces | ✅ Done | none |
-| B2 | Define rules board categories and precedence | ✅ Done | B1 |
-| B3 | Map current repo folders to the board model | ✅ Done | B1, B2 |
+| B1 | Inventory current shared surfaces | ✅ Done | none |
+| B2 | Define board roots and precedence | ✅ Done | B1 |
+| B3 | Map current repo folders to the board model | 🟠 Active | B1, B2 |
 | B4 | Define update and drift rules for the board | 🟠 Active | B2, B3 |
 
 The board is implemented as documentation and governance. It does not create a second instruction source of truth.
@@ -40,7 +40,7 @@ The board is implemented as documentation and governance. It does not create a s
 
 ## Ordered Tasks
 
-### [2026-03-30 08:59] Task B1: Inventory Current Instruction Surfaces
+### [2026-03-30 08:59] Task B1: Inventory Current Shared Surfaces
 
 - Capture the current authoritative surfaces:
   - `.github/AGENTS.md`
@@ -51,21 +51,20 @@ The board is implemented as documentation and governance. It does not create a s
   - `definitions/shared/instructions/**/*.instructions.md`
 - Identify which surfaces are canonical, projected, or local overrides.
 - Status:
-  - complete; inventory now reflects the semantic folder taxonomy under `core/`, `process/`, `architecture/`, `operations/`, `data/`, `security/`, and `docs/`
+  - complete; inventory now covers the current instruction tree, current skill surfaces, and the control files that will feed the shallow shared-root refactor
 - Commit checkpoint:
   - `docs(planning): baseline instruction surface inventory`
 
-### [2026-03-30 08:59] Task B2: Define Board Categories And Precedence
+### [2026-03-30 08:59] Task B2: Define Board Roots And Precedence
 
-- Group surfaces into the same conceptual lanes shown in the reference image:
-  - AI agent configuration
-  - core agent functions
-  - mandatory rules
-  - standard structure
-  - skills
+- Group surfaces into the repo-native roots:
+  - `instructions/`
+  - `agents/`
+  - `skills/`
+  - `hooks/`
 - Define which surfaces are mandatory, which are standard, and which are optional or projection-only.
 - Status:
-  - complete; categories and precedence are now documented in `.github/instructions/README.md`, `definitions/shared/instructions/README.md`, and `.github/AGENTS.md`
+  - complete; board roots and precedence are now documented in README/governance surfaces, though the final shallow root execution is still pending
 - Commit checkpoint:
   - `docs(instructions): define rules board categories and precedence`
 
@@ -75,7 +74,7 @@ The board is implemented as documentation and governance. It does not create a s
 - Keep the existing repo-owned source of truth model intact.
 - Document where the board should point for each category.
 - Status:
-  - complete; the board now maps semantic instruction folders and the governance manifest tracks domain surfaces by nested taxonomy
+  - active; the board already maps transitional semantic folders, but the final mapping still needs to collapse those lanes into the shallow `instructions/`, `agents/`, `skills/`, and `hooks/` root model
 - Commit checkpoint:
   - `docs(instructions): map repository instruction surfaces to rules board`
 
@@ -85,8 +84,9 @@ The board is implemented as documentation and governance. It does not create a s
 - Keep the external `copilot-instructions` baseline as a reference comparison, not a live write target.
 - Add rules for avoiding duplicate or stale instruction surfaces.
 - Active follow-up:
-  - finish normalizing remaining references, labels, and helper surfaces that still mention legacy flat instruction names
-  - keep `super-agent` under the dedicated `agents/` lane so `core/` remains reserved for repository invariants
+  - finish normalizing remaining references, labels, and helper surfaces that still mention transitional semantic lanes
+  - keep `super-agent` under the dedicated `agents/` root so `instructions/` stays reserved for the five first-level instruction categories
+  - document that finer specialization should prefer file names over another nested folder taxonomy
 - Commit checkpoint:
   - `docs(planning): define rules board update and drift policy`
 

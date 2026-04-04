@@ -4,9 +4,9 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 02:20
-- Objective: refactor the repository instruction system into grouped semantic folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
-- Normalized Request: reorganize the instruction system while the repository is still evolving so instructions are grouped by concern, references remain valid, and repeated guidance is reduced.
+- LastUpdated: 2026-04-04 10:30
+- Objective: refactor the repository instruction system into a shallow, predictable layout rooted in `instructions/`, `agents/`, `skills/`, and `hooks/`, with `instructions/` limited to five first-level categories and specialization carried by file names instead of deeper folder nesting.
+- Normalized Request: reorganize the instruction system while the repository is still evolving so the top-level layout stays predictable across projects, `instructions/` keeps only five primary categories, and agent/skill/hook surfaces stop being mixed into the instruction tree.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-taxonomy-and-path-refactor.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -38,6 +38,8 @@ Generated: 2026-04-03 00:00
 | I7 | Split generic operations lane | replace `runtime-ops/` with narrower `operations/*` subdomains | ✅ Done | I4, I6 |
 | I8 | Split process lane into workflow subdomains | replace flat `process/` paths with `planning`, `collaboration`, and `delivery` | ✅ Done | I4, I6 |
 | I9 | Separate agent-controller lane | move `super-agent` from `core/` into dedicated `agents/` surfaces | ✅ Done | I4, I6, I8 |
+| I10 | Freeze root taxonomy and shallow depth rule | move from the transitional lane split to `instructions/`, `agents/`, `skills/`, and `hooks/` roots with shallow paths and explicit authority | 🔴 Immediate | I9 |
+| I11 | Re-map semantic lanes to five primary instruction categories | collapse current instruction lanes into `governance`, `development`, `operations`, `security`, and `data`, with specialization encoded in file names | 🔴 Immediate | I10 |
 
 ---
 
@@ -113,7 +115,7 @@ Generated: 2026-04-03 00:00
 - Keep the existing `ntk-runtime-*` file names stable during the folder move to minimize rename churn outside path updates.
 - Update canonical shared paths first, projected `.github` paths second, then routing, providers, README indexes, prompts, skills, VS Code assets, plans, and validation fixtures in the same slice.
 - Status:
-  - complete; canonical shared files and projected `.github` files now live under `operations/*`
+  - complete as a transitional slice; canonical shared files and projected `.github` files now live under narrower `operations/*` subdomains that will later collapse into the final shallow `instructions/operations/` category
   - complete; routing catalogs, provider prompts/chatmodes/skills, VS Code settings/snippets, validation fixtures, and active plans now point at the semantic operations subdomains
 - Commit checkpoint:
   - `refactor(instructions): split operations taxonomy into semantic subdomains`
@@ -128,7 +130,7 @@ Generated: 2026-04-03 00:00
 - Move backend and frontend test-specific guidance out of `process/`; keep only cross-cutting workflow verification in `process/delivery/`.
 - Update canonical shared paths first, projected `.github` paths second, then routing, skills, prompts, governance, validation fixtures, and active plans in the same slice.
 - Status:
-  - complete; canonical shared files and projected `.github` files now live under `process/planning`, `process/collaboration`, and `process/delivery`
+  - complete as a transitional slice; canonical shared files and projected `.github` files now live under `process/planning`, `process/collaboration`, and `process/delivery`, which will later collapse into the final shallow `instructions/governance/` category
   - complete; routing catalogs, provider skills/prompts, governance manifests, validation fixtures, and active planning references now point at the narrower process workflow lanes
   - complete; dedicated `process/README.md` files now document the three workflow lanes and keep platform concerns under `operations/`
 - Commit checkpoint:
@@ -148,6 +150,61 @@ Generated: 2026-04-03 00:00
 - Commit checkpoint:
   - `refactor(instructions): separate agent-controller guidance from core invariants`
 
+### [2026-04-04 10:05] Task I10: Freeze Root Taxonomy And Depth Rule
+
+- Adopt the shared-root contract under `definitions/shared/`:
+  - `instructions/`
+  - `agents/`
+  - `skills/`
+  - `hooks/`
+- Mirror the same conceptual layout for projected and provider-facing consumers where applicable.
+- Keep the taxonomy shallow:
+  - `instructions/` may contain only the five first-level semantic categories
+  - `agents/`, `skills/`, and `hooks/` may contain only role/lifecycle folders plus files
+  - avoid adding another nested lane below those category/role folders unless a later spec explicitly reopens that decision
+  - no numeric prefixes
+  - no mixed concerns such as `runtime-ops/` or `process/` surviving the final layout
+- Status:
+  - planning only; no file moves executed in this slice
+- Commit checkpoint:
+  - `docs(planning): freeze shared instruction root taxonomy`
+
+### [2026-04-04 10:05] Task I11: Re-map Instruction Lanes To Five Primary Categories
+
+- Freeze the final instruction categories as:
+  - `instructions/governance/`
+  - `instructions/development/`
+  - `instructions/operations/`
+  - `instructions/security/`
+  - `instructions/data/`
+- Keep specialization inside those folders at the file-name level, not as another folder taxonomy:
+  - `ntk-governance-*`
+  - `ntk-development-*`
+  - `ntk-operations-*`
+  - `ntk-security-*`
+  - `ntk-data-*`
+- Move agent-controller lifecycle out of `instructions/` entirely and into:
+  - `agents/super-agent/`
+  - `agents/planner/`
+  - `agents/reviewer/`
+  - `agents/implementer/`
+- Keep reusable engineering playbooks under:
+  - `skills/dev-backend/`
+  - `skills/dev-frontend/`
+  - `skills/dev-rust/`
+  - `skills/test/`
+  - `skills/security/`
+  - `skills/docs/`
+- Keep lifecycle automation under:
+  - `hooks/session-start/`
+  - `hooks/pre-tool-use/`
+  - `hooks/subagent-start/`
+  - `hooks/stop/`
+- Status:
+  - planning only; rename and move map still pending execution
+- Commit checkpoint:
+  - `docs(planning): freeze shallow instruction category model`
+
 ---
 
 ## Validation Checklist
@@ -163,9 +220,10 @@ Generated: 2026-04-03 00:00
 ## Risks And Mitigations
 
 - Renaming instructions can break routing, prompts, and skills if path updates are incomplete.
+- Changing root taxonomy affects not only instruction paths but also skill, prompt, hook, and provider projection paths.
 - Shared/projected drift can reappear if the authority rule stays implicit.
 - Over-consolidating backend/frontend files can remove useful stack-specific guidance.
-- Mitigation: freeze the rename map first, update consumers in the same refactor, and keep architecture-vs-stack ownership explicit.
+- Mitigation: freeze the root taxonomy and shallow-depth rule first, update consumers in the same refactor, and keep instructions vs agents vs skills vs hooks explicit.
 
 ---
 

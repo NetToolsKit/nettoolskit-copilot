@@ -4,9 +4,9 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 02:20
-- Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
-- Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
+- LastUpdated: 2026-04-04 10:30
+- Objective: keep repository instructions, agent surfaces, skill surfaces, hook surfaces, and the external `copilot-instructions` reference aligned without losing canonical guidance, routing fidelity, or the `super-agent` lifecycle.
+- Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared control-surface system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-governance-and-super-agent-retention.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -31,7 +31,7 @@ This plan coordinates four governance slices:
 | G2 | Super-agent retention | local and projected instruction surfaces | ✅ Done | G1 |
 | G3 | Routing and precedence clarity | catalog + operating model docs | ✅ Done | G1 |
 | G4 | Drift monitoring and sync rules | instructions projections and planning docs | ✅ Done | G2, G3 |
-| G5 | Domain consolidation | semantic instruction domains with reduced repetition | 🟡 In progress | G2, G3, G4 |
+| G5 | Domain consolidation and root normalization | shallow shared roots with reduced repetition and explicit surface ownership | 🟡 In progress | G2, G3, G4 |
 
 The `ntk` CLI prefix is already in place and is not a new implementation gap.
 
@@ -80,28 +80,23 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 ### [2026-04-03 17:10] Task G5: Consolidate Semantic Instruction Domains
 
 - Reduce repeated guidance inside semantic instruction folders without collapsing distinct responsibilities.
-- Keep canonical authority in `definitions/shared/instructions/` and project identical copies into `.github/instructions/`.
-- Clarify the separation between:
-  - architecture invariants
-  - platform/runtime behavior
-  - language/framework specifics
-- Start with `architecture/backend/`, then continue with frontend, agentic, operations, data, and security slices.
+- Keep canonical authority in `definitions/shared/` and project consumer-facing copies from those canonical surfaces.
+- Normalize the final shared-root contract as:
+  - `instructions/`
+  - `agents/`
+  - `skills/`
+  - `hooks/`
+- Limit `instructions/` to:
+  - `governance/`
+  - `development/`
+  - `operations/`
+  - `security/`
+  - `data/`
+- Carry specialization primarily in file names instead of deep nested instruction lanes.
 - Status:
-  - backend slice complete; `ntk-backend-architecture-core`, `ntk-backend-architecture-platform`, and `ntk-backend-dotnet-csharp` now have narrower scopes and less repeated policy
-  - frontend slice complete; `ntk-frontend-architecture-core`, `ntk-frontend-vue-quasar-architecture`, `ntk-frontend-vue-quasar`, and `ntk-frontend-ui-ux` now separate architecture, framework structure, implementation, and design-system guidance
-  - agentic slice complete; `ntk-agentic-surfaces` now owns MCP/A2A/RAG/CAG boundaries while `ntk-agentic-context-economy-checkpoint` keeps only the checkpoint/compression protocol
-  - operations automation slice complete; `ntk-runtime-powershell-execution` now owns runtime invocation safety while `ntk-runtime-powershell-script-creation` owns authoring/template rules
-  - operations devops slice complete; `ntk-runtime-ci-cd-devops` now owns general pipeline and DevOps platform guidance while `ntk-runtime-workflow-generation` owns GitHub Actions authoring requirements
-  - operations reliability slice complete; `ntk-runtime-observability-sre` now owns telemetry, SLO, dashboards, alerts, and incident operations while `ntk-runtime-platform-reliability-resilience` owns resilience patterns, capacity, chaos, and disaster readiness
-  - operations reliability microservice slice complete; `ntk-runtime-microservices-performance` now owns service boundaries, service contracts, caching, and application-level throughput guidance while Docker, Kubernetes, observability, and resilience details stay in their specialized instruction files
-  - operations containers slice complete; `ntk-runtime-docker` now owns image construction, container runtime, and Docker Compose policy while `ntk-runtime-k8s` owns cluster manifests, rollout, networking, storage, and autoscaling policy
-  - operations quality slice complete; `ntk-runtime-static-analysis-sonarqube` now owns SonarQube/static-analysis configuration, quality profiles, exclusions, and report import policy while CI/workflow execution stays in the CI/CD and workflow-generation instructions
-  - data slice complete; `ntk-data-database` now owns schema and query design while `ntk-data-database-configuration-operations` owns connection/failover/backup operations and `ntk-data-orm` owns ORM/repository mapping conventions
-  - taxonomy split complete; the former `data-security/` lane is now represented by separate `data/` and `security/` folders across canonical, projected, and provider-consumer surfaces
-  - security supply-chain slice complete; `ntk-security-cicd-supply-chain-hardening` now owns trusted workflow boundaries, immutable action pinning, OIDC, runner isolation, SBOM, and provenance policy while CI/CD and workflow-generation instructions keep their narrower operational scopes
-  - testing taxonomy slice complete; `process/` now keeps only cross-cutting TDD and verification workflow while `architecture/backend/` owns Rust crate testing and backend integration/API testing and `architecture/frontend/` owns browser/E2E automation guidance
-  - process taxonomy slice complete; flat `process/` guidance is now split into `process/planning`, `process/collaboration`, and `process/delivery`, so planning, PR/worktree coordination, and verification/closeout no longer sit in one generic folder
-  - agents taxonomy slice complete; `ntk-agents-super-agent` now lives in `agents/` while `core/` stays reserved for repository invariants and operating-model guidance
+  - responsibility narrowing is complete across backend, frontend, agentic, operations, data, security, and testing content; those slices are now treated as transitional inputs to the final shallow root taxonomy
+  - `super-agent` is already treated as a dedicated agent surface and must stay outside the final `instructions/` tree
+  - final normalization is still pending: collapse transitional instruction lanes into the five first-level instruction categories and reserve dedicated shared roots for `agents/`, `skills/`, and `hooks/`
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 
