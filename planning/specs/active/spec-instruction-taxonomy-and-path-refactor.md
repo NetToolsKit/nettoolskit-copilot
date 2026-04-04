@@ -76,7 +76,9 @@ The repository already separates shared instruction sources under `definitions/s
   - workflow generation/optimization
   - observability/resilience
   - runtime/editor efficiency
-- `instructions/data-security/`
+- `instructions/data/`
+- `instructions/security/`
+- Keep data and security as separate semantic lanes so database/ORM guidance does not drift into vulnerability, privacy, or API-security policy.
   - database/ORM
   - privacy/compliance
   - security vulnerabilities
@@ -105,4 +107,3 @@ The exact numbering may adjust, but the architecture/process/runtime/docs separa
 - Ready for planning immediately.
 - The first slice should freeze the target taxonomy and rename map before moving files.
 - Implementation should update references in the same slice as file moves to avoid dangling paths.
-

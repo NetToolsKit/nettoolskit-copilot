@@ -179,8 +179,8 @@ Status: `[x]` Completed
     - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
     - `instructions/process/ntk-process-rust-testing.instructions.md`
     - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-    - `instructions/data-security/ntk-data-orm.instructions.md`
-    - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
+    - `instructions/data/ntk-data-orm.instructions.md`
+    - `instructions/security/ntk-security-api-high-performance.instructions.md`
   - Infrastructure:
     - `instructions/runtime-ops/ntk-runtime-docker.instructions.md`
     - `instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
@@ -190,9 +190,9 @@ Status: `[x]` Completed
     - `instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
     - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
   - Security:
-    - `instructions/data-security/ntk-security-vulnerabilities.instructions.md`
-    - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
-    - `instructions/data-security/ntk-security-data-privacy-compliance.instructions.md`
+    - `instructions/security/ntk-security-vulnerabilities.instructions.md`
+    - `instructions/security/ntk-security-api-high-performance.instructions.md`
+    - `instructions/security/ntk-security-data-privacy-compliance.instructions.md`
   - Testing:
     - `instructions/process/ntk-process-rust-testing.instructions.md`
     - `instructions/process/ntk-process-tdd-verification.instructions.md`

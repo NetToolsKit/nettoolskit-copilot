@@ -14,7 +14,7 @@ description: Design and implement observability and SRE controls including SLO/S
 ## Observability instruction pack
 
 - `.github/instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md` (when API/backend runtime is in scope)
+- `.github/instructions/data/ntk-data-orm.instructions.md` (when API/backend runtime is in scope)
 - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md` (for distributed systems or scaling paths)
 - `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
 

@@ -50,7 +50,7 @@
             "Applied instructions:",
             "- %USERPROFILE%\\.github\\AGENTS.md",
             "- %USERPROFILE%\\.github\\copilot-instructions.md",
-            "- ${1:.github/instructions/data-security/ntk-data-orm.instructions.md}",
+            "- ${1:.github/instructions/data/ntk-data-orm.instructions.md}",
             "- ${2:.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md}",
             "${3:}"
         ]

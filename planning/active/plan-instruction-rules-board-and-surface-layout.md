@@ -51,7 +51,7 @@ The board is implemented as documentation and governance. It does not create a s
   - `definitions/shared/instructions/**/*.instructions.md`
 - Identify which surfaces are canonical, projected, or local overrides.
 - Status:
-  - complete; inventory now reflects the semantic folder taxonomy under `core/`, `process/`, `architecture/`, `runtime-ops/`, `data-security/`, and `docs/`
+  - complete; inventory now reflects the semantic folder taxonomy under `core/`, `process/`, `architecture/`, `runtime-ops/`, `data/`, `security/`, and `docs/`
 - Commit checkpoint:
   - `docs(planning): baseline instruction surface inventory`
 

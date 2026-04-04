@@ -204,7 +204,7 @@ routing:
         reason: C# conventions, XML docs, namespaces, TFMs
       - path: instructions/architecture/backend/ntk-backend-architecture-core.instructions.md
         reason: Layering and dependency rules
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: API conventions, errors, resilience, security
 
   - id: dotnet-testing-unit
@@ -227,7 +227,7 @@ routing:
     include:
       - path: instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
         reason: C# conventions used in tests
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: Testing strategy notes (when relevant)
     notes:
       - Prefer prompt prompts/generate-unit-tests.prompt.md for test generation.
@@ -246,7 +246,7 @@ routing:
     include:
       - path: instructions/process/ntk-process-e2e-testing.instructions.md
         reason: E2E testing guidance
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: Testing strategy patterns
     notes:
       - Keep integration tests focused; prefer testcontainers for realistic dependencies when available.
@@ -289,11 +289,11 @@ routing:
       - "failover"
       - "read replica"
     include:
-      - path: instructions/data-security/ntk-data-database.instructions.md
+      - path: instructions/data/ntk-data-database.instructions.md
         reason: Database patterns and schema guidance
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: ORM patterns and repository/context conventions
-      - path: instructions/data-security/ntk-data-database-configuration-operations.instructions.md
+      - path: instructions/data/ntk-data-database-configuration-operations.instructions.md
         reason: Runtime database configuration, pooling, failover, and recovery operations baseline
 
   - id: devops-containers
@@ -368,7 +368,7 @@ routing:
       - "authorization"
       - "hardening"
     include:
-      - path: instructions/data-security/ntk-security-vulnerabilities.instructions.md
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Cross-layer vulnerability prevention and security hardening baseline
 
   - id: observability-sre
@@ -387,7 +387,7 @@ routing:
     include:
       - path: instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md
         reason: SLO/SLI, telemetry design, alerting, dashboards, and incident-readiness baseline
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: API and backend runtime observability integration
       - path: instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md
         reason: Distributed runtime performance and operational scaling considerations
@@ -405,11 +405,11 @@ routing:
       - "request size limit"
       - "performance api"
     include:
-      - path: instructions/data-security/ntk-security-api-high-performance.instructions.md
+      - path: instructions/security/ntk-security-api-high-performance.instructions.md
         reason: High-performance and secure API implementation baseline
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: Backend API conventions and resilience patterns
-      - path: instructions/data-security/ntk-security-vulnerabilities.instructions.md
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Cross-layer vulnerability prevention and hardening controls
       - path: instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
         reason: .NET/C# implementation conventions when API is in C#
@@ -427,13 +427,13 @@ routing:
       - "data subject request"
       - "privacy by design"
     include:
-      - path: instructions/data-security/ntk-security-data-privacy-compliance.instructions.md
+      - path: instructions/security/ntk-security-data-privacy-compliance.instructions.md
         reason: Privacy-by-design and data protection lifecycle controls
-      - path: instructions/data-security/ntk-security-vulnerabilities.instructions.md
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Security controls that protect confidentiality and integrity
-      - path: instructions/data-security/ntk-data-database.instructions.md
+      - path: instructions/data/ntk-data-database.instructions.md
         reason: Data-layer enforcement for retention, masking, and access control
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: API/service enforcement for privacy policies and data handling
 
   - id: platform-reliability-resilience

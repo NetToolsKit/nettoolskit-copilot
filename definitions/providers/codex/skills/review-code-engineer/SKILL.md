@@ -28,8 +28,8 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 ## Useful references
 
 - `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md`
+- `.github/instructions/data/ntk-data-orm.instructions.md`
 - `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
-- `.github/instructions/data-security/ntk-data-database.instructions.md`
+- `.github/instructions/data/ntk-data-database.instructions.md`
 - `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
 - `.github/chatmodes/clean-architecture-review.chatmode.md`

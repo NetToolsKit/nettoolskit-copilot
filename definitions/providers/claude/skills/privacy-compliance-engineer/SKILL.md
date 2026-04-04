@@ -13,10 +13,10 @@ description: Design and enforce privacy and data protection controls across appl
 
 ## Instruction pack
 
-- `.github/instructions/data-security/ntk-security-data-privacy-compliance.instructions.md`
-- `.github/instructions/data-security/ntk-security-vulnerabilities.instructions.md`
-- `.github/instructions/data-security/ntk-data-database.instructions.md` (when data schema/queries are in scope)
-- `.github/instructions/data-security/ntk-data-orm.instructions.md` (when API/service logic is in scope)
+- `.github/instructions/security/ntk-security-data-privacy-compliance.instructions.md`
+- `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
+- `.github/instructions/data/ntk-data-database.instructions.md` (when data schema/queries are in scope)
+- `.github/instructions/data/ntk-data-orm.instructions.md` (when API/service logic is in scope)
 
 ## Claude-native execution
 

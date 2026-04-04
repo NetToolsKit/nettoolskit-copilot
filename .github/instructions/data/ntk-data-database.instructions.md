@@ -8,7 +8,7 @@ priority: medium
 Use this instruction for schema design, normalization, query shape, indexing,
 transaction semantics, concurrency control, and data-model choices.
 
-Use adjacent `data-security` instructions for other concerns:
+Use adjacent `data/` and `security/` instructions for other concerns:
 
 - `ntk-data-database-configuration-operations.instructions.md` for connection settings, pooling, failover, backup/restore, and operational database policy
 - `ntk-data-orm.instructions.md` for ORM mapping, repository boundaries, projections, and persistence-layer conventions

@@ -75,9 +75,9 @@
         "database-orm"
       ],
       "expected_selected_paths": [
-        "instructions/data-security/ntk-data-database.instructions.md",
-        "instructions/data-security/ntk-data-orm.instructions.md",
-        "instructions/data-security/ntk-data-database-configuration-operations.instructions.md"
+        "instructions/data/ntk-data-database.instructions.md",
+        "instructions/data/ntk-data-orm.instructions.md",
+        "instructions/data/ntk-data-database-configuration-operations.instructions.md"
       ]
     },
     {
@@ -131,7 +131,7 @@
         "security-vulnerabilities"
       ],
       "expected_selected_paths": [
-        "instructions/data-security/ntk-security-vulnerabilities.instructions.md"
+        "instructions/security/ntk-security-vulnerabilities.instructions.md"
       ]
     },
     {
@@ -153,9 +153,9 @@
         "api-high-performance-security"
       ],
       "expected_selected_paths": [
-        "instructions/data-security/ntk-security-api-high-performance.instructions.md",
+        "instructions/security/ntk-security-api-high-performance.instructions.md",
         "instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md",
-        "instructions/data-security/ntk-security-vulnerabilities.instructions.md",
+        "instructions/security/ntk-security-vulnerabilities.instructions.md",
         "instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md"
       ]
     },
@@ -166,9 +166,9 @@
         "data-privacy-compliance"
       ],
       "expected_selected_paths": [
-        "instructions/data-security/ntk-security-data-privacy-compliance.instructions.md",
-        "instructions/data-security/ntk-security-vulnerabilities.instructions.md",
-        "instructions/data-security/ntk-data-database.instructions.md",
+        "instructions/security/ntk-security-data-privacy-compliance.instructions.md",
+        "instructions/security/ntk-security-vulnerabilities.instructions.md",
+        "instructions/data/ntk-data-database.instructions.md",
         "instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md"
       ]
     },

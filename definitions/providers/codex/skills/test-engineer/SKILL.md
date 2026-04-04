@@ -15,7 +15,7 @@ description: Design, implement, and stabilize automated tests in this repository
 
 - Core .NET testing:
   - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
-  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
+  - `.github/instructions/data/ntk-data-orm.instructions.md`
 - Integration and E2E:
   - `.github/instructions/process/ntk-process-e2e-testing.instructions.md`
 - Rust testing:

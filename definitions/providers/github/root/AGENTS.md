@@ -71,8 +71,8 @@ Use the **Mandatory Context Files** list above.
     - `instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
     - `instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`
   - data/security examples:
-    - `instructions/data-security/ntk-data-database.instructions.md`
-    - `instructions/data-security/ntk-data-orm.instructions.md`
+    - `instructions/data/ntk-data-database.instructions.md`
+    - `instructions/data/ntk-data-orm.instructions.md`
   - runtime/process examples:
     - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
     - `instructions/process/ntk-process-rust-testing.instructions.md`
@@ -225,6 +225,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `architecture/frontend/`: frontend stack, UX, and component architecture rules
   - `architecture/agentic/`: context economy and agentic-surface rules
   - `runtime-ops/`: runtime, automation, observability, resilience, and infra execution rules
-  - `data-security/`: data, privacy, security, and ORM/database rules
+  - `data/`: schema, query, database operations, and ORM/database rules
+  - `security/`: API security, privacy/compliance, vulnerability, and hardening rules
   - `docs/`: README, instruction-authoring, and prompt-template rules
 - The taxonomy intentionally avoids numeric directory prefixes. Use semantic folders plus stable `ntk-*` file names.

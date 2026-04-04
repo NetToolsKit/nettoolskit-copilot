@@ -19,15 +19,15 @@ Select based on target area. Load only the pack(s) relevant to the task.
 ### .NET / C# / Backend
 - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
 - `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md`
-- `.github/instructions/data-security/ntk-security-api-high-performance.instructions.md`
+- `.github/instructions/data/ntk-data-orm.instructions.md`
+- `.github/instructions/security/ntk-security-api-high-performance.instructions.md`
 - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
 - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
 
 ### Database / ORM
-- `.github/instructions/data-security/ntk-data-database.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md`
-- `.github/instructions/data-security/ntk-data-database-configuration-operations.instructions.md`
+- `.github/instructions/data/ntk-data-database.instructions.md`
+- `.github/instructions/data/ntk-data-orm.instructions.md`
+- `.github/instructions/data/ntk-data-database-configuration-operations.instructions.md`
 
 ### Frontend / Vue / Quasar
 - `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
@@ -50,8 +50,8 @@ Select based on target area. Load only the pack(s) relevant to the task.
 - `.github/instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md`
 
 ### Security / Compliance / Privacy
-- `.github/instructions/data-security/ntk-security-vulnerabilities.instructions.md`
-- `.github/instructions/data-security/ntk-security-data-privacy-compliance.instructions.md`
+- `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
+- `.github/instructions/security/ntk-security-data-privacy-compliance.instructions.md`
 
 ### Observability / SRE / Reliability
 - `.github/instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`

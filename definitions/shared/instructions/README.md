@@ -12,7 +12,8 @@ The canonical tree is organized as a semantic rules board.
 - `architecture/frontend/`: frontend stack, UX, and component architecture rules.
 - `architecture/agentic/`: context economy and agentic-surface rules.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
-- `data-security/`: data, privacy, security, and ORM/database rules.
+- `data/`: schema design, query policy, database operations, and ORM/database rules.
+- `security/`: API security, privacy/compliance, vulnerability, and hardening rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
 ## Precedence
@@ -22,7 +23,7 @@ The shared source is designed for projection into runtime surfaces with this aut
 1. direct user request
 2. global runtime entry files such as `AGENTS.md` and `copilot-instructions.md`
 3. `core/`
-4. the narrowest matching domain folder under `process/`, `architecture/`, `runtime-ops/`, `data-security/`, or `docs/`
+4. the narrowest matching domain folder under `process/`, `architecture/`, `runtime-ops/`, `data/`, `security/`, or `docs/`
 5. prompts, templates, snippets, and other projected helpers as non-authoritative consumers
 
 ## Structure
@@ -55,11 +56,12 @@ Keep SonarQube/static-analysis configuration, quality profiles, exclusions, and
 report import policy in
 `ntk-runtime-static-analysis-sonarqube.instructions.md`, and keep CI/workflow
 execution wiring in the CI/CD and workflow-generation instructions.
-- `data-security/`: database, ORM, privacy/compliance, API security, and vulnerability guidance.
-- Within `data-security/`, keep schema/query design in
+- `data/`: database schema, query design, database operations, and ORM guidance.
+- Within `data/`, keep schema/query design in
   `ntk-data-database.instructions.md`, keep connection/failover/backup and DB
   operations in `ntk-data-database-configuration-operations.instructions.md`,
   and keep ORM/repository mapping rules in `ntk-data-orm.instructions.md`.
+- `security/`: API security, privacy/compliance, and vulnerability guidance.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
 
 ## Naming

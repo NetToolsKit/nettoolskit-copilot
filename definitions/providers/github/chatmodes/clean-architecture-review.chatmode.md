@@ -24,7 +24,7 @@ Verify compliance with [ntk-backend-dotnet-csharp.instructions.md](../instructio
 - XML documentation completeness
 
 ### Backend Patterns
-Review against [ntk-backend-architecture-platform.instructions.md](../instructions/data-security/ntk-data-orm.instructions.md):
+Review against [ntk-backend-architecture-platform.instructions.md](../instructions/data/ntk-data-orm.instructions.md):
 - CQRS implementation
 - Event handling
 - API design consistency

@@ -35,10 +35,10 @@ Migration: none
 ```
 
 # Applied Instructions
-List paths like .github/instructions/data-security/ntk-data-orm.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; summarize how each was applied; include any deviations and justification.
+List paths like .github/instructions/data/ntk-data-orm.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; summarize how each was applied; include any deviations and justification.
 ```markdown
 Applied instructions:
-- .github/instructions/data-security/ntk-data-orm.instructions.md
+- .github/instructions/data/ntk-data-orm.instructions.md
 - .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
 - .github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
 Applied: resilience (retry/jitter), CancellationToken, tests and pipeline gates
@@ -67,5 +67,3 @@ Milestone: 2025-Q1
 CI: green
 Artifacts: test results attached
 ```
-
-

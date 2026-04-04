@@ -12,11 +12,8 @@ The instruction tree acts as a semantic rules board for the runtime.
 - `architecture/frontend/`: frontend stack, UX, and component architecture rules.
 - `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
-- `data-security/`: data, privacy, security, and ORM/database rules.
-- Within `data-security/`, keep schema/query design in
-  `ntk-data-database.instructions.md`, keep connection/failover/backup and DB
-  operations in `ntk-data-database-configuration-operations.instructions.md`,
-  and keep ORM/repository mapping rules in `ntk-data-orm.instructions.md`.
+- `data/`: schema design, query policy, database operations, and ORM/database rules.
+- `security/`: API security, privacy/compliance, vulnerability, and hardening rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
 ## Precedence
@@ -27,7 +24,7 @@ When multiple surfaces apply, use this order:
 2. `.github/AGENTS.md`
 3. `.github/copilot-instructions.md`
 4. `core/`
-5. the narrowest matching domain folder under `process/`, `architecture/`, `runtime-ops/`, `data-security/`, or `docs/`
+5. the narrowest matching domain folder under `process/`, `architecture/`, `runtime-ops/`, `data/`, `security/`, or `docs/`
 6. prompts, templates, snippets, and projected surfaces as non-authoritative helpers
 
 ## Structure
@@ -60,7 +57,12 @@ Keep SonarQube/static-analysis configuration, quality profiles, exclusions, and
 report import policy in
 `ntk-runtime-static-analysis-sonarqube.instructions.md`, and keep CI/workflow
 execution wiring in the CI/CD and workflow-generation instructions.
-- `data-security/`: data, privacy, and security rules.
+- `data/`: database schema, query design, database operations, and ORM rules.
+- `security/`: API security, privacy/compliance, dependency hardening, and vulnerability rules.
+- Within `data/`, keep schema/query design in
+  `ntk-data-database.instructions.md`, keep connection/failover/backup and DB
+  operations in `ntk-data-database-configuration-operations.instructions.md`,
+  and keep ORM/repository mapping rules in `ntk-data-orm.instructions.md`.
 - `docs/`: README and instruction-authoring rules.
 
 The taxonomy intentionally avoids numeric directory prefixes. Agents should select instructions by domain and route metadata, not by folder sort order.

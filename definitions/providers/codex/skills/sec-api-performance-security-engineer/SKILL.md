@@ -13,10 +13,10 @@ description: Build and harden high-performance APIs with strong security control
 
 ## API performance and security instruction pack
 
-- `.github/instructions/data-security/ntk-security-api-high-performance.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md`
+- `.github/instructions/security/ntk-security-api-high-performance.instructions.md`
+- `.github/instructions/data/ntk-data-orm.instructions.md`
 - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md` (when .NET is in scope)
-- `.github/instructions/data-security/ntk-security-vulnerabilities.instructions.md`
+- `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
 
 ## Execution workflow
 

@@ -26,7 +26,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Keep the external `copilot-instructions` repository as a reference baseline, not as a live write target.
 - Make routing and precedence rules explicit so the `ntk` prefix and instruction surfaces stay stable.
 - Keep semantic folder taxonomy and stable `ntk-*` filenames as part of the governance contract.
-- Reduce repeated policy across semantic domains so backend, frontend, agentic, runtime-ops, and data-security instructions each keep a clear responsibility boundary.
+- Reduce repeated policy across semantic domains so backend, frontend, agentic, runtime-ops, data, and security instructions each keep a clear responsibility boundary.
 
 ---
 

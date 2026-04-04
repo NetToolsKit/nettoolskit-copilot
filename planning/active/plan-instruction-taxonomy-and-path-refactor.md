@@ -4,8 +4,8 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-03 00:00
-- Objective: refactor the repository instruction system into grouped folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
+- LastUpdated: 2026-04-03 23:04
+- Objective: refactor the repository instruction system into grouped semantic folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
 - Normalized Request: reorganize the instruction system while the repository is still evolving so instructions are grouped by concern, references remain valid, and repeated guidance is reduced.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-taxonomy-and-path-refactor.md`
@@ -94,6 +94,8 @@ Generated: 2026-04-03 00:00
 - Record the canonical authority rule:
   - `definitions/shared/instructions` is source of truth
   - `.github/instructions` is projected consumer surface
+- Status:
+  - complete; semantic taxonomy now exposes `data/` and `security/` as separate lanes instead of the previous combined `data-security/` folder
 - Commit checkpoint:
   - `docs(instructions): document instruction taxonomy and authority model`
 

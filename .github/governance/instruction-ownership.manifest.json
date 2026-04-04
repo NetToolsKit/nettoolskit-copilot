@@ -101,7 +101,8 @@
         ".github/instructions/architecture/frontend/*.instructions.md",
         ".github/instructions/architecture/agentic/*.instructions.md",
         ".github/instructions/runtime-ops/*.instructions.md",
-        ".github/instructions/data-security/*.instructions.md",
+        ".github/instructions/data/*.instructions.md",
+        ".github/instructions/security/*.instructions.md",
         ".github/instructions/docs/*.instructions.md"
       ],
       "excludePatterns": [

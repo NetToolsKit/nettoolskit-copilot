@@ -305,11 +305,11 @@ routing:
       - "failover"
       - "read replica"
     include:
-      - path: instructions/data-security/ntk-data-database.instructions.md
+      - path: instructions/data/ntk-data-database.instructions.md
         reason: Database patterns and schema guidance
-      - path: instructions/data-security/ntk-data-orm.instructions.md
+      - path: instructions/data/ntk-data-orm.instructions.md
         reason: ORM patterns and repository/context conventions
-      - path: instructions/data-security/ntk-data-database-configuration-operations.instructions.md
+      - path: instructions/data/ntk-data-database-configuration-operations.instructions.md
         reason: Runtime database configuration, pooling, failover, and recovery operations baseline
 
   - id: devops-containers
@@ -384,7 +384,7 @@ routing:
       - "authorization"
       - "hardening"
     include:
-      - path: instructions/data-security/ntk-security-vulnerabilities.instructions.md
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Cross-layer vulnerability prevention and security hardening baseline
 
   - id: observability-sre
@@ -421,11 +421,11 @@ routing:
       - "request size limit"
       - "performance api"
     include:
-      - path: instructions/data-security/ntk-security-api-high-performance.instructions.md
+      - path: instructions/security/ntk-security-api-high-performance.instructions.md
         reason: High-performance and secure API implementation baseline
       - path: instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md
         reason: Backend API conventions and resilience patterns
-      - path: instructions/data-security/ntk-security-vulnerabilities.instructions.md
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Cross-layer vulnerability prevention and hardening controls
       - path: instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
         reason: .NET/C# implementation conventions when API is in C#
@@ -443,11 +443,11 @@ routing:
       - "data subject request"
       - "privacy by design"
     include:
-      - path: instructions/data-security/ntk-security-data-privacy-compliance.instructions.md
+      - path: instructions/security/ntk-security-data-privacy-compliance.instructions.md
         reason: Privacy-by-design and data protection lifecycle controls
-      - path: instructions/data-security/ntk-security-vulnerabilities.instructions.md
+      - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Security controls that protect confidentiality and integrity
-      - path: instructions/data-security/ntk-data-database.instructions.md
+      - path: instructions/data/ntk-data-database.instructions.md
         reason: Data-layer enforcement for retention, masking, and access control
       - path: instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md
         reason: API/service enforcement for privacy policies and data handling

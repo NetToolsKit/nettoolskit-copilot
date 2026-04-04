@@ -14,9 +14,9 @@ description: Extend dev-software-engineer with .NET/C# backend specialization fo
 
 - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
 - `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md`
-- `.github/instructions/data-security/ntk-data-database.instructions.md`
-- `.github/instructions/data-security/ntk-data-orm.instructions.md`
+- `.github/instructions/data/ntk-data-orm.instructions.md`
+- `.github/instructions/data/ntk-data-database.instructions.md`
+- `.github/instructions/data/ntk-data-orm.instructions.md`
 - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md` (when applicable)
 
 ## Claude-native execution

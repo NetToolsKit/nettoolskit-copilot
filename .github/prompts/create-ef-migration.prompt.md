@@ -9,8 +9,8 @@ Generate an Entity Framework Core migration following repository standards with 
 
 ## Instructions
 Create a new EF Core migration based on:
-- [ntk-data-database.instructions.md](../instructions/data-security/ntk-data-database.instructions.md)
-- [ntk-data-orm.instructions.md](../instructions/data-security/ntk-data-orm.instructions.md)
+- [ntk-data-database.instructions.md](../instructions/data/ntk-data-database.instructions.md)
+- [ntk-data-orm.instructions.md](../instructions/data/ntk-data-orm.instructions.md)
 - [dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md)
 
 ## Input Variables

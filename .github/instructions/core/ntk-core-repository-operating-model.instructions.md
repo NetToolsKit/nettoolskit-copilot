@@ -209,7 +209,7 @@ priority: high
   - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
   - `instructions/process/ntk-process-rust-testing.instructions.md`
   - `instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md`
-  - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
+  - `instructions/security/ntk-security-api-high-performance.instructions.md`
 - Infrastructure:
   - `instructions/runtime-ops/ntk-runtime-docker.instructions.md`
   - `instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
@@ -219,9 +219,9 @@ priority: high
   - `instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
   - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
 - Security:
-  - `instructions/data-security/ntk-security-vulnerabilities.instructions.md`
-  - `instructions/data-security/ntk-security-api-high-performance.instructions.md`
-  - `instructions/data-security/ntk-security-data-privacy-compliance.instructions.md`
+  - `instructions/security/ntk-security-vulnerabilities.instructions.md`
+  - `instructions/security/ntk-security-api-high-performance.instructions.md`
+  - `instructions/security/ntk-security-data-privacy-compliance.instructions.md`
 - Testing:
   - `instructions/process/ntk-process-e2e-testing.instructions.md`
   - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`

@@ -22,10 +22,10 @@ description: Base implementation skill for this repository across .NET/C#, backe
 - .NET and backend:
   - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
   - `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
+  - `.github/instructions/data/ntk-data-orm.instructions.md`
 - Database and ORM:
-  - `.github/instructions/data-security/ntk-data-database.instructions.md`
-  - `.github/instructions/data-security/ntk-data-orm.instructions.md`
+  - `.github/instructions/data/ntk-data-database.instructions.md`
+  - `.github/instructions/data/ntk-data-orm.instructions.md`
 - Frontend Vue/Quasar:
   - `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
   - `.github/instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`

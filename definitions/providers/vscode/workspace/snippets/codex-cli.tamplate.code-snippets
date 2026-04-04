@@ -55,7 +55,7 @@
         "prefix": "codexbackend",
         "description": "Backend task referencing Copilot + domain instructions (clean architecture, C#, backend)",
         "body": [
-            "codex \"Backend task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; .github/instructions/data-security/ntk-data-orm.instructions.md; File ${2:src/Project/Path/File.cs}; Namespace matches folder structure; Target frameworks net8.0 net9.0; XML docs; sealed classes when appropriate; clean using statements; UTF-8 without BOM; no trailing blank line\"$3 ;exit"
+            "codex \"Backend task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; .github/instructions/data/ntk-data-orm.instructions.md; File ${2:src/Project/Path/File.cs}; Namespace matches folder structure; Target frameworks net8.0 net9.0; XML docs; sealed classes when appropriate; clean using statements; UTF-8 without BOM; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Frontend Task": {
@@ -83,7 +83,7 @@
         "prefix": "codexdb",
         "description": "Database task referencing Copilot + data instructions (ORM, database, microservices performance)",
         "body": [
-            "codex \"Database task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/data-security/ntk-data-orm.instructions.md; .github/instructions/data-security/ntk-data-database.instructions.md; .github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md; File ${2:src/Project/Data/Repository.cs}; avoid N+1; sargable queries; indexes; transactions and retries; no trailing blank line\"$3 ;exit"
+            "codex \"Database task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/data/ntk-data-orm.instructions.md; .github/instructions/data/ntk-data-database.instructions.md; .github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md; File ${2:src/Project/Data/Repository.cs}; avoid N+1; sargable queries; indexes; transactions and retries; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Testing Task": {
@@ -153,7 +153,7 @@
         "prefix": "codexorm",
         "description": "ORM mapping/repository tasks per ntk-data-orm.instructions.md",
         "body": [
-            "codex \"ORM task: ${1:short description}; Follow .github/instructions/data-security/ntk-data-orm.instructions.md; mapping centralized; no lazy loading; DTOs; File ${2:src/Project/Infrastructure/Repository/EntityRepository.cs}; no trailing blank line\"$3 ;exit"
+            "codex \"ORM task: ${1:short description}; Follow .github/instructions/data/ntk-data-orm.instructions.md; mapping centralized; no lazy loading; DTOs; File ${2:src/Project/Infrastructure/Repository/EntityRepository.cs}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex PS Task": {
