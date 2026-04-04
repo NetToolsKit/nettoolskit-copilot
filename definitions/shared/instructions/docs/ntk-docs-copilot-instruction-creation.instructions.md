@@ -242,5 +242,3 @@ CHANGELOG format:
 - New instruction-creation standards with code examples
 - Heading hierarchy guidelines for better structure
 ```
-
-

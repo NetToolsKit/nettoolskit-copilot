@@ -89,5 +89,3 @@ Do not restate generic README rules here.
 - [ ] Features bullets use `- ✅ ...`
 - [ ] Horizontal rules (`---`) are present between major sections
 - [ ] License section matches the required template
-
-
