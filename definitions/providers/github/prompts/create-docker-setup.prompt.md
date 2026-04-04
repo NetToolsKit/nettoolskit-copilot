@@ -9,9 +9,9 @@ Generate complete Docker setup with multi-stage builds, docker-compose, and Kube
 
 ## Instructions
 Create Docker setup based on:
-- [ntk-runtime-docker.instructions.md](../instructions/runtime-ops/ntk-runtime-docker.instructions.md)
-- [ntk-runtime-k8s.instructions.md](../instructions/runtime-ops/ntk-runtime-k8s.instructions.md)
-- [ntk-runtime-ci-cd-devops.instructions.md](../instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md)
+- [ntk-runtime-docker.instructions.md](../instructions/operations/containers/ntk-runtime-docker.instructions.md)
+- [ntk-runtime-k8s.instructions.md](../instructions/operations/containers/ntk-runtime-k8s.instructions.md)
+- [ntk-runtime-ci-cd-devops.instructions.md](../instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md)
 
 ## Input Variables
 - `${input:appName:Application name}` - Application identifier

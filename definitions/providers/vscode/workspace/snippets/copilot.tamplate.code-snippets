@@ -7,7 +7,7 @@
             "  { \"file\": \"%USERPROFILE%\\.github\\AGENTS.md\" },",
             "  { \"file\": \"%USERPROFILE%\\.github\\copilot-instructions.md\" },",
             "  { \"file\": \"%USERPROFILE%\\.github\\instructions\\process\\ntk-process-workflow-optimization.instructions.md\" },",
-            "  { \"file\": \"%USERPROFILE%\\.github\\instructions\\runtime-ops\\ntk-runtime-powershell-execution.instructions.md\" },",
+            "  { \"file\": \"%USERPROFILE%\\.github\\instructions\\operations\\automation\\ntk-runtime-powershell-execution.instructions.md\" },",
             "  { \"file\": \"%USERPROFILE%\\.github\\instructions\\process\\ntk-process-feedback-changelog.instructions.md\" },",
             "  { \"file\": \"%USERPROFILE%\\.github\\instructions\\${1:backend}.instructions.md\" },",
             "  { \"file\": \"%USERPROFILE%\\.github\\instructions\\${2:dotnet-csharp}.instructions.md\" },",

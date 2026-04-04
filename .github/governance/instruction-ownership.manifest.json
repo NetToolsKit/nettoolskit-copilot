@@ -35,7 +35,7 @@
         "instructions/process/ntk-process-subagent-planning-workflow.instructions.md",
         "instructions/process/ntk-process-workflow-optimization.instructions.md",
         "instructions/core/ntk-core-authoritative-sources.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md",
+        "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
         "instructions/process/ntk-process-feedback-changelog.instructions.md"
       ]
     }
@@ -100,7 +100,11 @@
         ".github/instructions/architecture/backend/*.instructions.md",
         ".github/instructions/architecture/frontend/*.instructions.md",
         ".github/instructions/architecture/agentic/*.instructions.md",
-        ".github/instructions/runtime-ops/*.instructions.md",
+        ".github/instructions/operations/devops/*.instructions.md",
+        ".github/instructions/operations/automation/*.instructions.md",
+        ".github/instructions/operations/containers/*.instructions.md",
+        ".github/instructions/operations/reliability/*.instructions.md",
+        ".github/instructions/operations/quality/*.instructions.md",
         ".github/instructions/data/*.instructions.md",
         ".github/instructions/security/*.instructions.md",
         ".github/instructions/docs/*.instructions.md"

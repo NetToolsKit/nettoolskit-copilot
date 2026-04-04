@@ -13,10 +13,10 @@ description: Design and implement observability and SRE controls including SLO/S
 
 ## Instruction pack
 
-- `.github/instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
+- `.github/instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md`
 - `.github/instructions/data/ntk-data-orm.instructions.md` (when API/backend runtime is in scope)
-- `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md` (for distributed systems)
-- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
+- `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md` (for distributed systems)
+- `.github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
 
 ## Claude-native execution
 

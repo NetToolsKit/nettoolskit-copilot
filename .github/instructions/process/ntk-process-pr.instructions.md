@@ -40,7 +40,7 @@ List paths like .github/instructions/architecture/backend/ntk-backend-architectu
 Applied instructions:
 - .github/instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md
 - .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
-- .github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
+- .github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md
 Applied: resilience (retry/jitter), CancellationToken, tests and pipeline gates
 Deviations: none
 ```

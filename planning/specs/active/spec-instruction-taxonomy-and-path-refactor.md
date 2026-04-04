@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-03 00:00
+- LastUpdated: 2026-04-03 01:05
 - Objective: refactor the repository instruction system into a clearer folder taxonomy with stable `ntk-*` naming, explicit authority rules, and reduced duplication/divergence across projected and shared instruction surfaces.
 - Normalized Request: reorganize the instruction system so instructions are grouped by concern, use stable prefixed names, and reduce repetition and drift while the repository is still in development.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -71,11 +71,21 @@ The repository already separates shared instruction sources under `definitions/s
 - `instructions/architecture/agentic/`
   - agentic surface model
   - context economy / RAG/CAG
-- `instructions/runtime-ops/`
+- `instructions/operations/devops/`
+  - CI/CD platform policy
+  - workflow generation
+- `instructions/operations/automation/`
   - PowerShell execution/creation
-  - workflow generation/optimization
-  - observability/resilience
   - runtime/editor efficiency
+- `instructions/operations/containers/`
+  - Docker
+  - Kubernetes
+- `instructions/operations/reliability/`
+  - observability/SRE
+  - resilience
+  - microservices/runtime performance
+- `instructions/operations/quality/`
+  - static analysis and quality gates
 - `instructions/data/`
 - `instructions/security/`
 - Keep data and security as separate semantic lanes so database/ORM guidance does not drift into vulnerability, privacy, or API-security policy.
@@ -88,7 +98,7 @@ The repository already separates shared instruction sources under `definitions/s
   - repo-specific README overrides
   - prompt template authoring
 
-The exact numbering may adjust, but the architecture/process/runtime/docs separation must remain explicit.
+The exact numbering may adjust, but the architecture/process/operations/docs separation must remain explicit and generic buckets must keep shrinking over time.
 
 ---
 
@@ -99,6 +109,7 @@ The exact numbering may adjust, but the architecture/process/runtime/docs separa
 - Routing catalog, prompts, skills, manifests, plans, and README references point to the new paths.
 - README policy and repo override files no longer drift between shared and projected copies.
 - The most overlapping backend/frontend instruction surfaces have sharper ownership after the refactor.
+- The generic `runtime-ops/` lane is replaced by narrower `operations/*` subfolders so DevOps, automation, containers, reliability, and quality guidance are not mixed in one bucket.
 
 ---
 

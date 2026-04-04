@@ -592,7 +592,7 @@ fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
         "instructions/process/ntk-process-subagent-planning-workflow.instructions.md",
         "instructions/process/ntk-process-workflow-optimization.instructions.md",
         "instructions/core/ntk-core-authoritative-sources.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md",
+        "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
         "instructions/process/ntk-process-feedback-changelog.instructions.md"
       ]
     }
@@ -706,7 +706,7 @@ Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
   - path: instructions/process/ntk-process-subagent-planning-workflow.instructions.md
   - path: instructions/process/ntk-process-workflow-optimization.instructions.md
   - path: instructions/core/ntk-core-authoritative-sources.instructions.md
-  - path: instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md
+  - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
   - path: instructions/process/ntk-process-feedback-changelog.instructions.md
 routing:
   - id: repo-guidance
@@ -776,7 +776,7 @@ Use the routing catalog.
         "# Workflow Optimization\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md"),
+        &repo_root.join(".github/instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md"),
         "# PowerShell Execution\n",
     );
     write_file(

@@ -211,13 +211,13 @@ priority: high
   - `instructions/data/ntk-data-orm.instructions.md`
   - `instructions/security/ntk-security-api-high-performance.instructions.md`
 - Infrastructure:
-  - `instructions/runtime-ops/ntk-runtime-docker.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
+  - `instructions/operations/containers/ntk-runtime-docker.instructions.md`
+  - `instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md`
+  - `instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md`
+  - `instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md`
+  - `instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md`
+  - `instructions/operations/automation/ntk-runtime-powershell-script-creation.instructions.md`
+  - `instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
 - Security:
   - `instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md`
   - `instructions/security/ntk-security-vulnerabilities.instructions.md`
@@ -228,7 +228,7 @@ priority: high
   - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
   - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
   - `instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
+  - `instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
   - `instructions/process/ntk-process-tdd-verification.instructions.md`
 - Documentation and process:
   - `instructions/docs/ntk-docs-readme.instructions.md`

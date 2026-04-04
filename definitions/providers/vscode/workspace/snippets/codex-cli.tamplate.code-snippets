@@ -76,14 +76,14 @@
         "prefix": "codexinfra",
         "description": "Infrastructure task referencing Copilot + infra instructions (docker, k8s, ci-cd, static analysis)",
         "body": [
-            "codex \"Infra task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/runtime-ops/ntk-runtime-docker.instructions.md; .github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md; .github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md; .github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md; File ${2:.azure/pipelines/build-test.yml}; production-ready and secure defaults; no trailing blank line\"$3 ;exit"
+            "codex \"Infra task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/operations/containers/ntk-runtime-docker.instructions.md; .github/instructions/operations/containers/ntk-runtime-k8s.instructions.md; .github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md; .github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md; File ${2:.azure/pipelines/build-test.yml}; production-ready and secure defaults; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Database Task": {
         "prefix": "codexdb",
         "description": "Database task referencing Copilot + data instructions (ORM, database, microservices performance)",
         "body": [
-            "codex \"Database task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/data/ntk-data-orm.instructions.md; .github/instructions/data/ntk-data-database.instructions.md; .github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md; File ${2:src/Project/Data/Repository.cs}; avoid N+1; sargable queries; indexes; transactions and retries; no trailing blank line\"$3 ;exit"
+            "codex \"Database task: ${1:short description}; Follow .github/copilot-instructions.md; .github/instructions/data/ntk-data-orm.instructions.md; .github/instructions/data/ntk-data-database.instructions.md; .github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md; File ${2:src/Project/Data/Repository.cs}; avoid N+1; sargable queries; indexes; transactions and retries; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Testing Task": {
@@ -111,35 +111,35 @@
         "prefix": "codexk8s",
         "description": "Kubernetes manifests/Helm tasks per ntk-runtime-k8s.instructions.md",
         "body": [
-            "codex \"K8s task: ${1:short description}; Follow .github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md; security (non-root, NetworkPolicies), resources (requests/limits), probes; File ${2:deploy/k8s/deployment.yaml}; no trailing blank line\"$3 ;exit"
+            "codex \"K8s task: ${1:short description}; Follow .github/instructions/operations/containers/ntk-runtime-k8s.instructions.md; security (non-root, NetworkPolicies), resources (requests/limits), probes; File ${2:deploy/k8s/deployment.yaml}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Docker Task": {
         "prefix": "codexdocker",
         "description": "Dockerfile/compose tasks per ntk-runtime-docker.instructions.md",
         "body": [
-            "codex \"Docker task: ${1:short description}; Follow .github/instructions/runtime-ops/ntk-runtime-docker.instructions.md; multi-stage, non-root, small images; File ${2:Dockerfile}; no trailing blank line\"$3 ;exit"
+            "codex \"Docker task: ${1:short description}; Follow .github/instructions/operations/containers/ntk-runtime-docker.instructions.md; multi-stage, non-root, small images; File ${2:Dockerfile}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex CI/CD Task": {
         "prefix": "codexcicd",
         "description": "Pipeline tasks per ntk-runtime-ci-cd-devops.instructions.md",
         "body": [
-            "codex \"CI/CD task: ${1:short description}; Follow .github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md; stages build/test/package/deploy; artifacts; rollbacks; File ${2:.azure/pipelines/ci.yml}; no trailing blank line\"$3 ;exit"
+            "codex \"CI/CD task: ${1:short description}; Follow .github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md; stages build/test/package/deploy; artifacts; rollbacks; File ${2:.azure/pipelines/ci.yml}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex SonarQube Task": {
         "prefix": "codexsonar",
         "description": "Static analysis tasks per ntk-runtime-static-analysis-sonarqube.instructions.md",
         "body": [
-            "codex \"SonarQube task: ${1:short description}; Follow .github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md; quality gate; coverage integration; PR decoration; File ${2:sonar-project.properties}; no trailing blank line\"$3 ;exit"
+            "codex \"SonarQube task: ${1:short description}; Follow .github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md; quality gate; coverage integration; PR decoration; File ${2:sonar-project.properties}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Microservices Performance Task": {
         "prefix": "codexmsa",
         "description": "Performance/caching/communication patterns per ntk-runtime-microservices-performance.instructions.md",
         "body": [
-            "codex \"Microservices performance task: ${1:short description}; Follow .github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md; caching, retries, circuit breaker; resource limits; File ${2:src/Service/Settings.json}; no trailing blank line\"$3 ;exit"
+            "codex \"Microservices performance task: ${1:short description}; Follow .github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md; caching, retries, circuit breaker; resource limits; File ${2:src/Service/Settings.json}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex E2E Testing Task": {
@@ -160,7 +160,7 @@
         "prefix": "codexps",
         "description": "PowerShell script tasks per ntk-runtime-powershell-execution.instructions.md",
         "body": [
-            "codex \"PowerShell task: ${1:short description}; Follow .github/instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md; auto-detect solution root; robust error handling; cross-platform; File ${2:scripts/Task.ps1}; no trailing blank line\"$3 ;exit"
+            "codex \"PowerShell task: ${1:short description}; Follow .github/instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md; auto-detect solution root; robust error handling; cross-platform; File ${2:scripts/Task.ps1}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Instruction Creation Task": {

@@ -85,17 +85,17 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - architecture invariants
   - platform/runtime behavior
   - language/framework specifics
-- Start with `architecture/backend/`, then continue with frontend, agentic, runtime-ops, data, and security slices.
+- Start with `architecture/backend/`, then continue with frontend, agentic, operations, data, and security slices.
 - Status:
   - backend slice complete; `ntk-backend-architecture-core`, `ntk-backend-architecture-platform`, and `ntk-backend-dotnet-csharp` now have narrower scopes and less repeated policy
   - frontend slice complete; `ntk-frontend-architecture-core`, `ntk-frontend-vue-quasar-architecture`, `ntk-frontend-vue-quasar`, and `ntk-frontend-ui-ux` now separate architecture, framework structure, implementation, and design-system guidance
   - agentic slice complete; `ntk-agentic-surfaces` now owns MCP/A2A/RAG/CAG boundaries while `ntk-agentic-context-economy-checkpoint` keeps only the checkpoint/compression protocol
-  - runtime-ops PowerShell slice complete; `ntk-runtime-powershell-execution` now owns runtime invocation safety while `ntk-runtime-powershell-script-creation` owns authoring/template rules
-  - runtime-ops workflow slice complete; `ntk-runtime-ci-cd-devops` now owns general pipeline and DevOps platform guidance while `ntk-runtime-workflow-generation` owns GitHub Actions authoring requirements
-  - runtime-ops reliability slice complete; `ntk-runtime-observability-sre` now owns telemetry, SLO, dashboards, alerts, and incident operations while `ntk-runtime-platform-reliability-resilience` owns resilience patterns, capacity, chaos, and disaster readiness
-  - runtime-ops microservice slice complete; `ntk-runtime-microservices-performance` now owns service boundaries, service contracts, caching, and application-level throughput guidance while Docker, Kubernetes, observability, and resilience details stay in their specialized instruction files
-  - runtime-ops container slice complete; `ntk-runtime-docker` now owns image construction, container runtime, and Docker Compose policy while `ntk-runtime-k8s` owns cluster manifests, rollout, networking, storage, and autoscaling policy
-  - runtime-ops static-analysis slice complete; `ntk-runtime-static-analysis-sonarqube` now owns SonarQube/static-analysis configuration, quality profiles, exclusions, and report import policy while CI/workflow execution stays in the CI/CD and workflow-generation instructions
+  - operations automation slice complete; `ntk-runtime-powershell-execution` now owns runtime invocation safety while `ntk-runtime-powershell-script-creation` owns authoring/template rules
+  - operations devops slice complete; `ntk-runtime-ci-cd-devops` now owns general pipeline and DevOps platform guidance while `ntk-runtime-workflow-generation` owns GitHub Actions authoring requirements
+  - operations reliability slice complete; `ntk-runtime-observability-sre` now owns telemetry, SLO, dashboards, alerts, and incident operations while `ntk-runtime-platform-reliability-resilience` owns resilience patterns, capacity, chaos, and disaster readiness
+  - operations reliability microservice slice complete; `ntk-runtime-microservices-performance` now owns service boundaries, service contracts, caching, and application-level throughput guidance while Docker, Kubernetes, observability, and resilience details stay in their specialized instruction files
+  - operations containers slice complete; `ntk-runtime-docker` now owns image construction, container runtime, and Docker Compose policy while `ntk-runtime-k8s` owns cluster manifests, rollout, networking, storage, and autoscaling policy
+  - operations quality slice complete; `ntk-runtime-static-analysis-sonarqube` now owns SonarQube/static-analysis configuration, quality profiles, exclusions, and report import policy while CI/workflow execution stays in the CI/CD and workflow-generation instructions
   - data slice complete; `ntk-data-database` now owns schema and query design while `ntk-data-database-configuration-operations` owns connection/failover/backup operations and `ntk-data-orm` owns ORM/repository mapping conventions
   - taxonomy split complete; the former `data-security/` lane is now represented by separate `data/` and `security/` folders across canonical, projected, and provider-consumer surfaces
   - security supply-chain slice complete; `ntk-security-cicd-supply-chain-hardening` now owns trusted workflow boundaries, immutable action pinning, OIDC, runner isolation, SBOM, and provenance policy while CI/CD and workflow-generation instructions keep their narrower operational scopes

@@ -35,7 +35,7 @@ description: Base implementation skill for this repository across .NET/C#, backe
   - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
   - `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 - Performance/microservices (when applicable):
-  - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
+  - `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md`
 
 ## Execution workflow
 

@@ -31,5 +31,5 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 - `.github/instructions/data/ntk-data-orm.instructions.md`
 - `.github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
 - `.github/instructions/data/ntk-data-database.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
+- `.github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md`
 - `.github/chatmodes/clean-architecture-review.chatmode.md`

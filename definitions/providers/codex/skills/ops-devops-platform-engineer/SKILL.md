@@ -14,16 +14,16 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 ## Infrastructure instruction packs
 
 - CI/CD:
-  - `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
+  - `.github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md`
 - Containers:
-  - `.github/instructions/runtime-ops/ntk-runtime-docker.instructions.md`
+  - `.github/instructions/operations/containers/ntk-runtime-docker.instructions.md`
 - Kubernetes:
-  - `.github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md`
+  - `.github/instructions/operations/containers/ntk-runtime-k8s.instructions.md`
 - Quality gates:
-  - `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
+  - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - Performance and optimization (when needed):
   - `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
-  - `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
+  - `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md`
 
 ## Execution workflow
 

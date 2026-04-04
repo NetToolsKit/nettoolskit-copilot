@@ -23,7 +23,7 @@ description: Design, implement, and stabilize automated tests (unit, integration
   - `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
   - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
+  - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - TDD:
   - `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
 

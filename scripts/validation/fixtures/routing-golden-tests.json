@@ -43,8 +43,8 @@
         "powershell"
       ],
       "expected_selected_paths": [
-        "instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md"
+        "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
+        "instructions/operations/automation/ntk-runtime-powershell-script-creation.instructions.md"
       ]
     },
     {
@@ -87,10 +87,10 @@
         "devops-containers"
       ],
       "expected_selected_paths": [
-        "instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-docker.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-k8s.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md"
+        "instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md",
+        "instructions/operations/containers/ntk-runtime-docker.instructions.md",
+        "instructions/operations/containers/ntk-runtime-k8s.instructions.md",
+        "instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md"
       ]
     },
     {
@@ -122,7 +122,7 @@
         "quality-static-analysis"
       ],
       "expected_selected_paths": [
-        "instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md"
+        "instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md"
       ]
     },
     {
@@ -143,8 +143,8 @@
       ],
       "expected_selected_paths": [
         "instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md",
+        "instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md",
+        "instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md",
         "instructions/security/ntk-security-vulnerabilities.instructions.md"
       ]
     },
@@ -155,9 +155,9 @@
         "observability-sre"
       ],
       "expected_selected_paths": [
-        "instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md",
+        "instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md",
         "instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md"
+        "instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md"
       ]
     },
     {
@@ -193,10 +193,10 @@
         "platform-reliability-resilience"
       ],
       "expected_selected_paths": [
-        "instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md",
-        "instructions/runtime-ops/ntk-runtime-k8s.instructions.md"
+        "instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md",
+        "instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md",
+        "instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md",
+        "instructions/operations/containers/ntk-runtime-k8s.instructions.md"
       ]
     },
     {
@@ -230,7 +230,7 @@
         "developer-workspace"
       ],
       "expected_selected_paths": [
-        "instructions/runtime-ops/ntk-runtime-vscode-workspace-efficiency.instructions.md"
+        "instructions/operations/automation/ntk-runtime-vscode-workspace-efficiency.instructions.md"
       ]
     },
     {

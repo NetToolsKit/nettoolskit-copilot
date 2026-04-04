@@ -161,7 +161,7 @@ Follow this order of operations on every task:
 - instructions/process/ntk-process-tdd-verification.instructions.md
 - instructions/core/ntk-core-authoritative-sources.instructions.md
 - instructions/process/ntk-process-workflow-optimization.instructions.md
-- instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md
+- instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
 - instructions/process/ntk-process-feedback-changelog.instructions.md
 
 ## Only for Workspace-Adapter Mode

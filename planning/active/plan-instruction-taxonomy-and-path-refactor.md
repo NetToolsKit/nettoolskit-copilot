@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-03 23:04
+- LastUpdated: 2026-04-03 01:05
 - Objective: refactor the repository instruction system into grouped semantic folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
 - Normalized Request: reorganize the instruction system while the repository is still evolving so instructions are grouped by concern, references remain valid, and repeated guidance is reduced.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -33,8 +33,9 @@ Generated: 2026-04-03 00:00
 | I2 | Move canonical shared instructions | `definitions/shared/instructions` | 🔴 Immediate | I1 |
 | I3 | Reproject `.github/instructions` and unify drift | projected copies + overrides | 🔴 Immediate | I2 |
 | I4 | Update routing and consumption paths | routing catalog, prompts, skills, manifests, plans | 🟠 High | I2, I3 |
-| I5 | Tighten backend/frontend ownership | reduce overlap in the highest-conflict files | 🟠 High | I3 |
+| I5 | Tighten backend/frontend ownership | reduce overlap in the highest-conflict files | ✅ Done | I3 |
 | I6 | Add taxonomy docs and validation references | README/governance/closeout | 🟡 Medium | I4, I5 |
+| I7 | Split generic operations lane | replace `runtime-ops/` with narrower `operations/*` subdomains | ✅ Done | I4, I6 |
 
 ---
 
@@ -98,6 +99,22 @@ Generated: 2026-04-03 00:00
   - complete; semantic taxonomy now exposes `data/` and `security/` as separate lanes instead of the previous combined `data-security/` folder
 - Commit checkpoint:
   - `docs(instructions): document instruction taxonomy and authority model`
+
+### [2026-04-04 00:18] Task I7: Split Generic Operations Lane
+
+- Replace the generic `runtime-ops/` bucket with narrower semantic lanes:
+  - `operations/devops/`
+  - `operations/automation/`
+  - `operations/containers/`
+  - `operations/reliability/`
+  - `operations/quality/`
+- Keep the existing `ntk-runtime-*` file names stable during the folder move to minimize rename churn outside path updates.
+- Update canonical shared paths first, projected `.github` paths second, then routing, providers, README indexes, prompts, skills, VS Code assets, plans, and validation fixtures in the same slice.
+- Status:
+  - complete; canonical shared files and projected `.github` files now live under `operations/*`
+  - complete; routing catalogs, provider prompts/chatmodes/skills, VS Code settings/snippets, validation fixtures, and active plans now point at the semantic operations subdomains
+- Commit checkpoint:
+  - `refactor(instructions): split operations taxonomy into semantic subdomains`
 
 ---
 

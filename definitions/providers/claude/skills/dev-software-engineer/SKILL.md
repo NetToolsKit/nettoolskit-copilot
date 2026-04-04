@@ -21,7 +21,7 @@ Select based on target area. Load only the pack(s) relevant to the task.
 - `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
 - `.github/instructions/data/ntk-data-orm.instructions.md`
 - `.github/instructions/security/ntk-security-api-high-performance.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
+- `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md`
 - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
 
 ### Database / ORM
@@ -40,28 +40,28 @@ Select based on target area. Load only the pack(s) relevant to the task.
 - `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 
 ### PowerShell / Scripts
-- `.github/instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md`
+- `.github/instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
+- `.github/instructions/operations/automation/ntk-runtime-powershell-script-creation.instructions.md`
 
 ### Infrastructure / DevOps / CI-CD
-- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-docker.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md`
+- `.github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md`
+- `.github/instructions/operations/containers/ntk-runtime-docker.instructions.md`
+- `.github/instructions/operations/containers/ntk-runtime-k8s.instructions.md`
+- `.github/instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md`
 
 ### Security / Compliance / Privacy
 - `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
 - `.github/instructions/security/ntk-security-data-privacy-compliance.instructions.md`
 
 ### Observability / SRE / Reliability
-- `.github/instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md`
+- `.github/instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md`
+- `.github/instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md`
 
 ### Testing
 - `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
 - `.github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
 - `.github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
+- `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 
 ### Documentation / README / Changelog
 - `.github/instructions/docs/ntk-docs-readme.instructions.md`
@@ -69,7 +69,7 @@ Select based on target area. Load only the pack(s) relevant to the task.
 - `.github/instructions/process/ntk-process-effort-estimation-ucp.instructions.md`
 
 ### VS Code / Workspace
-- `.github/instructions/runtime-ops/ntk-runtime-vscode-workspace-efficiency.instructions.md`
+- `.github/instructions/operations/automation/ntk-runtime-vscode-workspace-efficiency.instructions.md`
 - `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
 
 ### Orchestration / Instructions Authoring

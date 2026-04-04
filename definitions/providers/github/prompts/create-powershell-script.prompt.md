@@ -10,8 +10,8 @@ Create a new PowerShell script in `scripts/` following this repository's safety,
 ## Instructions
 Create the script based on:
 - [powershell-script-template.ps1](../templates/powershell-script-template.ps1)
-- [ntk-runtime-powershell-script-creation.instructions.md](../instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md)
-- [ntk-runtime-powershell-execution.instructions.md](../instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md)
+- [ntk-runtime-powershell-script-creation.instructions.md](../instructions/operations/automation/ntk-runtime-powershell-script-creation.instructions.md)
+- [ntk-runtime-powershell-execution.instructions.md](../instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md)
 
 ## Input Variables
 - `${input:scriptPath:Relative path in scripts/ (example: scripts/maintenance/my-script.ps1)}` - Destination script path

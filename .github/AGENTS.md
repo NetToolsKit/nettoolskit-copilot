@@ -78,7 +78,7 @@ Use the **Mandatory Context Files** list above.
     - `instructions/data/ntk-data-orm.instructions.md`
     - `instructions/security/ntk-security-vulnerabilities.instructions.md`
   - runtime/process examples:
-    - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
+    - `instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
     - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 
 3) Precedence rules when instructions conflict
@@ -212,7 +212,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `instructions/process/ntk-process-worktree-isolation.instructions.md`
   - `instructions/process/ntk-process-tdd-verification.instructions.md`
   - `instructions/process/ntk-process-workflow-optimization.instructions.md`
-  - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
+  - `instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
   - `instructions/process/ntk-process-feedback-changelog.instructions.md`
 - `instructions/core/ntk-core-repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
 - Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
@@ -228,7 +228,11 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `architecture/backend/`: backend platform, language, and architecture rules
   - `architecture/frontend/`: frontend stack, UX, and component architecture rules
   - `architecture/agentic/`: context economy and agentic-surface rules
-  - `runtime-ops/`: runtime, automation, observability, resilience, and infra execution rules
+  - `operations/devops/`: CI/CD platform policy, release controls, and workflow governance
+  - `operations/automation/`: PowerShell execution, script authoring, and workspace automation rules
+  - `operations/containers/`: Docker image/runtime and Kubernetes workload rules
+  - `operations/reliability/`: observability, resilience, and service/runtime performance rules
+  - `operations/quality/`: static analysis and quality-gate rules
   - `data/`: schema, query, database operations, and ORM/database rules
   - `security/`: API security, privacy/compliance, vulnerability, and hardening rules
   - `docs/`: README, instruction-authoring, and prompt-template rules

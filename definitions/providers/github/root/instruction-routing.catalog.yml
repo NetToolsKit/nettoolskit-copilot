@@ -36,7 +36,7 @@ always:
     reason: Task breakdown and token efficiency
   - path: instructions/core/ntk-core-authoritative-sources.instructions.md
     reason: Resolve external technical behavior with repository context first and official docs second
-  - path: instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md
+  - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
     reason: When running or writing PowerShell
   - path: instructions/process/ntk-process-feedback-changelog.instructions.md
     reason: When changing CHANGELOG/feedback
@@ -267,7 +267,7 @@ routing:
     include:
       - path: instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
         reason: Multi-target guidance and conventions
-      - path: instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
+      - path: instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md
         when: changes include pipelines/workflows
 
   - id: database-orm
@@ -311,13 +311,13 @@ routing:
       - "github actions"
       - "azure devops"
     include:
-      - path: instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md
+      - path: instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md
         reason: GitHub Actions workflow generation baseline (security, tests, vulnerabilities, quality)
-      - path: instructions/runtime-ops/ntk-runtime-docker.instructions.md
+      - path: instructions/operations/containers/ntk-runtime-docker.instructions.md
         reason: Dockerfile conventions
-      - path: instructions/runtime-ops/ntk-runtime-k8s.instructions.md
+      - path: instructions/operations/containers/ntk-runtime-k8s.instructions.md
         reason: Kubernetes manifests guidance
-      - path: instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
+      - path: instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md
         reason: CI/CD conventions and gates
 
   - id: developer-workspace
@@ -332,7 +332,7 @@ routing:
       - "workspace settings"
       - "workspace efficiency"
     include:
-      - path: instructions/runtime-ops/ntk-runtime-vscode-workspace-efficiency.instructions.md
+      - path: instructions/operations/automation/ntk-runtime-vscode-workspace-efficiency.instructions.md
         reason: Efficient VS Code workspace composition and settings for multi-window AI usage
 
   - id: quality-static-analysis
@@ -344,7 +344,7 @@ routing:
       - "lint"
       - "quality gate"
     include:
-      - path: instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md
+      - path: instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md
         reason: Static analysis and quality gate conventions
 
   - id: security-vulnerabilities
@@ -389,9 +389,9 @@ routing:
     include:
       - path: instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md
         reason: Trusted workflow boundaries, action pinning, runner isolation, SBOM, provenance, and OIDC baseline
-      - path: instructions/runtime-ops/ntk-runtime-workflow-generation.instructions.md
+      - path: instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md
         reason: GitHub Actions authoring details that must follow the hardening baseline
-      - path: instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
+      - path: instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md
         reason: CI/CD stage boundaries, promotion, and delivery controls around the hardened workflow
       - path: instructions/security/ntk-security-vulnerabilities.instructions.md
         reason: Cross-layer security baseline that complements supply-chain controls
@@ -410,11 +410,11 @@ routing:
       - "incident response"
       - "runbook"
     include:
-      - path: instructions/runtime-ops/ntk-runtime-observability-sre.instructions.md
+      - path: instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md
         reason: SLO/SLI, telemetry design, alerting, dashboards, and incident-readiness baseline
       - path: instructions/data/ntk-data-orm.instructions.md
         reason: API and backend runtime observability integration
-      - path: instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md
+      - path: instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md
         reason: Distributed runtime performance and operational scaling considerations
 
   - id: api-high-performance-security
@@ -474,13 +474,13 @@ routing:
       - "error budget burn"
       - "reliability"
     include:
-      - path: instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md
+      - path: instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md
         reason: Reliability objectives, resilience patterns, chaos, and DR baseline
-      - path: instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md
+      - path: instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md
         reason: Runtime scaling and performance behavior under stress
-      - path: instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md
+      - path: instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md
         reason: Progressive delivery, rollback, and reliability gates in pipelines
-      - path: instructions/runtime-ops/ntk-runtime-k8s.instructions.md
+      - path: instructions/operations/containers/ntk-runtime-k8s.instructions.md
         reason: Platform-level reliability controls for orchestrated workloads
 
   - id: frontend-vue
@@ -523,9 +523,9 @@ routing:
       - "pwsh"
       - ".ps1"
     include:
-      - path: instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md
+      - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
         reason: PowerShell execution safety and conventions
-      - path: instructions/runtime-ops/ntk-runtime-powershell-script-creation.instructions.md
+      - path: instructions/operations/automation/ntk-runtime-powershell-script-creation.instructions.md
         reason: PowerShell script authoring standards for scripts/*
     notes:
       - Prefer prompt prompts/create-powershell-script.prompt.md for script scaffolding.

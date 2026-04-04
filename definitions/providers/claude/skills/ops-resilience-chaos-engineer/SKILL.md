@@ -13,10 +13,10 @@ description: Improve platform resilience with timeout/retry/circuit-breaker stra
 
 ## Instruction pack
 
-- `.github/instructions/runtime-ops/ntk-runtime-platform-reliability-resilience.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-microservices-performance.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-ci-cd-devops.instructions.md`
-- `.github/instructions/runtime-ops/ntk-runtime-k8s.instructions.md` (when workload orchestration is in scope)
+- `.github/instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md`
+- `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md`
+- `.github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md`
+- `.github/instructions/operations/containers/ntk-runtime-k8s.instructions.md` (when workload orchestration is in scope)
 
 ## Claude-native execution
 
