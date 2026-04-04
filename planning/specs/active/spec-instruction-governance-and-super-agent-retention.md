@@ -66,6 +66,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Repeated runtime microservice guidance is reduced by separating service-boundary and application-level performance policy from Docker, Kubernetes, observability, and resilience guidance.
 - Repeated runtime container guidance is reduced by separating Docker image/container policy from Kubernetes cluster-manifest and rollout policy.
 - Repeated runtime static-analysis guidance is reduced by separating SonarQube/static-analysis configuration from CI/workflow execution policy.
+- Repeated data/database guidance is reduced by separating schema/query design from connection/failover/backup operations and ORM mapping policy.
 
 ---
 

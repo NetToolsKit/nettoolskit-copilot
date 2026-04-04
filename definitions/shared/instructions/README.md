@@ -56,6 +56,10 @@ report import policy in
 `ntk-runtime-static-analysis-sonarqube.instructions.md`, and keep CI/workflow
 execution wiring in the CI/CD and workflow-generation instructions.
 - `data-security/`: database, ORM, privacy/compliance, API security, and vulnerability guidance.
+- Within `data-security/`, keep schema/query design in
+  `ntk-data-database.instructions.md`, keep connection/failover/backup and DB
+  operations in `ntk-data-database-configuration-operations.instructions.md`,
+  and keep ORM/repository mapping rules in `ntk-data-orm.instructions.md`.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
 
 ## Naming

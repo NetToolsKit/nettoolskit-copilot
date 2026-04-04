@@ -5,6 +5,8 @@ priority: high
 
 # Database Configuration and Operations Baseline
 - Use this instruction when configuring runtime database access, connection settings, failover, or operational database policies.
+- Use `ntk-data-database.instructions.md` for schema design, query shape, indexing, and concurrency-model decisions.
+- Use `ntk-data-orm.instructions.md` for ORM mapping and repository-layer persistence conventions.
 - Prioritize secure-by-default settings, deterministic performance, and recoverability under real production load.
 
 # Environment and Configuration Source of Truth

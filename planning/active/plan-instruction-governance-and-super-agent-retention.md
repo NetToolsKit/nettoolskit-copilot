@@ -96,6 +96,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - runtime-ops microservice slice complete; `ntk-runtime-microservices-performance` now owns service boundaries, service contracts, caching, and application-level throughput guidance while Docker, Kubernetes, observability, and resilience details stay in their specialized instruction files
   - runtime-ops container slice complete; `ntk-runtime-docker` now owns image construction, container runtime, and Docker Compose policy while `ntk-runtime-k8s` owns cluster manifests, rollout, networking, storage, and autoscaling policy
   - runtime-ops static-analysis slice complete; `ntk-runtime-static-analysis-sonarqube` now owns SonarQube/static-analysis configuration, quality profiles, exclusions, and report import policy while CI/workflow execution stays in the CI/CD and workflow-generation instructions
+  - data-security database slice complete; `ntk-data-database` now owns schema and query design while `ntk-data-database-configuration-operations` owns connection/failover/backup operations and `ntk-data-orm` owns ORM/repository mapping conventions
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

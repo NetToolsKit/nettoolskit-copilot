@@ -13,6 +13,10 @@ The instruction tree acts as a semantic rules board for the runtime.
 - `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data-security/`: data, privacy, security, and ORM/database rules.
+- Within `data-security/`, keep schema/query design in
+  `ntk-data-database.instructions.md`, keep connection/failover/backup and DB
+  operations in `ntk-data-database-configuration-operations.instructions.md`,
+  and keep ORM/repository mapping rules in `ntk-data-orm.instructions.md`.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
 ## Precedence
