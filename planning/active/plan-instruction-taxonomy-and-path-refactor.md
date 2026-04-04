@@ -4,9 +4,9 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 10:30
-- Objective: refactor the repository instruction system into a shallow, predictable layout rooted in `instructions/`, `agents/`, `skills/`, and `hooks/`, with `instructions/` limited to five first-level categories and specialization carried by file names instead of deeper folder nesting.
-- Normalized Request: reorganize the instruction system while the repository is still evolving so the top-level layout stays predictable across projects, `instructions/` keeps only five primary categories, and agent/skill/hook surfaces stop being mixed into the instruction tree.
+- LastUpdated: 2026-04-04 11:05
+- Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
+- Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-taxonomy-and-path-refactor.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
@@ -15,11 +15,13 @@ Generated: 2026-04-03 00:00
   - `planning/active/plan-instruction-governance-and-super-agent-retention.md`
   - `planning/active/plan-repository-consolidation-continuity.md`
 - Inputs:
-  - `definitions/shared/instructions/*`
+  - `definitions/*`
+  - `definitions/shared/*`
   - `.github/instructions/*`
   - `.github/instruction-routing.catalog.yml`
   - `.github/prompts/*`
   - `.codex/skills/*`
+  - `docs/manifest/*`
   - `planning/README.md`
   - `planning/specs/README.md`
 
@@ -29,8 +31,8 @@ Generated: 2026-04-03 00:00
 
 | ID | Slice | Target | Priority | Dependency |
 |---|---|---|---|---|
-| I1 | Freeze taxonomy and rename map | instruction folders + file names | 🔴 Immediate | none |
-| I2 | Move canonical shared instructions | `definitions/shared/instructions` | 🔴 Immediate | I1 |
+| I1 | Freeze taxonomy and rename map | definition roots + file names | 🔴 Immediate | none |
+| I2 | Establish canonical `definitions/` roots | `definitions/instructions`, `templates`, `agents`, `skills`, `hooks`, `providers` | 🔴 Immediate | I1 |
 | I3 | Reproject `.github/instructions` and unify drift | projected copies + overrides | 🔴 Immediate | I2 |
 | I4 | Update routing and consumption paths | routing catalog, prompts, skills, manifests, plans | 🟠 High | I2, I3 |
 | I5 | Tighten backend/frontend ownership | reduce overlap in the highest-conflict files | ✅ Done | I3 |
@@ -40,6 +42,7 @@ Generated: 2026-04-03 00:00
 | I9 | Separate agent-controller lane | move `super-agent` from `core/` into dedicated `agents/` surfaces | ✅ Done | I4, I6, I8 |
 | I10 | Freeze root taxonomy and shallow depth rule | move from the transitional lane split to `instructions/`, `agents/`, `skills/`, and `hooks/` roots with shallow paths and explicit authority | 🔴 Immediate | I9 |
 | I11 | Re-map semantic lanes to five primary instruction categories | collapse current instruction lanes into `governance`, `development`, `operations`, `security`, and `data`, with specialization encoded in file names | 🔴 Immediate | I10 |
+| I12 | Add canonical template and sample lanes | create `definitions/templates/*` and `docs/samples/manifests/` without deleting legacy sources | 🟠 High | I2, I10, I11 |
 
 ---
 
@@ -48,7 +51,12 @@ Generated: 2026-04-03 00:00
 ### [2026-04-03 00:00] Task I1: Freeze Taxonomy And Rename Map
 
 - Define the target folder taxonomy inside:
-  - `definitions/shared/instructions/`
+  - `definitions/instructions/`
+  - `definitions/templates/`
+  - `definitions/agents/`
+  - `definitions/skills/`
+  - `definitions/hooks/`
+  - `definitions/providers/`
   - `.github/instructions/`
 - Define the stable rename map for every instruction file.
 - Keep `.instructions.md` suffix and add `ntk-*` prefix to the renamed files.
@@ -57,8 +65,9 @@ Generated: 2026-04-03 00:00
 
 ### [2026-04-03 00:00] Task I2: Move Canonical Shared Instructions
 
-- Move shared instruction sources into the new folder taxonomy.
-- Update only canonical copies first.
+- Move canonical instruction sources into `definitions/instructions/` from the legacy `definitions/shared/instructions/` tree.
+- Initialize the other canonical roots in `definitions/` at the same time so future slices can migrate templates, agents, skills, and hooks into place without inventing new roots later.
+- Update canonical copies first and keep legacy compatibility copies until routing and provider consumers are updated.
 - Keep semantics stable during the move.
 - Commit checkpoint:
   - `refactor(instructions): move canonical shared instruction sources`
@@ -152,14 +161,17 @@ Generated: 2026-04-03 00:00
 
 ### [2026-04-04 10:05] Task I10: Freeze Root Taxonomy And Depth Rule
 
-- Adopt the shared-root contract under `definitions/shared/`:
+- Adopt the canonical root contract under `definitions/`:
   - `instructions/`
+  - `templates/`
   - `agents/`
   - `skills/`
   - `hooks/`
+  - `providers/`
 - Mirror the same conceptual layout for projected and provider-facing consumers where applicable.
 - Keep the taxonomy shallow:
   - `instructions/` may contain only the five first-level semantic categories
+  - `templates/` may contain only artifact-type categories
   - `agents/`, `skills/`, and `hooks/` may contain only role/lifecycle folders plus files
   - avoid adding another nested lane below those category/role folders unless a later spec explicitly reopens that decision
   - no numeric prefixes
@@ -204,6 +216,23 @@ Generated: 2026-04-03 00:00
   - planning only; rename and move map still pending execution
 - Commit checkpoint:
   - `docs(planning): freeze shallow instruction category model`
+
+### [2026-04-04 11:05] Task I12: Add Canonical Template And Sample Lanes
+
+- Freeze the final template categories under `definitions/templates/` as:
+  - `codegen/`
+  - `docs/`
+  - `manifests/`
+  - `prompts/`
+  - `workflows/`
+- Keep `docs/` focused on human-readable technical documentation and add:
+  - `docs/samples/manifests/`
+- Treat `docs/samples/manifests/` as the human-facing sample surface while `definitions/templates/manifests/` becomes the canonical authored manifest-template surface.
+- Keep `templates/` at the repository root and `definitions/shared/templates/` as legacy compatibility roots until template consumers and crates finish migrating.
+- Status:
+  - first scaffolding slice ready; canonical root folders and manifest sample lane can be created without deleting legacy documents
+- Commit checkpoint:
+  - `docs(repo): scaffold canonical definition roots and manifest samples`
 
 ---
 

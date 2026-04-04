@@ -1,6 +1,6 @@
 # Template Assets
 
-> Repository-owned authored templates for project generation and scaffolding workflows.
+> Transitional root template tree preserved while canonical authored templates move into `definitions/templates/`.
 
 ---
 
@@ -10,14 +10,16 @@
 
 The current tree is focused on `.NET` project scaffolding, with layered source and test templates plus a generated README template for output projects.
 
+This root is now transitional. Canonical authored templates are moving toward `definitions/templates/` so generation inputs and provider consumers can share one definition root.
+
 ---
 
 ## Features
 
-- ✅ Repository-owned template assets kept separate from generated project outputs
-- ✅ Layered `.NET` template structure for source and test scaffolding
-- ✅ Template-authored README contract for generated projects
-- ✅ Stable authored input for future `ntk` templating and generation workflows
+- ✅ Preserves existing `.NET` scaffolding assets during migration
+- ✅ Keeps generated project outputs separate from authored inputs
+- ✅ Maintains a safe cutover path toward `definitions/templates/`
+- ✅ Avoids destructive moves while the new canonical template taxonomy is introduced
 
 ---
 
@@ -80,11 +82,14 @@ The current template tree contains:
 
 Templates are authored inputs. Generated projects should not be edited back into this tree.
 
+New canonical reusable templates should prefer `definitions/templates/` when the corresponding lane already exists.
+
 ---
 
 ## References
 
 - [Repository README](../README.md)
+- [definitions/templates/README.md](../definitions/templates/README.md)
 - [templates/dotnet/README.hbs](dotnet/README.hbs)
 - [crates/commands/templating/README.md](../crates/commands/templating/README.md)
 - [definitions/shared/README.md](../definitions/shared/README.md)

@@ -1,25 +1,31 @@
 # Definitions Tree
 
-> Repository-owned authoritative non-code assets projected into provider and editor surfaces.
+> Repository-owned canonical non-code assets consumed by crates, runtime projections, and provider surfaces.
 
 ---
 
 ## Introduction
 
-`definitions/` is the canonical source tree for repository-owned non-code assets that must stay stable across provider, editor, and runtime projections.
+`definitions/` is the canonical root for repository-owned assets that are not application source code but still drive behavior across the workspace.
 
-The tree separates reusable shared assets from provider-authored overlays so the repository can render `.github/`, `.codex/`, `.claude/`, `.vscode/`, and related runtime surfaces without duplicating authority or drifting file names.
+This tree now separates five canonical authored lanes:
 
-The authoritative projection map between authored definitions, generated exceptions, projected destinations, and renderer ownership lives in `.github/governance/provider-surface-projection.catalog.json`.
+- `instructions/` for stable engineering and governance rules
+- `templates/` for reusable authored artifacts used in generation and documentation flows
+- `agents/` for controller and specialist orchestration contracts
+- `skills/` for reusable specialist capability packs
+- `hooks/` for lifecycle-triggered runtime behaviors
+
+`providers/` remains the consumer and projection side of the model.
 
 ---
 
 ## Features
 
-- ✅ Canonical shared assets reused across provider and runtime surfaces
-- ✅ Provider-authored overlays kept separate from shared instructions, prompts, and templates
-- ✅ Catalog-driven rendering with explicit renderer and projection ownership
-- ✅ Stable provider replication model without hand-editing generated surfaces
+- ✅ Canonical roots for instructions, templates, agents, skills, and hooks
+- ✅ Clear separation between authored definitions and provider-specific consumers
+- ✅ Stable path contract for crate-driven generation and projection flows
+- ✅ Transitional compatibility while legacy `definitions/shared/` and root `templates/` are retired safely
 
 ---
 
@@ -29,9 +35,9 @@ The authoritative projection map between authored definitions, generated excepti
 - [Features](#features)
 - [Contents](#contents)
   - [Architecture](#architecture)
-  - [Shared Definitions](#shared-definitions)
-  - [Provider Definitions](#provider-definitions)
-  - [Projection Workflow](#projection-workflow)
+  - [Canonical Roots](#canonical-roots)
+  - [Provider Consumers](#provider-consumers)
+  - [Migration Policy](#migration-policy)
 - [References](#references)
 - [License](#license)
 
@@ -42,85 +48,79 @@ The authoritative projection map between authored definitions, generated excepti
 ```mermaid
 graph TD
     DEFINITIONS["definitions/"]
-    SHARED["shared/<br/>instructions, prompts, templates"]
-    PROVIDERS["providers/<br/>github, vscode, codex, claude"]
-    CATALOG["provider-surface-projection.catalog.json"]
+    INSTR["instructions/"]
+    TEMPLATES["templates/"]
+    AGENTS["agents/"]
+    SKILLS["skills/"]
+    HOOKS["hooks/"]
+    PROVIDERS["providers/"]
+    LEGACY["shared/ (legacy compatibility)"]
     RENDER["ntk runtime render-provider-surfaces"]
-    GITHUB[".github/"]
-    VSCODE[".vscode/"]
-    CODEX[".codex/"]
-    CLAUDE[".claude/"]
+    GITHUB["provider surfaces"]
 
-    DEFINITIONS --> SHARED
+    DEFINITIONS --> INSTR
+    DEFINITIONS --> TEMPLATES
+    DEFINITIONS --> AGENTS
+    DEFINITIONS --> SKILLS
+    DEFINITIONS --> HOOKS
     DEFINITIONS --> PROVIDERS
-    SHARED --> CATALOG
-    PROVIDERS --> CATALOG
-    CATALOG --> RENDER
+    DEFINITIONS --> LEGACY
+    INSTR --> RENDER
+    TEMPLATES --> RENDER
+    AGENTS --> RENDER
+    SKILLS --> RENDER
+    HOOKS --> RENDER
+    PROVIDERS --> RENDER
     RENDER --> GITHUB
-    RENDER --> VSCODE
-    RENDER --> CODEX
-    RENDER --> CLAUDE
 ```
 
 ---
 
-## Shared Definitions
+## Canonical Roots
 
-`definitions/shared/` owns canonical assets that should be authored once and projected many times.
+- `instructions/` holds the shallow canonical rules board organized by `governance`, `development`, `operations`, `security`, and `data`.
+- `templates/` holds canonical authored templates organized by `codegen`, `docs`, `manifests`, `prompts`, and `workflows`.
+- `agents/` holds controller and specialist agent definitions such as `super-agent`, `planner`, `reviewer`, and `implementer`.
+- `skills/` holds reusable capability packs grouped by engineering role.
+- `hooks/` holds lifecycle entrypoints such as `session-start`, `pre-tool-use`, `subagent-start`, and `stop`.
 
-- `instructions/` is the semantic rules board for repository guidance.
-- `prompts/` stores reusable prompt and POML assets.
-- `templates/` stores reusable authored templates that should not be duplicated in provider folders.
-
-See [definitions/shared/README.md](shared/README.md) for the canonical shared-authority contract.
-
----
-
-## Provider Definitions
-
-`definitions/providers/` owns authored overlays that are intentionally provider-specific and should not be promoted into shared authority by default.
-
-- `github/` contains repository-owned `.github/` authored surfaces.
-- `vscode/` contains profile and workspace-authored VS Code surfaces.
-- `codex/` contains Codex compatibility, orchestration, MCP, and skill-authored surfaces.
-- `claude/` contains Claude runtime and skill-authored surfaces.
-
-See [definitions/providers/README.md](providers/README.md) for the provider overlay contract.
+Each canonical root should be authored here first, then projected or consumed elsewhere.
 
 ---
 
-## Projection Workflow
+## Provider Consumers
 
-Provider replication is driven by the projection catalog and repository-owned renderers.
+`definitions/providers/` remains the consumer side of the model.
 
-1. Author or update canonical shared or provider-specific assets under `definitions/`.
-2. Keep the semantic taxonomy and stable `ntk-*` file names unchanged across canonical and projected copies.
-3. Render runtime surfaces through the catalog-driven entrypoint:
+- `github/` contains `.github/`-oriented surfaces and compatibility consumers.
+- `vscode/` contains workspace and editor consumers.
+- `codex/` contains Codex runtime, MCP, orchestration, and skill consumers.
+- `claude/` contains Claude runtime and skill consumers.
 
-```powershell
-ntk runtime render-provider-surfaces --repo-root .
-```
+Provider trees should consume canonical definitions instead of inventing parallel sources of truth.
 
-4. Validate projected surfaces against repository ownership and drift rules.
+---
 
-This keeps canonical authority inside `definitions/` while allowing provider/runtime folders to stay consumable by local tools and agents.
+## Migration Policy
+
+This root is mid-migration and currently preserves compatibility on purpose.
+
+- `definitions/shared/` remains available as the legacy canonical surface until all consumers are realigned.
+- Root `templates/` remains available until its authored content is migrated into `definitions/templates/`.
+- The reorganization must prefer copy-then-cutover over destructive moves so documents are not lost during path normalization.
+- Human-facing examples belong in `docs/samples/`; canonical reusable authored assets belong in `definitions/templates/`.
 
 ---
 
 ## References
 
-- [definitions/shared/README.md](shared/README.md)
-- [definitions/shared/instructions/README.md](shared/instructions/README.md)
-- [definitions/shared/prompts/README.md](shared/prompts/README.md)
-- [definitions/shared/prompts/poml/README.md](shared/prompts/poml/README.md)
+- [definitions/instructions/README.md](instructions/README.md)
+- [definitions/templates/README.md](templates/README.md)
+- [definitions/agents/README.md](agents/README.md)
+- [definitions/skills/README.md](skills/README.md)
+- [definitions/hooks/README.md](hooks/README.md)
 - [definitions/providers/README.md](providers/README.md)
-- [definitions/providers/github/README.md](providers/github/README.md)
-- [definitions/providers/vscode/profiles/README.md](providers/vscode/profiles/README.md)
-- [definitions/providers/vscode/workspace/README.md](providers/vscode/workspace/README.md)
-- [definitions/providers/codex/mcp/README.md](providers/codex/mcp/README.md)
-- [definitions/providers/codex/orchestration/README.md](providers/codex/orchestration/README.md)
-- [definitions/providers/codex/scripts/README.md](providers/codex/scripts/README.md)
-- [definitions/providers/codex/skills/README.md](providers/codex/skills/README.md)
+- [definitions/shared/README.md](shared/README.md)
 - [.github/governance/provider-surface-projection.catalog.json](../.github/governance/provider-surface-projection.catalog.json)
 - `ntk runtime render-provider-surfaces --repo-root .`
 

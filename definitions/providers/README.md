@@ -7,8 +7,8 @@
 ## Introduction
 
 `definitions/providers/` contains authored overlays that are intentionally
-provider-specific and should remain separate from canonical shared authority in
-`definitions/shared/`.
+provider-specific and should remain separate from the canonical roots under
+`definitions/`.
 
 These folders define provider/runtime-specific entrypoints, compatibility
 surfaces, settings, and authored assets that the projection catalog renders into
@@ -76,8 +76,12 @@ by design.
   for Codex runtime integration.
 - `claude/` owns runtime and skill-authored surfaces for Claude integration.
 
-Reusable instructions, prompts, and templates that should be shared across
-multiple providers belong in `definitions/shared/`.
+Reusable canonical assets should live under the canonical roots in
+`definitions/instructions/`, `definitions/templates/`, `definitions/agents/`,
+`definitions/skills/`, and `definitions/hooks/`.
+
+`definitions/shared/` remains available only as a legacy compatibility surface
+while consumer paths are being realigned.
 
 ---
 
@@ -103,6 +107,11 @@ ntk runtime render-provider-surfaces --repo-root .
 ## References
 
 - [definitions/README.md](../README.md)
+- [definitions/instructions/README.md](../instructions/README.md)
+- [definitions/templates/README.md](../templates/README.md)
+- [definitions/agents/README.md](../agents/README.md)
+- [definitions/skills/README.md](../skills/README.md)
+- [definitions/hooks/README.md](../hooks/README.md)
 - [definitions/shared/README.md](../shared/README.md)
 - [definitions/providers/github/README.md](github/README.md)
 - [definitions/providers/vscode/profiles/README.md](vscode/profiles/README.md)

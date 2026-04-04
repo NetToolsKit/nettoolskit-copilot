@@ -1,28 +1,31 @@
 # Shared Definitions
 
-> Canonical shared assets reused across multiple repository surfaces.
+> Legacy compatibility surface preserved while canonical roots move to shallow top-level lanes under `definitions/`.
 
 ---
 
 ## Introduction
 
-`definitions/shared/` contains repository-owned source artifacts that are shared
-across provider and runtime surfaces. The folder is the authoritative input for
-instruction, prompt, and template content that gets projected into tracked
-workspace surfaces.
+`definitions/shared/` remains available to avoid breaking existing consumers
+while the canonical roots move to:
+
+- `definitions/instructions/`
+- `definitions/templates/`
+- `definitions/agents/`
+- `definitions/skills/`
+- `definitions/hooks/`
+
+Do not treat this folder as the long-term target structure for new authored
+content when an equivalent canonical root already exists.
 
 ---
 
 ## Features
 
-- ✅ Shared instruction assets are authored once and projected into
-  `.github/instructions/`
-- ✅ Shared prompt assets are authored once and projected into
-  `.github/prompts/poml/`
-- ✅ Shared templates stay reusable instead of being duplicated across provider
-  folders
-- ✅ The folder keeps canonical documentation separate from generated or
-  provider-specific runtime surfaces
+- ✅ Preserves existing consumers while canonical paths are being introduced
+- ✅ Keeps older projections functioning during migration
+- ✅ Reduces risk of document loss by using copy-then-cutover instead of destructive moves
+- ✅ Provides a compatibility checkpoint while providers are realigned
 
 ---
 
@@ -44,34 +47,29 @@ workspace surfaces.
 ```mermaid
 graph TD
     SHARED["definitions/shared/"]
-    INSTR["instructions/"]
-    PROMPTS["prompts/"]
-    TEMPLATES["templates/"]
-    GITHUB[".github/* projected surfaces"]
-    PROVIDERS["provider-authored overlays"]
+    LEGACY_INSTR["legacy instructions/"]
+    LEGACY_PROMPTS["legacy prompts/"]
+    LEGACY_TEMPLATES["legacy templates/"]
+    CANONICAL["definitions/* canonical roots"]
+    PROVIDERS["provider consumers"]
 
-    SHARED --> INSTR
-    SHARED --> PROMPTS
-    SHARED --> TEMPLATES
-    INSTR --> GITHUB
-    PROMPTS --> GITHUB
-    TEMPLATES --> PROVIDERS
+    SHARED --> LEGACY_INSTR
+    SHARED --> LEGACY_PROMPTS
+    SHARED --> LEGACY_TEMPLATES
+    CANONICAL --> PROVIDERS
+    SHARED -. compatibility .-> CANONICAL
 ```
 
 ---
 
 ## Shared Asset Boundaries
 
-`definitions/shared/` should only hold assets that are intentionally reusable
-across more than one provider or runtime surface.
+`definitions/shared/` should now be treated as a migration compatibility lane.
 
-- `instructions/` is the canonical semantic rules board for repository guidance.
-- `prompts/` stores reusable prompt entry content and POML prompt assets.
-- `templates/` stores reusable authored templates that provider trees may
-  consume but should not fork without an explicit reason.
-
-Provider-specific runtime behavior belongs under `definitions/providers/`, not
-here.
+- keep existing consumers working until their canonical root is in place
+- prefer authoring new root-level canonical content under `definitions/`
+- do not create new long-lived taxonomy branches here when an equivalent root
+  exists already
 
 ---
 
@@ -80,20 +78,26 @@ here.
 Shared assets keep canonical authority even when projected into runtime
 surfaces.
 
-- Canonical source: `definitions/shared/`
+- Transitional compatibility source: `definitions/shared/`
+- Preferred canonical source: `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`
 - Projected runtime surface: `.github/`, `.codex/`, `.claude/`, `.vscode/`
 - Ownership and projection rules: `.github/governance/provider-surface-projection.catalog.json`
 - Naming contract: semantic domain folders plus stable `ntk-*` file names for
   instruction assets
 
-Do not edit generated runtime surfaces in place when the canonical shared asset
-already exists here.
+Do not delete or force-move existing shared content until all known consumers
+have been realigned.
 
 ---
 
 ## References
 
 - [definitions/README.md](../README.md)
+- [definitions/instructions/README.md](../instructions/README.md)
+- [definitions/templates/README.md](../templates/README.md)
+- [definitions/agents/README.md](../agents/README.md)
+- [definitions/skills/README.md](../skills/README.md)
+- [definitions/hooks/README.md](../hooks/README.md)
 - [definitions/providers/README.md](../providers/README.md)
 - [definitions/shared/instructions/README.md](instructions/README.md)
 - [definitions/shared/prompts/README.md](prompts/README.md)
