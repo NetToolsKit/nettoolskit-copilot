@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 11:05
+- LastUpdated: 2026-04-04 12:08
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -70,13 +70,13 @@ The repository already separates shared instruction sources under `definitions/s
 - `definitions/instructions/governance/`
   - repository invariants, workflow guidance, README/changelog policy, and collaboration rules live here as `ntk-governance-*` files.
 - `definitions/instructions/development/`
-  - architecture, backend, frontend, persistence, and testing guidance live here as `ntk-development-*` files.
+  - architecture, backend, frontend, agentic, persistence, and testing guidance live here as `ntk-development-*` files.
 - `definitions/instructions/operations/`
   - DevOps, platform, reliability, workspace, and local runtime operations live here as `ntk-operations-*` files.
 - `definitions/instructions/security/`
   - application hardening, supply-chain trust, and secret-handling guidance live here as `ntk-security-*` files.
 - `definitions/instructions/data/`
-  - database and privacy guidance live here as `ntk-data-*` files.
+  - database, database-operations, and privacy/data-governance guidance live here as `ntk-data-*` files.
 - `definitions/templates/`
   - `codegen/`
   - `docs/`
@@ -109,6 +109,11 @@ The repository already separates shared instruction sources under `definitions/s
   - human-readable manifest examples rendered or curated for operators and contributors
 
 This structure is the target contract for the next refactor. Instructions must stay within the five semantic instruction categories; templates stay separate from instructions; agents, skills, and hooks must not be forced back into the instruction tree; and documentation samples stay outside canonical template storage.
+
+The first copy-first migration wave also fixes two earlier placement concerns:
+
+- ORM guidance belongs under `development/` in the shallow model as persistence implementation guidance.
+- Privacy/data-compliance guidance belongs under `data/` when it is primarily about governed data handling and retention policy rather than generic application hardening.
 
 ---
 

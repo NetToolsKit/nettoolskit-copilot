@@ -18,6 +18,14 @@ The lane is intentionally shallow and uses five predictable categories:
 
 Specialization should prefer stable `ntk-*` file names instead of deep folder nesting.
 
+Typical specialization patterns:
+
+- `ntk-governance-*` for repository invariants and workflow contracts
+- `ntk-development-*` for backend, frontend, agentic, persistence, and testing guidance
+- `ntk-operations-*` for DevOps, platform, reliability, quality, and workspace operations
+- `ntk-security-*` for supply-chain, application, and vulnerability hardening
+- `ntk-data-*` for database and privacy/data-governance concerns
+
 ---
 
 ### Architecture

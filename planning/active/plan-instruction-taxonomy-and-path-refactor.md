@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 11:05
+- LastUpdated: 2026-04-04 12:08
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -43,6 +43,7 @@ Generated: 2026-04-03 00:00
 | I10 | Freeze root taxonomy and shallow depth rule | move from the transitional lane split to `instructions/`, `agents/`, `skills/`, and `hooks/` roots with shallow paths and explicit authority | 🔴 Immediate | I9 |
 | I11 | Re-map semantic lanes to five primary instruction categories | collapse current instruction lanes into `governance`, `development`, `operations`, `security`, and `data`, with specialization encoded in file names | 🔴 Immediate | I10 |
 | I12 | Add canonical template and sample lanes | create `definitions/templates/*` and `docs/samples/manifests/` without deleting legacy sources | 🟠 High | I2, I10, I11 |
+| I13 | Scaffold shallow domain instruction copies | copy existing non-governance instruction content into `development`, `operations`, `security`, and `data` lanes with stable new file names while keeping legacy roots intact | 🔴 Immediate | I10, I11 |
 
 ---
 
@@ -233,6 +234,27 @@ Generated: 2026-04-03 00:00
   - first scaffolding slice ready; canonical root folders and manifest sample lane can be created without deleting legacy documents
 - Commit checkpoint:
   - `docs(repo): scaffold canonical definition roots and manifest samples`
+
+### [2026-04-04 12:08] Task I13: Scaffold Shallow Domain Instruction Copies
+
+- Copy the current canonical instruction content into the new shallow instruction lanes:
+  - `definitions/instructions/development/`
+  - `definitions/instructions/operations/`
+  - `definitions/instructions/security/`
+  - `definitions/instructions/data/`
+- Keep legacy copies under `definitions/shared/instructions/` intact during this phase.
+- Encode specialization in the new file names instead of creating deeper subfolders.
+- Normalize the first pass of remapping as follows:
+  - backend, frontend, agentic, and ORM guidance move under `development/`
+  - DevOps, platform, reliability, quality, and automation guidance move under `operations/`
+  - vulnerability, API, and supply-chain guidance remain under `security/`
+  - database, database-operations, and privacy/data-compliance guidance move under `data/`
+- Status:
+  - in progress; first shallow copies created for all four lanes without deleting legacy sources
+  - ORM now enters the shallow model as `ntk-development-persistence-orm.instructions.md`
+  - privacy/data-compliance now enters the shallow model as `ntk-data-privacy-compliance.instructions.md`
+- Commit checkpoint:
+  - `docs(instructions): scaffold shallow domain instruction copies`
 
 ---
 
