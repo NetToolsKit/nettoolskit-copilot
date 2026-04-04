@@ -3,215 +3,76 @@ applyTo: "**/microservice*/**/*.{cs,ts,js,json,yml,yaml,config,dockerfile}"
 priority: medium
 ---
 
-# Service boundaries
-- Single responsibility
-- Domain-driven boundaries
-- Database per service
-- Prefer async communication
-- Event-driven architecture
-- Saga for distributed transactions
-- API gateway as entry point
-```yaml
-routes:
-  - path: /orders
-    service: order-service
-```
+# Microservice Boundaries and Application Performance
 
-# Performance
-- Configured connection pooling
-- Consistent async/await
-- Bulk operations
-- Appropriate lazy loading
-- Distributed cache (Redis)
-- CDN for assets
-- Compression enabled
-```csharp
-var cache = ConnectionMultiplexer.Connect("redis");
-cache.GetDatabase().StringSet("key", value);
-```
+Use this instruction for service boundaries, service-to-service contracts,
+application-layer performance, data access, caching, and throughput patterns
+inside distributed services.
 
-# Resource efficiency
-- Minimal images
-- Multi-stage builds
-- Defined resource limits
-- Accurate CPU/memory requests
-- HPA/VPA
-- Tuned probes
-```yaml
-resources:
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
-  requests:
-    cpu: "250m"
-    memory: "256Mi"
-```
+Use other `runtime-ops` instructions for adjacent concerns:
 
-# Communication
-- gRPC for service-to-service
-- REST for external APIs
-- Message queues for async
-- Circuit breaker
-- Retries with exponential backoff
-- Timeouts
-- Idempotent operations
-```csharp
-.AddPolicyHandler(Policy.Handle<Exception>().WaitAndRetryAsync(3, retry => TimeSpan.FromSeconds(Math.Pow(2, retry))))
-```
+- `ntk-runtime-docker.instructions.md` for container image and Docker Compose policy
+- `ntk-runtime-k8s.instructions.md` for cluster manifests, probes, scaling primitives, and network/storage objects
+- `ntk-runtime-observability-sre.instructions.md` for telemetry, SLOs, dashboards, alerts, and incident operations
+- `ntk-runtime-platform-reliability-resilience.instructions.md` for retries, timeouts, graceful degradation, and disaster readiness
 
-# Consistency
-- Eventual consistency by default
-- CQRS when applicable
-- Event sourcing for audit
-- Saga orchestration
-- Compensation patterns
-- Avoid distributed transactions
-- Optimized read models
-```csharp
-public class OrderSaga { /* Orchestrate steps with compensation */ }
-```
+## Service Boundaries
 
-# Caching
-- Application cache
-- Distributed cache
-- Cache-aside
-- Write-through when needed
-- Proper TTL
-- Invalidation
-- Warming
-- Hierarchy
-```csharp
-var value = cache.Get("key") ?? LoadAndCache("key");
-```
+- Keep each service aligned to a single business capability or cohesive bounded context.
+- Avoid shared mutable databases across services unless the integration model explicitly requires it.
+- Expose explicit contracts for public APIs, events, and async messages.
+- Prefer autonomous deployability over prematurely splitting small modules into separate services.
+- Use API gateway or ingress routing as an edge concern, not as the place where domain logic lives.
 
-# Load balancing
-- Round-robin default
-- Health-based routing
-- Session affinity when needed
-- Geo routing
-- A/B testing
-- Canary
-- Blue-green
-```yaml
-spec:
-  template:
-    metadata:
-      labels:
-        version: v2
-  traffic: 10%
-```
+## Application Performance
 
-# Monitoring
-- Structured logs
-- Correlation IDs
-- Metrics aggregation
-- Tracing
-- SLA monitoring
-- Error rate
-- Latency percentiles
-- Resource utilization
-```yaml
-- job_name: 'service'
-  metrics_path: /metrics
-```
+- Keep hot paths asynchronous and cancellation-aware.
+- Use connection pooling, bounded concurrency, and batch operations intentionally.
+- Avoid N+1 query patterns, unnecessary eager graph loads, and oversized payloads.
+- Prefer pagination, streaming, or chunked processing for large result sets.
+- Optimize serialization cost and payload shape for service-to-service calls.
 
-# Security performance
-- JWT validation
-- Optimized OAuth2 flows
-- Per-service rate limiting
-- API key caching
-- Certificate rotation
-- Secrets management
-- Network policies
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-spec:
-  podSelector: {}
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector: {}
-```
+## Service Communication
 
-# Database
-- Read replicas
-- Pooling
-- Query optimization
-- Indexes
-- Partitioning when needed
-- Archiving
-- DB monitoring
-- Slow query detection
-```sql
-CREATE INDEX idx_orders_status ON orders(status);
-```
+- Choose synchronous calls only when latency coupling is acceptable.
+- Prefer asynchronous messaging for workflows that tolerate eventual completion.
+- Keep idempotency explicit for retried commands, handlers, and consumers.
+- Define message versioning, deduplication, and poison-message handling rules for queue-driven flows.
+- Keep service contracts backward-compatible during rolling or phased upgrades.
 
-# Messaging
-- Batch processing
-- Parallel consumers
-- DLQ
-- Deduplication
-- Poison message handling
-- Backpressure
-- Consumer scaling
-```yaml
-deadLetterQueue: enabled
-```
+## Consistency and Workflow Coordination
 
-# Memory
-- Object pooling
-- Dispose patterns
-- Weak refs
-- GC tuning
-- Profiling
-- Leak detection
-- Memory limits
-- Streaming large data
-```csharp
-using var pooled = ArrayPool<byte>.Shared.Rent(1024);
-```
+- Prefer eventual consistency as the default cross-service model.
+- Use compensating actions when workflows span multiple services.
+- Apply CQRS or read-model specialization only when it reduces measurable bottlenecks or complexity.
+- Avoid distributed transactions unless there is no viable alternative.
+- Keep orchestration and choreography choices explicit per workflow.
 
-# Network
-- Connection reuse
-- Compression
-- Binary protocols
-- Payload optimization
-- Bandwidth monitoring
-- Partition handling
-- Edge caching
-```http
-Accept-Encoding: gzip
-```
+## Caching and Data Access
 
-# Service discovery
-- Health checks
-- Graceful shutdown
-- Registration
-- Load balancer integration
-- DNS discovery
-- Service mesh when applicable
-- Failover
-```yaml
-livenessProbe:
-  httpGet:
-    path: /health/live
-    port: 80
-```
+- Use application or distributed cache only where it measurably reduces cost or latency.
+- Define cache ownership, TTL, invalidation, and warming strategy explicitly.
+- Keep database indexes, query plans, and read/write patterns observable.
+- Use replicas, partitioning, or archive strategies only when justified by workload characteristics.
+- Treat cache staleness and fallback behavior as part of the service contract.
 
-# Deployment
-- Rolling updates
-- Zero-downtime
-- Config management
-- Environment parity
-- IaC
-- Automated rollbacks
-- Deploy monitoring
-```yaml
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 1
-    maxUnavailable: 0
-```
+## Resource Efficiency at Service Level
+
+- Reduce allocation pressure on hot paths.
+- Use pooling, streaming, and reuse patterns when they materially improve throughput.
+- Keep compression, binary protocols, and connection reuse aligned with real bottlenecks.
+- Avoid premature micro-optimizations without profiling evidence.
+- Profile CPU, memory, allocation, and query hotspots before changing architecture.
+
+## Security and Performance Intersections
+
+- Keep authentication and authorization checks efficient but explicit.
+- Apply per-service rate limiting or quota enforcement where abuse or overload risk exists.
+- Protect secrets and credentials without introducing blocking lookup patterns on every request.
+- Keep certificate rotation, token validation, and key fetch strategies compatible with latency budgets.
+
+## Verification
+
+- Validate latency, throughput, and error behavior on critical service flows.
+- Add focused load, soak, or regression tests where service bottlenecks are known.
+- Keep performance evidence tied to real use cases, not synthetic vanity metrics.

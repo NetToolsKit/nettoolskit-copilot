@@ -43,6 +43,10 @@ Keep telemetry, SLO, dashboards, alerts, and incident operations in
 `ntk-runtime-observability-sre.instructions.md`, and keep resilience patterns,
 capacity, chaos testing, and disaster readiness in
 `ntk-runtime-platform-reliability-resilience.instructions.md`.
+Keep service-boundary, service-contract, caching, and application-level
+throughput guidance in `ntk-runtime-microservices-performance.instructions.md`,
+and keep container or cluster implementation details in the Docker and
+Kubernetes instructions.
 - `data-security/`: database, ORM, privacy/compliance, API security, and vulnerability guidance.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
 

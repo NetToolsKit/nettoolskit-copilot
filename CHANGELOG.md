@@ -135,6 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating general CI/CD and DevOps platform policy from GitHub Actions-specific workflow authoring.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating observability and incident operations from resilience and disaster-readiness policy.
+- Instruction governance taxonomy now narrows `runtime-ops` guidance by separating microservice boundary and application-performance policy from Docker, Kubernetes, observability, and resilience guidance.
 - Workspace lint policy adjusted to keep CI gate strict on `clippy::all` with `-D warnings`.
 - `CHANGELOG.md` aligned to Keep a Changelog structure with an explicit `Unreleased` section.
 - `crates/otel` migrated to a hybrid model: optional OTLP trace export plus existing in-process metrics.
