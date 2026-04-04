@@ -70,6 +70,9 @@ Use the **Mandatory Context Files** list above.
   - frontend examples:
     - `instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
     - `instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`
+  - agentic examples:
+    - `instructions/architecture/agentic/ntk-agentic-surfaces.instructions.md`
+    - `instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`
   - data/security examples:
     - `instructions/data-security/ntk-data-database.instructions.md`
     - `instructions/data-security/ntk-data-orm.instructions.md`

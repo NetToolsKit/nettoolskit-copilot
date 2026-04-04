@@ -33,7 +33,7 @@ The instruction tree is grouped by semantic domain, not numeric prefixes. Direct
 - `process/`: planning, verification, worktree isolation, PR, and workflow execution rules.
 - `architecture/backend/`: backend platform, clean architecture, .NET, and Rust organization guidance.
 - `architecture/frontend/`: frontend architecture, Vue/Quasar, and UI/UX guidance.
-- `architecture/agentic/`: context economy and agentic-surface guidance.
+- `architecture/agentic/`: agentic-surface boundaries plus context economy and checkpoint guidance.
 - `runtime-ops/`: CI/CD, Docker, Kubernetes, PowerShell, resilience, observability, and workflow generation.
 - `data-security/`: database, ORM, privacy/compliance, API security, and vulnerability guidance.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
@@ -47,6 +47,7 @@ Examples:
 - `ntk-core-repository-operating-model.instructions.md`
 - `ntk-backend-architecture-platform.instructions.md`
 - `ntk-frontend-vue-quasar.instructions.md`
+- `ntk-agentic-surfaces.instructions.md`
 - `ntk-runtime-powershell-execution.instructions.md`
 - `ntk-docs-readme.instructions.md`
 

@@ -10,7 +10,7 @@ The instruction tree acts as a semantic rules board for the runtime.
 - `process/`: planning, verification, PR, worktree, and workflow execution rules.
 - `architecture/backend/`: backend platform, language, and architecture rules.
 - `architecture/frontend/`: frontend stack, UX, and component architecture rules.
-- `architecture/agentic/`: context economy and agentic-surface rules.
+- `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
 - `runtime-ops/`: runtime, automation, observability, resilience, and infrastructure execution rules.
 - `data-security/`: data, privacy, security, and ORM/database rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.

@@ -184,6 +184,22 @@ routing:
       - path: instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md
         reason: Full context economy, compression triggers, CHECKPOINT format, and command vocabulary
 
+  - id: agentic-surfaces
+    tags: [agentic, mcp, a2a, rag, cag, retrieval, context-assembly]
+    triggers:
+      - "mcp"
+      - "a2a"
+      - "rag"
+      - "cag"
+      - "agentic"
+      - "retrieval"
+      - "context assembly"
+      - "prompt compaction"
+      - "token economy"
+    include:
+      - path: instructions/architecture/agentic/ntk-agentic-surfaces.instructions.md
+        reason: Architectural separation of MCP, A2A, RAG, and CAG responsibilities
+
   - id: dotnet-backend
     tags: [dotnet, csharp, backend, api, clean-architecture, cqrs]
     triggers:

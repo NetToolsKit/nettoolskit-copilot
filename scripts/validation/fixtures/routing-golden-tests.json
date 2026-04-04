@@ -262,6 +262,16 @@
       ]
     },
     {
+      "id": "agentic-surfaces-route",
+      "request": "Separate MCP, A2A, RAG, and CAG responsibilities in the repository architecture.",
+      "expected_route_ids": [
+        "agentic-surfaces"
+      ],
+      "expected_selected_paths": [
+        "instructions/architecture/agentic/ntk-agentic-surfaces.instructions.md"
+      ]
+    },
+    {
       "id": "no-match-route",
       "request": "Tell me a random joke.",
       "expected_route_ids": [],

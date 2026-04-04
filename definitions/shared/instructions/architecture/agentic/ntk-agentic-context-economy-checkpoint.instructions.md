@@ -6,24 +6,32 @@ priority: high
 # Context Economy and Checkpoint Protocol
 
 ## Purpose
-Agents must operate with automatic context compression and structured checkpoint continuity at all times.
-This protocol is always active — no user command is required to enable it.
+This file owns only the in-session context economy and checkpoint protocol.
+
+- automatic context compression
+- checkpoint formatting
+- continuity block structure
+- command vocabulary for checkpoint and progress operations
+
+It does not define MCP, A2A, RAG, or CAG boundaries by itself. Use
+`ntk-agentic-surfaces.instructions.md` for the architecture-level separation of
+those concepts.
 
 ## Core Principle
 Treat conversation history as temporary and disposable.
 Maintain a compact, structured operational memory that is continuously updated.
 Continuity depends on the active plan artifact and this checkpoint model — not on raw history.
 
-## Three Operating Modes (always active simultaneously)
+## Operating Modes
 
-### MODE 1 — EXECUTION
+### EXECUTION
 Respond to and execute tasks normally.
 
-### MODE 2 — CONTINUOUS COMPRESSION
+### CONTINUOUS COMPRESSION
 Silently consolidate context when any compression trigger fires (see below).
 Never announce compression unless the user asks for a checkpoint.
 
-### MODE 3 — STRUCTURED CHECKPOINT
+### STRUCTURED CHECKPOINT
 When resuming or transitioning phases, use the compressed state as the primary continuity source.
 Show the CHECKPOINT block only when triggered, never proactively.
 
@@ -95,7 +103,7 @@ Execute immediately when received. English is the canonical form; PT-BR aliases 
 | `show progress` | Output Completed + Next step blocks |
 | `resume from summary` | Drop raw history; resume from last CHECKPOINT |
 
-## Priority Order (when in doubt)
+## Priority Order
 1. Continuity of the work
 2. Token economy
 3. Preservation of important decisions
@@ -105,11 +113,14 @@ Execute immediately when received. English is the canonical form; PT-BR aliases 
 A detail that does not influence the next execution step must be compressed or dropped from active memory.
 
 ## Relationship to Planning Artifacts
-This protocol complements — it does not replace — the planning-first continuity model.
-The active plan under `planning/active/` remains the authoritative resume point after context resets.
-The CHECKPOINT is an in-session working memory tool; the plan is the durable artifact.
+This protocol complements the planning-first continuity model.
+
+- The active plan under `planning/active/` remains the authoritative durable resume point.
+- The CHECKPOINT is the in-session working memory tool.
 
 ## Relationship to Other Instructions
-- **`ntk-core-super-agent.instructions.md`** owns planning-first continuity, session boundary handling, cleanup scripts, and planning artifact management. This file owns in-session compression and the checkpoint state model.
-- **`ntk-process-workflow-optimization.instructions.md`** owns output token efficiency rules, task breakdown, and code-diff output economy. This file owns compression triggers, six-block state structure, and command vocabulary.
-- Do not duplicate rules from this file in either of those files; use a short summary paragraph pointing here.
+- `ntk-core-super-agent.instructions.md` owns lifecycle, planning-first continuity, and session-boundary handling.
+- `ntk-process-workflow-optimization.instructions.md` owns output-discipline and token-economy guidance.
+- `ntk-agentic-surfaces.instructions.md` owns the architectural separation of MCP, A2A, RAG, and CAG.
+
+Do not duplicate those responsibilities here.
