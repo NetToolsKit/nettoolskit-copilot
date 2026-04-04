@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 21:07
+- LastUpdated: 2026-04-03 21:12
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -92,6 +92,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - agentic slice complete; `ntk-agentic-surfaces` now owns MCP/A2A/RAG/CAG boundaries while `ntk-agentic-context-economy-checkpoint` keeps only the checkpoint/compression protocol
   - runtime-ops PowerShell slice complete; `ntk-runtime-powershell-execution` now owns runtime invocation safety while `ntk-runtime-powershell-script-creation` owns authoring/template rules
   - runtime-ops workflow slice complete; `ntk-runtime-ci-cd-devops` now owns general pipeline and DevOps platform guidance while `ntk-runtime-workflow-generation` owns GitHub Actions authoring requirements
+  - runtime-ops reliability slice complete; `ntk-runtime-observability-sre` now owns telemetry, SLO, dashboards, alerts, and incident operations while `ntk-runtime-platform-reliability-resilience` owns resilience patterns, capacity, chaos, and disaster readiness
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

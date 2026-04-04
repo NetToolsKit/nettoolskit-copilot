@@ -5,6 +5,7 @@ priority: high
 
 # Platform Reliability and Resilience Baseline
 - Use this instruction for reliability architecture, resilience patterns, failure testing, and disaster readiness.
+- Use `ntk-runtime-observability-sre.instructions.md` for telemetry design, dashboards, alerts, SLO instrumentation, and incident operations.
 - Design for graceful degradation under dependency failure and traffic volatility.
 
 # Reliability Objectives
@@ -45,11 +46,6 @@ priority: high
 - Use progressive delivery strategies such as canary, blue-green, or phased rollout.
 - Gate rollout with health, error, and latency signals tied to rollback rules.
 - Automate rollback for severe regressions when signal confidence is high.
-
-# Observability for Reliability
-- Instrument request outcomes, retries, breaker states, queue backlog, and saturation.
-- Maintain dashboards and alerts aligned to reliability objectives and on-call workflows.
-- Ensure every critical alert points to an actionable runbook.
 
 # Operational Readiness
 - Maintain incident command protocol and role assignments.

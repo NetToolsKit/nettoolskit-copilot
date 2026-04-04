@@ -4,7 +4,8 @@ priority: high
 ---
 
 # Observability and SRE Baseline
-- Use this instruction when designing runtime telemetry, reliability operations, incident response, and service-level objectives.
+- Use this instruction when designing runtime telemetry, service-level objectives, alerting, dashboards, and incident operations.
+- Use `ntk-runtime-platform-reliability-resilience.instructions.md` for timeout/retry patterns, graceful degradation, chaos testing, and disaster readiness.
 - Treat observability as a product requirement; every critical user flow must be measurable end-to-end.
 
 # SLO and Error Budget
@@ -40,7 +41,7 @@ priority: high
 - Ensure readiness reflects real dependency availability and startup state.
 - Keep liveness checks lightweight and isolated from downstream dependency failures when possible.
 
-# Reliability Operations
+# Incident Operations
 - Track MTTR, MTTD, change failure rate, and deployment frequency as core operational KPIs.
 - Require post-incident reviews with corrective actions, ownership, and due dates.
 - Convert repeated incident classes into preventive engineering backlog items.

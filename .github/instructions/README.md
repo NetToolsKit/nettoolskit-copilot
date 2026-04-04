@@ -40,6 +40,10 @@ This folder mirrors the semantic taxonomy from `definitions/shared/instructions/
 Within `runtime-ops/`, keep general pipeline and DevOps platform guidance in
 `ntk-runtime-ci-cd-devops.instructions.md` and keep GitHub Actions-specific
 authoring rules in `ntk-runtime-workflow-generation.instructions.md`.
+Keep telemetry, SLO, dashboards, alerts, and incident operations in
+`ntk-runtime-observability-sre.instructions.md`, and keep resilience patterns,
+capacity, chaos testing, and disaster readiness in
+`ntk-runtime-platform-reliability-resilience.instructions.md`.
 - `data-security/`: data, privacy, and security rules.
 - `docs/`: README and instruction-authoring rules.
 
