@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 22:26
+- LastUpdated: 2026-04-03 22:31
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -95,6 +95,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - runtime-ops reliability slice complete; `ntk-runtime-observability-sre` now owns telemetry, SLO, dashboards, alerts, and incident operations while `ntk-runtime-platform-reliability-resilience` owns resilience patterns, capacity, chaos, and disaster readiness
   - runtime-ops microservice slice complete; `ntk-runtime-microservices-performance` now owns service boundaries, service contracts, caching, and application-level throughput guidance while Docker, Kubernetes, observability, and resilience details stay in their specialized instruction files
   - runtime-ops container slice complete; `ntk-runtime-docker` now owns image construction, container runtime, and Docker Compose policy while `ntk-runtime-k8s` owns cluster manifests, rollout, networking, storage, and autoscaling policy
+  - runtime-ops static-analysis slice complete; `ntk-runtime-static-analysis-sonarqube` now owns SonarQube/static-analysis configuration, quality profiles, exclusions, and report import policy while CI/workflow execution stays in the CI/CD and workflow-generation instructions
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 22:26
+- LastUpdated: 2026-04-03 22:31
 - Objective: define the design intent for keeping repository instructions authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -65,6 +65,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Repeated runtime reliability guidance is reduced by separating observability and incident operations from resilience patterns and disaster readiness.
 - Repeated runtime microservice guidance is reduced by separating service-boundary and application-level performance policy from Docker, Kubernetes, observability, and resilience guidance.
 - Repeated runtime container guidance is reduced by separating Docker image/container policy from Kubernetes cluster-manifest and rollout policy.
+- Repeated runtime static-analysis guidance is reduced by separating SonarQube/static-analysis configuration from CI/workflow execution policy.
 
 ---
 

@@ -52,6 +52,10 @@ Keep image construction, container runtime, and Docker Compose guidance in
 `ntk-runtime-docker.instructions.md`, and keep Kubernetes manifests, cluster
 rollout, networking, storage, and autoscaling guidance in
 `ntk-runtime-k8s.instructions.md`.
+Keep SonarQube/static-analysis configuration, quality profiles, exclusions, and
+report import policy in
+`ntk-runtime-static-analysis-sonarqube.instructions.md`, and keep CI/workflow
+execution wiring in the CI/CD and workflow-generation instructions.
 - `data-security/`: data, privacy, and security rules.
 - `docs/`: README and instruction-authoring rules.
 

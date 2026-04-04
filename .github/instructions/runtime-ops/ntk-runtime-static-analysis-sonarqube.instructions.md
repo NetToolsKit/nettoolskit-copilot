@@ -3,115 +3,65 @@ applyTo: "**/{sonar,sonarqube,analysis,quality,lint,static}*/**/*.{properties,ym
 priority: low
 ---
 
-# SonarQube Setup
-Docker-compose with PostgreSQL; configured sonar-scanner-cli; quality gates set; 80%+ coverage threshold for new code; max duplication 3%; maintainability A; reliability/security A.
-```yaml
-# docker-compose.yml
-services:
-  sonarqube:
-    image: sonarqube:community
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
-```
+# Static Analysis and SonarQube
 
-# Project Configuration
-sonar-project.properties at root; exclusions for generated code; specific inclusions; language analyzers; custom rules when needed; baseline set; incremental analysis.
-```properties
-sonar.projectKey=NetToolsKit
-sonar.sources=src
-sonar.tests=tests
-sonar.exclusions=**/*.g.cs
-sonar.cs.opencover.reportsPaths=coverage.xml
-```
+Use this instruction for SonarQube configuration, static-analysis scope,
+quality profile expectations, exclusions, report import, and analysis
+governance.
 
-# Coverage Integration
-Test coverage reports; jacoco for Java; coverage.py for Python; nyc for Node.js; coverlet for .NET; OpenCover/ReportGenerator; merge reports; exclude test files.
-```bash
-# .NET coverage collection
-dotnet test --collect:"XPlat Code Coverage"
-reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:coverage -reporttypes:SonarQube
-```
+Use adjacent instructions for related concerns:
 
-# Quality Gates
-Zero tolerance for blocker/critical; differential coverage; duplication %; maintainability; reliability; security; hotspots reviewed.
-- Fail PR if new code has coverage <80%
-- Fail if duplication >3%
-- Fail if critical issues present
-- Review hotspots before merge
+- `ntk-runtime-ci-cd-devops.instructions.md` for generic pipeline stage policy
+- `ntk-runtime-workflow-generation.instructions.md` for GitHub Actions wiring and artifact publication
+- `ntk-security-vulnerabilities.instructions.md` for dependency vulnerability and supply-chain scanning policy
 
-# CI/CD Integration
-sonar-scanner in pipeline; quality gate status check; PR decoration; fail build on gate fail; sonar token via secrets; branch and PR analysis.
-```yaml
-# GitHub Actions
-- name: SonarQube Scan
-  uses: sonarqube-quality-gate-action@master
-  env:
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-```
+## SonarQube Scope
 
-# Security
-OWASP detection; dependency check; hotspot review; sensitive data exposure; SQL injection; XSS; authz/authn issues.
-- Enable dependency-check
-- Ensure SQL queries parameterized
-- Lint for XSS sinks
-- Review hotspots weekly
+- Keep SonarQube focused on static analysis, quality gates, and trend visibility.
+- Treat analysis configuration as repository policy, not as ad-hoc per-branch experimentation.
+- Keep project keys, inclusions, exclusions, and report paths explicit and reviewable.
 
-# Code Smells
-Complexity metrics; naming; unused code; magic numbers; long methods/classes; deep nesting; cognitive complexity; technical debt.
-- Set thresholds for method length (<=50)
-- Class size (<=1000 lines)
-- Flag cognitive complexity >15
-- Remove unused code and magic numbers
+## Project Configuration
 
-# Performance Rules
-Inefficient algorithms; leaks; resource handling; async/await; DB query optimization; caching; loops; string concatenation.
-- Replace synchronous I/O with async
-- Avoid large string concatenations in loops
-- Review allocations
-- Ensure DB queries SARGABLE
+- Maintain deterministic project metadata and source/test boundaries.
+- Exclude generated artifacts, vendor content, transient build output, and known non-source directories intentionally.
+- Keep language-specific analyzer configuration aligned with the actual stack in the repository.
+- Prefer stable report paths so CI and local analysis remain predictable.
 
-# Maintainability
-- Cyclomatic complexity <= 15
-- Cognitive complexity <= 15
-- Function length <= 50 lines
-- Class size <= 1000 lines
-- File length <= 2000 lines
+## Coverage and Report Import
 
-# Custom Rules
-Company patterns; architecture compliance; naming; coding standards; deprecated API usage; stack compliance; framework-specific rules.
-```java
-// Custom rule: forbid domain annotations in Entities
-// Enforce namespace structure NetToolsKit.Core.*
-// Block deprecated APIs
-```
+- Import coverage reports only from supported, deterministic test outputs.
+- Keep coverage exclusions explicit and justified.
+- Normalize report generation paths before SonarQube ingestion rather than relying on fragile globbing.
+- Treat coverage import as analysis input, not as the source of truth for test execution policy.
 
-# Reporting
-SonarQube dashboard; email; Slack/Teams; trends; team/project comparisons; technical debt; remediation plan.
-- Weekly report to Slack with new issues and trend lines
-- Assign remediation tasks with due dates
+## Quality Gates
 
-# Branch Strategy
-Main analysis; feature decoration; per-branch gates; merge requirements; hotfix analysis; release validation; dev branch monitoring.
-- Analyze every feature/* branch
-- Enforce gates before merging to main
-- Run release validation analysis on tags
+- Keep gate thresholds explicit for coverage, duplication, reliability, maintainability, and security review.
+- Fail on conditions that represent real quality regressions, not vanity metrics.
+- Review hotspots and code-smell policies with the same repository governance used for other release gates.
+- Keep thresholds stable enough for branch protection and trend interpretation.
 
-# Language Specifics
-.NET analyzers (FxCop, StyleCop); ESLint; TSLint legacy; Java Checkstyle; Python pylint; Roslyn analyzers; custom analyzers; plugins.
-- Enable Microsoft.CodeAnalysis.NetAnalyzers and StyleCop.Analyzers
-- ESLint extends recommended+security
-- Custom Roslyn rules if needed
+## Rule and Profile Governance
 
-# Exclusions
-Generated files; vendor libs; test utilities; migration scripts; legacy code separation; external deps; auto-generated docs.
-```properties
-sonar.exclusions=**/*.g.cs,**/Migrations/**,**/bin/**,**/obj/**
-sonar.coverage.exclusions=**/Tests/**
-```
+- Use approved analyzer sets and quality profiles per language.
+- Keep custom rules limited, reviewable, and justified by repository policy.
+- Avoid conflicting rule sets that duplicate the same concern with different semantics.
+- Document deprecated or advisory-only rule classes instead of silently mixing them into blocking policy.
 
-# Performance Monitoring
-Analysis duration; scanner performance; DB optimization; memory usage; parallel analysis; incremental scanning; cache; network.
-- Cache scanner dependencies
-- Enable incremental analysis
-- Monitor analysis time SLA
-- Optimize DB for SonarQube instance
+## Branch and PR Analysis
+
+- Keep branch and pull-request analysis semantics explicit.
+- Use decoration and quality-gate reporting when the hosting platform supports it.
+- Do not treat branch-analysis wiring as a substitute for repository validation or tests.
+
+## Reporting and Operations
+
+- Keep dashboards, trend reports, and remediation queues tied to maintainable ownership.
+- Track analysis duration and scanner performance when static analysis becomes materially slow.
+- Keep technical debt reporting actionable and tied to real remediation paths.
+
+## Verification
+
+- Validate the SonarQube project configuration, report import paths, exclusions, and quality-gate expectations.
+- Keep pipeline-specific execution details out of this instruction and in workflow or CI/CD guidance.
