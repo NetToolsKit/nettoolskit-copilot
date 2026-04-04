@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 12:08
+- LastUpdated: 2026-04-04 12:32
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -29,6 +29,7 @@ The repository already separates shared instruction sources under `definitions/s
   - `hooks/`
   - `providers/`
 - Keep each root shallow, with no more than one semantic folder below the root unless a later spec explicitly reopens that decision.
+- Avoid lane-local instruction `README.md` files when the lane contract can live in the root README and the file names.
 - Use stable repository-owned `ntk-*` prefixes for instruction filenames.
 - Move canonical authorship to `definitions/` and treat `definitions/shared/` plus root `templates/` as legacy compatibility sources during the migration.
 - Limit `instructions/` to five first-level categories:
@@ -114,6 +115,8 @@ The first copy-first migration wave also fixes two earlier placement concerns:
 
 - ORM guidance belongs under `development/` in the shallow model as persistence implementation guidance.
 - Privacy/data-compliance guidance belongs under `data/` when it is primarily about governed data handling and retention policy rather than generic application hardening.
+
+The second copy-first migration wave applies the same shallow model to the projected `.github/instructions/` surface without deleting the current legacy folders yet.
 
 ---
 

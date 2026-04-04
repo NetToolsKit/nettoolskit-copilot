@@ -79,3 +79,7 @@ Examples:
 ## Projection
 
 `.github/instructions/` is a projected runtime surface. Shared definitions stay authoritative; projected copies must preserve the same folder taxonomy and file names.
+
+## Simplification Rule
+
+Instruction subfolders should not depend on local `README.md` files for discoverability. Keep taxonomy and precedence explained in the root README and in the instruction file names so the migration to the shallow canonical tree stays predictable.

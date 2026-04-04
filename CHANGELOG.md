@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added the first shallow projected instruction copies under `.github/instructions/{governance,development,operations,data}` while preserving the legacy projected taxonomy during migration.
 - Scaffolded shallow `definitions/instructions/{development,operations,security,data}` copies for backend, frontend, agentic, persistence, runtime, security, database, and privacy guidance while preserving the legacy instruction tree during migration.
 - Added the first canonical-root reorganization slice for `definitions/`, introducing scaffolded `instructions/`, `templates/`, `agents/`, `skills/`, and `hooks/` roots plus `docs/samples/manifests/` as the stable human-facing manifest sample lane.
 - Added planning baseline for a shallow shared control-surface taxonomy rooted in `instructions/`, `agents/`, `skills/`, and `hooks/`, with `instructions/` limited to five first-level categories and narrower specialization carried by file names.
@@ -140,6 +141,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- Instruction taxonomy documentation now keeps lane discovery in root READMEs instead of adding `README.md` files to every instruction category folder.
 - Instruction governance taxonomy now keeps cross-cutting TDD and verification workflow in `process/` while moving Rust crate testing into backend, backend integration/API testing into backend, and browser E2E automation into frontend.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating general CI/CD and DevOps platform policy from GitHub Actions-specific workflow authoring.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating observability and incident operations from resilience and disaster-readiness policy.

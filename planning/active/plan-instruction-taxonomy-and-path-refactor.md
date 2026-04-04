@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 12:08
+- LastUpdated: 2026-04-04 12:32
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -44,6 +44,7 @@ Generated: 2026-04-03 00:00
 | I11 | Re-map semantic lanes to five primary instruction categories | collapse current instruction lanes into `governance`, `development`, `operations`, `security`, and `data`, with specialization encoded in file names | 🔴 Immediate | I10 |
 | I12 | Add canonical template and sample lanes | create `definitions/templates/*` and `docs/samples/manifests/` without deleting legacy sources | 🟠 High | I2, I10, I11 |
 | I13 | Scaffold shallow domain instruction copies | copy existing non-governance instruction content into `development`, `operations`, `security`, and `data` lanes with stable new file names while keeping legacy roots intact | 🔴 Immediate | I10, I11 |
+| I14 | Simplify instruction lane docs and start projected shallow copies | remove per-lane instruction READMEs and scaffold `.github/instructions/{governance,development,operations,security,data}` copies while keeping legacy paths intact | 🔴 Immediate | I13 |
 
 ---
 
@@ -255,6 +256,23 @@ Generated: 2026-04-03 00:00
   - privacy/data-compliance now enters the shallow model as `ntk-data-privacy-compliance.instructions.md`
 - Commit checkpoint:
   - `docs(instructions): scaffold shallow domain instruction copies`
+
+### [2026-04-04 12:32] Task I14: Simplify Instruction Lane Docs And Start Projected Shallow Copies
+
+- Remove redundant per-folder `README.md` files from instruction category folders.
+- Keep instruction taxonomy discovery in the root READMEs instead of multiplying lane-local docs.
+- Scaffold the projected shallow instruction copies under:
+  - `.github/instructions/governance/`
+  - `.github/instructions/development/`
+  - `.github/instructions/operations/`
+  - `.github/instructions/security/`
+  - `.github/instructions/data/`
+- Keep legacy projected folders (`core`, `process`, `architecture`, `docs`, `agents`) intact until consumers are retargeted.
+- Status:
+  - in progress; shallow projected copies now exist for `governance`, `development`, `operations`, and the rehomed `data` privacy lane
+  - in progress; redundant instruction-lane `README.md` files are being removed in favor of root-level taxonomy docs
+- Commit checkpoint:
+  - `docs(instructions): scaffold shallow projected instruction copies`
 
 ---
 

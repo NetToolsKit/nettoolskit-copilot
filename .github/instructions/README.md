@@ -2,6 +2,16 @@
 
 `.github/instructions/` is the projected runtime surface used by local agents and provider integrations.
 
+The tree is transitioning toward a shallow projected taxonomy that mirrors the canonical definitions root:
+
+- `governance/`
+- `development/`
+- `operations/`
+- `security/`
+- `data/`
+
+Legacy lanes (`agents/`, `core/`, `process/`, `architecture/`, `docs/`) remain in place during migration so current consumers do not break.
+
 ## Rules Board
 
 The instruction tree acts as a semantic rules board for the runtime.
@@ -69,3 +79,5 @@ The taxonomy intentionally avoids numeric directory prefixes. Agents should sele
 ## Naming
 
 All instruction files keep `ntk-*` prefixes so references remain stable and self-describing across prompts, catalogs, skills, and generated surfaces.
+
+Category folders under `.github/instructions/` intentionally do not carry their own `README.md`; keep the routing contract centralized here while the shallow projection is introduced.

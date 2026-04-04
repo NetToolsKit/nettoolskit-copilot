@@ -53,5 +53,6 @@ graph TD
 - `definitions/shared/instructions/` remains available during migration.
 - Author new canonical instruction content here first when the new lane exists.
 - Provider consumers should eventually project from this root instead of from legacy paths.
+- Category folders under `definitions/instructions/` intentionally do not carry their own `README.md`; keep the lane contract centralized here and inside the file names themselves.
 
 ---
