@@ -11,7 +11,7 @@ The instruction tree acts as a semantic rules board for the runtime.
 - `architecture/backend/`: backend platform, language, and architecture rules.
 - `architecture/frontend/`: frontend stack, UX, and component architecture rules.
 - `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
-- `runtime-ops/`: runtime, automation, observability, resilience, and infrastructure execution rules.
+- `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data-security/`: data, privacy, security, and ORM/database rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
@@ -35,7 +35,11 @@ This folder mirrors the semantic taxonomy from `definitions/shared/instructions/
 - `architecture/backend/`: backend architecture and stack-specific rules.
 - `architecture/frontend/`: frontend architecture and stack-specific rules.
 - `architecture/agentic/`: context economy and agentic-surface rules.
-- `runtime-ops/`: runtime, pipeline, automation, observability, and execution rules.
+- `runtime-ops/`: runtime, CI/CD platform, workflow generation, automation, observability, and execution rules.
+
+Within `runtime-ops/`, keep general pipeline and DevOps platform guidance in
+`ntk-runtime-ci-cd-devops.instructions.md` and keep GitHub Actions-specific
+authoring rules in `ntk-runtime-workflow-generation.instructions.md`.
 - `data-security/`: data, privacy, and security rules.
 - `docs/`: README and instruction-authoring rules.
 

@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 18:18
+- LastUpdated: 2026-04-03 21:07
 - Objective: define the design intent for keeping repository instructions authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -61,6 +61,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Repeated frontend guidance is reduced by separating frontend architecture, Vue/Quasar structure, Vue/Quasar implementation, and UI/UX system guidance.
 - Repeated agentic guidance is reduced by separating architectural surface ownership from the checkpoint/compression protocol.
 - Repeated runtime PowerShell guidance is reduced by separating execution safety from script-authoring/template rules.
+- Repeated runtime workflow guidance is reduced by separating general CI/CD and DevOps platform guidance from GitHub Actions-specific workflow authoring.
 
 ---
 

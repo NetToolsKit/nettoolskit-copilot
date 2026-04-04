@@ -11,7 +11,7 @@ The canonical tree is organized as a semantic rules board.
 - `architecture/backend/`: backend platform, language, and architecture rules.
 - `architecture/frontend/`: frontend stack, UX, and component architecture rules.
 - `architecture/agentic/`: context economy and agentic-surface rules.
-- `runtime-ops/`: runtime, automation, observability, resilience, and infrastructure execution rules.
+- `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data-security/`: data, privacy, security, and ORM/database rules.
 - `docs/`: README, instruction-authoring, and prompt-template rules.
 
@@ -34,7 +34,11 @@ The instruction tree is grouped by semantic domain, not numeric prefixes. Direct
 - `architecture/backend/`: backend platform, clean architecture, .NET, and Rust organization guidance.
 - `architecture/frontend/`: frontend architecture, Vue/Quasar, and UI/UX guidance.
 - `architecture/agentic/`: agentic-surface boundaries plus context economy and checkpoint guidance.
-- `runtime-ops/`: CI/CD, Docker, Kubernetes, PowerShell, resilience, observability, and workflow generation.
+- `runtime-ops/`: CI/CD, workflow generation, Docker, Kubernetes, PowerShell, resilience, observability, and execution rules.
+
+Within `runtime-ops/`, keep general pipeline and DevOps platform guidance in
+`ntk-runtime-ci-cd-devops.instructions.md` and keep GitHub Actions-specific
+authoring rules in `ntk-runtime-workflow-generation.instructions.md`.
 - `data-security/`: database, ORM, privacy/compliance, API security, and vulnerability guidance.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
 
