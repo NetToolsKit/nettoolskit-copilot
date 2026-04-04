@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-29 22:02
+- LastUpdated: 2026-04-04 09:45
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
@@ -41,6 +41,8 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 6. **`definitions/shared/instructions/` mirror synchronization**: The `ntk-core-repository-operating-model.instructions.md` exists in both `.github/instructions/` and `definitions/shared/instructions/`. Both copies must be updated together; updating only the `.github/` projection while leaving the authoritative `definitions/` source stale would cause the rendering pipeline to revert the fix on the next sync.
 
+7. **Pre-commit EOF hook command-line overflow on Windows**: the managed EOF hygiene hook currently forwards every staged file as its own `--literal-path` argument to `ntk runtime trim-trailing-blank-lines`. Large commits with hundreds of staged files can exceed Windows process invocation limits and fail before the commit completes.
+
 ---
 
 ## Desired Outcome
@@ -51,6 +53,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 - Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 63 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
 - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` stays in sync with the `.github/instructions/` projection after every update.
+- Large staged commits remain committable on Windows because the managed EOF hygiene hook trims files in bounded batches instead of issuing one oversized process invocation.
 
 ---
 

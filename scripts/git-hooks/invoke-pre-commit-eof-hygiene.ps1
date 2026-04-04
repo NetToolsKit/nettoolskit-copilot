@@ -41,6 +41,7 @@ if (-not (Test-Path -LiteralPath $script:CommonBootstrapPath -PathType Leaf)) {
 }
 . $script:CommonBootstrapPath -CallerScriptRoot $PSScriptRoot -Helpers @('console-style', 'repository-paths', 'runtime-paths', 'git-hook-eof-settings')
 $script:IsVerboseEnabled = [bool] $Verbose
+$script:MaxTrimLiteralPathBatchSize = 64
 
 # Normalizes repository-relative paths into Git CLI-safe slash format.
 function Convert-ToGitRelativePath {
@@ -95,6 +96,41 @@ function Get-UnsafeMixedStageFileList {
     return @($unsafeFiles)
 }
 
+# Trims staged files in bounded batches so Windows command-line limits do not
+# break large commits that carry hundreds of explicit --literal-path arguments.
+function Invoke-StagedFileTrimBatches {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $RuntimeBinaryPath,
+        [Parameter(Mandatory = $true)]
+        [string] $ResolvedRepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string[]] $StagedFiles
+    )
+
+    $batchSize = [Math]::Max(1, $script:MaxTrimLiteralPathBatchSize)
+    $batchCount = [Math]::Ceiling($StagedFiles.Count / $batchSize)
+
+    for ($offset = 0; $offset -lt $StagedFiles.Count; $offset += $batchSize) {
+        $batchFiles = @($StagedFiles | Select-Object -Skip $offset -First $batchSize)
+        $batchIndex = [int]($offset / $batchSize) + 1
+
+        if ($batchCount -gt 1) {
+            Write-VerboseLog ("Running EOF trim batch {0}/{1} with {2} staged file(s)." -f $batchIndex, $batchCount, $batchFiles.Count)
+        }
+
+        $trimArguments = @('runtime', 'trim-trailing-blank-lines', '--repo-root', $ResolvedRepoRoot)
+        foreach ($stagedFile in $batchFiles) {
+            $trimArguments += @('--literal-path', $stagedFile)
+        }
+
+        & $RuntimeBinaryPath @trimArguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "EOF autofix failed while trimming staged files through the managed ntk runtime boundary (exit code: $LASTEXITCODE)"
+        }
+    }
+}
+
 $resolvedRepoRoot = Resolve-ExplicitOrGitRoot -RequestedRoot $RepoRoot
 Set-Location -Path $resolvedRepoRoot
 $effectiveMode = Get-EffectiveGitHookEofMode -ResolvedRepoRoot $resolvedRepoRoot
@@ -137,14 +173,7 @@ if ($unsafeFiles.Count -gt 0) {
 $runtimeBinaryPath = Resolve-NtkRuntimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -RuntimePreference github
 
 Write-StyledOutput ('[pre-commit] EOF autofix mode active. Checking {0} staged file(s)...' -f $stagedFiles.Count)
-$trimArguments = @('runtime', 'trim-trailing-blank-lines', '--repo-root', $resolvedRepoRoot)
-foreach ($stagedFile in $stagedFiles) {
-    $trimArguments += @('--literal-path', $stagedFile)
-}
-& $runtimeBinaryPath @trimArguments
-if ($LASTEXITCODE -ne 0) {
-    throw "EOF autofix failed while trimming staged files through the managed ntk runtime boundary (exit code: $LASTEXITCODE)"
-}
+Invoke-StagedFileTrimBatches -RuntimeBinaryPath $runtimeBinaryPath -ResolvedRepoRoot $resolvedRepoRoot -StagedFiles $stagedFiles
 
 foreach ($stagedFile in $stagedFiles) {
     $relativePath = Convert-ToGitRelativePath -ResolvedRepoRoot $resolvedRepoRoot -FullPath $stagedFile

@@ -326,6 +326,35 @@ try {
         $overrideRun = Invoke-PowerShellScript -ScriptPath $runnerScriptPath -Arguments @('-RepoRoot', $inheritRepoRoot)
         Assert-Equal -Actual $overrideRun.ExitCode -Expected 0 -Message 'Local manual override must still allow pre-commit to continue.'
         Assert-Equal -Actual ([System.IO.File]::ReadAllText($inheritFile)) -Expected "public sealed class InheritMode { public int LocalOverride => 2; }`n`n" -Message 'Local override must win over the inherited global autofix mode.'
+
+        $batchedRepoRoot = Join-Path $tempRoot 'batched-repo'
+        New-MinimalHookTestRepository -SourceRepoRoot $resolvedRepoRoot -TargetRepoRoot $batchedRepoRoot
+
+        $batchedSetup = Invoke-PowerShellScript -ScriptPath $setupScriptPath -Arguments @('-RepoRoot', $batchedRepoRoot, '-EofHygieneMode', 'autofix')
+        Assert-Equal -Actual $batchedSetup.ExitCode -Expected 0 -Message 'setup-git-hooks must succeed for batched autofix mode.'
+
+        $batchedFileCount = 160
+        for ($index = 0; $index -lt $batchedFileCount; $index++) {
+            $fileName = ('batch-{0:D3}.cs' -f $index)
+            $filePath = Join-Path $batchedRepoRoot $fileName
+            Write-TextFile -Path $filePath -Content ("public sealed class Batch{0:D3} {{ }}" -f $index)
+        }
+        & git -C $batchedRepoRoot add . | Out-Null
+        & git -C $batchedRepoRoot commit -m 'initial batch' | Out-Null
+
+        for ($index = 0; $index -lt $batchedFileCount; $index++) {
+            $fileName = ('batch-{0:D3}.cs' -f $index)
+            $filePath = Join-Path $batchedRepoRoot $fileName
+            Write-TextFile -Path $filePath -Content ("public sealed class Batch{0:D3} {{ public int Value => {0}; }}`n`n" -f $index)
+        }
+        & git -C $batchedRepoRoot add . | Out-Null
+
+        $batchedRun = Invoke-PowerShellScript -ScriptPath $runnerScriptPath -Arguments @('-RepoRoot', $batchedRepoRoot)
+        Assert-Equal -Actual $batchedRun.ExitCode -Expected 0 -Message 'Autofix mode must support large staged batches without command-line overflow.'
+        $batchedProbePath = Join-Path $batchedRepoRoot 'batch-159.cs'
+        Assert-Equal -Actual ([System.IO.File]::ReadAllText($batchedProbePath)) -Expected 'public sealed class Batch159 { public int Value => 159; }' -Message 'Batched autofix mode must trim trailing EOF blank lines for late-batch files.'
+        $batchedIndexFiles = @(& git -C $batchedRepoRoot diff --cached --name-only)
+        Assert-Equal -Actual $batchedIndexFiles.Count -Expected $batchedFileCount -Message 'Batched autofix mode must re-stage all large-batch files after trimming.'
     }
     finally {
         if ([string]::IsNullOrWhiteSpace($previousGlobalSettingsOverride)) {

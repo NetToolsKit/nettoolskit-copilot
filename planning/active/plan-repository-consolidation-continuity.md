@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
+- LastUpdated: 2026-04-04 09:45
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -46,6 +46,9 @@ This plan coordinates six workstreams:
 | W6 | `copilot-instructions` Phase 8 Rust directives | `copilot-instructions` | 🟡 High | — |
 
 This plan does not replace the tactical phase plans; Phases 17 and 18 are now archived and this plan inherits their closed baseline for W5.
+
+Operational hardening checkpoint:
+- The managed pre-commit EOF hygiene path now needs bounded batching when forwarding large staged-file sets to `ntk runtime trim-trailing-blank-lines`, because Windows process invocation fails once hundreds of `--literal-path` arguments exceed command-line limits during commit-time hook execution.
 
 ---
 
