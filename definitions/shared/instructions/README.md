@@ -47,6 +47,10 @@ Keep service-boundary, service-contract, caching, and application-level
 throughput guidance in `ntk-runtime-microservices-performance.instructions.md`,
 and keep container or cluster implementation details in the Docker and
 Kubernetes instructions.
+Keep image construction, container runtime, and Docker Compose guidance in
+`ntk-runtime-docker.instructions.md`, and keep Kubernetes manifests, cluster
+rollout, networking, storage, and autoscaling guidance in
+`ntk-runtime-k8s.instructions.md`.
 - `data-security/`: database, ORM, privacy/compliance, API security, and vulnerability guidance.
 - `docs/`: README, instruction authoring, and prompt-template guidance.
 

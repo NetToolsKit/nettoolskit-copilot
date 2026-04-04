@@ -3,419 +3,73 @@ applyTo: "**/{k8s,kubernetes,manifests,helm,charts,deploy,deployment,cluster}*/*
 priority: medium
 ---
 
-# Security
-- Pod Security Standards (restricted)
-- SecurityContext non-root (runAsNonRoot: true, runAsUser: 1001)
-- ReadOnlyRootFilesystem when possible
-- NetworkPolicies for isolation
-- minimal RBAC
-- per-app ServiceAccount
-- secrets via volumes not env vars
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: secure-pod
-spec:
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 1001
-  containers:
-  - name: app
-    image: nginx
-    securityContext:
-      readOnlyRootFilesystem: true
-    volumeMounts:
-    - name: secret-vol
-      mountPath: /etc/secret
-  volumes:
-  - name: secret-vol
-    secret:
-      secretName: mysecret
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-backend
-spec:
-  podSelector:
-    matchLabels:
-      app: frontend
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: backend
-```
+# Kubernetes Manifests and Cluster Policy
 
-# Resources
-- always set requests/limits
-- QoS Guaranteed for critical workloads
-- ResourceQuotas per namespace
-- LimitRanges for defaults
-- HPA/VPA for scaling
-- PodDisruptionBudgets for availability
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: resource-pod
-spec:
-  containers:
-  - name: app
-    image: nginx
-    resources:
-      requests:
-        memory: "128Mi"
-        cpu: "100m"
-      limits:
-        memory: "512Mi"
-        cpu: "500m"
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: hpa-example
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: myapp
-  minReplicas: 1
-  maxReplicas: 5
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
-```
+Use this instruction for Kubernetes resource definitions, cluster rollout
+policy, networking, storage, autoscaling, and workload operational posture.
 
-# Health Checks
-- livenessProbe for auto-restart
-- readinessProbe for traffic routing
-- startupProbe for slow apps
-- appropriate timeouts
-- HTTP/TCP/exec probes as needed
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: health-pod
-spec:
-  containers:
-  - name: app
-    image: nginx
-    livenessProbe:
-      httpGet:
-        path: /health/live
-        port: 80
-      initialDelaySeconds: 30
-      periodSeconds: 10
-    readinessProbe:
-      httpGet:
-        path: /health/ready
-        port: 80
-      initialDelaySeconds: 5
-      periodSeconds: 5
-    startupProbe:
-      httpGet:
-        path: /health/startup
-        port: 80
-      failureThreshold: 30
-      periodSeconds: 10
-```
+Use adjacent `runtime-ops` instructions for other concerns:
 
-# Configuration
-- ConfigMaps for non-sensitive config
-- Secrets for sensitive data
-- environment-specific configs
-- hot reload when possible
-- volume mounts for large files
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
-data:
-  appsettings.json: |
-    {
-      "Logging": {
-        "LogLevel": {
-          "Default": "Information"
-        }
-      }
-    }
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: app-secret
-type: Opaque
-data:
-  password: cGFzc3dvcmQ=  # base64 encoded
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: config-pod
-spec:
-  containers:
-  - name: app
-    image: nginx
-    envFrom:
-    - configMapRef:
-        name: app-config
-    - secretRef:
-        name: app-secret
-    volumeMounts:
-    - name: config-vol
-      mountPath: /app/config
-  volumes:
-  - name: config-vol
-    configMap:
-      name: app-config
-```
+- `ntk-runtime-docker.instructions.md` for image construction, container runtime, and Docker Compose
+- `ntk-runtime-microservices-performance.instructions.md` for service boundaries, service contracts, caching, and application-level throughput
+- `ntk-runtime-observability-sre.instructions.md` for telemetry, dashboards, alerts, and incident operations
+- `ntk-runtime-platform-reliability-resilience.instructions.md` for resilience patterns, graceful degradation, and disaster readiness
 
-# Networking
-- appropriate Service types (ClusterIP/NodePort/LoadBalancer)
-- Ingress for HTTP routing
-- TLS termination
-- DNS policies
-- service mesh for complex microservices
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: my-service
-spec:
-  selector:
-    app: myapp
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-ingress
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-spec:
-  tls:
-  - hosts:
-    - myapp.example.com
-    secretName: myapp-tls
-  rules:
-  - host: myapp.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: my-service
-            port:
-              number: 80
-```
+## Workload Security
 
-# Storage
-- PersistentVolumes for durable data
-- appropriate StorageClasses
-- backup strategies
-- correct access modes (ReadWriteOnce/ReadWriteMany)
-- volume snapshots
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: gp2
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: snapshot.storage.k8s.io/v1
-kind: VolumeSnapshot
-metadata:
-  name: my-snapshot
-spec:
-  volumeSnapshotClassName: csi-aws-vsc
-  source:
-    persistentVolumeClaimName: my-pvc
-```
+- Apply least-privilege pod and container security settings.
+- Use per-application service accounts and minimal RBAC.
+- Prefer read-only filesystems and non-root execution where the workload supports it.
+- Keep namespace and network isolation explicit.
+- Treat secret projection and access policy as part of workload design.
 
-# Observability
-- structured logging to stdout/stderr
-- Prometheus metrics endpoints
-- distributed tracing
-- log aggregation
-- dashboards
-- alerting
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: observability-pod
-spec:
-  containers:
-  - name: app
-    image: nginx
-    ports:
-    - containerPort: 9090
-      name: metrics
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: app-monitor
-spec:
-  selector:
-    matchLabels:
-      app: myapp
-  endpoints:
-  - port: metrics
-    path: /metrics
-```
+## Resources and Scheduling
 
-# Deployment
-- rolling updates by default
-- blue-green for zero downtime
-- canary for critical releases
-- rollback strategies
-- health checks during deploy
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-deployment
-spec:
-  replicas: 3
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
-  template:
-    spec:
-      containers:
-      - name: app
-        image: nginx
-        lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh", "-c", "sleep 15"]
-```
+- Set resource requests and limits intentionally.
+- Use disruption budgets, quotas, and default ranges where cluster policy requires them.
+- Keep affinity, anti-affinity, spread constraints, and topology policy explicit for critical workloads.
+- Avoid relying on scheduler defaults for availability-sensitive services.
 
-# Scaling
-- HorizontalPodAutoscaler based on CPU/memory/custom metrics
-- VerticalPodAutoscaler for right-sizing
-- cluster autoscaling
-- pod affinity/anti-affinity
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: hpa-custom
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: myapp
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Pods
-    pods:
-      metric:
-        name: requests_per_second
-      target:
-        type: AverageValue
-        averageValue: 100
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: affinity-pod
-spec:
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - myapp
-        topologyKey: kubernetes.io/hostname
-```
+## Probes and Lifecycle
 
-# Production Readiness
-- multi-zone
-- disaster recovery
-- backups
-- security scanning
-- compliance
-- cost optimization
-- capacity planning
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: prod-deployment
-spec:
-  replicas: 3
-  template:
-    spec:
-      topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: topology.kubernetes.io/zone
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app: myapp
-      containers:
-      - name: app
-        image: nginx
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-```
+- Define readiness, liveness, and startup probes based on real workload behavior.
+- Keep termination and pre-stop behavior compatible with graceful shutdown requirements.
+- Ensure rollout logic respects probe semantics before traffic admission.
 
-# Development
-- local dev with skaffold/telepresence
-- staging environments
-- feature branches
-- CI/CD integration
-- test automation
-- environment parity
-```bash
-# Example with Skaffold
-skaffold dev --port-forward
-```
+## Configuration and Secrets
 
-# Troubleshooting
-- kubectl debugging
-- log aggregation
-- tracing
-- performance profiling
-- resource monitoring
-- event analysis
-```bash
-kubectl debug my-pod --image=busybox --target=my-container
-kubectl top pod
-kubectl describe pod my-pod
-kubectl get events --sort-by=.metadata.creationTimestamp
-```
+- Use ConfigMaps and Secrets deliberately and keep environment-specific separation visible.
+- Prefer mounted files for large or structured configuration where appropriate.
+- Avoid duplicating configuration across manifests when overlays or chart values can express it cleanly.
+
+## Networking and Exposure
+
+- Use Service, Ingress, Gateway, or mesh resources according to the actual traffic model.
+- Keep TLS termination, host routing, and policy annotations reviewable.
+- Make internal-only vs external exposure explicit.
+- Treat network policies as first-class security controls, not optional extras.
+
+## Storage and Stateful Workloads
+
+- Use persistent volumes only where data durability is required.
+- Keep storage class, access mode, backup, and snapshot assumptions explicit.
+- Distinguish ephemeral scratch storage from durable state.
+
+## Scaling and Rollout
+
+- Use HPA, VPA, or cluster autoscaling only when the workload and signals justify them.
+- Keep deployment strategy, surge/unavailable policy, and rollback expectations explicit.
+- Prefer progressive rollout controls for high-risk workloads.
+- Treat cluster scaling primitives as Kubernetes concerns, not Docker concerns.
+
+## Cluster Operations
+
+- Keep troubleshooting paths based on `kubectl`, events, logs, describe output, and metrics surfaces.
+- Document cluster-specific operational assumptions close to the manifests.
+- Keep local Compose workflows and image build rules outside this instruction.
+
+## Verification
+
+- Validate manifests for security context, resources, probes, networking, and storage correctness.
+- Confirm rollout and rollback behavior for critical workloads.
+- Check that workload policy matches cluster operating constraints before release.

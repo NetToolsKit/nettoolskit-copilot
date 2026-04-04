@@ -3,170 +3,75 @@ applyTo: "**/Dockerfile*"
 priority: medium
 ---
 
-# Multi-stage Builds
-- ALWAYS use template .github/templates/dotnet-dockerfile-template as base for .NET projects
-- Do not assemble a full Dockerfile directly from the snippets in this instruction when the template applies; use the template as the concrete starting point and treat snippets here as partial patterns.
-- stages build/publish/base/final
-- copy only required artifacts
-- fixed NetToolsKit layout (src/, samples/, eng/, .build/)
-```dockerfile
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY ["src/MyApp/MyApp.csproj", "src/MyApp/"]
-RUN dotnet restore "src/MyApp/MyApp.csproj"
-COPY . .
-WORKDIR "/src/src/MyApp"
-RUN dotnet build "MyApp.csproj" -c Release -o /app/build
+# Docker Image and Container Runtime
 
-# Publish stage
-FROM build AS publish
-RUN dotnet publish "MyApp.csproj" -c Release -o /app/publish
+Use this instruction for container image authoring, container runtime
+configuration, Docker Compose layouts, and local container packaging flows.
 
-# Final stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MyApp.dll"]
-```
+Use adjacent `runtime-ops` instructions for other concerns:
 
-# Security
-- Mandatory non-root user (pattern unet:gnet)
-- distroless images when possible
-- vulnerability scanning
-- secrets via environment variables only
-```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
-RUN adduser -D -u 1001 unet && addgroup -S gnet && adduser unet gnet
-USER unet:gnet
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MyApp.dll"]
-```
+- `ntk-runtime-k8s.instructions.md` for cluster manifests, ingress, storage, autoscaling, and Kubernetes rollout policy
+- `ntk-runtime-microservices-performance.instructions.md` for service boundaries, service contracts, caching, and application-level throughput
+- `ntk-runtime-observability-sre.instructions.md` for telemetry, dashboards, alerts, and incident operations
+- `ntk-runtime-platform-reliability-resilience.instructions.md` for resilience patterns, graceful degradation, and disaster readiness
 
-# Performance
-- Layer caching optimization
-- COPY order (dependencies first)
-- .dockerignore for exclusions
-- minimize base image size
-```dockerfile
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY ["src/MyApp/MyApp.csproj", "."]
-RUN dotnet restore
-COPY . .
-RUN dotnet build -c Release -o /app/build
-```
+## Image Construction
 
-# Resource Limits
-- Memory/CPU constraints
-- health checks configured
-- appropriate restart policies
-- network security groups
-```yaml
-version: '3.8'
-services:
-  myapp:
-    image: myapp:latest
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-```
+- Prefer multi-stage builds for production images.
+- Copy only the artifacts required at runtime.
+- Keep build context narrow and maintain a correct `.dockerignore`.
+- Reuse repository templates when the workspace provides an approved Dockerfile baseline.
+- Keep image steps deterministic and reviewable.
 
-# Production Readiness
-- Environment variables
-- logging config
-- monitoring endpoints
-- graceful shutdown
-```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
-ENV ASPNETCORE_URLS=http://+:80
-ENV ASPNETCORE_ENVIRONMENT=Production
-EXPOSE 80
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MyApp.dll"]
-```
+## Base Image Policy
 
-# Alpine Variants
-- Prefer alpine tags for smaller footprint
-- install needed dependencies
-- timezone configuration when required
-```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
-RUN apk add --no-cache icu-libs tzdata
-ENV TZ=Etc/UTC
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MyApp.dll"]
-```
+- Prefer smaller and well-supported base images.
+- Use runtime-only images for final stages when possible.
+- Keep OS package installs minimal and justified.
+- Pin image families intentionally and update them through normal dependency governance.
+- Avoid mixing debug-only tooling into production images.
 
-# Docker Compose
-- ALWAYS use template .github/templates/docker-compose-template.yml
-- Do not assemble a full docker-compose file directly from the snippets in this instruction when the template applies; use the template as the concrete starting point and treat snippets here as partial patterns.
-- strict order: image → hostname → container_name → restart → deploy → networks → command → healthcheck → ports → volumes → environment
-- naming [SERVICE_NAME]-[COMPONENT]-${COMPOSE_PROJECT_NAME}
-- network isolation
-- volumes for persistent data
-- env files
-- service dependencies with health checks
-See .github/templates/docker-compose-template.yml for full example.
+## Container Security
 
-# Orchestration
-- Labels for metadata
-- resource reservations
-- deployment strategies
-- rolling updates configuration
-```yaml
-version: '3.8'
-services:
-  myapp:
-    image: myregistry/myapp:latest
-    deploy:
-      labels:
-        com.company: NetToolsKit
-        com.version: "1.0"
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-      update_config:
-        parallelism: 1
-        delay: 10s
-        order: start-first
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-```
+- Run as a non-root user by default.
+- Keep filesystem permissions explicit and minimal.
+- Avoid baking secrets into images.
+- Prefer immutable runtime configuration through environment variables, mounted files, or external secret providers.
+- Keep vulnerability scanning and image review part of the delivery path.
 
-# Dev Workflow
-- Separate development Dockerfile
-- hot reload
-- debugging
-- volume mounts for development
-```dockerfile
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
-WORKDIR /src
-COPY ["src/MyApp/MyApp.csproj", "."]
-RUN dotnet restore
-COPY . .
-EXPOSE 5000 9229
-CMD ["dotnet", "watch", "run", "--urls", "http://+:5000"]
-```
+## Runtime Configuration
+
+- Define only the ports, environment variables, volumes, and entrypoint arguments that the container actually needs.
+- Keep graceful shutdown behavior compatible with the application runtime.
+- Expose health endpoints only when the application surface provides them.
+- Keep log output on stdout/stderr for container-native collection.
+- Avoid hidden init scripts or mutation steps during container startup unless explicitly justified.
+
+## Docker Compose and Local Orchestration
+
+- Use Docker Compose for local multi-container development or deterministic local smoke environments.
+- Keep Compose files focused on local runtime wiring, service dependencies, ports, volumes, and environment injection.
+- Prefer health-based dependency ordering where startup timing matters.
+- Keep network, volume, and service naming predictable.
+- Treat Compose as local orchestration, not as the source of truth for cluster policy.
+
+## Build and Layer Efficiency
+
+- Order `COPY` and dependency restore steps to preserve layer cache value.
+- Avoid invalidating expensive build layers unnecessarily.
+- Keep final image size aligned with actual runtime needs.
+- Minimize duplicate artifact copies across stages.
+- Validate that build-time optimization does not compromise reproducibility.
+
+## Local Development Containers
+
+- Keep dev-oriented Dockerfiles or compose overrides separate from production container definitions.
+- Make hot reload, debugger ports, and source mounts explicit and local-only.
+- Do not leak development-only settings into production images.
+
+## Verification
+
+- Validate image build success and container startup behavior.
+- Confirm the final image runs with the intended non-root identity and entrypoint.
+- Check that Compose-based local environments expose the expected health and connectivity behavior.
+- Keep Kubernetes-specific checks out of this instruction and in the Kubernetes surface.
