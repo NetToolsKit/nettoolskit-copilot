@@ -79,11 +79,11 @@ For non-trivial work, prefer this execution chain unless the user explicitly ask
    - recommend the correct specialist path
    - never remove required working context by default solely for token savings
 5. worktree isolation decision
-   - for risky, long-running, or broad-scope work, prefer `instructions/process/ntk-process-worktree-isolation.instructions.md`
+   - for risky, long-running, or broad-scope work, prefer `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`
    - use the repository-owned helper `scripts/runtime/new-super-agent-worktree.ps1` when isolation is warranted
 6. `specialist` agent
    - perform the domain implementation using the routed context only
-   - keep execution aligned with `instructions/process/ntk-process-tdd-verification.instructions.md`
+   - keep execution aligned with `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
 7. `tester` agent
    - mandatory when code, runtime behavior, or validation scripts changed
 8. `reviewer` agent
@@ -120,5 +120,5 @@ Every active plan must define:
 ## Closeout Rules
 - If the change affects stable documentation, update the relevant README in the same workstream.
 - Always return a suggested commit message when the work reaches a stable checkpoint.
-- If the change should be retained in release history, update the changelog with entry-ready content following `instructions/process/ntk-process-feedback-changelog.instructions.md`.
+- If the change should be retained in release history, update the changelog with entry-ready content following `instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`.
 - Do not move a plan to `planning/completed/` until implementation, validation, review, and closeout are all materially complete.

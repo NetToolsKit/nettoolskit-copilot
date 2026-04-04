@@ -7,7 +7,9 @@
 The instruction tree acts as a semantic rules board for the runtime.
 
 - `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules loaded first.
-- `process/`: planning, verification, PR, worktree, and workflow execution rules.
+- `process/planning/`: specification, estimation, planning, and workflow optimization rules.
+- `process/collaboration/`: PR collaboration and isolated-worktree coordination rules.
+- `process/delivery/`: verification, quality evidence, and changelog/closeout rules.
 - `architecture/backend/`: backend platform, language, architecture, Rust crate testing, and backend integration/API testing rules.
 - `architecture/frontend/`: frontend stack, UX, component architecture, and browser/E2E testing rules.
 - `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
@@ -36,7 +38,10 @@ When multiple surfaces apply, use this order:
 This folder mirrors the semantic taxonomy from `definitions/shared/instructions/`.
 
 - `core/`: repository-wide control and authority rules.
-- `process/`: planning, verification, worktree, and delivery workflow rules.
+- `process/`: semantic human-workflow lanes for planning, collaboration, and delivery.
+- `process/planning/`: brainstorming/spec workflow, effort estimation, active-planning flow, and workflow optimization.
+- `process/collaboration/`: PR authoring/review coordination and worktree isolation.
+- `process/delivery/`: TDD/verification evidence and changelog/release-history closeout.
 - `architecture/backend/`: backend architecture, stack-specific rules, Rust crate testing, and backend integration/API testing.
 - `architecture/frontend/`: frontend architecture, stack-specific rules, and browser/E2E testing.
 - `architecture/agentic/`: context economy and agentic-surface rules.

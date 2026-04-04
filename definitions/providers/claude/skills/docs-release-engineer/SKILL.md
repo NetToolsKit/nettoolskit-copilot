@@ -17,8 +17,8 @@ description: Produce and maintain repository documentation and release artifacts
   - `.github/instructions/docs/ntk-docs-readme.instructions.md`
   - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
 - PR and release:
-  - `.github/instructions/process/ntk-process-pr.instructions.md`
-  - `.github/instructions/process/ntk-process-feedback-changelog.instructions.md`
+  - `.github/instructions/process/collaboration/ntk-process-pr.instructions.md`
+  - `.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
   - `.github/instructions/docs/ntk-docs-prompt-templates.instructions.md`
   - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`

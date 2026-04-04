@@ -197,7 +197,7 @@ Status: `[x]` Completed
     - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
     - `instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
     - `instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
-    - `instructions/process/ntk-process-tdd-verification.instructions.md`
+    - `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
     - `instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
   - Documentation and process: keep as-is (shared lifecycle files apply generically).
   - Remove: `dotnet-csharp`, `orm`, `database`, `database-configuration-operations`, `vue-quasar`, `vue-quasar-architecture`, `frontend`, `ui-ux`, `microservices-performance`.

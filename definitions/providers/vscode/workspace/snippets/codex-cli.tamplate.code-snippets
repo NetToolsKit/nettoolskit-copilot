@@ -174,7 +174,7 @@
         "prefix": "codexpr",
         "description": "Create/curate PR description per ntk-process-pr.instructions.md",
         "body": [
-            "codex \"PR task: ${1:short description}; Follow .github/instructions/process/ntk-process-pr.instructions.md; include sections Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration; add Applied instructions; English; File ${2:.github/templates/github-change-checklist-template.md}; no trailing blank line\"$3 ;exit"
+            "codex \"PR task: ${1:short description}; Follow .github/instructions/process/collaboration/ntk-process-pr.instructions.md; include sections Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration; add Applied instructions; English; File ${2:.github/templates/github-change-checklist-template.md}; no trailing blank line\"$3 ;exit"
         ]
     }
 }

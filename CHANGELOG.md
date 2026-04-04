@@ -142,6 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating Docker image/container policy from Kubernetes cluster-manifest and rollout policy.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating SonarQube/static-analysis configuration from CI and workflow execution policy.
 - Instruction governance taxonomy now replaces the generic `runtime-ops/` lane with semantic `operations/devops`, `operations/automation`, `operations/containers`, `operations/reliability`, and `operations/quality` subdomains.
+- Instruction governance taxonomy now replaces the flat `process/` lane with semantic `process/planning`, `process/collaboration`, and `process/delivery` subdomains.
 - Instruction governance taxonomy now separates `data/` and `security/` into independent rules-board lanes, keeping database/ORM policy distinct from vulnerability, privacy, and API-security policy.
 - Workspace lint policy adjusted to keep CI gate strict on `clippy::all` with `-D warnings`.
 - `CHANGELOG.md` aligned to Keep a Changelog structure with an explicit `Unreleased` section.

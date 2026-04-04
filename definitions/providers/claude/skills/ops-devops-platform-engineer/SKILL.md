@@ -18,7 +18,7 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 - Kubernetes: `.github/instructions/operations/containers/ntk-runtime-k8s.instructions.md`
 - Quality gates: `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - Performance (when needed):
-  - `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+  - `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
   - `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md`
 
 ## Claude-native execution

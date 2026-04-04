@@ -65,7 +65,7 @@
         "changelog"
       ],
       "expected_selected_paths": [
-        "instructions/process/ntk-process-feedback-changelog.instructions.md"
+        "instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"
       ]
     },
     {
@@ -240,8 +240,8 @@
         "planning-spec"
       ],
       "expected_selected_paths": [
-        "instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md",
-        "instructions/process/ntk-process-subagent-planning-workflow.instructions.md"
+        "instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md",
+        "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md"
       ]
     },
     {
@@ -251,8 +251,8 @@
         "super-agent-workflow"
       ],
       "expected_selected_paths": [
-        "instructions/process/ntk-process-worktree-isolation.instructions.md",
-        "instructions/process/ntk-process-tdd-verification.instructions.md"
+        "instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md",
+        "instructions/process/delivery/ntk-process-tdd-verification.instructions.md"
       ]
     },
     {

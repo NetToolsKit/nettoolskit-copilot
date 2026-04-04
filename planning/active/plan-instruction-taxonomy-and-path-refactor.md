@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-03 01:05
+- LastUpdated: 2026-04-04 00:32
 - Objective: refactor the repository instruction system into grouped semantic folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
 - Normalized Request: reorganize the instruction system while the repository is still evolving so instructions are grouped by concern, references remain valid, and repeated guidance is reduced.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -36,6 +36,7 @@ Generated: 2026-04-03 00:00
 | I5 | Tighten backend/frontend ownership | reduce overlap in the highest-conflict files | ✅ Done | I3 |
 | I6 | Add taxonomy docs and validation references | README/governance/closeout | 🟡 Medium | I4, I5 |
 | I7 | Split generic operations lane | replace `runtime-ops/` with narrower `operations/*` subdomains | ✅ Done | I4, I6 |
+| I8 | Split process lane into workflow subdomains | replace flat `process/` paths with `planning`, `collaboration`, and `delivery` | ✅ Done | I4, I6 |
 
 ---
 
@@ -115,6 +116,21 @@ Generated: 2026-04-03 00:00
   - complete; routing catalogs, provider prompts/chatmodes/skills, VS Code settings/snippets, validation fixtures, and active plans now point at the semantic operations subdomains
 - Commit checkpoint:
   - `refactor(instructions): split operations taxonomy into semantic subdomains`
+
+### [2026-04-04 00:32] Task I8: Split Flat Process Lane
+
+- Replace the flat `process/` lane with narrower workflow subdomains:
+  - `process/planning/`
+  - `process/collaboration/`
+  - `process/delivery/`
+- Keep the existing `ntk-process-*` file names stable during the folder move to minimize rename churn outside path updates.
+- Move backend and frontend test-specific guidance out of `process/`; keep only cross-cutting workflow verification in `process/delivery/`.
+- Update canonical shared paths first, projected `.github` paths second, then routing, skills, prompts, governance, validation fixtures, and active plans in the same slice.
+- Status:
+  - complete; canonical shared files and projected `.github` files now live under `process/planning`, `process/collaboration`, and `process/delivery`
+  - complete; routing catalogs, provider skills/prompts, governance manifests, validation fixtures, and active planning references now point at the narrower process workflow lanes
+- Commit checkpoint:
+  - `refactor(instructions): split process taxonomy into workflow subdomains`
 
 ---
 

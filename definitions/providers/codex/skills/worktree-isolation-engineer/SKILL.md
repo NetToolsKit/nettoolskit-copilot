@@ -10,7 +10,7 @@ description: Create safe, deterministic git worktrees for large or risky workstr
 1. Load `.github/AGENTS.md`.
 2. Load `.github/copilot-instructions.md`.
 3. Load `.github/instructions/core/ntk-core-super-agent.instructions.md`.
-4. Load `.github/instructions/process/ntk-process-worktree-isolation.instructions.md`.
+4. Load `.github/instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`.
 5. Load `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
 
 ## Responsibilities

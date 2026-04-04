@@ -65,7 +65,7 @@ Review the listed documents, identify issues, and produce prioritized recommenda
   <examples>
     <example>
       <input>
-Documents: [".github/copilot-instructions.md", ".github/instructions/process/ntk-process-workflow-optimization.instructions.md"]
+Documents: [".github/copilot-instructions.md", ".github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md"]
 Criteria: operational impact and alignment with available tools.
       </input>
       <output>

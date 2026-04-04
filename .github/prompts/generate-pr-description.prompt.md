@@ -9,8 +9,8 @@ Generate a comprehensive Pull Request description following repository standards
 
 ## Instructions
 Create PR description based on:
-- [ntk-process-pr.instructions.md](../instructions/process/ntk-process-pr.instructions.md)
-- [ntk-process-feedback-changelog.instructions.md](../instructions/process/ntk-process-feedback-changelog.instructions.md)
+- [ntk-process-pr.instructions.md](../instructions/process/collaboration/ntk-process-pr.instructions.md)
+- [ntk-process-feedback-changelog.instructions.md](../instructions/process/delivery/ntk-process-feedback-changelog.instructions.md)
 - [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
 
 ## Input Variables

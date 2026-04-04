@@ -7,7 +7,9 @@
 The canonical tree is organized as a semantic rules board.
 
 - `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules.
-- `process/`: planning, verification, PR, worktree, and workflow execution rules.
+- `process/planning/`: specification, estimation, planning, and workflow optimization rules.
+- `process/collaboration/`: PR collaboration and isolated-worktree coordination rules.
+- `process/delivery/`: verification, quality evidence, and changelog/closeout rules.
 - `architecture/backend/`: backend platform, language, architecture, Rust crate testing, and backend integration/API testing rules.
 - `architecture/frontend/`: frontend stack, UX, component architecture, and browser/E2E testing rules.
 - `architecture/agentic/`: context economy and agentic-surface rules.
@@ -35,7 +37,10 @@ The shared source is designed for projection into runtime surfaces with this aut
 The instruction tree is grouped by semantic domain, not numeric prefixes. Directory order is not part of the contract; agents should route by path and file purpose instead of lexical ordering.
 
 - `core/`: repository-wide operating model, authoritative sources, artifact layout, and super-agent control.
-- `process/`: planning, verification, worktree isolation, PR, and workflow execution rules.
+- `process/`: semantic human-workflow lanes for planning, collaboration, and delivery.
+- `process/planning/`: brainstorming/spec workflow, effort estimation, active-planning flow, and workflow optimization.
+- `process/collaboration/`: PR authoring/review coordination and worktree isolation.
+- `process/delivery/`: TDD/verification evidence and changelog/release-history closeout.
 - `architecture/backend/`: backend platform, clean architecture, .NET, Rust organization, Rust crate testing, and backend integration/API testing guidance.
 - `architecture/frontend/`: frontend architecture, Vue/Quasar, UI/UX, and browser/E2E guidance.
 - `architecture/agentic/`: agentic-surface boundaries plus context economy and checkpoint guidance.

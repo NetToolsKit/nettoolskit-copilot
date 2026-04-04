@@ -48,4 +48,3 @@ NEVER leave empty lines at end of CHANGELOG files; remove trailing newlines; end
 
 # Feedback Tracking Format
 File | context | problem | solution | workspace-impact within CHANGELOG entries.
-

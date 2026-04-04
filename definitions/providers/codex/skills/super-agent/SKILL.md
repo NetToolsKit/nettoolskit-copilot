@@ -10,7 +10,7 @@ description: Use as the single visible starter and controller for workspace work
 1. If the workspace provides local `.github/AGENTS.md` and `.github/copilot-instructions.md`, load them first.
 2. Otherwise load the mirrored runtime `~/.github/AGENTS.md` and `~/.github/copilot-instructions.md`.
 3. Load `.github/instructions/core/ntk-core-super-agent.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy under `~/.github/instructions/`.
-4. Load `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy.
+4. Load `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy.
 5. Only load `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md` when the workspace actually provides them.
 6. Only load `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` when the workspace actually provides a local repo adapter and repo-specific operating model.
 7. Reuse the shared `$plan-active-work-planner`, `$context-token-optimizer`, and `$release-closeout-engineer` skills as downstream stages.

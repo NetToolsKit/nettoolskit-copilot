@@ -6,10 +6,10 @@ Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
 - `.github/instructions/core/ntk-core-super-agent.instructions.md`
-- `.github/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+- `.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
 - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-- `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
-- `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+- `.github/instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
+- `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
 - `.github/instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`
 
 Context economy: Apply the three-mode protocol from `ntk-agentic-context-economy-checkpoint.instructions.md` automatically.

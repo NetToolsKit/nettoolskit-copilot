@@ -10,7 +10,7 @@ description: Create safe, deterministic git worktrees for large or risky workstr
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
 3. `.github/instructions/core/ntk-core-super-agent.instructions.md`
-4. `.github/instructions/process/ntk-process-worktree-isolation.instructions.md`
+4. `.github/instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`
 5. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 
 ## Claude-native execution

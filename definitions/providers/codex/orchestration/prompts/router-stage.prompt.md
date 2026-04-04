@@ -7,7 +7,7 @@ Mandatory context:
 - `.github/copilot-instructions.md`
 - `.github/instructions/core/ntk-core-super-agent.instructions.md`
 - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-- `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
+- `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
 
 Objective:
 - Keep the context pack sufficient for quality and select the best specialist focus.

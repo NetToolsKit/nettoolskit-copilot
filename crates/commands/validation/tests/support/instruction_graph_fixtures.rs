@@ -246,11 +246,11 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
         "instructions/core/ntk-core-super-agent.instructions.md",
         "instructions/core/ntk-core-repository-operating-model.instructions.md",
         "instructions/core/ntk-core-artifact-layout.instructions.md",
-        "instructions/process/ntk-process-subagent-planning-workflow.instructions.md",
-        "instructions/process/ntk-process-workflow-optimization.instructions.md",
+        "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
+        "instructions/process/planning/ntk-process-workflow-optimization.instructions.md",
         "instructions/core/ntk-core-authoritative-sources.instructions.md",
         "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
-        "instructions/process/ntk-process-feedback-changelog.instructions.md"
+        "instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"
       ]
     }
   },
@@ -363,11 +363,11 @@ Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
   - path: instructions/core/ntk-core-super-agent.instructions.md
   - path: instructions/core/ntk-core-repository-operating-model.instructions.md
   - path: instructions/core/ntk-core-artifact-layout.instructions.md
-  - path: instructions/process/ntk-process-subagent-planning-workflow.instructions.md
-  - path: instructions/process/ntk-process-workflow-optimization.instructions.md
+  - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
+  - path: instructions/process/planning/ntk-process-workflow-optimization.instructions.md
   - path: instructions/core/ntk-core-authoritative-sources.instructions.md
   - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
-  - path: instructions/process/ntk-process-feedback-changelog.instructions.md
+  - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
 routing:
   - id: repo-guidance
     triggers:
@@ -428,11 +428,11 @@ Use the routing catalog.
         "# Artifact Layout\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md"),
+        &repo_root.join(".github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md"),
         "# Subagent Planning Workflow\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/process/ntk-process-workflow-optimization.instructions.md"),
+        &repo_root.join(".github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md"),
         "# Workflow Optimization\n",
     );
     write_file(
@@ -440,7 +440,7 @@ Use the routing catalog.
         "# PowerShell Execution\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/process/ntk-process-feedback-changelog.instructions.md"),
+        &repo_root.join(".github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"),
         "# Feedback Changelog\n",
     );
     write_file(

@@ -13,10 +13,10 @@ description: Plan and sequence complex implementation work into deterministic, t
 
 ## Planning instruction pack
 
-- `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
-- `.github/instructions/process/ntk-process-effort-estimation-ucp.instructions.md`
-- `.github/instructions/process/ntk-process-pr.instructions.md` (when output is PR-oriented)
-- `.github/instructions/process/ntk-process-feedback-changelog.instructions.md` (when release/change log impact exists)
+- `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
+- `.github/instructions/process/planning/ntk-process-effort-estimation-ucp.instructions.md`
+- `.github/instructions/process/collaboration/ntk-process-pr.instructions.md` (when output is PR-oriented)
+- `.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md` (when release/change log impact exists)
 
 ## Planning workflow
 

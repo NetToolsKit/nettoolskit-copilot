@@ -6,8 +6,8 @@ Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
 - `.github/instructions/core/ntk-core-super-agent.instructions.md`
-- `.github/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
-- `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
+- `.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
+- `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
 
 Objective:
 - Verify whether the implementation task output matches the approved task scope and spec intent.

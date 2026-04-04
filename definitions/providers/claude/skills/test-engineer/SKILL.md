@@ -25,7 +25,7 @@ description: Design, implement, and stabilize automated tests (unit, integration
 - Quality gates (when requested):
   - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - TDD:
-  - `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
+  - `.github/instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
 
 ## Claude-native execution
 

@@ -7,7 +7,7 @@ priority: high
 
 Use this instruction for Rust crate test structure, test discovery, async test
 patterns, and error-path coverage. Keep cross-cutting TDD workflow and
-verification evidence in `instructions/process/ntk-process-tdd-verification.instructions.md`.
+verification evidence in `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
 
 ## Core Principles
 

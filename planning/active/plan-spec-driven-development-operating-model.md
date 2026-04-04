@@ -12,7 +12,7 @@ Generated: 2026-03-30 08:59
 - Dependencies:
   - `planning/README.md`
   - `planning/specs/README.md`
-  - `definitions/shared/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `definitions/shared/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
   - `.github/instructions/core/ntk-core-super-agent.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
@@ -47,7 +47,7 @@ This workstream does not implement product behavior. It defines the planning dis
 - Inventory the current spec-first tooling and docs:
   - `planning/specs/README.md`
   - `planning/README.md`
-  - `definitions/shared/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `definitions/shared/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
   - `.github/instructions/core/ntk-core-super-agent.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`

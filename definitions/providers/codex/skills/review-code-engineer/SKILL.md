@@ -8,7 +8,7 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 ## Load minimal context first
 
 1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
-2. Load `.github/instructions/process/ntk-process-pr.instructions.md`.
+2. Load `.github/instructions/process/collaboration/ntk-process-pr.instructions.md`.
 3. Route additional domain instructions with `.github/instruction-routing.catalog.yml` based on changed files.
 
 ## Review order

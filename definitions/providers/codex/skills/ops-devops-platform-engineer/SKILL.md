@@ -22,7 +22,7 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 - Quality gates:
   - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 - Performance and optimization (when needed):
-  - `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+  - `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
   - `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md`
 
 ## Execution workflow

@@ -30,15 +30,15 @@ always:
     reason: Repository topology, build/test/run commands, style, and domain instruction map
   - path: instructions/core/ntk-core-artifact-layout.instructions.md
     reason: Canonical non-versioned artifact layout for build, generated, and deployment outputs
-  - path: instructions/process/ntk-process-subagent-planning-workflow.instructions.md
+  - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
     reason: Mandatory planning lifecycle and sub-agent chain for non-trivial work
-  - path: instructions/process/ntk-process-workflow-optimization.instructions.md
+  - path: instructions/process/planning/ntk-process-workflow-optimization.instructions.md
     reason: Task breakdown and token efficiency
   - path: instructions/core/ntk-core-authoritative-sources.instructions.md
     reason: Resolve external technical behavior with repository context first and official docs second
   - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
     reason: When running or writing PowerShell
-  - path: instructions/process/ntk-process-feedback-changelog.instructions.md
+  - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
     reason: When changing CHANGELOG/feedback
 
 routing:
@@ -56,7 +56,7 @@ routing:
         when: editing instructions/*
       - path: instructions/docs/ntk-docs-prompt-templates.instructions.md
         when: editing prompts or authoring prompts
-      - path: instructions/process/ntk-process-pr.instructions.md
+      - path: instructions/process/collaboration/ntk-process-pr.instructions.md
         when: creating/updating PR-related content
 
   - id: planning-spec
@@ -72,9 +72,9 @@ routing:
       - "architecture decision"
       - "workstream"
     include:
-      - path: instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md
+      - path: instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md
         reason: Brainstorming and versioned specification workflow before execution planning
-      - path: instructions/process/ntk-process-subagent-planning-workflow.instructions.md
+      - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
         reason: Planning chain and active/completed workstream lifecycle
 
   - id: super-agent-workflow
@@ -89,9 +89,9 @@ routing:
       - "verification"
       - "verify before completion"
     include:
-      - path: instructions/process/ntk-process-worktree-isolation.instructions.md
+      - path: instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md
         reason: Isolated worktree guidance for risky or broad-scope execution
-      - path: instructions/process/ntk-process-tdd-verification.instructions.md
+      - path: instructions/process/delivery/ntk-process-tdd-verification.instructions.md
         reason: Stronger verification and evidence requirements for code-bearing work
 
   - id: docs-readme
@@ -168,7 +168,7 @@ routing:
       - "version"
       - "semver"
     include:
-      - path: instructions/process/ntk-process-feedback-changelog.instructions.md
+      - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
         reason: CHANGELOG process and versioning rules
 
   - id: context-economy

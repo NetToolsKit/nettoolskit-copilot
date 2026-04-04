@@ -238,7 +238,7 @@ function New-FallbackRouteResult {
     }
     foreach ($extraPath in @(
         '.github/instructions/core/ntk-core-super-agent.instructions.md',
-        '.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md',
+        '.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md',
         '.github/instruction-routing.catalog.yml'
     )) {
         if (-not $contextPaths.Contains($extraPath)) {

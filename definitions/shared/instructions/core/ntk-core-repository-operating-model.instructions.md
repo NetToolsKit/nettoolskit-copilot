@@ -18,11 +18,11 @@ priority: high
   - `instructions/core/ntk-core-authoritative-sources.instructions.md`
   - `instructions/core/ntk-core-artifact-layout.instructions.md`
   - `.github/governance/authoritative-source-map.json`
-- Planning lifecycle rules are centralized in `instructions/process/ntk-process-subagent-planning-workflow.instructions.md` and `planning/README.md`.
-- Brainstorm/spec rules are centralized in `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
+- Planning lifecycle rules are centralized in `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` and `planning/README.md`.
+- Brainstorm/spec rules are centralized in `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
 - Super Agent lifecycle rules are centralized in `instructions/core/ntk-core-super-agent.instructions.md`.
-- Worktree isolation rules are centralized in `instructions/process/ntk-process-worktree-isolation.instructions.md`.
-- TDD and verification rules are centralized in `instructions/process/ntk-process-tdd-verification.instructions.md`.
+- Worktree isolation rules are centralized in `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`.
+- TDD and verification rules are centralized in `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
@@ -67,10 +67,10 @@ priority: high
 
 ## Planning Workspace
 - Use `instructions/core/ntk-core-super-agent.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
-- Use `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
-- Use `instructions/process/ntk-process-subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
-- Use `instructions/process/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
-- Use `instructions/process/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
+- Use `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
+- Use `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
+- Use `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Use `instructions/process/delivery/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
 - Active plans live in `planning/active/`.
 - Completed plans move to `planning/completed/` only after implementation, validation, review, and release closeout are materially complete.
 - Active specs live in `planning/specs/active/`.
@@ -229,14 +229,14 @@ priority: high
   - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
   - `instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
   - `instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
-  - `instructions/process/ntk-process-tdd-verification.instructions.md`
+  - `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
 - Documentation and process:
   - `instructions/docs/ntk-docs-readme.instructions.md`
   - `instructions/docs/ntk-docs-prompt-templates.instructions.md`
-  - `instructions/process/ntk-process-effort-estimation-ucp.instructions.md`
-  - `instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
+  - `instructions/process/planning/ntk-process-effort-estimation-ucp.instructions.md`
+  - `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
+  - `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
   - `instructions/core/ntk-core-super-agent.instructions.md`
-  - `instructions/process/ntk-process-worktree-isolation.instructions.md`
-  - `instructions/process/ntk-process-tdd-verification.instructions.md`
-  - `instructions/process/ntk-process-pr.instructions.md`
+  - `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`
+  - `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
+  - `instructions/process/collaboration/ntk-process-pr.instructions.md`

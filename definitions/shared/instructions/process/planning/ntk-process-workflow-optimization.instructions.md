@@ -7,7 +7,7 @@ priority: high
 Split large tasks into manageable steps; avoid hard token limits; split by functional domain when possible.
 
 # Planning and Routing
-- For non-trivial work, route first and then follow `instructions/process/ntk-process-subagent-planning-workflow.instructions.md`.
+- For non-trivial work, route first and then follow `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`.
 - Treat `planning/README.md`, `planning/active/`, and `planning/completed/` as the versioned planning workspace.
 - Keep the context pack minimal, but do not omit mandatory instruction files or the planning workflow when the task needs staging.
 

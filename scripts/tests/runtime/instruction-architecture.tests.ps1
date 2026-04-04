@@ -92,11 +92,11 @@ function Initialize-ValidInstructionArchitectureRepo {
         "instructions/core/ntk-core-super-agent.instructions.md",
         "instructions/core/ntk-core-repository-operating-model.instructions.md",
         "instructions/core/ntk-core-artifact-layout.instructions.md",
-        "instructions/process/ntk-process-subagent-planning-workflow.instructions.md",
-        "instructions/process/ntk-process-workflow-optimization.instructions.md",
+        "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
+        "instructions/process/planning/ntk-process-workflow-optimization.instructions.md",
         "instructions/core/ntk-core-authoritative-sources.instructions.md",
         "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
-        "instructions/process/ntk-process-feedback-changelog.instructions.md"
+        "instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"
       ]
     }
   },
@@ -201,11 +201,11 @@ always:
   - path: instructions/core/ntk-core-super-agent.instructions.md
   - path: instructions/core/ntk-core-repository-operating-model.instructions.md
   - path: instructions/core/ntk-core-artifact-layout.instructions.md
-  - path: instructions/process/ntk-process-subagent-planning-workflow.instructions.md
-  - path: instructions/process/ntk-process-workflow-optimization.instructions.md
+  - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
+  - path: instructions/process/planning/ntk-process-workflow-optimization.instructions.md
   - path: instructions/core/ntk-core-authoritative-sources.instructions.md
   - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
-  - path: instructions/process/ntk-process-feedback-changelog.instructions.md
+  - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
 '@
     Write-TextFile -Path (Join-Path $Root '.github/prompts/route-instructions.prompt.md') -Content @'
 ---
@@ -235,10 +235,10 @@ Use the routing catalog.
     Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-authoritative-sources.instructions.md') -Content '# Authoritative Sources'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-super-agent.instructions.md') -Content '# Super Agent'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-artifact-layout.instructions.md') -Content '# Artifact Layout'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/ntk-process-workflow-optimization.instructions.md') -Content '# Workflow Optimization'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md') -Content '# Workflow Optimization'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md') -Content '# PowerShell Execution'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/ntk-process-feedback-changelog.instructions.md') -Content '# Feedback Changelog'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md') -Content '# Feedback Changelog'
     Write-TextFile -Path (Join-Path $Root '.codex/skills/sample/agents/openai.yaml') -Content @'
 display_name: Sample Skill
 short_description: Example

@@ -58,37 +58,37 @@ Select based on target area. Load only the pack(s) relevant to the task.
 - `.github/instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md`
 
 ### Testing
-- `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
+- `.github/instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
 - `.github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
 - `.github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
 - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
 
 ### Documentation / README / Changelog
 - `.github/instructions/docs/ntk-docs-readme.instructions.md`
-- `.github/instructions/process/ntk-process-feedback-changelog.instructions.md`
-- `.github/instructions/process/ntk-process-effort-estimation-ucp.instructions.md`
+- `.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`
+- `.github/instructions/process/planning/ntk-process-effort-estimation-ucp.instructions.md`
 
 ### VS Code / Workspace
 - `.github/instructions/operations/automation/ntk-runtime-vscode-workspace-efficiency.instructions.md`
-- `.github/instructions/process/ntk-process-workflow-optimization.instructions.md`
+- `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
 
 ### Orchestration / Instructions Authoring
 - `.github/instructions/core/ntk-core-super-agent.instructions.md`
-- `.github/instructions/process/ntk-process-brainstorm-spec-workflow.instructions.md`
-- `.github/instructions/process/ntk-process-subagent-planning-workflow.instructions.md`
-- `.github/instructions/process/ntk-process-worktree-isolation.instructions.md`
+- `.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
+- `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
+- `.github/instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`
 - `.github/instructions/core/ntk-core-artifact-layout.instructions.md`
 - `.github/instructions/core/ntk-core-authoritative-sources.instructions.md`
 - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
 - `.github/instructions/docs/ntk-docs-prompt-templates.instructions.md`
 
 ### Pull Requests
-- `.github/instructions/process/ntk-process-pr.instructions.md`
+- `.github/instructions/process/collaboration/ntk-process-pr.instructions.md`
 
 ## Claude-native execution
 
 - Run as a `general-purpose` agent within the Super Agent pipeline.
-- Use worktree isolation for risky or large-scope changes (`.github/instructions/process/ntk-process-worktree-isolation.instructions.md`).
+- Use worktree isolation for risky or large-scope changes (`.github/instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`).
 
 ## Execution workflow
 
