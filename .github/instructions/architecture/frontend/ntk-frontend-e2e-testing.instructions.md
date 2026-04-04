@@ -3,8 +3,17 @@ applyTo: "**/{e2e,E2E,end-to-end,integration,spec,test}*/**/*.{cs,ts,js,json,yml
 priority: high
 ---
 
+# Frontend E2E And Browser Automation
+
+Use this instruction for browser-facing E2E, UI integration, Playwright/Cypress
+strategy, visual checks, flaky-test control, and frontend-oriented test
+environments. Keep backend/API integration specifics in
+`ntk-backend-integration-testing.instructions.md`, and keep cross-cutting TDD
+workflow in `instructions/process/ntk-process-tdd-verification.instructions.md`.
+
 # Frameworks
-Prefer Playwright (web); Cypress as alternative; SpecFlow (BDD .NET); xUnit/NUnit for .NET integration; Jest/Vitest for JS; configure in docker‑compose for CI/CD; use Testcontainers when possible.
+Prefer Playwright (web); Cypress as an alternative; Jest/Vitest where frontend
+integration needs code-level harnesses.
 ```typescript
 // Playwright example
 import { test, expect } from '@playwright/test';
@@ -29,28 +38,6 @@ test('user can login', async ({ page }) => {
   - Simple operations: NO extra comments needed
   - Complex logic: Add brief explanation of WHY or WHAT makes it critical
   - Avoid: Redundant descriptions of obvious operations
-
-```csharp
-// C# Example
-[Test]
-public async Task Should_CreateOrder()
-{
-    // Arrange
-    // Setup: prepare API client and valid order
-    var client = _factory.CreateClient();
-    var order = OrderFactory.CreateValid();
-
-    // Act
-    // Execute: send POST request
-    var response = await client.PostAsJsonAsync("/orders", order);
-
-    // Assert
-    // Verify: successful creation with correct status
-    response.StatusCode.Should().Be(HttpStatusCode.Created);
-    var created = await response.Content.ReadAsAsync<Order>();
-    created.Id.Should().BeGreaterThan(0);
-}
-```
 
 ```typescript
 // TypeScript/Playwright Example
@@ -81,13 +68,16 @@ test('user can complete checkout', async ({ page }) => {
 - Use explicit ordering for integration/E2E tests **only** when steps must run in sequence (shared state, workflow stages).
 - If a test validates more than one distinct feature, split into multiple tests (one feature per test).
 
-**Additional Requirements**: Isolated setup/teardown; test data factories; page object model for UI; reusable API clients; avoid inter‑test dependencies; appropriate timeouts.
+**Additional Requirements**: Isolated setup/teardown; test data factories; page
+object model for UI; reusable frontend test helpers; avoid inter-test
+dependencies; appropriate timeouts.
 
 # Environment
 Dedicated E2E environment; clean data per run; stage‑specific env vars; dynamic URLs; secure credentials via secrets; automated DB seeding; automatic rollback.
 
 # Authentication
-Token/session management; predefined user personas; auto‑login; refresh token handling; multi‑tenant scenarios; permissions matrix; logout/session expiry.
+Token/session management; predefined user personas; auto-login; refresh token
+handling; multi-tenant scenarios; permissions matrix; logout/session expiry.
 
 # Data Strategies
 Test data builders; random data generation; realistic volumes; edge cases; cleanup after run; controlled shared fixtures; DB snapshots when applicable.
@@ -115,8 +105,10 @@ Parallel execution; test sharding; artifact collection; failure notifications; s
     API_TOKEN: ${{ secrets.E2E_API_TOKEN }}
 ```
 
-# API Testing
-Contract validation; schema compliance; error scenarios; boundaries; security headers; CORS; rate limiting; auth flows; data integrity.
+# API Boundaries In Browser Flows
+Validate API contracts indirectly where browser flows depend on them, but keep
+deep API, consumer-contract, and Testcontainers guidance in
+`ntk-backend-integration-testing.instructions.md`.
 
 # Browser Automation
 Headless in CI; pinned versions; device emulation; network throttling; geolocation; file upload/download; popups; iframes.

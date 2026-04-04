@@ -207,7 +207,7 @@ priority: high
 - Development:
   - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
   - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-  - `instructions/process/ntk-process-rust-testing.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
   - `instructions/data/ntk-data-orm.instructions.md`
   - `instructions/security/ntk-security-api-high-performance.instructions.md`
 - Infrastructure:
@@ -224,9 +224,10 @@ priority: high
   - `instructions/security/ntk-security-api-high-performance.instructions.md`
   - `instructions/security/ntk-security-data-privacy-compliance.instructions.md`
 - Testing:
-  - `instructions/process/ntk-process-e2e-testing.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
   - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-  - `instructions/process/ntk-process-rust-testing.instructions.md`
+  - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
+  - `instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
   - `instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
   - `instructions/process/ntk-process-tdd-verification.instructions.md`
 - Documentation and process:

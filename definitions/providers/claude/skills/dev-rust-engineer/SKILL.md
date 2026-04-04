@@ -14,7 +14,7 @@ description: Implement, organize, and test Rust modules following mandatory proj
 ## Rust instruction pack
 
 - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-- `.github/instructions/process/ntk-process-rust-testing.instructions.md`
+- `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 
 ## Claude-native execution
 

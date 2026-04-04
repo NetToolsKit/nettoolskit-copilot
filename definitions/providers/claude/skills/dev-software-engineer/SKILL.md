@@ -37,7 +37,7 @@ Select based on target area. Load only the pack(s) relevant to the task.
 
 ### Rust
 - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-- `.github/instructions/process/ntk-process-rust-testing.instructions.md`
+- `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 
 ### PowerShell / Scripts
 - `.github/instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
@@ -59,7 +59,8 @@ Select based on target area. Load only the pack(s) relevant to the task.
 
 ### Testing
 - `.github/instructions/process/ntk-process-tdd-verification.instructions.md`
-- `.github/instructions/process/ntk-process-e2e-testing.instructions.md`
+- `.github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
+- `.github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
 - `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`
 
 ### Documentation / README / Changelog

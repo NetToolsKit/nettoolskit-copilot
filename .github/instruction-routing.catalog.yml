@@ -260,8 +260,10 @@ routing:
       - "playwright"
       - "testcontainers"
     include:
-      - path: instructions/process/ntk-process-e2e-testing.instructions.md
-        reason: E2E testing guidance
+      - path: instructions/architecture/backend/ntk-backend-integration-testing.instructions.md
+        reason: Backend integration, API, and Testcontainers guidance
+      - path: instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md
+        reason: Browser E2E and frontend automation guidance
       - path: instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md
         reason: Testing strategy patterns
     notes:
@@ -527,7 +529,7 @@ routing:
     include:
       - path: instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md
         reason: Rust project organization
-      - path: instructions/process/ntk-process-rust-testing.instructions.md
+      - path: instructions/architecture/backend/ntk-backend-rust-testing.instructions.md
         reason: Rust testing patterns
 
   - id: powershell

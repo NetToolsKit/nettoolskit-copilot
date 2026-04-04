@@ -512,9 +512,10 @@
         { "file": "%USERPROFILE%\\.github\\instructions\\runtime-ops\\ntk-runtime-docker.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\runtime-ops\\ntk-runtime-k8s.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\runtime-ops\\ntk-runtime-ci-cd-devops.instructions.md" },
-        { "file": "%USERPROFILE%\\.github\\instructions\\process\\ntk-process-e2e-testing.instructions.md" },
+        { "file": "%USERPROFILE%\\.github\\instructions\\architecture\\backend\\ntk-backend-integration-testing.instructions.md" },
+        { "file": "%USERPROFILE%\\.github\\instructions\\architecture\\frontend\\ntk-frontend-e2e-testing.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\architecture\\backend\\ntk-backend-rust-code-organization.instructions.md" },
-        { "file": "%USERPROFILE%\\.github\\instructions\\process\\ntk-process-rust-testing.instructions.md" },
+        { "file": "%USERPROFILE%\\.github\\instructions\\architecture\\backend\\ntk-backend-rust-testing.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\docs\\ntk-docs-readme.instructions.md" },
         { "file": "%USERPROFILE%\\.github\\instructions\\process\\ntk-process-feedback-changelog.instructions.md" },
         { "text": "Code suggestions must follow Clean Architecture: separation of concerns, dependency inversion, maintainability, readability and simplicity." }

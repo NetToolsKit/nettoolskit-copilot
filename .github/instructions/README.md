@@ -8,8 +8,8 @@ The instruction tree acts as a semantic rules board for the runtime.
 
 - `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules loaded first.
 - `process/`: planning, verification, PR, worktree, and workflow execution rules.
-- `architecture/backend/`: backend platform, language, and architecture rules.
-- `architecture/frontend/`: frontend stack, UX, and component architecture rules.
+- `architecture/backend/`: backend platform, language, architecture, Rust crate testing, and backend integration/API testing rules.
+- `architecture/frontend/`: frontend stack, UX, component architecture, and browser/E2E testing rules.
 - `architecture/agentic/`: agentic-surface rules plus context economy and checkpoint protocol.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data/`: schema design, query policy, database operations, and ORM/database rules.
@@ -33,8 +33,8 @@ This folder mirrors the semantic taxonomy from `definitions/shared/instructions/
 
 - `core/`: repository-wide control and authority rules.
 - `process/`: planning, verification, worktree, and delivery workflow rules.
-- `architecture/backend/`: backend architecture and stack-specific rules.
-- `architecture/frontend/`: frontend architecture and stack-specific rules.
+- `architecture/backend/`: backend architecture, stack-specific rules, Rust crate testing, and backend integration/API testing.
+- `architecture/frontend/`: frontend architecture, stack-specific rules, and browser/E2E testing.
 - `architecture/agentic/`: context economy and agentic-surface rules.
 - `runtime-ops/`: runtime, CI/CD platform, workflow generation, automation, observability, and execution rules.
 

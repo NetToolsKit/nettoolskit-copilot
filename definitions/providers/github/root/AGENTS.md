@@ -75,7 +75,7 @@ Use the **Mandatory Context Files** list above.
     - `instructions/data/ntk-data-orm.instructions.md`
   - runtime/process examples:
     - `instructions/runtime-ops/ntk-runtime-powershell-execution.instructions.md`
-    - `instructions/process/ntk-process-rust-testing.instructions.md`
+    - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 
 3) Precedence rules when instructions conflict
 - Follow the user prompt first.

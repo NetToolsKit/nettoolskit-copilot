@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 23:26
+- LastUpdated: 2026-04-03 23:48
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -99,6 +99,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - data slice complete; `ntk-data-database` now owns schema and query design while `ntk-data-database-configuration-operations` owns connection/failover/backup operations and `ntk-data-orm` owns ORM/repository mapping conventions
   - taxonomy split complete; the former `data-security/` lane is now represented by separate `data/` and `security/` folders across canonical, projected, and provider-consumer surfaces
   - security supply-chain slice complete; `ntk-security-cicd-supply-chain-hardening` now owns trusted workflow boundaries, immutable action pinning, OIDC, runner isolation, SBOM, and provenance policy while CI/CD and workflow-generation instructions keep their narrower operational scopes
+  - testing taxonomy slice complete; `process/` now keeps only cross-cutting TDD and verification workflow while `architecture/backend/` owns Rust crate testing and backend integration/API testing and `architecture/frontend/` owns browser/E2E automation guidance
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

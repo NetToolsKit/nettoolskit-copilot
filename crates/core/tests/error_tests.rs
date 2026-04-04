@@ -4,7 +4,7 @@
 //! introduce custom error types. All error handling is delegated
 //! to the underlying `std::io::Error` or other standard library errors.
 //!
-//! As per .github/instructions/process/ntk-process-rust-testing.instructions.md:
+//! As per .github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md:
 //! "Every crate MUST have `tests/error_tests.rs`"
 //!
 //! This file exists to document that nettoolskit-core follows the

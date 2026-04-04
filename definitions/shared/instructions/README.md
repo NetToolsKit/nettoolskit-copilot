@@ -8,8 +8,8 @@ The canonical tree is organized as a semantic rules board.
 
 - `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules.
 - `process/`: planning, verification, PR, worktree, and workflow execution rules.
-- `architecture/backend/`: backend platform, language, and architecture rules.
-- `architecture/frontend/`: frontend stack, UX, and component architecture rules.
+- `architecture/backend/`: backend platform, language, architecture, Rust crate testing, and backend integration/API testing rules.
+- `architecture/frontend/`: frontend stack, UX, component architecture, and browser/E2E testing rules.
 - `architecture/agentic/`: context economy and agentic-surface rules.
 - `runtime-ops/`: runtime, CI/CD, workflow generation, automation, observability, resilience, and infrastructure execution rules.
 - `data/`: schema design, query policy, database operations, and ORM/database rules.
@@ -32,8 +32,8 @@ The instruction tree is grouped by semantic domain, not numeric prefixes. Direct
 
 - `core/`: repository-wide operating model, authoritative sources, artifact layout, and super-agent control.
 - `process/`: planning, verification, worktree isolation, PR, and workflow execution rules.
-- `architecture/backend/`: backend platform, clean architecture, .NET, and Rust organization guidance.
-- `architecture/frontend/`: frontend architecture, Vue/Quasar, and UI/UX guidance.
+- `architecture/backend/`: backend platform, clean architecture, .NET, Rust organization, Rust crate testing, and backend integration/API testing guidance.
+- `architecture/frontend/`: frontend architecture, Vue/Quasar, UI/UX, and browser/E2E guidance.
 - `architecture/agentic/`: agentic-surface boundaries plus context economy and checkpoint guidance.
 - `runtime-ops/`: CI/CD, workflow generation, Docker, Kubernetes, PowerShell, resilience, observability, and execution rules.
 

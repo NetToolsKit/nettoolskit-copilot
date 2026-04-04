@@ -110,7 +110,8 @@
         "dotnet-testing-integration-e2e"
       ],
       "expected_selected_paths": [
-        "instructions/process/ntk-process-e2e-testing.instructions.md",
+        "instructions/architecture/backend/ntk-backend-integration-testing.instructions.md",
+        "instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md",
         "instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md"
       ]
     },
@@ -206,7 +207,7 @@
       ],
       "expected_selected_paths": [
         "instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md",
-        "instructions/process/ntk-process-rust-testing.instructions.md"
+        "instructions/architecture/backend/ntk-backend-rust-testing.instructions.md"
       ]
     },
     {

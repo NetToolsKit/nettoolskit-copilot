@@ -1,6 +1,6 @@
 //! Error Handling Tests
 //!
-//! This file exists per .github/instructions/process/ntk-process-rust-testing.instructions.md
+//! This file exists per .github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md
 //! Even if the help crate does not define custom error types, this file serves as:
 //! 1. A compliance checkpoint for error handling standards
 //! 2. A future location for error-related tests if custom errors are introduced

@@ -88,9 +88,9 @@
     },
     "Codex Testing Task": {
         "prefix": "codextest",
-        "description": "Testing task referencing Copilot + testing instructions (E2E, .NET test categories)",
+        "description": "Testing task referencing backend integration, frontend E2E, and .NET test-category instructions",
         "body": [
-            "codex \"Testing task: ${1:Unit|Integration|E2E} for ${2:component}; Follow .github/copilot-instructions.md; .github/instructions/process/ntk-process-e2e-testing.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; Create tests with correct categories (xUnit Trait or NUnit Category); deterministic and isolated; File ${3:tests/Project.Tests/ComponentTests.cs}; no trailing blank line\"$4 ;exit"
+            "codex \"Testing task: ${1:Unit|Integration|E2E} for ${2:component}; Follow .github/copilot-instructions.md; .github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md; .github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; Create tests with correct categories (xUnit Trait or NUnit Category); deterministic and isolated; File ${3:tests/Project.Tests/ComponentTests.cs}; no trailing blank line\"$4 ;exit"
         ]
     },
     "Codex Readme Task": {
@@ -144,9 +144,9 @@
     },
     "Codex E2E Testing Task": {
         "prefix": "codexe2e",
-        "description": "E2E/integration tests per ntk-process-e2e-testing.instructions.md",
+        "description": "E2E/browser tests per ntk-frontend-e2e-testing.instructions.md",
         "body": [
-            "codex \"Testing task: ${1:E2E|Integration}; Follow .github/instructions/process/ntk-process-e2e-testing.instructions.md; framework selection, environment, retries, reporting; File ${2:tests/E2E/specs/sample.spec.ts}; no trailing blank line\"$3 ;exit"
+            "codex \"Testing task: ${1:E2E|Integration}; Follow .github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md; .github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md; framework selection, environment, retries, reporting; File ${2:tests/E2E/specs/sample.spec.ts}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex ORM Task": {

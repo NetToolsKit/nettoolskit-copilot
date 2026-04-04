@@ -17,9 +17,10 @@ description: Design, implement, and stabilize automated tests (unit, integration
   - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
   - `.github/instructions/data/ntk-data-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/process/ntk-process-e2e-testing.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
+  - `.github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
 - Rust:
-  - `.github/instructions/process/ntk-process-rust-testing.instructions.md`
+  - `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
   - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
   - `.github/instructions/runtime-ops/ntk-runtime-static-analysis-sonarqube.instructions.md`

@@ -134,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- Instruction governance taxonomy now keeps cross-cutting TDD and verification workflow in `process/` while moving Rust crate testing into backend, backend integration/API testing into backend, and browser E2E automation into frontend.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating general CI/CD and DevOps platform policy from GitHub Actions-specific workflow authoring.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating observability and incident operations from resilience and disaster-readiness policy.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating microservice boundary and application-performance policy from Docker, Kubernetes, observability, and resilience guidance.

@@ -3,9 +3,11 @@ applyTo: '**/*.rs'
 priority: high
 ---
 
-# Testing Standards
+# Rust Testing Standards
 
-All code must follow these testing standards to ensure quality and maintainability.
+Use this instruction for Rust crate test structure, test discovery, async test
+patterns, and error-path coverage. Keep cross-cutting TDD workflow and
+verification evidence in `instructions/process/ntk-process-tdd-verification.instructions.md`.
 
 ## Core Principles
 
@@ -487,5 +489,3 @@ Refer to:
 1. Templates in `.github/templates/`
 2. Full documentation in `tools/nettoolskit-cli/docs/`
 3. Existing tests in `crates/commands/tests/` (best practices)
-
-

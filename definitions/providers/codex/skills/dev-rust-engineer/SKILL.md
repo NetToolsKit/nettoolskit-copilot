@@ -14,7 +14,7 @@ description: Implement, organize, and test Rust modules in this repository follo
 ## Rust instruction pack
 
 - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-- `.github/instructions/process/ntk-process-rust-testing.instructions.md`
+- `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
 
 ## Prompt and chatmode accelerators
 
