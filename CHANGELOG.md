@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added a dedicated `agents/` instruction lane so `ntk-agents-super-agent.instructions.md` no longer shares the `core/` lane with repository invariants.
 - Added planning workstream for a development-focused AI agent orchestrator covering provider profiles, runtime doctor/report surfaces, smart routing, normalized provider adapters, operator playbook guidance, and agent-to-model routing.
 - Added dedicated CI/CD supply-chain hardening instruction covering trusted workflow boundaries, immutable action pinning, OIDC, runner isolation, SBOM, and provenance policy for GitHub Actions.
 - Decision log centralized in `CHANGELOG.md` as the single source of truth for architecture/engineering decisions.

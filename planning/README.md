@@ -142,7 +142,7 @@ Use `planning/` for versioned workstream control, not for transient scratch outp
 - [planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md](planning/specs/completed/spec-enterprise-rust-runtime-transcription-architecture.md)
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
-- [ntk-core-super-agent.instructions.md](../.github/instructions/core/ntk-core-super-agent.instructions.md)
+- [ntk-agents-super-agent.instructions.md](../.github/instructions/agents/ntk-agents-super-agent.instructions.md)
 - [ntk-process-brainstorm-spec-workflow.instructions.md](../.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md)
 - [ntk-process-subagent-planning-workflow.instructions.md](../.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md)
 - [ntk-core-repository-operating-model.instructions.md](../.github/instructions/core/ntk-core-repository-operating-model.instructions.md)

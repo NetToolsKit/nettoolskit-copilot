@@ -6,7 +6,8 @@
 
 The instruction tree acts as a semantic rules board for the runtime.
 
-- `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules loaded first.
+- `agents/`: mandatory agent-controller lifecycle and orchestration rules loaded first for change-bearing work.
+- `core/`: mandatory repository-wide control, authority, artifact, and operating-model rules loaded with the controller.
 - `process/planning/`: specification, estimation, planning, and workflow optimization rules.
 - `process/collaboration/`: PR collaboration and isolated-worktree coordination rules.
 - `process/delivery/`: verification, quality evidence, and changelog/closeout rules.
@@ -29,15 +30,17 @@ When multiple surfaces apply, use this order:
 1. user prompt
 2. `.github/AGENTS.md`
 3. `.github/copilot-instructions.md`
-4. `core/`
-5. the narrowest matching domain folder under `process/`, `architecture/`, `operations/`, `data/`, `security/`, or `docs/`
-6. prompts, templates, snippets, and projected surfaces as non-authoritative helpers
+4. `agents/`
+5. `core/`
+6. the narrowest matching domain folder under `process/`, `architecture/`, `operations/`, `data/`, `security/`, or `docs/`
+7. prompts, templates, snippets, and projected surfaces as non-authoritative helpers
 
 ## Structure
 
 This folder mirrors the semantic taxonomy from `definitions/shared/instructions/`.
 
-- `core/`: repository-wide control and authority rules.
+- `agents/`: agent-controller lifecycle and orchestration rules.
+- `core/`: repository-wide control, authority, artifact, and operating-model rules.
 - `process/`: semantic human-workflow lanes for planning, collaboration, and delivery.
 - `process/planning/`: brainstorming/spec workflow, effort estimation, active-planning flow, and workflow optimization.
 - `process/collaboration/`: PR authoring/review coordination and worktree isolation.

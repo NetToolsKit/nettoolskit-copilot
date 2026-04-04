@@ -24,7 +24,7 @@ always:
     reason: Global rules and domain mapping
 
   # Mandatory instruction files (always applied)
-  - path: instructions/core/ntk-core-super-agent.instructions.md
+  - path: instructions/agents/ntk-agents-super-agent.instructions.md
     reason: Repository-owned Super Agent lifecycle for intake, planning, specialist routing, validation, review, and closeout
   - path: instructions/core/ntk-core-repository-operating-model.instructions.md
     reason: Repository topology, build/test/run commands, style, and domain instruction map

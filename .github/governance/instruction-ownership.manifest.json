@@ -15,7 +15,7 @@
     },
     {
       "concern": "Super Agent lifecycle orchestration must remain globally visible so change-bearing work cannot bypass planning, testing, review, or closeout.",
-      "ownedBy": "global-core"
+      "ownedBy": "agent-control"
     }
   ],
   "architectureConstraints": {
@@ -29,7 +29,7 @@
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/core/ntk-core-super-agent.instructions.md",
+        "instructions/agents/ntk-agents-super-agent.instructions.md",
         "instructions/core/ntk-core-repository-operating-model.instructions.md",
         "instructions/core/ntk-core-artifact-layout.instructions.md",
         "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
@@ -76,6 +76,13 @@
       ]
     },
     {
+      "id": "agent-control",
+      "description": "Agent-controller lifecycle rules that stay globally visible but are not repository invariants.",
+      "pathPatterns": [
+        ".github/instructions/agents/*.instructions.md"
+      ]
+    },
+    {
       "id": "repository-operating-model",
       "description": "Repository-specific operational rules, commands, style, release, and domain instruction map.",
       "pathPatterns": [
@@ -86,7 +93,6 @@
       "id": "cross-cutting-policies",
       "description": "Policies, maps, and baselines that apply across domains.",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
@@ -113,7 +119,6 @@
       ],
       "excludePatterns": [
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },

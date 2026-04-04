@@ -229,7 +229,7 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
   "intentionalGlobalExceptions": [
     {
       "concern": "Global context must remain visible.",
-      "ownedBy": "global-core"
+      "ownedBy": "agent-control"
     }
   ],
   "architectureConstraints": {
@@ -243,7 +243,7 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/core/ntk-core-super-agent.instructions.md",
+        "instructions/agents/ntk-agents-super-agent.instructions.md",
         "instructions/core/ntk-core-repository-operating-model.instructions.md",
         "instructions/core/ntk-core-artifact-layout.instructions.md",
         "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
@@ -263,6 +263,12 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
       ]
     },
     {
+      "id": "agent-control",
+      "pathPatterns": [
+        ".github/instructions/agents/*.instructions.md"
+      ]
+    },
+    {
       "id": "repository-operating-model",
       "pathPatterns": [
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
@@ -271,7 +277,6 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     {
       "id": "cross-cutting-policies",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
@@ -284,7 +289,7 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
       ],
       "excludePatterns": [
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/agents/ntk-agents-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
@@ -360,7 +365,7 @@ Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
         r#"always:
   - path: AGENTS.md
   - path: copilot-instructions.md
-  - path: instructions/core/ntk-core-super-agent.instructions.md
+  - path: instructions/agents/ntk-agents-super-agent.instructions.md
   - path: instructions/core/ntk-core-repository-operating-model.instructions.md
   - path: instructions/core/ntk-core-artifact-layout.instructions.md
   - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
@@ -420,7 +425,7 @@ Use the routing catalog.
         "# Authoritative Sources\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-super-agent.instructions.md"),
+        &repo_root.join(".github/instructions/agents/ntk-agents-super-agent.instructions.md"),
         "# Super Agent\n",
     );
     write_file(

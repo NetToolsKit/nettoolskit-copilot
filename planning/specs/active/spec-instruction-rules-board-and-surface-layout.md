@@ -4,7 +4,7 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-03 15:40
+- LastUpdated: 2026-04-04 02:20
 - Objective: define the design intent for a repo-native rules board that makes instruction configuration, rules, commands, and skills easier to discover, route, and keep in sync.
 - Normalized Request: compare the architecture in the reference image against the current repository structure and capture the useful improvements as a repo-native rules board with explicit precedence and semantic taxonomy.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -24,7 +24,7 @@ The repository already has the real ingredients of the reference architecture: a
 - Keep the current repo-owned sources of truth unchanged.
 - Define the board as a governance and discoverability layer, not as a second instruction tree.
 - Group surfaces by responsibility so the loading path is obvious and token-efficient.
-- Preserve `super-agent` and the repo operating model as the highest-precedence contracts.
+- Preserve `super-agent` under the dedicated `agents/` lane and the repo operating model under `core/` as the highest-precedence contracts.
 - Keep semantic domain folders and stable `ntk-*` file names; do not use numeric directory prefixes.
 
 ---
@@ -54,7 +54,7 @@ The repository already has the real ingredients of the reference architecture: a
 
 - The board may update documentation, governance metadata, and projection comments, but must not create a competing instruction tree.
 - The repo already has enough surfaces to map into the board model.
-- The board must not compete with `AGENTS.md`, `copilot-instructions.md`, or `ntk-core-super-agent.instructions.md`.
+- The board must not compete with `AGENTS.md`, `copilot-instructions.md`, or `ntk-agents-super-agent.instructions.md`.
 - The external `copilot-instructions` repository remains a comparison baseline, not a live sync target.
 
 ---

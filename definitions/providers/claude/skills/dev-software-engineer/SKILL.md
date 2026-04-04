@@ -73,7 +73,7 @@ Select based on target area. Load only the pack(s) relevant to the task.
 - `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
 
 ### Orchestration / Instructions Authoring
-- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
 - `.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
 - `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
 - `.github/instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`

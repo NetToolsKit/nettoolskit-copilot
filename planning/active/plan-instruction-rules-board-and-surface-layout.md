@@ -4,7 +4,7 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-03 15:40
+- LastUpdated: 2026-04-04 02:20
 - Objective: evaluate and define a repo-native rules board that groups instruction surfaces by responsibility so agents can load config, rules, commands, and skills with less ambiguity and less context waste.
 - Normalized Request: compare the board-style agent architecture against the current repository instruction layout and plan the improvements that would make it more discoverable, token-efficient, and SDD-friendly.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -16,7 +16,7 @@ Generated: 2026-03-30 08:59
   - `.github/AGENTS.md`
   - `.github/copilot-instructions.md`
   - `.github/instruction-routing.catalog.yml`
-  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/README.md`
   - `definitions/README.md`
@@ -86,6 +86,7 @@ The board is implemented as documentation and governance. It does not create a s
 - Add rules for avoiding duplicate or stale instruction surfaces.
 - Active follow-up:
   - finish normalizing remaining references, labels, and helper surfaces that still mention legacy flat instruction names
+  - keep `super-agent` under the dedicated `agents/` lane so `core/` remains reserved for repository invariants
 - Commit checkpoint:
   - `docs(planning): define rules board update and drift policy`
 

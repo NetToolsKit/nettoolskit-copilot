@@ -35,7 +35,7 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 # Hierarchy and Scope
 - Global rules live here and are always applied.
-- The Super Agent lifecycle lives in `instructions/core/ntk-core-super-agent.instructions.md` and is always applied for change-bearing work.
+- The Super Agent lifecycle lives in `instructions/agents/ntk-agents-super-agent.instructions.md` and is always applied for change-bearing work.
 - The canonical non-versioned artifact layout lives in `instructions/core/ntk-core-artifact-layout.instructions.md`.
 - Non-trivial design-bearing work also uses `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` before execution planning.
 - Risky execution may use `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`.
@@ -89,7 +89,7 @@ Follow this order of operations on every task:
 # Workflow
 
 ## Super Agent Lifecycle
-- Treat `instructions/core/ntk-core-super-agent.instructions.md` as the mandatory controller contract for change-bearing work.
+- Treat `instructions/agents/ntk-agents-super-agent.instructions.md` as the mandatory controller contract for change-bearing work.
 - Default lifecycle:
   1. Super Agent intake
      - ask up to 3 concise clarification questions and stop before spec/planning when ambiguity would materially change scope, architecture, runtime behavior, validation, or safety
@@ -153,7 +153,7 @@ Follow this order of operations on every task:
 
 ## Always Applied
 - AGENTS.md (agents and context policy)
-- instructions/core/ntk-core-super-agent.instructions.md
+- instructions/agents/ntk-agents-super-agent.instructions.md
 - instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md
 - instructions/core/ntk-core-artifact-layout.instructions.md
 - instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
@@ -173,7 +173,7 @@ Follow this order of operations on every task:
 # Repository and Domain Rules
 - In `workspace-adapter` mode, repo topology, build/test/run commands, style, security/changelog process, and the full domain instruction map live in `instructions/core/ntk-core-repository-operating-model.instructions.md`.
 - In `global-runtime` mode, infer repo topology and local commands from the target workspace itself; do not import the `copilot-instructions` repo topology into an unrelated client repository.
-- Change-bearing work must start with `instructions/core/ntk-core-super-agent.instructions.md` before planning and implementation.
+- Change-bearing work must start with `instructions/agents/ntk-agents-super-agent.instructions.md` before planning and implementation.
 - Non-trivial tasks must also follow `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` and the workspace planning surface under `planning/` when it exists, otherwise the fallback under `.build/super-agent/`.
 - When the work is non-trivial and design-bearing, create or update a spec under `planning/specs/` when available, otherwise under `.build/super-agent/specs/`, and do not continue to planning until that spec is planning-ready.
 - Use domain instructions from that map according to the active route and file scope.

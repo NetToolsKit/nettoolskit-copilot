@@ -75,7 +75,7 @@ function Initialize-ValidInstructionArchitectureRepo {
   "intentionalGlobalExceptions": [
     {
       "concern": "Global context must remain visible.",
-      "ownedBy": "global-core"
+      "ownedBy": "agent-control"
     }
   ],
   "architectureConstraints": {
@@ -89,7 +89,7 @@ function Initialize-ValidInstructionArchitectureRepo {
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/core/ntk-core-super-agent.instructions.md",
+        "instructions/agents/ntk-agents-super-agent.instructions.md",
         "instructions/core/ntk-core-repository-operating-model.instructions.md",
         "instructions/core/ntk-core-artifact-layout.instructions.md",
         "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
@@ -109,6 +109,12 @@ function Initialize-ValidInstructionArchitectureRepo {
       ]
     },
     {
+      "id": "agent-control",
+      "pathPatterns": [
+        ".github/instructions/agents/*.instructions.md"
+      ]
+    },
+    {
       "id": "repository-operating-model",
       "pathPatterns": [
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
@@ -117,7 +123,6 @@ function Initialize-ValidInstructionArchitectureRepo {
     {
       "id": "cross-cutting-policies",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
@@ -130,7 +135,7 @@ function Initialize-ValidInstructionArchitectureRepo {
       ],
       "excludePatterns": [
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/agents/ntk-agents-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
@@ -198,7 +203,7 @@ Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
 always:
   - path: AGENTS.md
   - path: copilot-instructions.md
-  - path: instructions/core/ntk-core-super-agent.instructions.md
+  - path: instructions/agents/ntk-agents-super-agent.instructions.md
   - path: instructions/core/ntk-core-repository-operating-model.instructions.md
   - path: instructions/core/ntk-core-artifact-layout.instructions.md
   - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
@@ -233,7 +238,7 @@ Use the routing catalog.
     Write-TextFile -Path (Join-Path $Root '.github/policies/example.policy.md') -Content '# Example Policy'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-repository-operating-model.instructions.md') -Content '# Repository Operating Model'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-authoritative-sources.instructions.md') -Content '# Authoritative Sources'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-super-agent.instructions.md') -Content '# Super Agent'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/agents/ntk-agents-super-agent.instructions.md') -Content '# Super Agent'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-artifact-layout.instructions.md') -Content '# Artifact Layout'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
     Write-TextFile -Path (Join-Path $Root '.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md') -Content '# Workflow Optimization'

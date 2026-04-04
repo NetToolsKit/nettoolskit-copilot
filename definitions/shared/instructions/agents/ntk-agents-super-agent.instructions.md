@@ -142,5 +142,3 @@ User commands (execute immediately; PT-BR aliases in `.github/COMMANDS.md`): `ch
 - This lifecycle augments the existing repository governance model; it does not replace it.
 - Never drop existing mandatory instructions, baselines, or validations to satisfy the lifecycle.
 - User instructions still take precedence over automation details.
-
-

@@ -13,7 +13,7 @@ Generated: 2026-03-30 08:59
   - `planning/README.md`
   - `planning/specs/README.md`
   - `definitions/shared/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
   - `.codex/skills/core-context-router/SKILL.md`
@@ -48,7 +48,7 @@ This workstream does not implement product behavior. It defines the planning dis
   - `planning/specs/README.md`
   - `planning/README.md`
   - `definitions/shared/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
   - `.codex/skills/core-context-router/SKILL.md`

@@ -7,7 +7,7 @@
     ".github/instruction-routing.catalog.yml",
     ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
     ".github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md",
-    ".github/instructions/core/ntk-core-super-agent.instructions.md",
+    ".github/instructions/agents/ntk-agents-super-agent.instructions.md",
     ".github/instructions/core/ntk-core-artifact-layout.instructions.md",
     ".github/instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md",
     ".github/instructions/process/delivery/ntk-process-tdd-verification.instructions.md",

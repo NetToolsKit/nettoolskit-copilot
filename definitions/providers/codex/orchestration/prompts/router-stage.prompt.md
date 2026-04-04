@@ -5,7 +5,7 @@ You are the context routing and specialist selection agent for a deterministic e
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
 - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 - `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
 

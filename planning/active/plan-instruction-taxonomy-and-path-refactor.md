@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 01:10
+- LastUpdated: 2026-04-04 02:20
 - Objective: refactor the repository instruction system into grouped semantic folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
 - Normalized Request: reorganize the instruction system while the repository is still evolving so instructions are grouped by concern, references remain valid, and repeated guidance is reduced.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -37,6 +37,7 @@ Generated: 2026-04-03 00:00
 | I6 | Add taxonomy docs and validation references | README/governance/closeout | 🟡 Medium | I4, I5 |
 | I7 | Split generic operations lane | replace `runtime-ops/` with narrower `operations/*` subdomains | ✅ Done | I4, I6 |
 | I8 | Split process lane into workflow subdomains | replace flat `process/` paths with `planning`, `collaboration`, and `delivery` | ✅ Done | I4, I6 |
+| I9 | Separate agent-controller lane | move `super-agent` from `core/` into dedicated `agents/` surfaces | ✅ Done | I4, I6, I8 |
 
 ---
 
@@ -132,6 +133,20 @@ Generated: 2026-04-03 00:00
   - complete; dedicated `process/README.md` files now document the three workflow lanes and keep platform concerns under `operations/`
 - Commit checkpoint:
   - `refactor(instructions): split process taxonomy into workflow subdomains`
+
+### [2026-04-04 02:20] Task I9: Separate Agent-Control From Core
+
+- Move `super-agent` out of `core/` into a dedicated `agents/` lane.
+- Keep `core/` reserved for repository invariants:
+  - repository operating model
+  - authoritative sources
+  - artifact layout
+- Update canonical shared paths first, projected `.github` paths second, then routing, provider consumers, governance manifests, validation fixtures, and instruction-architecture tests in the same slice.
+- Status:
+  - complete; `ntk-agents-super-agent.instructions.md` now lives under `agents/` in canonical and projected trees
+  - complete; rules-board docs, governance manifests, provider surfaces, and validation fixtures now treat `agents/` as a dedicated semantic lane instead of overloading `core/`
+- Commit checkpoint:
+  - `refactor(instructions): separate agent-controller guidance from core invariants`
 
 ---
 

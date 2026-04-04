@@ -9,7 +9,7 @@ description: Use as the single visible starter and controller for workspace work
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-super-agent.instructions.md`
+3. `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
 
 ## Claude-native execution
 

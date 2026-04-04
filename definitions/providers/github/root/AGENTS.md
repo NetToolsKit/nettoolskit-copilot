@@ -149,7 +149,7 @@ Use the **Mandatory Context Files** list above.
 - Follow `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
 - Follow `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
 - Follow `instructions/process/delivery/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification evidence.
-- Follow `instructions/core/ntk-core-super-agent.instructions.md` for the mandatory lifecycle contract.
+- Follow `instructions/agents/ntk-agents-super-agent.instructions.md` for the mandatory lifecycle contract.
 - Follow `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
 
 ### For Multi-Task Requests
@@ -200,7 +200,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `copilot-instructions.md`
   - `instructions/core/ntk-core-repository-operating-model.instructions.md`
 - Universal Super Agent instructions that still apply in `global-runtime` mode are:
-  - `instructions/core/ntk-core-super-agent.instructions.md`
+  - `instructions/agents/ntk-agents-super-agent.instructions.md`
   - `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
   - `instructions/core/ntk-core-artifact-layout.instructions.md`
   - `instructions/core/ntk-core-authoritative-sources.instructions.md`
@@ -219,7 +219,8 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 - Treat the instruction tree as a semantic rules board, not a lexically ordered checklist.
 - Folder order is not part of the contract. The runtime selects by route metadata, scope, and precedence.
 - Current board lanes:
-  - `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules
+  - `agents/`: mandatory agent-controller lifecycle and orchestration rules
+  - `core/`: mandatory repository-wide control, authority, artifact, and operating-model rules
   - `process/`: planning, verification, PR, worktree, and workflow execution rules
   - `architecture/backend/`: backend platform, language, and architecture rules
   - `architecture/frontend/`: frontend stack, UX, and component architecture rules

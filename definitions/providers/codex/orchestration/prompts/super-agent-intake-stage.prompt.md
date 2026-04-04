@@ -5,7 +5,7 @@ You are the Super Agent intake controller for a deterministic enterprise orchest
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
 - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 - `.github/instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`
 

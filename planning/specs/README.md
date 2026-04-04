@@ -114,7 +114,7 @@ Use `planning/specs/` to lock architecture and behavior intent before implementa
 - [planning/specs/completed/spec-readme-standards-repository-normalization.md](planning/specs/completed/spec-readme-standards-repository-normalization.md)
 - [planning/specs/completed/spec-repository-unification-and-rust-migration.md](planning/specs/completed/spec-repository-unification-and-rust-migration.md)
 - [planning/README.md](../README.md)
-- [ntk-core-super-agent.instructions.md](../../.github/instructions/core/ntk-core-super-agent.instructions.md)
+- [ntk-agents-super-agent.instructions.md](../../.github/instructions/agents/ntk-agents-super-agent.instructions.md)
 - [ntk-process-brainstorm-spec-workflow.instructions.md](../../.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md)
 - [ntk-process-subagent-planning-workflow.instructions.md](../../.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md)
 

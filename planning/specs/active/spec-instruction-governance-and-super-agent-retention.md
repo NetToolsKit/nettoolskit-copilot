@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 23:48
+- LastUpdated: 2026-04-04 02:20
 - Objective: define the design intent for keeping repository instructions authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository instruction system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -26,7 +26,7 @@ The repository already has a rich instruction and routing system, but it must st
 - Keep the external `copilot-instructions` repository as a reference baseline, not as a live write target.
 - Make routing and precedence rules explicit so the `ntk` prefix and instruction surfaces stay stable.
 - Keep semantic folder taxonomy and stable `ntk-*` filenames as part of the governance contract.
-- Reduce repeated policy across semantic domains so backend, frontend, agentic, runtime-ops, data, and security instructions each keep a clear responsibility boundary.
+- Reduce repeated policy across semantic domains so agents, backend, frontend, operations, data, and security instructions each keep a clear responsibility boundary.
 
 ---
 
@@ -44,7 +44,7 @@ The repository already has a rich instruction and routing system, but it must st
 ## Proposed Boundaries
 
 - `AGENTS.md` and `copilot-instructions.md` remain the mandatory context entry points.
-- `ntk-core-super-agent.instructions.md` remains the workflow controller contract.
+- `ntk-agents-super-agent.instructions.md` remains the workflow controller contract under a dedicated `agents/` lane.
 - `ntk-core-repository-operating-model.instructions.md` remains the repo-local source of truth for workspace behavior.
 - Semantic domain folders remain stable, but each file inside them must keep a narrow responsibility and avoid restating adjacent instruction files without need.
 

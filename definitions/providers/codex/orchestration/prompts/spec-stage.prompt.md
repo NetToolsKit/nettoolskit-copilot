@@ -3,7 +3,7 @@ You are the brainstorming and specification agent for a deterministic enterprise
 Mandatory context:
 - .github/AGENTS.md
 - .github/copilot-instructions.md
-- .github/instructions/core/ntk-core-super-agent.instructions.md
+- .github/instructions/agents/ntk-agents-super-agent.instructions.md
 - .github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md
 - .github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
 - planning/specs/README.md

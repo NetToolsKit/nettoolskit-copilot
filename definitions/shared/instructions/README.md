@@ -6,7 +6,8 @@
 
 The canonical tree is organized as a semantic rules board.
 
-- `core/`: mandatory repository-wide control, authority, artifact, and super-agent rules.
+- `agents/`: mandatory agent-controller lifecycle and orchestration rules.
+- `core/`: mandatory repository-wide control, authority, artifact, and operating-model rules.
 - `process/planning/`: specification, estimation, planning, and workflow optimization rules.
 - `process/collaboration/`: PR collaboration and isolated-worktree coordination rules.
 - `process/delivery/`: verification, quality evidence, and changelog/closeout rules.
@@ -28,15 +29,17 @@ The shared source is designed for projection into runtime surfaces with this aut
 
 1. direct user request
 2. global runtime entry files such as `AGENTS.md` and `copilot-instructions.md`
-3. `core/`
-4. the narrowest matching domain folder under `process/`, `architecture/`, `operations/`, `data/`, `security/`, or `docs/`
-5. prompts, templates, snippets, and other projected helpers as non-authoritative consumers
+3. `agents/`
+4. `core/`
+5. the narrowest matching domain folder under `process/`, `architecture/`, `operations/`, `data/`, `security/`, or `docs/`
+6. prompts, templates, snippets, and other projected helpers as non-authoritative consumers
 
 ## Structure
 
 The instruction tree is grouped by semantic domain, not numeric prefixes. Directory order is not part of the contract; agents should route by path and file purpose instead of lexical ordering.
 
-- `core/`: repository-wide operating model, authoritative sources, artifact layout, and super-agent control.
+- `agents/`: agent-controller lifecycle and orchestration rules.
+- `core/`: repository-wide operating model, authoritative sources, artifact layout, and other repository invariants.
 - `process/`: semantic human-workflow lanes for planning, collaboration, and delivery.
 - `process/planning/`: brainstorming/spec workflow, effort estimation, active-planning flow, and workflow optimization.
 - `process/collaboration/`: PR authoring/review coordination and worktree isolation.

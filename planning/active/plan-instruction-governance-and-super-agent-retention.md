@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 01:10
+- LastUpdated: 2026-04-04 02:20
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -14,7 +14,7 @@ Generated: 2026-03-30 07:31
 - Inputs:
   - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-  - `.github/instructions/core/ntk-core-super-agent.instructions.md`
+  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
   - `.github/instruction-routing.catalog.yml`
   - `C:\Users\tguis\copilot-instructions\`
   - `planning/completed/plan-instruction-parity-and-script-retirement.md`
@@ -53,7 +53,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 - Make sure instruction projections do not overwrite the canonical guidance with a stale copy.
 - Confirm the repo still routes work through the same lifecycle contract.
 - Status:
-  - complete; `super-agent` remains in the `core/` lane and the rules board now keeps it globally visible with semantic taxonomy
+  - complete; `super-agent` now lives in the dedicated `agents/` lane and the rules board keeps it globally visible with semantic taxonomy
 - Commit checkpoint:
   - `docs(instructions): reinforce super agent canonical routing`
 
@@ -101,6 +101,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - security supply-chain slice complete; `ntk-security-cicd-supply-chain-hardening` now owns trusted workflow boundaries, immutable action pinning, OIDC, runner isolation, SBOM, and provenance policy while CI/CD and workflow-generation instructions keep their narrower operational scopes
   - testing taxonomy slice complete; `process/` now keeps only cross-cutting TDD and verification workflow while `architecture/backend/` owns Rust crate testing and backend integration/API testing and `architecture/frontend/` owns browser/E2E automation guidance
   - process taxonomy slice complete; flat `process/` guidance is now split into `process/planning`, `process/collaboration`, and `process/delivery`, so planning, PR/worktree coordination, and verification/closeout no longer sit in one generic folder
+  - agents taxonomy slice complete; `ntk-agents-super-agent` now lives in `agents/` while `core/` stays reserved for repository invariants and operating-model guidance
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

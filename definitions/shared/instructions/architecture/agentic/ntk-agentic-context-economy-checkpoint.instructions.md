@@ -119,7 +119,7 @@ This protocol complements the planning-first continuity model.
 - The CHECKPOINT is the in-session working memory tool.
 
 ## Relationship to Other Instructions
-- `ntk-core-super-agent.instructions.md` owns lifecycle, planning-first continuity, and session-boundary handling.
+- `ntk-agents-super-agent.instructions.md` owns lifecycle, planning-first continuity, and session-boundary handling.
 - `ntk-process-workflow-optimization.instructions.md` owns output-discipline and token-economy guidance.
 - `ntk-agentic-surfaces.instructions.md` owns the architectural separation of MCP, A2A, RAG, and CAG.
 

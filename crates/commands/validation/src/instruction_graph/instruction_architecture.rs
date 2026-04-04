@@ -22,6 +22,7 @@ const DEFAULT_TEMPLATE_ROOT: &str = ".github/templates";
 const DEFAULT_SKILL_ROOT: &str = ".codex/skills";
 const REQUIRED_LAYER_IDS: &[&str] = &[
     "global-core",
+    "agent-control",
     "repository-operating-model",
     "cross-cutting-policies",
     "domain-instructions",

@@ -5,7 +5,7 @@ You are the final reviewer for a deterministic enterprise orchestration pipeline
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/core/ntk-core-super-agent.instructions.md`
+- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
 - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
 - `.github/instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
 

@@ -572,7 +572,7 @@ fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
   "intentionalGlobalExceptions": [
     {
       "concern": "Global context must remain visible.",
-      "ownedBy": "global-core"
+      "ownedBy": "agent-control"
     }
   ],
   "architectureConstraints": {
@@ -586,7 +586,7 @@ fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/core/ntk-core-super-agent.instructions.md",
+        "instructions/agents/ntk-agents-super-agent.instructions.md",
         "instructions/core/ntk-core-repository-operating-model.instructions.md",
         "instructions/core/ntk-core-artifact-layout.instructions.md",
         "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
@@ -606,6 +606,12 @@ fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
       ]
     },
     {
+      "id": "agent-control",
+      "pathPatterns": [
+        ".github/instructions/agents/*.instructions.md"
+      ]
+    },
+    {
       "id": "repository-operating-model",
       "pathPatterns": [
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
@@ -614,7 +620,6 @@ fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
     {
       "id": "cross-cutting-policies",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
@@ -627,7 +632,7 @@ fn initialize_instruction_architecture_repo_root(repo_root: &Path) {
       ],
       "excludePatterns": [
         ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/core/ntk-core-super-agent.instructions.md",
+        ".github/instructions/agents/ntk-agents-super-agent.instructions.md",
         ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
       ]
     },
@@ -700,7 +705,7 @@ Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
         r#"always:
   - path: AGENTS.md
   - path: copilot-instructions.md
-  - path: instructions/core/ntk-core-super-agent.instructions.md
+  - path: instructions/agents/ntk-agents-super-agent.instructions.md
   - path: instructions/core/ntk-core-repository-operating-model.instructions.md
   - path: instructions/core/ntk-core-artifact-layout.instructions.md
   - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
@@ -760,7 +765,7 @@ Use the routing catalog.
         "# Authoritative Sources\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-super-agent.instructions.md"),
+        &repo_root.join(".github/instructions/agents/ntk-agents-super-agent.instructions.md"),
         "# Super Agent\n",
     );
     write_file(
@@ -1713,7 +1718,7 @@ fn test_validation_instruction_architecture_reports_pass_for_valid_assets() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
-        .stdout(predicate::str::contains("Layers checked: 9"))
+        .stdout(predicate::str::contains("Layers checked: 10"))
         .stdout(predicate::str::contains("Prompt files scanned: 2"))
         .stdout(predicate::str::contains("Template files scanned: 1"))
         .stdout(predicate::str::contains("Skill files scanned: 1"));
