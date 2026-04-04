@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 12:32
+- LastUpdated: 2026-04-04 14:25
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -15,7 +15,7 @@ Generated: 2026-04-03 00:00
 
 ## Problem Statement
 
-The repository already separates shared instruction sources under `definitions/shared/instructions/` from projected GitHub-facing copies under `.github/instructions/`, but the current legacy layout still mixes multiple concerns under transitional roots and keeps canonical assets split between `definitions/shared/`, root `templates/`, and documentation example folders. Several instruction files overlap in responsibility, and there is already real drift between some shared and projected copies.
+The repository already separates shared instruction sources under `definitions/shared/instructions/` from projected GitHub-facing copies under `.github/instructions/`, but the current legacy layout still mixes multiple concerns under transitional roots and keeps canonical assets split between `definitions/shared/`, root `templates/`, and documentation example folders. Several instruction files overlap in responsibility, there is already real drift between some shared and projected copies, and the validation/audit code still treats generated `.github/.codex` surfaces as the primary contract instead of the new canonical `definitions/` roots.
 
 ---
 
@@ -52,6 +52,8 @@ The repository already separates shared instruction sources under `definitions/s
   - `ntk-data-*`
 - Keep documentation samples in `docs/samples/manifests/` instead of mixing them with canonical manifest templates.
 - Preserve routing, prompts, skills, governance manifests, README references, and provider projections through path updates.
+- Repoint validation and audit code to canonical `definitions/` assets before tightening or regenerating the projected `.github/.codex/.claude` surfaces.
+- Treat generated provider/runtime folders as output surfaces that should be cut over last, after canonical authorship and validator contracts stabilize.
 
 ---
 
@@ -116,7 +118,7 @@ The first copy-first migration wave also fixes two earlier placement concerns:
 - ORM guidance belongs under `development/` in the shallow model as persistence implementation guidance.
 - Privacy/data-compliance guidance belongs under `data/` when it is primarily about governed data handling and retention policy rather than generic application hardening.
 
-The second copy-first migration wave applies the same shallow model to the projected `.github/instructions/` surface without deleting the current legacy folders yet.
+The second copy-first migration wave applies the same shallow model to the projected `.github/instructions/` surface without deleting the current legacy folders yet, but only after validation and audit code starts from the canonical `definitions/` roots.
 
 ---
 
@@ -134,6 +136,8 @@ The second copy-first migration wave applies the same shallow model to the proje
 - `docs/samples/manifests/` exists as the human sample surface for manifests.
 - The taxonomy stays shallow and avoids reintroducing another semantic folder layer below those first-level category and role folders.
 - `super-agent` no longer competes with repository invariants inside the instruction tree; it belongs to the `agents/` root.
+- `validate-instructions` and follow-up audit validators can pass by using canonical `definitions/` assets first, without requiring `.github/.codex/.claude` generated surfaces to be the primary source of truth.
+- Projection/runtime surfaces are explicitly a later migration stage, not a prerequisite for canonical instruction reorganization.
 
 ---
 

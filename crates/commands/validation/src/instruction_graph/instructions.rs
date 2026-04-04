@@ -15,7 +15,23 @@ use crate::{
     ValidateRoutingCoverageRequest, ValidationCheckStatus,
 };
 
-const REQUIRED_FILES: &[&str] = &[
+const CANONICAL_REQUIRED_FILES: &[&str] = &[
+    "definitions/instructions/README.md",
+    "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md",
+    "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+    "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+    "definitions/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md",
+    "definitions/instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+    "definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md",
+    "definitions/instructions/operations/ntk-operations-powershell-execution.instructions.md",
+    "definitions/agents/super-agent/ntk-agents-super-agent.instructions.md",
+    "definitions/providers/github/root/AGENTS.md",
+    "definitions/providers/github/root/copilot-instructions.md",
+    "definitions/providers/github/root/instruction-routing.catalog.yml",
+    "definitions/providers/github/prompts/route-instructions.prompt.md",
+];
+
+const GENERATED_SURFACE_FILES: &[&str] = &[
     ".github/AGENTS.md",
     ".github/copilot-instructions.md",
     ".github/instruction-routing.catalog.yml",
@@ -39,17 +55,21 @@ const REQUIRED_FILES: &[&str] = &[
 
 const EXPLICIT_MARKDOWN_FILES: &[&str] = &[
     "README.md",
-    ".github/AGENTS.md",
-    ".github/copilot-instructions.md",
-    ".codex/mcp/README.md",
+    "definitions/instructions/README.md",
+    "definitions/providers/github/root/AGENTS.md",
+    "definitions/providers/github/root/copilot-instructions.md",
+    "definitions/providers/codex/mcp/README.md",
+    "docs/samples/manifests/README.md",
 ];
 
 const MARKDOWN_FOLDERS: &[&str] = &[
-    ".github/instructions",
-    ".github/chatmodes",
-    ".github/prompts",
-    ".github/runbooks",
-    ".codex/skills",
+    "definitions/instructions",
+    "definitions/agents",
+    "definitions/providers/github/chatmodes",
+    "definitions/providers/github/prompts",
+    "definitions/providers/codex/skills",
+    "definitions/providers/codex/mcp",
+    "docs/samples",
 ];
 
 const JSON_DIRECTORIES: &[&str] = &[
@@ -260,7 +280,7 @@ fn test_required_files(
     failures: &mut Vec<String>,
 ) -> usize {
     let mut checked = 0usize;
-    for relative_path in REQUIRED_FILES {
+    for relative_path in CANONICAL_REQUIRED_FILES {
         checked += 1;
         let absolute_path = repo_root.join(relative_path);
         if !absolute_path.exists() {
@@ -272,6 +292,17 @@ fn test_required_files(
             );
         }
     }
+
+    for relative_path in GENERATED_SURFACE_FILES {
+        checked += 1;
+        let absolute_path = repo_root.join(relative_path);
+        if !absolute_path.exists() {
+            warnings.push(format!(
+                "Generated/runtime surface missing (deferred output): {relative_path}"
+            ));
+        }
+    }
+
     checked
 }
 
@@ -798,9 +829,14 @@ fn test_skill_definitions(
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) -> SkillValidationStats {
-    let skills_root = repo_root.join(".codex/skills");
+    let skills_root = resolve_existing_repo_path(
+        repo_root,
+        &["definitions/providers/codex/skills", ".codex/skills"],
+    )
+    .unwrap_or_else(|| repo_root.join("definitions/providers/codex/skills"));
+    let skills_root_label = to_repo_relative_path(repo_root, &skills_root);
     if !skills_root.is_dir() {
-        warnings.push("Skipping skill lint: .codex/skills not found.".to_string());
+        warnings.push(format!("Skipping skill lint: {skills_root_label} not found."));
         return SkillValidationStats::default();
     }
 
@@ -832,7 +868,7 @@ fn test_skill_definitions(
                 warning_only,
                 warnings,
                 failures,
-                format!("Skill missing SKILL.md: .codex/skills/{folder_name}"),
+                format!("Skill missing SKILL.md: {skills_root_label}/{folder_name}"),
             );
             continue;
         }
@@ -844,7 +880,7 @@ fn test_skill_definitions(
                 warnings,
                 failures,
                 format!(
-                    "Invalid or missing frontmatter in skill: .codex/skills/{folder_name}/SKILL.md"
+                    "Invalid or missing frontmatter in skill: {skills_root_label}/{folder_name}/SKILL.md"
                 ),
             );
             continue;
@@ -860,7 +896,7 @@ fn test_skill_definitions(
                     warnings,
                     failures,
                     format!(
-                        "Skill frontmatter missing '{required_key}': .codex/skills/{folder_name}/SKILL.md"
+                        "Skill frontmatter missing '{required_key}': {skills_root_label}/{folder_name}/SKILL.md"
                     ),
                 );
             }
@@ -873,7 +909,7 @@ fn test_skill_definitions(
                     warnings,
                     failures,
                     format!(
-                        "Skill name must match ^[a-z0-9-]{{1,64}}$: .codex/skills/{folder_name}/SKILL.md"
+                        "Skill name must match ^[a-z0-9-]{{1,64}}$: {skills_root_label}/{folder_name}/SKILL.md"
                     ),
                 );
             } else if skill_name != &folder_name {
@@ -895,7 +931,7 @@ fn test_skill_definitions(
             .collect::<Vec<_>>();
         if !extra_keys.is_empty() {
             warnings.push(format!(
-                "Skill frontmatter has non-standard keys ({}): .codex/skills/{folder_name}/SKILL.md",
+                "Skill frontmatter has non-standard keys ({}): {skills_root_label}/{folder_name}/SKILL.md",
                 extra_keys.join(", ")
             ));
         }
@@ -906,7 +942,7 @@ fn test_skill_definitions(
                 warnings,
                 failures,
                 format!(
-                    "Skill exceeds 500 lines: .codex/skills/{folder_name}/SKILL.md ({total_lines} lines)"
+                    "Skill exceeds 500 lines: {skills_root_label}/{folder_name}/SKILL.md ({total_lines} lines)"
                 ),
             );
         }
@@ -917,7 +953,7 @@ fn test_skill_definitions(
                 warning_only,
                 warnings,
                 failures,
-                format!("Skill missing agents/openai.yaml: .codex/skills/{folder_name}"),
+                format!("Skill missing agents/openai.yaml: {skills_root_label}/{folder_name}"),
             );
             continue;
         }
@@ -929,7 +965,7 @@ fn test_skill_definitions(
                 warnings,
                 failures,
                 format!(
-                    "Could not read agents/openai.yaml: .codex/skills/{folder_name}/agents/openai.yaml"
+                    "Could not read agents/openai.yaml: {skills_root_label}/{folder_name}/agents/openai.yaml"
                 ),
             );
             continue;
@@ -942,7 +978,7 @@ fn test_skill_definitions(
                     warnings,
                     failures,
                     format!(
-                        "openai.yaml missing '{}': .codex/skills/{folder_name}/agents/openai.yaml",
+                        "openai.yaml missing '{}': {skills_root_label}/{folder_name}/agents/openai.yaml",
                         required_pattern.trim_end_matches(':')
                     ),
                 );
@@ -952,12 +988,19 @@ fn test_skill_definitions(
         let expected_token = format!("${folder_name}");
         if !openai_content.contains(&expected_token) {
             warnings.push(format!(
-                "openai.yaml default_prompt should reference {expected_token}: .codex/skills/{folder_name}/agents/openai.yaml"
+                "openai.yaml default_prompt should reference {expected_token}: {skills_root_label}/{folder_name}/agents/openai.yaml"
             ));
         }
     }
 
     stats
+}
+
+fn resolve_existing_repo_path(repo_root: &Path, relative_paths: &[&str]) -> Option<PathBuf> {
+    relative_paths
+        .iter()
+        .map(|relative_path| repo_root.join(relative_path))
+        .find(|path| path.exists())
 }
 
 fn parse_frontmatter(path: &Path) -> Option<(BTreeMap<String, String>, usize)> {

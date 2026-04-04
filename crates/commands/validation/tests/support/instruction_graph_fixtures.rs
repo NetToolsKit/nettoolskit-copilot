@@ -14,6 +14,7 @@ pub fn write_file(path: &Path, contents: &str) {
 pub fn initialize_instruction_architecture_repo(repo_root: &Path) {
     write_valid_instruction_architecture_manifest(repo_root);
     write_instruction_architecture_documents(repo_root);
+    write_canonical_instruction_documents(repo_root);
 }
 
 pub fn initialize_validate_instructions_repo(repo_root: &Path) {
@@ -33,6 +34,14 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
     write_file(
         &repo_root.join(".github/runbooks/runtime-drift.runbook.md"),
         "# Runtime Drift\n",
+    );
+    write_file(
+        &repo_root.join("docs/samples/manifests/README.md"),
+        "# Manifest Samples\n\nSee [App Manifest](app.manifest.yaml).\n",
+    );
+    write_file(
+        &repo_root.join("docs/samples/manifests/app.manifest.yaml"),
+        "name: sample-app\nruntime: service\n",
     );
     write_file(
         &repo_root.join(".codex/mcp/README.md"),
@@ -194,18 +203,6 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
         "display_name: Sample Skill\nshort_description: Example\ndefault_prompt: $sample\n",
     );
     write_file(
-        &repo_root.join(".codex/skills/sample/SKILL.md"),
-        r#"---
-name: sample
-description: sample skill
----
-
-# Sample Skill
-
-Load `ntk-core-repository-operating-model.instructions.md`.
-"#,
-    );
-    write_file(
         &repo_root.join("scripts/validation/fixtures/routing-golden-tests.json"),
         r#"{
   "cases": [
@@ -218,6 +215,127 @@ Load `ntk-core-repository-operating-model.instructions.md`.
     }
   ]
 }"#,
+    );
+}
+
+fn write_canonical_instruction_documents(repo_root: &Path) {
+    write_file(
+        &repo_root.join("definitions/instructions/README.md"),
+        "# Instructions\n\nCanonical instruction root.\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"),
+        "# Repository Operating Model\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
+        "# Authoritative Sources\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
+        "# Artifact Layout\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md"),
+        "# Subagent Planning Workflow\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/governance/ntk-governance-workflow-optimization.instructions.md"),
+        "# Workflow Optimization\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md"),
+        "# Feedback Changelog\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/instructions/operations/ntk-operations-powershell-execution.instructions.md"),
+        "# PowerShell Execution\n",
+    );
+    write_file(
+        &repo_root.join("definitions/agents/super-agent/ntk-agents-super-agent.instructions.md"),
+        "# Super Agent\n",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/AGENTS.md"),
+        r#"# AGENTS
+
+Use `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+"#,
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/root/copilot-instructions.md"),
+        r#"# Global Instructions
+
+Use `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+"#,
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/root/instruction-routing.catalog.yml"),
+        r#"always:
+  - path: AGENTS.md
+  - path: copilot-instructions.md
+routing:
+  - id: repo-guidance
+    triggers:
+      - repository
+    include:
+      - path: ../prompts/route-instructions.prompt.md
+"#,
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/prompts/route-instructions.prompt.md"),
+        r#"---
+description: Route a request
+mode: ask
+tools: ['readFile']
+---
+
+# Route Instructions
+
+Hard cap: at most 5 selected instruction files (excluding mandatory).
+"#,
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/chatmodes/example.chatmode.md"),
+        "# Example Chatmode\n\nSee [Route Prompt](../prompts/route-instructions.prompt.md).\n",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/mcp/README.md"),
+        "# MCP\n\nSee [Config](codex.config.template.toml).\n",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/mcp/codex.config.template.toml"),
+        "[mcp]\nenabled = true\n",
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/codex/skills/sample/agents/openai.yaml"),
+        "display_name: Sample Skill\nshort_description: Example\ndefault_prompt: $sample\n",
+    );
+    write_file(
+        &repo_root.join("definitions/providers/codex/skills/sample/SKILL.md"),
+        r#"---
+name: sample
+description: sample skill
+---
+
+# Sample Skill
+
+Load `ntk-governance-repository-operating-model.instructions.md`.
+"#,
     );
 }
 

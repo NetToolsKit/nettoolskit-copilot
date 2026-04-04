@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 12:32
+- LastUpdated: 2026-04-04 14:25
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -17,13 +17,12 @@ Generated: 2026-04-03 00:00
 - Inputs:
   - `definitions/*`
   - `definitions/shared/*`
-  - `.github/instructions/*`
-  - `.github/instruction-routing.catalog.yml`
-  - `.github/prompts/*`
-  - `.codex/skills/*`
+  - `definitions/providers/*`
   - `docs/manifest/*`
   - `planning/README.md`
   - `planning/specs/README.md`
+  - `crates/commands/validation/*`
+  - `scripts/validation/*`
 
 ---
 
@@ -33,8 +32,8 @@ Generated: 2026-04-03 00:00
 |---|---|---|---|---|
 | I1 | Freeze taxonomy and rename map | definition roots + file names | 🔴 Immediate | none |
 | I2 | Establish canonical `definitions/` roots | `definitions/instructions`, `templates`, `agents`, `skills`, `hooks`, `providers` | 🔴 Immediate | I1 |
-| I3 | Reproject `.github/instructions` and unify drift | projected copies + overrides | 🔴 Immediate | I2 |
-| I4 | Update routing and consumption paths | routing catalog, prompts, skills, manifests, plans | 🟠 High | I2, I3 |
+| I3 | Reproject generated surfaces and unify drift | `.github`, `.codex`, `.claude` copies + overrides | 🟡 Deferred | I15 |
+| I4 | Update canonical consumers and validation paths | definitions-aware routing, fixtures, prompts, skills, manifests, plans | 🔴 Immediate | I2 |
 | I5 | Tighten backend/frontend ownership | reduce overlap in the highest-conflict files | ✅ Done | I3 |
 | I6 | Add taxonomy docs and validation references | README/governance/closeout | 🟡 Medium | I4, I5 |
 | I7 | Split generic operations lane | replace `runtime-ops/` with narrower `operations/*` subdomains | ✅ Done | I4, I6 |
@@ -44,7 +43,8 @@ Generated: 2026-04-03 00:00
 | I11 | Re-map semantic lanes to five primary instruction categories | collapse current instruction lanes into `governance`, `development`, `operations`, `security`, and `data`, with specialization encoded in file names | 🔴 Immediate | I10 |
 | I12 | Add canonical template and sample lanes | create `definitions/templates/*` and `docs/samples/manifests/` without deleting legacy sources | 🟠 High | I2, I10, I11 |
 | I13 | Scaffold shallow domain instruction copies | copy existing non-governance instruction content into `development`, `operations`, `security`, and `data` lanes with stable new file names while keeping legacy roots intact | 🔴 Immediate | I10, I11 |
-| I14 | Simplify instruction lane docs and start projected shallow copies | remove per-lane instruction READMEs and scaffold `.github/instructions/{governance,development,operations,security,data}` copies while keeping legacy paths intact | 🔴 Immediate | I13 |
+| I14 | Simplify instruction lane docs and pause generated-surface expansion | remove per-lane instruction READMEs, freeze generated-surface scaffolds, and avoid further `.github/.codex/.claude` churn until validators are definitions-aware | ✅ Done | I13 |
+| I15 | Repoint validation and audit code to canonical definitions | `crates/commands/validation/*`, `scripts/validation/*`, fixtures, and audit helpers must treat `definitions/` as primary and generated surfaces as deferred outputs | 🔴 Immediate | I10, I11, I12, I13, I14 |
 
 ---
 
@@ -74,25 +74,26 @@ Generated: 2026-04-03 00:00
 - Commit checkpoint:
   - `refactor(instructions): move canonical shared instruction sources`
 
-### [2026-04-03 00:00] Task I3: Reproject And Unify Projected Copies
+### [2026-04-03 00:00] Task I3: Reproject And Unify Generated Copies
 
-- Move `.github/instructions/` to the same folder taxonomy.
+- Reproject `.github/`, `.codex/`, and `.claude/` only after canonical `definitions/` roots and validators are aligned.
 - Eliminate shared/projected drift in:
   - README baseline
   - repo-specific README overrides
   - any renamed instruction that still differs across the mirror
+- Status:
+  - deferred; generated/runtime surfaces are explicitly last so canonical instruction authorship and validator contracts can stabilize first
 - Commit checkpoint:
   - `refactor(instructions): align projected instruction surfaces`
 
 ### [2026-04-03 00:00] Task I4: Update All Consumers
 
 - Update references in:
-  - `.github/instruction-routing.catalog.yml`
-  - `.github/prompts/*`
-  - `.codex/skills/*`
+  - `definitions/providers/*`
   - governance manifests and policies
   - planning indexes and active plans/specs
-- Ensure there are no dangling legacy paths.
+- Update validators, fixtures, and audit helpers before generated/runtime surfaces.
+- Ensure there are no dangling legacy paths in canonical `definitions/` consumers.
 - Commit checkpoint:
   - `refactor(instructions): update instruction routing and consumers`
 
@@ -257,22 +258,37 @@ Generated: 2026-04-03 00:00
 - Commit checkpoint:
   - `docs(instructions): scaffold shallow domain instruction copies`
 
-### [2026-04-04 12:32] Task I14: Simplify Instruction Lane Docs And Start Projected Shallow Copies
+### [2026-04-04 12:32] Task I14: Simplify Instruction Lane Docs And Pause Generated-Surface Expansion
 
 - Remove redundant per-folder `README.md` files from instruction category folders.
 - Keep instruction taxonomy discovery in the root READMEs instead of multiplying lane-local docs.
-- Scaffold the projected shallow instruction copies under:
-  - `.github/instructions/governance/`
-  - `.github/instructions/development/`
-  - `.github/instructions/operations/`
-  - `.github/instructions/security/`
-  - `.github/instructions/data/`
-- Keep legacy projected folders (`core`, `process`, `architecture`, `docs`, `agents`) intact until consumers are retargeted.
+- Freeze the current generated-surface scaffolds and avoid further `.github/.codex/.claude` migration work until validator and audit code treats `definitions/` as primary.
 - Status:
-  - in progress; shallow projected copies now exist for `governance`, `development`, `operations`, and the rehomed `data` privacy lane
-  - in progress; redundant instruction-lane `README.md` files are being removed in favor of root-level taxonomy docs
+  - complete; shallow generated-surface scaffolds exist as transitional output only
+  - complete; redundant instruction-lane `README.md` files are removed in favor of root-level taxonomy docs
 - Commit checkpoint:
   - `docs(instructions): scaffold shallow projected instruction copies`
+
+### [2026-04-04 14:25] Task I15: Repoint Validation And Audit Code To Canonical Definitions
+
+- Refactor validation and audit code so canonical `definitions/` assets are the primary contract:
+  - `definitions/instructions/*`
+  - `definitions/agents/*`
+  - `definitions/providers/*`
+- Treat `.github/`, `.codex/`, and `.claude/` as generated/runtime output surfaces and defer strict enforcement of those copies until the canonical move is complete.
+- Start with:
+  - `crates/commands/validation/src/instruction_graph/instructions.rs`
+  - `crates/commands/validation/tests/support/instruction_graph_fixtures.rs`
+  - `crates/commands/validation/tests/instruction_graph/instructions_tests.rs`
+  - `scripts/validation/fixtures/routing-golden-tests.json`
+- Follow with the remaining audit surfaces:
+  - `instruction_architecture.rs`
+  - `authoritative_source_policy.rs`
+  - routing coverage and documentation metadata validators
+- Status:
+  - in progress; the first slice repoints `validate-instructions` to canonical definitions and codex skill definitions before generated surfaces
+- Commit checkpoint:
+  - `refactor(validation): prioritize canonical definitions in validate-instructions`
 
 ---
 

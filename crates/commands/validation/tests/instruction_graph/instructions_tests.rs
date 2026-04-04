@@ -46,7 +46,7 @@ fn test_invoke_validate_instructions_passes_for_valid_assets() {
 fn test_invoke_validate_instructions_reports_missing_required_file() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validate_instructions_repo(repo.path());
-    fs::remove_file(repo.path().join(".github/AGENTS.md"))
+    fs::remove_file(repo.path().join("definitions/providers/github/root/AGENTS.md"))
         .expect("temporary AGENTS file should be removed");
 
     let result = invoke_validate_instructions(&ValidateInstructionsRequest {
@@ -59,7 +59,7 @@ fn test_invoke_validate_instructions_reports_missing_required_file() {
     assert!(result
         .failures
         .iter()
-        .any(|message| message.contains("Required file not found: .github/AGENTS.md")));
+        .any(|message| message.contains("Required file not found: definitions/providers/github/root/AGENTS.md")));
 }
 
 #[test]
@@ -110,7 +110,10 @@ fn test_invoke_validate_instructions_reports_broken_markdown_link() {
 fn test_invoke_validate_instructions_reports_missing_openai_yaml() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validate_instructions_repo(repo.path());
-    fs::remove_file(repo.path().join(".codex/skills/sample/agents/openai.yaml"))
+    fs::remove_file(
+        repo.path()
+            .join("definitions/providers/codex/skills/sample/agents/openai.yaml"),
+    )
         .expect("temporary openai.yaml should be removed");
 
     let result = invoke_validate_instructions(&ValidateInstructionsRequest {
@@ -221,7 +224,7 @@ fn test_invoke_validate_instructions_reports_broken_routing_fixture() {
 fn test_invoke_validate_instructions_converts_failures_to_warnings() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validate_instructions_repo(repo.path());
-    fs::remove_file(repo.path().join(".github/AGENTS.md"))
+    fs::remove_file(repo.path().join("definitions/providers/github/root/AGENTS.md"))
         .expect("temporary AGENTS file should be removed");
 
     let result = invoke_validate_instructions(&ValidateInstructionsRequest {
@@ -236,5 +239,5 @@ fn test_invoke_validate_instructions_converts_failures_to_warnings() {
     assert!(result
         .warnings
         .iter()
-        .any(|message| message.contains("Required file not found: .github/AGENTS.md")));
+        .any(|message| message.contains("Required file not found: definitions/providers/github/root/AGENTS.md")));
 }
