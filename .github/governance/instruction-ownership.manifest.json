@@ -96,7 +96,9 @@
       "id": "domain-instructions",
       "description": "Semantic domain rules grouped by responsibility instead of flat or numbered ordering.",
       "pathPatterns": [
-        ".github/instructions/process/*.instructions.md",
+        ".github/instructions/process/planning/*.instructions.md",
+        ".github/instructions/process/collaboration/*.instructions.md",
+        ".github/instructions/process/delivery/*.instructions.md",
         ".github/instructions/architecture/backend/*.instructions.md",
         ".github/instructions/architecture/frontend/*.instructions.md",
         ".github/instructions/architecture/agentic/*.instructions.md",

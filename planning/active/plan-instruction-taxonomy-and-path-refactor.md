@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 00:32
+- LastUpdated: 2026-04-04 01:10
 - Objective: refactor the repository instruction system into grouped semantic folders with stable `ntk-*` naming, clearer authority boundaries, and reduced duplication/drift.
 - Normalized Request: reorganize the instruction system while the repository is still evolving so instructions are grouped by concern, references remain valid, and repeated guidance is reduced.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -129,6 +129,7 @@ Generated: 2026-04-03 00:00
 - Status:
   - complete; canonical shared files and projected `.github` files now live under `process/planning`, `process/collaboration`, and `process/delivery`
   - complete; routing catalogs, provider skills/prompts, governance manifests, validation fixtures, and active planning references now point at the narrower process workflow lanes
+  - complete; dedicated `process/README.md` files now document the three workflow lanes and keep platform concerns under `operations/`
 - Commit checkpoint:
   - `refactor(instructions): split process taxonomy into workflow subdomains`
 
