@@ -53,6 +53,7 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md](planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md)
 - [planning/active/plan-runtime-operational-diagnostics-and-observability.md](planning/active/plan-runtime-operational-diagnostics-and-observability.md)
 - [planning/active/plan-free-llm-provider-test-matrix.md](planning/active/plan-free-llm-provider-test-matrix.md)
+- [planning/active/plan-development-agent-orchestrator-experience.md](planning/active/plan-development-agent-orchestrator-experience.md)
 - [planning/active/plan-repository-consolidation-continuity.md](planning/active/plan-repository-consolidation-continuity.md)
 - [planning/active/plan-token-economy-optimization.md](planning/active/plan-token-economy-optimization.md)
 - [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)

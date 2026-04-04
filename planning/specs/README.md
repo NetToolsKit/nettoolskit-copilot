@@ -52,6 +52,7 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/active/spec-multi-agent-runtime-lineage-and-a2a-readiness.md](planning/specs/active/spec-multi-agent-runtime-lineage-and-a2a-readiness.md)
 - [planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md](planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md)
 - [planning/specs/active/spec-free-llm-provider-test-matrix.md](planning/specs/active/spec-free-llm-provider-test-matrix.md)
+- [planning/specs/active/spec-development-agent-orchestrator-experience.md](planning/specs/active/spec-development-agent-orchestrator-experience.md)
 - [planning/specs/active/spec-repository-consolidation-continuity.md](planning/specs/active/spec-repository-consolidation-continuity.md)
 - [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
 - [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)
