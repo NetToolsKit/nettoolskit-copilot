@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-03 18:00
+- LastUpdated: 2026-04-03 18:18
 - Objective: keep repository instructions, `super-agent` behavior, and the external `copilot-instructions` reference aligned without losing canonical guidance or routing fidelity.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared instruction system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -90,6 +90,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
   - backend slice complete; `ntk-backend-architecture-core`, `ntk-backend-architecture-platform`, and `ntk-backend-dotnet-csharp` now have narrower scopes and less repeated policy
   - frontend slice complete; `ntk-frontend-architecture-core`, `ntk-frontend-vue-quasar-architecture`, `ntk-frontend-vue-quasar`, and `ntk-frontend-ui-ux` now separate architecture, framework structure, implementation, and design-system guidance
   - agentic slice complete; `ntk-agentic-surfaces` now owns MCP/A2A/RAG/CAG boundaries while `ntk-agentic-context-economy-checkpoint` keeps only the checkpoint/compression protocol
+  - runtime-ops PowerShell slice complete; `ntk-runtime-powershell-execution` now owns runtime invocation safety while `ntk-runtime-powershell-script-creation` owns authoring/template rules
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

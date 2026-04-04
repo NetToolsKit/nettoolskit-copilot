@@ -3,82 +3,70 @@ applyTo: "**/*.ps1"
 priority: high
 ---
 
-# Working Directory Detection
-MANDATORY: ALWAYS detect and navigate to solution root automatically in ALL PowerShell scripts; NEVER assume correct working directory; ALWAYS use Set-CorrectWorkingDirectory or similar.
-- Check .sln files OR (src/ + .github/) combo to identify solution root
-- Walk up to 5 levels
-- Test common paths (../../, .., ../../../../)
-- Visual feedback on navigation
-```powershell
-function Set-CorrectWorkingDirectory {
-    $current = Get-Location
-    for ($i = 0; $i -lt 5; $i++) {
-        if (Test-Path "*.sln" -or (Test-Path "src" -and Test-Path ".github")) {
-            Write-Host "Solution root found: $PWD" -ForegroundColor Green
-            return
-        }
-        Set-Location ".."
-    }
-    throw "Could not find solution root"
-}
-```
+# PowerShell Execution
 
-# Path Safety
-- ALWAYS use Test-Path before Set-Location
-- Resolve-Path to validate
-- Join-Path for building paths
-- Avoid hardcoded absolute paths
-- Use relative paths from solution root
-```powershell
-if (Test-Path $targetPath) {
-    $resolvedPath = Resolve-Path $targetPath
-    Set-Location $resolvedPath
-}
-```
+Use this instruction for executing, invoking, or operationally maintaining
+existing PowerShell scripts. Use
+`ntk-runtime-powershell-script-creation.instructions.md` for authoring or
+refactoring script files.
 
-# Error Handling
-- try/catch for critical ops
-- Meaningful error messages
-- Appropriate exit codes (0=success, 1=failure)
-- Write-Error for critical
-- Write-Warning for warnings
-```powershell
-try {
-    Set-CorrectWorkingDirectory
-} catch {
-    Write-Error "Failed to find solution root: $_"
-    exit 1
-}
-```
+## Repository Root Detection
 
-# AI Guidance
-Include directory navigation notes in responses that involve PowerShell scripts; explain root detection briefly; do not assume user is in correct directory; show navigation commands when relevant.
+- Never assume the caller is already at the repository root.
+- Detect and validate the repository root before any repo-relative operation.
+- Prefer a shared helper such as `Set-CorrectWorkingDirectory` or equivalent deterministic logic.
+- Use `Test-Path` and `Resolve-Path` before changing directories.
+- Keep repository-root discovery bounded and explicit.
 
-# Script Structure
-- param block first
-- Helper functions for navigation
-- Validation before execution
-- Cleanup in finally blocks
-- Structured output with colors
+## Path Safety
 
-# Execution Policies
-Use -ExecutionPolicy Bypass when needed; document requirements; handle security restrictions; provide alternatives.
+- Build paths with `Join-Path`.
+- Use `-LiteralPath` for filesystem operations when paths may contain special characters.
+- Avoid hardcoded absolute paths.
+- Validate target paths before mutation or navigation.
+- Prefer repo-relative paths once the root is confirmed.
 
-# Cross-Platform
-Correct path separators; consider case sensitivity; handle different PS versions; test on Windows/Linux when applicable.
+## Runtime Error Handling
 
-# Performance
-Avoid unnecessary Get-ChildItem -Recurse; use -ErrorAction SilentlyContinue; filter early; cache expensive ops; limit search scope.
+- Wrap critical operations in `try/catch`.
+- Use meaningful failure messages and non-zero exit codes for execution failure.
+- Use `Write-Error` for hard failures and `Write-Warning` for recoverable issues.
+- Keep success summaries explicit and short.
+- Do not swallow exceptions silently.
 
-# Development
-Debug output with -Verbose; structured logging; parameter validation; help comments; example usage; error scenarios.
+## Mutation Safety
 
-# Security
-- Do not log secrets
-- Sanitize inputs
-- Validate file paths
-- Avoid eval/invoke-expression
-- Least privilege
+- Prefer safe default behavior.
+- Require explicit switches for destructive or bulk-changing operations.
+- Add `DryRun` or equivalent preview modes when a script mutates many files or resources.
+- Use `-Force` only when the caller opted into it or the workflow explicitly requires it.
+- Validate targets before delete/move/replace behavior.
 
-# Example Pattern
-Set-CorrectWorkingDirectory at script start; verify .github structure; create directories if needed; relative paths from root; appropriate exit codes.
+## Logging And Diagnostics
+
+- Keep log prefixes stable and operator-readable.
+- Support `-Verbose` or an equivalent diagnostic mode.
+- Do not print secrets, tokens, or full sensitive configuration values.
+- Keep output deterministic so runtime wrappers and validation flows can parse it reliably.
+
+## Cross-Platform And Compatibility
+
+- Consider Windows PowerShell vs PowerShell 7+ behavior where relevant.
+- Normalize path handling and case-sensitivity assumptions.
+- Avoid platform-specific shell shortcuts unless the script is intentionally platform-bound.
+- Keep execution guidance aligned with repository runtime wrappers and native `ntk` commands.
+
+## Performance
+
+- Avoid broad `Get-ChildItem -Recurse` scans without early filters.
+- Cache expensive path or config lookups when repeated.
+- Limit search depth or scope when the repo layout is known.
+- Use `-ErrorAction SilentlyContinue` only when the failure mode is expected and safe.
+
+## Security
+
+- Sanitize user-controlled inputs before use.
+- Avoid `Invoke-Expression` or equivalent dynamic execution unless the workflow truly requires it.
+- Run with the least privilege required for the task.
+- Validate file and directory targets before mutation.
+- Keep secrets and sensitive material out of logs and summaries.
