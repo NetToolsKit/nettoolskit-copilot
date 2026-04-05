@@ -220,6 +220,10 @@ pub fn invoke_ai_doctor(request: &AiDoctorRequest) -> Result<AiDoctorResult, Str
 pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String;
 ```
 
+Operational guidance for profile selection, doctor usage, and degraded-state troubleshooting lives in:
+
+- [AI Development Operator Playbook](../../docs/operations/ai-development-operator-playbook.md)
+
 ### AI Profiles
 
 ```rust
@@ -264,6 +268,7 @@ pub fn execute_repo_workflow(request: RepoWorkflowRequest) -> Result<RepoWorkflo
 
 - [nettoolskit-core README](../core/README.md)
 - [nettoolskit-task-worker README](../task-worker/README.md)
+- [AI Development Operator Playbook](../../docs/operations/ai-development-operator-playbook.md)
 - [Tokio documentation](https://docs.rs/tokio/)
 - [Strum documentation](https://docs.rs/strum/)
 

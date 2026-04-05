@@ -161,6 +161,10 @@ Run `ntk --help` for the full live surface and per-command flags.
 | `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |
 | `ntk ai usage summary` | Report a bounded multi-week local AI usage summary |
 
+Operator guidance for choosing profiles and capturing diagnostics lives in:
+
+- [AI Development Operator Playbook](../../docs/operations/ai-development-operator-playbook.md)
+
 ### Runtime Highlights
 
 | Command | Description |
@@ -376,6 +380,7 @@ Primary runtime dependencies for this crate:
 - [nettoolskit-runtime README](../commands/runtime/README.md)
 - [nettoolskit-validation README](../commands/validation/README.md)
 - [Local Service Mode Runbook](../../docs/operations/service-mode-local-runbook.md)
+- [AI Development Operator Playbook](../../docs/operations/ai-development-operator-playbook.md)
 
 ---
 

@@ -60,6 +60,7 @@ graph TD
 
 - `architecture/` contains control-plane and operator-model references.
 - `operations/` contains runbooks for incident response, release verification, reverse proxy routing, and service mode.
+- `operations/` also contains the AI development operator playbook for profile selection, diagnostics, and degraded-state troubleshooting.
 - `ui/` contains UX guidance and visual support artifacts for terminal-facing experiences.
 - `samples/` contains human-facing examples that illustrate stable authored concepts.
 - `samples/manifests/` contains example manifests meant for understanding and copying, not canonical generation.
@@ -84,6 +85,7 @@ When a manifest or document is meant to be consumed by generation or runtime too
 - [Repository README](../README.md)
 - [docs/architecture/control-plane-session-operator-model.md](architecture/control-plane-session-operator-model.md)
 - [docs/operations/incident-response-playbook.md](operations/incident-response-playbook.md)
+- [docs/operations/ai-development-operator-playbook.md](operations/ai-development-operator-playbook.md)
 - [docs/operations/release-artifact-verification.md](operations/release-artifact-verification.md)
 - [docs/operations/service-mode-local-deployment.md](operations/service-mode-local-deployment.md)
 - [docs/ui/tui-ux-guidelines.md](ui/tui-ux-guidelines.md)

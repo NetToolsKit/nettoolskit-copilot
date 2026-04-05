@@ -4,7 +4,7 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:05
+- LastUpdated: 2026-04-05 11:42
 - Objective: define the target experience and architectural boundaries required for `ntk` to operate as a development-focused AI agent orchestrator with strong provider ergonomics, diagnostics, routing, and operator guidance.
 - Normalized Request: create a design specification for applying stronger development-agent orchestrator patterns to the repository without collapsing existing focused workstreams.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -100,3 +100,6 @@ This separation is required so the development experience becomes stronger witho
   - `ntk ai doctor` read-only runtime inspection
   - machine-readable JSON output
   - optional Markdown report generation for operator troubleshooting
+- Third implementation proof now exists for operator guidance:
+  - `docs/operations/ai-development-operator-playbook.md`
+  - profile-selection and diagnostics workflow documented outside the root README

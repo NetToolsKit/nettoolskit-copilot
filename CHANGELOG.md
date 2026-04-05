@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added `docs/operations/ai-development-operator-playbook.md` as the stable human-facing runbook for AI profile selection, `ntk ai doctor`, JSON/Markdown diagnostics, local-vs-remote guidance, and degraded-state recovery.
 - Added `ntk ai doctor` with JSON output and optional Markdown report generation so operators can inspect active AI profile, provider chain, timeout, auth readiness, and fallback state without executing a request.
 - Added built-in AI provider profiles (`balanced`, `coding`, `cheap`, `latency`, `local`) with canonical orchestrator exports, `NTK_AI_PROFILE` resolution, and new `ntk ai profiles list/show` operator surfaces.
 - Added an active `Phase 22 orchestration consumer sweep` plan/spec pair so the last 10 `scripts/orchestration/**/*.ps1` wrappers are tracked as their own final blocker-audit domain before the post-Phase-22 retention audit.
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed the development-orchestrator umbrella to record that the operator playbook slice is now implemented, with root/crate/documentation READMEs linking to the dedicated playbook instead of duplicating troubleshooting guidance inline.
 - Normalized archived planning references so historical phase plans/specs and earlier completed workstreams now point at the completed `repository-consolidation-continuity` umbrella instead of stale `planning/active/*` paths.
 - Archived the local `repository-consolidation-continuity` umbrella after the continuity planning sequence, the audit-only Phase 19-22 script-retirement sweeps, the retained-estate proof, and the external W6 Rust-directive handoff left no remaining planning-discovery work open in this repository.
 - Closed the generic `script-retirement-tail-cutover` umbrella as a completed planning artifact after the Phase 19-22 consumer sweeps and the post-Phase-22 retention audit proved that the remaining PowerShell estate is fully categorized and now belongs to blocker-reduction implementation work instead of further generic discovery planning.

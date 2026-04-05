@@ -259,6 +259,7 @@ Operational runbooks and incident procedures:
 
 - [Documentation Tree](docs/README.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
+- [AI Development Operator Playbook](docs/operations/ai-development-operator-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
 - [Local Service Mode Runbook](docs/operations/service-mode-local-runbook.md)
 - [ChatOps Agent VPS Profile](docs/operations/chatops-agent-vps-profile.md)
@@ -361,6 +362,7 @@ We follow semantic versioning and conventional commits. Please ensure your contr
 - [Template Assets](templates/README.md)
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
+- [AI Development Operator Playbook](docs/operations/ai-development-operator-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
 - [Local Service Mode Runbook](docs/operations/service-mode-local-runbook.md)
 - [ChatOps Agent VPS Profile](docs/operations/chatops-agent-vps-profile.md)

@@ -4,13 +4,13 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:05
+- LastUpdated: 2026-04-05 11:42
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: D1 and D2 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, and `ntk ai doctor` JSON/report surfaces; D3 smart routing is next.
+- Current Slice: D1, D2, and D5 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, `ntk ai doctor` JSON/report surfaces, and a dedicated AI development operator playbook; D3 smart routing is next.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -115,6 +115,9 @@ This workstream coordinates the development-operator experience for `ntk` as an 
   - degraded provider behavior
   - local vs remote provider guidance
 - Keep the root README concise and link out to the playbook.
+- Completed slice:
+  - `docs/operations/ai-development-operator-playbook.md` now provides the stable human-facing runbook for profile selection, doctor usage, Markdown reports, local-vs-remote guidance, and degraded-state recovery.
+  - `README.md`, `docs/README.md`, `crates/cli/README.md`, and `crates/orchestrator/README.md` now link to the playbook instead of overloading their local AI sections with operator detail.
 - Target paths:
   - `docs/operations/`
   - `README.md`
