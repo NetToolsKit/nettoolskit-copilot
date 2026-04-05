@@ -11,9 +11,8 @@ use serde::Deserialize;
 use serde_json::{Map, Value};
 use walkdir::WalkDir;
 
+use crate::agent_orchestration::common::resolve_governance_default_path;
 use crate::{error::ValidateWorkspaceEfficiencyCommandError, ValidationCheckStatus};
-
-const DEFAULT_BASELINE_PATH: &str = ".github/governance/workspace-efficiency.baseline.json";
 const DEFAULT_SETTINGS_TEMPLATE_PATH: &str = ".vscode/settings.tamplate.jsonc";
 const DEFAULT_WORKSPACE_SEARCH_ROOT: &str = ".";
 
@@ -119,7 +118,7 @@ pub fn invoke_validate_workspace_efficiency(
         )?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
-        None => repo_root.join(DEFAULT_BASELINE_PATH),
+        None => resolve_governance_default_path(&repo_root, "workspace-efficiency.baseline.json"),
     };
     let settings_template_path = match request.settings_template_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),

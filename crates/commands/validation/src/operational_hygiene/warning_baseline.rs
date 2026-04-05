@@ -10,13 +10,12 @@ use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_reposi
 use serde::Deserialize;
 use serde_json::{json, Value};
 
+use crate::agent_orchestration::common::resolve_governance_default_path;
 use crate::error::ValidateWarningBaselineCommandError;
 use crate::operational_hygiene::common::{
     current_timestamp_string, derive_status, push_required_finding, resolve_executable,
 };
 use crate::ValidationCheckStatus;
-
-const DEFAULT_BASELINE_PATH: &str = ".github/governance/warning-baseline.json";
 const DEFAULT_REPORT_PATH: &str = ".temp/audit/warning-baseline-report.json";
 
 /// Request payload for `validate-warning-baseline`.
@@ -111,7 +110,7 @@ pub fn invoke_validate_warning_baseline(
         .map_err(|source| ValidateWarningBaselineCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
-        None => repo_root.join(DEFAULT_BASELINE_PATH),
+        None => resolve_governance_default_path(&repo_root, "warning-baseline.json"),
     };
     let analyzer_report_path = request
         .analyzer_report_path

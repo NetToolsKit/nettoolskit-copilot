@@ -328,7 +328,7 @@ pub fn invoke_validate_workspace_efficiency(
 | `ValidateAllRequest` | `validation_profile` | Validation profile selected by `validate-all`. | `"dev"` |
 | `ValidateAllRequest` | `warning_only` | Convert failures into warnings. | `true` |
 | `ValidateAllRequest` | `write_ledger` | Append the run to the validation ledger. | `true` |
-| `ValidateReadmeStandardsRequest` | `baseline_path` | Optional override for the README baseline file. | `".github/governance/readme-standards.baseline.json"` |
+| `ValidateReadmeStandardsRequest` | `baseline_path` | Optional override for the README baseline file. | `"definitions/providers/github/governance/readme-standards.baseline.json"` |
 | `ValidationSurfaceContract` | `surface_id` | Stable validation surface identifier. | `"validation-commands"` |
 | `ValidationSurfaceContract` | `wave` | Migration wave used for cutover planning. | `Wave2` |
 
@@ -348,7 +348,7 @@ pub enum ValidateTestNamingCommandError { ResolveWorkspaceRoot { ... }, InvalidR
 ## References
 
 - [planning/completed/plan-repository-unification-and-rust-migration.md](../../../planning/completed/plan-repository-unification-and-rust-migration.md)
-- [README standards baseline](../../../.github/governance/readme-standards.baseline.json)
+- [README standards baseline](../../../definitions/providers/github/governance/readme-standards.baseline.json)
 - [crates/commands/runtime/README.md](../runtime/README.md)
 
 ---

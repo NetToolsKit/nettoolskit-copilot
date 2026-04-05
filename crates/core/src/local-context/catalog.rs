@@ -9,6 +9,10 @@ use walkdir::WalkDir;
 
 use crate::path_utils::repository::resolve_full_path;
 
+const CANONICAL_CATALOG_RELATIVE_PATH: &str =
+    "definitions/providers/github/governance/local-context-index.catalog.json";
+const LEGACY_CATALOG_RELATIVE_PATH: &str = ".github/governance/local-context-index.catalog.json";
+
 /// Chunking settings for the local context index.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -62,12 +66,22 @@ pub fn resolve_local_context_index_catalog_path(
     repo_root: &Path,
     catalog_path: Option<&Path>,
 ) -> PathBuf {
-    let default_path = repo_root.join(".github/governance/local-context-index.catalog.json");
-
     match catalog_path {
         Some(path) if path.is_absolute() => path.to_path_buf(),
         Some(path) => resolve_full_path(repo_root, path),
-        None => default_path,
+        None => {
+            let canonical_path = repo_root.join(CANONICAL_CATALOG_RELATIVE_PATH);
+            if canonical_path.is_file() {
+                canonical_path
+            } else {
+                let legacy_path = repo_root.join(LEGACY_CATALOG_RELATIVE_PATH);
+                if legacy_path.is_file() {
+                    legacy_path
+                } else {
+                    canonical_path
+                }
+            }
+        }
     }
 }
 

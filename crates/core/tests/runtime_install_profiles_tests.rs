@@ -26,7 +26,7 @@ fn test_runtime_install_profile_catalog_path_points_to_governance_file() {
     assert_eq!(
         path,
         repo.path()
-            .join(".github/governance/runtime-install-profiles.json")
+            .join("definitions/providers/github/governance/runtime-install-profiles.json")
     );
 }
 
@@ -69,4 +69,38 @@ fn test_resolve_runtime_install_profile_rejects_unknown_profile() {
     assert!(error
         .to_string()
         .contains("unknown runtime profile 'missing'"));
+}
+
+#[test]
+fn test_read_runtime_install_profile_catalog_falls_back_to_legacy_governance_file() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    write_runtime_install_profile_catalog(repo.path());
+
+    let catalog_path = runtime_install_profile_catalog_path(repo.path());
+
+    assert_eq!(
+        catalog_path,
+        repo.path().join(".github/governance/runtime-install-profiles.json")
+    );
+}
+
+#[test]
+fn test_runtime_install_profile_catalog_path_prefers_canonical_governance_file() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    let canonical_dir = repo.path().join("definitions/providers/github/governance");
+    fs::create_dir_all(&canonical_dir).expect("canonical governance directory should exist");
+    fs::write(
+        canonical_dir.join("runtime-install-profiles.json"),
+        r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false},"runtime":{"github":false,"codex":false,"claude":false}}}}"#,
+    )
+    .expect("canonical catalog should be written");
+    write_runtime_install_profile_catalog(repo.path());
+
+    let catalog_path = runtime_install_profile_catalog_path(repo.path());
+
+    assert_eq!(
+        catalog_path,
+        repo.path()
+            .join("definitions/providers/github/governance/runtime-install-profiles.json")
+    );
 }

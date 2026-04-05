@@ -9,6 +9,10 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const CANONICAL_CATALOG_RELATIVE_PATH: &str =
+    "definitions/providers/github/governance/runtime-install-profiles.json";
+const LEGACY_CATALOG_RELATIVE_PATH: &str = ".github/governance/runtime-install-profiles.json";
+
 /// Install toggles exposed by one runtime profile.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "camelCase")]
@@ -123,7 +127,17 @@ pub struct ResolvedRuntimeInstallProfile {
 /// Resolve the catalog path for versioned runtime install profiles.
 #[must_use]
 pub fn runtime_install_profile_catalog_path(resolved_repo_root: &Path) -> PathBuf {
-    resolved_repo_root.join(".github/governance/runtime-install-profiles.json")
+    let canonical_path = resolved_repo_root.join(CANONICAL_CATALOG_RELATIVE_PATH);
+    if canonical_path.is_file() {
+        canonical_path
+    } else {
+        let legacy_path = resolved_repo_root.join(LEGACY_CATALOG_RELATIVE_PATH);
+        if legacy_path.is_file() {
+            legacy_path
+        } else {
+            canonical_path
+        }
+    }
 }
 
 /// Load the runtime install profile catalog.

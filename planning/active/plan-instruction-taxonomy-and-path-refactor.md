@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 00:07
+- LastUpdated: 2026-04-05 00:12
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -306,6 +306,8 @@ Generated: 2026-04-03 00:00
   - in progress; canonical provider consumers now pass the validation stack after replacing remaining `.github/*` authored references in codex/claude skill packs, codex orchestration prompts, GitHub root command docs, and provider runtime settings with `definitions/*` paths
   - in progress; `validate-template-standards` and `validate-dotnet-standards` now prefer canonical `definitions/templates/*` and `definitions/providers/github/governance/template-standards.baseline.json`, while runtime test fixtures keep legacy template copies only as temporary compatibility
   - in progress; runtime catalog readers now prefer canonical governance mirrors under `definitions/providers/github/governance/*` for MCP runtime, provider-surface projection, and git-hook EOF settings, while falling back to `.github/governance/*` only when a temp repo has not been scaffolded canonically yet
+  - in progress; shared validation path helpers now resolve governance defaults to `definitions/providers/github/governance/*` before `.github/governance/*`, so README/workspace/warning/release/security validators and `validate-all` no longer start from generated governance surfaces
+  - in progress; core local-context and runtime-install-profile readers now prefer canonical governance catalogs under `definitions/providers/github/governance/*`, with explicit regression tests proving canonical preference and legacy fallback
 - Commit checkpoint:
   - `refactor(validation): prioritize canonical definitions in validate-instructions`
 

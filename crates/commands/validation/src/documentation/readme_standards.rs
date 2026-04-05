@@ -8,9 +8,8 @@ use std::path::{Path, PathBuf};
 use nettoolskit_core::path_utils::repository::{resolve_full_path, resolve_repository_root};
 use serde::Deserialize;
 
+use crate::agent_orchestration::common::resolve_governance_default_path;
 use crate::{error::ValidateReadmeStandardsCommandError, ValidationCheckStatus};
-
-const DEFAULT_BASELINE_PATH: &str = ".github/governance/readme-standards.baseline.json";
 
 /// Request payload for `validate-readme-standards`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -100,7 +99,7 @@ pub fn invoke_validate_readme_standards(
         .map_err(|source| ValidateReadmeStandardsCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
-        None => repo_root.join(DEFAULT_BASELINE_PATH),
+        None => resolve_governance_default_path(&repo_root, "readme-standards.baseline.json"),
     };
 
     let mut warnings = Vec::new();

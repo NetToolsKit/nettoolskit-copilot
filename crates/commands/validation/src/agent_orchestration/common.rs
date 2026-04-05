@@ -17,6 +17,10 @@ use serde_json::Value;
 
 use crate::operational_hygiene::common::push_required_finding;
 
+pub(crate) const CANONICAL_GITHUB_GOVERNANCE_ROOT: &str =
+    "definitions/providers/github/governance";
+pub(crate) const LEGACY_GITHUB_GOVERNANCE_ROOT: &str = ".github/governance";
+
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct AgentManifest {
@@ -176,8 +180,31 @@ pub(crate) fn resolve_repo_relative_path(
 ) -> PathBuf {
     match override_path {
         Some(path) => resolve_full_path(repo_root, path),
-        None => repo_root.join(default_path),
+        None => resolve_default_repo_path(repo_root, default_path),
     }
+}
+
+pub(crate) fn resolve_governance_default_path(repo_root: &Path, file_name: &str) -> PathBuf {
+    let canonical_path = repo_root.join(CANONICAL_GITHUB_GOVERNANCE_ROOT).join(file_name);
+    if canonical_path.exists() {
+        return canonical_path;
+    }
+
+    let legacy_path = repo_root.join(LEGACY_GITHUB_GOVERNANCE_ROOT).join(file_name);
+    if legacy_path.exists() {
+        legacy_path
+    } else {
+        canonical_path
+    }
+}
+
+fn resolve_default_repo_path(repo_root: &Path, default_path: &str) -> PathBuf {
+    let normalized = default_path.replace('\\', "/");
+    if let Some(file_name) = normalized.strip_prefix(".github/governance/") {
+        return resolve_governance_default_path(repo_root, file_name);
+    }
+
+    repo_root.join(default_path)
 }
 
 pub(crate) fn read_required_json_document<T: DeserializeOwned>(
@@ -264,6 +291,51 @@ pub(crate) fn read_required_json_value(
             );
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{resolve_governance_default_path, resolve_repo_relative_path};
+    use std::fs;
+    use std::path::Path;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_resolve_governance_default_path_prefers_canonical_file() {
+        let repo = TempDir::new().expect("temporary repository should be created");
+        let canonical_dir = repo.path().join("definitions/providers/github/governance");
+        let legacy_dir = repo.path().join(".github/governance");
+        fs::create_dir_all(&canonical_dir).expect("canonical governance dir should exist");
+        fs::create_dir_all(&legacy_dir).expect("legacy governance dir should exist");
+        fs::write(canonical_dir.join("sample.json"), "{}").expect("canonical file should exist");
+        fs::write(legacy_dir.join("sample.json"), "{}").expect("legacy file should exist");
+
+        let resolved = resolve_governance_default_path(repo.path(), "sample.json");
+
+        assert_eq!(resolved, canonical_dir.join("sample.json"));
+    }
+
+    #[test]
+    fn test_resolve_repo_relative_path_falls_back_to_legacy_governance_file() {
+        let repo = TempDir::new().expect("temporary repository should be created");
+        let legacy_dir = repo.path().join(".github/governance");
+        fs::create_dir_all(&legacy_dir).expect("legacy governance dir should exist");
+        fs::write(legacy_dir.join("sample.json"), "{}").expect("legacy file should exist");
+
+        let resolved =
+            resolve_repo_relative_path(repo.path(), None, ".github/governance/sample.json");
+
+        assert_eq!(resolved, legacy_dir.join("sample.json"));
+    }
+
+    #[test]
+    fn test_resolve_repo_relative_path_keeps_non_governance_defaults_unchanged() {
+        let repo = TempDir::new().expect("temporary repository should be created");
+
+        let resolved = resolve_repo_relative_path(repo.path(), None, "scripts/example.ps1");
+
+        assert_eq!(resolved, repo.path().join(Path::new("scripts/example.ps1")));
     }
 }
 
