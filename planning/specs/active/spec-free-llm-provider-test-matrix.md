@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 18:35
+- LastUpdated: 2026-04-05 19:00
 - Objective: define the design intent for a free-provider test matrix that covers the providers shown in `.docs/llm-free.png` while keeping provider-specific concerns separate from the main AI orchestration path.
 - Normalized Request: create a planning workstream for using all listed free providers in tests in a controlled, maintainable, SOLID-aligned way.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, a built-in provider-profile catalog, a strategy-aware routing layer, normalized adapter descriptors, canonical agent/skill model-routing defaults, a versioned free-provider matrix catalog, and explicit documentation/sample surfaces for that matrix; the live harness is still pending.
+- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, a built-in provider-profile catalog, a strategy-aware routing layer, normalized adapter descriptors, canonical agent/skill model-routing defaults, a versioned free-provider matrix catalog, explicit documentation/sample surfaces, and a reusable harness catalog with deterministic offline validation; the workstream is materially complete.
 
 ---
 
@@ -66,6 +66,7 @@ This classification can evolve, but the repository should store the mode and ass
 
 - `crates/orchestrator/src/execution/ai.rs` remains the provider abstraction and adapter home.
 - `crates/orchestrator/src/execution/ai_provider_matrix.rs` owns the free-provider family catalog and compatibility mapping for diagnostics/reporting.
+- `crates/orchestrator/src/execution/ai_provider_harness.rs` owns the shared prompt/output-contract harness document and keeps offline validation separate from live network smoke.
 - `crates/orchestrator/src/execution/processor.rs` continues to orchestrate runtime execution, but should not own provider-family policy.
 - `crates/orchestrator/src/execution/ai_usage.rs` can enrich weekly/summary reports with read-only provider-family, quota, and fallback context, but it must not mutate provider selection.
 - `crates/cli/src/ai_commands.rs` remains the reporting surface for AI usage summaries and future provider-matrix reporting.

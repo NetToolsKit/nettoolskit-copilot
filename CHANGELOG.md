@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added an embedded free-provider harness catalog plus orchestrator validation helpers so every family in the free-provider matrix now shares the same prompt fixture, output contract, latency/error-path expectations, and deterministic offline contract checks before any live smoke test is enabled.
 - Added an embedded free-provider matrix catalog under `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` plus an orchestrator `ai_provider_matrix` module so free-tier families, quota hints, compatibility tags, and operator caveats are versioned once and reused by runtime diagnostics/reporting.
 - Added canonical agent and skill model-routing policy manifests under `definitions/agents/*` and `definitions/skills/*`, plus a shared orchestrator `ai_model_routing` module, so the development runtime can resolve lane-aware profile/model defaults without hiding them inside provider adapters.
 - Added normalized AI provider adapter descriptors for transport, auth, streaming, usage, and fallback-output capabilities so provider-family contracts are inspectable without leaking vendor-specific transport details into orchestration code.

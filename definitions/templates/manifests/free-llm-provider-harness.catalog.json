@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "prompt_fixtures": [
+    {
+      "prompt_id": "repo-summary",
+      "title": "Repository summary",
+      "intent": "ask",
+      "prompt": "Summarize the repository state in Markdown with a Summary section and a Risks section."
+    }
+  ],
+  "output_contracts": [
+    {
+      "contract_id": "markdown-summary-and-risks",
+      "title": "Markdown summary with risks",
+      "required_markers": ["## Summary", "## Risks"]
+    }
+  ],
+  "provider_cases": [
+    {
+      "family_id": "openrouter",
+      "profile_id": "balanced",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 45000,
+      "supports_streaming": true,
+      "supports_error_path": true,
+      "notes": "Primary gateway reference for openai-compatible free-tier checks."
+    },
+    {
+      "family_id": "groq",
+      "profile_id": "latency",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 15000,
+      "supports_streaming": true,
+      "supports_error_path": true,
+      "notes": "Low-latency free-tier route that should be exercised with stricter timeout expectations."
+    },
+    {
+      "family_id": "google-ai-studio",
+      "profile_id": "balanced",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 45000,
+      "supports_streaming": true,
+      "supports_error_path": true,
+      "notes": "Native API family retained in the same harness with an opt-in live gate."
+    },
+    {
+      "family_id": "together-ai",
+      "profile_id": "balanced",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 30000,
+      "supports_streaming": true,
+      "supports_error_path": true,
+      "notes": "Balanced gateway-style free surface."
+    },
+    {
+      "family_id": "hugging-face-inference",
+      "profile_id": "cheap",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 30000,
+      "supports_streaming": false,
+      "supports_error_path": true,
+      "notes": "Hosted inference API path with lower expectations for streaming."
+    },
+    {
+      "family_id": "nvidia-nim-preview",
+      "profile_id": "latency",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 20000,
+      "supports_streaming": true,
+      "supports_error_path": true,
+      "notes": "Preview-grade infra surface; keep explicit latency/error gates."
+    },
+    {
+      "family_id": "opencode-ai",
+      "profile_id": "balanced",
+      "network_mode": "live_opt_in",
+      "prompt_id": "repo-summary",
+      "output_contract_id": "markdown-summary-and-risks",
+      "latency_budget_ms": 30000,
+      "supports_streaming": false,
+      "supports_error_path": true,
+      "notes": "Control-plane proxy family kept in the matrix, but still treated as orchestration rather than model-family runtime."
+    }
+  ]
+}

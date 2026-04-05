@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 18:35
+- LastUpdated: 2026-04-05 19:00
 - Objective: compare, classify, and prepare the free AI providers shown in `.docs/llm-free.png` for deterministic test coverage without coupling the runtime to a single vendor surface.
 - Normalized Request: create a planning workstream for evaluating all listed free providers and using them in repository tests through explicit, SOLID-aligned boundaries.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: F5 now documents the canonical free-provider matrix in the root README, the AI operator playbook, and `docs/samples/manifests/`, leaving only the live/provider harness slice open.
+- Current Slice: F3 now has a canonical reusable harness catalog with shared prompt/output contracts and deterministic offline validation, so the workstream is materially complete and ready for archive.
 - Inputs:
   - `.docs/llm-free.png`
   - `crates/orchestrator/src/execution/ai.rs`
@@ -87,7 +87,13 @@ This workstream treats OpenCode.ai as an orchestration/control-plane surface, no
 - Separate deterministic offline assertions from live-network smoke tests.
 - Ensure the harness can reuse the same prompt set and expected output structure across providers.
 - Keep provider-specific prompts and result normalization outside the main orchestration path.
+- Implemented slice:
+  - `definitions/templates/manifests/free-llm-provider-harness.catalog.json` now freezes the reusable prompt fixture, output contract, and live-opt-in harness expectations for every free-provider family in the matrix.
+  - `crates/orchestrator/src/execution/ai_provider_harness.rs` now exposes the embedded harness document plus reusable contract validation helpers for deterministic offline coverage.
+  - `crates/orchestrator/tests/execution/ai_provider_harness_tests.rs` now proves matrix parity, shared prompt/contract reuse, latency/error-path declaration, and output-contract validation without any live network dependency.
 - Target paths:
+  - `definitions/templates/manifests/free-llm-provider-harness.catalog.json`
+  - `crates/orchestrator/src/execution/ai_provider_harness.rs`
   - `crates/orchestrator/tests/execution/*`
   - `crates/cli/tests/ai_commands_tests.rs`
   - future provider matrix fixtures under `planning/` or `tests/`

@@ -7,6 +7,7 @@ mod ai_doctor_tests;
 mod ai_e2e_tests;
 mod ai_model_routing_tests;
 mod ai_profiles_tests;
+mod ai_provider_harness_tests;
 mod ai_provider_matrix_tests;
 mod ai_routing_tests;
 mod ai_usage_tests;

@@ -10,6 +10,8 @@ pub mod ai_doctor;
 pub mod ai_model_routing;
 /// Built-in AI provider profiles and preset resolution helpers.
 pub mod ai_profiles;
+/// Canonical free-provider harness descriptors for deterministic/offline coverage.
+pub mod ai_provider_harness;
 /// Canonical free-provider matrix for diagnostics and reporting.
 pub mod ai_provider_matrix;
 /// Provider routing strategy, scoring, and timeout resolution.
@@ -59,6 +61,13 @@ pub use ai_model_routing::{
 pub use ai_profiles::{
     find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
     resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
+};
+pub use ai_provider_harness::{
+    embedded_ai_free_provider_harness, find_ai_free_provider_harness_case,
+    find_ai_free_provider_harness_output_contract, find_ai_free_provider_harness_prompt,
+    validate_ai_free_provider_harness_output, AiFreeProviderHarnessCase,
+    AiFreeProviderHarnessDocument, AiFreeProviderHarnessNetworkMode,
+    AiFreeProviderHarnessOutputContract, AiFreeProviderHarnessPromptFixture,
 };
 pub use ai_provider_matrix::{
     classify_ai_free_provider, list_ai_free_provider_matrix_entries,
