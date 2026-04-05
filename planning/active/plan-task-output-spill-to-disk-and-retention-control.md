@@ -12,7 +12,7 @@ Generated: 2026-03-31 00:00
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstreams:
   - `planning/active/plan-build-target-cleanup-and-artifact-pruning.md`
-  - `planning/active/plan-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
 - Inputs:
   - `crates/orchestrator/src/execution/*`
   - `crates/commands/runtime/src/*`

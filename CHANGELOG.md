@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Archived the local `repository-consolidation-continuity` umbrella after the continuity planning sequence, the audit-only Phase 19-22 script-retirement sweeps, the retained-estate proof, and the external W6 Rust-directive handoff left no remaining planning-discovery work open in this repository.
 - Closed the generic `script-retirement-tail-cutover` umbrella as a completed planning artifact after the Phase 19-22 consumer sweeps and the post-Phase-22 retention audit proved that the remaining PowerShell estate is fully categorized and now belongs to blocker-reduction implementation work instead of further generic discovery planning.
 - Updated the repository-consolidation umbrella/spec to reflect that `copilot-instructions` Phase 8 is no longer blocked on directive discovery: the Rust directive baseline is now versioned externally, and the remaining W6 work is implementation in the other repository.
 - Closed the post-Phase-22 retention audit by recording that the live `scripts/**/*.ps1` estate remains `96`, and that the full `63`-script gap above the `retain wrapper intentionally` floor of `33` is completely explained by the five audited blocked domains rather than any unclassified wrapper drift.

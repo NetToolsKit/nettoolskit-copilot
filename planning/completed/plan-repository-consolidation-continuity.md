@@ -4,11 +4,11 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 16:00
-- Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
+- LastUpdated: 2026-04-05 17:35
+- Objective: preserve the final continuity and handoff record for repository consolidation after the local planning sequence, audit-only script-retirement sweeps, and external Rust-directive handoff all completed.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
-- Active Branch: `main` (planning only; follow-on implementation branches TBD)
-- Spec Path: `planning/specs/active/spec-repository-consolidation-continuity.md`
+- Active Branch: `docs/planning-gap-workstreams` (planning closeout)
+- Spec Path: `planning/specs/completed/spec-repository-consolidation-continuity.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependency: `planning/completed/plan-script-retirement-phase-18.md`, `planning/completed/plan-script-retirement-phase-19.md`, `planning/completed/plan-script-retirement-phase-20c-self-heal.md`, `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`, `planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md`, and `planning/completed/plan-script-retirement-phase-20f-codex-orchestration-renderer.md` are now complete; Workstream W5 now continues from the closed 96-script baseline.
 - Inputs:
@@ -16,7 +16,7 @@ Generated: 2026-03-29
   - `planning/completed/plan-script-retirement-phase-18.md`
   - `planning/completed/plan-script-retirement-phase-19.md`
   - `planning/completed/plan-script-retirement-phase-20c-self-heal.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
@@ -31,6 +31,12 @@ Generated: 2026-03-29
   - `C:\Users\tguis\copilot-instructions\planning\active\plan-rust-runtime-engine-foundation-phase-8.md`
 
 ---
+
+## Closeout Summary
+
+- W1-W5 are complete in `nettoolskit-copilot`, including the audit-only Phase 19-22 script-retirement sweeps and the post-Phase-22 retained-estate proof.
+- W6.1 is complete in `copilot-instructions`, and the remaining W6.2-W6.5 work is explicitly implementation work in that external repository rather than additional planning discovery here.
+- The local continuity umbrella is therefore archived in this repository: future changes belong either to concrete implementation workstreams under the remaining active plans or to the external `copilot-instructions` repo.
 
 ## Scope Summary
 
@@ -634,7 +640,7 @@ Status: `[x]` Completed
 
 ### Workstream W6 — `copilot-instructions` Phase 8 Rust Directives
 
-Status: `[~]` Planning complete / external implementation pending
+Status: `[x]` Completed locally / external implementation handed off
 
 **Problem being fixed:**
 `copilot-instructions` Phase 8 was blocked on explicit Rust directives. Those directives are now
@@ -670,7 +676,7 @@ Status: `[x]` Completed
 
 #### Task W6.2: Scaffold Cargo Workspace
 
-Status: `[ ]` Pending (implementation in external repo)
+Status: `[~]` External implementation pending (`copilot-instructions`)
 
 - Create `Cargo.toml` at `copilot-instructions` root:
   ```toml
@@ -702,7 +708,7 @@ Status: `[ ]` Pending (implementation in external repo)
 
 #### Task W6.3: Implement Bootstrap Parity Contract
 
-Status: `[ ]` Pending (implementation in external repo)
+Status: `[~]` External implementation pending (`copilot-instructions`)
 
 - In `src/runtime/src/lib.rs`, define the bootstrap parity surface:
   - `pub struct RuntimeBootstrapParity { pub legacy_script: &'static str, pub native_ready: bool }`
@@ -716,7 +722,7 @@ Status: `[ ]` Pending (implementation in external repo)
 
 #### Task W6.4: Implement Renderer Dispatch Parity Contract
 
-Status: `[ ]` Pending (implementation in external repo)
+Status: `[~]` External implementation pending (`copilot-instructions`)
 
 - In `src/runtime/src/renderer.rs`, define the renderer dispatch parity surface:
   - `pub enum RendererTarget { GithubInstructions, CodexCompatibility, ClaudeRuntime, VscodeProfiles, ProviderSurfaces, McpArtifacts }`
@@ -728,7 +734,7 @@ Status: `[ ]` Pending (implementation in external repo)
 
 #### Task W6.5: Verify Phase 8 Validates and Update Evidence
 
-Status: `[ ]` Pending (implementation in external repo)
+Status: `[~]` External implementation pending (`copilot-instructions`)
 
 - Run validation to confirm the new Cargo workspace does not break the existing PowerShell validation surface:
   - `cargo build --workspace`
@@ -806,4 +812,4 @@ W5 phases must be sequential and depend on Phases 17 and 18 closing.
 - W4 closes when `ntk validation readme-standards` passes and all 50+ subcommands are documented.
 - W5 phases each close when their safety matrix and parity ledger are updated and the phase plan/spec is archived.
 - W6 closes when Phase 8 first implementation slice passes `cargo build` and `cargo test` in `copilot-instructions`.
-- This plan itself moves to `planning/completed/` only when W2, W3, W4, and W6 are all closed. W5 phases have their own plans and close independently.
+- This plan is now archived because the local planning workstream is complete and the only remaining W6 activity is implementation in the external `copilot-instructions` repository.
