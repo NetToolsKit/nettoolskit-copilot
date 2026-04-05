@@ -228,6 +228,20 @@ The workspace also keeps the free/provider-preview evaluation matrix separate fr
 
 ---
 
+### Runtime Diagnostics Model
+
+Runtime health, degraded-state evidence, and subsystem ownership are versioned separately from raw logs and validation rules.
+
+| Element | Role | Canonical entry point |
+| --- | --- | --- |
+| Diagnostics taxonomy | Defines `healthy`, `degraded`, `blocked`, `misconfigured`, and `recovering` plus subsystem ownership | `definitions/templates/manifests/runtime-diagnostics.taxonomy.json` |
+| Operator playbook | Human troubleshooting and remediation flow | `docs/operations/runtime-diagnostics-observability-playbook.md` |
+| Current doctor surface | Read-only runtime inspection for AI/runtime health | `ntk ai doctor` |
+
+Future MCP, recall, task, and service doctor/report surfaces should reuse the same taxonomy instead of inventing per-command state names.
+
+---
+
 ### Control Plane Model
 
 Formal control-plane, session, and operator contracts are documented in:
@@ -280,6 +294,7 @@ Operational runbooks and incident procedures:
 - [Documentation Tree](docs/README.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
 - [AI Development Operator Playbook](docs/operations/ai-development-operator-playbook.md)
+- [Runtime Diagnostics and Observability Playbook](docs/operations/runtime-diagnostics-observability-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
 - [Local Service Mode Runbook](docs/operations/service-mode-local-runbook.md)
 - [ChatOps Agent VPS Profile](docs/operations/chatops-agent-vps-profile.md)

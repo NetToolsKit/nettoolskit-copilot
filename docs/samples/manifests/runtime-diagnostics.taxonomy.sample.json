@@ -1,0 +1,30 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "runtime-diagnostics-taxonomy",
+  "states": [
+    {
+      "id": "healthy",
+      "severity": "info"
+    },
+    {
+      "id": "degraded",
+      "severity": "warning"
+    }
+  ],
+  "subsystems": [
+    {
+      "id": "ai-runtime",
+      "entryPoints": [
+        "ntk ai doctor",
+        "ntk ai usage weekly"
+      ]
+    },
+    {
+      "id": "mcp-runtime",
+      "entryPoints": [
+        "ntk runtime doctor",
+        "ntk runtime render-provider-surfaces"
+      ]
+    }
+  ]
+}

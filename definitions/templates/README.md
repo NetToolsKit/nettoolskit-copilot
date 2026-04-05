@@ -43,5 +43,6 @@ graph TD
 - Root `templates/` remains available during migration and should be retired only after canonical content is moved safely.
 - `definitions/shared/templates/` remains as a temporary compatibility surface only while canonical consumers finish switching to `definitions/templates/`.
 - Human-facing examples belong in `docs/samples/`; canonical authored templates belong here.
+- Runtime diagnostics and provider-family catalogs should stay versioned under `definitions/templates/manifests/` and only be mirrored into docs as samples, never duplicated as authored operator truth.
 
 ---

@@ -13,5 +13,6 @@ Canonical reusable manifest templates belong under `definitions/templates/manife
 Current samples:
 
 - `free-llm-provider-matrix.sample.json` - trimmed example of the free-provider matrix shape used by runtime diagnostics and AI usage reporting
+- `runtime-diagnostics.taxonomy.sample.json` - trimmed example of the runtime diagnostics taxonomy consumed by operator playbooks and future doctor/report surfaces
 
 ---

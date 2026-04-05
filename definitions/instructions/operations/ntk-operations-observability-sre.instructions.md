@@ -7,6 +7,7 @@ priority: high
 - Use this instruction when designing runtime telemetry, service-level objectives, alerting, dashboards, and incident operations.
 - Use `ntk-operations-platform-reliability-resilience.instructions.md` for timeout/retry patterns, graceful degradation, chaos testing, and disaster readiness.
 - Treat observability as a product requirement; every critical user flow must be measurable end-to-end.
+- When the repository exposes operator doctor/report surfaces, keep the canonical health-state taxonomy versioned under `definitions/templates/manifests/` and align runbooks to that authored manifest instead of inventing per-command state names.
 
 # SLO and Error Budget
 - Define SLI and SLO per critical journey using explicit targets for availability, latency, and correctness.
@@ -35,6 +36,7 @@ priority: high
 - Maintain service dashboards with request rates, error rates, percentile latencies, dependency health, and resource saturation.
 - Keep runbooks versioned with deterministic diagnosis and mitigation steps.
 - Include rollback strategy, feature-flag strategy, and verification checklist in runbooks.
+- Degraded-state runbooks must reuse the canonical runtime-diagnostics state language (`healthy`, `degraded`, `blocked`, `misconfigured`, `recovering`) and include operator evidence fields, remediation steps, and verification checks.
 
 # Health and Probes
 - Separate readiness and liveness probes with explicit dependency semantics.
@@ -55,3 +57,4 @@ priority: high
 - Validate telemetry coverage for new endpoints, background jobs, and integration points.
 - Require synthetic checks or smoke checks for critical public entrypoints.
 - For high-risk changes, require observability evidence before and after rollout.
+- New doctor/report surfaces should expose concise, machine-readable, and human-report forms without changing runtime state.

@@ -4,13 +4,13 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:05
+- LastUpdated: 2026-04-05 22:40
 - Objective: unify operator-facing diagnostics and observability concepts across runtime, MCP, AI, task execution, and service surfaces.
 - Normalized Request: create a detailed workstream for runtime diagnostics and observability because the repository needs stronger operational visibility across its growing agent runtime.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: the first AI-specific normalized runtime health surface is now implemented through `ntk ai doctor`, with JSON and Markdown report output.
+- Current Slice: D1, D4, and D5 are now materially implemented through the canonical runtime-diagnostics taxonomy manifest, the operator playbook, and README/instruction updates; together with the existing `ntk ai doctor` proof for D2-D3, the workstream is materially complete and ready for archive.
 - Related Workstreams:
   - `planning/active/plan-sdk-control-plane-schemas-and-runtime-introspection.md`
   - `planning/active/plan-mcp-transport-auth-and-session-resilience.md`
@@ -47,6 +47,8 @@ Generated: 2026-03-31 00:00
   - local recall
   - task execution
   - service/runtime state
+- Implemented slice:
+  - `definitions/templates/manifests/runtime-diagnostics.taxonomy.json` now freezes the canonical health states, subsystem ownership, inspection surfaces, and degraded-state evidence requirements in one authored manifest.
 - Commit checkpoint:
   - `docs(planning): freeze runtime diagnostics taxonomy`
 
@@ -77,6 +79,9 @@ Generated: 2026-03-31 00:00
 - Define what must be logged, counted, or surfaced when the runtime degrades.
 - Connect diagnostics to remediation guidance and troubleshooting flows.
 - Keep observability and validation related but distinct.
+- Implemented slice:
+  - `docs/operations/runtime-diagnostics-observability-playbook.md` now explains the canonical health states, subsystem map, operator workflow, and degraded-state telemetry expectations.
+  - `docs/samples/manifests/runtime-diagnostics.taxonomy.sample.json` now provides a human-facing sample while authored truth remains under `definitions/templates/manifests/`.
 - Commit checkpoint:
   - `docs(planning): define degraded-state diagnostics and telemetry requirements`
 
@@ -84,6 +89,9 @@ Generated: 2026-03-31 00:00
 
 - Update README and runtime/operator docs.
 - Add governance rules so new runtime features expose diagnostics consistently.
+- Implemented slice:
+  - `README.md`, `docs/README.md`, and `definitions/templates/*` now point operators and contributors to the canonical runtime diagnostics taxonomy and playbook.
+  - `definitions/instructions/operations/ntk-operations-observability-sre.instructions.md` and `definitions/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md` now require doctor/report surfaces to align with the shared taxonomy and runbook model.
 - Commit checkpoint:
   - `docs(runtime): document operational diagnostics model`
 

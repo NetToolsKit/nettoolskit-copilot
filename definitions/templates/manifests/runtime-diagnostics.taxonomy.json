@@ -1,0 +1,156 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "runtime-diagnostics-taxonomy",
+  "title": "NetToolsKit Runtime Diagnostics Taxonomy",
+  "states": [
+    {
+      "id": "healthy",
+      "severity": "info",
+      "operatorMeaning": "The subsystem is functioning within expected policy and budget.",
+      "requiredEvidence": ["current_status", "checked_at"]
+    },
+    {
+      "id": "degraded",
+      "severity": "warning",
+      "operatorMeaning": "The subsystem still serves requests but is operating with elevated risk, fallback, or reduced capability.",
+      "requiredEvidence": ["current_status", "impact_summary", "fallback_state", "next_action"]
+    },
+    {
+      "id": "blocked",
+      "severity": "error",
+      "operatorMeaning": "The subsystem cannot complete its critical workflow without operator intervention.",
+      "requiredEvidence": ["current_status", "blocking_dependency", "remediation_hint"]
+    },
+    {
+      "id": "misconfigured",
+      "severity": "error",
+      "operatorMeaning": "The subsystem is locally reachable but its required configuration, credentials, or catalog inputs are incomplete or invalid.",
+      "requiredEvidence": ["current_status", "configuration_gap", "expected_source_of_truth"]
+    },
+    {
+      "id": "recovering",
+      "severity": "warning",
+      "operatorMeaning": "The subsystem is returning to service after a degraded or blocked state and still requires active observation.",
+      "requiredEvidence": ["current_status", "recovery_action", "verification_check"]
+    }
+  ],
+  "subsystems": [
+    {
+      "id": "ai-runtime",
+      "title": "AI Runtime And Token Economy",
+      "entryPoints": [
+        "ntk ai doctor",
+        "ntk ai usage weekly",
+        "ntk ai usage summary"
+      ],
+      "requiredSignals": [
+        "profile_id",
+        "routing_strategy",
+        "provider_chain",
+        "fallback_state",
+        "timeout_budget_ms"
+      ],
+      "runbookAnchor": "docs/operations/runtime-diagnostics-observability-playbook.md#ai-runtime"
+    },
+    {
+      "id": "mcp-runtime",
+      "title": "MCP Projection And Runtime Configuration",
+      "entryPoints": [
+        "ntk runtime doctor",
+        "ntk runtime render-provider-surfaces",
+        "ntk runtime sync-codex-mcp-config"
+      ],
+      "requiredSignals": [
+        "catalog_version",
+        "projection_state",
+        "surface_drift",
+        "auth_readiness"
+      ],
+      "runbookAnchor": "docs/operations/runtime-diagnostics-observability-playbook.md#mcp-runtime"
+    },
+    {
+      "id": "local-recall",
+      "title": "Local Recall And Context Stores",
+      "entryPoints": [
+        "ntk runtime update-local-context-index",
+        "ntk runtime query-local-context-index",
+        "ntk runtime update-local-memory",
+        "ntk runtime query-local-memory"
+      ],
+      "requiredSignals": [
+        "index_age",
+        "sqlite_health",
+        "catalog_count",
+        "query_latency_ms"
+      ],
+      "runbookAnchor": "docs/operations/runtime-diagnostics-observability-playbook.md#local-recall"
+    },
+    {
+      "id": "task-execution",
+      "title": "Task Execution And Output Pressure",
+      "entryPoints": [
+        "ntk service",
+        "ntk validation all"
+      ],
+      "requiredSignals": [
+        "queue_depth",
+        "retry_state",
+        "output_spill_state",
+        "worker_health"
+      ],
+      "runbookAnchor": "docs/operations/runtime-diagnostics-observability-playbook.md#task-execution"
+    },
+    {
+      "id": "service-runtime",
+      "title": "Service And Local Runtime State",
+      "entryPoints": [
+        "ntk service",
+        "ntk runtime healthcheck",
+        "ntk runtime self-heal"
+      ],
+      "requiredSignals": [
+        "runtime_mode",
+        "bind_state",
+        "ingress_health",
+        "self_heal_status"
+      ],
+      "runbookAnchor": "docs/operations/runtime-diagnostics-observability-playbook.md#service-runtime"
+    }
+  ],
+  "inspectionSurfaces": [
+    {
+      "id": "concise-cli",
+      "title": "Concise CLI Inspection",
+      "contract": "Short operator-readable status output for immediate triage."
+    },
+    {
+      "id": "json-report",
+      "title": "Machine-readable Diagnostics",
+      "contract": "Stable structured output for tooling, validation, and automation."
+    },
+    {
+      "id": "markdown-report",
+      "title": "Human troubleshooting report",
+      "contract": "Versionable diagnostic report with state, evidence, and next action."
+    }
+  ],
+  "degradedStateRequirements": {
+    "structuredFields": [
+      "subsystem_id",
+      "state",
+      "checked_at",
+      "impact_summary",
+      "next_action"
+    ],
+    "minimumCounters": [
+      "degraded_transition_count",
+      "fallback_count",
+      "error_count"
+    ],
+    "operatorArtifacts": [
+      "runbook_link",
+      "remediation_hint",
+      "verification_check"
+    ]
+  }
+}
