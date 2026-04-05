@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 10:30
+- LastUpdated: 2026-04-04 22:20
 - Objective: keep repository instructions, agent surfaces, skill surfaces, hook surfaces, and the external `copilot-instructions` reference aligned without losing canonical guidance, routing fidelity, or the `super-agent` lifecycle.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared control-surface system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -12,10 +12,9 @@ Generated: 2026-03-30 07:31
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependency: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
 - Inputs:
-  - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-  - `.github/instruction-routing.catalog.yml`
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+  - `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+  - `definitions/providers/github/root/instruction-routing.catalog.yml`
   - `C:\Users\tguis\copilot-instructions\`
   - `planning/completed/plan-instruction-parity-and-script-retirement.md`
 
@@ -80,7 +79,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 ### [2026-04-03 17:10] Task G5: Consolidate Semantic Instruction Domains
 
 - Reduce repeated guidance inside semantic instruction folders without collapsing distinct responsibilities.
-- Keep canonical authority in `definitions/shared/` and project consumer-facing copies from those canonical surfaces.
+- Keep canonical authority in `definitions/` and project consumer-facing copies from those canonical surfaces.
 - Normalize the final shared-root contract as:
   - `instructions/`
   - `agents/`

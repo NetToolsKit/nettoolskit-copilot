@@ -4,7 +4,7 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-03-30 08:59
+- LastUpdated: 2026-04-04 22:20
 - Objective: establish the spec-first operating model that every remaining planning workstream must follow so the repository can preserve quality, token efficiency, instruction governance, and branch discipline without starting implementation.
 - Normalized Request: adjust the remaining planning backlog to run under a Spec-Driven Development baseline aligned with the current repository instruction system, while keeping this work planning-only for now.
 - Active Branch: `docs/planning-gap-workstreams` (planning only; implementation branches TBD)
@@ -12,9 +12,9 @@ Generated: 2026-03-30 08:59
 - Dependencies:
   - `planning/README.md`
   - `planning/specs/README.md`
-  - `definitions/shared/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+  - `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
   - `.codex/skills/core-context-router/SKILL.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -47,9 +47,9 @@ This workstream does not implement product behavior. It defines the planning dis
 - Inventory the current spec-first tooling and docs:
   - `planning/specs/README.md`
   - `planning/README.md`
-  - `definitions/shared/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+  - `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
   - `.codex/skills/context-token-optimizer/SKILL.md`
   - `.codex/skills/core-context-router/SKILL.md`
 - Record the current planning and spec surfaces that already support SDD.

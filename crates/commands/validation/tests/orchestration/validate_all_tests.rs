@@ -241,6 +241,59 @@ fn write_template_standards_fixture(repo_root: &std::path::Path) {
 
 fn write_authoritative_source_policy_fixtures(repo_root: &std::path::Path) {
     write_file(
+        &repo_root.join("definitions/providers/github/governance/authoritative-source-map.json"),
+        r#"{
+  "version": 1,
+  "defaultPolicy": {
+    "repositoryContextFirst": true
+  },
+  "stackRules": [
+    { "id": "dotnet", "displayName": ".NET", "keywords": ["dotnet"], "officialDomains": ["learn.microsoft.com"] },
+    { "id": "github-copilot", "displayName": "GitHub Copilot", "keywords": ["copilot"], "officialDomains": ["docs.github.com"] },
+    { "id": "vscode", "displayName": "VS Code", "keywords": ["vscode"], "officialDomains": ["code.visualstudio.com"] },
+    { "id": "rust", "displayName": "Rust", "keywords": ["rust"], "officialDomains": ["doc.rust-lang.org"] },
+    { "id": "vue", "displayName": "Vue", "keywords": ["vue"], "officialDomains": ["vuejs.org"] },
+    { "id": "quasar", "displayName": "Quasar", "keywords": ["quasar"], "officialDomains": ["quasar.dev"] },
+    { "id": "docker", "displayName": "Docker", "keywords": ["docker"], "officialDomains": ["docs.docker.com"] },
+    { "id": "kubernetes", "displayName": "Kubernetes", "keywords": ["kubernetes"], "officialDomains": ["kubernetes.io"] },
+    { "id": "postgresql", "displayName": "PostgreSQL", "keywords": ["postgresql"], "officialDomains": ["postgresql.org"] },
+    { "id": "openai", "displayName": "OpenAI", "keywords": ["openai"], "officialDomains": ["platform.openai.com"] }
+  ]
+}"#,
+    );
+    write_file(
+        &repo_root.join(
+            "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        ),
+        r#"# Authoritative Sources
+
+Use `governance/authoritative-source-map.json`.
+Repository context first.
+Use official documentation.
+Use community sources only as fallback.
+"#,
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/AGENTS.md"),
+        r#"# AGENTS
+
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `governance/authoritative-source-map.json`.
+"#,
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/copilot-instructions.md"),
+        r#"# Global Instructions
+
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `governance/authoritative-source-map.json`.
+"#,
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/root/instruction-routing.catalog.yml"),
+        "always:\n  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md\n",
+    );
+    write_file(
         &repo_root.join(".github/governance/authoritative-source-map.json"),
         r#"{
   "version": 1,

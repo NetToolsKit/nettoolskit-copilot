@@ -12,6 +12,7 @@ use walkdir::WalkDir;
 
 use crate::{
     error::ValidateInstructionsCommandError, invoke_validate_routing_coverage,
+    governance::{resolve_catalog_reference_path, resolve_default_catalog_path},
     ValidateRoutingCoverageRequest, ValidationCheckStatus,
 };
 
@@ -312,7 +313,7 @@ fn test_catalog_paths(
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) -> usize {
-    let catalog_path = repo_root.join(".github/instruction-routing.catalog.yml");
+    let catalog_path = resolve_default_catalog_path(repo_root);
     if !catalog_path.is_file() {
         return 0;
     }
@@ -361,14 +362,7 @@ fn test_catalog_paths(
             continue;
         }
 
-        let absolute_path = if Path::new(&entry).is_absolute() {
-            PathBuf::from(&entry)
-        } else {
-            resolve_full_path(
-                catalog_path.parent().unwrap_or(repo_root),
-                Path::new(&entry),
-            )
-        };
+        let absolute_path = resolve_catalog_reference_path(repo_root, &catalog_path, &entry);
         if !absolute_path.exists() {
             push_required_finding(
                 warning_only,

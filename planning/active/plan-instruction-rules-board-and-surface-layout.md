@@ -4,7 +4,7 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-04 10:30
+- LastUpdated: 2026-04-04 22:20
 - Objective: evaluate and define a repo-native rules board that groups shared surfaces into `instructions/`, `agents/`, `skills/`, and `hooks/` so agents can load the right control surface with less ambiguity and less context waste.
 - Normalized Request: compare the board-style agent architecture against the current repository layout and plan the improvements that would make the shared roots more discoverable, token-efficient, and SDD-friendly.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -13,11 +13,11 @@ Generated: 2026-03-30 08:59
 - Dependencies:
   - `planning/active/plan-spec-driven-development-operating-model.md`
   - `planning/active/plan-instruction-governance-and-super-agent-retention.md`
-  - `.github/AGENTS.md`
-  - `.github/copilot-instructions.md`
-  - `.github/instruction-routing.catalog.yml`
-  - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `definitions/providers/github/root/AGENTS.md`
+  - `definitions/providers/github/root/copilot-instructions.md`
+  - `definitions/providers/github/root/instruction-routing.catalog.yml`
+  - `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
   - `.codex/skills/README.md`
   - `definitions/README.md`
 
@@ -43,12 +43,14 @@ The board is implemented as documentation and governance. It does not create a s
 ### [2026-03-30 08:59] Task B1: Inventory Current Shared Surfaces
 
 - Capture the current authoritative surfaces:
-  - `.github/AGENTS.md`
-  - `.github/copilot-instructions.md`
-  - `.github/instruction-routing.catalog.yml`
-  - `.github/instructions/**/*.instructions.md`
+  - `definitions/providers/github/root/AGENTS.md`
+  - `definitions/providers/github/root/copilot-instructions.md`
+  - `definitions/providers/github/root/instruction-routing.catalog.yml`
+  - `definitions/instructions/**/*.instructions.md`
+  - `definitions/agents/**/*.instructions.md`
+  - `definitions/skills/**/*`
+  - `definitions/hooks/**/*`
   - `.codex/skills/*/SKILL.md`
-  - `definitions/shared/instructions/**/*.instructions.md`
 - Identify which surfaces are canonical, projected, or local overrides.
 - Status:
   - complete; inventory now covers the current instruction tree, current skill surfaces, and the control files that will feed the shallow shared-root refactor

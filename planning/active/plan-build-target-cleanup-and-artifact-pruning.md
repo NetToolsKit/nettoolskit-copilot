@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
+- LastUpdated: 2026-04-04 22:20
 - Objective: prevent `.build/target` and related transient artifacts from growing without bound and consuming excessive disk on the developer workstation.
 - Normalized Request: create a planning workstream for cargo target cleanup and generated-artifact pruning so the repository stops accumulating multi-gigabyte build state.
 - Active Branch: `main` (planning only; implementation branches TBD)
@@ -13,8 +13,8 @@ Generated: 2026-03-30 07:31
 - Inputs:
   - `.cargo/config.toml`
   - `.gitignore`
-  - `instructions/core/ntk-core-artifact-layout.instructions.md`
-  - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+  - `instructions/governance/ntk-governance-artifact-layout.instructions.md`
+  - `instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
   - `planning/completed/enterprise-progress-tracker.md`
 
 ---

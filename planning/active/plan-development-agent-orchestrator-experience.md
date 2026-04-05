@@ -4,7 +4,7 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 00:00
+- LastUpdated: 2026-04-04 22:20
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -110,7 +110,7 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Target paths:
   - `docs/operations/`
   - `README.md`
-  - `.github/instructions/docs/`
+  - `definitions/instructions/governance/`
 - Commit checkpoint:
   - `docs(ai): add development operator playbook`
 
@@ -122,7 +122,7 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Tie lineage and inherited settings into the multi-agent runtime plan instead of duplicating that work here.
 - Target paths:
   - `crates/orchestrator/src/execution/`
-  - `.github/instructions/architecture/agentic/`
+  - `definitions/instructions/development/`
   - `planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md`
 - Commit checkpoint:
   - `feat(agentic): add agent model routing policy`

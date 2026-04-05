@@ -75,6 +75,20 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
 }"#,
     );
     write_file(
+        &repo_root.join(".github/governance/instruction-ownership.manifest.json"),
+        r#"{
+  "version": 1,
+  "layers": [
+    {
+      "id": "runtime-projection",
+      "pathPatterns": [
+        ".github/AGENTS.md"
+      ]
+    }
+  ]
+}"#,
+    );
+    write_file(
         &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
         r#"{
   "servers": [
@@ -210,7 +224,7 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
       "id": "repository-operating-model",
       "expected_route_ids": ["repo-guidance"],
       "expected_selected_paths": [
-        "instructions/core/ntk-core-repository-operating-model.instructions.md"
+        "instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     }
   ]
@@ -231,7 +245,13 @@ fn write_canonical_instruction_documents(repo_root: &Path) {
     write_file(
         &repo_root
             .join("definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
-        "# Authoritative Sources\n",
+        r#"# Authoritative Sources
+
+Use `governance/authoritative-source-map.json`.
+repository context first.
+Use official documentation.
+Use community sources only as fallback.
+"#,
     );
     write_file(
         &repo_root

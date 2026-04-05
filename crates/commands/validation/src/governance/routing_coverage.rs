@@ -10,8 +10,24 @@ use serde::Deserialize;
 
 use crate::{error::ValidateRoutingCoverageCommandError, ValidationCheckStatus};
 
-const DEFAULT_CATALOG_PATH: &str = ".github/instruction-routing.catalog.yml";
+pub(crate) const PRIMARY_CATALOG_PATH: &str =
+    "definitions/providers/github/root/instruction-routing.catalog.yml";
+pub(crate) const LEGACY_CATALOG_PATH: &str = ".github/instruction-routing.catalog.yml";
 const DEFAULT_FIXTURE_PATH: &str = "scripts/validation/fixtures/routing-golden-tests.json";
+const CANONICAL_DEFINITION_PREFIXES: &[&str] = &[
+    "instructions/",
+    "templates/",
+    "agents/",
+    "skills/",
+    "hooks/",
+    "providers/",
+];
+const CANONICAL_PROVIDER_ROOT_FILES: &[&str] = &[
+    "AGENTS.md",
+    "copilot-instructions.md",
+    "instruction-routing.catalog.yml",
+    "COMMANDS.md",
+];
 
 /// Request payload for `validate-routing-coverage`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -113,7 +129,7 @@ pub fn invoke_validate_routing_coverage(
         .map_err(|source| ValidateRoutingCoverageCommandError::ResolveWorkspaceRoot { source })?;
     let catalog_path = match request.catalog_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
-        None => repo_root.join(DEFAULT_CATALOG_PATH),
+        None => resolve_default_catalog_path(&repo_root),
     };
     let fixture_path = match request.fixture_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
@@ -213,10 +229,10 @@ pub fn invoke_validate_routing_coverage(
                 );
             }
 
-            let catalog_directory = catalog_path.parent().unwrap_or(repo_root.as_path());
             for (route_id, include_paths) in &route_map {
                 for include_path in include_paths {
-                    let resolved_path = catalog_directory.join(include_path);
+                    let resolved_path =
+                        resolve_catalog_reference_path(&repo_root, &catalog_path, include_path);
                     if !resolved_path.is_file() {
                         push_required_finding(
                             request.warning_only,
@@ -297,7 +313,8 @@ pub fn invoke_validate_routing_coverage(
                         );
                     }
 
-                    let resolved_path = catalog_directory.join(expected_path);
+                    let resolved_path =
+                        resolve_catalog_reference_path(&repo_root, &catalog_path, expected_path);
                     if !resolved_path.is_file() {
                         push_required_finding(
                             request.warning_only,
@@ -339,6 +356,46 @@ pub fn invoke_validate_routing_coverage(
         status,
         exit_code,
     })
+}
+
+pub(crate) fn resolve_default_catalog_path(repo_root: &Path) -> PathBuf {
+    let primary_path = repo_root.join(PRIMARY_CATALOG_PATH);
+    if primary_path.is_file() {
+        primary_path
+    } else {
+        repo_root.join(LEGACY_CATALOG_PATH)
+    }
+}
+
+pub(crate) fn resolve_catalog_reference_path(
+    repo_root: &Path,
+    catalog_path: &Path,
+    logical_path: &str,
+) -> PathBuf {
+    let candidate_path = Path::new(logical_path);
+    if candidate_path.is_absolute() {
+        return candidate_path.to_path_buf();
+    }
+
+    if catalog_path == repo_root.join(PRIMARY_CATALOG_PATH) {
+        let catalog_directory = catalog_path.parent().unwrap_or(repo_root);
+        let provider_root = catalog_directory.parent().unwrap_or(catalog_directory);
+
+        if CANONICAL_PROVIDER_ROOT_FILES.contains(&logical_path) {
+            return resolve_full_path(catalog_directory, candidate_path);
+        }
+
+        if CANONICAL_DEFINITION_PREFIXES
+            .iter()
+            .any(|prefix| logical_path.starts_with(prefix))
+        {
+            return repo_root.join("definitions").join(candidate_path);
+        }
+
+        return resolve_full_path(provider_root, candidate_path);
+    }
+
+    resolve_full_path(catalog_path.parent().unwrap_or(repo_root), candidate_path)
 }
 
 fn read_catalog_document(

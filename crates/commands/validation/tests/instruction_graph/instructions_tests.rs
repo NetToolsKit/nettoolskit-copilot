@@ -67,7 +67,9 @@ fn test_invoke_validate_instructions_reports_broken_catalog_path() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validate_instructions_repo(repo.path());
     write_file(
-        &repo.path().join(".github/instruction-routing.catalog.yml"),
+        &repo
+            .path()
+            .join("definitions/providers/github/root/instruction-routing.catalog.yml"),
         "always:\n  - path: missing.file\n",
     );
 

@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 10:30
+- LastUpdated: 2026-04-04 22:20
 - Objective: define the design intent for keeping repository instructions, agents, skills, and hooks authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository control-surface system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -51,10 +51,10 @@ The repository already has a rich instruction and routing system, but it must st
 ## Proposed Boundaries
 
 - `AGENTS.md` and `copilot-instructions.md` remain the mandatory context entry points.
-- `definitions/shared/instructions/` remains the canonical root for repository instructions.
-- `definitions/shared/agents/` remains the canonical root for agent lifecycle and role contracts.
-- `definitions/shared/skills/` remains the canonical root for reusable specialist playbooks.
-- `definitions/shared/hooks/` remains the canonical root for lifecycle automation hooks.
+- `definitions/instructions/` remains the canonical root for repository instructions.
+- `definitions/agents/` remains the canonical root for agent lifecycle and role contracts.
+- `definitions/skills/` remains the canonical root for reusable specialist playbooks.
+- `definitions/hooks/` remains the canonical root for lifecycle automation hooks.
 - `ntk-agents-super-agent.instructions.md` remains the workflow controller contract under the dedicated `agents/` root.
 - `ntk-core-repository-operating-model.instructions.md` remains the repo-local source of truth for workspace behavior.
 - Each instruction file must keep a narrow responsibility and avoid restating adjacent files without need.

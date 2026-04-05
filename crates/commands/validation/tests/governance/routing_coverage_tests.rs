@@ -17,6 +17,12 @@ fn write_file(path: &std::path::Path, contents: &str) {
 fn initialize_repo_layout(repo_root: &std::path::Path) {
     fs::create_dir_all(repo_root.join(".github")).expect("github directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
+    fs::create_dir_all(repo_root.join("definitions/providers/github/root"))
+        .expect("provider root directory should be created");
+    fs::create_dir_all(repo_root.join("definitions/instructions/governance"))
+        .expect("governance instruction directory should be created");
+    fs::create_dir_all(repo_root.join("definitions/instructions/development"))
+        .expect("development instruction directory should be created");
 }
 
 #[test]
@@ -24,18 +30,20 @@ fn test_invoke_validate_routing_coverage_passes_for_valid_catalog_and_fixtures()
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/instruction-routing.catalog.yml"),
+        &repo
+            .path()
+            .join("definitions/providers/github/root/instruction-routing.catalog.yml"),
         r#"version: 1
 routing:
   - id: docs
     include:
-      - path: instructions/docs/ntk-docs-readme.instructions.md
+      - path: instructions/governance/ntk-governance-readme.instructions.md
 "#,
     );
     write_file(
         &repo
             .path()
-            .join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
+            .join("definitions/instructions/governance/ntk-governance-readme.instructions.md"),
         "# readme",
     );
     write_file(
@@ -47,7 +55,7 @@ routing:
     {
       "id": "docs-route",
       "expected_route_ids": ["docs"],
-      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
+      "expected_selected_paths": ["instructions/governance/ntk-governance-readme.instructions.md"]
     }
   ]
 }"#,
@@ -71,27 +79,29 @@ fn test_invoke_validate_routing_coverage_reports_missing_coverage_and_unknown_ro
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/instruction-routing.catalog.yml"),
+        &repo
+            .path()
+            .join("definitions/providers/github/root/instruction-routing.catalog.yml"),
         r#"version: 1
 routing:
   - id: docs
     include:
-      - path: instructions/docs/ntk-docs-readme.instructions.md
+      - path: instructions/governance/ntk-governance-readme.instructions.md
   - id: rust
     include:
-      - path: instructions/rust.instructions.md
+      - path: instructions/development/ntk-development-rust.instructions.md
 "#,
     );
     write_file(
         &repo
             .path()
-            .join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
+            .join("definitions/instructions/governance/ntk-governance-readme.instructions.md"),
         "# readme",
     );
     write_file(
         &repo
             .path()
-            .join(".github/instructions/rust.instructions.md"),
+            .join("definitions/instructions/development/ntk-development-rust.instructions.md"),
         "# rust",
     );
     write_file(
@@ -103,7 +113,7 @@ routing:
     {
       "id": "broken-route",
       "expected_route_ids": ["missing"],
-      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
+      "expected_selected_paths": ["instructions/governance/ntk-governance-readme.instructions.md"]
     }
   ]
 }"#,
@@ -133,18 +143,20 @@ fn test_invoke_validate_routing_coverage_converts_required_findings_to_warnings(
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_file(
-        &repo.path().join(".github/instruction-routing.catalog.yml"),
+        &repo
+            .path()
+            .join("definitions/providers/github/root/instruction-routing.catalog.yml"),
         r#"version: 1
 routing:
   - id: docs
     include:
-      - path: instructions/docs/ntk-docs-readme.instructions.md
+      - path: instructions/governance/ntk-governance-readme.instructions.md
 "#,
     );
     write_file(
         &repo
             .path()
-            .join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
+            .join("definitions/instructions/governance/ntk-governance-readme.instructions.md"),
         "# readme",
     );
     write_file(
@@ -156,7 +168,7 @@ routing:
     {
       "id": "no-routes",
       "expected_route_ids": [],
-      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
+      "expected_selected_paths": ["instructions/governance/ntk-governance-readme.instructions.md"]
     }
   ]
 }"#,
