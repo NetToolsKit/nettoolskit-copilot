@@ -97,6 +97,7 @@ Run `ntk --help` for the current top-level surface. If no command is provided, `
 | `ntk runtime doctor` | Run the native runtime doctor workflow, with human-readable output or a typed JSON control schema |
 | `ntk runtime healthcheck` | Run the native runtime healthcheck workflow |
 | `ntk runtime self-heal` | Run the native runtime self-heal workflow |
+| `ntk runtime clean-build-artifacts` | Discover and optionally remove `.build`, `.deployment`, `bin`, and `obj` artifact directories under the selected path |
 | `ntk runtime update-local-context-index` | Build or refresh the repository-owned local context index |
 | `ntk runtime query-local-context-index` | Query the repository-owned local context index |
 | `ntk runtime update-local-memory` | Build or refresh the repository-owned SQLite local memory snapshot |

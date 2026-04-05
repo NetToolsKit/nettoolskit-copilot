@@ -5,16 +5,18 @@ use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
     build_runtime_doctor_control_schema, export_planning_summary,
     invoke_apply_vscode_templates, invoke_export_enterprise_trends,
-    invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_render_mcp_runtime_artifacts,
-    invoke_render_provider_surfaces, invoke_render_vscode_mcp_template, invoke_runtime_doctor,
-    invoke_runtime_healthcheck, invoke_runtime_self_heal, invoke_setup_git_hooks,
-    invoke_setup_global_git_aliases, invoke_sync_codex_mcp_config,
+    invoke_clean_build_artifacts, invoke_pre_commit_eof_hygiene, invoke_pre_tool_use,
+    invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
+    invoke_render_vscode_mcp_template, invoke_runtime_doctor, invoke_runtime_healthcheck,
+    invoke_runtime_self_heal, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
+    invoke_sync_codex_mcp_config,
     invoke_trim_trailing_blank_lines, query_local_context_index, query_local_memory,
     update_local_context_index, update_local_memory, ExportPlanningSummaryRequest,
     QueryLocalContextIndexRequest, QueryLocalMemoryRequest, RuntimeApplyVscodeTemplatesRequest,
-    RuntimeDoctorRequest, RuntimeDoctorStatus, RuntimeExportEnterpriseTrendsRequest,
-    RuntimeHealthcheckRequest, RuntimeHealthcheckStatus, RuntimePreCommitEofHygieneRequest,
-    RuntimePreCommitEofHygieneStatus, RuntimePreToolUseRequest,
+    RuntimeCleanBuildArtifactsRequest, RuntimeCleanBuildArtifactsStatus, RuntimeDoctorRequest,
+    RuntimeDoctorStatus, RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest,
+    RuntimeHealthcheckStatus, RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
+    RuntimePreToolUseRequest,
     RuntimeRenderMcpRuntimeArtifactsRequest, RuntimeRenderProviderSurfacesRequest,
     RuntimeRenderVscodeMcpTemplateRequest, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
     RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
@@ -37,6 +39,9 @@ pub enum RuntimeCommand {
     Healthcheck(RuntimeHealthcheckArgs),
     /// Run the native runtime self-heal workflow.
     SelfHeal(RuntimeSelfHealArgs),
+    /// Remove repository build artifacts under the selected path.
+    #[command(name = "clean-build-artifacts")]
+    CleanBuildArtifacts(RuntimeCleanBuildArtifactsArgs),
     /// Build or refresh the repository-owned local context index.
     UpdateLocalContextIndex(RuntimeUpdateLocalContextIndexArgs),
     /// Query the repository-owned local context index.
@@ -198,6 +203,23 @@ pub struct RuntimeSelfHealArgs {
     /// Optional explicit plain-text log path.
     #[clap(long)]
     pub log_path: Option<PathBuf>,
+}
+
+/// CLI arguments for `runtime clean-build-artifacts`.
+#[derive(Debug, Args)]
+pub struct RuntimeCleanBuildArtifactsArgs {
+    /// Optional explicit repository root.
+    #[clap(long)]
+    pub repo_root: Option<PathBuf>,
+    /// Optional directory or file path used to scope artifact discovery.
+    #[clap(long)]
+    pub path: Option<PathBuf>,
+    /// Skip confirmation and remove discovered artifact directories.
+    #[clap(long)]
+    pub force: bool,
+    /// Report the artifact directories that would be removed without touching the filesystem.
+    #[clap(long)]
+    pub dry_run: bool,
 }
 
 /// CLI arguments for `runtime trim-trailing-blank-lines`.
@@ -538,6 +560,9 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         RuntimeCommand::Doctor(arguments) => execute_runtime_doctor(arguments),
         RuntimeCommand::Healthcheck(arguments) => execute_runtime_healthcheck(arguments),
         RuntimeCommand::SelfHeal(arguments) => execute_runtime_self_heal(arguments),
+        RuntimeCommand::CleanBuildArtifacts(arguments) => {
+            execute_clean_build_artifacts(arguments)
+        }
         RuntimeCommand::UpdateLocalContextIndex(arguments) => {
             execute_update_local_context_index(arguments)
         }
@@ -766,6 +791,51 @@ fn execute_runtime_self_heal(arguments: RuntimeSelfHealArgs) -> ExitStatus {
     println!("Total steps: {}", result.total_steps);
     println!("Passed steps: {}", result.passed_steps);
     println!("Failed steps: {}", result.failed_steps);
+
+    if result.exit_code == 0 {
+        ExitStatus::Success
+    } else {
+        ExitStatus::Error
+    }
+}
+
+fn execute_clean_build_artifacts(arguments: RuntimeCleanBuildArtifactsArgs) -> ExitStatus {
+    let result = match invoke_clean_build_artifacts(&RuntimeCleanBuildArtifactsRequest {
+        repo_root: arguments.repo_root,
+        path: arguments.path,
+        force: arguments.force,
+        dry_run: arguments.dry_run,
+    }) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!(
+        "Status: {}",
+        match result.status {
+            RuntimeCleanBuildArtifactsStatus::Passed => "passed",
+            RuntimeCleanBuildArtifactsStatus::DryRun => "dry-run",
+            RuntimeCleanBuildArtifactsStatus::ConfirmationRequired => "confirmation-required",
+        }
+    );
+    println!("Target path: {}", result.target_path.display());
+    println!(
+        "Discovered artifact directories: {}",
+        result.discovered_directories.len()
+    );
+    for path in &result.discovered_directories {
+        println!("- {}", display_repo_relative_path(&result.repo_root, path));
+    }
+
+    if !result.removed_directories.is_empty() {
+        println!("Removed artifact directories: {}", result.removed_directories.len());
+        for path in &result.removed_directories {
+            println!("  removed: {}", display_repo_relative_path(&result.repo_root, path));
+        }
+    }
 
     if result.exit_code == 0 {
         ExitStatus::Success

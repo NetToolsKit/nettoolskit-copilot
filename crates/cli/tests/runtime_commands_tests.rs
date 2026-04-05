@@ -789,6 +789,50 @@ fn test_runtime_doctor_cli_supports_json_output_with_control_schema() {
 }
 
 #[test]
+fn test_runtime_clean_build_artifacts_cli_supports_dry_run() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    fs::create_dir_all(repo.path().join(".build/cargo-target/debug"))
+        .expect("build target should be created");
+    fs::create_dir_all(repo.path().join("src/MyProject/bin/Debug"))
+        .expect("bin directory should be created");
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "clean-build-artifacts", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: dry-run"))
+        .stdout(predicate::str::contains("Discovered artifact directories: 2"))
+        .stdout(predicate::str::contains(".build"))
+        .stdout(predicate::str::contains("src/MyProject/bin"));
+
+    assert!(repo.path().join(".build").exists());
+    assert!(repo.path().join("src/MyProject/bin").exists());
+}
+
+#[test]
+fn test_runtime_clean_build_artifacts_cli_removes_directories_when_forced() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_repo_root(repo.path());
+    fs::create_dir_all(repo.path().join(".build/cargo-target/debug"))
+        .expect("build target should be created");
+    fs::create_dir_all(repo.path().join("src/MyProject/obj/Debug"))
+        .expect("obj directory should be created");
+
+    ntk()
+        .current_dir(repo.path())
+        .args(["runtime", "clean-build-artifacts", "--force"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Status: passed"))
+        .stdout(predicate::str::contains("Removed artifact directories: 2"));
+
+    assert!(!repo.path().join(".build").exists());
+    assert!(!repo.path().join("src/MyProject/obj").exists());
+}
+
+#[test]
 fn test_runtime_export_enterprise_trends_cli_writes_dashboard_outputs() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_runtime_repo_root(repo.path());

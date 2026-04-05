@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 22:20
+- LastUpdated: 2026-04-06 00:45
 - Objective: prevent `.build/target` and related transient artifacts from growing without bound and consuming excessive disk on the developer workstation.
 - Normalized Request: create a planning workstream for cargo target cleanup and generated-artifact pruning so the repository stops accumulating multi-gigabyte build state.
 - Active Branch: `main` (planning only; implementation branches TBD)
@@ -55,6 +55,9 @@ This plan coordinates four cleanup slices:
 - Add or update scripts/commands that can prune stale build artifacts deterministically.
 - Prefer repository-owned automation over ad hoc manual deletion.
 - Validate the automation on Windows.
+- Status [2026-04-06 00:45]:
+  - Promoted the existing native `invoke_clean_build_artifacts` flow into the public CLI as `ntk runtime clean-build-artifacts`.
+  - Added CLI integration coverage for dry-run and forced removal behavior.
 - Commit checkpoint:
   - `feat(build): add deterministic cargo target cleanup automation`
 
@@ -63,6 +66,8 @@ This plan coordinates four cleanup slices:
 - Document the cleanup policy in the repo operating model and/or README.
 - Clarify when to use scoped cleanup versus full cleanup.
 - Explain how to avoid reintroducing uncontrolled `target/` growth.
+- Status [2026-04-06 00:45]:
+  - Documented the new runtime command in the root README and runtime crate README as the repository-owned artifact cleanup entry point.
 - Commit checkpoint:
   - `docs(build): document cargo target hygiene and prune policy`
 

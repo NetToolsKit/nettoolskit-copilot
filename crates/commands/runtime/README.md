@@ -17,6 +17,7 @@
 - ✅ Planning summary export for handoff and execution reviews
 - ✅ Bootstrap projection for `.github/`, `.codex/`, `.claude/`, and runtime templates
 - ✅ Drift diagnosis, healthcheck orchestration, self-heal repair flows, and versioned runtime doctor control-schema output
+- ✅ Native build-artifact cleanup for `.build`, `.deployment`, `bin`, and `obj` directories
 - ✅ Native application of tracked VS Code workspace templates
 
 ---
@@ -312,6 +313,9 @@ pub struct RuntimeSelfHealRequest {
 pub fn invoke_runtime_doctor(
     request: &RuntimeDoctorRequest,
 ) -> Result<RuntimeDoctorResult, RuntimeDoctorCommandError>;
+pub fn invoke_clean_build_artifacts(
+    request: &RuntimeCleanBuildArtifactsRequest,
+) -> Result<RuntimeCleanBuildArtifactsResult, RuntimeCleanBuildArtifactsCommandError>;
 pub fn build_runtime_doctor_control_schema(
     result: &RuntimeDoctorResult,
 ) -> nettoolskit_core::RuntimeDoctorControlSchema;
