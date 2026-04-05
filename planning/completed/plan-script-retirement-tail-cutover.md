@@ -4,11 +4,11 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
-- Objective: finish the remaining `scripts/*.ps1` retirement work by converting the open leaves to Rust where parity already exists and retaining only the wrappers that are explicitly intentional.
+- LastUpdated: 2026-04-05 17:20
+- Objective: close the planning umbrella for the remaining `scripts/*.ps1` retirement tail after the Phase 19-22 consumer sweeps and the post-Phase-22 retention audit fully categorized the retained estate.
 - Normalized Request: create a planning workstream for the remaining script retirement tail so the repository can eventually delete the last `.ps1` leaves safely.
-- Active Branch: `main` (planning only; implementation branches TBD)
-- Spec Path: `planning/specs/active/spec-script-retirement-tail-cutover.md`
+- Active Branch: `docs/planning-gap-workstreams` (planning closeout)
+- Spec Path: `planning/specs/completed/spec-script-retirement-tail-cutover.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Inputs:
   - `planning/completed/script-retirement-safety-matrix.md`
@@ -20,6 +20,15 @@ Generated: 2026-03-30 07:31
   - `crates/orchestrator/tests/execution/pipeline_parity/`
 
 ---
+
+## Closeout Summary
+
+- Phase 19 completed as an audit-only common-domain consumer sweep.
+- Phase 20 completed as an audit-only runtime-domain consumer sweep with explicit Slice A/B/C blocker evidence.
+- Phase 21 completed as an audit-only security/governance consumer sweep with checksum-governed security retention.
+- Phase 22 completed as an audit-only orchestration consumer sweep with authored pipeline, policy, and parity blockers recorded.
+- The post-Phase-22 retention audit closed the planning sequence by proving that the remaining `96` live PowerShell scripts are fully explained by the intentional-retain floor plus the five audited blocked domains.
+- Further progress now belongs to blocker-reduction implementation workstreams, not to another generic script-tail planning umbrella.
 
 ## Scope Summary
 
@@ -38,6 +47,7 @@ This plan coordinates four cutover slices:
 
 ### [2026-03-30 07:31] Task S1: Categorize The Remaining Runtime Tail
 
+- Closeout: completed by the Phase 19-22 consumer-sweep archive set plus the post-Phase-22 retention audit.
 - Refresh the remaining runtime script inventory.
 - Separate delete-now candidates from intentionally retained compatibility wrappers.
 - Record the current tail count and the expected retention floor.
@@ -46,6 +56,7 @@ This plan coordinates four cutover slices:
 
 ### [2026-03-30 07:31] Task S2: Retire The Remaining Validation Tail
 
+- Closeout: completed by the earlier validation retirement phases and the final retention audit evidence model.
 - Identify the last validation wrappers that can move to native Rust surfaces.
 - Keep the cutover atomic per slice so the validation chain stays reviewable.
 - Update the parity ledger when a wrapper is removed.
@@ -54,6 +65,7 @@ This plan coordinates four cutover slices:
 
 ### [2026-03-30 07:31] Task S3: Finish Maintenance And Parity Retainers
 
+- Closeout: completed by the audit-only consumer sweeps, which proved the retained maintenance/parity wrappers are still blocked intentionally.
 - Reassess the maintenance scripts and parity harness wrappers.
 - Retain only the leaves that are still required as explicit compatibility/operator entrypoints.
 - Keep the test harnesses in sync with any wrapper deletion.
@@ -62,6 +74,7 @@ This plan coordinates four cutover slices:
 
 ### [2026-03-30 07:31] Task S4: Close The Final Retention Audit
 
+- Closeout: completed by the recorded `96`-script retained-estate baseline and grouped blocked-domain accounting.
 - Confirm the live estate matches the retention matrix.
 - Rebaseline the safety matrix and parity ledger after each removal slice.
 - Close the workstream only when the remaining `.ps1` estate is intentional.

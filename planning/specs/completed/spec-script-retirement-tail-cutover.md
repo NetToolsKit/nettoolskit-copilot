@@ -4,11 +4,11 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
-- Objective: define the closeout criteria for the remaining PowerShell tail so only intentional compatibility wrappers remain in `scripts/`.
+- LastUpdated: 2026-04-05 17:20
+- Objective: record the final planning intent that governed the remaining PowerShell tail before the Phase 19-22 sweeps and retention audit closed the generic script-tail planning lane.
 - Normalized Request: plan the last script-retirement slices so the repository can keep deleting `.ps1` safely without breaking operator workflows.
-- Active Branch: `main` (planning only; implementation branches TBD)
-- Planning Path: `planning/active/plan-script-retirement-tail-cutover.md`
+- Active Branch: `docs/planning-gap-workstreams` (planning closeout)
+- Planning Path: `planning/completed/plan-script-retirement-tail-cutover.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---
@@ -16,6 +16,10 @@ Generated: 2026-03-30 07:31
 ## Problem Statement
 
 The repository has already retired a large part of the PowerShell estate. What remains is a narrower tail of compatibility, parity, and maintenance leaves that still need a decision: retire, keep intentionally, or move to a Rust-owned surface.
+
+Closeout result:
+- the Phase 19-22 domain sweeps and the post-Phase-22 retention audit now provide that decision evidence explicitly
+- the remaining retained estate is no longer an uncategorized "tail"; it is a blocker-accounted implementation backlog
 
 ---
 
@@ -53,9 +57,21 @@ The repository has already retired a large part of the PowerShell estate. What r
 - Every deleted wrapper has a Rust-owned replacement and tests.
 - The safety matrix and parity ledger stay synchronized.
 
+Closeout evidence:
+- `planning/completed/plan-script-retirement-phase-19.md`
+- `planning/completed/plan-script-retirement-phase-20-runtime-consumer-sweep.md`
+- `planning/completed/plan-script-retirement-phase-21-security-governance-sweep.md`
+- `planning/completed/plan-script-retirement-phase-22-orchestration-sweep.md`
+- `planning/completed/script-retirement-safety-matrix.md`
+- `planning/completed/rust-script-parity-ledger.md`
+
 ---
 
 ## Planning Readiness
 
 - The spec is planning-ready once the remaining tail is inventoried and mapped into the active plan.
 - Implementation should keep the same phase-by-phase deletion pattern already used for the earlier retirement waves.
+
+Closeout:
+- planning readiness has been consumed
+- future work should open blocker-reduction implementation workstreams instead of reopening this generic tail-cutover umbrella

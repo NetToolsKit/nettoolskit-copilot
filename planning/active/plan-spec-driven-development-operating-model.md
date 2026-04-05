@@ -21,7 +21,7 @@ Generated: 2026-03-30 08:59
   - `planning/active/plan-rag-cag-sqlite-evolution.md`
   - `planning/active/plan-build-target-cleanup-and-artifact-pruning.md`
   - `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
-  - `planning/active/plan-script-retirement-tail-cutover.md`
+  - `planning/completed/plan-script-retirement-tail-cutover.md`
 
 ---
 

@@ -56,7 +56,6 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
 - [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)
 - [planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md)
-- [planning/specs/active/spec-script-retirement-tail-cutover.md](planning/specs/active/spec-script-retirement-tail-cutover.md)
 
 ---
 
@@ -110,6 +109,7 @@ Use `planning/specs/` to lock architecture and behavior intent before implementa
 - [planning/specs/completed/spec-script-retirement-phase-20-runtime-consumer-sweep.md](planning/specs/completed/spec-script-retirement-phase-20-runtime-consumer-sweep.md)
 - [planning/specs/completed/spec-script-retirement-phase-21-security-governance-sweep.md](planning/specs/completed/spec-script-retirement-phase-21-security-governance-sweep.md)
 - [planning/specs/completed/spec-script-retirement-phase-22-orchestration-sweep.md](planning/specs/completed/spec-script-retirement-phase-22-orchestration-sweep.md)
+- [planning/specs/completed/spec-script-retirement-tail-cutover.md](planning/specs/completed/spec-script-retirement-tail-cutover.md)
 - [planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md](planning/specs/completed/spec-script-retirement-phase-20c-self-heal.md)
 - [planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md)
 - [planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md](planning/specs/completed/spec-script-retirement-phase-20e-catalog-native-renderer-dispatch.md)
