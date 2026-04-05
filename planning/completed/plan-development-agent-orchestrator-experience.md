@@ -8,9 +8,9 @@ Generated: 2026-04-04 00:00
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
+- Spec Path: `planning/specs/completed/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: D1, D2, D3, D4, D5, and D6 are now implemented with built-in provider profiles, `ntk ai doctor` JSON/report surfaces, strategy-aware provider routing, normalized adapter contracts, a dedicated AI development operator playbook, and canonical agent/skill model-routing defaults exposed through `definitions/*`, `ntk ai model-routing`, and doctor surfaces; the workstream is ready for final governance closeout.
+- Current Slice: D1 through D7 are materially complete. The workstream now lives in `planning/completed/` after provider profiles, runtime doctor/reporting, smart routing, normalized adapter contracts, the operator playbook, agent/skill model routing, and governance integration were all delivered and validated.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -155,6 +155,10 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Update active planning indexes, runtime comparison matrix, and README summaries so the orchestrator experience is visible as a first-class workstream.
 - Keep this plan as the umbrella and continue implementing details in the narrower owner plans where appropriate.
 - Close this plan only after profiles, diagnostics, routing, adapters, playbook, and agent-routing are materially implemented or formally delegated.
+- Completed slice:
+  - README, crate READMEs, and the AI operator playbook now document `ntk ai doctor`, `ntk ai model-routing`, and lane-aware profile/model precedence.
+  - Related active plans now record the delivered agent/skill routing proof where it affects provider-matrix, multi-agent, and token-economy workstreams.
+  - The umbrella plan/spec have been moved to `planning/completed/` and `planning/specs/completed/` because the orchestrator experience is now a delivered baseline rather than an open design umbrella.
 - Commit checkpoint:
   - `docs(planning): integrate development orchestrator umbrella`
 

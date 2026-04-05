@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Closed the `development-agent-orchestrator-experience` umbrella as a completed workstream after profiles, runtime doctor/reporting, smart routing, normalized adapters, the AI operator playbook, and canonical agent/skill model-routing all landed with validated CLI and orchestrator surfaces.
 - Changed the AI development-orchestrator umbrella, the free-provider matrix, the multi-agent lineage plan, and token-economy notes to record that canonical agent-to-model routing is now materially implemented and inspectable.
 - Changed `ntk ai doctor`, `ntk ai model-routing`, the AI operator playbook, and root/crate READMEs so active agent/skill lanes and their derived profile/model defaults are visible to operators instead of remaining implicit runtime state.
 - Changed the development-orchestrator and free-provider-matrix workstreams to record that normalized provider adapter contracts are now materially implemented and surfaced through `ntk ai doctor`.

@@ -280,4 +280,4 @@ ntk ai doctor
 - [Repository README](../../README.md)
 - [crates/cli/README.md](../../crates/cli/README.md)
 - [crates/orchestrator/README.md](../../crates/orchestrator/README.md)
-- [planning/active/plan-development-agent-orchestrator-experience.md](../../planning/active/plan-development-agent-orchestrator-experience.md)
+- [planning/completed/plan-development-agent-orchestrator-experience.md](../../planning/completed/plan-development-agent-orchestrator-experience.md)
