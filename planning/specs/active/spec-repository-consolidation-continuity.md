@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:35
+- LastUpdated: 2026-04-05 11:05
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
@@ -43,6 +43,8 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 7. **Pre-commit EOF hook command-line overflow on Windows**: the managed EOF hygiene hook currently forwards every staged file as its own `--literal-path` argument to `ntk runtime trim-trailing-blank-lines`. Large commits with hundreds of staged files can exceed Windows process invocation limits and fail before the commit completes.
 
+8. **Global-core budget drift in provider root files**: `definitions/providers/github/root/AGENTS.md` and `definitions/providers/github/root/copilot-instructions.md` can easily regrow into duplicated policy hubs because both are always loaded. When that happens, instruction-architecture warnings reappear and the provider root stops behaving like a thin bootstrap layer.
+
 ---
 
 ## Desired Outcome
@@ -54,6 +56,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
 - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` remains the single authored source, while compatibility mirrors and `.github` projections stay renderer-derived.
 - Large staged commits remain committable on Windows because the managed EOF hygiene hook trims files in bounded batches instead of issuing one oversized process invocation.
+- The provider-root global-core files stay thin enough to remain bootstrap-only, while detailed policy continues to live in canonical `definitions/instructions/*` content.
 
 ---
 

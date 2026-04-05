@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:35
+- LastUpdated: 2026-04-05 11:05
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -49,6 +49,7 @@ This plan does not replace the tactical phase plans; Phases 17 and 18 are now ar
 
 Operational hardening checkpoint:
 - The managed pre-commit EOF hygiene path now needs bounded batching when forwarding large staged-file sets to `ntk runtime trim-trailing-blank-lines`, because Windows process invocation fails once hundreds of `--literal-path` arguments exceed command-line limits during commit-time hook execution.
+- The provider-root global-core layer (`definitions/providers/github/root/AGENTS.md` and `definitions/providers/github/root/copilot-instructions.md`) now fits the architecture budget again by keeping only bootstrap, precedence, and lifecycle summaries in the root files and pushing detailed policy to canonical `definitions/instructions/*` guidance.
 
 ---
 
