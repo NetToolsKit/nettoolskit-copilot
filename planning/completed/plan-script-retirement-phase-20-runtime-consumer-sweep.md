@@ -4,11 +4,11 @@ Generated: 2026-04-05
 
 ## Status
 
-- LastUpdated: 2026-04-05 15:00
+- LastUpdated: 2026-04-05 16:00
 - Objective: prove the remaining local consumer graph for the 30 retained `scripts/runtime/*.ps1` leaves, then retire only the zero-consumer subsets without reopening the already-closed tactical runtime slices.
 - Normalized Request: continue the script-retirement program with a dedicated Phase 20 plan for the remaining runtime-domain scripts, keep planning updated, and commit each stable phase separately.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-script-retirement-phase-20-runtime-consumer-sweep.md`
+- Spec Path: `planning/specs/completed/spec-script-retirement-phase-20-runtime-consumer-sweep.md`
 - Inputs:
   - `planning/active/plan-repository-consolidation-continuity.md`
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
@@ -186,7 +186,7 @@ Status: `[x]` Completed (audit-only; zero deletions)
 
 ### Task 4: Slice C Consumer Sweep — Bootstrap, Install, And Cleanup Surfaces
 
-Status: `[ ]` Pending
+Status: `[x]` Completed (audit-only; zero deletions)
 
 - Target paths:
   - `scripts/runtime/bootstrap.ps1`
@@ -203,12 +203,30 @@ Status: `[ ]` Pending
   - exact zero-consumer list for deletable Slice C leaves
   - retained-blocker list for non-deletable Slice C leaves
   - same-slice doc/policy/runtime re-points for every deleted leaf
+- Result:
+  - zero-consumer list: none
+  - deleted leaves: none
+  - retained-blocker graph:
+    - `bootstrap.ps1` remains a high-fanout compatibility hub across `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`, `definitions/providers/codex/{scripts,skills}/README.md`, `definitions/providers/github/governance/shared-script-checksums.manifest.json`, runtime/orchestrator Rust test fixtures, git hooks, orchestration stage scripts, deploy/security/maintenance/governance scripts, and the retained runtime parity suite
+    - `install.ps1` remains pinned by Claude runtime-sync surfaces, release-governance baselines, policy/standards fixtures, runtime/self-heal tests, and retained install/runtime parity tests
+    - `clean-codex-runtime.ps1` and `clean-vscode-user-runtime.ps1` remain pinned by `invoke-super-agent-housekeeping.ps1`, super-agent instructions, subagent-planning/worktree guidance, and retained runtime parity coverage
+- Outcome:
+  - Slice C closes as audit-only
+  - no same-slice re-points were enough to clear all blockers without reopening broad bootstrap/install fanout or the super-agent housekeeping path
+- Validation evidence for the Slice C checkpoint:
+  - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation agent-orchestration --repo-root .` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation instructions --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation planning-structure --repo-root . --warning-only false` ✅
+  - `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation policy --repo-root .` ⚠️ existing repository baseline failure; still missing governed `.github/workflows/*`, `.githooks/*`, `CODEOWNERS`, and issue-template assets outside this slice
+  - `git diff --check` ✅
 - Commit checkpoint:
-  - `chore(runtime-retirement): execute Phase 20 Slice C consumer sweep for bootstrap, install, and cleanup surfaces`
+  - `docs(runtime-retirement): record Phase 20 Slice C audit-only consumer proof for bootstrap, install, and cleanup surfaces`
 
 ### Task 5: Rebaseline And Close Out Phase 20
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - After every executed slice:
   - update `planning/completed/script-retirement-safety-matrix.md`
@@ -216,8 +234,13 @@ Status: `[ ]` Pending
   - update `planning/active/plan-repository-consolidation-continuity.md`
   - update `planning/specs/active/spec-repository-consolidation-continuity.md` when phase-level design intent changes
 - Archive the Phase 20 plan/spec only when all three slices are either executed or explicitly closed as blocked with recorded evidence.
+- Closeout result:
+  - Slice A closed audit-only with provider-surface, provider-doc, install, parity-test, and shell-hook-validation blockers
+  - Slice B closed audit-only with orchestration-policy, orchestration-doc, orchestrator-parity, validation-fixture, and runtime-chain blockers
+  - Slice C closed audit-only with bootstrap/install fanout and super-agent-housekeeping blockers
+  - Phase 20 therefore closes with zero deletions and an explicit retained-blocker graph for the whole runtime domain
 - Closeout checkpoint:
-  - move this plan/spec to `planning/completed/` and `planning/specs/completed/`
+  - move this plan/spec to `planning/completed/` and `planning/specs/completed/` ✅
 
 ## Validation Checklist
 

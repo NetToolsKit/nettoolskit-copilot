@@ -4,7 +4,7 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-04-05 15:00
+- LastUpdated: 2026-04-05 16:00
 - Objective: record the live deletion-readiness state for the local `scripts/**/*.ps1` estate after the completed Rust migration bundle.
 - Baseline Inventory: `147` PowerShell files from `scripts/**/*.ps1`
 - Live Inventory After Executed Slice: `96`
@@ -65,7 +65,7 @@ Generated: 2026-03-28 19:39
 | Scope | Count | Blocking Reason | Blocking Evidence |
 | --- | ---: | --- | --- |
 | `scripts/common/*.ps1` | 15 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
-| `scripts/runtime/*.ps1` excluding hooks | 30 | completed Rust ownership exists, but Phase 20 Slice A and Slice B proved the domain still has live consumers across the provider-surface projection catalog, provider README/operator docs, `install.ps1`, runtime parity tests, shell-hook validation fixtures, orchestration policies, Codex orchestration READMEs, orchestrator parity tests, validation fixtures, and the `run/resume/replay` runtime chain; `render-mcp-runtime-artifacts.ps1` remains a temporary retained renderer because the provider-surface projection catalog still requires a path-backed script | Phase 20 Slice A and Slice B both closed audit-only; continue with Slice C before any runtime-domain deletion resumes |
+| `scripts/runtime/*.ps1` excluding hooks | 30 | completed Rust ownership exists, but Phase 20 Slice A, Slice B, and Slice C proved the domain still has live consumers across the provider-surface projection catalog, provider README/operator docs, `install.ps1`, runtime parity tests, shell-hook validation fixtures, orchestration policies, Codex orchestration READMEs, orchestrator parity tests, validation fixtures, the `run/resume/replay` runtime chain, bootstrap/install compatibility fanout, shared checksum governance, stage scripts, hooks, and super-agent housekeeping flows; `render-mcp-runtime-artifacts.ps1` remains a temporary retained renderer because the provider-surface projection catalog still requires a path-backed script | Phase 20 closed audit-only for the full runtime domain; runtime deletion can resume only after consumer migration clears the recorded blocker graph |
 | `scripts/security/*.ps1` | 6 | shared-script governance still tracks this domain as a pinned script surface | `.github/governance/shared-script-checksums.manifest.json` includes `scripts/security` |
 | `scripts/governance/*.ps1` | 2 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
 | `scripts/orchestration/**/*.ps1` | 10 | completed Rust ownership exists, but this audit has not yet proven zero local consumers for the full domain | requires follow-up consumer sweep before deletion |
@@ -105,6 +105,7 @@ Generated: 2026-03-28 19:39
 - Phase 19 closed as an audit-only common-domain sweep with zero deletions because all 15 shared helpers still had live local consumers.
 - Phase 20 Slice A closed as an audit-only runtime-domain sweep with zero deletions because every projection/profile/sync/workspace leaf still had at least one live local consumer in catalog metadata, provider READMEs, `install.ps1`, parity tests, or validation fixtures.
 - Phase 20 Slice B closed as an audit-only runtime-domain sweep with zero deletions because every orchestration/replay leaf still had at least one live local consumer in orchestration policies, Codex orchestration READMEs, orchestrator parity tests, validation fixtures, retained runtime parity tests, or the `run/resume/replay` chain itself.
+- Phase 20 Slice C closed as an audit-only runtime-domain sweep with zero deletions because `bootstrap.ps1`, `install.ps1`, `clean-codex-runtime.ps1`, and `clean-vscode-user-runtime.ps1` still had broad local fanout across authored governance, provider sync surfaces, git hooks, stage scripts, runtime parity tests, and super-agent housekeeping flows.
 - The Phase 20c self-heal slice retired `self-heal`, reducing the live local estate from `100` to `99`.
 - The Phase 20d provider-surface dispatcher slice retired `render-provider-surfaces`, reducing the live local estate from `99` to `98`.
 - The Phase 20e catalog-native renderer slice retired `render-codex-compatibility-surfaces`, reducing the live local estate from `98` to `97`.

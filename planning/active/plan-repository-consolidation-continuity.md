@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 15:00
+- LastUpdated: 2026-04-05 16:00
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -517,8 +517,8 @@ Status: `[x]` Completed
 
 - This is the largest single domain: 30 scripts after Phases 17, 18, the tactical Phase 20c self-heal slice, the tactical Phase 20d provider-surface dispatcher slice, the tactical Phase 20e catalog-native renderer slice, and the tactical Phase 20f Codex orchestration slice remove `doctor.ps1`, `healthcheck.ps1`, `sync-codex-mcp-config.ps1`, `render-vscode-mcp-template.ps1`, `self-heal.ps1`, `render-provider-surfaces.ps1`, `render-codex-compatibility-surfaces.ps1`, and `render-codex-orchestration-surfaces.ps1`.
 - Created:
-  - `planning/active/plan-script-retirement-phase-20-runtime-consumer-sweep.md`
-  - `planning/specs/active/spec-script-retirement-phase-20-runtime-consumer-sweep.md`
+  - `planning/completed/plan-script-retirement-phase-20-runtime-consumer-sweep.md`
+  - `planning/specs/completed/spec-script-retirement-phase-20-runtime-consumer-sweep.md`
 - The active phase plan freezes the 30 remaining runtime leaves into:
   - Slice A: projection, profile, sync, and workspace runtime surfaces
   - Slice B: orchestration runtime entrypoints and replay helpers
@@ -529,7 +529,7 @@ Status: `[x]` Completed
 
 #### Task W5.4: Execute Phase 20 Consumer Sweep (Sub-slices A, B, C)
 
-Status: `[~]` Partial / Slice A and Slice B audit-only complete
+Status: `[x]` Completed (all sub-slices audit-only; zero deletions)
 
 - Run consumer sweeps for each sub-slice.
 - For each zero-consumer script: delete it.
@@ -543,11 +543,18 @@ Status: `[~]` Partial / Slice A and Slice B audit-only complete
   - zero-consumer leaves: none
   - deleted leaves: none
   - blocking consumers were confirmed in orchestration policies, Codex orchestration README surfaces, orchestrator parity tests, validation fixtures, retained runtime parity tests, `validate-stage.ps1`, and the `run/resume/replay` runtime chain
-  - the runtime domain still stays at `30` retained leaves, with Slice C now the only remaining pending sub-slice
+  - the runtime domain still stays at `30` retained leaves
+- Slice C result recorded:
+  - zero-consumer leaves: none
+  - deleted leaves: none
+  - blocking consumers were confirmed in bootstrap/install fanout, Codex and Claude runtime-sync surfaces, shared checksum governance, git hooks, stage scripts, retained runtime parity tests, super-agent housekeeping flows, and repository operating-model guidance
+  - the runtime domain still stays at `30` retained leaves
 - After each sub-slice:
   - Update safety matrix and parity ledger.
   - Run the Phase 20 validation checklist.
-- Archive `plan-script-retirement-phase-20-runtime-consumer-sweep.md` and `spec-script-retirement-phase-20-runtime-consumer-sweep.md` to completed only when all sub-slices are done.
+- Archive `plan-script-retirement-phase-20-runtime-consumer-sweep.md` and `spec-script-retirement-phase-20-runtime-consumer-sweep.md` to completed only when all sub-slices are done. ✅
+- Closeout:
+  - Phase 20 is now archived as an audit-only runtime-domain sweep with explicit retained-blocker evidence for all three slices
 - Validation checklist:
   - `cargo test -p nettoolskit-runtime --quiet`
   - `cargo test -p nettoolskit-cli --test test_suite runtime_commands_tests --quiet`
@@ -556,11 +563,11 @@ Status: `[~]` Partial / Slice A and Slice B audit-only complete
 - Commit checkpoint (one per sub-slice):
   - `docs(runtime-retirement): Phase 20 Slice A — record audit-only consumer proof for projection, profile, and sync scripts`
   - `docs(runtime-retirement): Phase 20 Slice B — record audit-only consumer proof for orchestration runtime scripts`
-  - `chore(runtime-retirement): Phase 20 Slice C — retire confirmed-zero-consumer bootstrap, install, and cleanup scripts`
+  - `docs(runtime-retirement): Phase 20 Slice C — record audit-only consumer proof for bootstrap, install, and cleanup scripts`
 
 #### Task W5.5: Create and Execute Phase 21 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
 
-Status: `[ ]` Pending (blocked on Phase 20 complete)
+Status: `[ ]` Pending
 
 - Create `planning/specs/active/spec-script-retirement-phase-21.md` and `planning/active/plan-script-retirement-phase-21.md`.
 - Special constraint for `scripts/security/*.ps1` (6): `.github/governance/shared-script-checksums.manifest.json` explicitly tracks this domain. The Phase 21 plan must include a task to update the checksums manifest before deleting any security scripts.
