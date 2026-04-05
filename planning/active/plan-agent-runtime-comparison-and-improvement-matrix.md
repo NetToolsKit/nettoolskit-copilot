@@ -25,7 +25,7 @@ Generated: 2026-03-31 00:00
 | Task output spill-to-disk | large-output lifecycle is not yet formalized | Weak | `plan-task-output-spill-to-disk-and-retention-control.md` |
 | Typed control schemas | runtime inspection is still more internal than contract-driven | Weak | `plan-sdk-control-plane-schemas-and-runtime-introspection.md` |
 | Internal multi-agent runtime | delegation exists, but lineage/inheritance/cleanup need a stronger contract | Partial | `plan-multi-agent-runtime-lineage-and-a2a-readiness.md` |
-| Plugin and skill extensibility | skills exist, but extension contracts and governance are still underspecified | Partial | `plan-plugin-skill-extensibility-and-runtime-governance.md` |
+| Plugin and skill extensibility | canonical extension taxonomy, authored-root governance, and loading boundaries now exist for agents, skills, hooks, prompts, projections, and future plugins | Substantial | `planning/completed/plan-plugin-skill-extensibility-and-runtime-governance.md` |
 | Operational diagnostics | canonical runtime health taxonomy, operator playbook, and AI doctor/report baseline now exist; future subsystem-specific doctors can build on this shared model | Substantial | `planning/completed/plan-runtime-operational-diagnostics-and-observability.md` |
 
 ---

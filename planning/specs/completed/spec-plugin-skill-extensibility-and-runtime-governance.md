@@ -8,7 +8,7 @@ Generated: 2026-03-31 00:00
 - Objective: define a repository-owned extensibility model for plugins, skills, prompts, and runtime extensions so new capabilities can be added without blurring ownership or weakening governance.
 - Normalized Request: open a dedicated workstream for plugin and skill extensibility because the repository already has skills and routing, but still lacks a stronger extension contract.
 - Active Branch: `docs/planning-gap-workstreams`
-- Planning Path: `planning/active/plan-plugin-skill-extensibility-and-runtime-governance.md`
+- Planning Path: `planning/completed/plan-plugin-skill-extensibility-and-runtime-governance.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---

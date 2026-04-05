@@ -8,7 +8,7 @@ Generated: 2026-03-31 00:00
 - Objective: define and strengthen the repository's extension model for skills, prompts, runtime projections, and future plugins.
 - Normalized Request: create a detailed workstream for extensibility and runtime governance because the repository needs stronger ownership and validation around its extension surfaces.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-plugin-skill-extensibility-and-runtime-governance.md`
+- Spec Path: `planning/specs/completed/spec-plugin-skill-extensibility-and-runtime-governance.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstreams:
   - `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
