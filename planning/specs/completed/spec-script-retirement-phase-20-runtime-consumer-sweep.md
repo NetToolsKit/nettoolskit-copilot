@@ -9,8 +9,8 @@ Generated: 2026-04-05
 - Planning Readiness: completed-audit-only
 - Related Plan: `planning/completed/plan-script-retirement-phase-20-runtime-consumer-sweep.md`
 - Source Inputs:
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `scripts/runtime/`

@@ -19,7 +19,7 @@ Generated: 2026-03-29
   - `crates/commands/runtime/src/diagnostics/enterprise_trends.rs`
   - `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
   - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-  - `planning/active/plan-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
   - User reference: `https://github.com/mksglu/context-mode`
 
 ---

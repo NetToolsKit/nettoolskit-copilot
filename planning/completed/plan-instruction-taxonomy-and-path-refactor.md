@@ -13,7 +13,7 @@ Generated: 2026-04-03 00:00
 - Related Workstreams:
   - `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
   - `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
-  - `planning/active/plan-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
 - Completion Note: canonical definitions, validators, governance catalogs, provider consumers, and runtime renderers now prefer `definitions/*`; the generated/runtime projection cutover later closed under `planning/completed/plan-provider-surface-projection-cutover.md`.
 - Inputs:
   - `definitions/*`

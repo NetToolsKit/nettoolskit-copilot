@@ -10,8 +10,8 @@ Generated: 2026-04-05
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/completed/spec-script-retirement-phase-21-security-governance-sweep.md`
 - Inputs:
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `definitions/providers/github/governance/shared-script-checksums.manifest.json`
@@ -114,7 +114,7 @@ Status: `[x]` Completed
 - After every executed slice:
   - update `planning/completed/script-retirement-safety-matrix.md`
   - update `planning/completed/rust-script-parity-ledger.md`
-  - update `planning/active/plan-repository-consolidation-continuity.md`
+  - update `planning/completed/plan-repository-consolidation-continuity.md`
 - If any security leaf is deleted:
   - update `definitions/providers/github/governance/shared-script-checksums.manifest.json`
 - Closeout result:

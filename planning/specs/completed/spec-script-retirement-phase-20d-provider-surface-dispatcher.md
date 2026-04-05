@@ -9,8 +9,8 @@ Generated: 2026-03-29
 - Planning Readiness: executed-and-completed
 - Related Plan: `planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md`
 - Source Inputs:
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `scripts/runtime/render-provider-surfaces.ps1`

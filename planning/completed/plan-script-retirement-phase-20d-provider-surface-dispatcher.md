@@ -10,8 +10,8 @@ Generated: 2026-03-29
 - Active Branch: `feature/instruction-runtime-retirement-audit`
 - Spec Path: `planning/specs/completed/spec-script-retirement-phase-20d-provider-surface-dispatcher.md`
 - Inputs:
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `scripts/runtime/render-provider-surfaces.ps1`

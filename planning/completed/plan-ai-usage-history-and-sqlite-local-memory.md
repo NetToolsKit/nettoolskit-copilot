@@ -18,8 +18,8 @@ Generated: 2026-03-29
   - `crates/core/src/local-context/search.rs`
   - `crates/commands/runtime/src/continuity/local_context.rs`
   - `crates/commands/runtime/src/diagnostics/enterprise_trends.rs`
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
 
 ---
 

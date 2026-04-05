@@ -10,8 +10,8 @@ Generated: 2026-04-05
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/completed/spec-script-retirement-phase-22-orchestration-sweep.md`
 - Inputs:
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `scripts/orchestration/**/*.ps1`
@@ -86,7 +86,7 @@ Status: `[x]` Completed
 - After the sweep:
   - update `planning/completed/script-retirement-safety-matrix.md`
   - update `planning/completed/rust-script-parity-ledger.md`
-  - update `planning/active/plan-repository-consolidation-continuity.md`
+  - update `planning/completed/plan-repository-consolidation-continuity.md`
   - update `crates/orchestrator` docs only if any wrapper is actually retired
 - Validation evidence:
   - `cargo test -p nettoolskit-orchestrator --quiet` ⚠️ existing baseline failure in `execution::chatops::tests::execute_chatops_envelope_submit_records_control_plane_metadata` caused by secure tool-scope allowlist policy for `ai.plan`, not by this orchestration sweep

@@ -10,8 +10,8 @@ Generated: 2026-03-29
 - Active Branch: `feature/instruction-runtime-retirement-audit`
 - Spec Path: `planning/specs/completed/spec-script-retirement-phase-20f-codex-orchestration-renderer.md`
 - Inputs:
-  - `planning/active/plan-repository-consolidation-continuity.md`
-  - `planning/specs/active/spec-repository-consolidation-continuity.md`
+  - `planning/completed/plan-repository-consolidation-continuity.md`
+  - `planning/specs/completed/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
   - `.github/governance/provider-surface-projection.catalog.json`
