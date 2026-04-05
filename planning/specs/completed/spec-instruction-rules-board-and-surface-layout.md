@@ -87,7 +87,7 @@ The repository already has the real ingredients of the reference architecture: a
 ## Planning Readiness
 
 - Completed: semantic taxonomy, board precedence, discoverability rules, and shallow-root guidance are now implemented at the governance/documentation layer.
-- Remaining generated-surface cutover is tracked separately under `plan-instruction-taxonomy-and-path-refactor.md`.
+- Remaining generated-surface cutover is tracked separately under `plan-provider-surface-projection-cutover.md`.
 
 ---
 

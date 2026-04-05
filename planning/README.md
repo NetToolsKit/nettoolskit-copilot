@@ -41,7 +41,7 @@ This folder is part of the repository operating model, not disposable scratch st
 
 - [planning/active/plan-spec-driven-development-operating-model.md](planning/active/plan-spec-driven-development-operating-model.md)
 - [planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md](planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md)
-- [planning/active/plan-instruction-taxonomy-and-path-refactor.md](planning/active/plan-instruction-taxonomy-and-path-refactor.md)
+- [planning/active/plan-provider-surface-projection-cutover.md](planning/active/plan-provider-surface-projection-cutover.md)
 - [planning/active/plan-agentic-surface-boundary-separation.md](planning/active/plan-agentic-surface-boundary-separation.md)
 - [planning/active/plan-cli-fast-path-and-startup-decomposition.md](planning/active/plan-cli-fast-path-and-startup-decomposition.md)
 - [planning/active/plan-mcp-transport-auth-and-session-resilience.md](planning/active/plan-mcp-transport-auth-and-session-resilience.md)
@@ -90,6 +90,7 @@ Use `planning/` for versioned workstream control, not for transient scratch outp
 - [planning/completed/plan-instruction-parity-and-script-retirement.md](planning/completed/plan-instruction-parity-and-script-retirement.md)
 - [planning/completed/plan-instruction-governance-and-super-agent-retention.md](planning/completed/plan-instruction-governance-and-super-agent-retention.md)
 - [planning/completed/plan-instruction-rules-board-and-surface-layout.md](planning/completed/plan-instruction-rules-board-and-surface-layout.md)
+- [planning/completed/plan-instruction-taxonomy-and-path-refactor.md](planning/completed/plan-instruction-taxonomy-and-path-refactor.md)
 - [planning/completed/plan-script-retirement-phase-2.md](planning/completed/plan-script-retirement-phase-2.md)
 - [planning/completed/plan-script-retirement-phase-3.md](planning/completed/plan-script-retirement-phase-3.md)
 - [planning/completed/plan-script-retirement-phase-4.md](planning/completed/plan-script-retirement-phase-4.md)

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added a focused follow-up workstream, `plan-provider-surface-projection-cutover`, so the remaining generated/runtime `.github/.codex/.claude` cutover is tracked separately from the completed canonical taxonomy migration.
 - Added a mirrored canonical GitHub governance catalog set under `definitions/providers/github/governance/`, covering the current `.github/governance/*` authored assets so runtime and validation code can cut over without losing compatibility.
 - Added canonical template copies under `definitions/templates/{docs,codegen}` for the shared docs/codegen assets plus the mirrored root `.NET` scaffold tree, so authoring can continue under `definitions/templates/*` while legacy roots remain compatibility-only.
 - Added canonical GitHub governance definitions under `definitions/providers/github/governance/` for `instruction-ownership.manifest.json` and `authoritative-source-map.json`, so validation and audit commands can resolve authored policy without starting from `.github/governance/`.
@@ -15,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
-- Changed planning closeout so `plan-instruction-governance-and-super-agent-retention` and `plan-instruction-rules-board-and-surface-layout` are now completed workstreams, while `plan-instruction-taxonomy-and-path-refactor` remains the single active instruction-migration follow-up for generated/runtime projection cutover.
+- Changed planning closeout so `plan-instruction-taxonomy-and-path-refactor` is now a completed authored-root migration workstream, with the remaining generated/runtime projection work narrowed into `plan-provider-surface-projection-cutover`.
 - Changed legacy compatibility docs and the repository consolidation umbrella/spec to stop treating `definitions/shared/instructions/*` and `.github/instructions/*` as authored sources; canonical instruction authority is now documented consistently under `definitions/instructions/*`, with `definitions/shared/*` retained only for compatibility and shared prompt assets.
 - Changed the authored PowerShell GitHub surface renderer and its smoke harness to project `.github/instructions` from `definitions/instructions` and `.github/templates` from `definitions/templates`, while keeping shared POML prompts under `definitions/shared/prompts/poml` until that lane is migrated.
 - Changed the native provider-surface renderer and its Rust/CLI test scaffolds to source GitHub instruction and template projections from `definitions/{instructions,templates}` directly, while leaving only shared POML prompt assets on the legacy `definitions/shared/*` path for now.

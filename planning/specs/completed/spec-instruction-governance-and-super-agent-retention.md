@@ -89,4 +89,4 @@ The repository already has a rich instruction and routing system, but it must st
 
 - The governance workstream is materially complete.
 - Precedence, projection, super-agent retention, and external-baseline drift rules are now documented against the canonical `definitions/*` model.
-- Remaining generated-surface cutover is tracked separately under `plan-instruction-taxonomy-and-path-refactor.md`.
+- Remaining generated-surface cutover is tracked separately under `plan-provider-surface-projection-cutover.md`.
