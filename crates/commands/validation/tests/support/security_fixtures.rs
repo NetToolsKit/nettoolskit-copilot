@@ -11,21 +11,46 @@ pub fn write_file(path: &Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+pub fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 pub fn initialize_security_repo(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex"))
         .expect("codex directory should be created for repository resolution");
     fs::create_dir_all(repo_root.join("scripts/validation"))
         .expect("scripts/validation directory should be created");
     write_repo_file(repo_root, "CODEOWNERS", "* @example\n");
-    write_repo_file(repo_root, ".github/AGENTS.md", "# Agents\n");
-    write_repo_file(repo_root, ".github/copilot-instructions.md", "# Copilot\n");
     write_repo_file(
         repo_root,
-        ".github/governance/security-baseline.json",
+        "definitions/providers/github/root/AGENTS.md",
+        "# Agents\n",
+    );
+    write_repo_file(
+        repo_root,
+        "definitions/providers/github/root/copilot-instructions.md",
+        "# Copilot\n",
+    );
+    write_governance_file(
+        repo_root,
+        "security-baseline.json",
         r#"{
   "version": 1,
-  "requiredFiles": ["CODEOWNERS", ".github/AGENTS.md"],
-  "requiredDirectories": [".github/governance", "scripts/validation"],
+  "requiredFiles": [
+    "CODEOWNERS",
+    "definitions/providers/github/root/AGENTS.md",
+    "definitions/providers/github/root/copilot-instructions.md"
+  ],
+  "requiredDirectories": [
+    "definitions/providers/github/governance",
+    "scripts/validation"
+  ],
   "scanExtensions": [".md", ".ps1"],
   "excludedPathGlobs": [".temp/**"],
   "forbiddenPathGlobs": ["**/*.key"],
@@ -59,9 +84,9 @@ pub fn initialize_shared_checksums_repo(repo_root: &Path) {
         .expect("codex directory should be created for repository resolution");
     write_repo_file(repo_root, "scripts/common/a.ps1", "Write-Output 'a'\n");
     write_repo_file(repo_root, "scripts/security/b.ps1", "Write-Output 'b'\n");
-    write_repo_file(
+    write_governance_file(
         repo_root,
-        ".github/governance/shared-script-checksums.manifest.json",
+        "shared-script-checksums.manifest.json",
         &format!(
             r#"{{
   "version": 1,
@@ -91,9 +116,9 @@ pub fn initialize_shared_checksums_repo(repo_root: &Path) {
 pub fn initialize_supply_chain_repo(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex"))
         .expect("codex directory should be created for repository resolution");
-    write_repo_file(
+    write_governance_file(
         repo_root,
-        ".github/governance/supply-chain.baseline.json",
+        "supply-chain.baseline.json",
         r#"{
   "version": 1,
   "sbomOutputPath": ".temp/audit/sbom.latest.json",
@@ -160,11 +185,7 @@ serde = "1.0"
 }
 
 pub fn write_supply_chain_baseline(repo_root: &Path, contents: &str) {
-    write_repo_file(
-        repo_root,
-        ".github/governance/supply-chain.baseline.json",
-        contents,
-    );
+    write_governance_file(repo_root, "supply-chain.baseline.json", contents);
 }
 
 pub fn write_repo_file(repo_root: &Path, relative_path: &str, contents: &str) {

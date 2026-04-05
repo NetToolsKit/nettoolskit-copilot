@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed canonical security and release baselines plus their Rust/CLI fixtures to require authored evidence from `definitions/providers/github/*` first, while preserving `.github/governance/*` mirrors only as temporary migration compatibility.
 - Changed agent-orchestration validation defaults, fixtures, and CLI test scaffolds to resolve the permission matrix and runtime/model routing catalogs from `definitions/providers/github/governance/*` first, while still materializing `.github/governance/*` mirrors for migration-time compatibility.
 - Changed shared governance baseline validators (`validate-all`, architecture boundaries, README standards, template standards, and workspace efficiency) plus their Rust/CLI fixtures to prefer `definitions/providers/github/governance/*`, with canonical template files under `definitions/templates/*` and legacy `.github/*` mirrors retained only for transition coverage.
 - Added the first shallow projected instruction copies under `.github/instructions/{governance,development,operations,data}` while preserving the legacy projected taxonomy during migration.

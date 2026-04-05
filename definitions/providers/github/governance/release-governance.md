@@ -7,7 +7,7 @@ Validation is deterministic and runs through the native `ntk validation` surface
 
 ## Branch Protection
 
-Branch protection baseline is versioned in `.github/governance/branch-protection.baseline.json`.
+Branch protection baseline is versioned in `definitions/providers/github/governance/branch-protection.baseline.json`.
 Apply or validate baseline drift with:
 
 ```powershell

@@ -7,7 +7,7 @@ use tempfile::TempDir;
 
 use crate::support::release_fixtures::{
     initialize_git_repository, initialize_release_provenance_repo, write_audit_report,
-    write_repo_file,
+    write_governance_file, write_repo_file,
 };
 
 #[test]
@@ -34,9 +34,9 @@ fn test_invoke_validate_release_provenance_passes_for_valid_repo() {
 fn test_invoke_validate_release_provenance_reports_missing_required_check() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_release_provenance_repo(repo.path());
-    write_repo_file(
+    write_governance_file(
         repo.path(),
-        ".github/governance/release-provenance.baseline.json",
+        "release-provenance.baseline.json",
         r#"{
   "version": 1,
   "releaseBranch": "main",
@@ -55,8 +55,8 @@ fn test_invoke_validate_release_provenance_reports_missing_required_check() {
   "requiredEvidenceFiles": [
     "CHANGELOG.md",
     "CODEOWNERS",
-    ".github/governance/release-governance.md",
-    ".github/governance/release-provenance.baseline.json"
+    "definitions/providers/github/governance/release-governance.md",
+    "definitions/providers/github/governance/release-provenance.baseline.json"
   ]
 }"#,
     );
@@ -101,9 +101,9 @@ fn test_invoke_validate_release_provenance_fails_when_required_audit_report_is_m
 fn test_invoke_validate_release_provenance_reports_dirty_worktree_when_required_clean() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_release_provenance_repo(repo.path());
-    write_repo_file(
+    write_governance_file(
         repo.path(),
-        ".github/governance/release-provenance.baseline.json",
+        "release-provenance.baseline.json",
         r#"{
   "version": 1,
   "releaseBranch": "main",
@@ -121,8 +121,8 @@ fn test_invoke_validate_release_provenance_reports_dirty_worktree_when_required_
   "requiredEvidenceFiles": [
     "CHANGELOG.md",
     "CODEOWNERS",
-    ".github/governance/release-governance.md",
-    ".github/governance/release-provenance.baseline.json"
+    "definitions/providers/github/governance/release-governance.md",
+    "definitions/providers/github/governance/release-provenance.baseline.json"
   ]
 }"#,
     );

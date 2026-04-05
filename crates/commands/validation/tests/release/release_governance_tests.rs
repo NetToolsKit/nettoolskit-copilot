@@ -6,7 +6,8 @@ use nettoolskit_validation::{
 use tempfile::TempDir;
 
 use crate::support::release_fixtures::{
-    initialize_release_governance_repo, remove_repo_path, write_repo_file,
+    initialize_release_governance_repo, remove_governance_file, write_governance_file,
+    write_repo_file,
 };
 
 #[test]
@@ -78,9 +79,9 @@ fn test_invoke_validate_release_governance_reports_invalid_changelog_order() {
 fn test_invoke_validate_release_governance_surfaces_branch_protection_warnings() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_release_governance_repo(repo.path());
-    write_repo_file(
+    write_governance_file(
         repo.path(),
-        ".github/governance/branch-protection.baseline.json",
+        "branch-protection.baseline.json",
         r#"{
   "repository": "example/repo",
   "branch": "main",
@@ -120,7 +121,7 @@ fn test_invoke_validate_release_governance_surfaces_branch_protection_warnings()
 fn test_invoke_validate_release_governance_converts_failures_to_warnings() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_release_governance_repo(repo.path());
-    remove_repo_path(repo.path(), ".github/governance/release-governance.md");
+    remove_governance_file(repo.path(), "release-governance.md");
 
     let result = invoke_validate_release_governance(&ValidateReleaseGovernanceRequest {
         repo_root: Some(repo.path().to_path_buf()),

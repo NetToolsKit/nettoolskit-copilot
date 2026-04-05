@@ -16,6 +16,16 @@ pub fn write_repo_file(repo_root: &Path, relative_path: &str, contents: &str) {
     write_file(&repo_root.join(relative_path), contents);
 }
 
+pub fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 pub fn remove_repo_path(repo_root: &Path, relative_path: &str) {
     let path = repo_root.join(relative_path);
     if path.is_dir() {
@@ -23,6 +33,14 @@ pub fn remove_repo_path(repo_root: &Path, relative_path: &str) {
     } else if path.is_file() {
         fs::remove_file(&path).expect("file should be removed");
     }
+}
+
+pub fn remove_governance_file(repo_root: &Path, file_name: &str) {
+    remove_repo_path(
+        repo_root,
+        &format!("definitions/providers/github/governance/{file_name}"),
+    );
+    remove_repo_path(repo_root, &format!(".github/governance/{file_name}"));
 }
 
 pub fn initialize_release_governance_repo(repo_root: &Path) {
@@ -42,9 +60,9 @@ pub fn initialize_release_governance_repo(repo_root: &Path) {
         "CODEOWNERS",
         "* @example\n.github/ @example\n.githooks/ @example\nscripts/ @example\n",
     );
-    write_repo_file(
+    write_governance_file(
         repo_root,
-        ".github/governance/release-governance.md",
+        "release-governance.md",
         r#"# Release Governance
 
 ## Scope
@@ -68,9 +86,9 @@ Checklist.
 Rollback.
 "#,
     );
-    write_repo_file(
+    write_governance_file(
         repo_root,
-        ".github/governance/branch-protection.baseline.json",
+        "branch-protection.baseline.json",
         r#"{
   "schemaVersion": 1,
   "repository": "example/repo",
@@ -95,9 +113,9 @@ Rollback.
 
 pub fn initialize_release_provenance_repo(repo_root: &Path) {
     initialize_release_governance_repo(repo_root);
-    write_repo_file(
+    write_governance_file(
         repo_root,
-        ".github/governance/release-provenance.baseline.json",
+        "release-provenance.baseline.json",
         r#"{
   "version": 1,
   "releaseBranch": "main",
@@ -115,8 +133,8 @@ pub fn initialize_release_provenance_repo(repo_root: &Path) {
   "requiredEvidenceFiles": [
     "CHANGELOG.md",
     "CODEOWNERS",
-    ".github/governance/release-governance.md",
-    ".github/governance/release-provenance.baseline.json"
+    "definitions/providers/github/governance/release-governance.md",
+    "definitions/providers/github/governance/release-provenance.baseline.json"
   ]
 }"#,
     );

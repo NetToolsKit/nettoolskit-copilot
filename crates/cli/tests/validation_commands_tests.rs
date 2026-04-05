@@ -430,17 +430,29 @@ fn initialize_security_baseline_repo_root(repo_root: &Path) {
     fs::create_dir_all(repo_root.join("scripts/validation"))
         .expect("scripts/validation should be created");
     write_file(&repo_root.join("CODEOWNERS"), "* @example\n");
-    write_file(&repo_root.join(".github/AGENTS.md"), "# Agents\n");
     write_file(
-        &repo_root.join(".github/copilot-instructions.md"),
-        "# Copilot\n",
+        &repo_root.join("definitions/providers/github/root/AGENTS.md"),
+        "# Agents\n",
     );
     write_file(
-        &repo_root.join(".github/governance/security-baseline.json"),
+        &repo_root.join("definitions/providers/github/root/copilot-instructions.md"),
+        "# Copilot\n",
+    );
+    write_governance_file(
+        repo_root,
+        "security-baseline.json",
         r#"{
   "version": 1,
-  "requiredFiles": ["CODEOWNERS", ".github/AGENTS.md", "crates/commands/validation/src/agent_orchestration/agent_hooks.rs"],
-  "requiredDirectories": [".github/governance", "scripts/validation"],
+  "requiredFiles": [
+    "CODEOWNERS",
+    "definitions/providers/github/root/AGENTS.md",
+    "definitions/providers/github/root/copilot-instructions.md",
+    "crates/commands/validation/src/agent_orchestration/agent_hooks.rs"
+  ],
+  "requiredDirectories": [
+    "definitions/providers/github/governance",
+    "scripts/validation"
+  ],
   "scanExtensions": [".md", ".ps1"],
   "excludedPathGlobs": [".temp/**"],
   "forbiddenPathGlobs": ["**/*.key"],
@@ -478,8 +490,9 @@ fn initialize_shared_script_checksums_repo_root(repo_root: &Path) {
         &repo_root.join("scripts/security/b.ps1"),
         "Write-Output 'b'\n",
     );
-    write_file(
-        &repo_root.join(".github/governance/shared-script-checksums.manifest.json"),
+    write_governance_file(
+        repo_root,
+        "shared-script-checksums.manifest.json",
         r#"{
   "version": 1,
   "sourceRepository": "https://example.invalid/repo",
@@ -504,8 +517,9 @@ fn initialize_shared_script_checksums_repo_root(repo_root: &Path) {
 
 fn initialize_supply_chain_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
-    write_file(
-        &repo_root.join(".github/governance/supply-chain.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "supply-chain.baseline.json",
         r#"{
   "version": 1,
   "sbomOutputPath": ".temp/audit/sbom.latest.json",
@@ -606,8 +620,9 @@ function Get-ExampleValue {
 
 fn initialize_warning_baseline_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
-    write_file(
-        &repo_root.join(".github/governance/warning-baseline.json"),
+    write_governance_file(
+        repo_root,
+        "warning-baseline.json",
         r#"{
   "version": 1,
   "maxTotalWarnings": 3,
@@ -659,8 +674,9 @@ fn initialize_release_governance_repo_root(repo_root: &Path) {
         &repo_root.join("CODEOWNERS"),
         "* @example\n.github/ @example\n.githooks/ @example\nscripts/ @example\n",
     );
-    write_file(
-        &repo_root.join(".github/governance/release-governance.md"),
+    write_governance_file(
+        repo_root,
+        "release-governance.md",
         r#"# Release Governance
 
 ## Scope
@@ -684,8 +700,9 @@ Checklist.
 Rollback.
 "#,
     );
-    write_file(
-        &repo_root.join(".github/governance/branch-protection.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "branch-protection.baseline.json",
         r#"{
   "schemaVersion": 1,
   "repository": "example/repo",
@@ -710,8 +727,9 @@ Rollback.
 
 fn initialize_release_provenance_repo_root(repo_root: &Path) {
     initialize_release_governance_repo_root(repo_root);
-    write_file(
-        &repo_root.join(".github/governance/release-provenance.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "release-provenance.baseline.json",
         r#"{
   "version": 1,
   "releaseBranch": "main",
@@ -729,8 +747,8 @@ fn initialize_release_provenance_repo_root(repo_root: &Path) {
   "requiredEvidenceFiles": [
     "CHANGELOG.md",
     "CODEOWNERS",
-    ".github/governance/release-governance.md",
-    ".github/governance/release-provenance.baseline.json"
+    "definitions/providers/github/governance/release-governance.md",
+    "definitions/providers/github/governance/release-provenance.baseline.json"
   ]
 }"#,
     );
@@ -2293,10 +2311,9 @@ fn test_validation_supply_chain_reports_pass_for_valid_manifests() {
 fn test_validation_supply_chain_fails_when_required_license_evidence_path_is_missing() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_supply_chain_repo_root(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/supply-chain.baseline.json"),
+    write_governance_file(
+        repo.path(),
+        "supply-chain.baseline.json",
         r#"{
   "version": 1,
   "sbomOutputPath": ".temp/audit/sbom.latest.json",
