@@ -513,23 +513,23 @@ Status: `[x]` Completed
 
 #### Task W5.3: Create Phase 20 Plan — `scripts/runtime/*.ps1` Excluding Hooks (30)
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - This is the largest single domain: 30 scripts after Phases 17, 18, the tactical Phase 20c self-heal slice, the tactical Phase 20d provider-surface dispatcher slice, the tactical Phase 20e catalog-native renderer slice, and the tactical Phase 20f Codex orchestration slice remove `doctor.ps1`, `healthcheck.ps1`, `sync-codex-mcp-config.ps1`, `render-vscode-mcp-template.ps1`, `self-heal.ps1`, `render-provider-surfaces.ps1`, `render-codex-compatibility-surfaces.ps1`, and `render-codex-orchestration-surfaces.ps1`.
-- Create `planning/specs/active/spec-script-retirement-phase-20.md` with:
-    - Problem: 30 runtime scripts have confirmed Rust owner in `crates/commands/runtime + crates/cli` but no zero-consumer proof.
-  - Group the remaining scripts into sub-slices by functional surface to enable incremental deletion:
-    - Sub-slice A: sync/render scripts (`render-*.ps1`, `sync-*.ps1`, `setup-*.ps1`) — likely consumed only by CI/docs
-    - Sub-slice B: invoke/pipeline scripts (`invoke-*.ps1`, `run-*.ps1`, `replay-*.ps1`, `resume-*.ps1`, `evaluate-*.ps1`) — likely consumed by orchestration and CI
-    - Sub-slice C: install/bootstrap/clean scripts (`bootstrap.ps1`, `install.ps1`, `clean-*.ps1`, `set-*.ps1`, plus the broader runtime leaves not already removed by Phases 17, 18, and the tactical 20c self-heal slice)
-    - Decision: each sub-slice gets its own Phase 20a/20b/20c consumer sweep so the safety matrix stays accurate.
-- This task creates `planning/specs/active/spec-script-retirement-phase-20.md` and `planning/active/plan-script-retirement-phase-20.md`.
+- Created:
+  - `planning/active/plan-script-retirement-phase-20-runtime-consumer-sweep.md`
+  - `planning/specs/active/spec-script-retirement-phase-20-runtime-consumer-sweep.md`
+- The active phase plan freezes the 30 remaining runtime leaves into:
+  - Slice A: projection, profile, sync, and workspace runtime surfaces
+  - Slice B: orchestration runtime entrypoints and replay helpers
+  - Slice C: bootstrap, install, and cleanup surfaces
+- Phase 20 now uses internal slice names inside one runtime-domain plan instead of opening new `phase-20a/20b/20c` plan files, which avoids collision with the already-completed tactical `Phase 20c self-heal` slice.
 - Commit checkpoint:
-  - `docs(planning): register Phase 20 plan for scripts/runtime consumer sweep`
+  - `docs(planning): open Phase 20 runtime consumer sweep with internal slice boundaries`
 
 #### Task W5.4: Execute Phase 20 Consumer Sweep (Sub-slices A, B, C)
 
-Status: `[ ]` Pending (blocked on Phase 20 plan creation)
+Status: `[ ]` Pending
 
 - Run consumer sweeps for each sub-slice.
 - For each zero-consumer script: delete it.
@@ -537,16 +537,16 @@ Status: `[ ]` Pending (blocked on Phase 20 plan creation)
 - After each sub-slice:
   - Update safety matrix and parity ledger.
   - Run the Phase 20 validation checklist.
-- Archive Phase 20 plan/spec to completed only when all sub-slices are done.
+- Archive `plan-script-retirement-phase-20-runtime-consumer-sweep.md` and `spec-script-retirement-phase-20-runtime-consumer-sweep.md` to completed only when all sub-slices are done.
 - Validation checklist:
   - `cargo test -p nettoolskit-runtime --quiet`
   - `cargo test -p nettoolskit-cli --test test_suite runtime_commands_tests --quiet`
   - `& .\.build\target\debug\ntk.exe validation all --repo-root . --warning-only false`
   - `git diff --check`
 - Commit checkpoint (one per sub-slice):
-  - `chore(scripts): Phase 20a — retire confirmed-zero-consumer scripts/runtime/render-* scripts`
-  - `chore(scripts): Phase 20b — retire confirmed-zero-consumer scripts/runtime/invoke-* and pipeline scripts`
-  - `chore(scripts): Phase 20c — retire confirmed-zero-consumer scripts/runtime/bootstrap and clean scripts`
+  - `chore(runtime-retirement): Phase 20 Slice A — retire confirmed-zero-consumer projection, profile, and sync scripts`
+  - `chore(runtime-retirement): Phase 20 Slice B — retire confirmed-zero-consumer orchestration runtime scripts`
+  - `chore(runtime-retirement): Phase 20 Slice C — retire confirmed-zero-consumer bootstrap, install, and cleanup scripts`
 
 #### Task W5.5: Create and Execute Phase 21 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
 
