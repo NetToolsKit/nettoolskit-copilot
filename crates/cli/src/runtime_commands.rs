@@ -3,6 +3,7 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
+    build_local_context_query_control_schema, build_local_memory_query_control_schema,
     build_runtime_doctor_control_schema, build_runtime_healthcheck_control_schema,
     build_runtime_self_heal_control_schema, export_planning_summary, invoke_apply_vscode_templates,
     invoke_clean_build_artifacts, invoke_export_enterprise_trends, invoke_pre_commit_eof_hygiene,
@@ -951,25 +952,17 @@ fn execute_query_local_context_index(arguments: RuntimeQueryLocalContextIndexArg
     };
 
     if arguments.json_output {
-        let payload = json!({
-            "backend": result.backend.as_str(),
-            "query": result.query,
-            "top": result.top,
-            "indexPath": result.index_path,
-            "memoryDbPath": result.memory_db_path,
-            "resultCount": result.result_count,
-            "hits": result.hits.iter().map(|hit| {
-                json!({
-                    "id": hit.id,
-                    "path": hit.path,
-                    "heading": hit.heading,
-                    "score": hit.score,
-                    "excerpt": hit.excerpt,
-                })
-            }).collect::<Vec<_>>()
-        });
-        println!("{payload}");
-        return ExitStatus::Success;
+        let schema = build_local_context_query_control_schema(&result);
+        return match serde_json::to_string_pretty(&schema) {
+            Ok(payload) => {
+                println!("{payload}");
+                ExitStatus::Success
+            }
+            Err(error) => {
+                eprintln!("{error}");
+                ExitStatus::Error
+            }
+        };
     }
 
     println!("Local context index query: {}", result.query);
@@ -1039,23 +1032,17 @@ fn execute_query_local_memory(arguments: RuntimeQueryLocalMemoryArgs) -> ExitSta
     };
 
     if arguments.json_output {
-        let payload = json!({
-            "query": result.query,
-            "top": result.top,
-            "memoryDbPath": result.memory_db_path,
-            "resultCount": result.result_count,
-            "hits": result.hits.iter().map(|hit| {
-                json!({
-                    "id": hit.id,
-                    "path": hit.path,
-                    "heading": hit.heading,
-                    "score": hit.score,
-                    "excerpt": hit.excerpt,
-                })
-            }).collect::<Vec<_>>()
-        });
-        println!("{payload}");
-        return ExitStatus::Success;
+        let schema = build_local_memory_query_control_schema(&result);
+        return match serde_json::to_string_pretty(&schema) {
+            Ok(payload) => {
+                println!("{payload}");
+                ExitStatus::Success
+            }
+            Err(error) => {
+                eprintln!("{error}");
+                ExitStatus::Error
+            }
+        };
     }
 
     println!("Local memory query: {}", result.query);

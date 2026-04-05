@@ -25,7 +25,7 @@ Objectives:
 - ✅ Local RAG/CAG context index and weekly AI usage ledger for deterministic repo recall
 - ✅ Built-in AI provider profiles plus `ntk ai doctor` diagnostics, smart routing strategy scoring, normalized adapter contracts, canonical agent/skill model-routing defaults, and matrix-aware usage reporting for balanced, coding, cheap, latency, and local orchestrator presets
 - ✅ Explicit agentic surface separation for MCP, A2A, RAG, and CAG
-- ✅ Versioned control-plane inspection schemas for `ntk ai doctor` and `ntk runtime doctor` machine output
+- ✅ Versioned control-plane inspection schemas for doctor, healthcheck, self-heal, and local recall machine output
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
 - ✅ Compatibility wrappers retained only where they still provide operator entry points
 
@@ -239,7 +239,7 @@ Runtime health, degraded-state evidence, and subsystem ownership are versioned s
 | Diagnostics taxonomy | Defines `healthy`, `degraded`, `blocked`, `misconfigured`, and `recovering` plus subsystem ownership | `definitions/templates/manifests/runtime-diagnostics.taxonomy.json` |
 | Control-schema catalog | Defines machine-readable doctor schema kinds, entry points, and versioning rules | `definitions/templates/manifests/control-plane-introspection.catalog.json` |
 | Operator playbook | Human troubleshooting and remediation flow | `docs/operations/runtime-diagnostics-observability-playbook.md` |
-| Current doctor surface | Read-only runtime inspection for AI/runtime health with versioned machine-readable contracts | `ntk ai doctor`, `ntk runtime doctor` |
+| Current typed surfaces | Read-only AI/runtime inspection and local recall with versioned machine-readable contracts | `ntk ai doctor`, `ntk runtime doctor`, `ntk runtime healthcheck`, `ntk runtime self-heal`, `ntk runtime query-local-context-index`, `ntk runtime query-local-memory` |
 
 Future MCP, recall, task, and service doctor/report surfaces should reuse the same taxonomy and the same typed control-schema style instead of inventing per-command state names or one-off JSON payloads.
 

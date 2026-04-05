@@ -232,6 +232,63 @@ pub struct RuntimeSelfHealControlSchema {
     pub steps: Vec<RuntimeSelfHealControlStep>,
 }
 
+/// One typed ranked hit from the local context or local memory surfaces.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct LocalContextSearchHitControl {
+    /// Stable chunk identifier.
+    pub id: String,
+    /// Repository-relative path that produced the hit.
+    pub path: String,
+    /// Optional heading associated with the hit.
+    pub heading: Option<String>,
+    /// Ranking score emitted by the query backend.
+    pub score: f64,
+    /// Bounded excerpt selected for operator and machine consumers.
+    pub excerpt: String,
+}
+
+/// Stable machine-readable local-context query payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct LocalContextQueryControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Retrieval backend that answered the query.
+    pub backend: String,
+    /// Query text executed against the local context index.
+    pub query: String,
+    /// Effective top limit used by the query.
+    pub top: usize,
+    /// Persisted compatibility JSON index path.
+    pub index_path: PathBuf,
+    /// Resolved SQLite memory database path.
+    pub memory_db_path: PathBuf,
+    /// Number of ranked hits returned.
+    pub result_count: usize,
+    /// Ranked search hits.
+    pub hits: Vec<LocalContextSearchHitControl>,
+}
+
+/// Stable machine-readable local-memory query payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct LocalMemoryQueryControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Query text executed against the local memory store.
+    pub query: String,
+    /// Effective top limit used by the query.
+    pub top: usize,
+    /// Resolved SQLite memory database path.
+    pub memory_db_path: PathBuf,
+    /// Number of ranked hits returned.
+    pub result_count: usize,
+    /// Ranked search hits.
+    pub hits: Vec<LocalContextSearchHitControl>,
+}
+
 /// Machine-readable readiness status for AI runtime inspection.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -632,6 +689,56 @@ mod tests {
 
         let json = serde_json::to_string(&schema).expect("schema should serialize");
         let parsed: RuntimeSelfHealControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn local_context_query_control_schema_roundtrips_json() {
+        let schema = LocalContextQueryControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "local_context_query".to_string(),
+            backend: "sqlite-default".to_string(),
+            query: "continuity".to_string(),
+            top: 3,
+            index_path: PathBuf::from("C:/repo/.temp/context-index/index.json"),
+            memory_db_path: PathBuf::from("C:/repo/.temp/context-memory/context.db"),
+            result_count: 1,
+            hits: vec![LocalContextSearchHitControl {
+                id: "chunk-1".to_string(),
+                path: "README.md".to_string(),
+                heading: Some("Intro".to_string()),
+                score: 0.98,
+                excerpt: "continuity summary".to_string(),
+            }],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: LocalContextQueryControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn local_memory_query_control_schema_roundtrips_json() {
+        let schema = LocalMemoryQueryControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "local_memory_query".to_string(),
+            query: "memory".to_string(),
+            top: 5,
+            memory_db_path: PathBuf::from("C:/repo/.temp/context-memory/context.db"),
+            result_count: 1,
+            hits: vec![LocalContextSearchHitControl {
+                id: "chunk-1".to_string(),
+                path: "planning/active/plan.md".to_string(),
+                heading: Some("Wave".to_string()),
+                score: 0.87,
+                excerpt: "memory continuity".to_string(),
+            }],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: LocalMemoryQueryControlSchema =
             serde_json::from_str(&json).expect("schema should deserialize");
         assert_eq!(parsed, schema);
     }

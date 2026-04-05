@@ -217,12 +217,18 @@ pub fn update_local_context_index(
 pub fn query_local_context_index(
     request: &QueryLocalContextIndexRequest,
 ) -> Result<QueryLocalContextIndexResult, LocalContextCommandError>;
+pub fn build_local_context_query_control_schema(
+    result: &QueryLocalContextIndexResult,
+) -> nettoolskit_core::LocalContextQueryControlSchema;
 pub fn update_local_memory(
     request: &UpdateLocalMemoryRequest,
 ) -> Result<UpdateLocalMemoryResult, LocalContextCommandError>;
 pub fn query_local_memory(
     request: &QueryLocalMemoryRequest,
 ) -> Result<QueryLocalMemoryResult, LocalContextCommandError>;
+pub fn build_local_memory_query_control_schema(
+    result: &QueryLocalMemoryResult,
+) -> nettoolskit_core::LocalMemoryQueryControlSchema;
 pub fn export_planning_summary(
     request: &ExportPlanningSummaryRequest,
 ) -> Result<ExportPlanningSummaryResult, PlanningSummaryCommandError>;

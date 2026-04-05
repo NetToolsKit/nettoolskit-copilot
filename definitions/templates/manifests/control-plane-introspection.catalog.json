@@ -55,6 +55,32 @@
         "follow-up healthcheck linkage",
         "explicit bootstrap/template option flags"
       ]
+    },
+    {
+      "id": "local-context-query",
+      "schemaKind": "local_context_query",
+      "entryPoints": ["ntk runtime query-local-context-index --json-output"],
+      "owner": "crates/commands/runtime/src/continuity/local_context.rs",
+      "contractType": "machine-readable continuity recall",
+      "guarantees": [
+        "stable schema version",
+        "typed backend label",
+        "explicit compatibility-index and sqlite-memory paths",
+        "ranked local-context hits"
+      ]
+    },
+    {
+      "id": "local-memory-query",
+      "schemaKind": "local_memory_query",
+      "entryPoints": ["ntk runtime query-local-memory --json-output"],
+      "owner": "crates/commands/runtime/src/continuity/local_context.rs",
+      "contractType": "machine-readable continuity recall",
+      "guarantees": [
+        "stable schema version",
+        "explicit sqlite-memory path",
+        "ranked local-memory hits",
+        "renderer-independent query metadata"
+      ]
     }
   ],
   "evolutionRules": {

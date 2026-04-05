@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-06 02:35
+- LastUpdated: 2026-04-06 09:55
 - Objective: expose typed control-plane schemas and runtime introspection surfaces for operational, CLI, and future SDK consumers.
 - Normalized Request: create a detailed workstream for typed runtime control contracts and introspection APIs without coupling callers to internal structs.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -70,6 +70,8 @@ Generated: 2026-03-31 00:00
   - Added `build_runtime_healthcheck_control_schema` so healthcheck orchestration now exposes a shared typed inspection boundary instead of relying only on its persisted crate-local JSON report.
 - Status [2026-04-06 02:35]:
   - Added `build_runtime_self_heal_control_schema` so runtime recovery and follow-up health validation now expose a shared typed inspection boundary instead of relying only on the persisted crate-local report payload.
+- Status [2026-04-06 09:55]:
+  - Added `build_local_context_query_control_schema` and `build_local_memory_query_control_schema` so repository recall surfaces expose the same shared typed control-plane family instead of ad-hoc JSON payloads.
 - Commit checkpoint:
   - `feat(runtime): add runtime introspection services`
 
@@ -86,6 +88,10 @@ Generated: 2026-03-31 00:00
   - `ntk runtime healthcheck --json-output` now emits the shared `runtime_healthcheck` control schema while still writing the persisted report/log artifacts for operators.
 - Status [2026-04-06 02:35]:
   - `ntk runtime self-heal --json-output` now emits the shared `runtime_self_heal` control schema while still writing the persisted repair report/log artifacts for operators.
+- Status [2026-04-06 09:55]:
+  - `ntk runtime query-local-context-index --json-output` now emits the shared `local_context_query` control schema.
+  - `ntk runtime query-local-memory --json-output` now emits the shared `local_memory_query` control schema.
+  - Runtime and CLI tests now assert the canonical `schema_version`/`schema_kind` shape for both local recall surfaces.
 - Commit checkpoint:
   - `refactor(cli): render runtime inspection from typed control schemas`
 
@@ -102,6 +108,8 @@ Generated: 2026-03-31 00:00
   - Expanded the canonical control-plane catalog, sample manifest, and README coverage to include the typed `runtime_healthcheck` surface.
 - Status [2026-04-06 02:35]:
   - Expanded the canonical control-plane catalog, sample manifest, and README coverage to include the typed `runtime_self_heal` surface.
+- Status [2026-04-06 09:55]:
+  - Expanded the canonical control-plane catalog, sample manifest, root/crate READMEs, and architecture guidance to include the typed `local_context_query` and `local_memory_query` surfaces.
 - Commit checkpoint:
   - `docs(runtime): document control schemas and introspection model`
 

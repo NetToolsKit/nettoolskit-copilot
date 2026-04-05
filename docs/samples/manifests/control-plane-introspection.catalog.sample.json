@@ -22,6 +22,16 @@
       "id": "runtime-self-heal",
       "schemaKind": "runtime_self_heal",
       "entryPoints": ["ntk runtime self-heal --json-output"]
+    },
+    {
+      "id": "local-context-query",
+      "schemaKind": "local_context_query",
+      "entryPoints": ["ntk runtime query-local-context-index --json-output"]
+    },
+    {
+      "id": "local-memory-query",
+      "schemaKind": "local_memory_query",
+      "entryPoints": ["ntk runtime query-local-memory --json-output"]
     }
   ],
   "evolutionRules": {

@@ -27,8 +27,10 @@ Use this document for human architecture guidance. Use the catalog for stable su
 | Runtime doctor | `ntk runtime doctor --json-output` | `runtime_doctor` | `crates/commands/runtime/src/diagnostics/doctor.rs` |
 | Runtime healthcheck | `ntk runtime healthcheck --json-output` | `runtime_healthcheck` | `crates/commands/runtime/src/diagnostics/healthcheck.rs` |
 | Runtime self-heal | `ntk runtime self-heal --json-output` | `runtime_self_heal` | `crates/commands/runtime/src/diagnostics/self_heal.rs` |
+| Local context query | `ntk runtime query-local-context-index --json-output` | `local_context_query` | `crates/commands/runtime/src/continuity/local_context.rs` |
+| Local memory query | `ntk runtime query-local-memory --json-output` | `local_memory_query` | `crates/commands/runtime/src/continuity/local_context.rs` |
 
-Both machine-readable surfaces are defined in `nettoolskit-core` under `crates/core/src/control_plane.rs`.
+All machine-readable surfaces are defined in `nettoolskit-core` under `crates/core/src/control_plane.rs`.
 
 ---
 
@@ -58,7 +60,7 @@ flowchart TD
 
 - Machine-readable inspection must serialize the shared control schema, not crate-local internal structs.
 - Human-readable CLI text remains an adapter and may evolve independently as long as the typed schema stays stable.
-- New doctor/report surfaces should add a schema kind and versioned contract before exposing JSON intended for automation.
+- New doctor/report/continuity surfaces should add a schema kind and versioned contract before exposing JSON intended for automation.
 - Provider/runtime-specific raw structs are allowed behind the collector boundary, but they are not the public inspection contract.
 
 ---

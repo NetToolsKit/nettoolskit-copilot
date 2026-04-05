@@ -9,6 +9,7 @@ pub mod maintenance;
 pub mod sync;
 
 pub use continuity::local_context::{
+    build_local_context_query_control_schema, build_local_memory_query_control_schema,
     query_local_context_index, query_local_memory, update_local_context_index, update_local_memory,
     LocalContextQueryBackend, QueryLocalContextIndexRequest, QueryLocalContextIndexResult,
     QueryLocalMemoryRequest, QueryLocalMemoryResult, UpdateLocalContextIndexRequest,

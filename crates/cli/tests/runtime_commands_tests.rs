@@ -377,10 +377,14 @@ fn test_runtime_query_local_context_index_supports_json_output() {
         ])
         .assert()
         .success()
-        .stdout(predicate::str::contains(r#""backend":"sqlite-default""#))
-        .stdout(predicate::str::contains(r#""resultCount":1"#))
-        .stdout(predicate::str::contains(r#""path":"README.md""#))
-        .stdout(predicate::str::contains(r#""memoryDbPath":"#));
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
+        .stdout(predicate::str::contains(
+            r#""schema_kind": "local_context_query""#,
+        ))
+        .stdout(predicate::str::contains(r#""backend": "sqlite-default""#))
+        .stdout(predicate::str::contains(r#""result_count": 1"#))
+        .stdout(predicate::str::contains(r#""path": "README.md""#))
+        .stdout(predicate::str::contains(r#""memory_db_path": "#));
 }
 
 #[test]
@@ -414,11 +418,15 @@ fn test_runtime_query_local_context_index_supports_compatibility_json_flag() {
         ])
         .assert()
         .success()
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
         .stdout(predicate::str::contains(
-            r#""backend":"json-compatibility""#,
+            r#""schema_kind": "local_context_query""#,
         ))
-        .stdout(predicate::str::contains(r#""resultCount":1"#))
-        .stdout(predicate::str::contains(r#""path":"README.md""#));
+        .stdout(predicate::str::contains(
+            r#""backend": "json-compatibility""#,
+        ))
+        .stdout(predicate::str::contains(r#""result_count": 1"#))
+        .stdout(predicate::str::contains(r#""path": "README.md""#));
 }
 
 #[test]
@@ -481,11 +489,15 @@ fn test_runtime_query_local_memory_supports_filters_and_json_output() {
         ])
         .assert()
         .success()
-        .stdout(predicate::str::contains(r#""resultCount":1"#))
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
         .stdout(predicate::str::contains(
-            r#""path":"planning/active/plan.md""#,
+            r#""schema_kind": "local_memory_query""#,
         ))
-        .stdout(predicate::str::contains(r#""memoryDbPath":"#));
+        .stdout(predicate::str::contains(r#""result_count": 1"#))
+        .stdout(predicate::str::contains(
+            r#""path": "planning/active/plan.md""#,
+        ))
+        .stdout(predicate::str::contains(r#""memory_db_path": "#));
 }
 
 #[test]

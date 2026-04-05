@@ -1,5 +1,8 @@
 //! Runtime-backed local context index commands.
 
+use nettoolskit_core::control_plane::{
+    LocalContextQueryControlSchema, LocalContextSearchHitControl, LocalMemoryQueryControlSchema,
+};
 use nettoolskit_core::local_context::{
     build_local_context_index, read_local_context_index_catalog, read_local_context_index_document,
     resolve_local_context_index_root, resolve_local_context_memory_db_path,
@@ -7,6 +10,7 @@ use nettoolskit_core::local_context::{
     LocalContextSqliteQueryRequest,
 };
 use nettoolskit_core::path_utils::repository::resolve_workspace_root;
+use nettoolskit_core::NTK_CONTROL_SCHEMA_VERSION;
 use std::env;
 use std::path::PathBuf;
 
@@ -152,6 +156,40 @@ pub struct QueryLocalMemoryResult {
     pub result_count: usize,
     /// Ranked search hits.
     pub hits: Vec<LocalContextSearchHit>,
+}
+
+/// Convert one local-context query result into the stable machine-readable control schema.
+#[must_use]
+pub fn build_local_context_query_control_schema(
+    result: &QueryLocalContextIndexResult,
+) -> LocalContextQueryControlSchema {
+    LocalContextQueryControlSchema {
+        schema_version: NTK_CONTROL_SCHEMA_VERSION,
+        schema_kind: "local_context_query".to_string(),
+        backend: result.backend.as_str().to_string(),
+        query: result.query.clone(),
+        top: result.top,
+        index_path: result.index_path.clone(),
+        memory_db_path: result.memory_db_path.clone(),
+        result_count: result.result_count,
+        hits: result.hits.iter().map(convert_search_hit).collect(),
+    }
+}
+
+/// Convert one local-memory query result into the stable machine-readable control schema.
+#[must_use]
+pub fn build_local_memory_query_control_schema(
+    result: &QueryLocalMemoryResult,
+) -> LocalMemoryQueryControlSchema {
+    LocalMemoryQueryControlSchema {
+        schema_version: NTK_CONTROL_SCHEMA_VERSION,
+        schema_kind: "local_memory_query".to_string(),
+        query: result.query.clone(),
+        top: result.top,
+        memory_db_path: result.memory_db_path.clone(),
+        result_count: result.result_count,
+        hits: result.hits.iter().map(convert_search_hit).collect(),
+    }
 }
 
 /// Build or refresh the local context index.
@@ -337,4 +375,14 @@ pub fn query_local_memory(
         result_count: hits.len(),
         hits,
     })
+}
+
+fn convert_search_hit(hit: &LocalContextSearchHit) -> LocalContextSearchHitControl {
+    LocalContextSearchHitControl {
+        id: hit.id.clone(),
+        path: hit.path.clone(),
+        heading: hit.heading.clone(),
+        score: f64::from(hit.score),
+        excerpt: hit.excerpt.clone(),
+    }
 }

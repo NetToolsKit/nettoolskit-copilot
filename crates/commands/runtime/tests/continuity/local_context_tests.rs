@@ -1,6 +1,7 @@
 //! Tests for runtime local context commands.
 
 use nettoolskit_runtime::{
+    build_local_context_query_control_schema, build_local_memory_query_control_schema,
     query_local_context_index, query_local_memory, update_local_context_index, update_local_memory,
     LocalContextCommandError, LocalContextQueryBackend, QueryLocalContextIndexRequest,
     QueryLocalMemoryRequest, UpdateLocalContextIndexRequest, UpdateLocalMemoryRequest,
@@ -80,6 +81,13 @@ fn test_update_local_context_index_builds_index_and_query_returns_hits() {
     assert_eq!(query_result.result_count, 1);
     assert_eq!(query_result.hits[0].path, "planning/active/plan.md");
     assert!(query_result.memory_db_path.is_file());
+
+    let schema = build_local_context_query_control_schema(&query_result);
+    assert_eq!(schema.schema_version, 1);
+    assert_eq!(schema.schema_kind, "local_context_query");
+    assert_eq!(schema.backend, "sqlite-default");
+    assert_eq!(schema.result_count, 1);
+    assert_eq!(schema.hits[0].path, "planning/active/plan.md");
 }
 
 #[test]
@@ -128,6 +136,12 @@ fn test_update_local_memory_builds_sqlite_store_and_query_returns_hits() {
     assert_eq!(query_result.result_count, 1);
     assert_eq!(query_result.hits[0].path, "planning/active/plan.md");
     assert!(query_result.memory_db_path.is_file());
+
+    let schema = build_local_memory_query_control_schema(&query_result);
+    assert_eq!(schema.schema_version, 1);
+    assert_eq!(schema.schema_kind, "local_memory_query");
+    assert_eq!(schema.result_count, 1);
+    assert_eq!(schema.hits[0].path, "planning/active/plan.md");
 }
 
 #[test]
@@ -245,4 +259,8 @@ fn test_query_local_context_index_can_force_json_compatibility_path() {
     );
     assert_eq!(query_result.result_count, 1);
     assert_eq!(query_result.hits[0].path, "planning/active/plan.md");
+
+    let schema = build_local_context_query_control_schema(&query_result);
+    assert_eq!(schema.backend, "json-compatibility");
+    assert_eq!(schema.hits[0].path, "planning/active/plan.md");
 }
