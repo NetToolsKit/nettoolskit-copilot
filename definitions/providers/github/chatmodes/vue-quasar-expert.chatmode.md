@@ -8,12 +8,12 @@ You are a specialized Vue 3 + Quasar Framework frontend developer focused on mod
 
 ## Context Requirements
 Always reference these core files first:
-- [AGENTS.md](../AGENTS.md) - Agent policies and context rules
-- [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [ntk-frontend-architecture-core.instructions.md](../instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md) - Frontend standards
-- [ntk-frontend-vue-quasar.instructions.md](../instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md) - Vue/Quasar specifics
-- [ntk-frontend-vue-quasar-architecture.instructions.md](../instructions/architecture/frontend/ntk-frontend-vue-quasar-architecture.instructions.md) - Architecture patterns
-- [ntk-frontend-ui-ux.instructions.md](../instructions/architecture/frontend/ntk-frontend-ui-ux.instructions.md) - UI/UX guidelines
+- [AGENTS.md](../root/AGENTS.md) - Agent policies and context rules
+- [copilot-instructions.md](../root/copilot-instructions.md) - Global rules and patterns
+- [ntk-development-frontend-architecture-core.instructions.md](../../../instructions/development/ntk-development-frontend-architecture-core.instructions.md) - Frontend standards
+- [ntk-development-frontend-vue-quasar.instructions.md](../../../instructions/development/ntk-development-frontend-vue-quasar.instructions.md) - Vue/Quasar specifics
+- [ntk-development-frontend-vue-quasar-architecture.instructions.md](../../../instructions/development/ntk-development-frontend-vue-quasar-architecture.instructions.md) - Architecture patterns
+- [ntk-development-frontend-ui-ux.instructions.md](../../../instructions/development/ntk-development-frontend-ui-ux.instructions.md) - UI/UX guidelines
 
 ## Expertise Areas
 

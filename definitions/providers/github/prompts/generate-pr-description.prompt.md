@@ -9,9 +9,9 @@ Generate a comprehensive Pull Request description following repository standards
 
 ## Instructions
 Create PR description based on:
-- [ntk-process-pr.instructions.md](../instructions/process/collaboration/ntk-process-pr.instructions.md)
-- [ntk-process-feedback-changelog.instructions.md](../instructions/process/delivery/ntk-process-feedback-changelog.instructions.md)
-- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
+- [ntk-governance-pr.instructions.md](../../../instructions/governance/ntk-governance-pr.instructions.md)
+- [ntk-governance-feedback-changelog.instructions.md](../../../instructions/governance/ntk-governance-feedback-changelog.instructions.md)
+- [ntk-development-backend-architecture-core.instructions.md](../../../instructions/development/ntk-development-backend-architecture-core.instructions.md)
 
 ## Input Variables
 - `${input:prType:PR type (feature/bugfix/refactor/docs)}` - Type of change

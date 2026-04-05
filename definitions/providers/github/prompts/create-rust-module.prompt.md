@@ -9,8 +9,8 @@ Generate a Rust module following repository structure and testing requirements.
 
 ## Instructions
 Create Rust module based on:
-- [ntk-backend-rust-code-organization.instructions.md](../instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md)
-- [ntk-backend-rust-testing.instructions.md](../instructions/architecture/backend/ntk-backend-rust-testing.instructions.md)
+- [ntk-development-backend-rust-code-organization.instructions.md](../../../instructions/development/ntk-development-backend-rust-code-organization.instructions.md)
+- [ntk-development-backend-rust-testing.instructions.md](../../../instructions/development/ntk-development-backend-rust-testing.instructions.md)
 
 ## Input Variables
 - `${input:moduleName:Module name (e.g., parser, validator)}` - The module name

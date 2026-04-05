@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 14:25
+- LastUpdated: 2026-04-04 15:10
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -54,6 +54,7 @@ The repository already separates shared instruction sources under `definitions/s
 - Preserve routing, prompts, skills, governance manifests, README references, and provider projections through path updates.
 - Repoint validation and audit code to canonical `definitions/` assets before tightening or regenerating the projected `.github/.codex/.claude` surfaces.
 - Treat generated provider/runtime folders as output surfaces that should be cut over last, after canonical authorship and validator contracts stabilize.
+- Normalize canonical provider-facing markdown references so `definitions/providers/*` resolves against `definitions/instructions/*`, `definitions/templates/*`, and provider-local roots instead of the legacy `.github` path graph.
 
 ---
 

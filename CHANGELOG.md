@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added an instruction-taxonomy migration checkpoint that defers `.github/.codex/.claude` projection cutover until canonical `definitions/` assets and validation/audit code are definitions-aware.
+- Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 - Added the first shallow projected instruction copies under `.github/instructions/{governance,development,operations,data}` while preserving the legacy projected taxonomy during migration.
 - Scaffolded shallow `definitions/instructions/{development,operations,security,data}` copies for backend, frontend, agentic, persistence, runtime, security, database, and privacy guidance while preserving the legacy instruction tree during migration.
 - Added the first canonical-root reorganization slice for `definitions/`, introducing scaffolded `instructions/`, `templates/`, `agents/`, `skills/`, and `hooks/` roots plus `docs/samples/manifests/` as the stable human-facing manifest sample lane.
@@ -142,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- Repointed `definitions/providers/github/{chatmodes,prompts}` markdown references to canonical `definitions/instructions/*`, `definitions/templates/*`, and `definitions/providers/github/root/*`, which cleared the current `validation instructions` warning set for canonical surfaces.
 - Instruction taxonomy documentation now keeps lane discovery in root READMEs instead of adding `README.md` files to every instruction category folder.
 - Instruction governance taxonomy now keeps cross-cutting TDD and verification workflow in `process/` while moving Rust crate testing into backend, backend integration/API testing into backend, and browser E2E automation into frontend.
 - Instruction governance taxonomy now narrows `runtime-ops` guidance by separating general CI/CD and DevOps platform policy from GitHub Actions-specific workflow authoring.

@@ -9,9 +9,9 @@ Generate an Entity Framework Core migration following repository standards with 
 
 ## Instructions
 Create a new EF Core migration based on:
-- [ntk-data-database.instructions.md](../instructions/data/ntk-data-database.instructions.md)
-- [ntk-data-orm.instructions.md](../instructions/data/ntk-data-orm.instructions.md)
-- [ntk-backend-dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md)
+- [ntk-data-database.instructions.md](../../../instructions/data/ntk-data-database.instructions.md)
+- [ntk-development-persistence-orm.instructions.md](../../../instructions/development/ntk-development-persistence-orm.instructions.md)
+- [ntk-development-backend-dotnet-csharp.instructions.md](../../../instructions/development/ntk-development-backend-dotnet-csharp.instructions.md)
 
 ## Input Variables
 - `${input:migrationName:Migration name (PascalCase)}` - Migration name (e.g., AddOrderNumberIndex)

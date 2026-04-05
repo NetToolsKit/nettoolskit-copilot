@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 14:25
+- LastUpdated: 2026-04-04 15:10
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -94,6 +94,9 @@ Generated: 2026-04-03 00:00
   - planning indexes and active plans/specs
 - Update validators, fixtures, and audit helpers before generated/runtime surfaces.
 - Ensure there are no dangling legacy paths in canonical `definitions/` consumers.
+- Status:
+  - in progress; `validate-instructions` now prioritizes canonical `definitions/` assets and codex skill definitions
+  - in progress; GitHub provider prompt/chatmode markdown references now target canonical `definitions/instructions/*`, `definitions/templates/*`, and `definitions/providers/github/root/*`
 - Commit checkpoint:
   - `refactor(instructions): update instruction routing and consumers`
 
@@ -234,6 +237,7 @@ Generated: 2026-04-03 00:00
 - Keep `templates/` at the repository root and `definitions/shared/templates/` as legacy compatibility roots until template consumers and crates finish migrating.
 - Status:
   - first scaffolding slice ready; canonical root folders and manifest sample lane can be created without deleting legacy documents
+  - in progress; the first canonical template copies now exist under `definitions/templates/codegen/` and `definitions/templates/docs/` for the provider prompt surfaces already migrated off `.github/templates/`
 - Commit checkpoint:
   - `docs(repo): scaffold canonical definition roots and manifest samples`
 

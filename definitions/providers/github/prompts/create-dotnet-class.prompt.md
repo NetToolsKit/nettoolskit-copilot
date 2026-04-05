@@ -9,9 +9,9 @@ Create a new .NET class following this repository's Clean Architecture standards
 
 ## Instructions
 Create a new C# class based on:
-- [dotnet-class-template.cs](../templates/dotnet-class-template.cs)
-- [ntk-backend-dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md)
-- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
+- [dotnet-class-template.cs](../../../templates/codegen/dotnet-class-template.cs)
+- [ntk-development-backend-dotnet-csharp.instructions.md](../../../instructions/development/ntk-development-backend-dotnet-csharp.instructions.md)
+- [ntk-development-backend-architecture-core.instructions.md](../../../instructions/development/ntk-development-backend-architecture-core.instructions.md)
 
 ## Input Variables
 - `${input:className:Class name (PascalCase)}` - The class name

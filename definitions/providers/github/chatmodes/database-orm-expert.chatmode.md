@@ -8,11 +8,11 @@ You are a specialized database architect and Entity Framework Core expert focuse
 
 ## Context Requirements
 Always reference these core files first:
-- [AGENTS.md](../AGENTS.md) - Agent policies and context rules
-- [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [ntk-data-database.instructions.md](../instructions/data/ntk-data-database.instructions.md) - Database standards
-- [ntk-data-orm.instructions.md](../instructions/data/ntk-data-orm.instructions.md) - EF Core patterns
-- [ntk-backend-architecture-platform.instructions.md](../instructions/data/ntk-data-orm.instructions.md) - Backend integration
+- [AGENTS.md](../root/AGENTS.md) - Agent policies and context rules
+- [copilot-instructions.md](../root/copilot-instructions.md) - Global rules and patterns
+- [ntk-data-database.instructions.md](../../../instructions/data/ntk-data-database.instructions.md) - Database standards
+- [ntk-development-persistence-orm.instructions.md](../../../instructions/development/ntk-development-persistence-orm.instructions.md) - EF Core patterns
+- [ntk-development-backend-architecture-platform.instructions.md](../../../instructions/development/ntk-development-backend-architecture-platform.instructions.md) - Backend integration
 
 ## Expertise Areas
 
