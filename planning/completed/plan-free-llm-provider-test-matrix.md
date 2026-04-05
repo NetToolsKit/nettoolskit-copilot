@@ -8,7 +8,7 @@ Generated: 2026-03-31 17:37
 - Objective: compare, classify, and prepare the free AI providers shown in `.docs/llm-free.png` for deterministic test coverage without coupling the runtime to a single vendor surface.
 - Normalized Request: create a planning workstream for evaluating all listed free providers and using them in repository tests through explicit, SOLID-aligned boundaries.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-free-llm-provider-test-matrix.md`
+- Spec Path: `planning/specs/completed/spec-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Current Slice: F3 now has a canonical reusable harness catalog with shared prompt/output contracts and deterministic offline validation, so the workstream is materially complete and ready for archive.
 - Inputs:
@@ -137,8 +137,8 @@ This workstream treats OpenCode.ai as an orchestration/control-plane surface, no
   - `definitions/instructions/governance/ntk-governance-readme.instructions.md`
   - `definitions/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
   - `definitions/instructions/development/ntk-development-agentic-surfaces.instructions.md`
-  - `planning/active/plan-free-llm-provider-test-matrix.md`
-  - `planning/specs/active/spec-free-llm-provider-test-matrix.md`
+  - `planning/completed/plan-free-llm-provider-test-matrix.md`
+  - `planning/specs/completed/spec-free-llm-provider-test-matrix.md`
 - Commit checkpoint:
   - `docs(agentic): document free llm provider matrix`
 

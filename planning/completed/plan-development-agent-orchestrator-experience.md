@@ -12,7 +12,7 @@ Generated: 2026-04-04 00:00
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Current Slice: D1 through D7 are materially complete. The workstream now lives in `planning/completed/` after provider profiles, runtime doctor/reporting, smart routing, normalized adapter contracts, the operator playbook, agent/skill model routing, and governance integration were all delivered and validated.
 - Inputs:
-  - `planning/active/plan-free-llm-provider-test-matrix.md`
+  - `planning/completed/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
   - `planning/active/plan-runtime-operational-diagnostics-and-observability.md`
   - `planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md`
@@ -53,7 +53,7 @@ This workstream coordinates the development-operator experience for `ntk` as an 
   - `crates/orchestrator/src/execution/ai.rs`
   - `crates/orchestrator/src/execution/processor.rs`
   - `crates/cli/src/ai_commands.rs`
-  - `planning/active/plan-free-llm-provider-test-matrix.md`
+  - `planning/completed/plan-free-llm-provider-test-matrix.md`
 - Commit checkpoint:
   - `feat(ai): define development provider profiles`
 
@@ -88,7 +88,7 @@ This workstream coordinates the development-operator experience for `ntk` as an 
   - `crates/orchestrator/src/execution/processor.rs`
   - `crates/orchestrator/src/execution/ai_usage.rs`
   - `planning/active/plan-token-economy-optimization.md`
-  - `planning/active/plan-free-llm-provider-test-matrix.md`
+  - `planning/completed/plan-free-llm-provider-test-matrix.md`
 - Commit checkpoint:
   - `feat(ai): add smart provider routing strategy`
 
