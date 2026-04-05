@@ -151,10 +151,12 @@ Run `ntk --help` for the full live surface and per-command flags.
 | `ntk manifest render` | Preview generated output without applying changes |
 | `ntk manifest apply` | Apply a manifest to generate or update files |
 
-### AI Usage Commands
+### AI Commands
 
 | Command | Description |
 | --- | --- |
+| `ntk ai profiles list` | List built-in AI provider presets for development orchestration |
+| `ntk ai profiles show [profile]` | Show one provider profile or the active `NTK_AI_PROFILE` preset |
 | `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |
 | `ntk ai usage summary` | Report a bounded multi-week local AI usage summary |
 

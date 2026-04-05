@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-03-31 17:37
+- LastUpdated: 2026-04-05 09:55
 - Objective: compare, classify, and prepare the free AI providers shown in `.docs/llm-free.png` for deterministic test coverage without coupling the runtime to a single vendor surface.
 - Normalized Request: create a planning workstream for evaluating all listed free providers and using them in repository tests through explicit, SOLID-aligned boundaries.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: planning only; no implementation work has started.
+- Current Slice: F2 has started with a built-in provider-profile catalog that classifies the currently supported `openai-compatible` and `local/mock` modes without coupling production routing to a single vendor.
 - Inputs:
   - `.docs/llm-free.png`
   - `crates/orchestrator/src/execution/ai.rs`
@@ -68,6 +68,10 @@ This workstream treats OpenCode.ai as an orchestration/control-plane surface, no
 - Keep vendor-specific endpoint/auth details behind adapters instead of leaking them into orchestration or tests.
 - Map the provider modes to the current `AiProvider` abstraction and the existing `OpenAiCompatibleProvider` checkpoint.
 - Keep production provider selection separate from evaluation-only provider selection.
+- Implemented slice:
+  - `crates/orchestrator/src/execution/ai_profiles.rs` now declares stable provider-mode metadata for built-in development presets.
+  - `crates/orchestrator/src/execution/processor.rs` consumes those presets only as optional defaults layered underneath explicit env overrides.
+  - `crates/cli/src/ai_commands.rs` exposes the preset catalog for operator inspection before live-provider harness work lands.
 - Target paths:
   - `crates/orchestrator/src/execution/ai.rs`
   - `crates/orchestrator/src/execution/processor.rs`

@@ -4,7 +4,7 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 00:00
+- LastUpdated: 2026-04-05 09:55
 - Objective: define the target experience and architectural boundaries required for `ntk` to operate as a development-focused AI agent orchestrator with strong provider ergonomics, diagnostics, routing, and operator guidance.
 - Normalized Request: create a design specification for applying stronger development-agent orchestrator patterns to the repository without collapsing existing focused workstreams.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -92,3 +92,7 @@ This separation is required so the development experience becomes stronger witho
   - provider profiles
   - doctor/report
   - routing strategy/status
+- First implementation proof now exists for provider profiles:
+  - built-in `balanced`, `coding`, `cheap`, `latency`, and `local` presets
+  - optional `NTK_AI_PROFILE` selection with env override precedence preserved
+  - `ntk ai profiles list/show` operator inspection surfaces

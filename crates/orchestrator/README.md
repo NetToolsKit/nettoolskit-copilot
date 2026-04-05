@@ -16,6 +16,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
 - ✅ Command routing and parsing through `MainAction` and `get_main_action`
 - ✅ Async command execution with progress and cancellation support
 - ✅ Shared AI session, ChatOps, plugin, and repository workflow orchestration helpers
+- ✅ Built-in AI provider profiles for development-oriented preset selection
 
 ---
 
@@ -33,6 +34,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
   - [Routing](#routing)
   - [Async Execution](#async-execution)
   - [Processor](#processor)
+  - [AI Profiles](#ai-profiles)
   - [Session and Workflow Helpers](#session-and-workflow-helpers)
 - [References](#references)
 - [License](#license)
@@ -204,6 +206,22 @@ pub async fn process_command_with_interrupt(
 ) -> nettoolskit_core::ExitStatus;
 pub async fn process_control_envelope(envelope: nettoolskit_core::ControlEnvelope) -> TaskSubmissionOutcome;
 pub async fn process_text(text: &str) -> nettoolskit_core::ExitStatus;
+```
+
+### AI Profiles
+
+```rust
+pub const NTK_AI_PROFILE_ENV: &str;
+
+pub struct AiProviderProfile { /* fields omitted */ }
+
+pub fn list_ai_provider_profiles() -> &'static [AiProviderProfile];
+pub fn find_ai_provider_profile(profile_id: &str) -> Option<&'static AiProviderProfile>;
+pub fn resolve_ai_provider_profile(
+    profile_id: Option<&str>,
+) -> Result<Option<&'static AiProviderProfile>, String>;
+pub fn resolve_ai_provider_profile_from_env()
+    -> Result<Option<&'static AiProviderProfile>, String>;
 ```
 
 ### Session and Workflow Helpers

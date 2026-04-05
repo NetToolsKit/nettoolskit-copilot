@@ -3,7 +3,8 @@
 use assert_cmd::cargo::cargo_bin_cmd;
 use assert_cmd::Command;
 use nettoolskit_orchestrator::{
-    record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource, NTK_AI_USAGE_DB_PATH_ENV,
+    record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource, NTK_AI_PROFILE_ENV,
+    NTK_AI_USAGE_DB_PATH_ENV,
 };
 use predicates::prelude::*;
 use serial_test::serial;
@@ -225,4 +226,55 @@ costBudgetUsdTotal = 1.2
         .stdout(predicate::str::contains("Current week budget (team)"))
         .stdout(predicate::str::contains("Recent weeks"))
         .stdout(predicate::str::contains("Providers/models in range"));
+}
+
+#[test]
+#[serial]
+fn test_ai_profiles_list_json_output_reports_builtin_profiles() {
+    ntk()
+        .args(["ai", "profiles", "list", "--json-output"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""id": "balanced""#))
+        .stdout(predicate::str::contains(r#""id": "local""#))
+        .stdout(predicate::str::contains(
+            r#""provider_mode": "gateway/openai-compatible""#,
+        ));
+}
+
+#[test]
+#[serial]
+fn test_ai_profiles_show_text_output_reports_one_profile() {
+    ntk()
+        .args(["ai", "profiles", "show", "coding"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Profile: coding"))
+        .stdout(predicate::str::contains(
+            "Provider chain: openai-compatible -> mock",
+        ))
+        .stdout(predicate::str::contains("Reasoning model: gpt-4.1"));
+}
+
+#[test]
+#[serial]
+fn test_ai_profiles_show_uses_active_env_profile_when_not_explicitly_provided() {
+    let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "local");
+
+    ntk()
+        .args(["ai", "profiles", "show"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Profile: local"))
+        .stdout(predicate::str::contains("Live network required: no"));
+}
+
+#[test]
+#[serial]
+fn test_ai_profiles_show_rejects_unknown_profile() {
+    ntk()
+        .args(["ai", "profiles", "show", "unknown"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unsupported AI profile"));
 }

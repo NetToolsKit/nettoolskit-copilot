@@ -15,6 +15,10 @@ pub use execution::{
         AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, AiUsage,
         MockAiOutcome, MockAiProvider, OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
     },
+    ai_profiles::{
+        find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
+        resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
+    },
     ai_session::{
         active_ai_session_id, list_local_ai_session_snapshots, load_local_ai_session_from_path,
         prune_local_ai_session_snapshots, resolve_active_ai_session_id, set_active_ai_session_id,

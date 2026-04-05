@@ -2,14 +2,22 @@
 
 use clap::{Args, Subcommand};
 use nettoolskit_orchestrator::{
-    query_ai_usage_summary, query_weekly_ai_usage_summary, AiUsageSummaryReport,
-    AiUsageSummaryReportRequest, AiUsageWeeklyReport, AiUsageWeeklyReportRequest, ExitStatus,
+    list_ai_provider_profiles, query_ai_usage_summary, query_weekly_ai_usage_summary,
+    resolve_ai_provider_profile, resolve_ai_provider_profile_from_env, AiProviderProfile,
+    AiUsageSummaryReport, AiUsageSummaryReportRequest, AiUsageWeeklyReport,
+    AiUsageWeeklyReportRequest, ExitStatus, NTK_AI_PROFILE_ENV,
 };
 use std::path::PathBuf;
 
 /// AI command group.
 #[derive(Debug, Subcommand)]
 pub enum AiCommand {
+    /// Inspect built-in AI provider profiles and presets.
+    Profiles {
+        /// Profile subcommand.
+        #[clap(subcommand)]
+        command: AiProfilesCommand,
+    },
     /// Inspect persisted AI usage history.
     Usage {
         /// Usage subcommand.
@@ -25,6 +33,33 @@ pub enum AiUsageCommand {
     Weekly(AiUsageWeeklyArgs),
     /// Report a bounded recent multi-week summary of persisted local AI usage history.
     Summary(AiUsageSummaryArgs),
+}
+
+/// AI provider profile subcommands.
+#[derive(Debug, Subcommand)]
+pub enum AiProfilesCommand {
+    /// List built-in AI provider profiles.
+    List(AiProfilesListArgs),
+    /// Show one built-in AI provider profile, or the active profile when no id is provided.
+    Show(AiProfilesShowArgs),
+}
+
+/// CLI arguments for `ai profiles list`.
+#[derive(Debug, Args)]
+pub struct AiProfilesListArgs {
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
+}
+
+/// CLI arguments for `ai profiles show`.
+#[derive(Debug, Args)]
+pub struct AiProfilesShowArgs {
+    /// Optional profile id. When omitted, resolves the active `NTK_AI_PROFILE`.
+    pub profile: Option<String>,
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
 }
 
 /// Shared report options for AI usage history commands.
@@ -81,7 +116,15 @@ pub struct AiUsageSummaryArgs {
 /// Execute one AI command.
 pub async fn execute_ai_command(command: AiCommand) -> ExitStatus {
     match command {
+        AiCommand::Profiles { command } => execute_ai_profiles_command(command),
         AiCommand::Usage { command } => execute_ai_usage_command(command),
+    }
+}
+
+fn execute_ai_profiles_command(command: AiProfilesCommand) -> ExitStatus {
+    match command {
+        AiProfilesCommand::List(arguments) => execute_ai_profiles_list(arguments),
+        AiProfilesCommand::Show(arguments) => execute_ai_profiles_show(arguments),
     }
 }
 
@@ -90,6 +133,84 @@ fn execute_ai_usage_command(command: AiUsageCommand) -> ExitStatus {
         AiUsageCommand::Weekly(arguments) => execute_ai_usage_weekly(arguments),
         AiUsageCommand::Summary(arguments) => execute_ai_usage_summary(arguments),
     }
+}
+
+fn execute_ai_profiles_list(arguments: AiProfilesListArgs) -> ExitStatus {
+    let profiles = list_ai_provider_profiles();
+
+    if arguments.json_output {
+        return print_json_or_error(profiles);
+    }
+
+    println!("AI provider profiles");
+    for profile in profiles {
+        println!(
+            "- {} ({}) [{} / {}]",
+            profile.id, profile.title, profile.provider_mode, profile.support_tier
+        );
+        println!("  {}", profile.summary);
+        println!("  chain: {}", profile.provider_chain.join(" -> "));
+    }
+
+    match resolve_ai_provider_profile_from_env() {
+        Ok(Some(active_profile)) => {
+            println!();
+            println!(
+                "Active profile: {} (from {})",
+                active_profile.id, NTK_AI_PROFILE_ENV
+            );
+        }
+        Ok(None) => {
+            println!();
+            println!(
+                "Active profile: none (set {} to activate a preset)",
+                NTK_AI_PROFILE_ENV
+            );
+        }
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    }
+
+    ExitStatus::Success
+}
+
+fn execute_ai_profiles_show(arguments: AiProfilesShowArgs) -> ExitStatus {
+    let profile = match arguments.profile.as_deref() {
+        Some(profile_id) => match resolve_ai_provider_profile(Some(profile_id)) {
+            Ok(Some(profile)) => profile,
+            Ok(None) => {
+                eprintln!("AI profile id is required");
+                return ExitStatus::Error;
+            }
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        },
+        None => match resolve_ai_provider_profile_from_env() {
+            Ok(Some(profile)) => profile,
+            Ok(None) => {
+                eprintln!(
+                    "No active AI profile is set. Pass a profile id or configure {}.",
+                    NTK_AI_PROFILE_ENV
+                );
+                return ExitStatus::Error;
+            }
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        },
+    };
+
+    if arguments.json_output {
+        return print_json_or_error(profile);
+    }
+
+    print_ai_profile(profile);
+    ExitStatus::Success
 }
 
 fn execute_ai_usage_weekly(arguments: AiUsageWeeklyArgs) -> ExitStatus {
@@ -147,7 +268,7 @@ fn execute_ai_usage_summary(arguments: AiUsageSummaryArgs) -> ExitStatus {
 
 fn print_json_or_error<T>(value: &T) -> ExitStatus
 where
-    T: serde::Serialize,
+    T: serde::Serialize + ?Sized,
 {
     match serde_json::to_string_pretty(value) {
         Ok(payload) => {
@@ -159,6 +280,40 @@ where
             ExitStatus::Error
         }
     }
+}
+
+fn print_ai_profile(profile: &AiProviderProfile) {
+    println!("Profile: {}", profile.id);
+    println!("Title: {}", profile.title);
+    println!("Summary: {}", profile.summary);
+    println!("Provider mode: {}", profile.provider_mode);
+    println!("Support tier: {}", profile.support_tier);
+    println!(
+        "Live network required: {}",
+        if profile.live_network_required {
+            "yes"
+        } else {
+            "no"
+        }
+    );
+    println!("Provider chain: {}", profile.provider_chain.join(" -> "));
+    println!(
+        "Timeouts: primary={}ms secondary={}ms",
+        profile.primary_timeout_ms, profile.secondary_timeout_ms
+    );
+    println!(
+        "Cheap model: {}",
+        profile.cheap_model.unwrap_or("provider-default")
+    );
+    println!(
+        "Reasoning model: {}",
+        profile.reasoning_model.unwrap_or("provider-default")
+    );
+    println!("Cheap intents: {}", profile.cheap_intents.join(", "));
+    println!(
+        "Reasoning intents: {}",
+        profile.reasoning_intents.join(", ")
+    );
 }
 
 fn print_weekly_usage_report(report: &AiUsageWeeklyReport) {

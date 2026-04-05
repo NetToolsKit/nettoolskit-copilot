@@ -4,13 +4,13 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 22:20
+- LastUpdated: 2026-04-05 09:55
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: planning only; no implementation work has started.
+- Current Slice: D1 is implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, processor policy overlays, and `ntk ai profiles` inspection surfaces; D2 runtime doctor/report is next.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -45,6 +45,10 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Keep profile persistence separate from provider adapter code.
 - Make profile selection readable by CLI, orchestrator, and future provider tests without duplicating configuration rules.
 - Reuse the free-provider matrix as the source of provider-mode classification instead of re-documenting providers here.
+- Completed slice:
+  - `crates/orchestrator/src/execution/ai_profiles.rs` now owns the built-in profile catalog and `NTK_AI_PROFILE` resolution.
+  - `crates/orchestrator/src/execution/processor.rs` now overlays provider-chain, timeout, and model-selection defaults from the selected profile while keeping explicit env vars authoritative.
+  - `crates/cli/src/ai_commands.rs` now exposes `ntk ai profiles list` and `ntk ai profiles show [profile]`.
 - Target paths:
   - `crates/orchestrator/src/execution/ai.rs`
   - `crates/orchestrator/src/execution/processor.rs`

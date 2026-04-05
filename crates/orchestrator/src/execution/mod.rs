@@ -4,6 +4,8 @@
 
 /// AI provider abstraction and deterministic mock provider.
 pub mod ai;
+/// Built-in AI provider profiles and preset resolution helpers.
+pub mod ai_profiles;
 /// Local AI session persistence and resume primitives.
 pub mod ai_session;
 /// AI token economy policy, budget estimation, and prompt compaction.
@@ -31,6 +33,10 @@ pub mod repo_workflow;
 pub use ai::{
     AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, AiUsage,
     MockAiOutcome, MockAiProvider, OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
+};
+pub use ai_profiles::{
+    find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
+    resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
 };
 pub use ai_session::{
     active_ai_session_id, list_local_ai_session_snapshots, load_local_ai_session_from_path,

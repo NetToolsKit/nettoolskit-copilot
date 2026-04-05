@@ -3,6 +3,9 @@ use crate::execution::ai::{
     AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, MockAiProvider,
     OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
 };
+use crate::execution::ai_profiles::{
+    resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
+};
 use crate::execution::ai_session::{
     prune_local_ai_session_snapshots, resolve_active_ai_session_id, set_active_ai_session_id,
     LocalAiSessionState, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
@@ -1633,8 +1636,34 @@ fn parse_ai_model_selection_model(value: &str) -> Option<String> {
     }
 }
 
-fn ai_model_selection_policy_from_env() -> AiModelSelectionPolicy {
+fn ai_model_selection_policy_from_profile(
+    profile: Option<&AiProviderProfile>,
+) -> AiModelSelectionPolicy {
     let mut policy = AiModelSelectionPolicy::default();
+
+    let Some(profile) = profile else {
+        return policy;
+    };
+
+    policy.cheap_model = profile.cheap_model.map(str::to_string);
+    policy.reasoning_model = profile.reasoning_model.map(str::to_string);
+
+    let cheap_intents = parse_ai_model_selection_intents(&profile.cheap_intents.join(","));
+    if !cheap_intents.is_empty() {
+        policy.cheap_intents = cheap_intents;
+    }
+
+    let reasoning_intents = parse_ai_model_selection_intents(&profile.reasoning_intents.join(","));
+    if !reasoning_intents.is_empty() {
+        policy.reasoning_intents = reasoning_intents;
+    }
+
+    policy
+}
+
+fn ai_model_selection_policy_from_env() -> Result<AiModelSelectionPolicy, String> {
+    let profile = resolve_ai_provider_profile_from_env()?;
+    let mut policy = ai_model_selection_policy_from_profile(profile);
 
     if let Ok(value) = std::env::var(NTK_AI_MODEL_SELECTION_ENABLED_ENV) {
         if let Some(parsed) = parse_bool(&value) {
@@ -1688,7 +1717,7 @@ fn ai_model_selection_policy_from_env() -> AiModelSelectionPolicy {
         }
     }
 
-    policy
+    Ok(policy)
 }
 
 fn select_ai_model_for_intent(
@@ -2555,8 +2584,7 @@ fn parse_ai_provider_chain(value: &str) -> Result<Vec<AiProviderKind>, String> {
 fn ai_provider_chain_from_env() -> Result<Vec<AiProviderKind>, String> {
     let mut providers = if let Ok(raw_chain) = std::env::var(NTK_AI_PROVIDER_CHAIN_ENV) {
         parse_ai_provider_chain(&raw_chain)?
-    } else {
-        let primary_name = std::env::var("NTK_AI_PROVIDER").unwrap_or_else(|_| "mock".to_string());
+    } else if let Ok(primary_name) = std::env::var("NTK_AI_PROVIDER") {
         let primary = AiProviderKind::parse(&primary_name).ok_or_else(|| {
             format!(
                 "unsupported NTK_AI_PROVIDER `{}` (allowed: mock, openai, openai-compatible)",
@@ -2564,6 +2592,10 @@ fn ai_provider_chain_from_env() -> Result<Vec<AiProviderKind>, String> {
             )
         })?;
         vec![primary]
+    } else if let Some(profile) = resolve_ai_provider_profile_from_env()? {
+        parse_ai_provider_chain(&profile.provider_chain.join(","))?
+    } else {
+        vec![AiProviderKind::Mock]
     };
 
     if providers.len() == 1 {
@@ -2588,11 +2620,17 @@ fn ai_provider_chain_from_env() -> Result<Vec<AiProviderKind>, String> {
 
 fn ai_provider_route_timeout_budget_from_env(
     default_timeout: Duration,
-) -> AiProviderRouteTimeoutBudget {
-    let mut budget = AiProviderRouteTimeoutBudget {
-        primary: default_timeout,
-        secondary: default_timeout,
-    };
+) -> Result<AiProviderRouteTimeoutBudget, String> {
+    let profile = resolve_ai_provider_profile_from_env()?;
+    let mut budget = profile
+        .map(|profile| AiProviderRouteTimeoutBudget {
+            primary: Duration::from_millis(profile.primary_timeout_ms),
+            secondary: Duration::from_millis(profile.secondary_timeout_ms),
+        })
+        .unwrap_or(AiProviderRouteTimeoutBudget {
+            primary: default_timeout,
+            secondary: default_timeout,
+        });
 
     if let Ok(value) = std::env::var(NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV) {
         if let Some(parsed) = parse_timeout_millis(&value) {
@@ -2606,7 +2644,7 @@ fn ai_provider_route_timeout_budget_from_env(
         }
     }
 
-    budget
+    Ok(budget)
 }
 
 fn ai_provider_from_kind(
@@ -2620,6 +2658,11 @@ fn ai_provider_from_kind(
         )))),
         AiProviderKind::OpenAiCompatible => {
             let mut config = OpenAiCompatibleProviderConfig::default();
+            if let Some(profile) = resolve_ai_provider_profile_from_env()? {
+                if let Some(profile_model) = profile.reasoning_model.or(profile.cheap_model) {
+                    config.default_model = profile_model.to_string();
+                }
+            }
             if let Ok(endpoint) = std::env::var("NTK_AI_ENDPOINT") {
                 if !endpoint.trim().is_empty() {
                     config.endpoint = endpoint;
@@ -2659,7 +2702,7 @@ fn ai_provider_routes_from_env(
     retry_policy: AiRetryPolicy,
 ) -> Result<Vec<AiProviderRoute>, String> {
     let provider_chain = ai_provider_chain_from_env()?;
-    let timeout_budget = ai_provider_route_timeout_budget_from_env(retry_policy.request_timeout);
+    let timeout_budget = ai_provider_route_timeout_budget_from_env(retry_policy.request_timeout)?;
     let mut routes = Vec::with_capacity(provider_chain.len());
 
     for (index, provider_kind) in provider_chain.iter().enumerate() {
@@ -3191,7 +3234,27 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
         let _ = nettoolskit_ui::append_footer_log("ai: context bundle attached");
     }
 
-    let model_selection_policy = ai_model_selection_policy_from_env();
+    let model_selection_policy = match ai_model_selection_policy_from_env() {
+        Ok(policy) => policy,
+        Err(error) => {
+            ai_metrics.increment_counter("runtime_ai_requests_error_total");
+            ai_metrics.set_gauge("runtime_ai_provider_health", 0.0);
+            update_ai_request_rate_gauges(&ai_metrics);
+            println!(
+                "{} {}",
+                "✗ Failed to resolve AI profile/model policy:"
+                    .color(Color::RED)
+                    .bold(),
+                error.color(Color::RED)
+            );
+            println!(
+                "{} {}",
+                "env:".color(Color::YELLOW),
+                NTK_AI_PROFILE_ENV.color(Color::CYAN)
+            );
+            return ExitStatus::Error;
+        }
+    };
     let mut model_selection = select_ai_model_for_intent(&model_selection_policy, intent);
     apply_ai_model_selection_to_request(&mut request, &model_selection);
     ai_metrics.increment_counter("runtime_ai_model_selection_decisions_total");
@@ -4382,7 +4445,24 @@ async fn submit_task_intent(
 
     if let Some(ai_intent) = ai_intent_from_task_intent(intent_kind) {
         let token_policy = ai_token_economy_policy_from_env();
-        let model_selection_policy = ai_model_selection_policy_from_env();
+        let model_selection_policy = match ai_model_selection_policy_from_env() {
+            Ok(policy) => policy,
+            Err(error) => {
+                println!(
+                    "{} {}",
+                    "✗ Task rejected by AI profile/model policy:"
+                        .color(Color::RED)
+                        .bold(),
+                    error.color(Color::RED)
+                );
+                println!(
+                    "{} {}",
+                    "env:".color(Color::YELLOW),
+                    NTK_AI_PROFILE_ENV.color(Color::CYAN)
+                );
+                return TaskSubmissionOutcome::rejected(runtime_mode, ExitStatus::Error);
+            }
+        };
         if let Err(reason) = evaluate_ai_task_submit_budget(
             ai_intent,
             payload.as_str(),
@@ -6363,6 +6443,7 @@ mod tests {
     }
 
     fn clear_ai_provider_route_env_vars() {
+        std::env::remove_var(NTK_AI_PROFILE_ENV);
         std::env::remove_var("NTK_AI_PROVIDER");
         std::env::remove_var(NTK_AI_PROVIDER_CHAIN_ENV);
         std::env::remove_var(NTK_AI_FALLBACK_PROVIDER_ENV);
@@ -6565,11 +6646,39 @@ mod tests {
         std::env::set_var(NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV, "1200");
         std::env::set_var(NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV, "3400");
 
-        let budget = ai_provider_route_timeout_budget_from_env(Duration::from_secs(9));
+        let budget = ai_provider_route_timeout_budget_from_env(Duration::from_secs(9))
+            .expect("timeout budget should resolve");
 
         clear_ai_provider_route_env_vars();
         assert_eq!(budget.primary, Duration::from_millis(1_200));
         assert_eq!(budget.secondary, Duration::from_millis(3_400));
+    }
+
+    #[tokio::test]
+    async fn ai_provider_chain_from_env_uses_profile_defaults_when_no_explicit_provider_is_set() {
+        let _guard = env_test_guard().await;
+        clear_ai_provider_route_env_vars();
+        std::env::set_var(NTK_AI_PROFILE_ENV, "local");
+
+        let providers =
+            ai_provider_chain_from_env().expect("profile provider chain should resolve");
+
+        clear_ai_provider_route_env_vars();
+        assert_eq!(providers, vec![AiProviderKind::Mock]);
+    }
+
+    #[tokio::test]
+    async fn ai_provider_route_timeout_budget_from_env_uses_profile_defaults() {
+        let _guard = env_test_guard().await;
+        clear_ai_provider_route_env_vars();
+        std::env::set_var(NTK_AI_PROFILE_ENV, "latency");
+
+        let budget = ai_provider_route_timeout_budget_from_env(Duration::from_secs(9))
+            .expect("profile timeout budget should resolve");
+
+        clear_ai_provider_route_env_vars();
+        assert_eq!(budget.primary, Duration::from_millis(15_000));
+        assert_eq!(budget.secondary, Duration::from_millis(8_000));
     }
 
     #[tokio::test]
@@ -6704,7 +6813,8 @@ mod tests {
             "false",
         );
 
-        let policy = ai_model_selection_policy_from_env();
+        let policy =
+            ai_model_selection_policy_from_env().expect("model selection policy should resolve");
 
         clear_ai_provider_route_env_vars();
         assert!(policy.enabled);
@@ -6720,6 +6830,38 @@ mod tests {
         assert_eq!(policy.cheap_cost_cap_usd, Some(0.20));
         assert_eq!(policy.reasoning_cost_cap_usd, Some(0.70));
         assert!(!policy.fallback_to_cheap_on_guardrail);
+    }
+
+    #[tokio::test]
+    async fn ai_model_selection_policy_from_env_uses_selected_profile_defaults() {
+        let _guard = env_test_guard().await;
+        clear_ai_provider_route_env_vars();
+        std::env::set_var(NTK_AI_PROFILE_ENV, "balanced");
+
+        let policy = ai_model_selection_policy_from_env()
+            .expect("profile model selection policy should resolve");
+
+        clear_ai_provider_route_env_vars();
+        assert_eq!(policy.cheap_model.as_deref(), Some("gpt-4.1-mini"));
+        assert_eq!(policy.reasoning_model.as_deref(), Some("gpt-4.1"));
+        assert_eq!(policy.cheap_intents, vec![AiIntent::Ask]);
+        assert_eq!(
+            policy.reasoning_intents,
+            vec![AiIntent::Plan, AiIntent::Explain, AiIntent::ApplyDryRun]
+        );
+    }
+
+    #[tokio::test]
+    async fn ai_model_selection_policy_from_env_rejects_unknown_profile() {
+        let _guard = env_test_guard().await;
+        clear_ai_provider_route_env_vars();
+        std::env::set_var(NTK_AI_PROFILE_ENV, "unknown");
+
+        let error = ai_model_selection_policy_from_env()
+            .expect_err("unknown AI profile should be rejected");
+
+        clear_ai_provider_route_env_vars();
+        assert!(error.contains("unsupported AI profile"));
     }
 
     #[test]

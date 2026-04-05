@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-03-31 17:37
+- LastUpdated: 2026-04-05 09:55
 - Objective: define the design intent for a free-provider test matrix that covers the providers shown in `.docs/llm-free.png` while keeping provider-specific concerns separate from the main AI orchestration path.
 - Normalized Request: create a planning workstream for using all listed free providers in tests in a controlled, maintainable, SOLID-aligned way.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: the repository currently exposes a generic AI provider trait, an OpenAI-compatible provider implementation, and persisted AI usage reporting, but no explicit free-provider matrix.
+- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, and a built-in provider-profile catalog for `openai-compatible` and `local/mock` development presets, but the full free-provider matrix and live harness are still pending.
 
 ---
 
@@ -86,3 +86,4 @@ This classification can evolve, but the repository should store the mode and ass
 - The current provider abstraction and usage ledger are sufficient to begin design work.
 - The next planning step should map the provider-mode matrix against the current `AiProvider` trait and `NTK_AI_PROVIDER_CHAIN` behavior.
 - Implementation should start with the classification matrix and harness design before any vendor-specific adapter work.
+- Initial implementation proof now exists for provider-mode boundaries through the built-in profile catalog and `ntk ai profiles` inspection surfaces, which can be reused when the wider free-provider matrix lands.

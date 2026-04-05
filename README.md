@@ -23,6 +23,7 @@ Objectives:
 - ✅ Versioned projection model for `.github/`, `.codex/`, `.claude/`, and `.vscode/`
 - ✅ Native MCP runtime projection and Codex config application from a canonical catalog
 - ✅ Local RAG/CAG context index and weekly AI usage ledger for deterministic repo recall
+- ✅ Built-in AI provider profiles for balanced, coding, cheap, latency, and local orchestrator presets
 - ✅ Explicit agentic surface separation for MCP, A2A, RAG, and CAG
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
 - ✅ Compatibility wrappers retained only where they still provide operator entry points
@@ -79,6 +80,8 @@ Run `ntk --help` for the current top-level surface. If no command is provided, `
 
 | Command | Description |
 | --- | --- |
+| `ntk ai profiles list` | List built-in AI provider profiles and their provider-mode classifications |
+| `ntk ai profiles show [profile]` | Show one AI provider profile or the active `NTK_AI_PROFILE` preset |
 | `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |
 | `ntk ai usage summary` | Report a bounded recent multi-week summary of persisted local AI usage history |
 
