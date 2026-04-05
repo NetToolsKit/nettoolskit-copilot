@@ -17,7 +17,7 @@
 - ✅ Planning summary export for handoff and execution reviews
 - ✅ Bootstrap projection for `.github/`, `.codex/`, `.claude/`, and runtime templates
 - ✅ Drift diagnosis, healthcheck orchestration, self-heal repair flows, and versioned runtime doctor control-schema output
-- ✅ Native build-artifact cleanup for `.build`, `.deployment`, `bin`, and `obj` directories
+- ✅ Native build-artifact cleanup for `.build`, `.deployment`, `bin`, and `obj` directories, including measured footprint and reclaimed-byte reporting
 - ✅ Native application of tracked VS Code workspace templates
 
 ---

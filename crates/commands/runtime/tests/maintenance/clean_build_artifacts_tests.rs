@@ -19,6 +19,15 @@ fn seed_artifacts(repo_root: &Path) {
         .expect(".deployment should be created");
     fs::create_dir_all(repo_root.join("src/bin")).expect("bin directory should be created");
     fs::create_dir_all(repo_root.join("src/obj")).expect("obj directory should be created");
+    fs::write(repo_root.join(".build/cache/build.bin"), "build-cache")
+        .expect("build payload should be written");
+    fs::write(
+        repo_root.join(".deployment/releases/publish.zip"),
+        "publish",
+    )
+    .expect("deployment payload should be written");
+    fs::write(repo_root.join("src/bin/app.dll"), "binary").expect("bin payload should be written");
+    fs::write(repo_root.join("src/obj/app.obj"), "object").expect("obj payload should be written");
     fs::write(repo_root.join("src/lib.rs"), "pub fn sample() {}\n")
         .expect("source file should be written");
 }
@@ -38,14 +47,16 @@ fn test_invoke_clean_build_artifacts_removes_artifacts_when_forced() {
 
     assert_eq!(result.status, RuntimeCleanBuildArtifactsStatus::Passed);
     assert_eq!(result.exit_code, 0);
+    assert!(result.discovered_total_bytes > 0);
+    assert_eq!(result.discovered_total_bytes, result.removed_total_bytes);
     assert!(result
         .discovered_directories
         .iter()
-        .any(|path| path.ends_with(".build")));
+        .any(|entry| entry.path.ends_with(".build")));
     assert!(result
         .removed_directories
         .iter()
-        .any(|path| path.ends_with(".deployment")));
+        .any(|entry| entry.path.ends_with(".deployment")));
     assert!(!repo.path().join(".build").exists());
     assert!(!repo.path().join(".deployment").exists());
     assert!(!repo.path().join("src/bin").exists());
@@ -70,6 +81,8 @@ fn test_invoke_clean_build_artifacts_reports_confirmation_required_without_force
         RuntimeCleanBuildArtifactsStatus::ConfirmationRequired
     );
     assert_eq!(result.exit_code, 1);
+    assert!(result.discovered_total_bytes > 0);
+    assert_eq!(result.removed_total_bytes, 0);
     assert!(repo.path().join(".build").exists());
     assert!(repo.path().join(".deployment").exists());
 }
@@ -89,6 +102,8 @@ fn test_invoke_clean_build_artifacts_keeps_artifacts_on_dry_run() {
 
     assert_eq!(result.status, RuntimeCleanBuildArtifactsStatus::DryRun);
     assert_eq!(result.exit_code, 0);
+    assert!(result.discovered_total_bytes > 0);
+    assert_eq!(result.removed_total_bytes, 0);
     assert!(repo.path().join(".build").exists());
     assert!(repo.path().join(".deployment").exists());
     assert!(repo.path().join("src/bin").exists());

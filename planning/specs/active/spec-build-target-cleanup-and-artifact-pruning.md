@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-06 00:45
+- LastUpdated: 2026-04-06 01:35
 - Objective: define the policy for keeping Cargo build output bounded and pruning stale artifacts safely on a Windows developer workstation.
 - Normalized Request: plan a cleanup system for cargo targets and generated build state so the repository does not accumulate multi-gigabyte artifact directories.
 - Active Branch: `main` (planning only; implementation branches TBD)
@@ -56,6 +56,9 @@ The repository already redirects build output to `.build/target`, but that alone
 - Progress [2026-04-06 00:45]:
   - The repository now exposes `ntk runtime clean-build-artifacts` as the native cleanup entry point over the existing Rust maintenance boundary.
   - CLI coverage now proves dry-run and forced-removal behavior on Windows-friendly temp repositories.
+- Progress [2026-04-06 01:35]:
+  - The cleanup boundary now reports measured artifact-byte totals and reclaimed bytes so the operator can prove cleanup footprint before deletion.
+  - Artifact discovery now treats managed roots as terminal cleanup boundaries, preventing nested double-counting inside `.build`, `.deployment`, `bin`, and `obj`.
 
 ---
 

@@ -64,8 +64,9 @@ pub use hooks::setup_global_git_aliases::{
     RuntimeSetupGlobalGitAliasesResult,
 };
 pub use maintenance::clean_build_artifacts::{
-    invoke_clean_build_artifacts, RuntimeCleanBuildArtifactsRequest,
-    RuntimeCleanBuildArtifactsResult, RuntimeCleanBuildArtifactsStatus,
+    invoke_clean_build_artifacts, RuntimeCleanBuildArtifactsDirectory,
+    RuntimeCleanBuildArtifactsRequest, RuntimeCleanBuildArtifactsResult,
+    RuntimeCleanBuildArtifactsStatus,
 };
 pub use maintenance::fix_region_spacing::{
     invoke_fix_region_spacing, RuntimeFixRegionSpacingRequest, RuntimeFixRegionSpacingResult,

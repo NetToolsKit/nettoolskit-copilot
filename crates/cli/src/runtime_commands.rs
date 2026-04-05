@@ -3,20 +3,18 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
-    build_runtime_doctor_control_schema, export_planning_summary,
-    invoke_apply_vscode_templates, invoke_export_enterprise_trends,
-    invoke_clean_build_artifacts, invoke_pre_commit_eof_hygiene, invoke_pre_tool_use,
-    invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
+    build_runtime_doctor_control_schema, export_planning_summary, invoke_apply_vscode_templates,
+    invoke_clean_build_artifacts, invoke_export_enterprise_trends, invoke_pre_commit_eof_hygiene,
+    invoke_pre_tool_use, invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
     invoke_render_vscode_mcp_template, invoke_runtime_doctor, invoke_runtime_healthcheck,
     invoke_runtime_self_heal, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
-    invoke_sync_codex_mcp_config,
-    invoke_trim_trailing_blank_lines, query_local_context_index, query_local_memory,
-    update_local_context_index, update_local_memory, ExportPlanningSummaryRequest,
-    QueryLocalContextIndexRequest, QueryLocalMemoryRequest, RuntimeApplyVscodeTemplatesRequest,
-    RuntimeCleanBuildArtifactsRequest, RuntimeCleanBuildArtifactsStatus, RuntimeDoctorRequest,
-    RuntimeDoctorStatus, RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest,
-    RuntimeHealthcheckStatus, RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus,
-    RuntimePreToolUseRequest,
+    invoke_sync_codex_mcp_config, invoke_trim_trailing_blank_lines, query_local_context_index,
+    query_local_memory, update_local_context_index, update_local_memory,
+    ExportPlanningSummaryRequest, QueryLocalContextIndexRequest, QueryLocalMemoryRequest,
+    RuntimeApplyVscodeTemplatesRequest, RuntimeCleanBuildArtifactsRequest,
+    RuntimeCleanBuildArtifactsStatus, RuntimeDoctorRequest, RuntimeDoctorStatus,
+    RuntimeExportEnterpriseTrendsRequest, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
+    RuntimePreCommitEofHygieneRequest, RuntimePreCommitEofHygieneStatus, RuntimePreToolUseRequest,
     RuntimeRenderMcpRuntimeArtifactsRequest, RuntimeRenderProviderSurfacesRequest,
     RuntimeRenderVscodeMcpTemplateRequest, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
     RuntimeSetupGitHooksRequest, RuntimeSetupGlobalGitAliasesRequest,
@@ -560,9 +558,7 @@ pub fn execute_runtime_command(command: RuntimeCommand) -> ExitStatus {
         RuntimeCommand::Doctor(arguments) => execute_runtime_doctor(arguments),
         RuntimeCommand::Healthcheck(arguments) => execute_runtime_healthcheck(arguments),
         RuntimeCommand::SelfHeal(arguments) => execute_runtime_self_heal(arguments),
-        RuntimeCommand::CleanBuildArtifacts(arguments) => {
-            execute_clean_build_artifacts(arguments)
-        }
+        RuntimeCommand::CleanBuildArtifacts(arguments) => execute_clean_build_artifacts(arguments),
         RuntimeCommand::UpdateLocalContextIndex(arguments) => {
             execute_update_local_context_index(arguments)
         }
@@ -826,14 +822,33 @@ fn execute_clean_build_artifacts(arguments: RuntimeCleanBuildArtifactsArgs) -> E
         "Discovered artifact directories: {}",
         result.discovered_directories.len()
     );
-    for path in &result.discovered_directories {
-        println!("- {}", display_repo_relative_path(&result.repo_root, path));
+    println!(
+        "Discovered bytes: {}",
+        format_human_readable_bytes(result.discovered_total_bytes)
+    );
+    for directory in &result.discovered_directories {
+        println!(
+            "- {} ({})",
+            display_repo_relative_path(&result.repo_root, &directory.path),
+            format_human_readable_bytes(directory.total_bytes)
+        );
     }
 
     if !result.removed_directories.is_empty() {
-        println!("Removed artifact directories: {}", result.removed_directories.len());
-        for path in &result.removed_directories {
-            println!("  removed: {}", display_repo_relative_path(&result.repo_root, path));
+        println!(
+            "Removed artifact directories: {}",
+            result.removed_directories.len()
+        );
+        println!(
+            "Reclaimed bytes: {}",
+            format_human_readable_bytes(result.removed_total_bytes)
+        );
+        for directory in &result.removed_directories {
+            println!(
+                "  removed: {} ({})",
+                display_repo_relative_path(&result.repo_root, &directory.path),
+                format_human_readable_bytes(directory.total_bytes)
+            );
         }
     }
 
@@ -1367,6 +1382,23 @@ fn display_repo_relative_path(repo_root: &Path, path: &Path) -> String {
         .unwrap_or(path)
         .to_string_lossy()
         .replace('\\', "/")
+}
+
+fn format_human_readable_bytes(total_bytes: u64) -> String {
+    const KB: f64 = 1024.0;
+    const MB: f64 = KB * 1024.0;
+    const GB: f64 = MB * 1024.0;
+
+    let bytes = total_bytes as f64;
+    if bytes >= GB {
+        format!("{bytes:.2} GiB", bytes = bytes / GB)
+    } else if bytes >= MB {
+        format!("{bytes:.2} MiB", bytes = bytes / MB)
+    } else if bytes >= KB {
+        format!("{bytes:.2} KiB", bytes = bytes / KB)
+    } else {
+        format!("{total_bytes} B")
+    }
 }
 
 fn healthcheck_status_label(status: RuntimeHealthcheckStatus) -> &'static str {

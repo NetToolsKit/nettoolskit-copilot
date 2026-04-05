@@ -11,6 +11,15 @@ use crate::error::RuntimeCleanBuildArtifactsCommandError;
 
 const ARTIFACT_DIRECTORY_NAMES: &[&str] = &[".build", ".deployment", "bin", "obj"];
 
+/// One discovered build-artifact directory plus its measured footprint.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeCleanBuildArtifactsDirectory {
+    /// Absolute path to the artifact directory.
+    pub path: PathBuf,
+    /// Recursive directory footprint in bytes at discovery time.
+    pub total_bytes: u64,
+}
+
 /// Request payload for `clean-build-artifacts`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct RuntimeCleanBuildArtifactsRequest {
@@ -43,9 +52,13 @@ pub struct RuntimeCleanBuildArtifactsResult {
     /// Resolved target path that was scanned.
     pub target_path: PathBuf,
     /// Artifact directories discovered under the target path.
-    pub discovered_directories: Vec<PathBuf>,
+    pub discovered_directories: Vec<RuntimeCleanBuildArtifactsDirectory>,
+    /// Total measured bytes across all discovered artifact directories.
+    pub discovered_total_bytes: u64,
     /// Artifact directories removed from disk.
-    pub removed_directories: Vec<PathBuf>,
+    pub removed_directories: Vec<RuntimeCleanBuildArtifactsDirectory>,
+    /// Total measured bytes reclaimed by removal.
+    pub removed_total_bytes: u64,
     /// Final command status.
     pub status: RuntimeCleanBuildArtifactsStatus,
     /// Process exit code equivalent.
@@ -73,13 +86,16 @@ pub fn invoke_clean_build_artifacts(
     let target_path = resolve_target_path(&repo_root, request.path.as_deref())?;
     let discovered_directories = discover_artifact_directories(&target_path)
         .map_err(|source| RuntimeCleanBuildArtifactsCommandError::DiscoverArtifacts { source })?;
+    let discovered_total_bytes = calculate_total_bytes(&discovered_directories);
 
     if discovered_directories.is_empty() {
         return Ok(RuntimeCleanBuildArtifactsResult {
             repo_root,
             target_path,
             discovered_directories,
+            discovered_total_bytes,
             removed_directories: Vec::new(),
+            removed_total_bytes: 0,
             status: RuntimeCleanBuildArtifactsStatus::Passed,
             exit_code: 0,
         });
@@ -90,7 +106,9 @@ pub fn invoke_clean_build_artifacts(
             repo_root,
             target_path,
             discovered_directories,
+            discovered_total_bytes,
             removed_directories: Vec::new(),
+            removed_total_bytes: 0,
             status: RuntimeCleanBuildArtifactsStatus::DryRun,
             exit_code: 0,
         });
@@ -101,7 +119,9 @@ pub fn invoke_clean_build_artifacts(
             repo_root,
             target_path,
             discovered_directories,
+            discovered_total_bytes,
             removed_directories: Vec::new(),
+            removed_total_bytes: 0,
             status: RuntimeCleanBuildArtifactsStatus::ConfirmationRequired,
             exit_code: 1,
         });
@@ -109,12 +129,15 @@ pub fn invoke_clean_build_artifacts(
 
     let removed_directories = remove_artifact_directories(&discovered_directories)
         .map_err(|source| RuntimeCleanBuildArtifactsCommandError::RemoveArtifacts { source })?;
+    let removed_total_bytes = calculate_total_bytes(&removed_directories);
 
     Ok(RuntimeCleanBuildArtifactsResult {
         repo_root,
         target_path,
         discovered_directories,
+        discovered_total_bytes,
         removed_directories,
+        removed_total_bytes,
         status: RuntimeCleanBuildArtifactsStatus::Passed,
         exit_code: 0,
     })
@@ -142,7 +165,9 @@ fn resolve_target_path(
     Ok(resolved)
 }
 
-fn discover_artifact_directories(root: &Path) -> anyhow::Result<Vec<PathBuf>> {
+fn discover_artifact_directories(
+    root: &Path,
+) -> anyhow::Result<Vec<RuntimeCleanBuildArtifactsDirectory>> {
     if root.is_file() {
         return Ok(Vec::new());
     }
@@ -158,29 +183,65 @@ fn discover_artifact_directories(root: &Path) -> anyhow::Result<Vec<PathBuf>> {
             let path = entry.path();
             if path.is_dir() {
                 if is_artifact_directory_name(&entry.file_name()) {
-                    matches.push(path.clone());
+                    matches.push(RuntimeCleanBuildArtifactsDirectory {
+                        path,
+                        total_bytes: measure_directory_bytes(&entry.path())?,
+                    });
+                    continue;
                 }
                 stack.push(path);
             }
         }
     }
 
-    matches.sort_by_key(|path| Reverse(path.components().count()));
+    matches.sort_by_key(|entry| Reverse(entry.path.components().count()));
     matches.dedup();
     Ok(matches)
 }
 
-fn remove_artifact_directories(paths: &[PathBuf]) -> anyhow::Result<Vec<PathBuf>> {
+fn remove_artifact_directories(
+    directories: &[RuntimeCleanBuildArtifactsDirectory],
+) -> anyhow::Result<Vec<RuntimeCleanBuildArtifactsDirectory>> {
     let mut removed = Vec::new();
-    for path in paths {
-        if path.exists() {
-            fs::remove_dir_all(path)
-                .with_context(|| format!("failed to remove '{}'", path.display()))?;
-            removed.push(path.clone());
+    for directory in directories {
+        if directory.path.exists() {
+            fs::remove_dir_all(&directory.path)
+                .with_context(|| format!("failed to remove '{}'", directory.path.display()))?;
+            removed.push(directory.clone());
         }
     }
 
     Ok(removed)
+}
+
+fn measure_directory_bytes(root: &Path) -> anyhow::Result<u64> {
+    let mut total = 0_u64;
+    let mut stack = vec![root.to_path_buf()];
+
+    while let Some(current) = stack.pop() {
+        let entries = fs::read_dir(&current)
+            .with_context(|| format!("failed to enumerate '{}'", current.display()))?;
+
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let metadata = entry
+                .metadata()
+                .with_context(|| format!("failed to read metadata for '{}'", path.display()))?;
+            if metadata.is_dir() {
+                stack.push(path);
+            } else if metadata.is_file() {
+                total = total.saturating_add(metadata.len());
+            }
+        }
+    }
+
+    Ok(total)
+}
+
+fn calculate_total_bytes(directories: &[RuntimeCleanBuildArtifactsDirectory]) -> u64 {
+    directories
+        .iter()
+        .fold(0_u64, |sum, entry| sum.saturating_add(entry.total_bytes))
 }
 
 fn is_artifact_directory_name(name: &std::ffi::OsStr) -> bool {

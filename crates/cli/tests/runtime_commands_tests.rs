@@ -782,8 +782,12 @@ fn test_runtime_doctor_cli_supports_json_output_with_control_schema() {
         .assert()
         .success()
         .stdout(predicate::str::contains(r#""schema_version": 1"#))
-        .stdout(predicate::str::contains(r#""schema_kind": "runtime_doctor""#))
-        .stdout(predicate::str::contains(r#""runtime_profile_name": "none""#))
+        .stdout(predicate::str::contains(
+            r#""schema_kind": "runtime_doctor""#,
+        ))
+        .stdout(predicate::str::contains(
+            r#""runtime_profile_name": "none""#,
+        ))
         .stdout(predicate::str::contains(r#""status": "clean""#))
         .stdout(predicate::str::contains(r#""mappings": []"#));
 }
@@ -796,6 +800,14 @@ fn test_runtime_clean_build_artifacts_cli_supports_dry_run() {
         .expect("build target should be created");
     fs::create_dir_all(repo.path().join("src/MyProject/bin/Debug"))
         .expect("bin directory should be created");
+    write_file(
+        &repo.path().join(".build/cargo-target/debug/output.bin"),
+        "build-output",
+    );
+    write_file(
+        &repo.path().join("src/MyProject/bin/Debug/app.dll"),
+        "binary-output",
+    );
 
     ntk()
         .current_dir(repo.path())
@@ -803,7 +815,10 @@ fn test_runtime_clean_build_artifacts_cli_supports_dry_run() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: dry-run"))
-        .stdout(predicate::str::contains("Discovered artifact directories: 2"))
+        .stdout(predicate::str::contains(
+            "Discovered artifact directories: 2",
+        ))
+        .stdout(predicate::str::contains("Discovered bytes:"))
         .stdout(predicate::str::contains(".build"))
         .stdout(predicate::str::contains("src/MyProject/bin"));
 
@@ -819,6 +834,14 @@ fn test_runtime_clean_build_artifacts_cli_removes_directories_when_forced() {
         .expect("build target should be created");
     fs::create_dir_all(repo.path().join("src/MyProject/obj/Debug"))
         .expect("obj directory should be created");
+    write_file(
+        &repo.path().join(".build/cargo-target/debug/output.bin"),
+        "build-output",
+    );
+    write_file(
+        &repo.path().join("src/MyProject/obj/Debug/app.obj"),
+        "object-output",
+    );
 
     ntk()
         .current_dir(repo.path())
@@ -826,7 +849,8 @@ fn test_runtime_clean_build_artifacts_cli_removes_directories_when_forced() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Status: passed"))
-        .stdout(predicate::str::contains("Removed artifact directories: 2"));
+        .stdout(predicate::str::contains("Removed artifact directories: 2"))
+        .stdout(predicate::str::contains("Reclaimed bytes:"));
 
     assert!(!repo.path().join(".build").exists());
     assert!(!repo.path().join("src/MyProject/obj").exists());

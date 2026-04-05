@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-06 00:45
+- LastUpdated: 2026-04-06 01:35
 - Objective: prevent `.build/target` and related transient artifacts from growing without bound and consuming excessive disk on the developer workstation.
 - Normalized Request: create a planning workstream for cargo target cleanup and generated-artifact pruning so the repository stops accumulating multi-gigabyte build state.
 - Active Branch: `main` (planning only; implementation branches TBD)
@@ -39,6 +39,9 @@ This plan coordinates four cleanup slices:
 - Record the current size and growth pattern of `.build/target`.
 - Check whether any build output still spills into `target/` or other uncontrolled folders.
 - Use the measurement as the acceptance baseline for the cleanup policy.
+- Status [2026-04-06 01:35]:
+  - `ntk runtime clean-build-artifacts` now reports measured byte totals for discovered artifact directories and reclaimed bytes after removal.
+  - Artifact inventory entries now preserve per-directory byte counts so dry-run output is usable as a deterministic cleanup baseline.
 - Commit checkpoint:
   - `docs/planning: freeze cargo target cleanup baseline`
 
@@ -47,6 +50,9 @@ This plan coordinates four cleanup slices:
 - Decide what can be pruned automatically and what should remain cached.
 - Keep worktree safety in mind for parallel branches and local development.
 - Ensure cleanup does not destroy useful incremental state unnecessarily.
+- Status [2026-04-06 01:35]:
+  - Artifact discovery now stops descending once a managed artifact directory is found, avoiding nested double-counting and duplicate cleanup intent under the same root.
+  - Cleanup remains opt-in (`--force`) and scoped to the selected path, while dry-run keeps the measurement-only baseline available.
 - Commit checkpoint:
   - `docs/planning: define cargo target pruning policy`
 
