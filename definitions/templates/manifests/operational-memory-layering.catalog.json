@@ -1,0 +1,59 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "operational-memory-layering-catalog",
+  "title": "NetToolsKit Operational Memory Layering Catalog",
+  "layers": [
+    {
+      "id": "entrypoint-memory",
+      "title": "Concise entrypoint memory",
+      "intent": "Always-loadable curated memory for stable operator context.",
+      "format": "markdown",
+      "sizeBudget": "small",
+      "editorialRules": [
+        "Keep only durable operational facts and high-value recall anchors.",
+        "Do not duplicate active planning tasks or verbose execution transcripts."
+      ]
+    },
+    {
+      "id": "topic-memory",
+      "title": "Topic memory files",
+      "intent": "Curated topic-specific detail that expands the entrypoint without bloating it.",
+      "format": "markdown",
+      "sizeBudget": "moderate",
+      "editorialRules": [
+        "Create one file per stable topic or subsystem.",
+        "Promote distilled notes from operational logs only after review."
+      ]
+    },
+    {
+      "id": "operational-notes",
+      "title": "Append-only operational notes",
+      "intent": "Temporary operational capture for later distillation into curated memory.",
+      "format": "append-only markdown or log-like text",
+      "sizeBudget": "unbounded but prunable",
+      "editorialRules": [
+        "Use for transient observations, raw findings, and note capture.",
+        "Do not treat operational notes as the always-loaded memory source."
+      ]
+    }
+  ],
+  "directoryModel": {
+    "editorialBoundary": "Memory files are curated operator assets. Planning stays under planning/ and is never the primary memory store.",
+    "indexingBoundary": "Local-context and SQLite recall may index memory files, but they do not own their editorial lifecycle."
+  },
+  "distillationFlow": [
+    "Capture raw observations in operational notes.",
+    "Review and condense recurring or durable facts.",
+    "Promote distilled facts into topic memory files.",
+    "Promote only the smallest stable anchors into the concise entrypoint."
+  ],
+  "retrievalAlignment": {
+    "ragRole": "RAG may retrieve layered memory files as evidence.",
+    "cagRole": "CAG may compact layered memory into bounded prompt context.",
+    "guardrails": [
+      "Do not flood always-loaded context with raw operational notes.",
+      "Do not repurpose planning artifacts as memory files.",
+      "Keep entrypoint memory concise enough for deterministic inclusion."
+    ]
+  }
+}

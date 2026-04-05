@@ -14,6 +14,7 @@ Current samples:
 
 - `extension-governance.catalog.sample.json` - trimmed example of the canonical extension taxonomy and ownership model for agents, skills, hooks, prompts, and future plugins
 - `free-llm-provider-matrix.sample.json` - trimmed example of the free-provider matrix shape used by runtime diagnostics and AI usage reporting
+- `operational-memory-layering.catalog.sample.json` - trimmed example of the layered file-memory model for entrypoint memory, topic memory, and append-only operational notes
 - `runtime-diagnostics.taxonomy.sample.json` - trimmed example of the runtime diagnostics taxonomy consumed by operator playbooks and future doctor/report surfaces
 
 ---

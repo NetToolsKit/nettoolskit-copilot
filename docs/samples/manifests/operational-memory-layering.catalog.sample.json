@@ -1,0 +1,21 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "operational-memory-layering-catalog",
+  "layers": [
+    {
+      "id": "entrypoint-memory",
+      "title": "Concise entrypoint memory"
+    },
+    {
+      "id": "topic-memory",
+      "title": "Topic memory files"
+    },
+    {
+      "id": "operational-notes",
+      "title": "Append-only operational notes"
+    }
+  ],
+  "directoryModel": {
+    "editorialBoundary": "planning/ is not the primary memory store."
+  }
+}

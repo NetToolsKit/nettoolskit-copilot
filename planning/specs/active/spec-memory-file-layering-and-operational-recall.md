@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 23:45
 - Objective: define a layered local-memory model that distinguishes concise always-loaded memory, topic files, and operational logs without collapsing them into one generic context store.
 - Normalized Request: create a workstream for file-based operational memory layering that complements the repository's RAG/CAG evolution and improves persistent recall discipline.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -65,3 +65,4 @@ The repository already has local context, planning, and instruction systems, but
 - Ready for planning now.
 - Initial implementation should freeze the editorial and directory model before wiring retrieval.
 - Validation should cover both file shape rules and the relationship to the local-context index.
+- The repository now has a canonical operational-memory layering catalog plus README and architecture guidance that separate curated file memory from planning artifacts and from SQLite-backed recall ownership.

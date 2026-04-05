@@ -45,5 +45,6 @@ graph TD
 - Human-facing examples belong in `docs/samples/`; canonical authored templates belong here.
 - Runtime diagnostics and provider-family catalogs should stay versioned under `definitions/templates/manifests/` and only be mirrored into docs as samples, never duplicated as authored operator truth.
 - Extension taxonomy, discovery, and loading-boundary contracts should also stay under `definitions/templates/manifests/` so future plugins, skills, hooks, and provider prompts share one governed classification model.
+- File-based operational memory layering should stay versioned under `definitions/templates/manifests/` so curated memory, topic memory, and append-only notes remain distinct from planning and retrieval storage.
 
 ---

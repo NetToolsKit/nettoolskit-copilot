@@ -257,6 +257,20 @@ Provider mirrors consume these roots, but they do not replace them as authored s
 
 ---
 
+### Operational Memory Model
+
+File-based operational memory is governed separately from both `planning/` and the SQLite-backed recall store so curated memory stays small, reviewable, and indexable.
+
+| Layer | Role | Canonical contract |
+| --- | --- | --- |
+| Entrypoint memory | concise always-loadable memory | `definitions/templates/manifests/operational-memory-layering.catalog.json` |
+| Topic memory | curated subsystem/topic detail | `definitions/templates/manifests/operational-memory-layering.catalog.json` |
+| Operational notes | append-only intake for later distillation | `definitions/templates/manifests/operational-memory-layering.catalog.json` |
+
+RAG may retrieve these files and CAG may compact them, but `planning/` remains the execution workspace and SQLite remains the retrieval store rather than the editorial source.
+
+---
+
 ### Control Plane Model
 
 Formal control-plane, session, and operator contracts are documented in:
@@ -412,6 +426,7 @@ We follow semantic versioning and conventional commits. Please ensure your contr
 - [Template Assets](templates/README.md)
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
 - [Extension Governance Model](docs/architecture/extension-governance-model.md)
+- [Operational Memory Layering Model](docs/architecture/operational-memory-layering-model.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
 - [AI Development Operator Playbook](docs/operations/ai-development-operator-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)

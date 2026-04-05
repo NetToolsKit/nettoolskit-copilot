@@ -18,6 +18,7 @@ This tree now separates five canonical authored lanes:
 
 `providers/` remains the consumer and projection side of the model.
 The canonical extension-class contract is versioned in `definitions/templates/manifests/extension-governance.catalog.json`.
+The canonical file-memory layering contract is versioned in `definitions/templates/manifests/operational-memory-layering.catalog.json`.
 
 ---
 
@@ -113,6 +114,7 @@ graph TD
 - `skills/` holds reusable capability packs grouped by engineering role.
 - `hooks/` holds lifecycle entrypoints such as `session-start`, `pre-tool-use`, `subagent-start`, and `stop`.
 - `templates/manifests/extension-governance.catalog.json` defines the shared extension taxonomy, authored roots, and loading boundaries across those lanes.
+- `templates/manifests/operational-memory-layering.catalog.json` defines how curated memory, topic memory, and append-only notes stay distinct from planning and retrieval storage.
 
 Each canonical root should be authored here first, then projected or consumed elsewhere.
 
@@ -194,6 +196,7 @@ This tree is consumed by:
 - [definitions/providers/README.md](providers/README.md)
 - [definitions/shared/README.md](shared/README.md)
 - [definitions/templates/manifests/extension-governance.catalog.json](templates/manifests/extension-governance.catalog.json)
+- [definitions/templates/manifests/operational-memory-layering.catalog.json](templates/manifests/operational-memory-layering.catalog.json)
 - [provider-surface-projection.catalog.json](providers/github/governance/provider-surface-projection.catalog.json)
 - `ntk runtime render-provider-surfaces --repo-root .`
 
