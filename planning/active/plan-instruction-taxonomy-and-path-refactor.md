@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 10:05
+- LastUpdated: 2026-04-05 10:40
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -317,6 +317,7 @@ Generated: 2026-04-03 00:00
   - in progress; canonical security and release baselines now require authored evidence from `definitions/providers/github/{governance,root,hooks}/*` where those assets already exist, and the release/security Rust plus CLI fixtures write canonical governance files first while preserving `.github/governance/*` mirrors only for temporary compatibility
   - in progress; runtime/bootstrap/doctor/healthcheck/self-heal, hook, MCP, and local-context Rust test scaffolds now materialize authored governance catalogs under `definitions/providers/github/governance/*` first, while preserving `.github/governance/*` mirrors only so current runtime readers and deferred projections keep passing during migration
   - in progress; the native provider-surface renderer plus its Rust/CLI scaffolds now source GitHub instruction and template projections from `definitions/{instructions,templates}` directly, leaving `definitions/shared/*` only for shared POML prompt assets until prompt/template migration is complete
+  - in progress; the authored PowerShell GitHub surface renderer and its smoke harness now follow the same contract as the Rust runtime path, projecting instructions/templates from `definitions/{instructions,templates}` while retaining `definitions/shared/prompts/poml` only for the shared POML prompt lane
 - Commit checkpoint:
   - `refactor(validation): prioritize canonical definitions in validate-instructions`
 

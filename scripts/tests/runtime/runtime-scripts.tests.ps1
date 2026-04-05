@@ -531,7 +531,8 @@ try {
         $setupProfilesScriptPath = Join-Path $runtimeScriptRoot 'setup-vscode-profiles.ps1'
         $providerSurfaceCatalogHelperPath = Join-Path $resolvedRepoRoot 'scripts\common\provider-surface-catalog.ps1'
         $providerSurfaceCatalogPath = Join-Path $resolvedRepoRoot '.github\governance\provider-surface-projection.catalog.json'
-        $sharedDefinitionRoot = Join-Path $tempRepoRoot 'definitions\shared'
+        $definitionsRoot = Join-Path $tempRepoRoot 'definitions'
+        $sharedDefinitionRoot = Join-Path $definitionsRoot 'shared'
         $sharedPomlSourceRoot = Join-Path $sharedDefinitionRoot 'prompts\poml'
         $providerSourceRoot = Join-Path $tempRepoRoot 'definitions\providers'
         $githubProviderSourceRoot = Join-Path $providerSourceRoot 'github'
@@ -565,9 +566,9 @@ try {
         New-Item -ItemType Directory -Path $claudeRuntimeSourceRoot -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $vscodeWorkspaceSourceRoot 'snippets') -Force | Out-Null
         New-Item -ItemType Directory -Path $profileDefinitionRoot -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $sharedDefinitionRoot 'instructions') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $definitionsRoot 'instructions\governance') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $sharedPomlSourceRoot 'templates') -Force | Out-Null
-        New-Item -ItemType Directory -Path (Join-Path $sharedDefinitionRoot 'templates') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $definitionsRoot 'templates\docs') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'root') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'agents') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
@@ -601,7 +602,7 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\copilot-instructions.md') -Value '# Demo Instructions' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'root\instruction-routing.catalog.yml') -Value 'routes: []' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'agents\super-agent.agent.md') -Value '# Agent' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'instructions\\core\\ntk-agents-super-agent.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $definitionsRoot 'instructions\governance\ntk-governance-repository-operating-model.instructions.md') -Value '# Instruction' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'prompts\route-instructions.prompt.md') -Value '# Prompt' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $sharedPomlSourceRoot 'prompt-engineering-poml.md') -Value '# POML Guide' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $sharedPomlSourceRoot 'templates\changelog-entry.poml') -Value '<poml />' -Encoding UTF8 -NoNewline
@@ -612,7 +613,7 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\session-start.ps1') -Value '# hook session' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
-        Set-Content -LiteralPath (Join-Path $sharedDefinitionRoot 'templates\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $definitionsRoot 'templates\docs\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
 
         & $renderProviderSkillsScriptPath -RepoRoot $tempRepoRoot -Provider codex,claude | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
@@ -670,13 +671,14 @@ try {
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-True ($exitCode -eq 0) 'render-github-instruction-surfaces smoke test failed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'AGENTS.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub root files.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\\core\\ntk-agents-super-agent.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'agents\super-agent.agent.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub agent surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'instructions\governance\ntk-governance-repository-operating-model.instructions.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub instruction surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'chatmodes\demo.chatmode.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub chatmode surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'prompts\route-instructions.prompt.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub prompt entrypoint surface.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'prompts\poml\prompt-engineering-poml.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected shared POML guide.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'prompts\poml\templates\changelog-entry.poml') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected shared POML template.'
         Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'hooks\scripts\session-start.ps1') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub hook wrapper.'
-        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'templates\readme-template.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub template surface.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $githubInstructionOutputRoot 'templates\docs\readme-template.md') -PathType Leaf) 'render-github-instruction-surfaces did not write the projected GitHub template surface.'
 
         & $renderVscodeWorkspaceScriptPath -RepoRoot $tempRepoRoot | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }

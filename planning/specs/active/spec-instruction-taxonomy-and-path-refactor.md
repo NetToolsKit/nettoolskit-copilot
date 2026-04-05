@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 10:05
+- LastUpdated: 2026-04-05 10:40
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -160,6 +160,7 @@ The second copy-first migration wave applies the same shallow model to the proje
 - Security and release authored baselines prefer canonical evidence under `definitions/providers/github/{governance,root,hooks}/*` wherever those assets already exist, while transitional tests may still mirror `.github/governance/*` until projection cutover is complete.
 - Runtime/bootstrap/doctor/healthcheck/self-heal, hook, MCP, and local-context Rust test scaffolds author governance catalogs under `definitions/providers/github/governance/*` first, while `.github/governance/*` remains only a compatibility mirror until generated-surface cutover.
 - Native provider-surface rendering for GitHub instruction/template projections prefers `definitions/{instructions,templates}` directly; `definitions/shared/*` remains only for shared POML prompt assets until that lane is migrated.
+- The authored PowerShell GitHub surface renderer must mirror the same instruction/template roots as the Rust runtime renderer, so the projected `.github` surface does not drift between implementation paths.
 
 ---
 

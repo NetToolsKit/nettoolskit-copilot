@@ -3,17 +3,17 @@
     Renders repository-owned GitHub/Copilot instruction surfaces from the authoritative definitions tree.
 
 .DESCRIPTION
-    Mirrors the authoritative GitHub provider tree plus shared instruction assets
+    Mirrors the authoritative GitHub provider tree plus canonical definition assets
     into the tracked `.github/` instruction/runtime surfaces:
     - managed provider root files (`AGENTS.md`, `COMMANDS.md`,
       `copilot-instructions.md`, `instruction-routing.catalog.yml`)
     - `.github/agents/`
     - `.github/chatmodes/`
-    - `.github/instructions/` from `definitions/shared/instructions/`
+    - `.github/instructions/` from `definitions/instructions/`
     - provider-specific `.github/prompts/*.prompt.md` entrypoints
-    - shared `.github/prompts/poml/`
+    - shared `.github/prompts/poml/` from `definitions/shared/prompts/poml/`
     - `.github/hooks/`
-    - `.github/templates/` from `definitions/shared/templates/`
+    - `.github/templates/` from `definitions/templates/`
 
     GitHub-native repository/community assets such as `.github/ISSUE_TEMPLATE/`,
     `.github/PULL_REQUEST_TEMPLATE.md`, `.github/dependabot.yml`, and
@@ -27,9 +27,11 @@
     Defaults to `<RepoRoot>/definitions/providers/github`.
 
 .PARAMETER SharedRoot
-    Optional override path to the shared authoritative definitions tree used for
-    projected instructions, templates, and shared prompt libraries.
-    Defaults to `<RepoRoot>/definitions/shared`.
+    Legacy parameter name kept for compatibility. When provided, this now
+    points at the canonical definitions root used for projected instructions and
+    templates. Shared POML prompt assets still resolve from
+    `<RepoRoot>/definitions/shared/prompts/poml`.
+    Defaults to `<RepoRoot>/definitions`.
 
 .PARAMETER OutputRoot
     Optional override path for the rendered `.github/` surface.
@@ -161,8 +163,9 @@ function Invoke-GithubPromptSurfaceRender {
 
 $resolvedRepoRoot = Resolve-RepositoryRoot -RequestedRoot $RepoRoot
 $resolvedSourceRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $SourceRoot -DefaultRelativePath 'definitions/providers/github'
-$resolvedSharedRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $SharedRoot -DefaultRelativePath 'definitions/shared'
+$resolvedDefinitionsRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $SharedRoot -DefaultRelativePath 'definitions'
 $resolvedOutputRoot = Resolve-GithubSurfacePath -ResolvedRepoRoot $resolvedRepoRoot -RequestedPath $OutputRoot -DefaultRelativePath '.github'
+$resolvedSharedPomlRoot = Join-Path $resolvedRepoRoot 'definitions/shared/prompts/poml'
 
 $rootSourcePath = Join-Path $resolvedSourceRoot 'root'
 $managedRootFiles = @(Get-ChildItem -LiteralPath $rootSourcePath -File -Force -ErrorAction Stop)
@@ -172,7 +175,8 @@ Start-ExecutionSession `
     -RootPath $resolvedRepoRoot `
     -Metadata ([ordered]@{
             'Source root' = $resolvedSourceRoot
-            'Shared root' = $resolvedSharedRoot
+            'Definitions root' = $resolvedDefinitionsRoot
+            'Shared POML root' = $resolvedSharedPomlRoot
             'Output root' = $resolvedOutputRoot
         }) `
     -IncludeMetadataInDefaultOutput | Out-Null
@@ -184,13 +188,13 @@ foreach ($rootFile in $managedRootFiles) {
 $directorySpecs = @(
     [pscustomobject]@{ Name = 'agents'; Source = Join-Path $resolvedSourceRoot 'agents'; Destination = Join-Path $resolvedOutputRoot 'agents' }
     [pscustomobject]@{ Name = 'chatmodes'; Source = Join-Path $resolvedSourceRoot 'chatmodes'; Destination = Join-Path $resolvedOutputRoot 'chatmodes' }
-    [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedSharedRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
+    [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedDefinitionsRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
     [pscustomobject]@{ Name = 'hooks'; Source = Join-Path $resolvedSourceRoot 'hooks'; Destination = Join-Path $resolvedOutputRoot 'hooks' }
-    [pscustomobject]@{ Name = 'templates'; Source = Join-Path $resolvedSharedRoot 'templates'; Destination = Join-Path $resolvedOutputRoot 'templates' }
+    [pscustomobject]@{ Name = 'templates'; Source = Join-Path $resolvedDefinitionsRoot 'templates'; Destination = Join-Path $resolvedOutputRoot 'templates' }
 )
 
 $providerPromptSourcePath = Join-Path $resolvedSourceRoot 'prompts'
-$sharedPomlSourcePath = Join-Path $resolvedSharedRoot 'prompts\poml'
+$sharedPomlSourcePath = $resolvedSharedPomlRoot
 $promptDestinationPath = Join-Path $resolvedOutputRoot 'prompts'
 Invoke-GithubPromptSurfaceRender -ProviderPromptSourcePath $providerPromptSourcePath -SharedPomlSourcePath $sharedPomlSourcePath -DestinationPath $promptDestinationPath
 Write-VerboseColor ("Rendered GitHub prompt surface: {0} + {1} -> {2}" -f $providerPromptSourcePath, $sharedPomlSourcePath, $promptDestinationPath) 'Gray'
