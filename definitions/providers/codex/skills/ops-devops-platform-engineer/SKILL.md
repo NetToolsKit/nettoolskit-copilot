@@ -7,23 +7,23 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml`.
 3. Load infrastructure packs only for impacted files.
 
 ## Infrastructure instruction packs
 
 - CI/CD:
-  - `.github/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
 - Containers:
-  - `.github/instructions/operations/ntk-operations-docker.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-docker.instructions.md`
 - Kubernetes:
-  - `.github/instructions/operations/ntk-operations-k8s.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-k8s.instructions.md`
 - Quality gates:
-  - `.github/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
 - Performance and optimization (when needed):
-  - `.github/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
-  - `.github/instructions/operations/ntk-operations-microservices-performance.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md`
 
 ## Execution workflow
 
@@ -35,7 +35,7 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 
 ## Prompt accelerators
 
-- `.github/prompts/create-docker-setup.prompt.md`
+- `definitions/providers/github/prompts/create-docker-setup.prompt.md`
 
 ## Validation examples
 

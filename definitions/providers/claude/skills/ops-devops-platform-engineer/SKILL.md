@@ -7,19 +7,19 @@ description: Build and maintain CI/CD pipelines, containerization, Kubernetes ma
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Infrastructure instruction packs
 
-- CI/CD: `.github/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
-- Containers: `.github/instructions/operations/ntk-operations-docker.instructions.md`
-- Kubernetes: `.github/instructions/operations/ntk-operations-k8s.instructions.md`
-- Quality gates: `.github/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
+- CI/CD: `definitions/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
+- Containers: `definitions/instructions/operations/ntk-operations-docker.instructions.md`
+- Kubernetes: `definitions/instructions/operations/ntk-operations-k8s.instructions.md`
+- Quality gates: `definitions/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
 - Performance (when needed):
-  - `.github/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
-  - `.github/instructions/operations/ntk-operations-microservices-performance.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md`
 
 ## Claude-native execution
 
@@ -35,7 +35,7 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 
 ## Prompt accelerators
 
-- `.github/prompts/create-docker-setup.prompt.md`
+- `definitions/providers/github/prompts/create-docker-setup.prompt.md`
 
 ## Validation examples
 

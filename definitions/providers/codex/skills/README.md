@@ -136,8 +136,8 @@ pwsh -File .\scripts\runtime\bootstrap.ps1
 - `definitions/providers/codex/skills/`
 - `.codex/skills/core-context-router/SKILL.md`
 - `.codex/skills/core-runtime-sync/SKILL.md`
-- `.github/instruction-routing.catalog.yml`
-- `.github/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
+- `definitions/providers/github/root/instruction-routing.catalog.yml`
+- `definitions/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
 - `scripts/runtime/bootstrap.ps1`
 - `scripts/runtime/render-provider-skill-surfaces.ps1`
 

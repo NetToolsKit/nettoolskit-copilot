@@ -7,16 +7,16 @@ description: Implement and refactor frontend features using Vue and Quasar with 
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Frontend instruction pack
 
-- `.github/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
-- `.github/instructions/development/ntk-development-frontend-vue-quasar.instructions.md`
-- `.github/instructions/development/ntk-development-frontend-vue-quasar-architecture.instructions.md`
-- `.github/instructions/development/ntk-development-frontend-ui-ux.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-vue-quasar.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-vue-quasar-architecture.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-ui-ux.instructions.md`
 
 ## Claude-native execution
 
@@ -32,7 +32,7 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 
 ## Prompt accelerators
 
-- `.github/prompts/create-vue-component.prompt.md`
+- `definitions/providers/github/prompts/create-vue-component.prompt.md`
 
 ## Validation examples
 

@@ -13,29 +13,29 @@ description: Base implementation skill for this repository across .NET/C#, backe
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml` and `definitions/providers/github/prompts/route-instructions.prompt.md`.
 3. Keep only mandatory files plus the selected domain pack.
 
 ## Select domain instruction pack
 
 - .NET and backend:
-  - `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
-  - `.github/instructions/development/ntk-development-backend-architecture-core.instructions.md`
-  - `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-architecture-core.instructions.md`
+  - `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
 - Database and ORM:
-  - `.github/instructions/data/ntk-data-database.instructions.md`
-  - `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
+  - `definitions/instructions/data/ntk-data-database.instructions.md`
+  - `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
 - Frontend Vue/Quasar:
-  - `.github/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
-  - `.github/instructions/development/ntk-development-frontend-vue-quasar.instructions.md`
-  - `.github/instructions/development/ntk-development-frontend-vue-quasar-architecture.instructions.md`
-  - `.github/instructions/development/ntk-development-frontend-ui-ux.instructions.md`
+  - `definitions/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
+  - `definitions/instructions/development/ntk-development-frontend-vue-quasar.instructions.md`
+  - `definitions/instructions/development/ntk-development-frontend-vue-quasar-architecture.instructions.md`
+  - `definitions/instructions/development/ntk-development-frontend-ui-ux.instructions.md`
 - Rust:
-  - `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
-  - `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-rust-testing.instructions.md`
 - Performance/microservices (when applicable):
-  - `.github/instructions/operations/ntk-operations-microservices-performance.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md`
 
 ## Execution workflow
 
@@ -47,12 +47,12 @@ description: Base implementation skill for this repository across .NET/C#, backe
 
 ## Prompt accelerators
 
-- `.github/prompts/create-dotnet-class.prompt.md`
-- `.github/prompts/create-api-endpoint.prompt.md`
-- `.github/prompts/create-ef-migration.prompt.md`
-- `.github/prompts/create-vue-component.prompt.md`
-- `.github/prompts/create-rust-module.prompt.md`
-- `.github/prompts/refactor-to-clean-architecture.prompt.md`
+- `definitions/providers/github/prompts/create-dotnet-class.prompt.md`
+- `definitions/providers/github/prompts/create-api-endpoint.prompt.md`
+- `definitions/providers/github/prompts/create-ef-migration.prompt.md`
+- `definitions/providers/github/prompts/create-vue-component.prompt.md`
+- `definitions/providers/github/prompts/create-rust-module.prompt.md`
+- `definitions/providers/github/prompts/refactor-to-clean-architecture.prompt.md`
 
 ## Validation examples
 

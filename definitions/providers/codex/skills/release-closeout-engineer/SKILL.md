@@ -7,13 +7,13 @@ description: Close out a completed workstream by updating README artifacts when 
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`.
-2. Load `.github/copilot-instructions.md`.
-3. Load `.github/instruction-routing.catalog.yml`.
-4. Load `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-5. Load `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`.
-6. Load `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md`.
-7. Load `.github/instructions/governance/ntk-governance-readme.instructions.md` when README files are in scope.
+1. Load `definitions/providers/github/root/AGENTS.md`.
+2. Load `definitions/providers/github/root/copilot-instructions.md`.
+3. Load `definitions/providers/github/root/instruction-routing.catalog.yml`.
+4. Load `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+5. Load `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`.
+6. Load `definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md`.
+7. Load `definitions/instructions/governance/ntk-governance-readme.instructions.md` when README files are in scope.
 8. Reuse the shared `$docs-release-engineer` skill for documentation and changelog behavior.
 
 ## Responsibilities

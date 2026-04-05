@@ -7,25 +7,25 @@ description: Design, implement, and stabilize automated tests (unit, integration
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Testing instruction packs
 
 - Core .NET:
-  - `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
-  - `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+  - `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/development/ntk-development-backend-integration-testing.instructions.md`
-  - `.github/instructions/development/ntk-development-frontend-e2e-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-integration-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-frontend-e2e-testing.instructions.md`
 - Rust:
-  - `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
-  - `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
 - TDD:
-  - `.github/instructions/governance/ntk-governance-tdd-verification.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-tdd-verification.instructions.md`
 
 ## Claude-native execution
 
@@ -41,7 +41,7 @@ Run as a `general-purpose` agent within the Super Agent pipeline. Always runs af
 
 ## Prompt accelerators
 
-- `.github/prompts/generate-unit-tests.prompt.md`
+- `definitions/providers/github/prompts/generate-unit-tests.prompt.md`
 
 ## Validation examples
 

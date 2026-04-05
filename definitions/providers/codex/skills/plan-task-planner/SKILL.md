@@ -7,16 +7,16 @@ description: Plan and sequence complex implementation work into deterministic, t
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml` and `definitions/providers/github/prompts/route-instructions.prompt.md`.
 3. Load only planning/process files plus the domain packs needed by the plan.
 
 ## Planning instruction pack
 
-- `.github/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
-- `.github/instructions/governance/ntk-governance-effort-estimation-ucp.instructions.md`
-- `.github/instructions/governance/ntk-governance-pr.instructions.md` (when output is PR-oriented)
-- `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md` (when release/change log impact exists)
+- `definitions/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
+- `definitions/instructions/governance/ntk-governance-effort-estimation-ucp.instructions.md`
+- `definitions/instructions/governance/ntk-governance-pr.instructions.md` (when output is PR-oriented)
+- `definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md` (when release/change log impact exists)
 
 ## Planning workflow
 

@@ -7,9 +7,9 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Load `.github/instructions/governance/ntk-governance-pr.instructions.md`.
-3. Route additional domain instructions with `.github/instruction-routing.catalog.yml` based on changed files.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Load `definitions/instructions/governance/ntk-governance-pr.instructions.md`.
+3. Route additional domain instructions with `definitions/providers/github/root/instruction-routing.catalog.yml` based on changed files.
 
 ## Review order
 
@@ -27,9 +27,9 @@ description: Perform repository-aware code reviews focused on bugs, regressions,
 
 ## Useful references
 
-- `.github/instructions/development/ntk-development-backend-architecture-core.instructions.md`
-- `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
-- `.github/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
-- `.github/instructions/data/ntk-data-database.instructions.md`
-- `.github/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-architecture-core.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
+- `definitions/instructions/data/ntk-data-database.instructions.md`
+- `definitions/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
 - `.github/chatmodes/clean-architecture-review.chatmode.md`

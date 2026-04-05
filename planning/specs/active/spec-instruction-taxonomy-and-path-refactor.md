@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 23:55
+- LastUpdated: 2026-04-04 23:16
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -55,6 +55,7 @@ The repository already separates shared instruction sources under `definitions/s
 - Repoint validation and audit code to canonical `definitions/` assets before tightening or regenerating the projected `.github/.codex/.claude` surfaces.
 - Treat generated provider/runtime folders as output surfaces that should be cut over last, after canonical authorship and validator contracts stabilize.
 - Normalize canonical provider-facing markdown references so `definitions/providers/*` resolves against `definitions/instructions/*`, `definitions/templates/*`, and provider-local roots instead of the legacy `.github` path graph.
+- Normalize provider-authored skills, orchestration prompts, runtime settings, and root command docs so canonical `definitions/providers/*` consumers never require projected `.github/*` authoring paths to function.
 - Move governance validation contracts into canonical provider-owned definitions under `definitions/providers/github/governance/` so validation and audit commands stop treating `.github/governance` as the primary authored source.
 - Allow temporary compatibility matching for old `core/` path references while canonical `governance/` paths are still being propagated through provider skills, prompts, and routing artifacts.
 - Repoint provider skill packs, orchestration prompts, and GitHub root governance assets to the shallow `definitions/instructions/{governance,development,operations,security,data}` taxonomy so canonical references stop depending on the transitional `core/process/architecture/runtime-ops` layout.
@@ -143,6 +144,7 @@ The second copy-first migration wave applies the same shallow model to the proje
 - `super-agent` no longer competes with repository invariants inside the instruction tree; it belongs to the `agents/` root.
 - `validate-instructions` and follow-up audit validators can pass by using canonical `definitions/` assets first, without requiring `.github/.codex/.claude` generated surfaces to be the primary source of truth.
 - Projection/runtime surfaces are explicitly a later migration stage, not a prerequisite for canonical instruction reorganization.
+- Provider-authored consumers under `definitions/providers/*` resolve only canonical `definitions/*` assets for authored references, with projected `.github/*` paths reserved for downstream runtime sync and generated copies.
 
 ---
 

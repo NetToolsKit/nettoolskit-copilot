@@ -7,11 +7,11 @@ description: Create safe, deterministic git worktrees for large or risky workstr
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`.
-2. Load `.github/copilot-instructions.md`.
-3. Load `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`.
-4. Load `.github/instructions/governance/ntk-governance-worktree-isolation.instructions.md`.
-5. Load `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+1. Load `definitions/providers/github/root/AGENTS.md`.
+2. Load `definitions/providers/github/root/copilot-instructions.md`.
+3. Load `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`.
+4. Load `definitions/instructions/governance/ntk-governance-worktree-isolation.instructions.md`.
+5. Load `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
 
 ## Responsibilities
 

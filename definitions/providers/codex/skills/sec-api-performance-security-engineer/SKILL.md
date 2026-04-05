@@ -7,16 +7,16 @@ description: Build and harden high-performance APIs with strong security control
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml`.
 3. Keep only mandatory files plus API performance and security packs.
 
 ## API performance and security instruction pack
 
-- `.github/instructions/security/ntk-security-api-high-performance.instructions.md`
-- `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
-- `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md` (when .NET is in scope)
-- `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
+- `definitions/instructions/security/ntk-security-api-high-performance.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md` (when .NET is in scope)
+- `definitions/instructions/security/ntk-security-vulnerabilities.instructions.md`
 
 ## Execution workflow
 

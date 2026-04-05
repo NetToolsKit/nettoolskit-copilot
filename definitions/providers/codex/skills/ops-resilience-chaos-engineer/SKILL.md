@@ -7,16 +7,16 @@ description: Improve platform resilience with timeout/retry/circuit-breaker stra
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml`.
 3. Keep only mandatory files plus reliability, platform, and impacted domain packs.
 
 ## Reliability instruction pack
 
-- `.github/instructions/operations/ntk-operations-platform-reliability-resilience.instructions.md`
-- `.github/instructions/operations/ntk-operations-microservices-performance.instructions.md`
-- `.github/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
-- `.github/instructions/operations/ntk-operations-k8s.instructions.md` (when workload orchestration is in scope)
+- `definitions/instructions/operations/ntk-operations-platform-reliability-resilience.instructions.md`
+- `definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md`
+- `definitions/instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
+- `definitions/instructions/operations/ntk-operations-k8s.instructions.md` (when workload orchestration is in scope)
 
 ## Execution workflow
 

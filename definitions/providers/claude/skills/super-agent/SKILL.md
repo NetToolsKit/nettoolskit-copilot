@@ -7,9 +7,9 @@ description: Use as the single visible starter and controller for workspace work
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
 
 ## Claude-native execution
 

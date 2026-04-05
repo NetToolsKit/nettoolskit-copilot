@@ -4,13 +4,13 @@ description: Use for non-trivial feature, behavior, workflow, or architecture wo
 ---
 # Brainstorm Spec Architect
 ## Load minimal context first
-1. Load .github/AGENTS.md.
-2. Load .github/copilot-instructions.md.
-3. Load .github/instruction-routing.catalog.yml.
-4. Load .github/instructions/governance/ntk-governance-repository-operating-model.instructions.md.
-5. Load .github/agents/super-agent/ntk-agents-super-agent.instructions.md.
-6. Load .github/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md.
-7. Load .github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md.
+1. Load definitions/providers/github/root/AGENTS.md.
+2. Load definitions/providers/github/root/copilot-instructions.md.
+3. Load definitions/providers/github/root/instruction-routing.catalog.yml.
+4. Load definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md.
+5. Load definitions/agents/super-agent/ntk-agents-super-agent.instructions.md.
+6. Load definitions/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md.
+7. Load definitions/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md.
 8. Load planning/specs/README.md.
 9. Reuse $plan-active-work-planner after the spec is ready for planning.
 ## Responsibilities

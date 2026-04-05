@@ -7,12 +7,12 @@ description: Use as the single visible starter and controller for workspace work
 
 ## Load minimal context first
 
-1. If the workspace provides local `.github/AGENTS.md` and `.github/copilot-instructions.md`, load them first.
-2. Otherwise load the mirrored runtime `~/.github/AGENTS.md` and `~/.github/copilot-instructions.md`.
-3. Load `.github/agents/super-agent/ntk-agents-super-agent.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy under `~/.github/instructions/`.
-4. Load `.github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy.
-5. Only load `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md` when the workspace actually provides them.
-6. Only load `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md` when the workspace actually provides a local repo adapter and repo-specific operating model.
+1. If the workspace provides local `definitions/providers/github/root/AGENTS.md` and `definitions/providers/github/root/copilot-instructions.md`, load them first.
+2. Otherwise load the mirrored runtime `~/definitions/providers/github/root/AGENTS.md` and `~/definitions/providers/github/root/copilot-instructions.md`.
+3. Load `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy from the synced GitHub runtime surface.
+4. Load `definitions/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md` when the workspace provides it, otherwise use the mirrored runtime copy.
+5. Only load `definitions/providers/github/root/instruction-routing.catalog.yml` and `definitions/providers/github/prompts/route-instructions.prompt.md` when the workspace actually provides them.
+6. Only load `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` when the workspace actually provides a local repo adapter and repo-specific operating model.
 7. Reuse the shared `$plan-active-work-planner`, `$context-token-optimizer`, and `$release-closeout-engineer` skills as downstream stages.
 
 ## Responsibilities
@@ -47,11 +47,11 @@ description: Use as the single visible starter and controller for workspace work
 ## Context Economy Protocol (always active)
 
 This protocol is mandatory and runs automatically alongside the lifecycle above.
-Full protocol, state model, CHECKPOINT format, and trigger list: `.github/instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md`.
+Full protocol, state model, CHECKPOINT format, and trigger list: `definitions/instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md`.
 
 - Auto-compress silently when a task completes, a phase transitions, a decision is closed, topic shifts, or context grows.
 - Show CHECKPOINT only on demand, at phase boundaries, or when continuity requires it.
-- User commands (execute immediately; PT-BR aliases in `.github/COMMANDS.md`): `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`.
+- User commands (execute immediately; PT-BR aliases in `definitions/providers/github/root/COMMANDS.md`): `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`.
 
 ## Invocation rule
 

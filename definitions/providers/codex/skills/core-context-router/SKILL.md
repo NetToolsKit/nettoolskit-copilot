@@ -9,15 +9,15 @@ Use this skill when the task should follow the repo routing model before executi
 
 ## Always Load First
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Route Then Execute
 
 1. Route with:
-   - `.github/instruction-routing.catalog.yml`
-   - `.github/prompts/route-instructions.prompt.md`
+   - `definitions/providers/github/root/instruction-routing.catalog.yml`
+   - `definitions/providers/github/prompts/route-instructions.prompt.md`
 2. Build a minimal context pack.
 3. Execute using only the files selected by the context pack.
 

@@ -7,21 +7,21 @@ description: Produce and maintain repository documentation and release artifacts
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml`.
 3. Load documentation/process packs based on target file type.
 
 ## Documentation instruction packs
 
 - README documentation:
-  - `.github/instructions/governance/ntk-governance-readme.instructions.md`
-  - `.github/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-readme.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
 - PR and release communication:
-  - `.github/instructions/governance/ntk-governance-pr.instructions.md`
-  - `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-pr.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
-  - `.github/instructions/governance/ntk-governance-prompt-templates.instructions.md`
-  - `.github/instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-prompt-templates.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`
 
 ## Execution workflow
 
@@ -33,5 +33,5 @@ description: Produce and maintain repository documentation and release artifacts
 
 ## Prompt accelerators
 
-- `.github/prompts/generate-pr-description.prompt.md`
-- `.github/prompts/generate-changelog.prompt.md`
+- `definitions/providers/github/prompts/generate-pr-description.prompt.md`
+- `definitions/providers/github/prompts/generate-changelog.prompt.md`

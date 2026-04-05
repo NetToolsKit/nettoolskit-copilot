@@ -7,11 +7,11 @@ description: Close out a completed workstream by updating README artifacts when 
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`
-4. `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
-5. `.github/instructions/governance/ntk-governance-readme.instructions.md` (when README files are in scope)
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+4. `definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
+5. `definitions/instructions/governance/ntk-governance-readme.instructions.md` (when README files are in scope)
 6. Active plan from `planning/active/`
 
 ## Claude-native execution

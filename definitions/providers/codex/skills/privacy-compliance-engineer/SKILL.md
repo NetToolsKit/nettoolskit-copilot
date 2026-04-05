@@ -7,16 +7,16 @@ description: Design and enforce privacy and data protection controls across appl
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml`.
 3. Keep only mandatory files plus privacy and impacted domain packs.
 
 ## Privacy instruction pack
 
-- `.github/instructions/data/ntk-data-privacy-compliance.instructions.md`
-- `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
-- `.github/instructions/data/ntk-data-database.instructions.md` (when data schema/queries are in scope)
-- `.github/instructions/development/ntk-development-persistence-orm.instructions.md` (when API/service logic is in scope)
+- `definitions/instructions/data/ntk-data-privacy-compliance.instructions.md`
+- `definitions/instructions/security/ntk-security-vulnerabilities.instructions.md`
+- `definitions/instructions/data/ntk-data-database.instructions.md` (when data schema/queries are in scope)
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md` (when API/service logic is in scope)
 
 ## Execution workflow
 

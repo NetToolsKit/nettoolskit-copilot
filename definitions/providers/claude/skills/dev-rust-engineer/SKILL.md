@@ -7,14 +7,14 @@ description: Implement, organize, and test Rust modules following mandatory proj
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Rust instruction pack
 
-- `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
-- `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-rust-testing.instructions.md`
 
 ## Claude-native execution
 
@@ -30,7 +30,7 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 
 ## Prompt accelerators
 
-- `.github/prompts/create-rust-module.prompt.md`
+- `definitions/providers/github/prompts/create-rust-module.prompt.md`
 
 ## Validation examples
 

@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoLogo -NoProfile -Command \"Write-Host '--- Context Economy Command Detected ---' -ForegroundColor Cyan; Write-Host 'Execute: .github/instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md' -ForegroundColor Yellow\""
+            "command": "pwsh -NoLogo -NoProfile -Command \"Write-Host '--- Context Economy Command Detected ---' -ForegroundColor Cyan; Write-Host 'Execute: definitions/instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md' -ForegroundColor Yellow\""
           }
         ]
       }
