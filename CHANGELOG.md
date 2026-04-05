@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Updated the repository-consolidation umbrella/spec to reflect that `copilot-instructions` Phase 8 is no longer blocked on directive discovery: the Rust directive baseline is now versioned externally, and the remaining W6 work is implementation in the other repository.
 - Closed the post-Phase-22 retention audit by recording that the live `scripts/**/*.ps1` estate remains `96`, and that the full `63`-script gap above the `retain wrapper intentionally` floor of `33` is completely explained by the five audited blocked domains rather than any unclassified wrapper drift.
 - Closed the Phase 22 orchestration consumer sweep as an audit-only workstream after confirming that all engine and stage wrappers still remain pinned by authored pipeline definitions, orchestration policy baselines, orchestrator and validation fixtures, retained runtime tests, and stage chaining.
 - Closed the Phase 21 security/governance consumer sweep as an audit-only workstream after confirming that all six security wrappers still remain pinned by the checksum manifest plus skill/doc/runtime/test consumers and both governance wrappers still remain pinned by authored release and branch-protection baselines.

@@ -37,7 +37,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 4. **Post-Phase-20f domain consumer migration**: After Phases 17, 18, the tactical `self-heal` runtime slice, the tactical provider-surface dispatcher slice, the tactical catalog-native renderer slice, and the tactical Codex orchestration renderer slice close, 63 scripts remain in the `retain until consumer migration completes` bucket across five domains (`scripts/common/`, `scripts/runtime/` excl. hooks, `scripts/security/`, `scripts/governance/`, `scripts/orchestration/`). Each domain has confirmed Rust ownership but no exact local-consumer proof. Without planned consumer sweeps, these scripts will remain indefinitely even though deletions are safe once consumer evidence is collected.
 
-5. **`copilot-instructions` Phase 8 awaiting directives**: The `copilot-instructions` repo has a planning-ready spec (`spec-rust-runtime-engine-foundation-phase-8.md`) that is blocked on user-provided Rust directives. The spec defines the compatibility-first migration contract but does not create any Cargo files until directives arrive. Starting this migration would bring the instruction runtime into the same Rust-native model that `nettoolskit-copilot` already operates with.
+5. **`copilot-instructions` Phase 8 execution still external**: The `copilot-instructions` repo now has the Rust directive baseline versioned in its active plan/spec, so planning discovery is no longer blocked. The remaining work is external implementation of the Cargo workspace and first parity contracts.
 
 6. **Canonical vs compatibility surface synchronization**: the repository now authors instructions in `definitions/instructions/*`, keeps `definitions/shared/*` only as compatibility, and renders provider/runtime consumers from `definitions/providers/*`. Historical references must stop treating `definitions/shared/instructions/*` or `.github/instructions/*` as the authored source, or future maintenance will drift back to the wrong root.
 
@@ -53,7 +53,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 - Root `README.md` and `crates/cli/README.md` document the full `ntk` CLI surface with named subcommands, so feature discoverability matches implementation reality.
 - The 23 PowerShell parity tests run in CI through the native `ntk validation runtime-script-tests` gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
 - Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 63 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
-- `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
+- `copilot-instructions` Phase 8 has explicit Rust directives versioned and is ready for its first implementation slice in the external repo.
 - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` remains the single authored source, while compatibility mirrors and `.github` projections stay renderer-derived.
 - Large staged commits remain committable on Windows because the managed EOF hygiene hook trims files in bounded batches instead of issuing one oversized process invocation.
 - The provider-root global-core files stay thin enough to remain bootstrap-only, while detailed policy continues to live in canonical `definitions/instructions/*` content.
@@ -111,9 +111,9 @@ No domain moves to deletion without the same exact consumer-proof standard used 
 
 ### W6: `copilot-instructions` Phase 8 Directives
 
-The Cargo workspace scaffold for `copilot-instructions` must follow these constraints:
+The Cargo workspace scaffold for `copilot-instructions` now has an explicit directive baseline and must follow these constraints:
 - `Cargo.toml` at repo root with `[workspace]` pointing at `src/`.
-- First crate: `ntk-runtime-engine` under `src/runtime/` — wraps the bootstrap, install, sync, and renderer dispatch surfaces that currently live in `scripts/runtime/*.ps1`.
+- First crate: `ntk-runtime-engine` under `src/runtime/` — starts with bootstrap and renderer-dispatch parity contracts before any install/sync cutover.
 - No Rust code replaces a PowerShell wrapper until the Rust crate has deterministic tests and an operator smoke check proves the native path works.
 - `scripts/` stays as the canonical operator entrypoint layer during the migration.
 - The projection architecture (`definitions/` → `.github/.codex/.claude/.vscode`) is NOT touched by Phase 8; only the execution engine moves to Rust.
@@ -188,6 +188,6 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 - Safety matrix and parity ledger are updated after each phase.
 
 ### W6: `copilot-instructions` Phase 8
-- `copilot-instructions` has a `Cargo.toml` workspace root and at least one Rust crate (`ntk-runtime-engine`) with a passing `cargo build`.
+- `copilot-instructions` has explicit Rust directives versioned in its active plan/spec and is implementation-ready for the first Cargo workspace slice.
 - No PowerShell wrapper is deleted until the Rust replacement passes deterministic tests and a smoke check.
 - Phase 8 spec and plan are updated to `completed` only when the first migration slice is proven.

@@ -634,20 +634,20 @@ Status: `[x]` Completed
 
 ### Workstream W6 — `copilot-instructions` Phase 8 Rust Directives
 
-Status: `[ ]` Pending
+Status: `[~]` Planning complete / external implementation pending
 
 **Problem being fixed:**
-`copilot-instructions` Phase 8 spec is planning-ready but awaiting user-provided Rust directives.
-No `Cargo.toml`, no crates, no Rust files have been created. This migration would bring the
-instruction runtime into the same Rust-native model that `nettoolskit-copilot` already operates with.
+`copilot-instructions` Phase 8 was blocked on explicit Rust directives. Those directives are now
+versioned in the external repo, but no `Cargo.toml`, no crates, and no Rust files have been created yet.
+The remaining W6 work is implementation in the external repository, not planning discovery.
 
 This workstream executes inside the `copilot-instructions` repository. All file paths below are relative to that repo root.
 
 #### Task W6.1: Provide Phase 8 Rust Directives
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
-- Update `planning/active/plan-rust-runtime-engine-foundation-phase-8.md` with explicit implementation directives.
+- Updated `planning/active/plan-rust-runtime-engine-foundation-phase-8.md` and `planning/specs/active/spec-rust-runtime-engine-foundation-phase-8.md` in `C:\Users\tguis\copilot-instructions`.
 - Directives to provide:
   - **Rust edition**: 2021
   - **MSRV**: 1.85.0 (matches `nettoolskit-copilot`)
@@ -662,12 +662,15 @@ Status: `[ ]` Pending
     - These are parity contracts only — no script deletions until smoke tests pass
   - **Cargo config**: set `target-dir = "../.build/cargo-target"` via `.cargo/config.toml`
   - **clippy flags**: `-D warnings` in `RUSTFLAGS` or CI config
+- External planning checkpoint:
+  - branch: `feature/context-mode`
+  - commit: `bd5502c`
 - Commit checkpoint:
   - `docs(planning): provide Phase 8 Rust directives for ntk-runtime-engine`
 
 #### Task W6.2: Scaffold Cargo Workspace
 
-Status: `[ ]` Pending (blocked on W6.1)
+Status: `[ ]` Pending (implementation in external repo)
 
 - Create `Cargo.toml` at `copilot-instructions` root:
   ```toml
@@ -699,7 +702,7 @@ Status: `[ ]` Pending (blocked on W6.1)
 
 #### Task W6.3: Implement Bootstrap Parity Contract
 
-Status: `[ ]` Pending (blocked on W6.2)
+Status: `[ ]` Pending (implementation in external repo)
 
 - In `src/runtime/src/lib.rs`, define the bootstrap parity surface:
   - `pub struct RuntimeBootstrapParity { pub legacy_script: &'static str, pub native_ready: bool }`
@@ -713,7 +716,7 @@ Status: `[ ]` Pending (blocked on W6.2)
 
 #### Task W6.4: Implement Renderer Dispatch Parity Contract
 
-Status: `[ ]` Pending (blocked on W6.3)
+Status: `[ ]` Pending (implementation in external repo)
 
 - In `src/runtime/src/renderer.rs`, define the renderer dispatch parity surface:
   - `pub enum RendererTarget { GithubInstructions, CodexCompatibility, ClaudeRuntime, VscodeProfiles, ProviderSurfaces, McpArtifacts }`
@@ -725,7 +728,7 @@ Status: `[ ]` Pending (blocked on W6.3)
 
 #### Task W6.5: Verify Phase 8 Validates and Update Evidence
 
-Status: `[ ]` Pending (blocked on W6.4)
+Status: `[ ]` Pending (implementation in external repo)
 
 - Run validation to confirm the new Cargo workspace does not break the existing PowerShell validation surface:
   - `cargo build --workspace`
