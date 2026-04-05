@@ -11,6 +11,16 @@ pub fn write_file(path: &Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 pub fn initialize_instruction_architecture_repo(repo_root: &Path) {
     write_valid_instruction_architecture_manifest(repo_root);
     write_instruction_architecture_documents(repo_root);
@@ -60,22 +70,25 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
   }
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/local-context-index.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "local-context-index.catalog.json",
         r#"{
   "includeGlobs": ["planning/**/*.md"]
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/authoritative-source-map.json"),
+    write_governance_file(
+        repo_root,
+        "authoritative-source-map.json",
         r#"{
   "stackRules": [
     { "id": "rust", "officialDomains": ["doc.rust-lang.org"] }
   ]
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/instruction-ownership.manifest.json"),
+    write_governance_file(
+        repo_root,
+        "instruction-ownership.manifest.json",
         r#"{
   "version": 1,
   "layers": [
@@ -88,16 +101,18 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
   ]
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "mcp-runtime.catalog.json",
         r#"{
   "servers": [
     { "id": "filesystem" }
   ]
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "provider-surface-projection.catalog.json",
         r#"{
   "renderers": [
     { "id": "github" }
@@ -107,8 +122,9 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
   ]
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/validation-profiles.json"),
+    write_governance_file(
+        repo_root,
+        "validation-profiles.json",
         r#"{
   "version": 1,
   "defaultProfile": "dev",
@@ -185,8 +201,9 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
   }
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "workspace-efficiency.baseline.json",
         r#"{
   "requiredSettings": {
     "files.exclude": {
@@ -204,8 +221,9 @@ pub fn initialize_validate_instructions_repo(repo_root: &Path) {
   }
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/governance/template-standards.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "template-standards.baseline.json",
         r#"{
   "templateRules": [
     { "path": ".github/templates/example.md" }

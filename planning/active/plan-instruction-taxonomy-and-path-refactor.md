@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 00:12
+- LastUpdated: 2026-04-05 00:30
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -308,6 +308,8 @@ Generated: 2026-04-03 00:00
   - in progress; runtime catalog readers now prefer canonical governance mirrors under `definitions/providers/github/governance/*` for MCP runtime, provider-surface projection, and git-hook EOF settings, while falling back to `.github/governance/*` only when a temp repo has not been scaffolded canonically yet
   - in progress; shared validation path helpers now resolve governance defaults to `definitions/providers/github/governance/*` before `.github/governance/*`, so README/workspace/warning/release/security validators and `validate-all` no longer start from generated governance surfaces
   - in progress; core local-context and runtime-install-profile readers now prefer canonical governance catalogs under `definitions/providers/github/governance/*`, with explicit regression tests proving canonical preference and legacy fallback
+  - in progress; `validate-instructions` now requires canonical governance assets under `definitions/providers/github/governance/*`, accepts either canonical or legacy JSON labels for known-contract checks, and prefers canonical governance documents when both mirrors exist
+  - in progress; shared validation fixtures and CLI validation command fixtures now materialize authored governance JSON into both `definitions/providers/github/governance/*` and `.github/governance/*` so canonical-first validation can coexist with deferred generated-surface coverage
 - Commit checkpoint:
   - `refactor(validation): prioritize canonical definitions in validate-instructions`
 

@@ -202,7 +202,7 @@ fn test_invoke_validate_instructions_reports_broken_routing_fixture() {
     {
       "id": "broken-route",
       "expected_route_ids": ["missing-route"],
-      "expected_selected_paths": ["instructions/core/ntk-core-repository-operating-model.instructions.md"]
+      "expected_selected_paths": ["instructions/governance/ntk-governance-repository-operating-model.instructions.md"]
     }
   ]
 }"#,

@@ -30,6 +30,14 @@ const CANONICAL_REQUIRED_FILES: &[&str] = &[
     "definitions/providers/github/root/copilot-instructions.md",
     "definitions/providers/github/root/instruction-routing.catalog.yml",
     "definitions/providers/github/prompts/route-instructions.prompt.md",
+    "definitions/providers/github/governance/authoritative-source-map.json",
+    "definitions/providers/github/governance/instruction-ownership.manifest.json",
+    "definitions/providers/github/governance/template-standards.baseline.json",
+    "definitions/providers/github/governance/workspace-efficiency.baseline.json",
+    "definitions/providers/github/governance/local-context-index.catalog.json",
+    "definitions/providers/github/governance/mcp-runtime.catalog.json",
+    "definitions/providers/github/governance/provider-surface-projection.catalog.json",
+    "definitions/providers/github/governance/validation-profiles.json",
 ];
 
 const GENERATED_SURFACE_FILES: &[&str] = &[
@@ -39,14 +47,6 @@ const GENERATED_SURFACE_FILES: &[&str] = &[
     ".github/prompts/route-instructions.prompt.md",
     ".github/instructions/core/ntk-core-repository-operating-model.instructions.md",
     ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-    ".github/governance/authoritative-source-map.json",
-    ".github/governance/instruction-ownership.manifest.json",
-    ".github/governance/template-standards.baseline.json",
-    ".github/governance/workspace-efficiency.baseline.json",
-    ".github/governance/local-context-index.catalog.json",
-    ".github/governance/mcp-runtime.catalog.json",
-    ".github/governance/provider-surface-projection.catalog.json",
-    ".github/governance/validation-profiles.json",
     ".github/schemas/instruction-routing.catalog.schema.json",
     ".codex/mcp/servers.manifest.json",
     ".vscode/base.code-workspace",
@@ -74,11 +74,15 @@ const MARKDOWN_FOLDERS: &[&str] = &[
 ];
 
 const JSON_DIRECTORIES: &[&str] = &[
+    "definitions/providers/github/governance",
     ".github/governance",
     ".github/schemas",
     ".codex/orchestration",
     ".vscode",
 ];
+
+const CANONICAL_GOVERNANCE_PREFIX: &str = "definitions/providers/github/governance/";
+const LEGACY_GOVERNANCE_PREFIX: &str = ".github/governance/";
 
 /// Request payload for `validate-instructions`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -202,7 +206,7 @@ pub fn invoke_validate_instructions(
     );
 
     test_workspace_template_compatibility(
-        json_documents.get(".github/governance/workspace-efficiency.baseline.json"),
+        preferred_governance_document(&json_documents, "workspace-efficiency.baseline.json"),
         json_documents.get(".vscode/settings.tamplate.jsonc"),
         request.warning_only,
         &mut warnings,
@@ -505,7 +509,7 @@ fn test_known_json_contract(
                 );
             }
         }
-        ".github/governance/local-context-index.catalog.json" => {
+        label if governance_label_matches(label, "local-context-index.catalog.json") => {
             if document
                 .get("includeGlobs")
                 .and_then(Value::as_array)
@@ -520,7 +524,7 @@ fn test_known_json_contract(
                 );
             }
         }
-        ".github/governance/provider-surface-projection.catalog.json" => {
+        label if governance_label_matches(label, "provider-surface-projection.catalog.json") => {
             if document
                 .get("renderers")
                 .and_then(Value::as_array)
@@ -548,7 +552,7 @@ fn test_known_json_contract(
                 );
             }
         }
-        ".github/governance/authoritative-source-map.json" => {
+        label if governance_label_matches(label, "authoritative-source-map.json") => {
             if document
                 .get("stackRules")
                 .and_then(Value::as_array)
@@ -563,7 +567,7 @@ fn test_known_json_contract(
                 );
             }
         }
-        ".github/governance/instruction-ownership.manifest.json" => {
+        label if governance_label_matches(label, "instruction-ownership.manifest.json") => {
             if document
                 .get("layers")
                 .and_then(Value::as_array)
@@ -577,7 +581,7 @@ fn test_known_json_contract(
                 );
             }
         }
-        ".github/governance/template-standards.baseline.json" => {
+        label if governance_label_matches(label, "template-standards.baseline.json") => {
             if document
                 .get("templateRules")
                 .and_then(Value::as_array)
@@ -592,7 +596,7 @@ fn test_known_json_contract(
                 );
             }
         }
-        ".github/governance/workspace-efficiency.baseline.json" => {
+        label if governance_label_matches(label, "workspace-efficiency.baseline.json") => {
             if document.get("requiredSettings").is_none() {
                 push_required_finding(
                     warning_only,
@@ -1180,6 +1184,24 @@ fn test_workspace_template_compatibility(
             }
         }
     }
+}
+
+fn governance_label_matches(label: &str, file_name: &str) -> bool {
+    label == format!("{CANONICAL_GOVERNANCE_PREFIX}{file_name}")
+        || label == format!("{LEGACY_GOVERNANCE_PREFIX}{file_name}")
+}
+
+fn preferred_governance_document<'a>(
+    json_documents: &'a BTreeMap<String, Value>,
+    file_name: &str,
+) -> Option<&'a Value> {
+    let canonical_label = format!("{CANONICAL_GOVERNANCE_PREFIX}{file_name}");
+    if let Some(document) = json_documents.get(&canonical_label) {
+        return Some(document);
+    }
+
+    let legacy_label = format!("{LEGACY_GOVERNANCE_PREFIX}{file_name}");
+    json_documents.get(&legacy_label)
 }
 
 fn test_vscode_settings_references(

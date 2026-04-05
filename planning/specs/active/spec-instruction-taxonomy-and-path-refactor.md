@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 00:12
+- LastUpdated: 2026-04-05 00:30
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -60,6 +60,7 @@ The repository already separates shared instruction sources under `definitions/s
 - Move governance validation contracts into canonical provider-owned definitions under `definitions/providers/github/governance/` so validation and audit commands stop treating `.github/governance` as the primary authored source.
 - Mirror operational governance catalogs under `definitions/providers/github/governance/` and make runtime readers prefer those canonical mirrors for MCP, provider-surface projection, and git-hook settings before falling back to `.github/governance/`.
 - Extend that same canonical-first rule to validation baselines and core governance-backed readers such as README/workspace/release/security validation, local-context catalog loading, and runtime install profile loading.
+- Apply the same authored-first rule inside `validate-instructions`, so canonical governance JSON is part of the required authored surface, while legacy `.github/governance/*` JSON remains acceptable only as compatibility mirrors during the migration window.
 - Allow temporary compatibility matching for old `core/` path references while canonical `governance/` paths are still being propagated through provider skills, prompts, and routing artifacts.
 - Repoint provider skill packs, orchestration prompts, and GitHub root governance assets to the shallow `definitions/instructions/{governance,development,operations,security,data}` taxonomy so canonical references stop depending on the transitional `core/process/architecture/runtime-ops` layout.
 - Make canonical validation semantics explicit: validators and temp-repo fixtures must resolve the provider routing catalog from `definitions/providers/github/root/instruction-routing.catalog.yml`, map logical `instructions/*` paths into `definitions/instructions/*`, and only fall back to legacy `.github` surfaces when canonical assets are intentionally absent.
@@ -151,6 +152,7 @@ The second copy-first migration wave applies the same shallow model to the proje
 - Template standards and .NET template validation commands prefer canonical `definitions/templates/*` and canonical GitHub governance baselines under `definitions/providers/github/governance/`, with legacy `.github/templates/*` accepted only as fallback compatibility during migration.
 - Runtime sync, projection, and hook commands prefer canonical governance catalogs under `definitions/providers/github/governance/`, with `.github/governance/` retained only as compatibility or generated output during the transition.
 - Validation defaults and core governance-backed readers prefer canonical governance assets under `definitions/providers/github/governance/`, while legacy `.github/governance/` remains a fallback compatibility surface for temp repos, tests, and deferred projections.
+- Shared Rust and CLI validation fixtures materialize canonical governance JSON plus legacy mirrors so validator regression coverage matches the authored-first contract without forcing the projected `.github` cutover early.
 
 ---
 
