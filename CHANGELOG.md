@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed planning closeout so `plan-instruction-governance-and-super-agent-retention` and `plan-instruction-rules-board-and-surface-layout` are now completed workstreams, while `plan-instruction-taxonomy-and-path-refactor` remains the single active instruction-migration follow-up for generated/runtime projection cutover.
 - Changed legacy compatibility docs and the repository consolidation umbrella/spec to stop treating `definitions/shared/instructions/*` and `.github/instructions/*` as authored sources; canonical instruction authority is now documented consistently under `definitions/instructions/*`, with `definitions/shared/*` retained only for compatibility and shared prompt assets.
 - Changed the authored PowerShell GitHub surface renderer and its smoke harness to project `.github/instructions` from `definitions/instructions` and `.github/templates` from `definitions/templates`, while keeping shared POML prompts under `definitions/shared/prompts/poml` until that lane is migrated.
 - Changed the native provider-surface renderer and its Rust/CLI test scaffolds to source GitHub instruction and template projections from `definitions/{instructions,templates}` directly, while leaving only shared POML prompt assets on the legacy `definitions/shared/*` path for now.

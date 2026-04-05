@@ -4,11 +4,11 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-04 10:30
+- LastUpdated: 2026-04-05 12:05
 - Objective: define the design intent for a repo-native rules board that makes repository instructions, agents, skills, and hooks easier to discover, route, and keep in sync.
 - Normalized Request: compare the architecture in the reference image against the current repository structure and capture the useful improvements as a repo-native rules board with explicit precedence and shallow shared roots.
 - Active Branch: `docs/planning-gap-workstreams`
-- Planning Path: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
+- Planning Path: `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---
@@ -86,7 +86,8 @@ The repository already has the real ingredients of the reference architecture: a
 
 ## Planning Readiness
 
-- Updated: 2026-04-03 15:40 — semantic taxonomy and board precedence are implemented at the documentation/governance layer; remaining work is drift cleanup and helper-surface normalization.
+- Completed: semantic taxonomy, board precedence, discoverability rules, and shallow-root guidance are now implemented at the governance/documentation layer.
+- Remaining generated-surface cutover is tracked separately under `plan-instruction-taxonomy-and-path-refactor.md`.
 
 ---
 

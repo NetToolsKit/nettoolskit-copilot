@@ -11,8 +11,8 @@ Generated: 2026-03-31 00:00
 - Spec Path: `planning/specs/active/spec-plugin-skill-extensibility-and-runtime-governance.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstreams:
-  - `planning/active/plan-instruction-rules-board-and-surface-layout.md`
-  - `planning/active/plan-instruction-governance-and-super-agent-retention.md`
+  - `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
+  - `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
   - `planning/active/plan-mcp-transport-auth-and-session-resilience.md`
 
 ---

@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 10:40
+- LastUpdated: 2026-04-05 12:05
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -166,6 +166,6 @@ The second copy-first migration wave applies the same shallow model to the proje
 
 ## Planning Readiness
 
-- Ready for planning immediately.
-- The first slice should freeze the target taxonomy and rename map before moving files.
-- Implementation should update references in the same slice as file moves to avoid dangling paths.
+- Ready for the remaining generated-surface cutover only.
+- Canonical authored roots, validator defaults, governance catalogs, provider consumers, runtime readers, and renderers are now aligned to `definitions/*`.
+- The remaining follow-up is to finish `.github/.codex/.claude` projection cutover after the canonical tree stays stable through the current migration window.

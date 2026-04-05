@@ -40,7 +40,7 @@ This workspace separates design intent from execution planning so non-trivial wo
 
 - [planning/specs/active/spec-spec-driven-development-operating-model.md](planning/specs/active/spec-spec-driven-development-operating-model.md)
 - [planning/specs/active/spec-agent-runtime-comparison-and-improvement-matrix.md](planning/specs/active/spec-agent-runtime-comparison-and-improvement-matrix.md)
-- [planning/specs/active/spec-instruction-rules-board-and-surface-layout.md](planning/specs/active/spec-instruction-rules-board-and-surface-layout.md)
+- [planning/specs/active/spec-instruction-taxonomy-and-path-refactor.md](planning/specs/active/spec-instruction-taxonomy-and-path-refactor.md)
 - [planning/specs/active/spec-agentic-surface-boundary-separation.md](planning/specs/active/spec-agentic-surface-boundary-separation.md)
 - [planning/specs/active/spec-cli-fast-path-and-startup-decomposition.md](planning/specs/active/spec-cli-fast-path-and-startup-decomposition.md)
 - [planning/specs/active/spec-mcp-transport-auth-and-session-resilience.md](planning/specs/active/spec-mcp-transport-auth-and-session-resilience.md)
@@ -57,7 +57,6 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
 - [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)
 - [planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md)
-- [planning/specs/active/spec-instruction-governance-and-super-agent-retention.md](planning/specs/active/spec-instruction-governance-and-super-agent-retention.md)
 - [planning/specs/active/spec-script-retirement-tail-cutover.md](planning/specs/active/spec-script-retirement-tail-cutover.md)
 
 ---
@@ -87,6 +86,8 @@ Use `planning/specs/` to lock architecture and behavior intent before implementa
 ## References
 
 - [planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md](planning/specs/completed/spec-instruction-parity-and-script-retirement-readiness.md)
+- [planning/specs/completed/spec-instruction-governance-and-super-agent-retention.md](planning/specs/completed/spec-instruction-governance-and-super-agent-retention.md)
+- [planning/specs/completed/spec-instruction-rules-board-and-surface-layout.md](planning/specs/completed/spec-instruction-rules-board-and-surface-layout.md)
 - [planning/specs/completed/spec-script-retirement-phase-2.md](planning/specs/completed/spec-script-retirement-phase-2.md)
 - [planning/specs/completed/spec-script-retirement-phase-3.md](planning/specs/completed/spec-script-retirement-phase-3.md)
 - [planning/specs/completed/spec-script-retirement-phase-4.md](planning/specs/completed/spec-script-retirement-phase-4.md)

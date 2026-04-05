@@ -4,16 +4,17 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 10:40
+- LastUpdated: 2026-04-05 12:05
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-instruction-taxonomy-and-path-refactor.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstreams:
-  - `planning/active/plan-instruction-rules-board-and-surface-layout.md`
-  - `planning/active/plan-instruction-governance-and-super-agent-retention.md`
+  - `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
+  - `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
   - `planning/active/plan-repository-consolidation-continuity.md`
+- Active Follow-up: canonical definitions, validators, governance catalogs, provider consumers, and runtime renderers now prefer `definitions/*`; the remaining open lane is generated/runtime projection cutover for `.github/.codex/.claude`, which stays explicitly deferred until authored roots remain stable.
 - Inputs:
   - `definitions/*`
   - `definitions/shared/*`

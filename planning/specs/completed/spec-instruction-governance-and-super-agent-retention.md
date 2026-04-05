@@ -4,13 +4,13 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 22:20
+- LastUpdated: 2026-04-05 12:05
 - Objective: define the design intent for keeping repository instructions, agents, skills, and hooks authoritative while preserving the `super-agent` lifecycle and avoiding drift from the external `copilot-instructions` baseline.
 - Normalized Request: plan how to preserve and sync the repository control-surface system without losing the shared guidance that already exists in `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
-- Planning Path: `planning/active/plan-instruction-governance-and-super-agent-retention.md`
+- Planning Path: `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Related Workstream: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
+- Related Workstream: `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
 
 ---
 
@@ -87,10 +87,6 @@ The repository already has a rich instruction and routing system, but it must st
 
 ## Planning Readiness
 
-- The spec is implementation-ready for governance/documentation slices because precedence, projection, and drift rules are now being applied incrementally.
-- Follow-up parity audit against the external baseline can remain staged because instruction projections affect both docs and operator workflows.
-- The next consolidation slices should follow the same pattern used for backend:
-  - preserve semantic taxonomy
-  - narrow each instruction file to one responsibility
-  - update the canonical shared source first
-  - keep `.github/instructions/` synchronized with the canonical copy
+- The governance workstream is materially complete.
+- Precedence, projection, super-agent retention, and external-baseline drift rules are now documented against the canonical `definitions/*` model.
+- Remaining generated-surface cutover is tracked separately under `plan-instruction-taxonomy-and-path-refactor.md`.

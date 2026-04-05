@@ -20,7 +20,7 @@ Generated: 2026-03-30 08:59
   - `planning/active/plan-token-economy-optimization.md`
   - `planning/active/plan-rag-cag-sqlite-evolution.md`
   - `planning/active/plan-build-target-cleanup-and-artifact-pruning.md`
-  - `planning/active/plan-instruction-governance-and-super-agent-retention.md`
+  - `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
   - `planning/active/plan-script-retirement-tail-cutover.md`
 
 ---

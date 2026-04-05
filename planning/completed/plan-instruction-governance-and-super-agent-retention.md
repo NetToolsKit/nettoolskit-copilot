@@ -4,13 +4,13 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-04 22:20
+- LastUpdated: 2026-04-05 12:05
 - Objective: keep repository instructions, agent surfaces, skill surfaces, hook surfaces, and the external `copilot-instructions` reference aligned without losing canonical guidance, routing fidelity, or the `super-agent` lifecycle.
 - Normalized Request: create a planning workstream for instruction organization and retention so the repository keeps the shared control-surface system intact while avoiding drift from `C:\Users\tguis\copilot-instructions`.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-instruction-governance-and-super-agent-retention.md`
+- Spec Path: `planning/specs/completed/spec-instruction-governance-and-super-agent-retention.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Dependency: `planning/active/plan-instruction-rules-board-and-surface-layout.md`
+- Dependency: `planning/completed/plan-instruction-rules-board-and-surface-layout.md`
 - Inputs:
   - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
   - `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
@@ -30,7 +30,7 @@ This plan coordinates four governance slices:
 | G2 | Super-agent retention | local and projected instruction surfaces | ✅ Done | G1 |
 | G3 | Routing and precedence clarity | catalog + operating model docs | ✅ Done | G1 |
 | G4 | Drift monitoring and sync rules | instructions projections and planning docs | ✅ Done | G2, G3 |
-| G5 | Domain consolidation and root normalization | shallow shared roots with reduced repetition and explicit surface ownership | 🟡 In progress | G2, G3, G4 |
+| G5 | Domain consolidation and root normalization | shallow shared roots with reduced repetition and explicit surface ownership | ✅ Done | G2, G3, G4 |
 
 The `ntk` CLI prefix is already in place and is not a new implementation gap.
 
@@ -95,7 +95,7 @@ The `ntk` CLI prefix is already in place and is not a new implementation gap.
 - Status:
   - responsibility narrowing is complete across backend, frontend, agentic, operations, data, security, and testing content; those slices are now treated as transitional inputs to the final shallow root taxonomy
   - `super-agent` is already treated as a dedicated agent surface and must stay outside the final `instructions/` tree
-  - final normalization is still pending: collapse transitional instruction lanes into the five first-level instruction categories and reserve dedicated shared roots for `agents/`, `skills/`, and `hooks/`
+  - final normalization is complete at the governance/model layer: `definitions/` now owns `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/`, while remaining generated-surface cutover continues under `plan-instruction-taxonomy-and-path-refactor.md`
 - Commit checkpoint:
   - `docs(instructions): narrow backend instruction responsibilities`
 

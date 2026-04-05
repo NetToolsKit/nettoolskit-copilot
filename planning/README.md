@@ -41,7 +41,7 @@ This folder is part of the repository operating model, not disposable scratch st
 
 - [planning/active/plan-spec-driven-development-operating-model.md](planning/active/plan-spec-driven-development-operating-model.md)
 - [planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md](planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md)
-- [planning/active/plan-instruction-rules-board-and-surface-layout.md](planning/active/plan-instruction-rules-board-and-surface-layout.md)
+- [planning/active/plan-instruction-taxonomy-and-path-refactor.md](planning/active/plan-instruction-taxonomy-and-path-refactor.md)
 - [planning/active/plan-agentic-surface-boundary-separation.md](planning/active/plan-agentic-surface-boundary-separation.md)
 - [planning/active/plan-cli-fast-path-and-startup-decomposition.md](planning/active/plan-cli-fast-path-and-startup-decomposition.md)
 - [planning/active/plan-mcp-transport-auth-and-session-resilience.md](planning/active/plan-mcp-transport-auth-and-session-resilience.md)
@@ -58,7 +58,6 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/active/plan-token-economy-optimization.md](planning/active/plan-token-economy-optimization.md)
 - [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)
 - [planning/active/plan-build-target-cleanup-and-artifact-pruning.md](planning/active/plan-build-target-cleanup-and-artifact-pruning.md)
-- [planning/active/plan-instruction-governance-and-super-agent-retention.md](planning/active/plan-instruction-governance-and-super-agent-retention.md)
 - [planning/active/plan-script-retirement-tail-cutover.md](planning/active/plan-script-retirement-tail-cutover.md)
 
 ---
@@ -89,6 +88,8 @@ Use `planning/` for versioned workstream control, not for transient scratch outp
 ## References
 
 - [planning/completed/plan-instruction-parity-and-script-retirement.md](planning/completed/plan-instruction-parity-and-script-retirement.md)
+- [planning/completed/plan-instruction-governance-and-super-agent-retention.md](planning/completed/plan-instruction-governance-and-super-agent-retention.md)
+- [planning/completed/plan-instruction-rules-board-and-surface-layout.md](planning/completed/plan-instruction-rules-board-and-surface-layout.md)
 - [planning/completed/plan-script-retirement-phase-2.md](planning/completed/plan-script-retirement-phase-2.md)
 - [planning/completed/plan-script-retirement-phase-3.md](planning/completed/plan-script-retirement-phase-3.md)
 - [planning/completed/plan-script-retirement-phase-4.md](planning/completed/plan-script-retirement-phase-4.md)

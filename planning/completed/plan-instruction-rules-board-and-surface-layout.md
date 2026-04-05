@@ -4,15 +4,15 @@ Generated: 2026-03-30 08:59
 
 ## Status
 
-- LastUpdated: 2026-04-04 22:20
+- LastUpdated: 2026-04-05 12:05
 - Objective: evaluate and define a repo-native rules board that groups shared surfaces into `instructions/`, `agents/`, `skills/`, and `hooks/` so agents can load the right control surface with less ambiguity and less context waste.
 - Normalized Request: compare the board-style agent architecture against the current repository layout and plan the improvements that would make the shared roots more discoverable, token-efficient, and SDD-friendly.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-instruction-rules-board-and-surface-layout.md`
+- Spec Path: `planning/specs/completed/spec-instruction-rules-board-and-surface-layout.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Dependencies:
   - `planning/active/plan-spec-driven-development-operating-model.md`
-  - `planning/active/plan-instruction-governance-and-super-agent-retention.md`
+  - `planning/completed/plan-instruction-governance-and-super-agent-retention.md`
   - `definitions/providers/github/root/AGENTS.md`
   - `definitions/providers/github/root/copilot-instructions.md`
   - `definitions/providers/github/root/instruction-routing.catalog.yml`
@@ -31,8 +31,8 @@ This plan coordinates four layout slices:
 |---|---|---|---|
 | B1 | Inventory current shared surfaces | ✅ Done | none |
 | B2 | Define board roots and precedence | ✅ Done | B1 |
-| B3 | Map current repo folders to the board model | 🟠 Active | B1, B2 |
-| B4 | Define update and drift rules for the board | 🟠 Active | B2, B3 |
+| B3 | Map current repo folders to the board model | ✅ Done | B1, B2 |
+| B4 | Define update and drift rules for the board | ✅ Done | B2, B3 |
 
 The board is implemented as documentation and governance. It does not create a second instruction source of truth.
 
@@ -76,7 +76,7 @@ The board is implemented as documentation and governance. It does not create a s
 - Keep the existing repo-owned source of truth model intact.
 - Document where the board should point for each category.
 - Status:
-  - active; the board already maps transitional semantic folders, but the final mapping still needs to collapse those lanes into the shallow `instructions/`, `agents/`, `skills/`, and `hooks/` root model
+  - complete; the board now maps canonical `definitions/instructions/`, `definitions/agents/`, `definitions/skills/`, and `definitions/hooks/` roots, while provider projections remain downstream outputs
 - Commit checkpoint:
   - `docs(instructions): map repository instruction surfaces to rules board`
 
@@ -86,9 +86,7 @@ The board is implemented as documentation and governance. It does not create a s
 - Keep the external `copilot-instructions` baseline as a reference comparison, not a live write target.
 - Add rules for avoiding duplicate or stale instruction surfaces.
 - Active follow-up:
-  - finish normalizing remaining references, labels, and helper surfaces that still mention transitional semantic lanes
-  - keep `super-agent` under the dedicated `agents/` root so `instructions/` stays reserved for the five first-level instruction categories
-  - document that finer specialization should prefer file names over another nested folder taxonomy
+  - governance and board semantics are complete; any remaining generated-surface cutover now belongs to `plan-instruction-taxonomy-and-path-refactor.md`
 - Commit checkpoint:
   - `docs(planning): define rules board update and drift policy`
 
