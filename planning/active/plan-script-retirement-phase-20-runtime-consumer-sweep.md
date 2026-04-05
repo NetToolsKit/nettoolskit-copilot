@@ -142,7 +142,7 @@ Status: `[x]` Completed (audit-only; zero deletions)
 
 ### Task 3: Slice B Consumer Sweep — Orchestration Runtime Entry Points
 
-Status: `[ ]` Pending
+Status: `[x]` Completed (audit-only; zero deletions)
 
 - Target paths:
   - `scripts/runtime/evaluate-agent-pipeline.ps1`
@@ -160,8 +160,29 @@ Status: `[ ]` Pending
   - exact zero-consumer list for deletable Slice B leaves
   - retained-blocker list for non-deletable Slice B leaves
   - same-slice parity/test/doc re-points for every deleted leaf
+- Result:
+  - zero-consumer list: none
+  - deleted leaves: none
+  - retained-blocker graph:
+    - `crates/orchestrator/tests/execution/pipeline_parity/*`, `crates/cli/tests/validation_commands_tests.rs`, `crates/commands/validation/src/agent_orchestration/orchestration_integrity.rs`, and `crates/commands/validation/tests/support/agent_orchestration_fixtures.rs` still hardcode `evaluate-agent-pipeline.ps1`, `replay-agent-run.ps1`, `resume-agent-pipeline.ps1`, and `run-agent-pipeline.ps1`
+    - `.codex/orchestration/README.md` and `definitions/providers/codex/orchestration/README.md` still advertise `invoke-super-agent-brainstorm.ps1`, `invoke-super-agent-execute.ps1`, `invoke-super-agent-parallel-dispatch.ps1`, `invoke-super-agent-plan.ps1`, `new-super-agent-worktree.ps1`, and `run-agent-pipeline.ps1`
+    - `definitions/providers/github/policies/instruction-system.policy.json`, `definitions/providers/github/policies/agent-orchestration.policy.json`, and `definitions/providers/github/governance/release-provenance.baseline.json` still encode the orchestration wrapper paths
+    - `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`, `definitions/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`, `definitions/instructions/governance/ntk-governance-worktree-isolation.instructions.md`, and their compatibility mirrors still advertise `invoke-super-agent-housekeeping.ps1` and `new-super-agent-worktree.ps1`
+    - retained runtime parity coverage still hardcodes Slice B leaves through `scripts/tests/runtime/agent-orchestration-engine.tests.ps1`, `scripts/tests/runtime/super-agent-entrypoints.tests.ps1`, `scripts/tests/runtime/super-agent-worktree.tests.ps1`, and `scripts/tests/runtime/runtime-scripts.tests.ps1`
+    - `scripts/orchestration/stages/validate-stage.ps1` and the runtime leaf graph itself still chain through `run-agent-pipeline.ps1`, `resume-agent-pipeline.ps1`, and the `invoke-super-agent-*.ps1` entrypoints
+- Outcome:
+  - Slice B closes as audit-only
+  - no same-slice re-points were enough to clear all blockers without reopening provider orchestration docs/policies, retained parity harnesses, or the orchestration-stage chain
+- Validation evidence for the Slice B checkpoint:
+  - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation agent-orchestration --repo-root .` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation instructions --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation planning-structure --repo-root . --warning-only false` ✅
+  - `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation policy --repo-root .` ⚠️ existing repository baseline failure; still missing governed `.github/workflows/*`, `.githooks/*`, `CODEOWNERS`, and issue-template assets outside this slice
+  - `git diff --check` ✅
 - Commit checkpoint:
-  - `chore(runtime-retirement): execute Phase 20 Slice B consumer sweep for orchestration entrypoints and replay helpers`
+  - `docs(runtime-retirement): record Phase 20 Slice B audit-only consumer proof for orchestration entrypoints and replay helpers`
 
 ### Task 4: Slice C Consumer Sweep — Bootstrap, Install, And Cleanup Surfaces
 

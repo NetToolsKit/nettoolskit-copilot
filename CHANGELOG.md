@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Recorded the Phase 20 Slice B runtime consumer sweep as a second audit-only checkpoint: no orchestration or replay leaf was deletion-ready because authored consumers still remain in orchestration policies, Codex orchestration README surfaces, orchestrator parity tests, validation fixtures, retained runtime parity tests, and the `run/resume/replay` chain itself.
 - Recorded the Phase 20 Slice A runtime consumer sweep as an audit-only checkpoint: no `scripts/runtime` projection/profile/sync/workspace leaf was deletion-ready yet because authored consumers still remain in the provider-surface projection catalog, provider README/operator guidance, `install.ps1`, runtime parity tests, and the shell-hook validation fixture.
 - Added Windows path normalization to the native `runtime-script-tests` validator so retained PowerShell smoke tests execute correctly even when the repository root is resolved through `\\?\` extended-length paths during CI or commit-time automation.
 - Added a dedicated Windows CI gate, `pwsh-runtime-parity`, that runs `ntk validation runtime-script-tests --repo-root . --warning-only false` instead of relying on an implied local-only parity harness or a non-existent Pester suite.

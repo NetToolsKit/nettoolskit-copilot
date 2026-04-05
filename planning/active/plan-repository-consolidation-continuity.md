@@ -529,7 +529,7 @@ Status: `[x]` Completed
 
 #### Task W5.4: Execute Phase 20 Consumer Sweep (Sub-slices A, B, C)
 
-Status: `[~]` Partial / Slice A audit-only complete
+Status: `[~]` Partial / Slice A and Slice B audit-only complete
 
 - Run consumer sweeps for each sub-slice.
 - For each zero-consumer script: delete it.
@@ -538,7 +538,12 @@ Status: `[~]` Partial / Slice A audit-only complete
   - zero-consumer leaves: none
   - deleted leaves: none
   - blocking consumers were confirmed in the provider-surface projection catalog, provider README/operator docs, `install.ps1`, runtime parity harness tests, and the shell-hook validation fixture
-  - the runtime domain therefore stays at `30` retained leaves for now, with Slice B and Slice C still pending
+  - the runtime domain therefore stays at `30` retained leaves for now
+- Slice B result recorded:
+  - zero-consumer leaves: none
+  - deleted leaves: none
+  - blocking consumers were confirmed in orchestration policies, Codex orchestration README surfaces, orchestrator parity tests, validation fixtures, retained runtime parity tests, `validate-stage.ps1`, and the `run/resume/replay` runtime chain
+  - the runtime domain still stays at `30` retained leaves, with Slice C now the only remaining pending sub-slice
 - After each sub-slice:
   - Update safety matrix and parity ledger.
   - Run the Phase 20 validation checklist.
@@ -550,7 +555,7 @@ Status: `[~]` Partial / Slice A audit-only complete
   - `git diff --check`
 - Commit checkpoint (one per sub-slice):
   - `docs(runtime-retirement): Phase 20 Slice A — record audit-only consumer proof for projection, profile, and sync scripts`
-  - `chore(runtime-retirement): Phase 20 Slice B — retire confirmed-zero-consumer orchestration runtime scripts`
+  - `docs(runtime-retirement): Phase 20 Slice B — record audit-only consumer proof for orchestration runtime scripts`
   - `chore(runtime-retirement): Phase 20 Slice C — retire confirmed-zero-consumer bootstrap, install, and cleanup scripts`
 
 #### Task W5.5: Create and Execute Phase 21 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
