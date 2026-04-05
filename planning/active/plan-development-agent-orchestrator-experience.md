@@ -4,13 +4,13 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 09:55
+- LastUpdated: 2026-04-05 11:05
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: D1 is implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, processor policy overlays, and `ntk ai profiles` inspection surfaces; D2 runtime doctor/report is next.
+- Current Slice: D1 and D2 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, and `ntk ai doctor` JSON/report surfaces; D3 smart routing is next.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -63,6 +63,10 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Validate configuration, env resolution, provider reachability, auth readiness, profile resolution, and fallback readiness.
 - Add a report mode for operator troubleshooting that stays read-only and safe for local use.
 - Keep diagnostics independent from request execution so failures in one path do not hide failures in the other.
+- Completed slice:
+  - `crates/orchestrator/src/execution/ai_doctor.rs` now owns read-only AI runtime diagnostics and Markdown report rendering.
+  - `crates/cli/src/ai_commands.rs` now exposes `ntk ai doctor`, `ntk ai doctor --json-output`, and `ntk ai doctor --report-path`.
+  - tests cover local/mock, remote readiness, provider-chain override, JSON output, and Markdown report generation.
 - Target paths:
   - `crates/cli/src/ai_commands.rs`
   - `crates/orchestrator/src/execution/`

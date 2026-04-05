@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added `ntk ai doctor` with JSON output and optional Markdown report generation so operators can inspect active AI profile, provider chain, timeout, auth readiness, and fallback state without executing a request.
 - Added built-in AI provider profiles (`balanced`, `coding`, `cheap`, `latency`, `local`) with canonical orchestrator exports, `NTK_AI_PROFILE` resolution, and new `ntk ai profiles list/show` operator surfaces.
 - Added an active `Phase 22 orchestration consumer sweep` plan/spec pair so the last 10 `scripts/orchestration/**/*.ps1` wrappers are tracked as their own final blocker-audit domain before the post-Phase-22 retention audit.
 - Added an active `Phase 21 security and governance consumer sweep` plan/spec pair so the next eight `scripts/security/*.ps1` and `scripts/governance/*.ps1` leaves are tracked with an explicit checksum-manifest rule before any delete is allowed.
@@ -114,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added secure tool-scope gateway for `/task submit` and worker execution with service-mode deny-by-default policy, global tool allowlist, intent-level tool scopes, and local JSONL audit proofs (`NTK_TOOL_SCOPE_*`).
 
 ### Changed
+- Changed the development-orchestrator and runtime-diagnostics workstreams to record that provider-profile inspection and the first AI-specific health/report surface are now materially implemented.
 - Changed AI provider/model policy resolution so the orchestrator can layer profile defaults for provider chain, timeout budgets, and model-selection tiers under explicit env overrides without changing existing env precedence.
 - Changed validation baseline resolution so `readme-standards`, `workspace-efficiency`, `warning-baseline`, release validation, security baselines, and `validate-all` now prefer canonical governance assets under `definitions/providers/github/governance/*` before falling back to `.github/governance/*`.
 - Changed core local-context and runtime-install-profile catalog resolution so repository services prefer canonical governance catalogs under `definitions/providers/github/governance/*` while keeping legacy `.github/governance/*` compatibility for temp repos and older fixtures.

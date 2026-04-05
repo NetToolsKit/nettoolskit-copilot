@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 11:05
 - Objective: define a coherent runtime diagnostics and observability model for operator-facing health, degradation, inspection, and troubleshooting.
 - Normalized Request: open a dedicated workstream for operational diagnostics because current runtime visibility exists but is not yet unified enough across CLI, service, MCP, AI, and task execution surfaces.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -52,3 +52,7 @@ The repository already has health, runtime, validation, and telemetry concepts, 
 
 - Ready for planning now.
 - The first slice should freeze the diagnostics taxonomy and ownership map.
+- Initial implementation proof now exists for the AI subsystem:
+  - `ntk ai doctor` exposes a normalized read-only health surface
+  - JSON output is available for machine consumers
+  - Markdown report generation is available for operator troubleshooting

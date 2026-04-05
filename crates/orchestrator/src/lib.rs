@@ -15,6 +15,10 @@ pub use execution::{
         AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, AiUsage,
         MockAiOutcome, MockAiProvider, OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
     },
+    ai_doctor::{
+        invoke_ai_doctor, render_ai_doctor_report, AiDoctorModelSelection, AiDoctorRequest,
+        AiDoctorResult, AiDoctorStatus,
+    },
     ai_profiles::{
         find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
         resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,

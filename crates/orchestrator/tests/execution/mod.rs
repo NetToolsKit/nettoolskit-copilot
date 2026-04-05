@@ -2,6 +2,7 @@
 //!
 //! Tests for orchestrator execution logic (processor, executor).
 
+mod ai_doctor_tests;
 mod ai_e2e_tests;
 mod ai_profiles_tests;
 mod ai_usage_tests;

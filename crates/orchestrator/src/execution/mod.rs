@@ -4,6 +4,8 @@
 
 /// AI provider abstraction and deterministic mock provider.
 pub mod ai;
+/// Read-only AI runtime diagnostics and operator reporting.
+pub mod ai_doctor;
 /// Built-in AI provider profiles and preset resolution helpers.
 pub mod ai_profiles;
 /// Local AI session persistence and resume primitives.
@@ -33,6 +35,10 @@ pub mod repo_workflow;
 pub use ai::{
     AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, AiUsage,
     MockAiOutcome, MockAiProvider, OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
+};
+pub use ai_doctor::{
+    invoke_ai_doctor, render_ai_doctor_report, AiDoctorModelSelection, AiDoctorRequest,
+    AiDoctorResult, AiDoctorStatus,
 };
 pub use ai_profiles::{
     find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,

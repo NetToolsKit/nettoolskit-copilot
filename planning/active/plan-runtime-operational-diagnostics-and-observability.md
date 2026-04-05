@@ -4,12 +4,13 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 11:05
 - Objective: unify operator-facing diagnostics and observability concepts across runtime, MCP, AI, task execution, and service surfaces.
 - Normalized Request: create a detailed workstream for runtime diagnostics and observability because the repository needs stronger operational visibility across its growing agent runtime.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Current Slice: the first AI-specific normalized runtime health surface is now implemented through `ntk ai doctor`, with JSON and Markdown report output.
 - Related Workstreams:
   - `planning/active/plan-sdk-control-plane-schemas-and-runtime-introspection.md`
   - `planning/active/plan-mcp-transport-auth-and-session-resilience.md`
@@ -54,6 +55,8 @@ Generated: 2026-03-31 00:00
 - Define normalized runtime inspection objects for each subsystem.
 - Keep raw traces and logs behind diagnostics rather than making them the contract.
 - Align diagnostics with typed control schemas where possible.
+- Implemented slice:
+  - `AiDoctorResult`, `AiDoctorStatus`, and `AiDoctorModelSelection` provide a normalized health surface for AI profile, provider chain, timeout, auth readiness, and fallback state.
 - Commit checkpoint:
   - `docs(planning): define normalized runtime health surfaces`
 
@@ -62,6 +65,10 @@ Generated: 2026-03-31 00:00
 - Define which CLI/service surfaces expose diagnostics and in what shape.
 - Keep diagnostic outputs machine-readable where appropriate.
 - Define concise and detailed inspection modes.
+- Implemented slice:
+  - `ntk ai doctor` exposes concise text output.
+  - `ntk ai doctor --json-output` exposes machine-readable inspection data.
+  - `ntk ai doctor --report-path` emits a Markdown operator report without mutating runtime state.
 - Commit checkpoint:
   - `docs(planning): define operator inspection surfaces`
 

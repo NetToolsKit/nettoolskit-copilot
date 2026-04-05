@@ -2,16 +2,20 @@
 
 use clap::{Args, Subcommand};
 use nettoolskit_orchestrator::{
-    list_ai_provider_profiles, query_ai_usage_summary, query_weekly_ai_usage_summary,
-    resolve_ai_provider_profile, resolve_ai_provider_profile_from_env, AiProviderProfile,
+    invoke_ai_doctor, list_ai_provider_profiles, query_ai_usage_summary,
+    query_weekly_ai_usage_summary, render_ai_doctor_report, resolve_ai_provider_profile,
+    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult, AiProviderProfile,
     AiUsageSummaryReport, AiUsageSummaryReportRequest, AiUsageWeeklyReport,
     AiUsageWeeklyReportRequest, ExitStatus, NTK_AI_PROFILE_ENV,
 };
+use std::fs;
 use std::path::PathBuf;
 
 /// AI command group.
 #[derive(Debug, Subcommand)]
 pub enum AiCommand {
+    /// Diagnose AI provider/profile readiness without executing a request.
+    Doctor(AiDoctorArgs),
     /// Inspect built-in AI provider profiles and presets.
     Profiles {
         /// Profile subcommand.
@@ -60,6 +64,17 @@ pub struct AiProfilesShowArgs {
     /// Emit JSON instead of the default human-readable summary.
     #[clap(long)]
     pub json_output: bool,
+}
+
+/// CLI arguments for `ai doctor`.
+#[derive(Debug, Args)]
+pub struct AiDoctorArgs {
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
+    /// Optionally write a Markdown report to disk.
+    #[clap(long)]
+    pub report_path: Option<PathBuf>,
 }
 
 /// Shared report options for AI usage history commands.
@@ -116,9 +131,40 @@ pub struct AiUsageSummaryArgs {
 /// Execute one AI command.
 pub async fn execute_ai_command(command: AiCommand) -> ExitStatus {
     match command {
+        AiCommand::Doctor(arguments) => execute_ai_doctor(arguments),
         AiCommand::Profiles { command } => execute_ai_profiles_command(command),
         AiCommand::Usage { command } => execute_ai_usage_command(command),
     }
+}
+
+fn execute_ai_doctor(arguments: AiDoctorArgs) -> ExitStatus {
+    let result = match invoke_ai_doctor(&AiDoctorRequest) {
+        Ok(result) => result,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    if let Some(report_path) = &arguments.report_path {
+        if let Some(parent) = report_path.parent() {
+            if let Err(error) = fs::create_dir_all(parent) {
+                eprintln!("{error}");
+                return ExitStatus::Error;
+            }
+        }
+        if let Err(error) = fs::write(report_path, render_ai_doctor_report(&result)) {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    }
+
+    if arguments.json_output {
+        return print_json_or_error(&result);
+    }
+
+    print_ai_doctor(&result, arguments.report_path.as_deref());
+    ExitStatus::Success
 }
 
 fn execute_ai_profiles_command(command: AiProfilesCommand) -> ExitStatus {
@@ -314,6 +360,79 @@ fn print_ai_profile(profile: &AiProviderProfile) {
         "Reasoning intents: {}",
         profile.reasoning_intents.join(", ")
     );
+}
+
+fn print_ai_doctor(result: &AiDoctorResult, report_path: Option<&std::path::Path>) {
+    println!("AI doctor");
+    println!("Status: {:?}", result.status);
+    println!("Active profile source: {}", result.active_profile_source);
+    if let Some(profile) = &result.active_profile {
+        println!("Active profile: {} ({})", profile.id, profile.title);
+    } else {
+        println!("Active profile: none");
+    }
+    println!(
+        "Provider chain: {} ({})",
+        result.provider_chain.join(" -> "),
+        result.provider_chain_source
+    );
+    println!(
+        "Timeouts: primary={}ms secondary={}ms",
+        result.primary_timeout_ms, result.secondary_timeout_ms
+    );
+    println!("Live provider ready: {}", result.live_provider_ready);
+    println!("Fallback ready: {}", result.fallback_ready);
+
+    if let Some(endpoint) = &result.endpoint {
+        println!(
+            "Endpoint: {} ({})",
+            endpoint,
+            result.endpoint_source.as_deref().unwrap_or("n/a")
+        );
+    }
+    if let Some(model) = &result.provider_default_model {
+        println!(
+            "Provider default model: {} ({})",
+            model,
+            result
+                .provider_default_model_source
+                .as_deref()
+                .unwrap_or("n/a")
+        );
+    }
+    println!("API key present: {}", result.api_key_present);
+    println!(
+        "Model selection enabled: {}",
+        result.model_selection.enabled
+    );
+    println!(
+        "Cheap model: {}",
+        result
+            .model_selection
+            .cheap_model
+            .as_deref()
+            .unwrap_or("provider-default")
+    );
+    println!(
+        "Reasoning model: {}",
+        result
+            .model_selection
+            .reasoning_model
+            .as_deref()
+            .unwrap_or("provider-default")
+    );
+
+    if let Some(report_path) = report_path {
+        println!("Report path: {}", report_path.display());
+    }
+
+    if !result.warnings.is_empty() {
+        println!();
+        println!("Warnings");
+        for warning in &result.warnings {
+            println!("- {warning}");
+        }
+    }
 }
 
 fn print_weekly_usage_report(report: &AiUsageWeeklyReport) {

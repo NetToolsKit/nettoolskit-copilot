@@ -278,3 +278,42 @@ fn test_ai_profiles_show_rejects_unknown_profile() {
         .failure()
         .stderr(predicate::str::contains("unsupported AI profile"));
 }
+
+#[test]
+#[serial]
+fn test_ai_doctor_json_output_reports_local_profile_status() {
+    let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "local");
+
+    ntk()
+        .args(["ai", "doctor", "--json-output"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""status": "local_only""#))
+        .stdout(predicate::str::contains(r#""provider_chain": ["#))
+        .stdout(predicate::str::contains(r#""mock""#));
+}
+
+#[test]
+#[serial]
+fn test_ai_doctor_writes_markdown_report_when_requested() {
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let report_path = temp_dir.path().join("reports").join("ai-doctor.md");
+    let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "local");
+
+    ntk()
+        .args([
+            "ai",
+            "doctor",
+            "--report-path",
+            report_path.to_string_lossy().as_ref(),
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Report path:"))
+        .stdout(predicate::str::contains("Status: LocalOnly"));
+
+    let report_content =
+        std::fs::read_to_string(&report_path).expect("ai doctor report should be written");
+    assert!(report_content.contains("# AI Doctor Report"));
+    assert!(report_content.contains("- Status: `local_only`"));
+}
