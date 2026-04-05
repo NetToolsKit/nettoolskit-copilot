@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-03-30 07:31
+- LastUpdated: 2026-04-05 12:20
 - Objective: reduce AI token, latency, and cost waste by tightening model routing, prompt compaction, session replay, and cache reuse across the `ntk` AI surfaces.
 - Normalized Request: create a planning workstream for token economy so the repository can actively reduce token burn instead of only measuring it.
 - Active Branch: `main` (planning only; implementation branches TBD)
@@ -18,6 +18,7 @@ Generated: 2026-03-30 07:31
   - `crates/cli/src/ai_commands.rs`
   - `planning/completed/plan-ai-usage-history-and-sqlite-local-memory.md`
   - `planning/completed/enterprise-progress-tracker.md`
+- Current Slice: intent-aware model selection already exists, and strategy-aware provider routing is now implemented in the orchestrator; the remaining work here is tighter token/cost policy rather than provider-order heuristics.
 
 ---
 

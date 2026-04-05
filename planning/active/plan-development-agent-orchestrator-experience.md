@@ -4,13 +4,13 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:42
+- LastUpdated: 2026-04-05 12:20
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: D1, D2, and D5 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, `ntk ai doctor` JSON/report surfaces, and a dedicated AI development operator playbook; D3 smart routing is next.
+- Current Slice: D1, D2, D3, and D5 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, `ntk ai doctor` JSON/report surfaces, strategy-aware provider routing, and a dedicated AI development operator playbook; D4 normalized provider adapters are next.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -80,6 +80,10 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Keep routing strategy configurable with clear operator modes such as `latency`, `balanced`, and `cost`.
 - Ensure fallback remains explicit and observable rather than hidden behind silent retries.
 - Reuse the token-economy workstream for budget policy instead of redefining cost controls here.
+- Completed slice:
+  - `crates/orchestrator/src/execution/ai_routing.rs` now owns provider-chain resolution, routing-strategy selection, timeout budgets, and scored provider ordering.
+  - `crates/orchestrator/src/execution/processor.rs` now consumes the scored routing plan before building provider routes, and logs attempt scores/rationales during failover execution.
+  - `crates/orchestrator/src/execution/ai_doctor.rs` and `crates/cli/src/ai_commands.rs` now expose the resolved strategy, ordered provider chain, and scored candidates for operator inspection.
 - Target paths:
   - `crates/orchestrator/src/execution/processor.rs`
   - `crates/orchestrator/src/execution/ai_usage.rs`

@@ -6,6 +6,10 @@ use crate::execution::ai::{
 use crate::execution::ai_profiles::{
     resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
 };
+use crate::execution::ai_routing::{
+    build_ai_provider_routing_plan, resolve_ai_provider_chain, resolve_ai_provider_timeout_budget,
+    AiProviderRouteTimeoutBudget,
+};
 use crate::execution::ai_session::{
     prune_local_ai_session_snapshots, resolve_active_ai_session_id, set_active_ai_session_id,
     LocalAiSessionState, NTK_AI_SESSION_COMPRESSION_MAX_CHARS_ENV,
@@ -61,6 +65,13 @@ use std::time::SystemTime;
 use std::time::{Duration, Instant};
 use strum::IntoEnumIterator;
 use tracing::{info, info_span, warn};
+
+#[cfg(test)]
+use crate::execution::ai_routing::{
+    NTK_AI_FALLBACK_PROVIDER_ENV, NTK_AI_PROVIDER_CHAIN_ENV, NTK_AI_PROVIDER_ENV,
+    NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV, NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV,
+    NTK_AI_ROUTING_STRATEGY_ENV,
+};
 
 static RUNTIME_METRICS: OnceLock<Metrics> = OnceLock::new();
 static COMMAND_CACHE: OnceLock<Mutex<CommandResultCache>> = OnceLock::new();
@@ -132,10 +143,6 @@ const NTK_AI_MODEL_SELECTION_REASONING_COST_CAP_USD_ENV: &str =
     "NTK_AI_MODEL_SELECTION_REASONING_COST_CAP_USD";
 const NTK_AI_MODEL_SELECTION_FALLBACK_TO_CHEAP_ON_GUARDRAIL_ENV: &str =
     "NTK_AI_MODEL_SELECTION_FALLBACK_TO_CHEAP_ON_GUARDRAIL";
-const NTK_AI_PROVIDER_CHAIN_ENV: &str = "NTK_AI_PROVIDER_CHAIN";
-const NTK_AI_FALLBACK_PROVIDER_ENV: &str = "NTK_AI_FALLBACK_PROVIDER";
-const NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV: &str = "NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS";
-const NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV: &str = "NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS";
 const NTK_AI_SLO_MAX_P95_LATENCY_MS_ENV: &str = "NTK_AI_SLO_MAX_P95_LATENCY_MS";
 const NTK_AI_SLO_MIN_SUCCESS_RATE_PCT_ENV: &str = "NTK_AI_SLO_MIN_SUCCESS_RATE_PCT";
 const NTK_AI_SLO_MAX_TOKENS_PER_TASK_ENV: &str = "NTK_AI_SLO_MAX_TOKENS_PER_TASK";
@@ -329,24 +336,11 @@ impl AiProviderKind {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-struct AiProviderRouteTimeoutBudget {
-    primary: Duration,
-    secondary: Duration,
-}
-
-impl Default for AiProviderRouteTimeoutBudget {
-    fn default() -> Self {
-        Self {
-            primary: Duration::from_millis(DEFAULT_AI_REQUEST_TIMEOUT_MS),
-            secondary: Duration::from_millis(DEFAULT_AI_REQUEST_TIMEOUT_MS),
-        }
-    }
-}
-
 struct AiProviderRoute {
     provider: Box<dyn AiProvider>,
     timeout_budget: Duration,
+    score: f64,
+    rationale: String,
 }
 
 #[derive(Debug)]
@@ -2402,11 +2396,13 @@ async fn request_ai_stream_with_provider_fallback(
         ));
 
         let _ = nettoolskit_ui::append_footer_log(&format!(
-            "ai: provider attempt {}/{} id={} timeout={}ms",
+            "ai: provider attempt {}/{} id={} timeout={}ms score={:.3} {}",
             index + 1,
             provider_routes.len(),
             provider_id,
-            route.timeout_budget.as_millis()
+            route.timeout_budget.as_millis(),
+            route.score,
+            route.rationale
         ));
 
         let mut routed_retry_policy = retry_policy;
@@ -2553,98 +2549,44 @@ fn mocked_ai_response(intent: AiIntent, prompt: &str) -> AiResponse {
     AiResponse::new("mock-assistant", content)
 }
 
+#[cfg(test)]
 fn parse_ai_provider_chain(value: &str) -> Result<Vec<AiProviderKind>, String> {
-    let mut providers = Vec::new();
-
-    for entry in value.split([',', ';']) {
-        let trimmed = entry.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
-
-        let kind = AiProviderKind::parse(trimmed).ok_or_else(|| {
-            format!(
-                "unsupported AI provider `{trimmed}` (allowed: mock, openai, openai-compatible)"
-            )
-        })?;
-
-        if !providers.contains(&kind) {
-            providers.push(kind);
-        }
-    }
-
-    if providers.is_empty() {
-        return Err("AI provider chain is empty".to_string());
-    }
-
-    providers.truncate(2);
-    Ok(providers)
+    crate::execution::ai_routing::parse_ai_provider_chain_ids(value)?
+        .into_iter()
+        .map(|provider_id| {
+            AiProviderKind::parse(&provider_id).ok_or_else(|| {
+                format!(
+                    "unsupported AI provider `{provider_id}` (allowed: mock, openai, openai-compatible)"
+                )
+            })
+        })
+        .collect()
 }
 
+#[cfg(test)]
 fn ai_provider_chain_from_env() -> Result<Vec<AiProviderKind>, String> {
-    let mut providers = if let Ok(raw_chain) = std::env::var(NTK_AI_PROVIDER_CHAIN_ENV) {
-        parse_ai_provider_chain(&raw_chain)?
-    } else if let Ok(primary_name) = std::env::var("NTK_AI_PROVIDER") {
-        let primary = AiProviderKind::parse(&primary_name).ok_or_else(|| {
-            format!(
-                "unsupported NTK_AI_PROVIDER `{}` (allowed: mock, openai, openai-compatible)",
-                primary_name.trim()
-            )
-        })?;
-        vec![primary]
-    } else if let Some(profile) = resolve_ai_provider_profile_from_env()? {
-        parse_ai_provider_chain(&profile.provider_chain.join(","))?
-    } else {
-        vec![AiProviderKind::Mock]
-    };
-
-    if providers.len() == 1 {
-        if let Ok(raw_fallback) = std::env::var(NTK_AI_FALLBACK_PROVIDER_ENV) {
-            let fallback = AiProviderKind::parse(&raw_fallback).ok_or_else(|| {
+    let profile = resolve_ai_provider_profile_from_env()?;
+    resolve_ai_provider_chain(profile)?
+        .providers
+        .into_iter()
+        .map(|provider_id| {
+            AiProviderKind::parse(&provider_id).ok_or_else(|| {
                 format!(
-                    "unsupported NTK_AI_FALLBACK_PROVIDER `{}` (allowed: mock, openai, openai-compatible)",
-                    raw_fallback.trim()
+                    "unsupported AI provider `{provider_id}` (allowed: mock, openai, openai-compatible)"
                 )
-            })?;
-            if fallback != providers[0] {
-                providers.push(fallback);
-            }
-        } else if providers[0] != AiProviderKind::Mock {
-            providers.push(AiProviderKind::Mock);
-        }
-    }
-
-    providers.truncate(2);
-    Ok(providers)
+            })
+        })
+        .collect()
 }
 
 fn ai_provider_route_timeout_budget_from_env(
     default_timeout: Duration,
 ) -> Result<AiProviderRouteTimeoutBudget, String> {
     let profile = resolve_ai_provider_profile_from_env()?;
-    let mut budget = profile
-        .map(|profile| AiProviderRouteTimeoutBudget {
-            primary: Duration::from_millis(profile.primary_timeout_ms),
-            secondary: Duration::from_millis(profile.secondary_timeout_ms),
-        })
-        .unwrap_or(AiProviderRouteTimeoutBudget {
-            primary: default_timeout,
-            secondary: default_timeout,
-        });
-
-    if let Ok(value) = std::env::var(NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV) {
-        if let Some(parsed) = parse_timeout_millis(&value) {
-            budget.primary = Duration::from_millis(parsed);
-        }
-    }
-
-    if let Ok(value) = std::env::var(NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV) {
-        if let Some(parsed) = parse_timeout_millis(&value) {
-            budget.secondary = Duration::from_millis(parsed);
-        }
-    }
-
-    Ok(budget)
+    resolve_ai_provider_timeout_budget(
+        profile,
+        u64::try_from(default_timeout.as_millis()).unwrap_or(DEFAULT_AI_REQUEST_TIMEOUT_MS),
+    )
 }
 
 fn ai_provider_from_kind(
@@ -2701,21 +2643,40 @@ fn ai_provider_routes_from_env(
     prompt: &str,
     retry_policy: AiRetryPolicy,
 ) -> Result<Vec<AiProviderRoute>, String> {
-    let provider_chain = ai_provider_chain_from_env()?;
+    let active_profile = resolve_ai_provider_profile_from_env()?;
+    let provider_chain = resolve_ai_provider_chain(active_profile)?;
+    let routing_plan = build_ai_provider_routing_plan(active_profile, &provider_chain.providers)?;
     let timeout_budget = ai_provider_route_timeout_budget_from_env(retry_policy.request_timeout)?;
-    let mut routes = Vec::with_capacity(provider_chain.len());
+    let mut routes = Vec::with_capacity(provider_chain.providers.len());
 
-    for (index, provider_kind) in provider_chain.iter().enumerate() {
-        let provider = ai_provider_from_kind(*provider_kind, intent, prompt)?;
+    for (index, provider_id) in routing_plan.ordered_provider_ids.iter().enumerate() {
+        let provider_kind = AiProviderKind::parse(provider_id).ok_or_else(|| {
+            format!(
+                "unsupported AI provider `{provider_id}` (allowed: mock, openai, openai-compatible)"
+            )
+        })?;
+        let provider = ai_provider_from_kind(provider_kind, intent, prompt)?;
         let timeout_budget = if index == 0 {
-            timeout_budget.primary
+            Duration::from_millis(timeout_budget.primary_ms)
         } else {
-            timeout_budget.secondary
+            Duration::from_millis(timeout_budget.secondary_ms)
         };
+        let candidate = routing_plan
+            .provider_scores
+            .iter()
+            .find(|candidate| candidate.provider_id == *provider_id)
+            .ok_or_else(|| format!("AI routing plan missing score for provider `{provider_id}`"))?;
 
         routes.push(AiProviderRoute {
             provider,
             timeout_budget,
+            score: candidate.total_score,
+            rationale: format!(
+                "{} strategy via {}: {}",
+                routing_plan.strategy.as_str(),
+                routing_plan.strategy_source,
+                candidate.rationale
+            ),
         });
     }
 
@@ -3090,7 +3051,7 @@ async fn process_ai_command(parts: &[&str], subcommand: Option<&str>) -> ExitSta
         );
         println!(
             "{}",
-            "Operational controls: NTK_AI_PROVIDER_CHAIN/NTK_AI_FALLBACK_PROVIDER, NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS, NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS, NTK_AI_MAX_RETRIES, NTK_AI_REQUEST_TIMEOUT_MS, NTK_AI_RATE_LIMIT_REQUESTS, NTK_AI_RATE_LIMIT_WINDOW_SECONDS, NTK_AI_TOKEN_BUDGET_*, NTK_AI_COST_BUDGET_USD_PER_REQUEST, NTK_AI_PROMPT_COMPACTION_TIER, NTK_AI_CACHE_FIRST_ENABLED, NTK_AI_MODEL_SELECTION_*, NTK_AI_SESSION_COMPRESSION_*, NTK_AI_SLO_*."
+            "Operational controls: NTK_AI_PROVIDER_CHAIN/NTK_AI_FALLBACK_PROVIDER, NTK_AI_ROUTING_STRATEGY, NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS, NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS, NTK_AI_MAX_RETRIES, NTK_AI_REQUEST_TIMEOUT_MS, NTK_AI_RATE_LIMIT_REQUESTS, NTK_AI_RATE_LIMIT_WINDOW_SECONDS, NTK_AI_TOKEN_BUDGET_*, NTK_AI_COST_BUDGET_USD_PER_REQUEST, NTK_AI_PROMPT_COMPACTION_TIER, NTK_AI_CACHE_FIRST_ENABLED, NTK_AI_MODEL_SELECTION_*, NTK_AI_SESSION_COMPRESSION_*, NTK_AI_SLO_*."
                 .color(Color::YELLOW)
         );
         return ExitStatus::Success;
@@ -6444,9 +6405,10 @@ mod tests {
 
     fn clear_ai_provider_route_env_vars() {
         std::env::remove_var(NTK_AI_PROFILE_ENV);
-        std::env::remove_var("NTK_AI_PROVIDER");
+        std::env::remove_var(NTK_AI_PROVIDER_ENV);
         std::env::remove_var(NTK_AI_PROVIDER_CHAIN_ENV);
         std::env::remove_var(NTK_AI_FALLBACK_PROVIDER_ENV);
+        std::env::remove_var(NTK_AI_ROUTING_STRATEGY_ENV);
         std::env::remove_var(NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV);
         std::env::remove_var(NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV);
         std::env::remove_var("NTK_AI_ENDPOINT");
@@ -6650,8 +6612,8 @@ mod tests {
             .expect("timeout budget should resolve");
 
         clear_ai_provider_route_env_vars();
-        assert_eq!(budget.primary, Duration::from_millis(1_200));
-        assert_eq!(budget.secondary, Duration::from_millis(3_400));
+        assert_eq!(budget.primary_ms, 1_200);
+        assert_eq!(budget.secondary_ms, 3_400);
     }
 
     #[tokio::test]
@@ -6677,8 +6639,8 @@ mod tests {
             .expect("profile timeout budget should resolve");
 
         clear_ai_provider_route_env_vars();
-        assert_eq!(budget.primary, Duration::from_millis(15_000));
-        assert_eq!(budget.secondary, Duration::from_millis(8_000));
+        assert_eq!(budget.primary_ms, 15_000);
+        assert_eq!(budget.secondary_ms, 8_000);
     }
 
     #[tokio::test]
@@ -7327,10 +7289,14 @@ mod tests {
             AiProviderRoute {
                 provider: Box::new(primary),
                 timeout_budget: Duration::from_millis(50),
+                score: 0.80,
+                rationale: "test primary route".to_string(),
             },
             AiProviderRoute {
                 provider: Box::new(secondary),
                 timeout_budget: Duration::from_millis(50),
+                score: 0.60,
+                rationale: "test fallback route".to_string(),
             },
         ];
 
@@ -7387,10 +7353,14 @@ mod tests {
             AiProviderRoute {
                 provider: Box::new(primary),
                 timeout_budget: Duration::from_millis(50),
+                score: 0.80,
+                rationale: "test primary route".to_string(),
             },
             AiProviderRoute {
                 provider: Box::new(secondary),
                 timeout_budget: Duration::from_millis(50),
+                score: 0.60,
+                rationale: "test fallback route".to_string(),
             },
         ];
 

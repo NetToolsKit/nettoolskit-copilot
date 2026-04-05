@@ -289,6 +289,7 @@ fn test_ai_doctor_json_output_reports_local_profile_status() {
         .assert()
         .success()
         .stdout(predicate::str::contains(r#""status": "local_only""#))
+        .stdout(predicate::str::contains(r#""strategy": "latency""#))
         .stdout(predicate::str::contains(r#""provider_chain": ["#))
         .stdout(predicate::str::contains(r#""mock""#));
 }
@@ -309,6 +310,8 @@ fn test_ai_doctor_writes_markdown_report_when_requested() {
         ])
         .assert()
         .success()
+        .stdout(predicate::str::contains("Routing strategy: latency"))
+        .stdout(predicate::str::contains("Routing scores"))
         .stdout(predicate::str::contains("Report path:"))
         .stdout(predicate::str::contains("Status: LocalOnly"));
 

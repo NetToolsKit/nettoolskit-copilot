@@ -377,6 +377,15 @@ fn print_ai_doctor(result: &AiDoctorResult, report_path: Option<&std::path::Path
         result.provider_chain_source
     );
     println!(
+        "Routing strategy: {} ({})",
+        result.routing_plan.strategy.as_str(),
+        result.routing_plan.strategy_source
+    );
+    println!(
+        "Routed order: {}",
+        result.routing_plan.ordered_provider_ids.join(" -> ")
+    );
+    println!(
         "Timeouts: primary={}ms secondary={}ms",
         result.primary_timeout_ms, result.secondary_timeout_ms
     );
@@ -421,6 +430,21 @@ fn print_ai_doctor(result: &AiDoctorResult, report_path: Option<&std::path::Path
             .as_deref()
             .unwrap_or("provider-default")
     );
+    if !result.routing_plan.provider_scores.is_empty() {
+        println!();
+        println!("Routing scores");
+        for candidate in &result.routing_plan.provider_scores {
+            println!(
+                "- {}: total={:.3} latency={:.2} cost={:.2} reliability={:.2} policy_fit={:.2}",
+                candidate.provider_id,
+                candidate.total_score,
+                candidate.latency_score,
+                candidate.cost_score,
+                candidate.reliability_score,
+                candidate.policy_fit_score
+            );
+        }
+    }
 
     if let Some(report_path) = report_path {
         println!("Report path: {}", report_path.display());

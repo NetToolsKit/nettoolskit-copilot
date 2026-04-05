@@ -2,14 +2,13 @@
 
 use crate::execution::ai::OpenAiCompatibleProviderConfig;
 use crate::execution::ai_profiles::{resolve_ai_provider_profile_from_env, AiProviderProfile};
+use crate::execution::ai_routing::{
+    build_ai_provider_routing_plan, resolve_ai_provider_chain, resolve_ai_provider_timeout_budget,
+    AiProviderRoutingPlan,
+};
 use serde::Serialize;
 
 const DEFAULT_AI_ROUTE_TIMEOUT_MS: u64 = 45_000;
-const NTK_AI_PROVIDER_ENV: &str = "NTK_AI_PROVIDER";
-const NTK_AI_PROVIDER_CHAIN_ENV: &str = "NTK_AI_PROVIDER_CHAIN";
-const NTK_AI_FALLBACK_PROVIDER_ENV: &str = "NTK_AI_FALLBACK_PROVIDER";
-const NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV: &str = "NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS";
-const NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV: &str = "NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS";
 const NTK_AI_ENDPOINT_ENV: &str = "NTK_AI_ENDPOINT";
 const NTK_AI_API_KEY_ENV: &str = "NTK_AI_API_KEY";
 const NTK_AI_MODEL_ENV: &str = "NTK_AI_MODEL";
@@ -62,7 +61,7 @@ pub struct AiDoctorModelSelection {
 }
 
 /// AI runtime doctor result payload.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct AiDoctorResult {
     /// Selected built-in profile, when configured.
     pub active_profile: Option<AiProviderProfile>,
@@ -96,16 +95,12 @@ pub struct AiDoctorResult {
     pub live_provider_ready: bool,
     /// Whether a fallback provider exists.
     pub fallback_ready: bool,
+    /// Effective routing strategy and scored provider order.
+    pub routing_plan: AiProviderRoutingPlan,
     /// Human-readable warnings for the operator.
     pub warnings: Vec<String>,
     /// Overall readiness status.
     pub status: AiDoctorStatus,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct ResolvedProviderChain {
-    providers: Vec<String>,
-    source: String,
 }
 
 /// Diagnose the effective AI runtime configuration without executing a request.
@@ -119,15 +114,19 @@ pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
         .as_ref()
         .map(|_| "env:NTK_AI_PROFILE".to_string())
         .unwrap_or_else(|| "none".to_string());
-    let provider_chain = resolve_provider_chain(active_profile.as_ref())?;
+    let provider_chain = resolve_ai_provider_chain(active_profile.as_ref())?;
+    let routing_plan =
+        build_ai_provider_routing_plan(active_profile.as_ref(), &provider_chain.providers)?;
     let primary_provider = provider_chain
         .providers
         .first()
         .cloned()
         .unwrap_or_else(|| "mock".to_string());
     let fallback_provider = provider_chain.providers.get(1).cloned();
-    let (primary_timeout_ms, secondary_timeout_ms) =
-        resolve_timeout_budget(active_profile.as_ref())?;
+    let timeout_budget =
+        resolve_ai_provider_timeout_budget(active_profile.as_ref(), DEFAULT_AI_ROUTE_TIMEOUT_MS)?;
+    let primary_timeout_ms = timeout_budget.primary_ms;
+    let secondary_timeout_ms = timeout_budget.secondary_ms;
     let model_selection = resolve_model_selection(active_profile.as_ref());
     let (endpoint, endpoint_source) = resolve_endpoint(&provider_chain.providers);
     let (provider_default_model, provider_default_model_source) =
@@ -192,6 +191,7 @@ pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
         model_selection,
         live_provider_ready,
         fallback_ready,
+        routing_plan,
         warnings,
         status,
     })
@@ -213,6 +213,15 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String {
             result.provider_chain_source
         ),
         format!("- Provider chain: `{}`", result.provider_chain.join(" -> ")),
+        format!(
+            "- Routing strategy: `{}` ({})",
+            result.routing_plan.strategy.as_str(),
+            result.routing_plan.strategy_source
+        ),
+        format!(
+            "- Routed order: `{}`",
+            result.routing_plan.ordered_provider_ids.join(" -> ")
+        ),
         format!(
             "- Timeouts: primary=`{}ms`, secondary=`{}ms`",
             result.primary_timeout_ms, result.secondary_timeout_ms
@@ -244,6 +253,21 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String {
                 .as_deref()
                 .unwrap_or("n/a")
         ));
+    }
+
+    lines.push(String::new());
+    lines.push("## Provider Routing".to_string());
+    for candidate in &result.routing_plan.provider_scores {
+        lines.push(format!(
+            "- `{}`: total=`{:.3}` latency=`{:.2}` cost=`{:.2}` reliability=`{:.2}` policy_fit=`{:.2}`",
+            candidate.provider_id,
+            candidate.total_score,
+            candidate.latency_score,
+            candidate.cost_score,
+            candidate.reliability_score,
+            candidate.policy_fit_score
+        ));
+        lines.push(format!("  - {}", candidate.rationale));
     }
 
     lines.push(String::new());
@@ -283,73 +307,6 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String {
     }
 
     lines.join("\n")
-}
-
-fn resolve_provider_chain(
-    profile: Option<&AiProviderProfile>,
-) -> Result<ResolvedProviderChain, String> {
-    if let Some(raw_chain) = resolve_nonempty_env(NTK_AI_PROVIDER_CHAIN_ENV) {
-        return Ok(ResolvedProviderChain {
-            providers: parse_provider_chain(&raw_chain)?,
-            source: format!("env:{NTK_AI_PROVIDER_CHAIN_ENV}"),
-        });
-    }
-
-    if let Some(primary) = resolve_nonempty_env(NTK_AI_PROVIDER_ENV) {
-        let mut providers = vec![normalize_provider_id(&primary)?];
-        if let Some(fallback) = resolve_nonempty_env(NTK_AI_FALLBACK_PROVIDER_ENV) {
-            let fallback = normalize_provider_id(&fallback)?;
-            if fallback != providers[0] {
-                providers.push(fallback);
-            }
-        } else if providers[0] != "mock" {
-            providers.push("mock".to_string());
-        }
-
-        providers.truncate(2);
-        return Ok(ResolvedProviderChain {
-            providers,
-            source: format!("env:{NTK_AI_PROVIDER_ENV}"),
-        });
-    }
-
-    if let Some(profile) = profile {
-        return Ok(ResolvedProviderChain {
-            providers: profile
-                .provider_chain
-                .iter()
-                .map(|entry| entry.to_string())
-                .collect(),
-            source: format!("profile:{}", profile.id),
-        });
-    }
-
-    Ok(ResolvedProviderChain {
-        providers: vec!["mock".to_string()],
-        source: "default".to_string(),
-    })
-}
-
-fn resolve_timeout_budget(profile: Option<&AiProviderProfile>) -> Result<(u64, u64), String> {
-    let mut primary = profile
-        .map(|profile| profile.primary_timeout_ms)
-        .unwrap_or(DEFAULT_AI_ROUTE_TIMEOUT_MS);
-    let mut secondary = profile
-        .map(|profile| profile.secondary_timeout_ms)
-        .unwrap_or(DEFAULT_AI_ROUTE_TIMEOUT_MS);
-
-    if let Some(value) = resolve_nonempty_env(NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV) {
-        primary = parse_timeout_ms(&value).ok_or_else(|| {
-            format!("{NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV} must be a positive integer")
-        })?;
-    }
-    if let Some(value) = resolve_nonempty_env(NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV) {
-        secondary = parse_timeout_ms(&value).ok_or_else(|| {
-            format!("{NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV} must be a positive integer")
-        })?;
-    }
-
-    Ok((primary, secondary))
 }
 
 fn resolve_model_selection(profile: Option<&AiProviderProfile>) -> AiDoctorModelSelection {
@@ -460,48 +417,11 @@ fn resolve_provider_default_model(
     )
 }
 
-fn parse_provider_chain(value: &str) -> Result<Vec<String>, String> {
-    let mut providers = Vec::new();
-
-    for entry in value.split([',', ';']) {
-        let trimmed = entry.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
-
-        let normalized = normalize_provider_id(trimmed)?;
-        if !providers.contains(&normalized) {
-            providers.push(normalized);
-        }
-    }
-
-    if providers.is_empty() {
-        return Err("AI provider chain is empty".to_string());
-    }
-
-    providers.truncate(2);
-    Ok(providers)
-}
-
-fn normalize_provider_id(value: &str) -> Result<String, String> {
-    match value.trim().to_ascii_lowercase().as_str() {
-        "mock" => Ok("mock".to_string()),
-        "openai" | "openai-compatible" => Ok("openai-compatible".to_string()),
-        invalid => Err(format!(
-            "unsupported AI provider `{invalid}` (allowed: mock, openai, openai-compatible)"
-        )),
-    }
-}
-
 fn resolve_nonempty_env(key: &str) -> Option<String> {
     std::env::var(key)
         .ok()
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
-}
-
-fn parse_timeout_ms(value: &str) -> Option<u64> {
-    value.trim().parse::<u64>().ok().filter(|value| *value > 0)
 }
 
 fn parse_bool(value: &str) -> Option<bool> {

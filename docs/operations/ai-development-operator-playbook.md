@@ -10,6 +10,7 @@ This playbook covers:
 
 - built-in AI provider profiles
 - `ntk ai doctor`
+- routing strategy override and scored provider order
 - Markdown and JSON operator reports
 - local vs remote provider guidance
 - degraded/fallback troubleshooting
@@ -105,6 +106,28 @@ Use JSON when:
 - capturing state in scripts
 - comparing provider/profile changes over time
 
+### Strategy override
+
+Use `NTK_AI_ROUTING_STRATEGY` when you want to force the provider-order policy without changing the underlying provider chain.
+
+```powershell
+$env:NTK_AI_PROFILE = "balanced"
+$env:NTK_AI_ROUTING_STRATEGY = "cost"
+ntk ai doctor
+```
+
+Allowed values:
+
+- `latency`
+- `balanced`
+- `cost`
+
+The doctor output now shows:
+
+- resolved strategy and source
+- routed provider order after scoring
+- per-provider latency/cost/reliability/policy-fit subscores
+
 ### Markdown report
 
 ```powershell
@@ -171,7 +194,7 @@ Common causes:
 Recommended sequence:
 
 1. confirm the active profile with `ntk ai profiles show`
-2. confirm the provider endpoint and auth state with `ntk ai doctor`
+2. confirm the provider endpoint, auth state, and routed provider order with `ntk ai doctor`
 3. switch to `local` if you need deterministic offline progress
 4. restore remote env vars and rerun `ntk ai doctor`
 

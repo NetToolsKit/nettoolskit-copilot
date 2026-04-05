@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added strategy-aware AI provider routing under `crates/orchestrator/src/execution/ai_routing.rs`, with explicit `latency`, `balanced`, and `cost` strategies, scored provider ordering, and shared timeout/provider-chain resolution for both the runtime pipeline and `ntk ai doctor`.
 - Added `docs/operations/ai-development-operator-playbook.md` as the stable human-facing runbook for AI profile selection, `ntk ai doctor`, JSON/Markdown diagnostics, local-vs-remote guidance, and degraded-state recovery.
 - Added `ntk ai doctor` with JSON output and optional Markdown report generation so operators can inspect active AI profile, provider chain, timeout, auth readiness, and fallback state without executing a request.
 - Added built-in AI provider profiles (`balanced`, `coding`, `cheap`, `latency`, `local`) with canonical orchestrator exports, `NTK_AI_PROFILE` resolution, and new `ntk ai profiles list/show` operator surfaces.
@@ -23,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed the AI development-orchestrator umbrella, free-provider matrix, and token-economy workstreams to record that smart provider routing and observable fallback scoring are now materially implemented.
+- Changed `ntk ai doctor`, the AI operator playbook, and root/crate READMEs so routing strategy, ordered candidates, and per-provider scoring are visible to operators instead of staying implicit inside provider failover logic.
 - Changed the development-orchestrator umbrella to record that the operator playbook slice is now implemented, with root/crate/documentation READMEs linking to the dedicated playbook instead of duplicating troubleshooting guidance inline.
 - Normalized archived planning references so historical phase plans/specs and earlier completed workstreams now point at the completed `repository-consolidation-continuity` umbrella instead of stale `planning/active/*` paths.
 - Archived the local `repository-consolidation-continuity` umbrella after the continuity planning sequence, the audit-only Phase 19-22 script-retirement sweeps, the retained-estate proof, and the external W6 Rust-directive handoff left no remaining planning-discovery work open in this repository.

@@ -8,6 +8,8 @@ pub mod ai;
 pub mod ai_doctor;
 /// Built-in AI provider profiles and preset resolution helpers.
 pub mod ai_profiles;
+/// Provider routing strategy, scoring, and timeout resolution.
+pub mod ai_routing;
 /// Local AI session persistence and resume primitives.
 pub mod ai_session;
 /// AI token economy policy, budget estimation, and prompt compaction.
@@ -43,6 +45,14 @@ pub use ai_doctor::{
 pub use ai_profiles::{
     find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
     resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
+};
+pub use ai_routing::{
+    build_ai_provider_routing_plan, normalize_ai_provider_id, parse_ai_provider_chain_ids,
+    resolve_ai_provider_chain, resolve_ai_provider_timeout_budget, resolve_ai_routing_strategy,
+    AiProviderRouteTimeoutBudget, AiProviderRoutingPlan, AiProviderRoutingScore, AiRoutingStrategy,
+    ResolvedAiProviderChain, NTK_AI_FALLBACK_PROVIDER_ENV, NTK_AI_PROVIDER_CHAIN_ENV,
+    NTK_AI_PROVIDER_ENV, NTK_AI_PROVIDER_PRIMARY_TIMEOUT_MS_ENV,
+    NTK_AI_PROVIDER_SECONDARY_TIMEOUT_MS_ENV, NTK_AI_ROUTING_STRATEGY_ENV,
 };
 pub use ai_session::{
     active_ai_session_id, list_local_ai_session_snapshots, load_local_ai_session_from_path,
