@@ -30,6 +30,7 @@ If a section does not apply, remove it instead of filling it with weak placehold
 - Prefer a Mermaid diagram in `Architecture` that shows the top-level components and ownership boundaries instead of ASCII art.
 - Keep `Architecture` concise and source-aligned; do not invent layers that do not exist in the repository.
 - When a repository uses multiple agentic technologies, separate them in a dedicated subsection under `Architecture` with clear roles, entry points, and support status. Prefer naming the subsection `### Agentic Surfaces` and cover MCP, A2A, RAG, and CAG explicitly when they are part of the repo model.
+- When the repository also owns a versioned AI provider-evaluation or provider-family matrix, document it in a short subsection under `Architecture` instead of folding it into MCP/A2A/RAG/CAG. Keep the matrix summary concise and point to the canonical catalog or operator doc for details.
 - Installation shows real setup commands and package references.
 - Quick Start stays minimal and runnable.
 - Usage Examples cover typical and advanced scenarios with real code.

@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 18:10
+- LastUpdated: 2026-04-05 18:35
 - Objective: compare, classify, and prepare the free AI providers shown in `.docs/llm-free.png` for deterministic test coverage without coupling the runtime to a single vendor surface.
 - Normalized Request: create a planning workstream for evaluating all listed free providers and using them in repository tests through explicit, SOLID-aligned boundaries.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: F4 now has a canonical free-provider matrix catalog, usage-report enrichment for provider-family classification, and read-only runtime route snapshots that surface quota/fallback guidance through the existing weekly/summary commands.
+- Current Slice: F5 now documents the canonical free-provider matrix in the root README, the AI operator playbook, and `docs/samples/manifests/`, leaving only the live/provider harness slice open.
 - Inputs:
   - `.docs/llm-free.png`
   - `crates/orchestrator/src/execution/ai.rs`
@@ -119,10 +119,18 @@ This workstream treats OpenCode.ai as an orchestration/control-plane surface, no
 - Add a concise provider matrix section to the repository README and instruction surfaces.
 - Record the provider modes, operator caveats, and the distinction between gateway, native API, and orchestrator surfaces.
 - Keep the README summary short and defer detail to the planning/spec docs.
+- Implemented slice:
+  - `README.md` now carries a dedicated `### AI Provider Matrix` subsection under `Architecture`, separate from MCP/A2A/RAG/CAG.
+  - `docs/operations/ai-development-operator-playbook.md` now explains how `ntk ai usage weekly|summary` surfaces route, fallback, and free-provider matrix context.
+  - `docs/samples/manifests/free-llm-provider-matrix.sample.json` now gives a human-facing example of the catalog shape, while the authored source remains under `definitions/templates/manifests/`.
+  - canonical README/agentic-surface instructions now require provider-matrix documentation to stay separate from MCP/A2A/RAG/CAG.
 - Target paths:
   - `README.md`
-  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
-  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
+  - `docs/operations/ai-development-operator-playbook.md`
+  - `docs/samples/manifests/*`
+  - `definitions/instructions/governance/ntk-governance-readme.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
+  - `definitions/instructions/development/ntk-development-agentic-surfaces.instructions.md`
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - Commit checkpoint:

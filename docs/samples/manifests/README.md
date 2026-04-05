@@ -10,4 +10,8 @@
 
 Canonical reusable manifest templates belong under `definitions/templates/manifests/`.
 
+Current samples:
+
+- `free-llm-provider-matrix.sample.json` - trimmed example of the free-provider matrix shape used by runtime diagnostics and AI usage reporting
+
 ---

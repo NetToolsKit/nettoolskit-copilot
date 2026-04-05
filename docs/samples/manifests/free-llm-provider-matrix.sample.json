@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "family_id": "openrouter",
+      "title": "OpenRouter",
+      "platform_type": "gateway",
+      "integration_mode": "gateway/openai-compatible",
+      "support_tier": "best-effort-free",
+      "stability_label": "stable",
+      "compatibility_tags": ["openai-compatible"],
+      "provider_aliases": ["openrouter"],
+      "endpoint_hosts": ["openrouter.ai"],
+      "quota_hint": "~50-200 req/day",
+      "operator_note": "Gateway-style free tier with broad model mix; limits can vary by model and day."
+    },
+    {
+      "family_id": "google-ai-studio",
+      "title": "Google AI Studio",
+      "platform_type": "api",
+      "integration_mode": "api/native",
+      "support_tier": "best-effort-free",
+      "stability_label": "stable",
+      "compatibility_tags": ["native-api"],
+      "provider_aliases": ["google-ai-studio", "gemini", "google-gemini"],
+      "endpoint_hosts": ["generativelanguage.googleapis.com"],
+      "quota_hint": "generous daily usage",
+      "operator_note": "Stable native Gemini surface; requires dedicated native adapter work instead of generic OpenAI-compatible routing."
+    }
+  ]
+}

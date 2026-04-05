@@ -23,7 +23,7 @@ Objectives:
 - ✅ Versioned projection model for `.github/`, `.codex/`, `.claude/`, and `.vscode/`
 - ✅ Native MCP runtime projection and Codex config application from a canonical catalog
 - ✅ Local RAG/CAG context index and weekly AI usage ledger for deterministic repo recall
-- ✅ Built-in AI provider profiles plus `ntk ai doctor` diagnostics, smart routing strategy scoring, normalized adapter contracts, and canonical agent/skill model-routing defaults for balanced, coding, cheap, latency, and local orchestrator presets
+- ✅ Built-in AI provider profiles plus `ntk ai doctor` diagnostics, smart routing strategy scoring, normalized adapter contracts, canonical agent/skill model-routing defaults, and matrix-aware usage reporting for balanced, coding, cheap, latency, and local orchestrator presets
 - ✅ Explicit agentic surface separation for MCP, A2A, RAG, and CAG
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
 - ✅ Compatibility wrappers retained only where they still provide operator entry points
@@ -85,8 +85,8 @@ Run `ntk --help` for the current top-level surface. If no command is provided, `
 | `ntk ai model-routing show` | Show the resolved active agent/skill routing selection or an explicit lane pairing |
 | `ntk ai profiles list` | List built-in AI provider profiles and their provider-mode classifications |
 | `ntk ai profiles show [profile]` | Show one AI provider profile or the active `NTK_AI_PROFILE` preset |
-| `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |
-| `ntk ai usage summary` | Report a bounded recent multi-week summary of persisted local AI usage history |
+| `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history plus current route, fallback posture, and compatible free-provider families |
+| `ntk ai usage summary` | Report a bounded recent multi-week summary of persisted local AI usage history plus current route, fallback posture, and compatible free-provider families |
 
 ### Runtime Commands
 
@@ -207,6 +207,24 @@ This workspace separates agentic capabilities by responsibility so each technolo
 | CAG | Context-augmented generation, compaction, and token-budget aware prompting | `crates/core/src/ai_context.rs`, `crates/orchestrator/src/execution/ai_usage.rs`, `scripts/runtime/invoke-super-agent-housekeeping.ps1` | Supported / evolving |
 
 MCP owns tool and provider projection, RAG owns deterministic recall, CAG owns prompt shaping and budget-aware context assembly, and A2A remains the future boundary for agent-to-agent interoperability.
+
+---
+
+### AI Provider Matrix
+
+The workspace also keeps the free/provider-preview evaluation matrix separate from MCP, A2A, RAG, and CAG so provider-family assumptions do not leak into orchestration or docs ad hoc.
+
+| Family | Mode | Support Tier | Canonical entry point |
+| --- | --- | --- | --- |
+| OpenRouter | gateway / OpenAI-compatible | best-effort-free | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+| Groq | API / OpenAI-compatible | best-effort-free | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+| Google AI Studio | native API | best-effort-free | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+| Together AI | gateway / OpenAI-compatible | best-effort-free | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+| Hugging Face Inference API | hosted inference API | best-effort-free | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+| NVIDIA NIM Preview | infra / OpenAI-compatible | preview | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+| OpenCode.ai | orchestrator / proxy | best-effort-free | `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` |
+
+`ntk ai usage weekly` and `ntk ai usage summary` expose the active runtime route, fallback posture, and compatible free-provider families from that catalog without changing production provider selection.
 
 ---
 

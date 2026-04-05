@@ -11,8 +11,10 @@ This playbook covers:
 - built-in AI provider profiles
 - canonical agent and skill model-routing defaults
 - `ntk ai doctor`
+- `ntk ai usage weekly|summary`
 - routing strategy override and scored provider order
 - Markdown and JSON operator reports
+- free-provider matrix guidance
 - local vs remote provider guidance
 - degraded/fallback troubleshooting
 
@@ -140,6 +142,46 @@ Use JSON when:
 - wiring local automation
 - capturing state in scripts
 - comparing provider/profile changes over time
+
+## Usage Reporting And Free-Provider Matrix
+
+Use the usage commands when you need the current route context plus persisted local usage totals.
+
+### Weekly report
+
+```powershell
+ntk ai usage weekly
+```
+
+This surface now shows:
+
+- persisted weekly usage totals
+- configured route snapshot
+- fallback readiness
+- compatible free-provider families from the canonical matrix
+- quota hints and operator caveats for those families
+
+### Summary report
+
+```powershell
+ntk ai usage summary --weeks 4
+```
+
+Use the summary when:
+
+- comparing recent burn across multiple weeks
+- checking which provider/model totals dominate the period
+- reviewing the current compatible free-provider families before switching profiles or endpoints
+
+### Canonical matrix source
+
+The versioned free-provider matrix lives in:
+
+- `definitions/templates/manifests/free-llm-provider-matrix.catalog.json`
+
+It classifies OpenRouter, Groq, Google AI Studio, Together AI, Hugging Face Inference API, NVIDIA NIM Preview, and OpenCode.ai by mode, tier, quota hint, and operator caveat.
+
+This matrix is read-only guidance for diagnostics and usage reports. It does not mutate provider selection by itself.
 
 ### Strategy override
 

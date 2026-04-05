@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 18:10
+- LastUpdated: 2026-04-05 18:35
 - Objective: define the design intent for a free-provider test matrix that covers the providers shown in `.docs/llm-free.png` while keeping provider-specific concerns separate from the main AI orchestration path.
 - Normalized Request: create a planning workstream for using all listed free providers in tests in a controlled, maintainable, SOLID-aligned way.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, a built-in provider-profile catalog, a strategy-aware routing layer, normalized adapter descriptors, canonical agent/skill model-routing defaults, and a versioned free-provider matrix catalog that enriches weekly/summary usage reports with runtime-route and quota/fallback context, but the live harness is still pending.
+- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, a built-in provider-profile catalog, a strategy-aware routing layer, normalized adapter descriptors, canonical agent/skill model-routing defaults, a versioned free-provider matrix catalog, and explicit documentation/sample surfaces for that matrix; the live harness is still pending.
 
 ---
 
@@ -69,6 +69,7 @@ This classification can evolve, but the repository should store the mode and ass
 - `crates/orchestrator/src/execution/processor.rs` continues to orchestrate runtime execution, but should not own provider-family policy.
 - `crates/orchestrator/src/execution/ai_usage.rs` can enrich weekly/summary reports with read-only provider-family, quota, and fallback context, but it must not mutate provider selection.
 - `crates/cli/src/ai_commands.rs` remains the reporting surface for AI usage summaries and future provider-matrix reporting.
+- `README.md`, the AI operator playbook, and `docs/samples/manifests/` describe the matrix for humans, but they should defer detailed contract ownership to the versioned catalog and plan/spec artifacts.
 - Provider-family evaluation lives in dedicated tests and fixtures, not in the production request path.
 - Documentation in `README.md` and `.github/instructions/*` should describe the matrix and mode classification, but not duplicate runtime logic.
 
