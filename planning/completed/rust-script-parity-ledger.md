@@ -4,17 +4,17 @@ Generated: 2026-03-28 19:39
 
 ## Status
 
-- LastUpdated: 2026-04-05 16:00
+- LastUpdated: 2026-04-05 18:05
 - Objective: define the parity evidence model and the current closeout status that every PowerShell migration domain must satisfy before wrapper cutover.
 - Source Plan: `planning/completed/plan-repository-unification-and-rust-migration.md`
 - Supporting Matrix: `planning/completed/rust-script-transcription-ownership-matrix.md`
 - Cutover Map: `planning/completed/rust-script-cutover-default-map.md`
 - Archived From Branch: `feature/native-validation-policy`
-- Remaining Open Backlog: none within the completed migration bundle; follow-up work is now limited to future domain-level consumer sweeps outside this closed retirement sequence.
+- Remaining Open Backlog: the consumer-sweep planning sequence is now closed; follow-up work is limited to blocker-reduction across the five audited retained domains (`common`, `runtime`, `security`, `governance`, and `orchestration`) rather than new discovery sweeps.
 - Live parity harness: `approval-approved-test`, the staged `run-test` closeout success path, `evaluate-agent-pipeline`, and `resume-agent-pipeline` are now covered by the native orchestrator harness in `crates/orchestrator/tests/execution/pipeline_parity`
 - Parity cleanup note: tracked repository artifacts now restore through Git-backed recovery, and projected POML assets are restored explicitly after parity runs so the worktree returns to a clean baseline deterministically.
 - Current closeout stance: the explicit cutover map now records which parity-proven domains are Rust-default now, intentionally wrapper-retained, or retained as legacy integration wrappers; the parity ledger still avoids promoting a domain to `cutover ready` by implication alone.
-- Follow-up note: the former `validate-agent-orchestration`, `validate-release-governance`, `validate-release-provenance`, `validate-compatibility-lifecycle-policy`, `validate-dotnet-standards`, `validate-authoritative-source-policy`, `validate-instruction-architecture`, `validate-planning-structure`, `validate-readme-standards`, `validate-template-standards`, `validate-workspace-efficiency`, `validate-instruction-metadata`, `validate-agent-hooks`, `validate-shell-hooks`, `validate-runtime-script-tests`, `validate-instructions`, `test-routing-selection`, `validate-all`, `export-audit-report`, `export-enterprise-trends`, `doctor`, `healthcheck`, `sync-codex-mcp-config`, `render-vscode-mcp-template`, `self-heal`, `render-provider-surfaces`, `render-codex-compatibility-surfaces`, and `render-codex-orchestration-surfaces` leaves were retired locally in Phases 9 through 20f, so the remaining follow-up is domain-level consumer proof outside the validation folder rather than single-leaf wrapper cutover.
+- Follow-up note: the former `validate-agent-orchestration`, `validate-release-governance`, `validate-release-provenance`, `validate-compatibility-lifecycle-policy`, `validate-dotnet-standards`, `validate-authoritative-source-policy`, `validate-instruction-architecture`, `validate-planning-structure`, `validate-readme-standards`, `validate-template-standards`, `validate-workspace-efficiency`, `validate-instruction-metadata`, `validate-agent-hooks`, `validate-shell-hooks`, `validate-runtime-script-tests`, `validate-instructions`, `test-routing-selection`, `validate-all`, `export-audit-report`, `export-enterprise-trends`, `doctor`, `healthcheck`, `sync-codex-mcp-config`, `render-vscode-mcp-template`, `self-heal`, `render-provider-surfaces`, `render-codex-compatibility-surfaces`, and `render-codex-orchestration-surfaces` leaves were retired locally in Phases 9 through 20f; Phases 19 through 22 then closed the remaining consumer-sweep discovery work as explicit audit-only blocker baselines.
 - Closeout board semantics:
   - `parity proven`: native Rust behavior and deterministic evidence exist; the cutover map then decides whether the domain is Rust-default now or wrapper retained intentionally
   - `cutover ready`: parity is proven and the domain is ready to become Rust-default

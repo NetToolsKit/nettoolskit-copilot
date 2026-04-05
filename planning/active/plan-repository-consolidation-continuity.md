@@ -608,17 +608,27 @@ Status: `[x]` Completed (audit-only; zero deletions)
 
 #### Task W5.7: Post-Phase-22 Retention Audit
 
-Status: `[ ]` Pending (blocked on Phase 22 complete)
+Status: `[x]` Completed
 
-- After Phases 19–22, the live estate should be at or near the `retain wrapper intentionally` floor of 33 scripts.
-- Print the remaining live estate: `(Get-ChildItem scripts -Filter "*.ps1" -Recurse).Count`
-- Compare to the expected floor.
-- For each script still present:
-  - Confirm it has an explicit entry in the `retain wrapper intentionally` table of `script-retirement-safety-matrix.md`.
-  - If any script is not in that table, it is either a missed deletion candidate or a new addition that escaped the safety matrix — investigate and resolve.
+- After Phases 19–22, the live estate remains `96`, not near the `retain wrapper intentionally` floor of `33`.
+- Audit result:
+  - `33` scripts are still covered by the explicit `retain wrapper intentionally` table.
+  - `63` scripts remain blocked under the explicit audited-domain rows for:
+    - `scripts/common/*.ps1` (`15`)
+    - `scripts/runtime/*.ps1` excluding hooks (`30`)
+    - `scripts/security/*.ps1` (`6`)
+    - `scripts/governance/*.ps1` (`2`)
+    - `scripts/orchestration/**/*.ps1` (`10`)
+  - the `96 - 33 = 63` gap exactly matches the blocked-domain total, so no extra drift bucket exists outside the safety matrix.
+  - grouped domain rows, not per-file rows, are the intended explicit accounting model for the remaining live estate.
 - Update `script-retirement-safety-matrix.md` and `rust-script-parity-ledger.md` to close this workstream.
 - Commit checkpoint:
-  - `docs(planning): Phase 22 retention audit — confirm floor and close consumer migration workstream`
+  - `docs(planning): close the post-Phase-22 retention audit and finish the scripted consumer-migration planning sequence`
+
+**Checkpoint: W5 Consumer Migration Sequence Complete**
+- Phases 19, 20, 21, and 22 are now all archived with explicit blocker evidence.
+- No further domain-level consumer-sweep planning remains open inside this workstream.
+- Future retirement progress now depends on blocker-reduction workstreams, not on additional discovery sweeps.
 
 ---
 

@@ -72,13 +72,15 @@ Generated: 2026-03-28 19:39
 
 ## Current Immediate Queue
 
-- No single-file `remove-now candidate` remains after Phase 20f Codex orchestration renderer retirement.
-- The next consumer sweep should move to domain-level proof for:
-  - `scripts/common/*.ps1`
-  - `scripts/runtime/*.ps1` excluding the retained hook wrappers plus the retired continuity/template, diagnostics, MCP, and self-heal leaves
-  - `scripts/security/*.ps1`
-  - `scripts/governance/*.ps1`
-  - `scripts/orchestration/**/*.ps1`
+- No single-file `remove-now candidate` remains after the archived Phase 19-22 consumer sweeps.
+- The live estate remains `96`, which is `63` above the `retain wrapper intentionally` floor of `33`.
+- That entire `63`-script gap is now explicitly explained by the five audited `retain until consumer migration completes` domain rows:
+  - `scripts/common/*.ps1` (`15`)
+  - `scripts/runtime/*.ps1` excluding hooks (`30`)
+  - `scripts/security/*.ps1` (`6`)
+  - `scripts/governance/*.ps1` (`2`)
+  - `scripts/orchestration/**/*.ps1` (`10`)
+- No additional consumer-sweep discovery phase remains open; future retirement work must reduce one or more recorded blocker graphs instead of rerunning domain discovery.
 
 ## Notes
 
@@ -108,6 +110,7 @@ Generated: 2026-03-28 19:39
 - Phase 20 Slice C closed as an audit-only runtime-domain sweep with zero deletions because `bootstrap.ps1`, `install.ps1`, `clean-codex-runtime.ps1`, and `clean-vscode-user-runtime.ps1` still had broad local fanout across authored governance, provider sync surfaces, git hooks, stage scripts, runtime parity tests, and super-agent housekeeping flows.
 - Phase 21 closed as an audit-only security/governance sweep with zero deletions because every security and governance leaf still had at least one live local consumer in checksum governance, authored policy baselines, skill/docs surfaces, runtime chains, or retained tests.
 - Phase 22 closed as an audit-only orchestration sweep with zero deletions because every engine and stage wrapper still had at least one live local consumer in authored pipeline definitions, policy baselines, orchestrator/validation fixtures, retained runtime tests, or stage chaining.
+- The post-Phase-22 retention audit confirmed that the live estate remains `96`, and that the full delta above the `33`-script policy-retained floor is exactly the `63`-script blocked-domain total already recorded in this matrix.
 - The Phase 20c self-heal slice retired `self-heal`, reducing the live local estate from `100` to `99`.
 - The Phase 20d provider-surface dispatcher slice retired `render-provider-surfaces`, reducing the live local estate from `99` to `98`.
 - The Phase 20e catalog-native renderer slice retired `render-codex-compatibility-surfaces`, reducing the live local estate from `98` to `97`.

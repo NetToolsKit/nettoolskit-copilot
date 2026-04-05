@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Closed the post-Phase-22 retention audit by recording that the live `scripts/**/*.ps1` estate remains `96`, and that the full `63`-script gap above the `retain wrapper intentionally` floor of `33` is completely explained by the five audited blocked domains rather than any unclassified wrapper drift.
 - Closed the Phase 22 orchestration consumer sweep as an audit-only workstream after confirming that all engine and stage wrappers still remain pinned by authored pipeline definitions, orchestration policy baselines, orchestrator and validation fixtures, retained runtime tests, and stage chaining.
 - Closed the Phase 21 security/governance consumer sweep as an audit-only workstream after confirming that all six security wrappers still remain pinned by the checksum manifest plus skill/doc/runtime/test consumers and both governance wrappers still remain pinned by authored release and branch-protection baselines.
 - Closed the Phase 20 runtime consumer sweep as an audit-only workstream after Slice C confirmed that `bootstrap.ps1`, `install.ps1`, `clean-codex-runtime.ps1`, and `clean-vscode-user-runtime.ps1` still have broad authored/runtime consumer fanout, so the runtime-domain backlog stays at `30` retained leaves with an explicit blocker graph instead of unsafe deletions.
