@@ -16,7 +16,7 @@
 - ✅ Local context index compatibility commands plus SQLite local-memory update/query commands for repository navigation
 - ✅ Planning summary export for handoff and execution reviews
 - ✅ Bootstrap projection for `.github/`, `.codex/`, `.claude/`, and runtime templates
-- ✅ Drift diagnosis, healthcheck orchestration, self-heal repair flows, and versioned runtime doctor/healthcheck control-schema output
+- ✅ Drift diagnosis, healthcheck orchestration, self-heal repair flows, and versioned runtime doctor/healthcheck/self-heal control-schema output
 - ✅ Native build-artifact cleanup for `.build`, `.deployment`, `bin`, and `obj` directories, including measured footprint and reclaimed-byte reporting
 - ✅ Native application of tracked VS Code workspace templates
 
@@ -325,6 +325,9 @@ pub fn build_runtime_healthcheck_control_schema(
 pub fn invoke_runtime_healthcheck(
     request: &RuntimeHealthcheckRequest,
 ) -> Result<RuntimeHealthcheckResult, RuntimeHealthcheckCommandError>;
+pub fn build_runtime_self_heal_control_schema(
+    result: &RuntimeSelfHealResult,
+) -> nettoolskit_core::RuntimeSelfHealControlSchema;
 pub fn invoke_runtime_self_heal(
     request: &RuntimeSelfHealRequest,
 ) -> Result<RuntimeSelfHealResult, RuntimeSelfHealCommandError>;

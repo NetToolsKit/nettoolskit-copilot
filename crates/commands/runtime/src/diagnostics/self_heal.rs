@@ -1,9 +1,15 @@
 //! Runtime self-heal orchestration for repair and follow-up health validation.
 
 use anyhow::Context;
-use nettoolskit_core::path_utils::repository::resolve_full_path;
-use nettoolskit_core::runtime_execution::{
-    resolve_runtime_execution_context, runtime_target_arguments, RuntimeTargetArguments,
+use nettoolskit_core::{
+    control_plane::{
+        RuntimeSelfHealControlSchema, RuntimeSelfHealControlStatus, RuntimeSelfHealControlStep,
+    },
+    path_utils::repository::resolve_full_path,
+    runtime_execution::{
+        resolve_runtime_execution_context, runtime_target_arguments, RuntimeTargetArguments,
+    },
+    NTK_CONTROL_SCHEMA_VERSION,
 };
 use serde_json::json;
 use std::env;
@@ -99,10 +105,22 @@ pub struct RuntimeSelfHealResult {
     pub repo_root: PathBuf,
     /// Effective runtime profile name.
     pub runtime_profile_name: String,
+    /// Whether mirror mode was enabled during bootstrap.
+    pub mirror: bool,
+    /// Whether MCP server settings were applied during bootstrap.
+    pub apply_mcp_config: bool,
+    /// Whether MCP backup creation was requested during bootstrap.
+    pub backup_config: bool,
+    /// Whether VS Code template application was enabled.
+    pub apply_vscode_templates: bool,
+    /// Whether the follow-up healthcheck treated extra files as failures.
+    pub strict_extras: bool,
     /// Resolved JSON report path.
     pub output_path: PathBuf,
     /// Resolved plain-text log path.
     pub log_path: PathBuf,
+    /// Follow-up healthcheck report path.
+    pub healthcheck_output_path: PathBuf,
     /// Ordered steps executed by the run.
     pub steps: Vec<RuntimeSelfHealStepResult>,
     /// Number of executed steps.
@@ -117,6 +135,47 @@ pub struct RuntimeSelfHealResult {
     pub exit_code: i32,
     /// Persisted JSON report payload.
     pub report_json: String,
+}
+
+/// Convert one runtime self-heal result into the stable machine-readable control schema.
+#[must_use]
+pub fn build_runtime_self_heal_control_schema(
+    result: &RuntimeSelfHealResult,
+) -> RuntimeSelfHealControlSchema {
+    RuntimeSelfHealControlSchema {
+        schema_version: NTK_CONTROL_SCHEMA_VERSION,
+        schema_kind: "runtime_self_heal".to_string(),
+        repo_root: result.repo_root.clone(),
+        runtime_profile_name: result.runtime_profile_name.clone(),
+        mirror: result.mirror,
+        apply_mcp_config: result.apply_mcp_config,
+        backup_config: result.backup_config,
+        apply_vscode_templates: result.apply_vscode_templates,
+        strict_extras: result.strict_extras,
+        output_path: result.output_path.clone(),
+        log_path: result.log_path.clone(),
+        healthcheck_output_path: result.healthcheck_output_path.clone(),
+        total_steps: result.total_steps,
+        passed_steps: result.passed_steps,
+        failed_steps: result.failed_steps,
+        overall_status: convert_self_heal_status(result.overall_status),
+        exit_code: result.exit_code,
+        steps: result
+            .steps
+            .iter()
+            .map(|step| RuntimeSelfHealControlStep {
+                name: step.name.clone(),
+                script: step.script.clone(),
+                arguments: step.arguments.clone(),
+                status: convert_self_heal_status(step.status),
+                exit_code: step.exit_code,
+                duration_ms: step.duration_ms,
+                started_at: step.started_at.clone(),
+                finished_at: step.finished_at.clone(),
+                error: step.error.clone(),
+            })
+            .collect(),
+    }
 }
 
 /// Execute the runtime self-heal flow.
@@ -288,8 +347,14 @@ pub fn invoke_runtime_self_heal(
     Ok(RuntimeSelfHealResult {
         repo_root: context.resolved_repo_root,
         runtime_profile_name: context.runtime_profile.name,
+        mirror: request.mirror,
+        apply_mcp_config: request.apply_mcp_config,
+        backup_config: request.backup_config,
+        apply_vscode_templates: request.apply_vscode_templates,
+        strict_extras: request.strict_extras,
         output_path,
         log_path,
+        healthcheck_output_path: healthcheck_report_path,
         steps,
         total_steps: passed_steps + failed_steps,
         passed_steps,
@@ -298,6 +363,13 @@ pub fn invoke_runtime_self_heal(
         exit_code,
         report_json,
     })
+}
+
+fn convert_self_heal_status(status: RuntimeSelfHealStatus) -> RuntimeSelfHealControlStatus {
+    match status {
+        RuntimeSelfHealStatus::Passed => RuntimeSelfHealControlStatus::Passed,
+        RuntimeSelfHealStatus::Failed => RuntimeSelfHealControlStatus::Failed,
+    }
 }
 
 fn run_bootstrap_step(

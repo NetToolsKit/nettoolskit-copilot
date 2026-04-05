@@ -26,6 +26,7 @@ Use this document for human architecture guidance. Use the catalog for stable su
 | AI doctor | `ntk ai doctor --json-output` | `ai_doctor` | `crates/orchestrator/src/execution/ai_doctor.rs` |
 | Runtime doctor | `ntk runtime doctor --json-output` | `runtime_doctor` | `crates/commands/runtime/src/diagnostics/doctor.rs` |
 | Runtime healthcheck | `ntk runtime healthcheck --json-output` | `runtime_healthcheck` | `crates/commands/runtime/src/diagnostics/healthcheck.rs` |
+| Runtime self-heal | `ntk runtime self-heal --json-output` | `runtime_self_heal` | `crates/commands/runtime/src/diagnostics/self_heal.rs` |
 
 Both machine-readable surfaces are defined in `nettoolskit-core` under `crates/core/src/control_plane.rs`.
 

@@ -2,7 +2,8 @@
 
 use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
 use nettoolskit_runtime::{
-    invoke_runtime_self_heal, RuntimeSelfHealRequest, RuntimeSelfHealStatus,
+    build_runtime_self_heal_control_schema, invoke_runtime_self_heal, RuntimeSelfHealRequest,
+    RuntimeSelfHealStatus,
 };
 use std::fs;
 use tempfile::TempDir;
@@ -183,4 +184,27 @@ fn test_invoke_runtime_self_heal_fails_when_vscode_template_files_are_missing() 
         .as_deref()
         .expect("missing template error should be reported")
         .contains("failed to apply runtime vscode templates"));
+}
+
+#[test]
+fn test_build_runtime_self_heal_control_schema_emits_typed_summary() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path());
+
+    let result =
+        invoke_runtime_self_heal(&runtime_request(repo.path())).expect("self-heal should execute");
+
+    let schema = build_runtime_self_heal_control_schema(&result);
+    assert_eq!(schema.schema_kind, "runtime_self_heal");
+    assert_eq!(schema.schema_version, 1);
+    assert_eq!(schema.runtime_profile_name, "none");
+    assert_eq!(schema.total_steps, result.total_steps);
+    assert_eq!(schema.passed_steps, result.passed_steps);
+    assert_eq!(schema.failed_steps, result.failed_steps);
+    assert_eq!(schema.exit_code, 0);
+    assert_eq!(schema.steps.len(), result.steps.len());
+    assert_eq!(
+        schema.healthcheck_output_path,
+        result.healthcheck_output_path
+    );
 }

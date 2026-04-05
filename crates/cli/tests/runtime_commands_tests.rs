@@ -778,6 +778,33 @@ fn test_runtime_self_heal_cli_writes_report_to_requested_output_path() {
 }
 
 #[test]
+fn test_runtime_self_heal_cli_supports_json_output_with_control_schema() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_health_repo(repo.path());
+    initialize_minimal_provider_surface_projection(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "self-heal",
+            "--runtime-profile",
+            "none",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            r#""schema_kind": "runtime_self_heal""#,
+        ))
+        .stdout(predicate::str::contains(
+            r#""runtime_profile_name": "none""#,
+        ))
+        .stdout(predicate::str::contains(r#""overall_status": "passed""#))
+        .stdout(predicate::str::contains(r#""healthcheck_output_path": "#));
+}
+
+#[test]
 fn test_runtime_doctor_cli_reports_clean_runtime_for_none_profile() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_runtime_health_repo(repo.path());

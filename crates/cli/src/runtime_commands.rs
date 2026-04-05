@@ -4,9 +4,9 @@ use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
     build_runtime_doctor_control_schema, build_runtime_healthcheck_control_schema,
-    export_planning_summary, invoke_apply_vscode_templates, invoke_clean_build_artifacts,
-    invoke_export_enterprise_trends, invoke_pre_commit_eof_hygiene, invoke_pre_tool_use,
-    invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
+    build_runtime_self_heal_control_schema, export_planning_summary, invoke_apply_vscode_templates,
+    invoke_clean_build_artifacts, invoke_export_enterprise_trends, invoke_pre_commit_eof_hygiene,
+    invoke_pre_tool_use, invoke_render_mcp_runtime_artifacts, invoke_render_provider_surfaces,
     invoke_render_vscode_mcp_template, invoke_runtime_doctor, invoke_runtime_healthcheck,
     invoke_runtime_self_heal, invoke_setup_git_hooks, invoke_setup_global_git_aliases,
     invoke_sync_codex_mcp_config, invoke_trim_trailing_blank_lines, query_local_context_index,
@@ -199,6 +199,9 @@ pub struct RuntimeSelfHealArgs {
     /// Treat extra runtime files as failures during the follow-up healthcheck.
     #[clap(long)]
     pub strict_extras: bool,
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
     /// Optional explicit JSON report output path.
     #[clap(long)]
     pub output_path: Option<PathBuf>,
@@ -801,6 +804,24 @@ fn execute_runtime_self_heal(arguments: RuntimeSelfHealArgs) -> ExitStatus {
             return ExitStatus::Error;
         }
     };
+
+    if arguments.json_output {
+        let schema = build_runtime_self_heal_control_schema(&result);
+        return match serde_json::to_string_pretty(&schema) {
+            Ok(payload) => {
+                println!("{payload}");
+                if result.exit_code == 0 {
+                    ExitStatus::Success
+                } else {
+                    ExitStatus::Error
+                }
+            }
+            Err(error) => {
+                eprintln!("{error}");
+                ExitStatus::Error
+            }
+        };
+    }
 
     println!("Status: {}", self_heal_status_label(result.overall_status));
     println!("Runtime profile: {}", result.runtime_profile_name);

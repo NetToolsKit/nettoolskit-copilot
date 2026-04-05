@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-06 02:10
+- LastUpdated: 2026-04-06 02:35
 - Objective: expose typed control-plane schemas and runtime introspection surfaces for operational, CLI, and future SDK consumers.
 - Normalized Request: create a detailed workstream for typed runtime control contracts and introspection APIs without coupling callers to internal structs.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -68,6 +68,8 @@ Generated: 2026-03-31 00:00
   - Added `build_ai_doctor_control_schema` and `build_runtime_doctor_control_schema` so machine-readable inspection is produced by dedicated adapters instead of CLI formatting.
 - Status [2026-04-06 02:10]:
   - Added `build_runtime_healthcheck_control_schema` so healthcheck orchestration now exposes a shared typed inspection boundary instead of relying only on its persisted crate-local JSON report.
+- Status [2026-04-06 02:35]:
+  - Added `build_runtime_self_heal_control_schema` so runtime recovery and follow-up health validation now expose a shared typed inspection boundary instead of relying only on the persisted crate-local report payload.
 - Commit checkpoint:
   - `feat(runtime): add runtime introspection services`
 
@@ -82,6 +84,8 @@ Generated: 2026-03-31 00:00
   - CLI integration tests cover both machine-readable surfaces.
 - Status [2026-04-06 02:10]:
   - `ntk runtime healthcheck --json-output` now emits the shared `runtime_healthcheck` control schema while still writing the persisted report/log artifacts for operators.
+- Status [2026-04-06 02:35]:
+  - `ntk runtime self-heal --json-output` now emits the shared `runtime_self_heal` control schema while still writing the persisted repair report/log artifacts for operators.
 - Commit checkpoint:
   - `refactor(cli): render runtime inspection from typed control schemas`
 
@@ -96,6 +100,8 @@ Generated: 2026-03-31 00:00
   - Updated root/crate/docs/template READMEs to point at the new control-plane introspection model.
 - Status [2026-04-06 02:10]:
   - Expanded the canonical control-plane catalog, sample manifest, and README coverage to include the typed `runtime_healthcheck` surface.
+- Status [2026-04-06 02:35]:
+  - Expanded the canonical control-plane catalog, sample manifest, and README coverage to include the typed `runtime_self_heal` surface.
 - Commit checkpoint:
   - `docs(runtime): document control schemas and introspection model`
 

@@ -42,6 +42,19 @@
         "typed executed-check state",
         "warning-mode and drift-policy options"
       ]
+    },
+    {
+      "id": "runtime-self-heal",
+      "schemaKind": "runtime_self_heal",
+      "entryPoints": ["ntk runtime self-heal --json-output"],
+      "owner": "crates/commands/runtime/src/diagnostics/self_heal.rs",
+      "contractType": "machine-readable diagnostics",
+      "guarantees": [
+        "stable schema version",
+        "typed repair-step state",
+        "follow-up healthcheck linkage",
+        "explicit bootstrap/template option flags"
+      ]
     }
   ],
   "evolutionRules": {

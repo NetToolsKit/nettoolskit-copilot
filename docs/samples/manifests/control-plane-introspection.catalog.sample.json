@@ -17,6 +17,11 @@
       "id": "runtime-healthcheck",
       "schemaKind": "runtime_healthcheck",
       "entryPoints": ["ntk runtime healthcheck --json-output"]
+    },
+    {
+      "id": "runtime-self-heal",
+      "schemaKind": "runtime_self_heal",
+      "entryPoints": ["ntk runtime self-heal --json-output"]
     }
   ],
   "evolutionRules": {

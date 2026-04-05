@@ -158,6 +158,80 @@ pub struct RuntimeHealthcheckControlSchema {
     pub checks: Vec<RuntimeHealthcheckControlCheck>,
 }
 
+/// Self-heal step or overall status.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum RuntimeSelfHealControlStatus {
+    /// Step or overall run passed.
+    Passed,
+    /// Step or overall run failed.
+    Failed,
+}
+
+/// One typed runtime self-heal step payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeSelfHealControlStep {
+    /// Logical step name.
+    pub name: String,
+    /// Script path or Rust surface identifier.
+    pub script: String,
+    /// Formatted argument list.
+    pub arguments: Vec<String>,
+    /// Final step status.
+    pub status: RuntimeSelfHealControlStatus,
+    /// Exit code equivalent used by the step.
+    pub exit_code: i32,
+    /// Elapsed execution time in milliseconds.
+    pub duration_ms: u128,
+    /// Start timestamp token.
+    pub started_at: String,
+    /// End timestamp token.
+    pub finished_at: String,
+    /// Optional error message.
+    pub error: Option<String>,
+}
+
+/// Stable machine-readable runtime self-heal payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeSelfHealControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Resolved repository root.
+    pub repo_root: PathBuf,
+    /// Effective runtime profile name.
+    pub runtime_profile_name: String,
+    /// Whether mirror mode was enabled during bootstrap.
+    pub mirror: bool,
+    /// Whether MCP configuration was applied during bootstrap.
+    pub apply_mcp_config: bool,
+    /// Whether MCP backup creation was requested during bootstrap.
+    pub backup_config: bool,
+    /// Whether VS Code templates were applied before follow-up health validation.
+    pub apply_vscode_templates: bool,
+    /// Whether the follow-up healthcheck treated extra files as failures.
+    pub strict_extras: bool,
+    /// Resolved JSON report path.
+    pub output_path: PathBuf,
+    /// Resolved plain-text log path.
+    pub log_path: PathBuf,
+    /// Follow-up healthcheck report path, when the self-heal flow generated one.
+    pub healthcheck_output_path: PathBuf,
+    /// Number of executed steps.
+    pub total_steps: usize,
+    /// Number of passed steps.
+    pub passed_steps: usize,
+    /// Number of failed steps.
+    pub failed_steps: usize,
+    /// Overall self-heal status.
+    pub overall_status: RuntimeSelfHealControlStatus,
+    /// Process exit code equivalent.
+    pub exit_code: i32,
+    /// Ordered steps executed by the run.
+    pub steps: Vec<RuntimeSelfHealControlStep>,
+}
+
 /// Machine-readable readiness status for AI runtime inspection.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -519,6 +593,45 @@ mod tests {
 
         let json = serde_json::to_string(&schema).expect("schema should serialize");
         let parsed: RuntimeHealthcheckControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn runtime_self_heal_control_schema_roundtrips_json() {
+        let schema = RuntimeSelfHealControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "runtime_self_heal".to_string(),
+            repo_root: PathBuf::from("C:/repo"),
+            runtime_profile_name: "none".to_string(),
+            mirror: false,
+            apply_mcp_config: false,
+            backup_config: false,
+            apply_vscode_templates: true,
+            strict_extras: false,
+            output_path: PathBuf::from("C:/repo/.temp/self-heal-report.json"),
+            log_path: PathBuf::from("C:/repo/.temp/logs/self-heal.log"),
+            healthcheck_output_path: PathBuf::from("C:/repo/.temp/healthcheck-report.json"),
+            total_steps: 3,
+            passed_steps: 3,
+            failed_steps: 0,
+            overall_status: RuntimeSelfHealControlStatus::Passed,
+            exit_code: 0,
+            steps: vec![RuntimeSelfHealControlStep {
+                name: "runtime-bootstrap".to_string(),
+                script: "rust:nettoolskit-runtime::bootstrap".to_string(),
+                arguments: vec!["-RuntimeProfile=none".to_string()],
+                status: RuntimeSelfHealControlStatus::Passed,
+                exit_code: 0,
+                duration_ms: 20,
+                started_at: "1".to_string(),
+                finished_at: "2".to_string(),
+                error: None,
+            }],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: RuntimeSelfHealControlSchema =
             serde_json::from_str(&json).expect("schema should deserialize");
         assert_eq!(parsed, schema);
     }

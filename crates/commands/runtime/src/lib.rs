@@ -35,8 +35,8 @@ pub use diagnostics::healthcheck::{
     RuntimeHealthcheckStatus,
 };
 pub use diagnostics::self_heal::{
-    invoke_runtime_self_heal, RuntimeSelfHealRequest, RuntimeSelfHealResult, RuntimeSelfHealStatus,
-    RuntimeSelfHealStepResult,
+    build_runtime_self_heal_control_schema, invoke_runtime_self_heal, RuntimeSelfHealRequest,
+    RuntimeSelfHealResult, RuntimeSelfHealStatus, RuntimeSelfHealStepResult,
 };
 pub use error::{
     LocalContextCommandError, PlanningSummaryCommandError, RuntimeApplyVscodeTemplatesCommandError,
