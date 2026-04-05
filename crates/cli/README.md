@@ -155,7 +155,9 @@ Run `ntk --help` for the full live surface and per-command flags.
 
 | Command | Description |
 | --- | --- |
-| `ntk ai doctor` | Diagnose active AI profile, provider chain, routing strategy, adapter contracts, timeout, and remote readiness |
+| `ntk ai doctor` | Diagnose active AI profile, active agent/skill routing, provider chain, routing strategy, adapter contracts, timeout, and remote readiness |
+| `ntk ai model-routing list` | List canonical agent and skill model-routing defaults |
+| `ntk ai model-routing show` | Show the resolved active lane selection or one explicit agent/skill pairing |
 | `ntk ai profiles list` | List built-in AI provider presets for development orchestration |
 | `ntk ai profiles show [profile]` | Show one provider profile or the active `NTK_AI_PROFILE` preset |
 | `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |

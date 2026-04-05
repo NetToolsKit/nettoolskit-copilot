@@ -1,0 +1,17 @@
+{
+  "laneKind": "skill",
+  "laneId": "dev-backend",
+  "title": "Backend Development",
+  "summary": "Backend skill lane for service, API, CQRS, and DDD-heavy implementation work.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "explain",
+    "apply-dry-run"
+  ]
+}

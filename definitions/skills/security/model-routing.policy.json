@@ -1,0 +1,17 @@
+{
+  "laneKind": "skill",
+  "laneId": "security",
+  "title": "Security",
+  "summary": "Security skill lane for hardening, threat review, and higher-scrutiny implementation decisions.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "explain",
+    "apply-dry-run"
+  ]
+}

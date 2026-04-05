@@ -1,0 +1,17 @@
+{
+  "laneKind": "skill",
+  "laneId": "dev-rust",
+  "title": "Rust Development",
+  "summary": "Rust skill lane for crate boundaries, module organization, and stricter implementation reasoning.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "explain",
+    "apply-dry-run"
+  ]
+}

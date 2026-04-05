@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:48
+- LastUpdated: 2026-04-05 14:05
 - Objective: define the design intent for a free-provider test matrix that covers the providers shown in `.docs/llm-free.png` while keeping provider-specific concerns separate from the main AI orchestration path.
 - Normalized Request: create a planning workstream for using all listed free providers in tests in a controlled, maintainable, SOLID-aligned way.
 - Active Branch: `docs/planning-gap-workstreams`
 - Planning Path: `planning/active/plan-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, a built-in provider-profile catalog, a strategy-aware routing layer, and normalized adapter descriptors for `openai-compatible` and `local/mock` development presets, but the full free-provider matrix and live harness are still pending.
+- Current Slice: the repository now exposes a generic AI provider trait, an OpenAI-compatible provider implementation, persisted AI usage reporting, a built-in provider-profile catalog, a strategy-aware routing layer, normalized adapter descriptors, and canonical agent/skill model-routing defaults for `openai-compatible` and `local/mock` development presets, but the full free-provider matrix and live harness are still pending.
 
 ---
 

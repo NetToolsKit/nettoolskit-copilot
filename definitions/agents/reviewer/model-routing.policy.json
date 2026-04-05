@@ -1,0 +1,17 @@
+{
+  "laneKind": "agent",
+  "laneId": "reviewer",
+  "title": "Reviewer",
+  "summary": "Review lane that keeps quick asks cheap while reserving stronger reasoning for risk analysis and dry-run review.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "explain",
+    "apply-dry-run"
+  ]
+}

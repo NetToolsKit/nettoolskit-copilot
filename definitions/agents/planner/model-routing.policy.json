@@ -1,0 +1,17 @@
+{
+  "laneKind": "agent",
+  "laneId": "planner",
+  "title": "Planner",
+  "summary": "Planning lane that biases deeper reasoning for scope shaping and execution sequencing.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "explain",
+    "apply-dry-run"
+  ]
+}

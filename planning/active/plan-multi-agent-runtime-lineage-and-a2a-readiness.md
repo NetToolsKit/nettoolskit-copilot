@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 14:05
 - Objective: strengthen the repository's internal multi-agent orchestration model while keeping future A2A work explicitly separate and planned.
 - Normalized Request: create a detailed workstream for lineage, delegation, permission inheritance, mailbox/bridge coordination, and A2A readiness in the agent runtime.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -14,6 +14,7 @@ Generated: 2026-03-31 00:00
   - `planning/active/plan-agentic-surface-boundary-separation.md`
   - `planning/active/plan-sdk-control-plane-schemas-and-runtime-introspection.md`
   - `planning/active/plan-token-economy-optimization.md`
+- Current Slice: A22 now has a first implementation proof because canonical agent and skill lanes can declare inherited profile/model defaults under `definitions/agents/*` and `definitions/skills/*`, and the orchestrator consumes those defaults without conflating internal delegation with A2A.
 - Inputs:
   - `crates/orchestrator/src/execution/*`
   - `README.md`

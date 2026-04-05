@@ -4,7 +4,7 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:20
+- LastUpdated: 2026-04-05 14:05
 - Objective: define the design intent for lowering AI token burn across routing, compaction, reuse, and output budgeting without breaking the existing `ntk` AI surfaces.
 - Normalized Request: plan a token-economy workstream that uses the existing usage ledger and runtime policies to reduce spend.
 - Active Branch: `main` (planning only; implementation branches TBD)
@@ -63,3 +63,4 @@ The repository already measures AI usage and enforces some token budgets, but th
 - The design is ready once the current token-policy defaults are captured in the active plan.
 - The next implementation branch should be isolated if the policy changes touch multiple AI flows at once.
 - A first routing-alignment proof now exists outside this plan: provider-order strategy is explicit and inspectable, so this workstream can stay focused on token/cost policy and compaction rather than route ordering.
+- A second policy-alignment proof now exists outside this plan: canonical agent/skill model-routing defaults can bias profile and model selection, but the final request still flows through the same token-economy guardrails and explicit `NTK_AI_MODEL_SELECTION_*` overrides.

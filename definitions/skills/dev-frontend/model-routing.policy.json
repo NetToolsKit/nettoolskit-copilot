@@ -1,0 +1,17 @@
+{
+  "laneKind": "skill",
+  "laneId": "dev-frontend",
+  "title": "Frontend Development",
+  "summary": "Frontend skill lane for UI, UX, and component-driven implementation work.",
+  "defaultProfile": "balanced",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask",
+    "explain"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "apply-dry-run"
+  ]
+}

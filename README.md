@@ -23,7 +23,7 @@ Objectives:
 - ✅ Versioned projection model for `.github/`, `.codex/`, `.claude/`, and `.vscode/`
 - ✅ Native MCP runtime projection and Codex config application from a canonical catalog
 - ✅ Local RAG/CAG context index and weekly AI usage ledger for deterministic repo recall
-- ✅ Built-in AI provider profiles plus `ntk ai doctor` diagnostics, smart routing strategy scoring, and normalized adapter contracts for balanced, coding, cheap, latency, and local orchestrator presets
+- ✅ Built-in AI provider profiles plus `ntk ai doctor` diagnostics, smart routing strategy scoring, normalized adapter contracts, and canonical agent/skill model-routing defaults for balanced, coding, cheap, latency, and local orchestrator presets
 - ✅ Explicit agentic surface separation for MCP, A2A, RAG, and CAG
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
 - ✅ Compatibility wrappers retained only where they still provide operator entry points
@@ -81,6 +81,8 @@ Run `ntk --help` for the current top-level surface. If no command is provided, `
 | Command | Description |
 | --- | --- |
 | `ntk ai doctor` | Diagnose active AI profile, provider chain, routing strategy, adapter contracts, timeout, and remote readiness without executing a request |
+| `ntk ai model-routing list` | List canonical agent and skill model-routing defaults consumed by the development orchestrator |
+| `ntk ai model-routing show` | Show the resolved active agent/skill routing selection or an explicit lane pairing |
 | `ntk ai profiles list` | List built-in AI provider profiles and their provider-mode classifications |
 | `ntk ai profiles show [profile]` | Show one AI provider profile or the active `NTK_AI_PROFILE` preset |
 | `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |

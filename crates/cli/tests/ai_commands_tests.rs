@@ -3,8 +3,8 @@
 use assert_cmd::cargo::cargo_bin_cmd;
 use assert_cmd::Command;
 use nettoolskit_orchestrator::{
-    record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource, NTK_AI_PROFILE_ENV,
-    NTK_AI_USAGE_DB_PATH_ENV,
+    record_ai_usage_event, AiUsageEventRecord, AiUsageEventSource, NTK_AI_ACTIVE_AGENT_ENV,
+    NTK_AI_ACTIVE_SKILL_ENV, NTK_AI_PROFILE_ENV, NTK_AI_USAGE_DB_PATH_ENV,
 };
 use predicates::prelude::*;
 use serial_test::serial;
@@ -281,6 +281,42 @@ fn test_ai_profiles_show_rejects_unknown_profile() {
 
 #[test]
 #[serial]
+fn test_ai_model_routing_list_json_output_reports_agent_and_skill_lanes() {
+    ntk()
+        .args(["ai", "model-routing", "list", "--json-output"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""laneKind": "agent""#))
+        .stdout(predicate::str::contains(r#""laneId": "super-agent""#))
+        .stdout(predicate::str::contains(r#""laneKind": "skill""#))
+        .stdout(predicate::str::contains(r#""laneId": "dev-rust""#));
+}
+
+#[test]
+#[serial]
+fn test_ai_model_routing_show_reports_explicit_agent_and_skill_selection() {
+    ntk()
+        .args([
+            "ai",
+            "model-routing",
+            "show",
+            "--agent",
+            "planner",
+            "--skill",
+            "dev-rust",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Active agent: planner"))
+        .stdout(predicate::str::contains("Active skill: dev-rust"))
+        .stdout(predicate::str::contains(
+            "Effective profile default: coding",
+        ))
+        .stdout(predicate::str::contains("Routed reasoning model: gpt-4.1"));
+}
+
+#[test]
+#[serial]
 fn test_ai_doctor_json_output_reports_local_profile_status() {
     let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "local");
 
@@ -292,6 +328,23 @@ fn test_ai_doctor_json_output_reports_local_profile_status() {
         .stdout(predicate::str::contains(r#""strategy": "latency""#))
         .stdout(predicate::str::contains(r#""provider_chain": ["#))
         .stdout(predicate::str::contains(r#""mock""#));
+}
+
+#[test]
+#[serial]
+fn test_ai_doctor_reports_active_agent_and_skill_model_routing() {
+    let _agent_guard = EnvVarGuard::set(NTK_AI_ACTIVE_AGENT_ENV, "planner");
+    let _skill_guard = EnvVarGuard::set(NTK_AI_ACTIVE_SKILL_ENV, "dev-rust");
+
+    ntk()
+        .args(["ai", "doctor"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Active agent: planner"))
+        .stdout(predicate::str::contains("Active skill: dev-rust"))
+        .stdout(predicate::str::contains(
+            "Effective lane profile default: coding",
+        ));
 }
 
 #[test]

@@ -3,9 +3,8 @@ use crate::execution::ai::{
     AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, MockAiProvider,
     OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
 };
-use crate::execution::ai_profiles::{
-    resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
-};
+use crate::execution::ai_model_routing::resolve_ai_profile_and_model_routing_from_env;
+use crate::execution::ai_profiles::{AiProviderProfile, NTK_AI_PROFILE_ENV};
 use crate::execution::ai_routing::{
     build_ai_provider_routing_plan, resolve_ai_provider_chain, resolve_ai_provider_timeout_budget,
     AiProviderRouteTimeoutBudget,
@@ -66,6 +65,8 @@ use std::time::{Duration, Instant};
 use strum::IntoEnumIterator;
 use tracing::{info, info_span, warn};
 
+#[cfg(test)]
+use crate::execution::ai_model_routing::{NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV};
 #[cfg(test)]
 use crate::execution::ai_routing::{
     NTK_AI_FALLBACK_PROVIDER_ENV, NTK_AI_PROVIDER_CHAIN_ENV, NTK_AI_PROVIDER_ENV,
@@ -1655,9 +1656,51 @@ fn ai_model_selection_policy_from_profile(
     policy
 }
 
+fn apply_ai_model_routing_selection_to_policy(
+    policy: &mut AiModelSelectionPolicy,
+    selection: &crate::execution::ai_model_routing::AiModelRoutingSelection,
+) {
+    if let Some(value) = selection
+        .effective_cheap_model
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        policy.cheap_model = Some(value.to_string());
+    }
+    if let Some(value) = selection
+        .effective_reasoning_model
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        policy.reasoning_model = Some(value.to_string());
+    }
+
+    if !selection.effective_cheap_intents.is_empty() {
+        let parsed = parse_ai_model_selection_intents(&selection.effective_cheap_intents.join(","));
+        if !parsed.is_empty() {
+            policy.cheap_intents = parsed;
+        }
+    }
+    if !selection.effective_reasoning_intents.is_empty() {
+        let parsed =
+            parse_ai_model_selection_intents(&selection.effective_reasoning_intents.join(","));
+        if !parsed.is_empty() {
+            policy.reasoning_intents = parsed;
+        }
+    }
+}
+
 fn ai_model_selection_policy_from_env() -> Result<AiModelSelectionPolicy, String> {
-    let profile = resolve_ai_provider_profile_from_env()?;
-    let mut policy = ai_model_selection_policy_from_profile(profile);
+    let resolved_profile_and_routing = resolve_ai_profile_and_model_routing_from_env()?;
+    let mut policy = ai_model_selection_policy_from_profile(
+        resolved_profile_and_routing.active_profile.as_ref(),
+    );
+    apply_ai_model_routing_selection_to_policy(
+        &mut policy,
+        &resolved_profile_and_routing.model_routing,
+    );
 
     if let Ok(value) = std::env::var(NTK_AI_MODEL_SELECTION_ENABLED_ENV) {
         if let Some(parsed) = parse_bool(&value) {
@@ -2565,8 +2608,8 @@ fn parse_ai_provider_chain(value: &str) -> Result<Vec<AiProviderKind>, String> {
 
 #[cfg(test)]
 fn ai_provider_chain_from_env() -> Result<Vec<AiProviderKind>, String> {
-    let profile = resolve_ai_provider_profile_from_env()?;
-    resolve_ai_provider_chain(profile)?
+    let profile = resolve_ai_profile_and_model_routing_from_env()?.active_profile;
+    resolve_ai_provider_chain(profile.as_ref())?
         .providers
         .into_iter()
         .map(|provider_id| {
@@ -2582,9 +2625,9 @@ fn ai_provider_chain_from_env() -> Result<Vec<AiProviderKind>, String> {
 fn ai_provider_route_timeout_budget_from_env(
     default_timeout: Duration,
 ) -> Result<AiProviderRouteTimeoutBudget, String> {
-    let profile = resolve_ai_provider_profile_from_env()?;
+    let profile = resolve_ai_profile_and_model_routing_from_env()?.active_profile;
     resolve_ai_provider_timeout_budget(
-        profile,
+        profile.as_ref(),
         u64::try_from(default_timeout.as_millis()).unwrap_or(DEFAULT_AI_REQUEST_TIMEOUT_MS),
     )
 }
@@ -2600,7 +2643,7 @@ fn ai_provider_from_kind(
         )))),
         AiProviderKind::OpenAiCompatible => {
             let mut config = OpenAiCompatibleProviderConfig::default();
-            if let Some(profile) = resolve_ai_provider_profile_from_env()? {
+            if let Some(profile) = resolve_ai_profile_and_model_routing_from_env()?.active_profile {
                 if let Some(profile_model) = profile.reasoning_model.or(profile.cheap_model) {
                     config.default_model = profile_model.to_string();
                 }
@@ -2643,9 +2686,10 @@ fn ai_provider_routes_from_env(
     prompt: &str,
     retry_policy: AiRetryPolicy,
 ) -> Result<Vec<AiProviderRoute>, String> {
-    let active_profile = resolve_ai_provider_profile_from_env()?;
-    let provider_chain = resolve_ai_provider_chain(active_profile)?;
-    let routing_plan = build_ai_provider_routing_plan(active_profile, &provider_chain.providers)?;
+    let active_profile = resolve_ai_profile_and_model_routing_from_env()?.active_profile;
+    let provider_chain = resolve_ai_provider_chain(active_profile.as_ref())?;
+    let routing_plan =
+        build_ai_provider_routing_plan(active_profile.as_ref(), &provider_chain.providers)?;
     let timeout_budget = ai_provider_route_timeout_budget_from_env(retry_policy.request_timeout)?;
     let mut routes = Vec::with_capacity(provider_chain.providers.len());
 
@@ -6405,6 +6449,8 @@ mod tests {
 
     fn clear_ai_provider_route_env_vars() {
         std::env::remove_var(NTK_AI_PROFILE_ENV);
+        std::env::remove_var(NTK_AI_ACTIVE_AGENT_ENV);
+        std::env::remove_var(NTK_AI_ACTIVE_SKILL_ENV);
         std::env::remove_var(NTK_AI_PROVIDER_ENV);
         std::env::remove_var(NTK_AI_PROVIDER_CHAIN_ENV);
         std::env::remove_var(NTK_AI_FALLBACK_PROVIDER_ENV);
@@ -6802,6 +6848,27 @@ mod tests {
 
         let policy = ai_model_selection_policy_from_env()
             .expect("profile model selection policy should resolve");
+
+        clear_ai_provider_route_env_vars();
+        assert_eq!(policy.cheap_model.as_deref(), Some("gpt-4.1-mini"));
+        assert_eq!(policy.reasoning_model.as_deref(), Some("gpt-4.1"));
+        assert_eq!(policy.cheap_intents, vec![AiIntent::Ask]);
+        assert_eq!(
+            policy.reasoning_intents,
+            vec![AiIntent::Plan, AiIntent::Explain, AiIntent::ApplyDryRun]
+        );
+    }
+
+    #[tokio::test]
+    async fn ai_model_selection_policy_from_env_uses_skill_routing_defaults_when_profile_env_is_absent(
+    ) {
+        let _guard = env_test_guard().await;
+        clear_ai_provider_route_env_vars();
+        std::env::set_var(NTK_AI_ACTIVE_AGENT_ENV, "super-agent");
+        std::env::set_var(NTK_AI_ACTIVE_SKILL_ENV, "dev-rust");
+
+        let policy = ai_model_selection_policy_from_env()
+            .expect("skill-based model routing policy should resolve");
 
         clear_ai_provider_route_env_vars();
         assert_eq!(policy.cheap_model.as_deref(), Some("gpt-4.1-mini"));

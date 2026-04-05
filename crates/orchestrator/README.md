@@ -16,7 +16,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
 - ✅ Command routing and parsing through `MainAction` and `get_main_action`
 - ✅ Async command execution with progress and cancellation support
 - ✅ Shared AI session, ChatOps, plugin, and repository workflow orchestration helpers
-- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, and normalized adapter contracts for development-oriented preset selection
+- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, normalized adapter contracts, and canonical agent/skill model-routing defaults for development-oriented preset selection
 
 ---
 
@@ -35,6 +35,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
   - [Async Execution](#async-execution)
   - [Processor](#processor)
   - [AI Doctor](#ai-doctor)
+  - [AI Model Routing](#ai-model-routing)
   - [AI Profiles](#ai-profiles)
   - [Session and Workflow Helpers](#session-and-workflow-helpers)
 - [References](#references)
@@ -223,6 +224,32 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String;
 Operational guidance for profile selection, doctor usage, and degraded-state troubleshooting lives in:
 
 - [AI Development Operator Playbook](../../docs/operations/ai-development-operator-playbook.md)
+
+### AI Model Routing
+
+```rust
+pub const NTK_AI_ACTIVE_AGENT_ENV: &str;
+pub const NTK_AI_ACTIVE_SKILL_ENV: &str;
+
+pub enum AiModelRoutingLaneKind { /* variants omitted */ }
+pub struct AiModelRoutingPolicy { /* fields omitted */ }
+pub struct AiModelRoutingSelection { /* fields omitted */ }
+pub struct ResolvedAiProfileAndModelRouting { /* fields omitted */ }
+
+pub fn list_ai_model_routing_policies() -> &'static [AiModelRoutingPolicy];
+pub fn find_ai_model_routing_policy(
+    lane_kind: AiModelRoutingLaneKind,
+    lane_id: &str,
+) -> Option<AiModelRoutingPolicy>;
+pub fn resolve_ai_model_routing_selection(
+    agent_lane: Option<&str>,
+    skill_lane: Option<&str>,
+) -> Result<AiModelRoutingSelection, String>;
+pub fn resolve_ai_model_routing_selection_from_env()
+    -> Result<AiModelRoutingSelection, String>;
+pub fn resolve_ai_profile_and_model_routing_from_env()
+    -> Result<ResolvedAiProfileAndModelRouting, String>;
+```
 
 ### AI Profiles
 

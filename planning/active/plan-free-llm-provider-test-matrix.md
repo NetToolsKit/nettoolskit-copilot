@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:48
+- LastUpdated: 2026-04-05 14:05
 - Objective: compare, classify, and prepare the free AI providers shown in `.docs/llm-free.png` for deterministic test coverage without coupling the runtime to a single vendor surface.
 - Normalized Request: create a planning workstream for evaluating all listed free providers and using them in repository tests through explicit, SOLID-aligned boundaries.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: F2 now has a built-in provider-profile catalog, a strategy-aware routing plan, and normalized adapter descriptors that classify, order, and describe the currently supported `openai-compatible` and `local/mock` modes without coupling production routing to a single vendor.
+- Current Slice: F2 now has a built-in provider-profile catalog, a strategy-aware routing plan, normalized adapter descriptors, and canonical agent/skill model-routing defaults that can bias evaluation lanes without coupling production routing to a single vendor.
 - Inputs:
   - `.docs/llm-free.png`
   - `crates/orchestrator/src/execution/ai.rs`

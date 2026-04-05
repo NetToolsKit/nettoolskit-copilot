@@ -4,7 +4,10 @@ use crate::execution::ai::{
     ai_provider_adapter_descriptor_for_id, AiProviderAdapterDescriptor,
     OpenAiCompatibleProviderConfig,
 };
-use crate::execution::ai_profiles::{resolve_ai_provider_profile_from_env, AiProviderProfile};
+use crate::execution::ai_model_routing::{
+    resolve_ai_profile_and_model_routing_from_env, AiModelRoutingSelection,
+};
+use crate::execution::ai_profiles::AiProviderProfile;
 use crate::execution::ai_routing::{
     build_ai_provider_routing_plan, resolve_ai_provider_chain, resolve_ai_provider_timeout_budget,
     AiProviderRoutingPlan,
@@ -94,6 +97,8 @@ pub struct AiDoctorResult {
     pub api_key_present: bool,
     /// Effective model-selection policy summary.
     pub model_selection: AiDoctorModelSelection,
+    /// Effective agent/skill model-routing selection.
+    pub model_routing: AiModelRoutingSelection,
     /// Whether the current primary provider can execute without extra config.
     pub live_provider_ready: bool,
     /// Whether a fallback provider exists.
@@ -114,11 +119,10 @@ pub struct AiDoctorResult {
 ///
 /// Returns an error when the configured profile or provider identifiers are invalid.
 pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
-    let active_profile = resolve_ai_provider_profile_from_env()?.copied();
-    let active_profile_source = active_profile
-        .as_ref()
-        .map(|_| "env:NTK_AI_PROFILE".to_string())
-        .unwrap_or_else(|| "none".to_string());
+    let resolved_profile_and_routing = resolve_ai_profile_and_model_routing_from_env()?;
+    let active_profile = resolved_profile_and_routing.active_profile;
+    let active_profile_source = resolved_profile_and_routing.active_profile_source;
+    let model_routing = resolved_profile_and_routing.model_routing;
     let provider_chain = resolve_ai_provider_chain(active_profile.as_ref())?;
     let routing_plan =
         build_ai_provider_routing_plan(active_profile.as_ref(), &provider_chain.providers)?;
@@ -132,7 +136,7 @@ pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
         resolve_ai_provider_timeout_budget(active_profile.as_ref(), DEFAULT_AI_ROUTE_TIMEOUT_MS)?;
     let primary_timeout_ms = timeout_budget.primary_ms;
     let secondary_timeout_ms = timeout_budget.secondary_ms;
-    let model_selection = resolve_model_selection(active_profile.as_ref());
+    let model_selection = resolve_model_selection(active_profile.as_ref(), &model_routing);
     let (endpoint, endpoint_source) = resolve_endpoint(&provider_chain.providers);
     let (provider_default_model, provider_default_model_source) =
         resolve_provider_default_model(active_profile.as_ref(), &provider_chain.providers);
@@ -199,6 +203,7 @@ pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
         provider_default_model_source,
         api_key_present,
         model_selection,
+        model_routing,
         live_provider_ready,
         fallback_ready,
         routing_plan,
@@ -265,6 +270,56 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String {
                 .unwrap_or("n/a")
         ));
     }
+
+    lines.push(String::new());
+    lines.push("## Model Routing".to_string());
+    lines.push(format!(
+        "- Active agent: `{}` ({})",
+        result
+            .model_routing
+            .active_agent
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        result.model_routing.active_agent_source
+    ));
+    lines.push(format!(
+        "- Active skill: `{}` ({})",
+        result
+            .model_routing
+            .active_skill
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        result.model_routing.active_skill_source
+    ));
+    lines.push(format!(
+        "- Effective profile default: `{}` ({})",
+        result
+            .model_routing
+            .effective_profile
+            .as_deref()
+            .unwrap_or("none"),
+        result.model_routing.effective_profile_source
+    ));
+    lines.push(format!(
+        "- Routed cheap model: `{}` ({})",
+        result
+            .model_routing
+            .effective_cheap_model
+            .as_deref()
+            .unwrap_or("none"),
+        result.model_routing.effective_cheap_model_source
+    ));
+    lines.push(format!(
+        "- Routed reasoning model: `{}` ({})",
+        result
+            .model_routing
+            .effective_reasoning_model
+            .as_deref()
+            .unwrap_or("none"),
+        result.model_routing.effective_reasoning_model_source
+    ));
 
     lines.push(String::new());
     lines.push("## Provider Routing".to_string());
@@ -334,7 +389,10 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String {
     lines.join("\n")
 }
 
-fn resolve_model_selection(profile: Option<&AiProviderProfile>) -> AiDoctorModelSelection {
+fn resolve_model_selection(
+    profile: Option<&AiProviderProfile>,
+    model_routing: &AiModelRoutingSelection,
+) -> AiDoctorModelSelection {
     let mut enabled = true;
     let mut cheap_model = profile.and_then(|profile| profile.cheap_model.map(str::to_string));
     let mut reasoning_model =
@@ -363,6 +421,29 @@ fn resolve_model_selection(profile: Option<&AiProviderProfile>) -> AiDoctorModel
                 "apply-dry-run".to_string(),
             ]
         });
+
+    if let Some(value) = model_routing
+        .effective_cheap_model
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        cheap_model = Some(value.to_string());
+    }
+    if let Some(value) = model_routing
+        .effective_reasoning_model
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        reasoning_model = Some(value.to_string());
+    }
+    if !model_routing.effective_cheap_intents.is_empty() {
+        cheap_intents = model_routing.effective_cheap_intents.clone();
+    }
+    if !model_routing.effective_reasoning_intents.is_empty() {
+        reasoning_intents = model_routing.effective_reasoning_intents.clone();
+    }
 
     if let Some(value) = resolve_nonempty_env(NTK_AI_MODEL_SELECTION_ENABLED_ENV)
         .and_then(|value| parse_bool(&value))

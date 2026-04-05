@@ -9,6 +9,7 @@ Operate the `ntk` AI development surfaces locally with predictable profile selec
 This playbook covers:
 
 - built-in AI provider profiles
+- canonical agent and skill model-routing defaults
 - `ntk ai doctor`
 - routing strategy override and scored provider order
 - Markdown and JSON operator reports
@@ -44,6 +45,39 @@ $env:NTK_AI_PROFILE = "coding"
 ntk ai profiles show
 ```
 
+## Agent And Skill Model Routing
+
+Use the canonical lane defaults when you want the orchestrator to inherit a profile/model preference from the active controller or specialist lane instead of forcing a global `NTK_AI_PROFILE`.
+
+Environment controls:
+
+- `NTK_AI_ACTIVE_AGENT`
+- `NTK_AI_ACTIVE_SKILL`
+
+Inspection commands:
+
+```powershell
+ntk ai model-routing list
+ntk ai model-routing show
+ntk ai model-routing show --agent planner --skill dev-rust
+```
+
+Precedence order:
+
+1. explicit `NTK_AI_MODEL_SELECTION_*` env vars
+2. explicit `NTK_AI_PROFILE`
+3. active skill lane defaults
+4. active agent lane defaults
+5. built-in profile defaults
+
+Example lane activation:
+
+```powershell
+$env:NTK_AI_ACTIVE_AGENT = "planner"
+$env:NTK_AI_ACTIVE_SKILL = "dev-rust"
+ntk ai doctor
+```
+
 ## Fast Bootstrap
 
 ### Offline-safe local mode
@@ -63,8 +97,8 @@ Expected result:
 
 ```powershell
 $env:NTK_AI_PROFILE = "balanced"
-$env:NTK_AI_PROVIDER_ENDPOINT = "https://api.openai.com/v1/chat/completions"
-$env:NTK_AI_PROVIDER_API_KEY = "<secret>"
+$env:NTK_AI_ENDPOINT = "https://api.openai.com/v1/chat/completions"
+$env:NTK_AI_API_KEY = "<secret>"
 ntk ai doctor
 ```
 
@@ -87,6 +121,7 @@ ntk ai doctor
 Use this for quick local inspection of:
 
 - active profile
+- active agent and skill lanes
 - provider chain
 - provider endpoint
 - timeout budgets
@@ -124,6 +159,8 @@ Allowed values:
 
 The doctor output now shows:
 
+- active agent and skill lanes
+- lane-derived profile/model defaults
 - resolved strategy and source
 - routed provider order after scoring
 - per-provider latency/cost/reliability/policy-fit subscores

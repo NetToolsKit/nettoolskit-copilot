@@ -1,0 +1,17 @@
+{
+  "laneKind": "agent",
+  "laneId": "implementer",
+  "title": "Implementer",
+  "summary": "Implementation lane that keeps coding and dry-run flows on the stronger reasoning tier by default.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask",
+    "explain"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "apply-dry-run"
+  ]
+}

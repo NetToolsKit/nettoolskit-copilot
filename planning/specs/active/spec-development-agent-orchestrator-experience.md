@@ -4,7 +4,7 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:48
+- LastUpdated: 2026-04-05 14:05
 - Objective: define the target experience and architectural boundaries required for `ntk` to operate as a development-focused AI agent orchestrator with strong provider ergonomics, diagnostics, routing, and operator guidance.
 - Normalized Request: create a design specification for applying stronger development-agent orchestrator patterns to the repository without collapsing existing focused workstreams.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -109,3 +109,7 @@ This separation is required so the development experience becomes stronger witho
 - Fifth implementation proof now exists for normalized adapters:
   - `crates/orchestrator/src/execution/ai.rs`
   - normalized adapter descriptors now make transport/auth/usage/fallback capabilities inspectable outside provider-specific code
+- Sixth implementation proof now exists for agent-to-model routing:
+  - `definitions/agents/*/model-routing.policy.json` and `definitions/skills/*/model-routing.policy.json`
+  - `crates/orchestrator/src/execution/ai_model_routing.rs`
+  - `ntk ai model-routing list/show` and `ntk ai doctor` now expose lane-aware profile/model defaults with explicit env override precedence

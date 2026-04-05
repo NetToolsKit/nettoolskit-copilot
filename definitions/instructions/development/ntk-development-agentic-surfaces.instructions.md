@@ -66,6 +66,7 @@ unless it truly implements that interoperability boundary.
 - Keep MCP separate from RAG/CAG. Tool projection is not recall.
 - Keep RAG separate from CAG. Retrieval is not prompt compaction.
 - Keep A2A separate from internal workflow routing unless a protocol contract exists.
+- Keep agent-to-model routing separate from MCP and A2A. Lane defaults are internal orchestration metadata, not transport or interoperability.
 - When multiple surfaces interact, document the handoff explicitly instead of merging responsibilities.
 
 ## Repository Mapping
@@ -75,6 +76,7 @@ Apply these repository ownership expectations by default:
 - `MCP` -> runtime projection, provider/editor surfaces, transport/session resilience
 - `RAG` -> local-context indexing and deterministic repository recall
 - `CAG` -> request-context assembly, compaction, token economy, checkpoint continuity
+- internal agent model-routing -> `definitions/agents/*`, `definitions/skills/*`, and orchestrator model-selection policy
 - `A2A` -> planning-only or explicit future protocol/readiness work until a concrete runtime surface exists
 
 ## Documentation Rules

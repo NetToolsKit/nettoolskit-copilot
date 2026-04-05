@@ -6,6 +6,8 @@
 pub mod ai;
 /// Read-only AI runtime diagnostics and operator reporting.
 pub mod ai_doctor;
+/// Agent and skill model-routing policy resolution.
+pub mod ai_model_routing;
 /// Built-in AI provider profiles and preset resolution helpers.
 pub mod ai_profiles;
 /// Provider routing strategy, scoring, and timeout resolution.
@@ -44,6 +46,13 @@ pub use ai::{
 pub use ai_doctor::{
     invoke_ai_doctor, render_ai_doctor_report, AiDoctorModelSelection, AiDoctorRequest,
     AiDoctorResult, AiDoctorStatus,
+};
+pub use ai_model_routing::{
+    find_ai_model_routing_policy, list_ai_model_routing_policies,
+    resolve_ai_model_routing_selection, resolve_ai_model_routing_selection_from_env,
+    resolve_ai_profile_and_model_routing_from_env, AiModelRoutingLaneKind, AiModelRoutingPolicy,
+    AiModelRoutingSelection, ResolvedAiProfileAndModelRouting, NTK_AI_ACTIVE_AGENT_ENV,
+    NTK_AI_ACTIVE_SKILL_ENV,
 };
 pub use ai_profiles::{
     find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,

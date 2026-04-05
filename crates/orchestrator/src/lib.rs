@@ -22,6 +22,13 @@ pub use execution::{
         invoke_ai_doctor, render_ai_doctor_report, AiDoctorModelSelection, AiDoctorRequest,
         AiDoctorResult, AiDoctorStatus,
     },
+    ai_model_routing::{
+        find_ai_model_routing_policy, list_ai_model_routing_policies,
+        resolve_ai_model_routing_selection, resolve_ai_model_routing_selection_from_env,
+        resolve_ai_profile_and_model_routing_from_env, AiModelRoutingLaneKind,
+        AiModelRoutingPolicy, AiModelRoutingSelection, ResolvedAiProfileAndModelRouting,
+        NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV,
+    },
     ai_profiles::{
         find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
         resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,

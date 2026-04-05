@@ -1,0 +1,17 @@
+{
+  "laneKind": "skill",
+  "laneId": "docs",
+  "title": "Documentation",
+  "summary": "Documentation skill lane for README, changelog, operator guidance, and release-oriented authoring.",
+  "defaultProfile": "balanced",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask",
+    "explain"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "apply-dry-run"
+  ]
+}

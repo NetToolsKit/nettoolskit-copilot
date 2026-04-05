@@ -2,11 +2,14 @@
 
 use clap::{Args, Subcommand};
 use nettoolskit_orchestrator::{
-    invoke_ai_doctor, list_ai_provider_profiles, query_ai_usage_summary,
-    query_weekly_ai_usage_summary, render_ai_doctor_report, resolve_ai_provider_profile,
-    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult, AiProviderProfile,
-    AiUsageSummaryReport, AiUsageSummaryReportRequest, AiUsageWeeklyReport,
-    AiUsageWeeklyReportRequest, ExitStatus, NTK_AI_PROFILE_ENV,
+    find_ai_model_routing_policy, invoke_ai_doctor, list_ai_model_routing_policies,
+    list_ai_provider_profiles, query_ai_usage_summary, query_weekly_ai_usage_summary,
+    render_ai_doctor_report, resolve_ai_model_routing_selection,
+    resolve_ai_model_routing_selection_from_env, resolve_ai_provider_profile,
+    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult, AiModelRoutingLaneKind,
+    AiModelRoutingPolicy, AiModelRoutingSelection, AiProviderProfile, AiUsageSummaryReport,
+    AiUsageSummaryReportRequest, AiUsageWeeklyReport, AiUsageWeeklyReportRequest, ExitStatus,
+    NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV, NTK_AI_PROFILE_ENV,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -16,6 +19,12 @@ use std::path::PathBuf;
 pub enum AiCommand {
     /// Diagnose AI provider/profile readiness without executing a request.
     Doctor(AiDoctorArgs),
+    /// Inspect canonical agent and skill model-routing defaults.
+    ModelRouting {
+        /// Model-routing subcommand.
+        #[clap(subcommand)]
+        command: AiModelRoutingCommand,
+    },
     /// Inspect built-in AI provider profiles and presets.
     Profiles {
         /// Profile subcommand.
@@ -48,6 +57,15 @@ pub enum AiProfilesCommand {
     Show(AiProfilesShowArgs),
 }
 
+/// AI model-routing subcommands.
+#[derive(Debug, Subcommand)]
+pub enum AiModelRoutingCommand {
+    /// List canonical agent and skill model-routing policies.
+    List(AiModelRoutingListArgs),
+    /// Show the resolved active model-routing selection or one explicit agent/skill pairing.
+    Show(AiModelRoutingShowArgs),
+}
+
 /// CLI arguments for `ai profiles list`.
 #[derive(Debug, Args)]
 pub struct AiProfilesListArgs {
@@ -61,6 +79,28 @@ pub struct AiProfilesListArgs {
 pub struct AiProfilesShowArgs {
     /// Optional profile id. When omitted, resolves the active `NTK_AI_PROFILE`.
     pub profile: Option<String>,
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
+}
+
+/// CLI arguments for `ai model-routing list`.
+#[derive(Debug, Args)]
+pub struct AiModelRoutingListArgs {
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
+}
+
+/// CLI arguments for `ai model-routing show`.
+#[derive(Debug, Args)]
+pub struct AiModelRoutingShowArgs {
+    /// Optional agent lane id to resolve explicitly.
+    #[clap(long)]
+    pub agent: Option<String>,
+    /// Optional skill lane id to resolve explicitly.
+    #[clap(long)]
+    pub skill: Option<String>,
     /// Emit JSON instead of the default human-readable summary.
     #[clap(long)]
     pub json_output: bool,
@@ -132,6 +172,7 @@ pub struct AiUsageSummaryArgs {
 pub async fn execute_ai_command(command: AiCommand) -> ExitStatus {
     match command {
         AiCommand::Doctor(arguments) => execute_ai_doctor(arguments),
+        AiCommand::ModelRouting { command } => execute_ai_model_routing_command(command),
         AiCommand::Profiles { command } => execute_ai_profiles_command(command),
         AiCommand::Usage { command } => execute_ai_usage_command(command),
     }
@@ -171,6 +212,13 @@ fn execute_ai_profiles_command(command: AiProfilesCommand) -> ExitStatus {
     match command {
         AiProfilesCommand::List(arguments) => execute_ai_profiles_list(arguments),
         AiProfilesCommand::Show(arguments) => execute_ai_profiles_show(arguments),
+    }
+}
+
+fn execute_ai_model_routing_command(command: AiModelRoutingCommand) -> ExitStatus {
+    match command {
+        AiModelRoutingCommand::List(arguments) => execute_ai_model_routing_list(arguments),
+        AiModelRoutingCommand::Show(arguments) => execute_ai_model_routing_show(arguments),
     }
 }
 
@@ -256,6 +304,101 @@ fn execute_ai_profiles_show(arguments: AiProfilesShowArgs) -> ExitStatus {
     }
 
     print_ai_profile(profile);
+    ExitStatus::Success
+}
+
+fn execute_ai_model_routing_list(arguments: AiModelRoutingListArgs) -> ExitStatus {
+    let policies = list_ai_model_routing_policies();
+
+    if arguments.json_output {
+        return print_json_or_error(policies);
+    }
+
+    println!("AI model routing policies");
+    for lane_kind in [AiModelRoutingLaneKind::Agent, AiModelRoutingLaneKind::Skill] {
+        println!();
+        println!("{} lanes", lane_kind.as_str());
+        for policy in policies
+            .iter()
+            .filter(|policy| policy.lane_kind == lane_kind)
+        {
+            println!(
+                "- {} ({}) -> profile={} cheap={} reasoning={}",
+                policy.lane_id,
+                policy.title,
+                policy.default_profile.as_deref().unwrap_or("none"),
+                policy.cheap_model.as_deref().unwrap_or("none"),
+                policy.reasoning_model.as_deref().unwrap_or("none")
+            );
+            println!("  {}", policy.summary);
+        }
+    }
+
+    let active_selection = match resolve_ai_model_routing_selection_from_env() {
+        Ok(selection) => selection,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    println!();
+    println!(
+        "Active lanes: agent={} skill={}",
+        active_selection
+            .active_agent
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        active_selection
+            .active_skill
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none")
+    );
+    println!(
+        "Set {} or {} to activate lane defaults.",
+        NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV
+    );
+
+    ExitStatus::Success
+}
+
+fn execute_ai_model_routing_show(arguments: AiModelRoutingShowArgs) -> ExitStatus {
+    let selection = match (arguments.agent.as_deref(), arguments.skill.as_deref()) {
+        (None, None) => resolve_ai_model_routing_selection_from_env(),
+        _ => resolve_ai_model_routing_selection(
+            arguments.agent.as_deref(),
+            arguments.skill.as_deref(),
+        ),
+    };
+    let selection = match selection {
+        Ok(selection) => selection,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
+
+    if arguments.json_output {
+        return print_json_or_error(&selection);
+    }
+
+    print_ai_model_routing_selection(&selection);
+    if let Some(agent_id) = arguments.agent.as_deref() {
+        if let Some(policy) = find_ai_model_routing_policy(AiModelRoutingLaneKind::Agent, agent_id)
+        {
+            println!();
+            print_ai_model_routing_policy(&policy);
+        }
+    }
+    if let Some(skill_id) = arguments.skill.as_deref() {
+        if let Some(policy) = find_ai_model_routing_policy(AiModelRoutingLaneKind::Skill, skill_id)
+        {
+            println!();
+            print_ai_model_routing_policy(&policy);
+        }
+    }
     ExitStatus::Success
 }
 
@@ -362,6 +505,80 @@ fn print_ai_profile(profile: &AiProviderProfile) {
     );
 }
 
+fn print_ai_model_routing_policy(policy: &AiModelRoutingPolicy) {
+    println!(
+        "{} lane: {} ({})",
+        policy.lane_kind.as_str(),
+        policy.lane_id,
+        policy.title
+    );
+    println!("Summary: {}", policy.summary);
+    println!(
+        "Default profile: {}",
+        policy.default_profile.as_deref().unwrap_or("none")
+    );
+    println!(
+        "Cheap model: {}",
+        policy.cheap_model.as_deref().unwrap_or("none")
+    );
+    println!(
+        "Reasoning model: {}",
+        policy.reasoning_model.as_deref().unwrap_or("none")
+    );
+    println!("Cheap intents: {}", policy.cheap_intents.join(", "));
+    println!("Reasoning intents: {}", policy.reasoning_intents.join(", "));
+}
+
+fn print_ai_model_routing_selection(selection: &AiModelRoutingSelection) {
+    println!("AI model routing");
+    println!(
+        "Active agent: {} ({})",
+        selection
+            .active_agent
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        selection.active_agent_source
+    );
+    println!(
+        "Active skill: {} ({})",
+        selection
+            .active_skill
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        selection.active_skill_source
+    );
+    println!(
+        "Effective profile default: {} ({})",
+        selection.effective_profile.as_deref().unwrap_or("none"),
+        selection.effective_profile_source
+    );
+    println!(
+        "Routed cheap model: {} ({})",
+        selection.effective_cheap_model.as_deref().unwrap_or("none"),
+        selection.effective_cheap_model_source
+    );
+    println!(
+        "Routed reasoning model: {} ({})",
+        selection
+            .effective_reasoning_model
+            .as_deref()
+            .unwrap_or("none"),
+        selection.effective_reasoning_model_source
+    );
+    println!(
+        "Routed cheap intents: {} ({})",
+        selection.effective_cheap_intents.join(", "),
+        selection.effective_cheap_intents_source
+    );
+    println!(
+        "Routed reasoning intents: {} ({})",
+        selection.effective_reasoning_intents.join(", "),
+        selection.effective_reasoning_intents_source
+    );
+}
+
 fn print_ai_doctor(result: &AiDoctorResult, report_path: Option<&std::path::Path>) {
     println!("AI doctor");
     println!("Status: {:?}", result.status);
@@ -371,6 +588,35 @@ fn print_ai_doctor(result: &AiDoctorResult, report_path: Option<&std::path::Path
     } else {
         println!("Active profile: none");
     }
+    println!(
+        "Active agent: {} ({})",
+        result
+            .model_routing
+            .active_agent
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        result.model_routing.active_agent_source
+    );
+    println!(
+        "Active skill: {} ({})",
+        result
+            .model_routing
+            .active_skill
+            .as_ref()
+            .map(|policy| policy.lane_id.as_str())
+            .unwrap_or("none"),
+        result.model_routing.active_skill_source
+    );
+    println!(
+        "Effective lane profile default: {} ({})",
+        result
+            .model_routing
+            .effective_profile
+            .as_deref()
+            .unwrap_or("none"),
+        result.model_routing.effective_profile_source
+    );
     println!(
         "Provider chain: {} ({})",
         result.provider_chain.join(" -> "),

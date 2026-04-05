@@ -1,0 +1,17 @@
+{
+  "laneKind": "skill",
+  "laneId": "test",
+  "title": "Testing",
+  "summary": "Testing skill lane for coverage, flake reduction, and integration validation flows.",
+  "defaultProfile": "coding",
+  "cheapModel": "gpt-4.1-mini",
+  "reasoningModel": "gpt-4.1",
+  "cheapIntents": [
+    "ask",
+    "explain"
+  ],
+  "reasoningIntents": [
+    "plan",
+    "apply-dry-run"
+  ]
+}

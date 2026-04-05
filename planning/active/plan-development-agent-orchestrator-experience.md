@@ -4,13 +4,13 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:48
+- LastUpdated: 2026-04-05 14:05
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: D1, D2, D3, D4, and D5 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, `ntk ai doctor` JSON/report surfaces, strategy-aware provider routing, normalized provider adapter contracts, and a dedicated AI development operator playbook; D6 agent-to-model routing policy is next.
+- Current Slice: D1, D2, D3, D4, D5, and D6 are now implemented with built-in provider profiles, `ntk ai doctor` JSON/report surfaces, strategy-aware provider routing, normalized adapter contracts, a dedicated AI development operator playbook, and canonical agent/skill model-routing defaults exposed through `definitions/*`, `ntk ai model-routing`, and doctor surfaces; the workstream is ready for final governance closeout.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -139,6 +139,10 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Keep the routing policy explicit, inspectable, and overrideable by operators.
 - Ensure model routing complements rather than bypasses token-economy and provider-profile policy.
 - Tie lineage and inherited settings into the multi-agent runtime plan instead of duplicating that work here.
+- Completed slice:
+  - `definitions/agents/*/model-routing.policy.json` and `definitions/skills/*/model-routing.policy.json` now define canonical lane defaults for profile/model selection.
+  - `crates/orchestrator/src/execution/ai_model_routing.rs` now resolves lane defaults, explicit env activation, and profile precedence without leaking lane policy into provider adapters.
+  - `crates/orchestrator/src/execution/processor.rs`, `crates/orchestrator/src/execution/ai_doctor.rs`, and `crates/cli/src/ai_commands.rs` now expose lane-aware model routing through execution, diagnostics, and `ntk ai model-routing list/show`.
 - Target paths:
   - `crates/orchestrator/src/execution/`
   - `definitions/instructions/development/`
