@@ -15,6 +15,11 @@ use super::mcp_runtime_artifacts::{
     invoke_render_mcp_runtime_artifacts, RuntimeRenderMcpRuntimeArtifactsRequest,
 };
 
+const CANONICAL_PROVIDER_SURFACE_CATALOG_RELATIVE_PATH: &str =
+    "definitions/providers/github/governance/provider-surface-projection.catalog.json";
+const LEGACY_PROVIDER_SURFACE_CATALOG_RELATIVE_PATH: &str =
+    ".github/governance/provider-surface-projection.catalog.json";
+
 /// Request payload for `render-provider-surfaces`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct RuntimeRenderProviderSurfacesRequest {
@@ -178,7 +183,14 @@ fn resolve_provider_surface_catalog_path(
     match requested_catalog_path {
         Some(path) if path.is_absolute() => path.to_path_buf(),
         Some(path) => resolve_full_path(repo_root, path),
-        None => repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
+        None => {
+            let canonical_path = repo_root.join(CANONICAL_PROVIDER_SURFACE_CATALOG_RELATIVE_PATH);
+            if canonical_path.is_file() {
+                canonical_path
+            } else {
+                repo_root.join(LEGACY_PROVIDER_SURFACE_CATALOG_RELATIVE_PATH)
+            }
+        }
     }
 }
 

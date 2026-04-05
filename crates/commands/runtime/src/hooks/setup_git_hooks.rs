@@ -19,7 +19,9 @@ const LOCAL_REPO_SCOPE: &str = "local-repo";
 const GLOBAL_SCOPE: &str = "global";
 const LOCAL_HOOKS_PATH: &str = ".githooks";
 const DEFAULT_GLOBAL_HOOKS_RELATIVE_PATH: &str = ".codex/git-hooks";
-const CATALOG_RELATIVE_PATH: &str = ".github/governance/git-hook-eof-modes.json";
+const CANONICAL_CATALOG_RELATIVE_PATH: &str =
+    "definitions/providers/github/governance/git-hook-eof-modes.json";
+const LEGACY_CATALOG_RELATIVE_PATH: &str = ".github/governance/git-hook-eof-modes.json";
 const PRE_COMMIT_FILE_NAME: &str = "pre-commit";
 const PRE_COMMIT_RUNNER_RELATIVE_PATH: &str = "scripts/git-hooks/invoke-pre-commit-eof-hygiene.ps1";
 
@@ -347,7 +349,13 @@ fn resolve_global_hook_support_paths(
 ) -> anyhow::Result<GlobalHookSupportPaths> {
     let catalog_path = resolve_full_path(
         repo_root,
-        catalog_path_override.unwrap_or_else(|| Path::new(CATALOG_RELATIVE_PATH)),
+        catalog_path_override.unwrap_or_else(|| {
+            if repo_root.join(CANONICAL_CATALOG_RELATIVE_PATH).is_file() {
+                Path::new(CANONICAL_CATALOG_RELATIVE_PATH)
+            } else {
+                Path::new(LEGACY_CATALOG_RELATIVE_PATH)
+            }
+        }),
     );
     if !catalog_path.is_file() {
         return Err(anyhow!(

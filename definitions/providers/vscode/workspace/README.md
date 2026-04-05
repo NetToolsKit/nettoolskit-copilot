@@ -20,7 +20,7 @@ For `settings` and `mcp`, the repository uses `*.tamplate.jsonc` files to avoid 
 - ✅ Versioned base workspace definition for shared workspace defaults
 - ✅ Versioned snippet templates for Copilot and Codex workflows
 - ✅ Deterministic rendering into the tracked `.vscode/` surface
-- ✅ Canonical catalog-driven MCP config via `.github/governance/mcp-runtime.catalog.json`
+- ✅ Canonical catalog-driven MCP config via `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - ✅ Versioned VS Code profile baselines under `.vscode/profiles/`
 - ✅ Local helper mirror for the rendered global MCP state
 
@@ -103,7 +103,7 @@ pwsh -File .\scripts\runtime\sync-workspace-settings.ps1 -WorkspacePath C:\Users
 ### Main Files
 
 - `settings.tamplate.jsonc`: base VS Code and Copilot instruction-routing settings
-- `mcp.tamplate.jsonc`: generated VS Code MCP projection rendered from `.github/governance/mcp-runtime.catalog.json`
+- `mcp.tamplate.jsonc`: generated VS Code MCP projection rendered from `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - `base.code-workspace`: shared pseudo-inheritance source for `.code-workspace` files
 - `snippets/codex-cli.tamplate.code-snippets`: versioned Codex CLI snippet template synchronized into the global profile
 - `snippets/copilot.tamplate.code-snippets`: versioned Copilot workflow snippet template synchronized into the global profile
@@ -136,7 +136,7 @@ ntk validation instructions --repo-root . --warning-only false
 
 - Keep template files valid JSON or JSONC.
 - Do not commit active `settings.json` or `mcp.json`.
-- When VS Code MCP servers change, update `.github/governance/mcp-runtime.catalog.json` first, then regenerate the tracked runtime projections.
+- When VS Code MCP servers change, update `definitions/providers/github/governance/mcp-runtime.catalog.json` first, then regenerate the tracked runtime projections.
 - Treat `definitions/providers/vscode/workspace/base.code-workspace` as the shared workspace inheritance baseline.
 - Treat `definitions/providers/vscode/workspace/snippets/*.tamplate.code-snippets` as the versioned snippet source.
 - Keep `.vscode/profiles/` versioned and internally consistent with the checked-in `profile-*.json` set.
@@ -153,7 +153,7 @@ ntk validation instructions --repo-root . --warning-only false
 
 ## References
 
-- `.github/governance/mcp-runtime.catalog.json`
+- `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - `definitions/providers/vscode/workspace/base.code-workspace`
 - `definitions/providers/vscode/workspace/settings.tamplate.jsonc`
 - `definitions/providers/vscode/workspace/snippets/codex-cli.tamplate.code-snippets`

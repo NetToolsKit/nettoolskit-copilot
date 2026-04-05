@@ -121,7 +121,7 @@ ntk runtime sync-codex-mcp-config --dry-run
 
 ## References
 
-- `.github/governance/mcp-runtime.catalog.json`
+- `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - `definitions/providers/codex/scripts/`
 - `.codex/mcp/README.md`
 - `scripts/runtime/bootstrap.ps1`

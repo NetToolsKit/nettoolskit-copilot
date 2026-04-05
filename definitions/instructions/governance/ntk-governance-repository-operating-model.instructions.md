@@ -24,7 +24,7 @@ priority: high
 - Worktree isolation rules are centralized in `instructions/governance/ntk-governance-worktree-isolation.instructions.md`.
 - TDD and verification rules are centralized in `instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
-- Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
+- Validate remote script integrity using `definitions/providers/github/governance/shared-script-checksums.manifest.json`.
 
 ## Instruction Source Of Truth And Projection
 - `definitions/instructions/` is the canonical instruction content for repo-owned guidance.

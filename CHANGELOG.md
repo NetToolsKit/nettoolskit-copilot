@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added a mirrored canonical GitHub governance catalog set under `definitions/providers/github/governance/`, covering the current `.github/governance/*` authored assets so runtime and validation code can cut over without losing compatibility.
 - Added canonical template copies under `definitions/templates/{docs,codegen}` for the shared docs/codegen assets plus the mirrored root `.NET` scaffold tree, so authoring can continue under `definitions/templates/*` while legacy roots remain compatibility-only.
 - Added canonical GitHub governance definitions under `definitions/providers/github/governance/` for `instruction-ownership.manifest.json` and `authoritative-source-map.json`, so validation and audit commands can resolve authored policy without starting from `.github/governance/`.
 - Added an instruction-taxonomy migration checkpoint that defers `.github/.codex/.claude` projection cutover until canonical `definitions/` assets and validation/audit code are definitions-aware.
@@ -145,6 +146,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- Runtime catalog readers now prefer canonical governance mirrors under `definitions/providers/github/governance/*` for MCP runtime, provider-surface projection, and git-hook EOF settings, while retaining `.github/governance/*` fallback compatibility for transitional temp repos and generated surfaces.
+- Canonical provider runtime docs, sync skills, and orchestration pipeline metadata now point at `definitions/providers/github/governance/*` instead of authored `.github/governance/*` paths.
 - Canonical governance, development, and operations instructions now reference `definitions/templates/*` instead of authored `.github/templates/*` paths, and VS Code provider snippets now point at the same canonical template roots.
 - `validate-template-standards` and `validate-dotnet-standards` now prefer canonical template content under `definitions/templates/*` and the canonical template baseline at `definitions/providers/github/governance/template-standards.baseline.json`, while retaining legacy `.github/templates/*` fallback compatibility during migration.
 - Provider-authored consumer surfaces in `definitions/providers/{claude,codex,github}` now resolve canonical `definitions/instructions/*`, `definitions/templates/*`, `definitions/agents/*`, and `definitions/providers/github/root/*` paths instead of authored `.github/*` references, keeping generated runtime surfaces deferred until the final projection cutover.

@@ -122,7 +122,7 @@ This root is mid-migration and currently preserves compatibility on purpose.
 - [definitions/hooks/README.md](hooks/README.md)
 - [definitions/providers/README.md](providers/README.md)
 - [definitions/shared/README.md](shared/README.md)
-- [.github/governance/provider-surface-projection.catalog.json](../.github/governance/provider-surface-projection.catalog.json)
+- [provider-surface-projection.catalog.json](providers/github/governance/provider-surface-projection.catalog.json)
 - `ntk runtime render-provider-surfaces --repo-root .`
 
 ---

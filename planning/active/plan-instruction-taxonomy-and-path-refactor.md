@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 23:48
+- LastUpdated: 2026-04-05 00:07
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -102,6 +102,7 @@ Generated: 2026-04-03 00:00
   - in progress; routing-coverage and validate-instructions now default to the canonical provider catalog at `definitions/providers/github/root/instruction-routing.catalog.yml` and resolve `instructions/*` references against `definitions/`
   - in progress; Rust validation tests and CLI validation command fixtures now scaffold canonical `definitions/` trees in temp repos so native checks pass without authored dependence on `.github/*`
   - in progress; provider-authored consumer surfaces under `definitions/providers/{claude,codex,github}` now resolve canonical `definitions/instructions/*`, `definitions/agents/*`, `definitions/templates/*`, and `definitions/providers/github/root/*` paths instead of linking back to projected `.github/*` authoring paths
+  - in progress; runtime-facing provider docs, sync skills, and orchestration pipeline metadata now reference canonical governance catalogs under `definitions/providers/github/governance/*` instead of authored `.github/governance/*` paths
 - Commit checkpoint:
   - `refactor(instructions): update instruction routing and consumers`
 
@@ -304,6 +305,7 @@ Generated: 2026-04-03 00:00
   - in progress; routing golden tests, planning indexes, and provider-authored VS Code snippets now validate or reference the same canonical shallow paths consumed by the canonical routing catalog
   - in progress; canonical provider consumers now pass the validation stack after replacing remaining `.github/*` authored references in codex/claude skill packs, codex orchestration prompts, GitHub root command docs, and provider runtime settings with `definitions/*` paths
   - in progress; `validate-template-standards` and `validate-dotnet-standards` now prefer canonical `definitions/templates/*` and `definitions/providers/github/governance/template-standards.baseline.json`, while runtime test fixtures keep legacy template copies only as temporary compatibility
+  - in progress; runtime catalog readers now prefer canonical governance mirrors under `definitions/providers/github/governance/*` for MCP runtime, provider-surface projection, and git-hook EOF settings, while falling back to `.github/governance/*` only when a temp repo has not been scaffolded canonically yet
 - Commit checkpoint:
   - `refactor(validation): prioritize canonical definitions in validate-instructions`
 

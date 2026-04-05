@@ -38,7 +38,7 @@ ntk runtime render-vscode-mcp-template --output-path .vscode/mcp.tamplate.jsonc
 
 ## Source Of Truth
 
-- `.github/governance/mcp-runtime.catalog.json`
+- `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - `.codex/mcp/servers.manifest.json` (generated Codex subset)
 - `ntk runtime sync-codex-mcp-config`
 - `ntk runtime render-vscode-mcp-template`

@@ -61,6 +61,17 @@
       ]
     },
     {
+      "id": "tokio",
+      "displayName": "Tokio",
+      "keywords": [
+        "tokio",
+        "async rust"
+      ],
+      "officialDomains": [
+        "tokio.rs"
+      ]
+    },
+    {
       "id": "vue",
       "displayName": "Vue",
       "keywords": [

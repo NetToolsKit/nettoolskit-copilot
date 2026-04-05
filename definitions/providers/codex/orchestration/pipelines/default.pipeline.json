@@ -8,8 +8,8 @@
     "maxPipelineDurationSeconds": 3000,
     "continueOnStageFailure": false,
     "writeRunState": true,
-    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
-    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
+    "policyCatalogPath": "definitions/providers/github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": "definitions/providers/github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
     {

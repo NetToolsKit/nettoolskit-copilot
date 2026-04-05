@@ -48,7 +48,7 @@ ntk runtime render-vscode-mcp-template --output-path .vscode/mcp.tamplate.jsonc
 
 ## Source of truth
 
-- `.github/governance/mcp-runtime.catalog.json` — canonical MCP runtime catalog
+- `definitions/providers/github/governance/mcp-runtime.catalog.json` — canonical MCP runtime catalog
 - `.codex/mcp/servers.manifest.json` — generated Codex subset
-- `.github/governance/runtime-location-catalog.json` — runtime path catalog
+- `definitions/providers/github/governance/runtime-location-catalog.json` — runtime path catalog
 - `scripts/common/runtime-paths.ps1` — effective path resolution

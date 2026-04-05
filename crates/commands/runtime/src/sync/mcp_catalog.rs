@@ -7,6 +7,10 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const CANONICAL_CATALOG_RELATIVE_PATH: &str =
+    "definitions/providers/github/governance/mcp-runtime.catalog.json";
+const LEGACY_CATALOG_RELATIVE_PATH: &str = ".github/governance/mcp-runtime.catalog.json";
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct McpRuntimeCatalog {
@@ -108,7 +112,14 @@ pub(crate) fn resolve_catalog_path(repo_root: &Path, catalog_path: Option<&Path>
     match catalog_path {
         Some(path) if path.is_absolute() => path.to_path_buf(),
         Some(path) => resolve_full_path(repo_root, path),
-        None => repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+        None => {
+            let canonical_path = repo_root.join(CANONICAL_CATALOG_RELATIVE_PATH);
+            if canonical_path.is_file() {
+                canonical_path
+            } else {
+                repo_root.join(LEGACY_CATALOG_RELATIVE_PATH)
+            }
+        }
     }
 }
 

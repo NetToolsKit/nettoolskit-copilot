@@ -8,7 +8,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const DEFAULT_CATALOG_RELATIVE_PATH: &str = ".github/governance/git-hook-eof-modes.json";
+const CANONICAL_CATALOG_RELATIVE_PATH: &str =
+    "definitions/providers/github/governance/git-hook-eof-modes.json";
+const LEGACY_CATALOG_RELATIVE_PATH: &str = ".github/governance/git-hook-eof-modes.json";
 const DEFAULT_GLOBAL_SETTINGS_RELATIVE_PATH: &str = ".codex/git-hook-eof-settings.json";
 
 /// Effective EOF mode resolved for the current repository.
@@ -288,7 +290,14 @@ fn load_git_hook_eof_catalog(
 ) -> anyhow::Result<GitHookEofCatalog> {
     let catalog_path = match override_path {
         Some(path) => path.to_path_buf(),
-        None => repo_root.join(DEFAULT_CATALOG_RELATIVE_PATH),
+        None => {
+            let canonical_path = repo_root.join(CANONICAL_CATALOG_RELATIVE_PATH);
+            if canonical_path.is_file() {
+                canonical_path
+            } else {
+                repo_root.join(LEGACY_CATALOG_RELATIVE_PATH)
+            }
+        }
     };
     let document = fs::read_to_string(&catalog_path)
         .with_context(|| format!("failed to read '{}'", catalog_path.display()))?;

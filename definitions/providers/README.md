@@ -94,7 +94,7 @@ through repository-owned projection rules.
   overlays do not automatically become shared authority.
 - Projection behavior is catalog-driven, not folder-order-driven.
 - Renderers and destinations are defined in
-  `.github/governance/provider-surface-projection.catalog.json`.
+  `definitions/providers/github/governance/provider-surface-projection.catalog.json`.
 
 Use the repository entrypoint to render provider surfaces:
 
@@ -120,7 +120,7 @@ ntk runtime render-provider-surfaces --repo-root .
 - [definitions/providers/codex/orchestration/README.md](codex/orchestration/README.md)
 - [definitions/providers/codex/scripts/README.md](codex/scripts/README.md)
 - [definitions/providers/codex/skills/README.md](codex/skills/README.md)
-- [.github/governance/provider-surface-projection.catalog.json](../../.github/governance/provider-surface-projection.catalog.json)
+- [provider-surface-projection.catalog.json](github/governance/provider-surface-projection.catalog.json)
 
 ---
 
