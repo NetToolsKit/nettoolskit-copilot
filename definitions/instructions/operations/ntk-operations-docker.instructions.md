@@ -10,10 +10,10 @@ configuration, Docker Compose layouts, and local container packaging flows.
 
 Use adjacent `runtime-ops` instructions for other concerns:
 
-- `ntk-runtime-k8s.instructions.md` for cluster manifests, ingress, storage, autoscaling, and Kubernetes rollout policy
-- `ntk-runtime-microservices-performance.instructions.md` for service boundaries, service contracts, caching, and application-level throughput
-- `ntk-runtime-observability-sre.instructions.md` for telemetry, dashboards, alerts, and incident operations
-- `ntk-runtime-platform-reliability-resilience.instructions.md` for resilience patterns, graceful degradation, and disaster readiness
+- `ntk-operations-k8s.instructions.md` for cluster manifests, ingress, storage, autoscaling, and Kubernetes rollout policy
+- `ntk-operations-microservices-performance.instructions.md` for service boundaries, service contracts, caching, and application-level throughput
+- `ntk-operations-observability-sre.instructions.md` for telemetry, dashboards, alerts, and incident operations
+- `ntk-operations-platform-reliability-resilience.instructions.md` for resilience patterns, graceful degradation, and disaster readiness
 
 ## Image Construction
 

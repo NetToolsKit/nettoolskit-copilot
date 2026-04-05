@@ -260,9 +260,9 @@ Implements ECF (Escrituração Contábil Fiscal) declaration generation with SPE
 - ✅ Infrastructure Layer - `EcfFileGenerator` service
 
 ### Applied Instructions
-- `ntk-backend-architecture-core.instructions.md`
-- `ntk-backend-architecture-platform.instructions.md`
-- `ntk-backend-dotnet-csharp.instructions.md`
+- `ntk-development-backend-architecture-core.instructions.md`
+- `ntk-development-backend-architecture-platform.instructions.md`
+- `ntk-development-backend-dotnet-csharp.instructions.md`
 
 ### Test Coverage
 - Unit Tests: 45 tests, 87% coverage

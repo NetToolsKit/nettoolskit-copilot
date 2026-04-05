@@ -8,13 +8,13 @@
 
 `definitions/providers/codex/mcp/` stores the authoritative support files for the shared Codex MCP runtime surface.
 
-The rendered `.codex/mcp/` surface is projected from that tree. The canonical server definitions live in `.github/governance/mcp-runtime.catalog.json`, and the native `ntk runtime render-mcp-runtime-artifacts` plus `ntk runtime sync-codex-mcp-config` commands keep Codex and VS Code MCP setups aligned without making the Codex subset the primary source of truth.
+The rendered `.codex/mcp/` surface is projected from that tree. The canonical server definitions live in `definitions/providers/github/governance/mcp-runtime.catalog.json`, and the native `ntk runtime render-mcp-runtime-artifacts` plus `ntk runtime sync-codex-mcp-config` commands keep Codex and VS Code MCP setups aligned without making the Codex subset the primary source of truth.
 
 ---
 
 ## Features
 
-- ✅ Canonical MCP server definitions come from `.github/governance/mcp-runtime.catalog.json`
+- ✅ Canonical MCP server definitions come from `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - ✅ Rendered Codex and VS Code support files stay versioned and reproducible
 - ✅ Local compatibility wrappers remain thin and point back to the canonical runtime catalog
 - ✅ Cross-links keep the projected `.codex/mcp/` surface traceable to its authored source
@@ -73,7 +73,7 @@ ntk runtime sync-codex-mcp-config --target-config-path "$env:USERPROFILE\.codex\
 
 ### Main Files
 
-- `.github/governance/mcp-runtime.catalog.json`: source of truth for runtime server definitions
+- `definitions/providers/github/governance/mcp-runtime.catalog.json`: source of truth for runtime server definitions
 - `servers.manifest.json`: generated Codex subset used for Codex TOML sync
 - `codex.config.template.toml`: reference template for local Codex config
 - `vscode.mcp.template.json`: reference template for VS Code MCP config
@@ -97,7 +97,7 @@ ntk runtime sync-codex-mcp-config --dry-run
 
 ## Contributing
 
-- Add or update servers only in `.github/governance/mcp-runtime.catalog.json`.
+- Add or update servers only in `definitions/providers/github/governance/mcp-runtime.catalog.json`.
 - Keep backward-compatible field names unless migration is documented.
 - Edit support docs and templates in `definitions/providers/codex/mcp/`, not directly in the projected `.codex/mcp/` copies.
 - Regenerate both runtime projections after catalog changes with `ntk runtime render-mcp-runtime-artifacts`.
@@ -113,7 +113,7 @@ ntk runtime sync-codex-mcp-config --dry-run
 
 ## References
 
-- `.github/governance/mcp-runtime.catalog.json`
+- `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - `definitions/providers/codex/mcp/`
 - `ntk runtime render-mcp-runtime-artifacts`
 - `ntk runtime render-vscode-mcp-template`

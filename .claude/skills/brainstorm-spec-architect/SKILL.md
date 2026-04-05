@@ -7,11 +7,11 @@ description: Use for non-trivial, design-bearing, or architecture-affecting work
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/super-agent.instructions.md`
-4. `.github/instructions/brainstorm-spec-workflow.instructions.md`
-5. `.github/instructions/subagent-planning-workflow.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+4. `definitions/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+5. `definitions/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`
 6. `planning/specs/README.md`
 
 ## Claude-native execution

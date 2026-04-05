@@ -9,7 +9,7 @@ Use this skill to keep local runtime folders aligned with the versioned reposito
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
 2. Use the repository operating model as the canonical source for runtime projection responsibilities.
 
 This includes syncing the complete versioned `.github/` asset set (instructions, routing catalog, prompts, chatmodes, schemas, templates) into `~/.github`.
@@ -38,7 +38,7 @@ ntk runtime render-vscode-mcp-template --output-path .vscode/mcp.tamplate.jsonc
 
 ## Source Of Truth
 
-- `.github/governance/mcp-runtime.catalog.json`
+- `definitions/providers/github/governance/mcp-runtime.catalog.json`
 - `.codex/mcp/servers.manifest.json` (generated Codex subset)
 - `ntk runtime sync-codex-mcp-config`
 - `ntk runtime render-vscode-mcp-template`

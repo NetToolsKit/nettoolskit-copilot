@@ -95,56 +95,56 @@
     },
     "Codex Readme Task": {
         "prefix": "codexreadme",
-        "description": "Create or update README following ntk-docs-readme.instructions.md",
+        "description": "Create or update README following ntk-governance-readme.instructions.md",
         "body": [
             "codex \"README task: ${1:short description}; Follow definitions/providers/github/root/copilot-instructions.md; definitions/instructions/governance/ntk-governance-readme.instructions.md; Use template definitions/templates/docs/readme-template.md; File ${2:src/Project/README.md}; concise and practical; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Prompt Template Task": {
         "prefix": "codexprompt",
-        "description": "Create/update prompt templates per ntk-docs-prompt-templates.instructions.md",
+        "description": "Create/update prompt templates per ntk-governance-prompt-templates.instructions.md",
         "body": [
             "codex \"Prompt template task: ${1:short description}; Follow definitions/instructions/governance/ntk-governance-prompt-templates.instructions.md; Use templates under definitions/templates/; provide Context | Objective | Requirements | Acceptance | Expected output; File ${2:definitions/templates/docs/changelog-entry-template.md}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex K8s Task": {
         "prefix": "codexk8s",
-        "description": "Kubernetes manifests/Helm tasks per ntk-runtime-k8s.instructions.md",
+        "description": "Kubernetes manifests/Helm tasks per ntk-operations-k8s.instructions.md",
         "body": [
             "codex \"K8s task: ${1:short description}; Follow definitions/instructions/operations/ntk-operations-k8s.instructions.md; security (non-root, NetworkPolicies), resources (requests/limits), probes; File ${2:deploy/k8s/deployment.yaml}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Docker Task": {
         "prefix": "codexdocker",
-        "description": "Dockerfile/compose tasks per ntk-runtime-docker.instructions.md",
+        "description": "Dockerfile/compose tasks per ntk-operations-docker.instructions.md",
         "body": [
             "codex \"Docker task: ${1:short description}; Follow definitions/instructions/operations/ntk-operations-docker.instructions.md; multi-stage, non-root, small images; File ${2:Dockerfile}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex CI/CD Task": {
         "prefix": "codexcicd",
-        "description": "Pipeline tasks per ntk-runtime-ci-cd-devops.instructions.md",
+        "description": "Pipeline tasks per ntk-operations-ci-cd-devops.instructions.md",
         "body": [
             "codex \"CI/CD task: ${1:short description}; Follow definitions/instructions/operations/ntk-operations-ci-cd-devops.instructions.md; stages build/test/package/deploy; artifacts; rollbacks; File ${2:.azure/pipelines/ci.yml}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex SonarQube Task": {
         "prefix": "codexsonar",
-        "description": "Static analysis tasks per ntk-runtime-static-analysis-sonarqube.instructions.md",
+        "description": "Static analysis tasks per ntk-operations-static-analysis-sonarqube.instructions.md",
         "body": [
             "codex \"SonarQube task: ${1:short description}; Follow definitions/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md; quality gate; coverage integration; PR decoration; File ${2:sonar-project.properties}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Microservices Performance Task": {
         "prefix": "codexmsa",
-        "description": "Performance/caching/communication patterns per ntk-runtime-microservices-performance.instructions.md",
+        "description": "Performance/caching/communication patterns per ntk-operations-microservices-performance.instructions.md",
         "body": [
             "codex \"Microservices performance task: ${1:short description}; Follow definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md; caching, retries, circuit breaker; resource limits; File ${2:src/Service/Settings.json}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex E2E Testing Task": {
         "prefix": "codexe2e",
-        "description": "E2E/browser tests per ntk-frontend-e2e-testing.instructions.md",
+        "description": "E2E/browser tests per ntk-development-frontend-e2e-testing.instructions.md",
         "body": [
             "codex \"Testing task: ${1:E2E|Integration}; Follow definitions/instructions/development/ntk-development-frontend-e2e-testing.instructions.md; definitions/instructions/development/ntk-development-backend-integration-testing.instructions.md; framework selection, environment, retries, reporting; File ${2:tests/E2E/specs/sample.spec.ts}; no trailing blank line\"$3 ;exit"
         ]
@@ -158,21 +158,21 @@
     },
     "Codex PS Task": {
         "prefix": "codexps",
-        "description": "PowerShell script tasks per ntk-runtime-powershell-execution.instructions.md",
+        "description": "PowerShell script tasks per ntk-operations-powershell-execution.instructions.md",
         "body": [
             "codex \"PowerShell task: ${1:short description}; Follow definitions/instructions/operations/ntk-operations-powershell-execution.instructions.md; auto-detect solution root; robust error handling; cross-platform; File ${2:scripts/Task.ps1}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Instruction Creation Task": {
         "prefix": "codexinstr",
-        "description": "Create/modify instruction files per ntk-docs-copilot-instruction-creation.instructions.md",
+        "description": "Create/modify instruction files per ntk-governance-copilot-instruction-creation.instructions.md",
         "body": [
             "codex \"Instruction task: ${1:new or update} ${2:area}.instructions.md; Follow definitions/instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md; include front matter (--- applyTo: \"glob\" ---); semicolon-separated single-line paragraphs; allow internal blank lines; forbid headings/lists/fences; English only; File definitions/instructions/${2:area}.instructions.md; UTF-8 without BOM; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex PR Task": {
         "prefix": "codexpr",
-        "description": "Create/curate PR description per ntk-process-pr.instructions.md",
+        "description": "Create/curate PR description per ntk-governance-pr.instructions.md",
         "body": [
             "codex \"PR task: ${1:short description}; Follow definitions/instructions/governance/ntk-governance-pr.instructions.md; include sections Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration; add Applied instructions; English; File ${2:definitions/templates/docs/github-change-checklist-template.md}; no trailing blank line\"$3 ;exit"
         ]

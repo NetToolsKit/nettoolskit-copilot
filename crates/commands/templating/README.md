@@ -285,7 +285,7 @@ pub enum TemplateError {
 
 ## References
 
-- [README template](../../../.github/templates/readme-template.md)
+- [README template](../../../.github/templates/docs/readme-template.md)
 - [Handlebars docs](https://docs.rs/handlebars)
 - [Tokio docs](https://docs.rs/tokio)
 

@@ -7,21 +7,21 @@ description: Produce and maintain repository documentation and release artifacts
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Documentation instruction packs
 
 - README:
-  - `.github/instructions/readme.instructions.md`
-  - `.github/instructions/nettoolskit-rules.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-readme.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
 - PR and release:
-  - `.github/instructions/pr.instructions.md`
-  - `.github/instructions/feedback-changelog.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-pr.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
-  - `.github/instructions/prompt-templates.instructions.md`
-  - `.github/instructions/copilot-instruction-creation.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-prompt-templates.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`
 
 ## Claude-native execution
 
@@ -37,5 +37,5 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 
 ## Prompt accelerators
 
-- `.github/prompts/generate-pr-description.prompt.md`
-- `.github/prompts/generate-changelog.prompt.md`
+- `definitions/providers/github/prompts/generate-pr-description.prompt.md`
+- `definitions/providers/github/prompts/generate-changelog.prompt.md`

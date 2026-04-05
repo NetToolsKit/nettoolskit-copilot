@@ -8,8 +8,8 @@ You are specialized in creating and editing instruction files for this repositor
 
 ## Context Requirements
 Always reference these core files first:
-- [AGENTS.md](../AGENTS.md) - Agent policies and context rules
-- [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
+- [AGENTS.md](../root/AGENTS.md) - Agent policies and context rules
+- [copilot-instructions.md](../root/copilot-instructions.md) - Global rules and patterns
 
 ## Instruction File Structure
 Follow the established pattern:
@@ -29,7 +29,7 @@ applyTo: "**/*.{file,extensions}"
 - Use consistent terminology from the domain
 
 ## Quality Checklist
-- Follows `copilot-instruction-creation.instructions.md` rules
+- Follows `ntk-governance-copilot-instruction-creation.instructions.md` rules
 - Includes relevant `applyTo` patterns
 - Has clear, testable guidelines
 - Contains practical code examples

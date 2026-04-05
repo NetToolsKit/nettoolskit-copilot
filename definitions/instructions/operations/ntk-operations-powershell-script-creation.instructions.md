@@ -6,7 +6,7 @@ priority: high
 # PowerShell Script Creation
 
 Use this instruction for creating or refactoring PowerShell scripts under
-`scripts/`. Use `ntk-runtime-powershell-execution.instructions.md` for runtime
+`scripts/`. Use `ntk-operations-powershell-execution.instructions.md` for runtime
 execution behavior and path-safety expectations.
 
 ## Purpose

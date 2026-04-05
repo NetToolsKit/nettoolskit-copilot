@@ -178,7 +178,7 @@ end {
             contextPaths = @(
                 '.github/AGENTS.md',
                 '.github/copilot-instructions.md',
-                '.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md'
+                '.github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md'
             )
             tokenBudgetGuidance = @('Load only routed files.', 'Keep prompts focused on the current work item.')
             executionNotes = @('Apply the routed focus to all work items.')

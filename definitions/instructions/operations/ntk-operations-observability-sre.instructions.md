@@ -5,7 +5,7 @@ priority: high
 
 # Observability and SRE Baseline
 - Use this instruction when designing runtime telemetry, service-level objectives, alerting, dashboards, and incident operations.
-- Use `ntk-runtime-platform-reliability-resilience.instructions.md` for timeout/retry patterns, graceful degradation, chaos testing, and disaster readiness.
+- Use `ntk-operations-platform-reliability-resilience.instructions.md` for timeout/retry patterns, graceful degradation, chaos testing, and disaster readiness.
 - Treat observability as a product requirement; every critical user flow must be measurable end-to-end.
 
 # SLO and Error Budget

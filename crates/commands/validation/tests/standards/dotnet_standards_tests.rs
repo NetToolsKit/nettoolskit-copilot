@@ -30,7 +30,7 @@ fn test_invoke_validate_dotnet_standards_reports_missing_required_template() {
     initialize_dotnet_standards_repo(repo.path());
     std::fs::remove_file(
         repo.path()
-            .join(".github/templates/dotnet-class-template.cs"),
+            .join(".github/templates/codegen/dotnet-class-template.cs"),
     )
     .expect("required template should be removed");
 

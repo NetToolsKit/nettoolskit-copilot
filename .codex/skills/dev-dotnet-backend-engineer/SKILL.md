@@ -9,24 +9,24 @@ description: Extend dev-software-engineer with .NET/C# backend specialization fo
 
 1. Load and apply `../dev-software-engineer/SKILL.md` as the base contract.
 2. Reuse the base workflow and safety rules unless this file defines a stricter override.
-3. Keep `.github/instructions/repository-operating-model.instructions.md` as the canonical repo-operating reference inherited from the base skill.
+3. Keep `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` as the canonical repo-operating reference inherited from the base skill.
 4. Restrict domain scope to .NET backend, database, and ORM concerns only.
 
 ## Domain instruction delta (override base selection)
 
-- `.github/instructions/dotnet-csharp.instructions.md`
-- `.github/instructions/clean-architecture-code.instructions.md`
-- `.github/instructions/backend.instructions.md`
-- `.github/instructions/database.instructions.md`
-- `.github/instructions/orm.instructions.md`
-- `.github/instructions/microservices-performance.instructions.md` (when applicable)
+- `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-architecture-core.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/data/ntk-data-database.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md` (when applicable)
 
 ## Prompt accelerator delta
 
-- `.github/prompts/create-dotnet-class.prompt.md`
-- `.github/prompts/create-api-endpoint.prompt.md`
-- `.github/prompts/create-ef-migration.prompt.md`
-- `.github/prompts/refactor-to-clean-architecture.prompt.md`
+- `definitions/providers/github/prompts/create-dotnet-class.prompt.md`
+- `definitions/providers/github/prompts/create-api-endpoint.prompt.md`
+- `definitions/providers/github/prompts/create-ef-migration.prompt.md`
+- `definitions/providers/github/prompts/refactor-to-clean-architecture.prompt.md`
 
 ## Execution workflow delta
 

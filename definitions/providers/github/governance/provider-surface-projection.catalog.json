@@ -210,6 +210,34 @@
       "repoTracked": true
     },
     {
+      "id": "github-governance",
+      "provider": "github",
+      "authority": "definitions",
+      "sourcePath": "definitions/providers/github/governance",
+      "projectedPath": ".github/governance",
+      "rendererId": "github-instruction-surfaces",
+      "validation": {
+        "enabled": true,
+        "mode": "directory"
+      },
+      "description": "GitHub governance baselines and projection catalogs.",
+      "repoTracked": true
+    },
+    {
+      "id": "github-policies",
+      "provider": "github",
+      "authority": "definitions",
+      "sourcePath": "definitions/providers/github/policies",
+      "projectedPath": ".github/policies",
+      "rendererId": "github-instruction-surfaces",
+      "validation": {
+        "enabled": true,
+        "mode": "directory"
+      },
+      "description": "GitHub policy contracts projected from canonical provider definitions.",
+      "repoTracked": true
+    },
+    {
       "id": "github-templates",
       "provider": "github",
       "authority": "definitions",

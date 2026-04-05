@@ -1,6 +1,6 @@
 //! Error Handling Tests
 //!
-//! This file exists per .github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md
+//! This file exists per definitions/instructions/development/ntk-development-backend-rust-testing.instructions.md
 //! The UI crate provides terminal interface components and does not define custom error types.
 //! This file serves as:
 //! 1. A compliance checkpoint for error handling standards

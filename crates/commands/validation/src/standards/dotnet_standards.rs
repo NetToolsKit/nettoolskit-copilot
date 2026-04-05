@@ -13,11 +13,11 @@ use crate::operational_hygiene::common::derive_status;
 use crate::ValidationCheckStatus;
 
 const CANONICAL_TEMPLATE_DIRECTORY: &str = "definitions/templates/codegen";
-const LEGACY_TEMPLATE_DIRECTORY: &str = ".github/templates";
+const LEGACY_TEMPLATE_DIRECTORY: &str = ".github/templates/codegen";
 const REQUIRED_TEMPLATE_RULES: &[(&str, &str, &[&str])] = &[
     (
         "definitions/templates/codegen/dotnet-class-template.cs",
-        ".github/templates/dotnet-class-template.cs",
+        ".github/templates/codegen/dotnet-class-template.cs",
         &[
             r"public\s+class\s+\[ClassName\]",
             r"namespace\s+\[Namespace\]",
@@ -25,7 +25,7 @@ const REQUIRED_TEMPLATE_RULES: &[(&str, &str, &[&str])] = &[
     ),
     (
         "definitions/templates/codegen/dotnet-interface-template.cs",
-        ".github/templates/dotnet-interface-template.cs",
+        ".github/templates/codegen/dotnet-interface-template.cs",
         &[
             r"public\s+interface\s+\[InterfaceName\]",
             r"namespace\s+\[Namespace\]",
@@ -33,12 +33,12 @@ const REQUIRED_TEMPLATE_RULES: &[(&str, &str, &[&str])] = &[
     ),
     (
         "definitions/templates/codegen/dotnet-unit-test-template.cs",
-        ".github/templates/dotnet-unit-test-template.cs",
+        ".github/templates/codegen/dotnet-unit-test-template.cs",
         &[r"\[TEST_CLASS\]", r"(\[Fact\]|\[Test\]|\[Theory\])"],
     ),
     (
         "definitions/templates/codegen/dotnet-integration-test-template.cs",
-        ".github/templates/dotnet-integration-test-template.cs",
+        ".github/templates/codegen/dotnet-integration-test-template.cs",
         &[r"IMediator", r"\[Test\]"],
     ),
 ];

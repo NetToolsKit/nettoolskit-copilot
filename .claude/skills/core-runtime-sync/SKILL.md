@@ -7,9 +7,9 @@ description: Sync shared repo assets into local ~/.github, ~/.codex, and ~/.clau
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Claude-native execution
 
@@ -48,7 +48,7 @@ ntk runtime render-vscode-mcp-template --output-path .vscode/mcp.tamplate.jsonc
 
 ## Source of truth
 
-- `.github/governance/mcp-runtime.catalog.json` — canonical MCP runtime catalog
+- `definitions/providers/github/governance/mcp-runtime.catalog.json` — canonical MCP runtime catalog
 - `.codex/mcp/servers.manifest.json` — generated Codex subset
-- `.github/governance/runtime-location-catalog.json` — runtime path catalog
+- `definitions/providers/github/governance/runtime-location-catalog.json` — runtime path catalog
 - `scripts/common/runtime-paths.ps1` — effective path resolution

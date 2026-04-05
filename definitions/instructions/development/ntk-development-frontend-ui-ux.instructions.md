@@ -7,8 +7,8 @@ priority: medium
 
 Use this instruction for visual system, accessibility, responsive behavior, and
 content/form experience. Keep framework structure in
-`ntk-frontend-vue-quasar-architecture.instructions.md` and Vue/Quasar
-implementation patterns in `ntk-frontend-vue-quasar.instructions.md`.
+`ntk-development-frontend-vue-quasar-architecture.instructions.md` and Vue/Quasar
+implementation patterns in `ntk-development-frontend-vue-quasar.instructions.md`.
 
 ## Design System
 

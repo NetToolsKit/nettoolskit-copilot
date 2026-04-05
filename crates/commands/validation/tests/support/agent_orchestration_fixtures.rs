@@ -112,7 +112,9 @@ pub fn initialize_agent_contract_repo(repo_root: &Path) {
     );
     write_file(
         repo_root
-            .join(".github/instructions/core/ntk-core-repository-operating-model.instructions.md")
+            .join(
+                ".github/instructions/governance/ntk-governance-repository-operating-model.instructions.md",
+            )
             .as_path(),
         "# Repository Operating Model\n",
     );
@@ -304,7 +306,7 @@ fn initialize_agent_skill(repo_root: &Path, skill_name: &str) {
         repo_root,
         skill_name,
         &format!(
-            "---\nname: {skill_name}\n---\nReference .github/AGENTS.md\nReference .github/copilot-instructions.md\nReference .github/instruction-routing.catalog.yml\nReference .github/instructions/core/ntk-core-repository-operating-model.instructions.md\n"
+            "---\nname: {skill_name}\n---\nReference .github/AGENTS.md\nReference .github/copilot-instructions.md\nReference .github/instruction-routing.catalog.yml\nReference .github/instructions/governance/ntk-governance-repository-operating-model.instructions.md\n"
         ),
     );
     write_agent_skill_openai_yaml(repo_root, skill_name, "name: openai\n");

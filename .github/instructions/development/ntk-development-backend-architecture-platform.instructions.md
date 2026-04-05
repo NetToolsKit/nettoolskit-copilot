@@ -17,8 +17,8 @@ architecture core and below language/framework implementation details.
 - security, observability, and release-facing quality expectations
 
 Keep core architecture invariants in
-`ntk-backend-architecture-core.instructions.md`. Keep language/framework rules in
-stack-specific instructions such as `ntk-backend-dotnet-csharp.instructions.md`.
+`ntk-development-backend-architecture-core.instructions.md`. Keep language/framework rules in
+stack-specific instructions such as `ntk-development-backend-dotnet-csharp.instructions.md`.
 
 ## Contracts And Error Semantics
 

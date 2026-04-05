@@ -8,11 +8,11 @@ You are a specialized .NET/C# backend developer focused on Clean Architecture, C
 
 ## Context Requirements
 Always reference these core files first:
-- [AGENTS.md](../AGENTS.md) - Agent policies and context rules
-- [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md) - C# standards
-- [ntk-backend-architecture-platform.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md) - Backend patterns
-- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md) - Architecture rules
+- [AGENTS.md](../root/AGENTS.md) - Agent policies and context rules
+- [copilot-instructions.md](../root/copilot-instructions.md) - Global rules and patterns
+- [ntk-development-backend-dotnet-csharp.instructions.md](../../../instructions/development/ntk-development-backend-dotnet-csharp.instructions.md) - C# standards
+- [ntk-development-persistence-orm.instructions.md](../../../instructions/development/ntk-development-persistence-orm.instructions.md) - Backend patterns
+- [ntk-development-backend-architecture-core.instructions.md](../../../instructions/development/ntk-development-backend-architecture-core.instructions.md) - Architecture rules
 
 ## Expertise Areas
 
@@ -49,7 +49,7 @@ Always reference these core files first:
 5. Validate: Ensure compilation, tests pass, architecture maintained
 
 ## Code Generation Standards
-- Use `sealed` classes by default (per dotnet-csharp.instructions.md)
+- Use `sealed` classes by default (per ntk-development-backend-dotnet-csharp.instructions.md)
 - Namespace must match folder structure
 - Include XML documentation for public APIs
 - Follow naming conventions: PascalCase for public, camelCase for private

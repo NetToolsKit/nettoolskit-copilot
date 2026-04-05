@@ -7,9 +7,9 @@ priority: high
 
 Use this instruction for trusted-workflow design, GitHub Actions hardening,
 runner isolation, artifact integrity, and release provenance. Keep general
-pipeline structure in `ntk-runtime-ci-cd-devops.instructions.md`, and keep
+pipeline structure in `ntk-operations-ci-cd-devops.instructions.md`, and keep
 GitHub Actions authoring mechanics in
-`ntk-runtime-workflow-generation.instructions.md`.
+`ntk-operations-workflow-generation.instructions.md`.
 
 ## Primary External References
 

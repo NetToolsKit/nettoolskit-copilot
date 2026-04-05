@@ -555,16 +555,16 @@ pub fn write_instruction_architecture_documents(repo_root: &Path) {
         &repo_root.join(".github/AGENTS.md"),
         r#"# AGENTS
 
-Use `instructions/core/ntk-core-repository-operating-model.instructions.md`.
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
 "#,
     );
     write_file(
         &repo_root.join(".github/copilot-instructions.md"),
         r#"# Global Instructions
 
-Use `instructions/core/ntk-core-repository-operating-model.instructions.md`.
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
 "#,
     );
     write_file(
@@ -572,21 +572,21 @@ Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
         r#"always:
   - path: AGENTS.md
   - path: copilot-instructions.md
-  - path: instructions/agents/ntk-agents-super-agent.instructions.md
-  - path: instructions/core/ntk-core-repository-operating-model.instructions.md
-  - path: instructions/core/ntk-core-artifact-layout.instructions.md
-  - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
-  - path: instructions/process/planning/ntk-process-workflow-optimization.instructions.md
-  - path: instructions/core/ntk-core-authoritative-sources.instructions.md
-  - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
-  - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
+  - path: agents/super-agent/ntk-agents-super-agent.instructions.md
+  - path: instructions/governance/ntk-governance-repository-operating-model.instructions.md
+  - path: instructions/governance/ntk-governance-artifact-layout.instructions.md
+  - path: instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md
+  - path: instructions/governance/ntk-governance-workflow-optimization.instructions.md
+  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md
+  - path: instructions/operations/ntk-operations-powershell-execution.instructions.md
+  - path: instructions/governance/ntk-governance-feedback-changelog.instructions.md
 routing:
   - id: repo-guidance
     triggers:
       - repository
       - operating model
     include:
-      - path: instructions/core/ntk-core-repository-operating-model.instructions.md
+      - path: instructions/governance/ntk-governance-repository-operating-model.instructions.md
 "#,
     );
     write_file(
@@ -624,35 +624,35 @@ Use the routing catalog.
         "# Example Policy\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-repository-operating-model.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-repository-operating-model.instructions.md"),
         "# Repository Operating Model\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-authoritative-sources.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
         "# Authoritative Sources\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/agents/ntk-agents-super-agent.instructions.md"),
+        &repo_root.join(".github/agents/super-agent.agent.md"),
         "# Super Agent\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-artifact-layout.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
         "# Artifact Layout\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md"),
         "# Subagent Planning Workflow\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-workflow-optimization.instructions.md"),
         "# Workflow Optimization\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md"),
+        &repo_root.join(".github/instructions/operations/ntk-operations-powershell-execution.instructions.md"),
         "# PowerShell Execution\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-feedback-changelog.instructions.md"),
         "# Feedback Changelog\n",
     );
     write_file(
@@ -668,7 +668,7 @@ description: sample skill
 
 # Sample Skill
 
-Load `ntk-core-repository-operating-model.instructions.md`.
+Load `ntk-governance-repository-operating-model.instructions.md`.
 "#,
     );
     write_file(

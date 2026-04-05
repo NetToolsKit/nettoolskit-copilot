@@ -7,16 +7,16 @@ description: Build and harden high-performance APIs with strong security control
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Instruction pack
 
-- `.github/instructions/api-high-performance-security.instructions.md`
-- `.github/instructions/backend.instructions.md`
-- `.github/instructions/dotnet-csharp.instructions.md` (when .NET is in scope)
-- `.github/instructions/security-vulnerabilities.instructions.md`
+- `definitions/instructions/security/ntk-security-api-high-performance.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md` (when .NET is in scope)
+- `definitions/instructions/security/ntk-security-vulnerabilities.instructions.md`
 
 ## Claude-native execution
 

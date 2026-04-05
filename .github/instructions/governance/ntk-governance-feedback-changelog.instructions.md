@@ -5,7 +5,7 @@ priority: high
 
 # Feedback Integration
 Use changelog-entry-template.md with feedback integration section; document issue + context + problem + solution in CHANGELOG format; semantic versioning with date; consolidate feedback tracking in version history.
-Do not assemble a final CHANGELOG entry directly from this instruction file; use `.github/templates/changelog-entry-template.md` as the concrete structure and treat examples here as illustrative only.
+Do not assemble a final CHANGELOG entry directly from this instruction file; use `definitions/templates/docs/changelog-entry-template.md` as the concrete structure and treat examples here as illustrative only.
 
 # CHANGELOG Format
 - Format [version] YYYY-MM-DD
@@ -19,7 +19,7 @@ Do not assemble a final CHANGELOG entry directly from this instruction file; use
 ## [2.0.1] - 2025-09-03
 
 ### Fixed
-- .github/instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md handleApiError(): automatic retry added
+- .github/instructions/development/ntk-development-frontend-architecture-core.instructions.md handleApiError(): automatic retry added
 - LoadingButton: improved loading state
 
 ### Feedback Integration

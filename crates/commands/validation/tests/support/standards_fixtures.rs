@@ -14,7 +14,7 @@ pub fn write_file(path: &Path, contents: &str) {
 pub fn initialize_dotnet_standards_repo(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".codex"))
         .expect("codex directory should be created for repository resolution");
-    fs::create_dir_all(repo_root.join(".github/templates"))
+    fs::create_dir_all(repo_root.join(".github/templates/codegen"))
         .expect("template directory should be created");
 
     write_dotnet_template_file(
@@ -125,7 +125,7 @@ function Get-ExampleValue {
 
 pub fn write_dotnet_template_file(repo_root: &Path, file_name: &str, contents: &str) {
     write_file(
-        &repo_root.join(".github/templates").join(file_name),
+        &repo_root.join(".github/templates/codegen").join(file_name),
         contents,
     );
 }

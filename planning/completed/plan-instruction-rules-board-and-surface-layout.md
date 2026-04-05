@@ -86,7 +86,7 @@ The board is implemented as documentation and governance. It does not create a s
 - Keep the external `copilot-instructions` baseline as a reference comparison, not a live write target.
 - Add rules for avoiding duplicate or stale instruction surfaces.
 - Active follow-up:
-  - governance and board semantics are complete; any remaining generated-surface cutover now belongs to `plan-provider-surface-projection-cutover.md`
+  - governance and board semantics are complete; the generated-surface cutover later closed under `planning/completed/plan-provider-surface-projection-cutover.md`
 - Commit checkpoint:
   - `docs(planning): define rules board update and drift policy`
 

@@ -8,8 +8,8 @@ priority: high
 Use this instruction for `.NET` and `C#` implementation details only. Clean
 architecture and backend platform behavior are defined in:
 
-- `ntk-backend-architecture-core.instructions.md`
-- `ntk-backend-architecture-platform.instructions.md`
+- `ntk-development-backend-architecture-core.instructions.md`
+- `ntk-development-backend-architecture-platform.instructions.md`
 
 Do not restate those generic backend rules here unless a `.NET`-specific
 constraint changes how they must be implemented.

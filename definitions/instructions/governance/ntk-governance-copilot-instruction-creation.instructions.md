@@ -159,9 +159,9 @@ applyTo: "**/*"
 - Use descriptive names that clearly indicate scope
 ```markdown
 Examples:
-- ntk-backend-architecture-core.instructions.md
-- ntk-backend-dotnet-csharp.instructions.md
-- ntk-runtime-microservices-performance.instructions.md
+- ntk-development-backend-architecture-core.instructions.md
+- ntk-development-backend-dotnet-csharp.instructions.md
+- ntk-operations-microservices-performance.instructions.md
 ```
 
 # Duplication and Inheritance Rules

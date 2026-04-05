@@ -334,7 +334,7 @@ fn test_${MainType}_methods() {
 ```
 
 ## Coverage Requirements
-From ntk-backend-rust-testing.instructions.md:
+From ntk-development-backend-rust-testing.instructions.md:
 - All modules with error types MUST have error_tests.rs
 - Test coverage minimum 80%
 - Error paths MUST be tested

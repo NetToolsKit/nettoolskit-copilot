@@ -214,11 +214,11 @@ fn write_routing_catalog_and_fixtures(repo_root: &std::path::Path) {
 routing:
   - id: docs
     include:
-      - path: instructions/docs/ntk-docs-readme.instructions.md
+      - path: instructions/governance/ntk-governance-readme.instructions.md
 "#,
     );
     write_file(
-        &repo_root.join(".github/instructions/docs/ntk-docs-readme.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-readme.instructions.md"),
         "# readme",
     );
     write_file(
@@ -228,7 +228,7 @@ routing:
     {
       "id": "docs-route",
       "expected_route_ids": ["docs"],
-      "expected_selected_paths": ["instructions/docs/ntk-docs-readme.instructions.md"]
+      "expected_selected_paths": ["instructions/governance/ntk-governance-readme.instructions.md"]
     }
   ]
 }"#,
@@ -333,7 +333,7 @@ Use `governance/authoritative-source-map.json`.
 }"#,
     );
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-authoritative-sources.instructions.md"),
+        &repo_root.join(".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
         r#"# Authoritative Sources
 
 Use `.github/governance/authoritative-source-map.json`.
@@ -346,7 +346,7 @@ Use community sources only as fallback.
         &repo_root.join(".github/AGENTS.md"),
         r#"# AGENTS
 
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
 Use `.github/governance/authoritative-source-map.json`.
 "#,
     );
@@ -354,13 +354,13 @@ Use `.github/governance/authoritative-source-map.json`.
         &repo_root.join(".github/copilot-instructions.md"),
         r#"# Global Instructions
 
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
 Use `.github/governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
         &repo_root.join(".github/instruction-routing.catalog.yml"),
-        "always:\n  - path: instructions/core/ntk-core-authoritative-sources.instructions.md\n",
+        "always:\n  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md\n",
     );
 }
 

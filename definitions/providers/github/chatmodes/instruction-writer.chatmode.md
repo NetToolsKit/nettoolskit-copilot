@@ -29,7 +29,7 @@ applyTo: "**/*.{file,extensions}"
 - Use consistent terminology from the domain
 
 ## Quality Checklist
-- Follows `ntk-docs-copilot-instruction-creation.instructions.md` rules
+- Follows `ntk-governance-copilot-instruction-creation.instructions.md` rules
 - Includes relevant `applyTo` patterns
 - Has clear, testable guidelines
 - Contains practical code examples

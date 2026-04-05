@@ -9,9 +9,9 @@ Generate a complete API endpoint following Clean Architecture and CQRS pattern w
 
 ## Instructions
 Create API endpoint based on:
-- [ntk-backend-architecture-platform.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md)
-- [ntk-backend-architecture-core.instructions.md](../instructions/architecture/backend/ntk-backend-architecture-core.instructions.md)
-- [dotnet-csharp.instructions.md](../instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md)
+- [ntk-development-persistence-orm.instructions.md](../../../instructions/development/ntk-development-persistence-orm.instructions.md)
+- [ntk-development-backend-architecture-core.instructions.md](../../../instructions/development/ntk-development-backend-architecture-core.instructions.md)
+- [ntk-development-backend-dotnet-csharp.instructions.md](../../../instructions/development/ntk-development-backend-dotnet-csharp.instructions.md)
 
 ## Input Variables
 - `${input:endpointName:Endpoint name (e.g., CreateOrder)}` - The operation name

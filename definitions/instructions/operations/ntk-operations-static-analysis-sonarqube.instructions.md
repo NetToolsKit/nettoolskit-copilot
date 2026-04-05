@@ -11,8 +11,8 @@ governance.
 
 Use adjacent instructions for related concerns:
 
-- `ntk-runtime-ci-cd-devops.instructions.md` for generic pipeline stage policy
-- `ntk-runtime-workflow-generation.instructions.md` for GitHub Actions wiring and artifact publication
+- `ntk-operations-ci-cd-devops.instructions.md` for generic pipeline stage policy
+- `ntk-operations-workflow-generation.instructions.md` for GitHub Actions wiring and artifact publication
 - `ntk-security-vulnerabilities.instructions.md` for dependency vulnerability and supply-chain scanning policy
 
 ## SonarQube Scope

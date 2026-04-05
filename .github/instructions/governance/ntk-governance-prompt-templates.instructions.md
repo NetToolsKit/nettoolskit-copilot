@@ -135,10 +135,10 @@ Output: {"consensus": "...", "confidence": 0.0-1.0, "divergences": [...]}
 - `readme-template.md` for READMEs
 - `effort-estimation-poc-mvp-template.md` for UCP estimates
 - `changelog-entry-template.md` for CHANGELOG entries or instruction feedback
-- `.github/templates/dotnet-*-template.*` for .NET code
-- `.github/templates/background-service-template.cs` for .NET background services
-- `.github/templates/powershell-script-template.ps1` for PowerShell scripts under `scripts/`
-- `.github/templates/rust-*-template.rs` for Rust code
+- `definitions/templates/codegen/dotnet-*-template.*` for .NET code
+- `definitions/templates/codegen/background-service-template.cs` for .NET background services
+- `definitions/templates/codegen/powershell-script-template.ps1` for PowerShell scripts under `scripts/`
+- `definitions/templates/codegen/rust-*-template.rs` for Rust code
 
 ### Prompt Templates (`prompts/`)
 - `create-dotnet-class.prompt.md` - Generate .NET classes

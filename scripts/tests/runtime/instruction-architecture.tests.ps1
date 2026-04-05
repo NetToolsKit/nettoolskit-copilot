@@ -64,6 +64,53 @@ function Write-TextFile {
     Set-Content -LiteralPath $Path -Value $Content
 }
 
+function New-InstructionArchitectureArgs {
+    param(
+        [string] $RepoRoot,
+        [string] $ManifestPath,
+        [string] $AgentsPath,
+        [string] $GlobalInstructionsPath,
+        [string] $RoutingCatalogPath,
+        [string] $RoutePromptPath,
+        [string] $PromptRoot,
+        [string] $TemplateRoot,
+        [string] $SkillRoot
+    )
+
+    $arguments = @(
+        'validation', 'instruction-architecture',
+        '--repo-root', $RepoRoot,
+        '--warning-only', 'false'
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($ManifestPath)) {
+        $arguments += @('--manifest-path', $ManifestPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($AgentsPath)) {
+        $arguments += @('--agents-path', $AgentsPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($GlobalInstructionsPath)) {
+        $arguments += @('--global-instructions-path', $GlobalInstructionsPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($RoutingCatalogPath)) {
+        $arguments += @('--routing-catalog-path', $RoutingCatalogPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($RoutePromptPath)) {
+        $arguments += @('--route-prompt-path', $RoutePromptPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($PromptRoot)) {
+        $arguments += @('--prompt-root', $PromptRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TemplateRoot)) {
+        $arguments += @('--template-root', $TemplateRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($SkillRoot)) {
+        $arguments += @('--skill-root', $SkillRoot)
+    }
+
+    return ,$arguments
+}
+
 function Initialize-ValidInstructionArchitectureRepo {
     param(
         [string] $Root
@@ -89,14 +136,14 @@ function Initialize-ValidInstructionArchitectureRepo {
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/agents/ntk-agents-super-agent.instructions.md",
-        "instructions/core/ntk-core-repository-operating-model.instructions.md",
-        "instructions/core/ntk-core-artifact-layout.instructions.md",
-        "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
-        "instructions/process/planning/ntk-process-workflow-optimization.instructions.md",
-        "instructions/core/ntk-core-authoritative-sources.instructions.md",
-        "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
-        "instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"
+        "agents/super-agent/ntk-agents-super-agent.instructions.md",
+        "instructions/governance/ntk-governance-repository-operating-model.instructions.md",
+        "instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md",
+        "instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+        "instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "instructions/operations/ntk-operations-powershell-execution.instructions.md",
+        "instructions/governance/ntk-governance-feedback-changelog.instructions.md"
       ]
     }
   },
@@ -111,19 +158,19 @@ function Initialize-ValidInstructionArchitectureRepo {
     {
       "id": "agent-control",
       "pathPatterns": [
-        ".github/instructions/agents/*.instructions.md"
+        ".github/agents/*.agent.md"
       ]
     },
     {
       "id": "repository-operating-model",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
+        ".github/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "cross-cutting-policies",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
+        ".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
         ".github/governance/*",
         ".github/policies/*"
       ]
@@ -131,12 +178,12 @@ function Initialize-ValidInstructionArchitectureRepo {
     {
       "id": "domain-instructions",
       "pathPatterns": [
-        ".github/instructions/*.instructions.md"
+        ".github/instructions/**/*.instructions.md"
       ],
       "excludePatterns": [
-        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/agents/ntk-agents-super-agent.instructions.md",
-        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
+        ".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        ".github/agents/super-agent.agent.md",
+        ".github/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     },
     {
@@ -190,27 +237,27 @@ function Initialize-ValidInstructionArchitectureRepo {
     Write-TextFile -Path (Join-Path $Root '.github/AGENTS.md') -Content @'
 # AGENTS
 
-Use `instructions/core/ntk-core-repository-operating-model.instructions.md`.
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
 '@
     Write-TextFile -Path (Join-Path $Root '.github/copilot-instructions.md') -Content @'
 # Global Instructions
 
-Use `instructions/core/ntk-core-repository-operating-model.instructions.md`.
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
 '@
     Write-TextFile -Path (Join-Path $Root '.github/instruction-routing.catalog.yml') -Content @'
 always:
   - path: AGENTS.md
   - path: copilot-instructions.md
-  - path: instructions/agents/ntk-agents-super-agent.instructions.md
-  - path: instructions/core/ntk-core-repository-operating-model.instructions.md
-  - path: instructions/core/ntk-core-artifact-layout.instructions.md
-  - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
-  - path: instructions/process/planning/ntk-process-workflow-optimization.instructions.md
-  - path: instructions/core/ntk-core-authoritative-sources.instructions.md
-  - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
-  - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
+  - path: agents/super-agent/ntk-agents-super-agent.instructions.md
+  - path: instructions/governance/ntk-governance-repository-operating-model.instructions.md
+  - path: instructions/governance/ntk-governance-artifact-layout.instructions.md
+  - path: instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md
+  - path: instructions/governance/ntk-governance-workflow-optimization.instructions.md
+  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md
+  - path: instructions/operations/ntk-operations-powershell-execution.instructions.md
+  - path: instructions/governance/ntk-governance-feedback-changelog.instructions.md
 '@
     Write-TextFile -Path (Join-Path $Root '.github/prompts/route-instructions.prompt.md') -Content @'
 ---
@@ -236,14 +283,14 @@ Use the routing catalog.
 '@
     Write-TextFile -Path (Join-Path $Root '.github/templates/example.md') -Content "# Example Template`n`nUse this as a reusable artifact."
     Write-TextFile -Path (Join-Path $Root '.github/policies/example.policy.md') -Content '# Example Policy'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-repository-operating-model.instructions.md') -Content '# Repository Operating Model'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-authoritative-sources.instructions.md') -Content '# Authoritative Sources'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/agents/ntk-agents-super-agent.instructions.md') -Content '# Super Agent'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/core/ntk-core-artifact-layout.instructions.md') -Content '# Artifact Layout'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md') -Content '# Workflow Optimization'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md') -Content '# PowerShell Execution'
-    Write-TextFile -Path (Join-Path $Root '.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md') -Content '# Feedback Changelog'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md') -Content '# Repository Operating Model'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/governance/ntk-governance-authoritative-sources.instructions.md') -Content '# Authoritative Sources'
+    Write-TextFile -Path (Join-Path $Root '.github/agents/super-agent.agent.md') -Content '# Super Agent'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/governance/ntk-governance-artifact-layout.instructions.md') -Content '# Artifact Layout'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md') -Content '# Subagent Planning Workflow'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/governance/ntk-governance-workflow-optimization.instructions.md') -Content '# Workflow Optimization'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/operations/ntk-operations-powershell-execution.instructions.md') -Content '# PowerShell Execution'
+    Write-TextFile -Path (Join-Path $Root '.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md') -Content '# Feedback Changelog'
     Write-TextFile -Path (Join-Path $Root '.codex/skills/sample/agents/openai.yaml') -Content @'
 display_name: Sample Skill
 short_description: Example
@@ -257,7 +304,7 @@ description: sample skill
 
 # Sample Skill
 
-Load `ntk-core-repository-operating-model.instructions.md`.
+Load `ntk-governance-repository-operating-model.instructions.md`.
 '@
     Write-TextFile -Path (Join-Path $Root 'scripts/orchestration/example.ps1') -Content "Write-Host 'orchestration'"
     Write-TextFile -Path (Join-Path $Root 'scripts/runtime/bootstrap.ps1') -Content "Write-Host 'runtime'"
@@ -271,8 +318,26 @@ try {
     try {
         $fixtureRepoRoot = Join-Path $tempRoot 'instruction-architecture-fixture'
         Initialize-ValidInstructionArchitectureRepo -Root $fixtureRepoRoot
+        $defaultManifestPath = Join-Path $fixtureRepoRoot '.github/governance/instruction-ownership.manifest.json'
+        $defaultAgentsPath = Join-Path $fixtureRepoRoot '.github/AGENTS.md'
+        $defaultGlobalInstructionsPath = Join-Path $fixtureRepoRoot '.github/copilot-instructions.md'
+        $defaultRoutingCatalogPath = Join-Path $fixtureRepoRoot '.github/instruction-routing.catalog.yml'
+        $defaultRoutePromptPath = Join-Path $fixtureRepoRoot '.github/prompts/route-instructions.prompt.md'
+        $defaultPromptRoot = Join-Path $fixtureRepoRoot '.github/prompts'
+        $defaultTemplateRoot = Join-Path $fixtureRepoRoot '.github/templates'
+        $defaultSkillRoot = Join-Path $fixtureRepoRoot '.codex/skills'
 
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $defaultManifestPath `
+            -AgentsPath $defaultAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $defaultRoutePromptPath `
+            -PromptRoot $defaultPromptRoot `
+            -TemplateRoot $defaultTemplateRoot `
+            -SkillRoot $defaultSkillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Repository instruction architecture should pass.'
 
@@ -289,7 +354,17 @@ try {
   ]
 }
 '@
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--manifest-path' $invalidManifestPath '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $invalidManifestPath `
+            -AgentsPath $defaultAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $defaultRoutePromptPath `
+            -PromptRoot $defaultPromptRoot `
+            -TemplateRoot $defaultTemplateRoot `
+            -SkillRoot $defaultSkillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Manifest missing required layers should fail.'
         Remove-Item -LiteralPath $invalidManifestPath -Force
@@ -300,7 +375,17 @@ try {
 
 - This file intentionally omits repository-operating-model reference.
 '@
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--agents-path' $invalidAgentsPath '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $defaultManifestPath `
+            -AgentsPath $invalidAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $defaultRoutePromptPath `
+            -PromptRoot $defaultPromptRoot `
+            -TemplateRoot $defaultTemplateRoot `
+            -SkillRoot $defaultSkillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing global core architecture reference should fail.'
         Remove-Item -LiteralPath $invalidAgentsPath -Force
@@ -317,7 +402,17 @@ description: temporary skill without canonical repo-operating reference
 
 Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
 '@
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--skill-root' $skillRoot '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $defaultManifestPath `
+            -AgentsPath $defaultAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $defaultRoutePromptPath `
+            -PromptRoot $defaultPromptRoot `
+            -TemplateRoot $defaultTemplateRoot `
+            -SkillRoot $skillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Missing skill canonical repository-operating reference should fail.'
 
@@ -328,7 +423,17 @@ Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
 
 This prompt claims to be the single source of truth for the whole repository.
 '@
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--prompt-root' $promptRoot '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $defaultManifestPath `
+            -AgentsPath $defaultAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $defaultRoutePromptPath `
+            -PromptRoot $promptRoot `
+            -TemplateRoot $defaultTemplateRoot `
+            -SkillRoot $defaultSkillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Prompt ownership markers should warn but not fail.'
 
@@ -344,7 +449,17 @@ tools: ['readFile']
 
 Use the routing catalog and return JSON.
 '@
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--route-prompt-path' $routePromptPath '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $defaultManifestPath `
+            -AgentsPath $defaultAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $routePromptPath `
+            -PromptRoot $defaultPromptRoot `
+            -TemplateRoot $defaultTemplateRoot `
+            -SkillRoot $defaultSkillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 1 -Message 'Route prompt without deterministic hard cap should fail.'
         Remove-Item -LiteralPath $routePromptPath -Force
@@ -356,7 +471,17 @@ Use the routing catalog and return JSON.
   "//": "temporary template that wrongly claims to be the single source of truth"
 }
 '@
-        & $runtimeBinaryPath 'validation' 'instruction-architecture' '--repo-root' $fixtureRepoRoot '--template-root' $templateRoot '--warning-only' 'false' | Out-Null
+        $invokeArgs = New-InstructionArchitectureArgs `
+            -RepoRoot $fixtureRepoRoot `
+            -ManifestPath $defaultManifestPath `
+            -AgentsPath $defaultAgentsPath `
+            -GlobalInstructionsPath $defaultGlobalInstructionsPath `
+            -RoutingCatalogPath $defaultRoutingCatalogPath `
+            -RoutePromptPath $defaultRoutePromptPath `
+            -PromptRoot $defaultPromptRoot `
+            -TemplateRoot $templateRoot `
+            -SkillRoot $defaultSkillRoot
+        & $runtimeBinaryPath @invokeArgs | Out-Null
         $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int] $LASTEXITCODE }
         Assert-ExitCode -ExitCode $exitCode -Expected 0 -Message 'Template ownership markers should warn but not fail.'
     }

@@ -7,15 +7,15 @@ description: Route tasks using the repository's static routing catalog and load 
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instructions/repository-operating-model.instructions.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Route then execute
 
 1. Route with:
-   - `.github/instruction-routing.catalog.yml`
-   - `.github/prompts/route-instructions.prompt.md`
+   - `definitions/providers/github/root/instruction-routing.catalog.yml`
+   - `definitions/providers/github/prompts/route-instructions.prompt.md`
 2. Build a minimal context pack (2–5 domain files).
 3. Execute using only the files selected by the context pack.
 

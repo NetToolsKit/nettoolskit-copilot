@@ -7,9 +7,9 @@ priority: medium
 
 Use this instruction for frontend architecture invariants that should remain
 true across frameworks. Keep Vue/Quasar-specific structure in
-`ntk-frontend-vue-quasar-architecture.instructions.md`, implementation rules in
-`ntk-frontend-vue-quasar.instructions.md`, and design-system guidance in
-`ntk-frontend-ui-ux.instructions.md`.
+`ntk-development-frontend-vue-quasar-architecture.instructions.md`, implementation rules in
+`ntk-development-frontend-vue-quasar.instructions.md`, and design-system guidance in
+`ntk-development-frontend-ui-ux.instructions.md`.
 
 ## Core Principles
 

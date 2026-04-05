@@ -13,6 +13,8 @@
     - provider-specific `.github/prompts/*.prompt.md` entrypoints
     - shared `.github/prompts/poml/` from `definitions/shared/prompts/poml/`
     - `.github/hooks/`
+    - `.github/governance/`
+    - `.github/policies/`
     - `.github/templates/` from `definitions/templates/`
 
     GitHub-native repository/community assets such as `.github/ISSUE_TEMPLATE/`,
@@ -90,13 +92,39 @@ function Resolve-GithubSurfacePath {
     return [System.IO.Path]::GetFullPath((Join-Path $ResolvedRepoRoot $RequestedPath))
 }
 
+function Rewrite-GithubProjectionRelativeLinks {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Content
+    )
+
+    $rewritten = $Content
+    $rewritten = $rewritten.Replace('../root/AGENTS.md', '../AGENTS.md')
+    $rewritten = $rewritten.Replace('../root/copilot-instructions.md', '../copilot-instructions.md')
+    $rewritten = $rewritten.Replace('../root/instruction-routing.catalog.yml', '../instruction-routing.catalog.yml')
+    $rewritten = $rewritten.Replace('../../../instructions/', '../instructions/')
+    $rewritten = $rewritten.Replace('../../../templates/', '../templates/')
+
+    return $rewritten
+}
+
+function Normalize-GithubProjectedFileContent {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Content
+    )
+
+    return ($Content.TrimEnd("`r", "`n") + "`n")
+}
+
 # Mirrors one authoritative GitHub directory into its projected surface.
 function Invoke-SurfaceMirror {
     param(
         [Parameter(Mandatory = $true)]
         [string] $SourcePath,
         [Parameter(Mandatory = $true)]
-        [string] $DestinationPath
+        [string] $DestinationPath,
+        [switch] $RewriteProjectionRelativeLinks
     )
 
     if (-not (Test-Path -LiteralPath $SourcePath -PathType Container)) {
@@ -110,6 +138,17 @@ function Invoke-SurfaceMirror {
 
     Get-ChildItem -LiteralPath $SourcePath -Force | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination $DestinationPath -Recurse -Force
+    }
+
+    if ($RewriteProjectionRelativeLinks) {
+        foreach ($file in @(Get-ChildItem -LiteralPath $DestinationPath -Recurse -File -Filter '*.md' -Force -ErrorAction Stop)) {
+            $original = Get-Content -LiteralPath $file.FullName -Raw -ErrorAction Stop
+            $rewritten = Rewrite-GithubProjectionRelativeLinks -Content $original
+            if ($rewritten -cne $original) {
+                $normalized = Normalize-GithubProjectedFileContent -Content $rewritten
+                Set-Content -LiteralPath $file.FullName -Value $normalized -Encoding UTF8NoBOM -NoNewline
+            }
+        }
     }
 }
 
@@ -148,7 +187,11 @@ function Invoke-GithubPromptSurfaceRender {
     }
 
     foreach ($promptFile in @(Get-ChildItem -LiteralPath $ProviderPromptSourcePath -File -Filter '*.prompt.md' -Force -ErrorAction Stop)) {
-        Copy-Item -LiteralPath $promptFile.FullName -Destination (Join-Path $DestinationPath $promptFile.Name) -Force
+        $destinationFilePath = Join-Path $DestinationPath $promptFile.Name
+        $content = Get-Content -LiteralPath $promptFile.FullName -Raw -ErrorAction Stop
+        $rewritten = Rewrite-GithubProjectionRelativeLinks -Content $content
+        $normalized = Normalize-GithubProjectedFileContent -Content $rewritten
+        Set-Content -LiteralPath $destinationFilePath -Value $normalized -Encoding UTF8NoBOM -NoNewline
     }
 
     $pomlDestinationPath = Join-Path $DestinationPath 'poml'
@@ -190,6 +233,8 @@ $directorySpecs = @(
     [pscustomobject]@{ Name = 'chatmodes'; Source = Join-Path $resolvedSourceRoot 'chatmodes'; Destination = Join-Path $resolvedOutputRoot 'chatmodes' }
     [pscustomobject]@{ Name = 'instructions'; Source = Join-Path $resolvedDefinitionsRoot 'instructions'; Destination = Join-Path $resolvedOutputRoot 'instructions' }
     [pscustomobject]@{ Name = 'hooks'; Source = Join-Path $resolvedSourceRoot 'hooks'; Destination = Join-Path $resolvedOutputRoot 'hooks' }
+    [pscustomobject]@{ Name = 'governance'; Source = Join-Path $resolvedSourceRoot 'governance'; Destination = Join-Path $resolvedOutputRoot 'governance' }
+    [pscustomobject]@{ Name = 'policies'; Source = Join-Path $resolvedSourceRoot 'policies'; Destination = Join-Path $resolvedOutputRoot 'policies' }
     [pscustomobject]@{ Name = 'templates'; Source = Join-Path $resolvedDefinitionsRoot 'templates'; Destination = Join-Path $resolvedOutputRoot 'templates' }
 )
 
@@ -200,7 +245,10 @@ Invoke-GithubPromptSurfaceRender -ProviderPromptSourcePath $providerPromptSource
 Write-VerboseColor ("Rendered GitHub prompt surface: {0} + {1} -> {2}" -f $providerPromptSourcePath, $sharedPomlSourcePath, $promptDestinationPath) 'Gray'
 
 foreach ($directorySpec in $directorySpecs) {
-    Invoke-SurfaceMirror -SourcePath $directorySpec.Source -DestinationPath $directorySpec.Destination
+    Invoke-SurfaceMirror `
+        -SourcePath $directorySpec.Source `
+        -DestinationPath $directorySpec.Destination `
+        -RewriteProjectionRelativeLinks:($directorySpec.Name -eq 'chatmodes')
     Write-VerboseColor ("Rendered GitHub surface: {0} -> {1}" -f $directorySpec.Source, $directorySpec.Destination) 'Gray'
 }
 

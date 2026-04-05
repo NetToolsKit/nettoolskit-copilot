@@ -5,7 +5,7 @@ priority: high
 
 # Platform Reliability and Resilience Baseline
 - Use this instruction for reliability architecture, resilience patterns, failure testing, and disaster readiness.
-- Use `ntk-runtime-observability-sre.instructions.md` for telemetry design, dashboards, alerts, SLO instrumentation, and incident operations.
+- Use `ntk-operations-observability-sre.instructions.md` for telemetry design, dashboards, alerts, SLO instrumentation, and incident operations.
 - Design for graceful degradation under dependency failure and traffic volatility.
 
 # Reliability Objectives

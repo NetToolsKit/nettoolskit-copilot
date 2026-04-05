@@ -5,7 +5,7 @@ priority: high
 
 # Purpose
 - Define the single repository-wide policy for resolving technical uncertainty with repository context first and authoritative documentation second.
-- Keep the stack-to-domain mapping centralized in `.github/governance/authoritative-source-map.json`.
+- Keep the stack-to-domain mapping centralized in `governance/authoritative-source-map.json`.
 - Prevent duplicated official documentation domain lists across domain instruction files.
 
 # Resolution Order
@@ -22,7 +22,7 @@ priority: high
 - API behavior, limits, defaults, or deployment/runtime constraints
 
 # Official Source Map
-- Use `.github/governance/authoritative-source-map.json` as the single source of truth for stack-specific official domains.
+- Use `governance/authoritative-source-map.json` as the single source of truth for stack-specific official domains.
 - Prefer the narrowest matching stack entry instead of a broad vendor-wide search.
 - Do not copy or restate official documentation domain lists inside other instruction files unless an exception is explicitly justified.
 
@@ -33,7 +33,7 @@ priority: high
 - When authoritative documentation is unavailable or insufficient, say so explicitly before relying on inference or community material.
 
 # Official Domains by Context
-- For the exact stack-to-domain mapping, use `.github/governance/authoritative-source-map.json`.
+- For the exact stack-to-domain mapping, use `governance/authoritative-source-map.json`.
 - Typical examples:
   - `.NET`, `C#`, `ASP.NET Core`, `EF Core`, `PowerShell`, Azure -> `learn.microsoft.com`
   - GitHub Copilot -> `docs.github.com`
@@ -49,6 +49,6 @@ priority: high
 # Validation Checklist
 - [ ] Repository context was checked first for project-specific rules
 - [ ] Official documentation was used for external technical behavior when needed
-- [ ] The official domain came from `.github/governance/authoritative-source-map.json`
+- [ ] The official domain came from `governance/authoritative-source-map.json`
 - [ ] Community material was used only as fallback
 - [ ] Final answer identifies the source type (`repo context`, `official docs`, or `inference`)

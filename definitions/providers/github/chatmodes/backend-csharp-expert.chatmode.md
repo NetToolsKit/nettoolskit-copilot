@@ -49,7 +49,7 @@ Always reference these core files first:
 5. Validate: Ensure compilation, tests pass, architecture maintained
 
 ## Code Generation Standards
-- Use `sealed` classes by default (per ntk-backend-dotnet-csharp.instructions.md)
+- Use `sealed` classes by default (per ntk-development-backend-dotnet-csharp.instructions.md)
 - Namespace must match folder structure
 - Include XML documentation for public APIs
 - Follow naming conventions: PascalCase for public, camelCase for private

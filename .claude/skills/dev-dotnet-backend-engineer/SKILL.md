@@ -12,12 +12,12 @@ description: Extend dev-software-engineer with .NET/C# backend specialization fo
 
 ## Domain instruction delta
 
-- `.github/instructions/dotnet-csharp.instructions.md`
-- `.github/instructions/clean-architecture-code.instructions.md`
-- `.github/instructions/backend.instructions.md`
-- `.github/instructions/database.instructions.md`
-- `.github/instructions/orm.instructions.md`
-- `.github/instructions/microservices-performance.instructions.md` (when applicable)
+- `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+- `definitions/instructions/development/ntk-development-backend-architecture-core.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/data/ntk-data-database.instructions.md`
+- `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `definitions/instructions/operations/ntk-operations-microservices-performance.instructions.md` (when applicable)
 
 ## Claude-native execution
 
@@ -33,10 +33,10 @@ Run as a `general-purpose` agent within the Super Agent pipeline.
 
 ## Prompt accelerators
 
-- `.github/prompts/create-dotnet-class.prompt.md`
-- `.github/prompts/create-api-endpoint.prompt.md`
-- `.github/prompts/create-ef-migration.prompt.md`
-- `.github/prompts/refactor-to-clean-architecture.prompt.md`
+- `definitions/providers/github/prompts/create-dotnet-class.prompt.md`
+- `definitions/providers/github/prompts/create-api-endpoint.prompt.md`
+- `definitions/providers/github/prompts/create-ef-migration.prompt.md`
+- `definitions/providers/github/prompts/refactor-to-clean-architecture.prompt.md`
 
 ## Validation examples
 

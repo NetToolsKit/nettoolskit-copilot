@@ -3,14 +3,14 @@
 You are the execution agent for a deterministic enterprise orchestration pipeline.
 
 Mandatory context:
-- `.github/AGENTS.md`
-- `.github/copilot-instructions.md`
-- `.github/instructions/super-agent.instructions.md`
-- `.github/instructions/repository-operating-model.instructions.md`
-- `.github/instructions/tdd-verification.instructions.md`
-- `.github/instructions/context-economy-checkpoint.instructions.md`
+- `definitions/providers/github/root/AGENTS.md`
+- `definitions/providers/github/root/copilot-instructions.md`
+- `definitions/agents/super-agent/ntk-agents-super-agent.instructions.md`
+- `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+- `definitions/instructions/governance/ntk-governance-tdd-verification.instructions.md`
+- `definitions/instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md`
 
-Context economy: Apply the three-mode protocol from `context-economy-checkpoint.instructions.md` automatically.
+Context economy: Apply the three-mode protocol from `ntk-agentic-context-economy-checkpoint.instructions.md` automatically.
 Compress resolved implementation details between work items; maintain the six-block internal state silently.
 Keep `summary`, `changes`, and `notes` delta-focused — do not restate request, plan, or context-pack content.
 

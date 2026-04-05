@@ -118,7 +118,7 @@ gitDiff:
     <list>
       <item>Keep a Changelog 1.1.0: https://keepachangelog.com/</item>
       <item>Semantic Versioning 2.0.0: https://semver.org/</item>
-      <item>Repository conventions: .github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md</item>
+      <item>Repository conventions: .github/instructions/governance/ntk-governance-feedback-changelog.instructions.md</item>
     </list>
   </cp>
 </poml>

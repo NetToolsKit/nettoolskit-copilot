@@ -7,7 +7,7 @@ priority: high
 
 Use this instruction for executing, invoking, or operationally maintaining
 existing PowerShell scripts. Use
-`ntk-runtime-powershell-script-creation.instructions.md` for authoring or
+`ntk-operations-powershell-script-creation.instructions.md` for authoring or
 refactoring script files.
 
 ## Repository Root Detection

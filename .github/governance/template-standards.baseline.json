@@ -1,18 +1,18 @@
 {
   "version": 1,
   "requiredFiles": [
-    ".github/templates/readme-template.md",
-    ".github/templates/copilot-instruction-creation.instructions-template.md",
-    ".github/templates/github-change-checklist-template.md",
-    ".github/templates/changelog-entry-template.md",
-    ".github/templates/effort-estimation-poc-mvp-template.md",
-    ".github/templates/powershell-script-template.ps1",
-    ".github/templates/dotnet-dockerfile-template",
-    ".github/templates/docker-compose-template.yml"
+    "definitions/templates/docs/readme-template.md",
+    "definitions/templates/docs/copilot-instruction-creation.instructions-template.md",
+    "definitions/templates/docs/github-change-checklist-template.md",
+    "definitions/templates/docs/changelog-entry-template.md",
+    "definitions/templates/docs/effort-estimation-poc-mvp-template.md",
+    "definitions/templates/codegen/powershell-script-template.ps1",
+    "definitions/templates/codegen/dotnet-dockerfile-template",
+    "definitions/templates/codegen/docker-compose-template.yml"
   ],
   "templateRules": [
     {
-      "path": ".github/templates/readme-template.md",
+      "path": "definitions/templates/docs/readme-template.md",
       "requiredPatterns": [
         "^# \\[PROJECT_NAME\\]",
         "Remove sections that do not apply\\.",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "path": ".github/templates/copilot-instruction-creation.instructions-template.md",
+      "path": "definitions/templates/docs/copilot-instruction-creation.instructions-template.md",
       "requiredPatterns": [
         "(?m)^---",
         "(?m)^applyTo:\\s+\"\\[TARGET_GLOB\\]\"",
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "path": ".github/templates/github-change-checklist-template.md",
+      "path": "definitions/templates/docs/github-change-checklist-template.md",
       "requiredPatterns": [
         "^# GitHub Change Validation Checklist",
         "\\.github/copilot-instructions\\.md",
@@ -61,13 +61,13 @@
       ],
       "requiredPathReferences": [
         "crates/commands/validation/src/instruction_graph/instructions.rs",
-        ".github/copilot-instructions.md",
+        "definitions/providers/github/root/copilot-instructions.md",
         "README.md",
         "CHANGELOG.md"
       ]
     },
     {
-      "path": ".github/templates/changelog-entry-template.md",
+      "path": "definitions/templates/docs/changelog-entry-template.md",
       "requiredPatterns": [
         "(?m)^## \\[X\\.Y\\.Z\\] - YYYY-MM-DD",
         "### Breaking",
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "path": ".github/templates/effort-estimation-poc-mvp-template.md",
+      "path": "definitions/templates/docs/effort-estimation-poc-mvp-template.md",
       "requiredPatterns": [
         "(?m)^# Effort Estimation",
         "## 6\\) Estimation by Use Case Points \\(UCP\\)",
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "path": ".github/templates/powershell-script-template.ps1",
+      "path": "definitions/templates/codegen/powershell-script-template.ps1",
       "requiredPatterns": [
         "\\.SYNOPSIS",
         "\\.PARAMETER RepoRoot",
@@ -94,7 +94,7 @@
       ]
     },
     {
-      "path": ".github/templates/dotnet-dockerfile-template",
+      "path": "definitions/templates/codegen/dotnet-dockerfile-template",
       "requiredPatterns": [
         "FROM mcr.microsoft.com/dotnet/sdk:\\$VERSION AS build",
         "USER unet:gnet",
@@ -102,7 +102,7 @@
       ]
     },
     {
-      "path": ".github/templates/docker-compose-template.yml",
+      "path": "definitions/templates/codegen/docker-compose-template.yml",
       "requiredPatterns": [
         "(?m)^version:\\s+'3\\.8'",
         "(?m)^services:",

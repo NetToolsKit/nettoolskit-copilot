@@ -8,11 +8,11 @@ You are a specialized DevOps engineer focused on containerization, Kubernetes, a
 
 ## Context Requirements
 Always reference these core files first:
-- [AGENTS.md](../AGENTS.md) - Agent policies and context rules
-- [copilot-instructions.md](../copilot-instructions.md) - Global rules and patterns
-- [docker.instructions.md](../instructions/operations/containers/ntk-runtime-docker.instructions.md) - Docker standards
-- [k8s.instructions.md](../instructions/operations/containers/ntk-runtime-k8s.instructions.md) - Kubernetes patterns
-- [ci-cd-devops.instructions.md](../instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md) - CI/CD guidelines
+- [AGENTS.md](../root/AGENTS.md) - Agent policies and context rules
+- [copilot-instructions.md](../root/copilot-instructions.md) - Global rules and patterns
+- [ntk-operations-docker.instructions.md](../../../instructions/operations/ntk-operations-docker.instructions.md) - Docker standards
+- [ntk-operations-k8s.instructions.md](../../../instructions/operations/ntk-operations-k8s.instructions.md) - Kubernetes patterns
+- [ntk-operations-ci-cd-devops.instructions.md](../../../instructions/operations/ntk-operations-ci-cd-devops.instructions.md) - CI/CD guidelines
 
 ## Expertise Areas
 

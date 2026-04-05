@@ -11,10 +11,10 @@ inside distributed services.
 
 Use other `runtime-ops` instructions for adjacent concerns:
 
-- `ntk-runtime-docker.instructions.md` for container image and Docker Compose policy
-- `ntk-runtime-k8s.instructions.md` for cluster manifests, probes, scaling primitives, and network/storage objects
-- `ntk-runtime-observability-sre.instructions.md` for telemetry, SLOs, dashboards, alerts, and incident operations
-- `ntk-runtime-platform-reliability-resilience.instructions.md` for retries, timeouts, graceful degradation, and disaster readiness
+- `ntk-operations-docker.instructions.md` for container image and Docker Compose policy
+- `ntk-operations-k8s.instructions.md` for cluster manifests, probes, scaling primitives, and network/storage objects
+- `ntk-operations-observability-sre.instructions.md` for telemetry, SLOs, dashboards, alerts, and incident operations
+- `ntk-operations-platform-reliability-resilience.instructions.md` for retries, timeouts, graceful degradation, and disaster readiness
 
 ## Service Boundaries
 

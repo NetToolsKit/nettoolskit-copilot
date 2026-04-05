@@ -168,4 +168,4 @@ The second copy-first migration wave applies the same shallow model to the proje
 
 - Completed for the canonical authored-root migration.
 - Canonical authored roots, validator defaults, governance catalogs, provider consumers, runtime readers, and renderers are now aligned to `definitions/*`.
-- The remaining generated-surface cutover now lives in `plan-provider-surface-projection-cutover.md`.
+- The generated-surface cutover later closed under `planning/completed/plan-provider-surface-projection-cutover.md`.

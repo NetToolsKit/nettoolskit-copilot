@@ -1,5 +1,5 @@
 ---
-applyTo: ".github/instructions/*"
+applyTo: "definitions/instructions/**/*.instructions.md"
 priority: high
 ---
 
@@ -11,7 +11,7 @@ priority: high
 - Use markdown headings with a simple, consistent hierarchy
 - Use inline code for paths, commands, globs, filenames, identifiers, and types when it improves precision
 - Header must follow template exactly
-- Start new instruction files from `.github/templates/copilot-instruction-creation.instructions-template.md` when creating or restructuring an instruction
+- Start new instruction files from `definitions/templates/docs/copilot-instruction-creation.instructions-template.md` when creating or restructuring an instruction
 - Do not assemble a final instruction directly from the inline examples in this file; use the template as the concrete structure and treat examples here as partial guidance only
 - Actionable information only
 - Pattern [area].instructions.md
@@ -159,9 +159,9 @@ applyTo: "**/*"
 - Use descriptive names that clearly indicate scope
 ```markdown
 Examples:
-- ntk-backend-architecture-core.instructions.md
-- dotnet-csharp.instructions.md
-- microservices-performance.instructions.md
+- ntk-development-backend-architecture-core.instructions.md
+- ntk-development-backend-dotnet-csharp.instructions.md
+- ntk-operations-microservices-performance.instructions.md
 ```
 
 # Duplication and Inheritance Rules
@@ -169,9 +169,9 @@ Examples:
 ## Avoiding Redundancy
 - Never repeat global rules from copilot-instructions.md
 - Centralize globals in copilot-instructions.md only
-- Keep repo topology, build/test/run commands, style, release process, and domain instruction mapping in `instructions/core/ntk-core-repository-operating-model.instructions.md`; do not regrow `AGENTS.md` or `copilot-instructions.md` with duplicated repo-operating detail
-- Keep layer ownership aligned with `.github/governance/instruction-ownership.manifest.json`; prompts and templates must not become policy owners, and skills must reference canonical instructions instead of forking them
-- Do not embed or repeat official documentation domain lists in new instruction files; reference `instructions/core/ntk-core-authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
+- Keep repo topology, build/test/run commands, style, release process, and domain instruction mapping in `instructions/governance/ntk-governance-repository-operating-model.instructions.md`; do not regrow `AGENTS.md` or `copilot-instructions.md` with duplicated repo-operating detail
+- Keep layer ownership aligned with `governance/instruction-ownership.manifest.json`; prompts and templates must not become policy owners, and skills must reference canonical instructions instead of forking them
+- Do not embed or repeat official documentation domain lists in new instruction files; reference `instructions/governance/ntk-governance-authoritative-sources.instructions.md` and `governance/authoritative-source-map.json`
 - Use explicit inheritance when applicable
 - Ensure specialization without overlap
 - Check for conflicts before adding new rules
@@ -226,7 +226,7 @@ Example metrics to track:
 - Test integration with existing workflows
 ```markdown
 # Update pattern in copilot-instructions.md
-- New area: `.github/instructions/<domain>/ntk-<domain>-<topic>.instructions.md` (description, examples)
+- New area: `definitions/instructions/<category>/ntk-<category>-<topic>.instructions.md` (description, examples)
 ```
 
 ## GitHub Changes Protocol

@@ -8,7 +8,7 @@ priority: high
 Use this instruction for browser-facing E2E, UI integration, Playwright/Cypress
 strategy, visual checks, flaky-test control, and frontend-oriented test
 environments. Keep backend/API integration specifics in
-`ntk-backend-integration-testing.instructions.md`, and keep cross-cutting TDD
+`ntk-development-backend-integration-testing.instructions.md`, and keep cross-cutting TDD
 workflow in `instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 
 # Frameworks
@@ -108,7 +108,7 @@ Parallel execution; test sharding; artifact collection; failure notifications; s
 # API Boundaries In Browser Flows
 Validate API contracts indirectly where browser flows depend on them, but keep
 deep API, consumer-contract, and Testcontainers guidance in
-`ntk-backend-integration-testing.instructions.md`.
+`ntk-development-backend-integration-testing.instructions.md`.
 
 # Browser Automation
 Headless in CI; pinned versions; device emulation; network throttling; geolocation; file upload/download; popups; iframes.

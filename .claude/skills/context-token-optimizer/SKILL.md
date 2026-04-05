@@ -7,10 +7,10 @@ description: Assembles the minimal context pack for a given task. Use when the t
 
 ## Load context first
 
-1. `.github/AGENTS.md`
-2. `.github/copilot-instructions.md`
-3. `.github/instruction-routing.catalog.yml`
-4. `.github/prompts/route-instructions.prompt.md`
+1. `definitions/providers/github/root/AGENTS.md`
+2. `definitions/providers/github/root/copilot-instructions.md`
+3. `definitions/providers/github/root/instruction-routing.catalog.yml`
+4. `definitions/providers/github/prompts/route-instructions.prompt.md`
 
 ## Claude-native execution
 
@@ -20,7 +20,7 @@ description: Assembles the minimal context pack for a given task. Use when the t
 
 ## Responsibilities
 
-- Route through `.github/instruction-routing.catalog.yml` when the workspace provides it.
+- Route through `definitions/providers/github/root/instruction-routing.catalog.yml` when the workspace provides it.
 - Build the minimal local context pack from target repo structure when the catalog is unavailable.
 - Identify domain instruction files relevant to the task.
 - Recommend the specialist focus based on the assembled pack.

@@ -7,7 +7,7 @@ priority: high
 
 Use this instruction for Rust crate test structure, test discovery, async test
 patterns, and error-path coverage. Keep cross-cutting TDD workflow and
-verification evidence in `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
+verification evidence in `instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 
 ## Core Principles
 
@@ -15,7 +15,7 @@ verification evidence in `instructions/process/delivery/ntk-process-tdd-verifica
 2. **Test Organization**: Use dedicated test files, not just inline tests
 3. **Test Naming**: Descriptive names following `test_[function]_[scenario]_[result]` pattern
 4. **Documentation**: All test files must have file-level doc comments
-5. **Template Precedence**: Start concrete test files from the applicable `.github/templates/rust-*-template.rs` file when one exists; treat inline examples in this instruction as partial guidance only
+5. **Template Precedence**: Start concrete test files from the applicable `definitions/templates/codegen/rust-*-template.rs` file when one exists; treat inline examples in this instruction as partial guidance only
 
 ## File Organization
 
@@ -73,7 +73,7 @@ Every crate MUST have `tests/error_tests.rs` testing:
 - Error propagation with `?` operator
 - Result type alias (if exists)
 
-**Template:** `.github/templates/rust-error-tests-template.rs`
+**Template:** `definitions/templates/codegen/rust-error-tests-template.rs`
 
 ### 2. integration_tests.rs (RECOMMENDED)
 For crates with multi-component workflows:
@@ -82,7 +82,7 @@ For crates with multi-component workflows:
 - Real dependency usage (filesystem, network)
 - Idempotency tests
 
-**Template:** `.github/templates/rust-integration-tests-template.rs`
+**Template:** `definitions/templates/codegen/rust-integration-tests-template.rs`
 
 ### 3. [module]_tests.rs (REQUIRED)
 One test file per public module testing:
@@ -92,7 +92,7 @@ One test file per public module testing:
 - Edge cases (empty, boundary, unicode, special chars)
 - Trait implementations (Debug, Clone, PartialEq)
 
-**Template:** `.github/templates/rust-unit-tests-template.rs`
+**Template:** `definitions/templates/codegen/rust-unit-tests-template.rs`
 
 ### 4. Async Tests (when applicable)
 For async code:
@@ -102,7 +102,7 @@ For async code:
 - Test cancellation
 - Test concurrent execution
 
-**Template:** `.github/templates/rust-async-tests-template.rs`
+**Template:** `definitions/templates/codegen/rust-async-tests-template.rs`
 
 ## Naming Conventions
 
@@ -468,10 +468,10 @@ Before completing ANY test-related work, verify:
 
 ## Resources
 
-- **Templates:** `.github/templates/*_template.rs`
+- **Templates:** `definitions/templates/codegen/*-template.rs`
 - **Full Guide:** `tools/nettoolskit-cli/docs/test-templates.md`
 - **Standards Analysis:** `tools/nettoolskit-cli/docs/test-standards-analysis.md`
-- **Official External Docs:** use `instructions/core/ntk-core-authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
+- **Official External Docs:** use `instructions/governance/ntk-governance-authoritative-sources.instructions.md` and `governance/authoritative-source-map.json`
 
 ## Enforcement
 
@@ -486,6 +486,6 @@ Non-compliance blocks merge.
 ## Questions?
 
 Refer to:
-1. Templates in `.github/templates/`
+1. Templates in `definitions/templates/codegen/`
 2. Full documentation in `tools/nettoolskit-cli/docs/`
 3. Existing tests in `crates/commands/tests/` (best practices)

@@ -225,7 +225,7 @@ fn render_planning_summary_document(
     lines.push("To resume work after context reset:".to_string());
     lines.push(String::new());
     lines.push("1. Load `.github/AGENTS.md` and `.github/copilot-instructions.md`".to_string());
-    lines.push("2. Load `.github/instructions/agents/ntk-agents-super-agent.instructions.md`".to_string());
+    lines.push("2. Load `.github/agents/super-agent.agent.md`".to_string());
     lines.push(format!(
         "3. Read the active plan(s) listed above from `{}/`",
         planning_surface.plan_root

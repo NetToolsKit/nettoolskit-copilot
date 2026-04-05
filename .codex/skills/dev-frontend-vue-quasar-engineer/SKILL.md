@@ -7,20 +7,20 @@ description: Implement and refactor frontend features using Vue and Quasar with 
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml`.
 3. Keep only mandatory files plus frontend pack.
 
 ## Frontend instruction pack
 
-- `.github/instructions/frontend.instructions.md`
-- `.github/instructions/vue-quasar.instructions.md`
-- `.github/instructions/vue-quasar-architecture.instructions.md`
-- `.github/instructions/ui-ux.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-architecture-core.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-vue-quasar.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-vue-quasar-architecture.instructions.md`
+- `definitions/instructions/development/ntk-development-frontend-ui-ux.instructions.md`
 
 ## Prompt and chatmode accelerators
 
-- `.github/prompts/create-vue-component.prompt.md`
+- `definitions/providers/github/prompts/create-vue-component.prompt.md`
 - `.github/chatmodes/vue-quasar-expert.chatmode.md`
 
 ## Execution workflow

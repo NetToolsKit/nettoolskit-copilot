@@ -29,19 +29,21 @@
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/agents/ntk-agents-super-agent.instructions.md",
-        "instructions/core/ntk-core-repository-operating-model.instructions.md",
-        "instructions/core/ntk-core-artifact-layout.instructions.md",
-        "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
-        "instructions/process/planning/ntk-process-workflow-optimization.instructions.md",
-        "instructions/core/ntk-core-authoritative-sources.instructions.md",
-        "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
-        "instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"
+        "agents/super-agent/ntk-agents-super-agent.instructions.md",
+        "instructions/governance/ntk-governance-repository-operating-model.instructions.md",
+        "instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md",
+        "instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+        "instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "instructions/operations/ntk-operations-powershell-execution.instructions.md",
+        "instructions/governance/ntk-governance-feedback-changelog.instructions.md"
       ]
     }
   },
   "projectionContract": {
-    "canonicalInstructionRoot": "definitions/shared/instructions",
+    "canonicalInstructionRoot": "definitions/instructions",
+    "canonicalTemplateRoot": "definitions/templates",
+    "canonicalAgentRoot": "definitions/agents",
     "projectedInstructionRoot": ".github/instructions",
     "providerRoots": [
       "definitions/providers/github/root",
@@ -50,83 +52,66 @@
       "definitions/providers/claude"
     ],
     "naming": {
-      "folderPolicy": "semantic-domain-folders",
+      "folderPolicy": "shallow-domain-roots",
       "disallowNumericPrefixes": true,
       "filePrefix": "ntk-"
     },
     "driftRules": [
-      "Treat definitions/shared/instructions as the canonical instruction content for repo-owned guidance.",
-      "Treat .github/instructions as the projected runtime surface; keep folder taxonomy and filenames aligned with canonical content.",
-      "Update provider surfaces only after canonical and projected instruction paths are stable.",
+      "Treat definitions/instructions as the canonical instruction content for repo-owned guidance.",
+      "Treat definitions/templates, definitions/agents, definitions/skills, and definitions/hooks as the canonical non-provider definition roots.",
+      "Treat .github, .codex, .claude, and .vscode as projected runtime surfaces updated only after canonical definition paths stabilize.",
       "Do not sync from the external copilot-instructions repository by blind overwrite; review drift explicitly and record intentional divergences."
     ]
   },
   "layers": [
     {
       "id": "global-core",
-      "description": "Thin global context and execution contract loaded first for every task.",
+      "description": "Thin provider-root context loaded first for every task.",
       "pathPatterns": [
-        ".github/AGENTS.md",
-        ".github/copilot-instructions.md"
-      ],
-      "mustReference": [
-        "instructions/core/ntk-core-repository-operating-model.instructions.md",
-        "instructions/core/ntk-core-authoritative-sources.instructions.md",
-        "instructions/core/ntk-core-artifact-layout.instructions.md"
+        "definitions/providers/github/root/AGENTS.md",
+        "definitions/providers/github/root/copilot-instructions.md"
       ]
     },
     {
       "id": "agent-control",
       "description": "Agent-controller lifecycle rules that stay globally visible but are not repository invariants.",
       "pathPatterns": [
-        ".github/instructions/agents/*.instructions.md"
+        "definitions/agents/*/*.instructions.md"
       ]
     },
     {
       "id": "repository-operating-model",
-      "description": "Repository-specific operational rules, commands, style, release, and domain instruction map.",
+      "description": "Repository-specific operating rules and command map.",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
+        "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "cross-cutting-policies",
-      "description": "Policies, maps, and baselines that apply across domains.",
+      "description": "Centralized policy and governance contracts that cut across domains.",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/governance/*",
-        ".github/policies/*"
+        "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "definitions/providers/github/governance/*"
       ]
     },
     {
       "id": "domain-instructions",
-      "description": "Semantic domain rules grouped by responsibility instead of flat or numbered ordering.",
+      "description": "Canonical shallow instruction lanes grouped by responsibility.",
       "pathPatterns": [
-        ".github/instructions/process/planning/*.instructions.md",
-        ".github/instructions/process/collaboration/*.instructions.md",
-        ".github/instructions/process/delivery/*.instructions.md",
-        ".github/instructions/architecture/backend/*.instructions.md",
-        ".github/instructions/architecture/frontend/*.instructions.md",
-        ".github/instructions/architecture/agentic/*.instructions.md",
-        ".github/instructions/operations/devops/*.instructions.md",
-        ".github/instructions/operations/automation/*.instructions.md",
-        ".github/instructions/operations/containers/*.instructions.md",
-        ".github/instructions/operations/reliability/*.instructions.md",
-        ".github/instructions/operations/quality/*.instructions.md",
-        ".github/instructions/data/*.instructions.md",
-        ".github/instructions/security/*.instructions.md",
-        ".github/instructions/docs/*.instructions.md"
+        "definitions/instructions/**/*.instructions.md"
       ],
       "excludePatterns": [
-        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
+        "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "prompts",
       "description": "Operational prompt helpers used for routing and generation.",
       "pathPatterns": [
-        ".github/prompts/*"
+        "definitions/providers/github/prompts/*"
       ],
       "forbiddenOwnershipMarkers": [
         "single source of truth",
@@ -138,11 +123,10 @@
       "id": "templates",
       "description": "Concrete artifact skeletons that must not become normative policy owners.",
       "pathPatterns": [
-        ".github/templates/*",
-        ".vscode/base.code-workspace",
-        ".vscode/*.tamplate.jsonc",
-        ".vscode/snippets/*.tamplate.code-snippets",
-        ".codex/mcp/*.template.*"
+        "definitions/templates/**/*",
+        "definitions/providers/vscode/workspace/*.tamplate.jsonc",
+        "definitions/providers/vscode/workspace/snippets/*.tamplate.code-snippets",
+        "definitions/providers/codex/mcp/*.template.*"
       ],
       "forbiddenOwnershipMarkers": [
         "single source of truth",
@@ -154,7 +138,7 @@
       "id": "codex-skills",
       "description": "Execution-specialized Codex skills that must reference canonical repository policy.",
       "pathPatterns": [
-        ".codex/skills/*/SKILL.md"
+        "definitions/providers/codex/skills/*/SKILL.md"
       ],
       "forbiddenOwnershipMarkers": [
         "single source of truth",
@@ -165,7 +149,7 @@
       "id": "orchestration",
       "description": "Pipeline contracts, evals, and handoff artifacts.",
       "pathPatterns": [
-        ".codex/orchestration/*",
+        "definitions/providers/codex/orchestration/**/*",
         "scripts/orchestration/*"
       ]
     },

@@ -7,22 +7,23 @@ description: Design, implement, and stabilize automated tests in this repository
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/repository-operating-model.instructions.md`.
-2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
+1. Load `definitions/providers/github/root/AGENTS.md`, `definitions/providers/github/root/copilot-instructions.md`, and `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+2. Route with `definitions/providers/github/root/instruction-routing.catalog.yml` and `definitions/providers/github/prompts/route-instructions.prompt.md`.
 3. Load only mandatory files plus testing and domain-specific packs.
 
 ## Testing instruction packs
 
 - Core .NET testing:
-  - `.github/instructions/dotnet-csharp.instructions.md`
-  - `.github/instructions/backend.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+  - `definitions/instructions/development/ntk-development-persistence-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/e2e-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-integration-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-frontend-e2e-testing.instructions.md`
 - Rust testing:
-  - `.github/instructions/rust-testing.instructions.md`
-  - `.github/instructions/rust-code-organization.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `definitions/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/static-analysis-sonarqube.instructions.md`
+  - `definitions/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
 
 ## Execution workflow
 
@@ -34,7 +35,7 @@ description: Design, implement, and stabilize automated tests in this repository
 
 ## Prompt accelerators
 
-- `.github/prompts/generate-unit-tests.prompt.md`
+- `definitions/providers/github/prompts/generate-unit-tests.prompt.md`
 
 ## Validation examples
 

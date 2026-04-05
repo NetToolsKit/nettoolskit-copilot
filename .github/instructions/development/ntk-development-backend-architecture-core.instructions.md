@@ -7,7 +7,7 @@ priority: high
 
 Use this instruction for backend architecture invariants that must remain true
 regardless of language or framework. Keep platform/runtime specifics in
-`ntk-backend-architecture-platform.instructions.md` and language/framework rules
+`ntk-development-backend-architecture-platform.instructions.md` and language/framework rules
 in the corresponding stack-specific file.
 
 ## Core Principles
