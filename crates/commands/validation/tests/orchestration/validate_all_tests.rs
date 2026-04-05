@@ -42,14 +42,33 @@ fn write_file(path: &std::path::Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
+fn write_template_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root.join("definitions/templates/docs").join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/templates").join(file_name), contents);
+}
+
 fn write_validation_profile_catalog(repo_root: &std::path::Path, check_order: &[&str]) {
     let checks = check_order
         .iter()
         .map(|check| format!("\"{check}\""))
         .collect::<Vec<_>>()
         .join(",");
-    write_file(
-        &repo_root.join(".github/governance/validation-profiles.json"),
+    write_governance_file(
+        repo_root,
+        "validation-profiles.json",
         &format!(
             "{{\"version\":1,\"defaultProfile\":\"test\",\"profiles\":[{{\"id\":\"test\",\"warningOnly\":false,\"checkOrder\":[{checks}]}}]}}"
         ),
@@ -65,8 +84,9 @@ fn initialize_repo_layout(repo_root: &std::path::Path, check_order: &[&str]) {
 }
 
 fn write_default_readme_baseline(repo_root: &std::path::Path) {
-    write_file(
-        &repo_root.join(".github/governance/readme-standards.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "readme-standards.baseline.json",
         r#"{
   "version": 1,
   "global": {
@@ -216,27 +236,25 @@ routing:
 }
 
 fn write_template_standards_fixture(repo_root: &std::path::Path) {
-    write_file(
-        &repo_root.join(".github/governance/template-standards.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "template-standards.baseline.json",
         r#"{
   "version": 1,
   "requiredFiles": [
-    ".github/templates/example.md"
+    "definitions/templates/docs/example.md"
   ],
   "templateRules": [
     {
-      "path": ".github/templates/example.md",
+      "path": "definitions/templates/docs/example.md",
       "requiredPatterns": ["^# Example", "Validation"],
       "forbiddenPatterns": ["Legacy"],
-      "requiredPathReferences": [".github/governance/template-standards.baseline.json"]
+      "requiredPathReferences": ["definitions/providers/github/governance/template-standards.baseline.json"]
     }
   ]
 }"#,
     );
-    write_file(
-        &repo_root.join(".github/templates/example.md"),
-        "# Example\n\nValidation content.\n",
-    );
+    write_template_file(repo_root, "example.md", "# Example\n\nValidation content.\n");
 }
 
 fn write_authoritative_source_policy_fixtures(repo_root: &std::path::Path) {
@@ -347,8 +365,9 @@ Use `.github/governance/authoritative-source-map.json`.
 }
 
 fn write_workspace_efficiency_baseline(repo_root: &std::path::Path) {
-    write_file(
-        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "workspace-efficiency.baseline.json",
         r#"{
   "version": 1,
   "templateWorkspacePaths": [
@@ -847,10 +866,9 @@ fn test_invoke_validate_all_applies_release_provenance_profile_options() {
     initialize_repo_layout(repo.path(), &["validate-release-provenance"]);
     initialize_release_provenance_repo(repo.path());
     initialize_git_repository(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/validation-profiles.json"),
+    write_governance_file(
+        repo.path(),
+        "validation-profiles.json",
         r#"{
   "version": 1,
   "defaultProfile": "release",
@@ -965,10 +983,9 @@ fn test_invoke_validate_all_runs_native_warning_baseline_check() {
         &analyzer_report_path,
         &[("PSAvoidUsingWriteHost", "scripts/example.ps1")],
     );
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/validation-profiles.json"),
+    write_governance_file(
+        repo.path(),
+        "validation-profiles.json",
         r#"{
   "version": 1,
   "defaultProfile": "test",
@@ -1099,10 +1116,9 @@ fn test_invoke_validate_all_runs_native_shell_hooks_check() {
         write_hook_file(repo.path(), hook_name, "#!/bin/sh\necho ok\n");
     }
     let shell_path = write_fake_shell_command(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/validation-profiles.json"),
+    write_governance_file(
+        repo.path(),
+        "validation-profiles.json",
         &format!(
             r#"{{
   "version": 1,

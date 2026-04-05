@@ -14,28 +14,45 @@ fn write_file(path: &std::path::Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
+fn write_template_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root.join("definitions/templates/docs").join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/templates").join(file_name), contents);
+}
+
 fn initialize_repo_layout(repo_root: &std::path::Path) {
-    fs::create_dir_all(repo_root.join(".github/governance"))
-        .expect("governance directory should be created");
     fs::create_dir_all(repo_root.join(".github/templates"))
         .expect("templates directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
 }
 
 fn write_baseline(repo_root: &std::path::Path) {
-    write_file(
-        &repo_root.join(".github/governance/template-standards.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "template-standards.baseline.json",
         r#"{
   "version": 1,
   "requiredFiles": [
-    ".github/templates/example.md"
+    "definitions/templates/docs/example.md"
   ],
   "templateRules": [
     {
-      "path": ".github/templates/example.md",
+      "path": "definitions/templates/docs/example.md",
       "requiredPatterns": ["^# Example", "Validation"],
       "forbiddenPatterns": ["Legacy"],
-      "requiredPathReferences": [".github/governance/template-standards.baseline.json"]
+      "requiredPathReferences": ["definitions/providers/github/governance/template-standards.baseline.json"]
     }
   ]
 }"#,
@@ -47,10 +64,7 @@ fn test_invoke_validate_template_standards_passes_for_valid_templates() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_baseline(repo.path());
-    write_file(
-        &repo.path().join(".github/templates/example.md"),
-        "# Example\n\nValidation content.\n",
-    );
+    write_template_file(repo.path(), "example.md", "# Example\n\nValidation content.\n");
 
     let result = invoke_validate_template_standards(&ValidateTemplateStandardsRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -69,19 +83,18 @@ fn test_invoke_validate_template_standards_passes_for_valid_templates() {
 fn test_invoke_validate_template_standards_reports_missing_patterns_and_references() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/template-standards.baseline.json"),
+    write_governance_file(
+        repo.path(),
+        "template-standards.baseline.json",
         r#"{
   "version": 1,
   "requiredFiles": [
-    ".github/templates/example.md",
-    ".github/templates/missing.md"
+    "definitions/templates/docs/example.md",
+    "definitions/templates/docs/missing.md"
   ],
   "templateRules": [
     {
-      "path": ".github/templates/example.md",
+      "path": "definitions/templates/docs/example.md",
       "requiredPatterns": ["^# Example", "Validation"],
       "forbiddenPatterns": ["Legacy"],
       "requiredPathReferences": ["missing/path.md"]
@@ -89,10 +102,7 @@ fn test_invoke_validate_template_standards_reports_missing_patterns_and_referenc
   ]
 }"#,
     );
-    write_file(
-        &repo.path().join(".github/templates/example.md"),
-        "# Example\n\nLegacy content. \n",
-    );
+    write_template_file(repo.path(), "example.md", "# Example\n\nLegacy content. \n");
 
     let result = invoke_validate_template_standards(&ValidateTemplateStandardsRequest {
         repo_root: Some(repo.path().to_path_buf()),
@@ -126,10 +136,7 @@ fn test_invoke_validate_template_standards_converts_required_findings_to_warning
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_baseline(repo.path());
-    write_file(
-        &repo.path().join(".github/templates/example.md"),
-        "# Example\n\nLegacy content.\n",
-    );
+    write_template_file(repo.path(), "example.md", "# Example\n\nLegacy content.\n");
 
     let result = invoke_validate_template_standards(&ValidateTemplateStandardsRequest {
         repo_root: Some(repo.path().to_path_buf()),

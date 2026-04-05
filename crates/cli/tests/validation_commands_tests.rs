@@ -1341,8 +1341,9 @@ fn initialize_planning_structure_repo_root(repo_root: &Path) {
 
 fn initialize_readme_standards_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
-    write_file(
-        &repo_root.join(".github/governance/readme-standards.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "readme-standards.baseline.json",
         r#"{
   "global": {
     "requireFeaturesCheckmarks": false,
@@ -1368,21 +1369,26 @@ fn initialize_readme_standards_repo_root(repo_root: &Path) {
 fn initialize_template_standards_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
     write_file(&repo_root.join("README.md"), "# Repo\n");
-    write_file(
-        &repo_root.join(".github/governance/template-standards.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "template-standards.baseline.json",
         r#"{
   "requiredFiles": [
-    ".github/templates/example-template.md"
+    "definitions/templates/docs/example-template.md"
   ],
   "templateRules": [
     {
-      "path": ".github/templates/example-template.md",
+      "path": "definitions/templates/docs/example-template.md",
       "requiredPatterns": ["^# Example Template"],
       "forbiddenPatterns": ["forbidden-token"],
       "requiredPathReferences": ["README.md"]
     }
   ]
 }"#,
+    );
+    write_file(
+        &repo_root.join("definitions/templates/docs/example-template.md"),
+        "# Example Template\n\nReference README.md.\n",
     );
     write_file(
         &repo_root.join(".github/templates/example-template.md"),
@@ -1392,8 +1398,9 @@ fn initialize_template_standards_repo_root(repo_root: &Path) {
 
 fn initialize_workspace_efficiency_repo_root(repo_root: &Path) {
     initialize_validation_repo_root(repo_root);
-    write_file(
-        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "workspace-efficiency.baseline.json",
         r#"{
   "templateWorkspacePaths": [],
   "allowedWorkspaceOverrideSettings": ["chat.agent.maxRequests"],
@@ -1939,10 +1946,9 @@ fn test_validation_audit_ledger_reports_pass_for_missing_ledger() {
 fn test_validation_architecture_boundaries_reports_pass_for_matching_baseline() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_validation_repo_root(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/architecture-boundaries.baseline.json"),
+    write_governance_file(
+        repo.path(),
+        "architecture-boundaries.baseline.json",
         r#"{
   "rules": [
     {

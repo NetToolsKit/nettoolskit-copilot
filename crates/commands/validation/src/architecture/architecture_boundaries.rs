@@ -9,13 +9,14 @@ use serde::Deserialize;
 use walkdir::WalkDir;
 
 use crate::agent_orchestration::common::{
-    resolve_repo_relative_path, resolve_validation_repo_root,
+    resolve_governance_default_path, resolve_repo_relative_path, resolve_validation_repo_root,
 };
 use crate::error::ValidateArchitectureBoundariesCommandError;
 use crate::operational_hygiene::common::derive_status;
 use crate::ValidationCheckStatus;
 
-const DEFAULT_BASELINE_PATH: &str = ".github/governance/architecture-boundaries.baseline.json";
+const DEFAULT_BASELINE_PATH: &str =
+    "definitions/providers/github/governance/architecture-boundaries.baseline.json";
 
 /// Request payload for `validate-architecture-boundaries`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -105,11 +106,10 @@ pub fn invoke_validate_architecture_boundaries(
         resolve_validation_repo_root(request.repo_root.as_deref()).map_err(|source| {
             ValidateArchitectureBoundariesCommandError::ResolveWorkspaceRoot { source }
         })?;
-    let baseline_path = resolve_repo_relative_path(
-        &repo_root,
-        request.baseline_path.as_deref(),
-        DEFAULT_BASELINE_PATH,
-    );
+    let baseline_path = match request.baseline_path.as_deref() {
+        Some(path) => resolve_repo_relative_path(&repo_root, Some(path), DEFAULT_BASELINE_PATH),
+        None => resolve_governance_default_path(&repo_root, "architecture-boundaries.baseline.json"),
+    };
 
     let mut warnings = Vec::new();
     let mut failures = Vec::new();

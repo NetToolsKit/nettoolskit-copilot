@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Changed agent-orchestration validation defaults, fixtures, and CLI test scaffolds to resolve the permission matrix and runtime/model routing catalogs from `definitions/providers/github/governance/*` first, while still materializing `.github/governance/*` mirrors for migration-time compatibility.
+- Changed shared governance baseline validators (`validate-all`, architecture boundaries, README standards, template standards, and workspace efficiency) plus their Rust/CLI fixtures to prefer `definitions/providers/github/governance/*`, with canonical template files under `definitions/templates/*` and legacy `.github/*` mirrors retained only for transition coverage.
 - Added the first shallow projected instruction copies under `.github/instructions/{governance,development,operations,data}` while preserving the legacy projected taxonomy during migration.
 - Scaffolded shallow `definitions/instructions/{development,operations,security,data}` copies for backend, frontend, agentic, persistence, runtime, security, database, and privacy guidance while preserving the legacy instruction tree during migration.
 - Added the first canonical-root reorganization slice for `definitions/`, introducing scaffolded `instructions/`, `templates/`, `agents/`, `skills/`, and `hooks/` roots plus `docs/samples/manifests/` as the stable human-facing manifest sample lane.

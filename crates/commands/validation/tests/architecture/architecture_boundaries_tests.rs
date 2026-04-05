@@ -7,6 +7,7 @@ use nettoolskit_validation::{
 use tempfile::TempDir;
 
 use crate::support::architecture_fixtures::{initialize_architecture_boundaries_repo, write_file};
+use crate::support::architecture_fixtures::write_governance_file;
 
 #[test]
 fn test_invoke_validate_architecture_boundaries_passes_for_valid_baseline() {
@@ -50,10 +51,9 @@ fn test_invoke_validate_architecture_boundaries_reports_missing_required_pattern
 fn test_invoke_validate_architecture_boundaries_warns_for_warning_severity_rule() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_architecture_boundaries_repo(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/architecture-boundaries.baseline.json"),
+    write_governance_file(
+        repo.path(),
+        "architecture-boundaries.baseline.json",
         r#"{
   "rules": [
     {
@@ -85,10 +85,9 @@ fn test_invoke_validate_architecture_boundaries_warns_for_warning_severity_rule(
 fn test_invoke_validate_architecture_boundaries_warns_for_unmatched_pattern() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_architecture_boundaries_repo(repo.path());
-    write_file(
-        &repo
-            .path()
-            .join(".github/governance/architecture-boundaries.baseline.json"),
+    write_governance_file(
+        repo.path(),
+        "architecture-boundaries.baseline.json",
         r#"{
   "rules": [
     {

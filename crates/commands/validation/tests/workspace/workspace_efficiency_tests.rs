@@ -14,9 +14,17 @@ fn write_file(path: &std::path::Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 fn initialize_repo_layout(repo_root: &std::path::Path) {
-    fs::create_dir_all(repo_root.join(".github/governance"))
-        .expect("governance directory should be created");
     fs::create_dir_all(repo_root.join(".vscode")).expect("vscode directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
 }
@@ -27,8 +35,9 @@ fn write_baseline(repo_root: &std::path::Path, template_entries: &[&str]) {
         .map(|entry| format!("\"{entry}\""))
         .collect::<Vec<_>>()
         .join(",");
-    write_file(
-        &repo_root.join(".github/governance/workspace-efficiency.baseline.json"),
+    write_governance_file(
+        repo_root,
+        "workspace-efficiency.baseline.json",
         &format!(
             r#"{{
   "version": 1,

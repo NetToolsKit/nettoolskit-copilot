@@ -13,6 +13,7 @@ use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use crate::error::ValidateAllCommandError;
+use crate::agent_orchestration::common::resolve_governance_default_path;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,
@@ -44,7 +45,7 @@ use crate::{
     ValidateWorkspaceEfficiencyRequest, ValidateXmlDocumentationRequest,
 };
 
-const DEFAULT_VALIDATION_PROFILES_PATH: &str = ".github/governance/validation-profiles.json";
+const DEFAULT_VALIDATION_PROFILES_FILE_NAME: &str = "validation-profiles.json";
 const DEFAULT_LEDGER_PATH: &str = ".temp/audit/validation-ledger.jsonl";
 const DEFAULT_OUTPUT_PATH: &str = ".temp/audit/validate-all.latest.json";
 const ZERO_LEDGER_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -538,7 +539,7 @@ pub fn invoke_validate_all(
 fn resolve_profiles_path(repo_root: &Path, requested_path: Option<&Path>) -> PathBuf {
     match requested_path {
         Some(path) => resolve_full_path(repo_root, path),
-        None => repo_root.join(DEFAULT_VALIDATION_PROFILES_PATH),
+        None => resolve_governance_default_path(repo_root, DEFAULT_VALIDATION_PROFILES_FILE_NAME),
     }
 }
 
