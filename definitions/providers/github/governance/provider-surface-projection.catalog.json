@@ -143,7 +143,7 @@
       "id": "github-instructions",
       "provider": "github",
       "authority": "definitions",
-      "sourcePath": "definitions/shared/instructions",
+      "sourcePath": "definitions/instructions",
       "projectedPath": ".github/instructions",
       "rendererId": "github-instruction-surfaces",
       "validation": {
@@ -213,7 +213,7 @@
       "id": "github-templates",
       "provider": "github",
       "authority": "definitions",
-      "sourcePath": "definitions/shared/templates",
+      "sourcePath": "definitions/templates",
       "projectedPath": ".github/templates",
       "rendererId": "github-instruction-surfaces",
       "validation": {
@@ -356,7 +356,7 @@
       "id": "vscode-mcp-template",
       "provider": "vscode",
       "authority": "generated",
-      "sourcePath": ".github/governance/mcp-runtime.catalog.json",
+      "sourcePath": "definitions/providers/github/governance/mcp-runtime.catalog.json",
       "projectedPath": ".vscode/mcp.tamplate.jsonc",
       "rendererId": "mcp-runtime-artifacts",
       "validation": {
@@ -370,7 +370,7 @@
       "id": "vscode-mcp-global-helper",
       "provider": "vscode",
       "authority": "generated",
-      "sourcePath": ".github/governance/mcp-runtime.catalog.json",
+      "sourcePath": "definitions/providers/github/governance/mcp-runtime.catalog.json",
       "projectedPath": ".vscode/mcp-vscode-global.json",
       "rendererId": "mcp-runtime-artifacts",
       "validation": {
@@ -384,7 +384,7 @@
       "id": "codex-mcp-manifest",
       "provider": "codex",
       "authority": "generated",
-      "sourcePath": ".github/governance/mcp-runtime.catalog.json",
+      "sourcePath": "definitions/providers/github/governance/mcp-runtime.catalog.json",
       "projectedPath": ".codex/mcp/servers.manifest.json",
       "rendererId": "mcp-runtime-artifacts",
       "validation": {

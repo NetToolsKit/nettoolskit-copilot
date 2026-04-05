@@ -318,7 +318,9 @@ fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
         .join("definitions")
         .join("providers")
         .join("github");
-    let shared_root = repo_root.join("definitions").join("shared");
+    let instructions_root = repo_root.join("definitions").join("instructions");
+    let templates_root = repo_root.join("definitions").join("templates");
+    let shared_prompt_root = repo_root.join("definitions").join("shared").join("prompts");
     let output_root = repo_root.join(".github");
     let root_source = source_root.join("root");
     ensure_directory_present(&root_source, "GitHub root source")?;
@@ -342,12 +344,9 @@ fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
     let directory_specs = [
         (source_root.join("agents"), output_root.join("agents")),
         (source_root.join("chatmodes"), output_root.join("chatmodes")),
-        (
-            shared_root.join("instructions"),
-            output_root.join("instructions"),
-        ),
+        (instructions_root, output_root.join("instructions")),
         (source_root.join("hooks"), output_root.join("hooks")),
-        (shared_root.join("templates"), output_root.join("templates")),
+        (templates_root, output_root.join("templates")),
     ];
     for (source_path, destination_path) in directory_specs {
         mirror_directory_contents(&source_path, &destination_path)?;
@@ -355,7 +354,7 @@ fn render_github_instruction_surfaces(repo_root: &Path) -> Result<()> {
 
     render_github_prompt_surface(
         &source_root.join("prompts"),
-        &shared_root.join("prompts").join("poml"),
+        &shared_prompt_root.join("poml"),
         &output_root.join("prompts"),
     )
 }

@@ -149,15 +149,7 @@ fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
         "# Shared instruction",
     );
     write_file(
-        &repo_root.join("definitions/shared/instructions/agents/ntk-agents-super-agent.instructions.md"),
-        "# Shared instruction",
-    );
-    write_file(
         &repo_root.join("definitions/templates/docs/readme-template.md"),
-        "# Readme Template",
-    );
-    write_file(
-        &repo_root.join("definitions/shared/templates/readme-template.md"),
         "# Readme Template",
     );
     write_file(
@@ -620,7 +612,11 @@ fn test_runtime_render_provider_surfaces_cli_renders_requested_renderer() {
     assert!(repo.path().join(".github/AGENTS.md").is_file());
     assert!(repo
         .path()
-        .join(".github/instructions/agents/ntk-agents-super-agent.instructions.md")
+        .join(".github/agents/super-agent.agent.md")
+        .is_file());
+    assert!(repo
+        .path()
+        .join(".github/templates/docs/readme-template.md")
         .is_file());
 }
 

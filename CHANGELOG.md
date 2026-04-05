@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed the native provider-surface renderer and its Rust/CLI test scaffolds to source GitHub instruction and template projections from `definitions/{instructions,templates}` directly, while leaving only shared POML prompt assets on the legacy `definitions/shared/*` path for now.
 - Changed runtime/bootstrap/doctor/healthcheck/self-heal, hook, MCP, and local-context Rust test scaffolds to author governance catalogs under `definitions/providers/github/governance/*` first, while mirroring `.github/governance/*` only for migration-time compatibility.
 - Changed canonical security and release baselines plus their Rust/CLI fixtures to require authored evidence from `definitions/providers/github/*` first, while preserving `.github/governance/*` mirrors only as temporary migration compatibility.
 - Changed agent-orchestration validation defaults, fixtures, and CLI test scaffolds to resolve the permission matrix and runtime/model routing catalogs from `definitions/providers/github/governance/*` first, while still materializing `.github/governance/*` mirrors for migration-time compatibility.

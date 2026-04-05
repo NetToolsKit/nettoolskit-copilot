@@ -72,15 +72,7 @@ pub fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
         "# Shared instruction",
     );
     write_file(
-        &repo_root.join("definitions/shared/instructions/agents/ntk-agents-super-agent.instructions.md"),
-        "# Shared instruction",
-    );
-    write_file(
         &repo_root.join("definitions/templates/docs/readme-template.md"),
-        "# Readme Template",
-    );
-    write_file(
-        &repo_root.join("definitions/shared/templates/readme-template.md"),
         "# Readme Template",
     );
     write_file(

@@ -51,7 +51,11 @@ fn test_invoke_render_provider_surfaces_renders_requested_direct_renderer_only()
     assert!(repo.path().join(".github/AGENTS.md").is_file());
     assert!(repo
         .path()
-        .join(".github/instructions/agents/ntk-agents-super-agent.instructions.md")
+        .join(".github/agents/super-agent.agent.md")
+        .is_file());
+    assert!(repo
+        .path()
+        .join(".github/templates/docs/readme-template.md")
         .is_file());
     assert!(!repo
         .path()
