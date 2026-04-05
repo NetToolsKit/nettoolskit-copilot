@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 14:08
+- LastUpdated: 2026-04-05 15:00
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -529,11 +529,16 @@ Status: `[x]` Completed
 
 #### Task W5.4: Execute Phase 20 Consumer Sweep (Sub-slices A, B, C)
 
-Status: `[ ]` Pending
+Status: `[~]` Partial / Slice A audit-only complete
 
 - Run consumer sweeps for each sub-slice.
 - For each zero-consumer script: delete it.
 - For each retained: document the retaining consumer.
+- Slice A result recorded:
+  - zero-consumer leaves: none
+  - deleted leaves: none
+  - blocking consumers were confirmed in the provider-surface projection catalog, provider README/operator docs, `install.ps1`, runtime parity harness tests, and the shell-hook validation fixture
+  - the runtime domain therefore stays at `30` retained leaves for now, with Slice B and Slice C still pending
 - After each sub-slice:
   - Update safety matrix and parity ledger.
   - Run the Phase 20 validation checklist.
@@ -544,7 +549,7 @@ Status: `[ ]` Pending
   - `& .\.build\target\debug\ntk.exe validation all --repo-root . --warning-only false`
   - `git diff --check`
 - Commit checkpoint (one per sub-slice):
-  - `chore(runtime-retirement): Phase 20 Slice A — retire confirmed-zero-consumer projection, profile, and sync scripts`
+  - `docs(runtime-retirement): Phase 20 Slice A — record audit-only consumer proof for projection, profile, and sync scripts`
   - `chore(runtime-retirement): Phase 20 Slice B — retire confirmed-zero-consumer orchestration runtime scripts`
   - `chore(runtime-retirement): Phase 20 Slice C — retire confirmed-zero-consumer bootstrap, install, and cleanup scripts`
 

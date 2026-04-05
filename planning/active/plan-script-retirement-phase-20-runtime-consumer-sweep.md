@@ -4,7 +4,7 @@ Generated: 2026-04-05
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:18
+- LastUpdated: 2026-04-05 15:00
 - Objective: prove the remaining local consumer graph for the 30 retained `scripts/runtime/*.ps1` leaves, then retire only the zero-consumer subsets without reopening the already-closed tactical runtime slices.
 - Normalized Request: continue the script-retirement program with a dedicated Phase 20 plan for the remaining runtime-domain scripts, keep planning updated, and commit each stable phase separately.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -79,7 +79,7 @@ This phase is complete only if:
 
 ### Task 1: Freeze Runtime Slice Boundaries And Search Patterns
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Lock the 30-script inventory above into a deterministic Phase 20 working set.
 - Build the per-slice consumer-search checklist:
@@ -91,12 +91,14 @@ Status: `[ ]` Pending
 - Confirm the search commands that will be reused for each slice:
   - `rg -n "scripts/runtime/<script-name>" .`
   - `rg -n "ntk runtime|ntk validation" definitions docs planning scripts crates`
+- Executed command for the canonical Slice A sweep:
+  - `rg -l --fixed-strings <script-name> definitions crates planning scripts docs templates deployments .codex .claude`
 - Checkpoint:
   - inventory and slice boundaries locked
 
 ### Task 2: Slice A Consumer Sweep — Projection, Profile, Sync, And Workspace Surfaces
 
-Status: `[ ]` Pending
+Status: `[x]` Completed (audit-only; zero deletions)
 
 - Target paths:
   - `scripts/runtime/render-*.ps1`
@@ -114,8 +116,29 @@ Status: `[ ]` Pending
   - exact zero-consumer list for deletable Slice A leaves
   - retained-blocker list for non-deletable Slice A leaves
   - same-slice doc/test re-points for every deleted leaf
+- Result:
+  - zero-consumer list: none
+  - deleted leaves: none
+  - retained-blocker graph:
+    - `definitions/providers/github/governance/provider-surface-projection.catalog.json` still pins `render-claude-runtime-surfaces.ps1`, `render-github-instruction-surfaces.ps1`, `render-mcp-runtime-artifacts.ps1`, `render-provider-skill-surfaces.ps1`, `render-vscode-profile-surfaces.ps1`, and `render-vscode-workspace-surfaces.ps1`
+    - `definitions/providers/github/README.md`, `definitions/providers/vscode/profiles/README.md`, and `definitions/providers/vscode/workspace/README.md` still advertise `render-github-instruction-surfaces.ps1`, `setup-vscode-profiles.ps1`, `sync-vscode-global-mcp.ps1`, `render-vscode-workspace-surfaces.ps1`, `sync-vscode-global-settings.ps1`, `sync-vscode-global-snippets.ps1`, and `sync-workspace-settings.ps1`
+    - cross-slice `scripts/runtime/install.ps1` still depends on `set-codex-runtime-preferences.ps1`, `sync-claude-settings.ps1`, `sync-claude-skills.ps1`, `sync-vscode-global-mcp.ps1`, `sync-vscode-global-settings.ps1`, and `sync-vscode-global-snippets.ps1`
+    - retained runtime parity coverage still hardcodes Slice A leaves through `scripts/tests/runtime/runtime-scripts.tests.ps1`, `scripts/tests/runtime/vscode-global-settings-sync.tests.ps1`, `scripts/tests/runtime/vscode-global-snippets-sync.tests.ps1`, `scripts/tests/runtime/workspace-settings-sync.tests.ps1`, and `scripts/tests/runtime/copilot-chat-title-normalization.tests.ps1`
+    - `crates/commands/validation/tests/operational_hygiene/shell_hooks_tests.rs` still hardcodes `validate-vscode-global-alignment.ps1`
+    - `definitions/instructions/operations/ntk-operations-vscode-workspace-efficiency.instructions.md` and `definitions/shared/instructions/operations/automation/ntk-runtime-vscode-workspace-efficiency.instructions.md` still advertise `sync-vscode-global-settings.ps1` and `sync-workspace-settings.ps1`
+- Outcome:
+  - Slice A closes as audit-only
+  - no same-slice re-points were enough to clear all blockers without reopening Slice C (`install.ps1`) or provider-runtime catalog migration
+- Validation evidence for the Slice A checkpoint:
+  - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation agent-orchestration --repo-root .` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation instructions --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation planning-structure --repo-root . --warning-only false` ✅
+  - `pwsh -NoProfile -File .\scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation policy --repo-root .` ⚠️ existing repository baseline failure; still missing governed `.github/workflows/*`, `.githooks/*`, `CODEOWNERS`, and issue-template assets outside this slice
+  - `git diff --check` ✅
 - Commit checkpoint:
-  - `chore(runtime-retirement): execute Phase 20 Slice A consumer sweep for projection, profile, and sync surfaces`
+  - `docs(runtime-retirement): record Phase 20 Slice A audit-only consumer proof for projection, profile, sync, and workspace surfaces`
 
 ### Task 3: Slice B Consumer Sweep — Orchestration Runtime Entry Points
 
