@@ -4,13 +4,13 @@ Generated: 2026-04-04 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 12:20
+- LastUpdated: 2026-04-05 12:48
 - Objective: evolve `ntk` into a stronger development-focused AI agent orchestrator with explicit provider profiles, runtime diagnostics, smart routing, normalized provider adapters, operator playbook coverage, and agent-to-model routing.
 - Normalized Request: create a detailed application plan for the strongest orchestrator concepts we want to bring into the repository so the system becomes better for AI-assisted software development workflows.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-development-agent-orchestrator-experience.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: D1, D2, D3, and D5 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, `ntk ai doctor` JSON/report surfaces, strategy-aware provider routing, and a dedicated AI development operator playbook; D4 normalized provider adapters are next.
+- Current Slice: D1, D2, D3, D4, and D5 are implemented with built-in provider profiles, `NTK_AI_PROFILE` resolution, `ntk ai profiles`, `ntk ai doctor` JSON/report surfaces, strategy-aware provider routing, normalized provider adapter contracts, and a dedicated AI development operator playbook; D6 agent-to-model routing policy is next.
 - Inputs:
   - `planning/active/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
@@ -101,6 +101,10 @@ This workstream coordinates the development-operator experience for `ntk` as an 
   - usage and cost metadata
   - typed error mapping
 - Ensure this boundary does not leak gateway-native quirks into the orchestrator core.
+- Completed slice:
+  - `crates/orchestrator/src/execution/ai.rs` now exposes normalized adapter descriptors for transport, auth, streaming, usage-reporting, and fallback-output capabilities.
+  - `crates/orchestrator/src/execution/ai_doctor.rs` and `crates/cli/src/ai_commands.rs` now surface those adapter contracts to operators alongside provider routing.
+  - `crates/orchestrator/tests/execution/ai_adapter_contract_tests.rs` now locks the adapter contract for `mock` and `openai-compatible`.
 - Target paths:
   - `crates/orchestrator/src/execution/ai.rs`
   - `crates/orchestrator/src/execution/mod.rs`

@@ -35,8 +35,11 @@ pub mod repo_workflow;
 
 // Re-export commonly used types
 pub use ai::{
-    AiChunk, AiMessage, AiProvider, AiProviderError, AiRequest, AiResponse, AiRole, AiUsage,
-    MockAiOutcome, MockAiProvider, OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
+    ai_provider_adapter_descriptor_for_id, mock_ai_provider_adapter_descriptor,
+    openai_compatible_provider_adapter_descriptor, AiChunk, AiMessage, AiProvider,
+    AiProviderAdapterDescriptor, AiProviderAuthKind, AiProviderError, AiProviderTransportKind,
+    AiRequest, AiResponse, AiRole, AiUsage, MockAiOutcome, MockAiProvider,
+    OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
 };
 pub use ai_doctor::{
     invoke_ai_doctor, render_ai_doctor_report, AiDoctorModelSelection, AiDoctorRequest,

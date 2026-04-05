@@ -67,6 +67,7 @@ fn test_render_ai_doctor_report_includes_status_and_model_selection() {
     assert!(report.contains("# AI Doctor Report"));
     assert!(report.contains("- Status: `local_only`"));
     assert!(report.contains("## Provider Routing"));
+    assert!(report.contains("## Adapter Contracts"));
     assert!(report.contains("## Model Selection"));
 }
 

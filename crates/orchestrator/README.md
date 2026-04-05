@@ -16,7 +16,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
 - ✅ Command routing and parsing through `MainAction` and `get_main_action`
 - ✅ Async command execution with progress and cancellation support
 - ✅ Shared AI session, ChatOps, plugin, and repository workflow orchestration helpers
-- ✅ Built-in AI provider profiles plus AI doctor diagnostics and strategy-aware provider routing for development-oriented preset selection
+- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, and normalized adapter contracts for development-oriented preset selection
 
 ---
 

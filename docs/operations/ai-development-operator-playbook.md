@@ -127,6 +127,7 @@ The doctor output now shows:
 - resolved strategy and source
 - routed provider order after scoring
 - per-provider latency/cost/reliability/policy-fit subscores
+- normalized adapter contract summary for each effective provider
 
 ### Markdown report
 

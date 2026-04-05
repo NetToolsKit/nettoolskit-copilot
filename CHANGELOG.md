@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added normalized AI provider adapter descriptors for transport, auth, streaming, usage, and fallback-output capabilities so provider-family contracts are inspectable without leaking vendor-specific transport details into orchestration code.
 - Added strategy-aware AI provider routing under `crates/orchestrator/src/execution/ai_routing.rs`, with explicit `latency`, `balanced`, and `cost` strategies, scored provider ordering, and shared timeout/provider-chain resolution for both the runtime pipeline and `ntk ai doctor`.
 - Added `docs/operations/ai-development-operator-playbook.md` as the stable human-facing runbook for AI profile selection, `ntk ai doctor`, JSON/Markdown diagnostics, local-vs-remote guidance, and degraded-state recovery.
 - Added `ntk ai doctor` with JSON output and optional Markdown report generation so operators can inspect active AI profile, provider chain, timeout, auth readiness, and fallback state without executing a request.
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed the development-orchestrator and free-provider-matrix workstreams to record that normalized provider adapter contracts are now materially implemented and surfaced through `ntk ai doctor`.
 - Changed the AI development-orchestrator umbrella, free-provider matrix, and token-economy workstreams to record that smart provider routing and observable fallback scoring are now materially implemented.
 - Changed `ntk ai doctor`, the AI operator playbook, and root/crate READMEs so routing strategy, ordered candidates, and per-provider scoring are visible to operators instead of staying implicit inside provider failover logic.
 - Changed the development-orchestrator umbrella to record that the operator playbook slice is now implemented, with root/crate/documentation READMEs linking to the dedicated playbook instead of duplicating troubleshooting guidance inline.

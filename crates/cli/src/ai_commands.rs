@@ -446,6 +446,22 @@ fn print_ai_doctor(result: &AiDoctorResult, report_path: Option<&std::path::Path
         }
     }
 
+    if !result.adapter_descriptors.is_empty() {
+        println!();
+        println!("Adapter contracts");
+        for descriptor in &result.adapter_descriptors {
+            println!(
+                "- {}: transport={:?} auth={:?} streaming={} usage={} fallback_output={}",
+                descriptor.provider_id,
+                descriptor.transport,
+                descriptor.auth,
+                descriptor.supports_streaming,
+                descriptor.supports_usage_reporting,
+                descriptor.supports_fallback_output
+            );
+        }
+    }
+
     if let Some(report_path) = report_path {
         println!("Report path: {}", report_path.display());
     }

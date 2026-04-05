@@ -14,6 +14,43 @@ use std::time::Duration;
 /// Boxed future returned by AI providers.
 pub type AiProviderFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
+/// Transport shape used by one provider adapter.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AiProviderTransportKind {
+    /// Deterministic local/mock transport.
+    LocalMock,
+    /// OpenAI-compatible chat-completions transport.
+    OpenAiCompatibleChat,
+}
+
+/// Authentication shape required by one provider adapter.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AiProviderAuthKind {
+    /// No auth is required.
+    None,
+    /// Bearer API key authentication.
+    BearerApiKey,
+}
+
+/// Normalized adapter descriptor exposed to orchestration and diagnostics.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct AiProviderAdapterDescriptor {
+    /// Stable provider identifier.
+    pub provider_id: &'static str,
+    /// Transport contract used by the adapter.
+    pub transport: AiProviderTransportKind,
+    /// Authentication contract used by the adapter.
+    pub auth: AiProviderAuthKind,
+    /// Indicates whether the adapter supports streaming.
+    pub supports_streaming: bool,
+    /// Indicates whether the adapter reports usage tokens/cost metadata.
+    pub supports_usage_reporting: bool,
+    /// Indicates whether the adapter can emit deterministic fallback output.
+    pub supports_fallback_output: bool,
+}
+
 /// Role used by a conversation message.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AiRole {
@@ -157,6 +194,9 @@ pub trait AiProvider: Send + Sync {
     /// Stable provider id.
     fn id(&self) -> &'static str;
 
+    /// Normalized adapter descriptor.
+    fn descriptor(&self) -> AiProviderAdapterDescriptor;
+
     /// Complete request with a single final response.
     fn complete(
         &self,
@@ -231,6 +271,44 @@ impl MockAiProvider {
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         queue.pop_front()
+    }
+}
+
+/// Return the normalized descriptor for the deterministic mock adapter.
+#[must_use]
+pub const fn mock_ai_provider_adapter_descriptor() -> AiProviderAdapterDescriptor {
+    AiProviderAdapterDescriptor {
+        provider_id: "mock",
+        transport: AiProviderTransportKind::LocalMock,
+        auth: AiProviderAuthKind::None,
+        supports_streaming: true,
+        supports_usage_reporting: false,
+        supports_fallback_output: false,
+    }
+}
+
+/// Return the normalized descriptor for the OpenAI-compatible adapter.
+#[must_use]
+pub const fn openai_compatible_provider_adapter_descriptor() -> AiProviderAdapterDescriptor {
+    AiProviderAdapterDescriptor {
+        provider_id: "openai-compatible",
+        transport: AiProviderTransportKind::OpenAiCompatibleChat,
+        auth: AiProviderAuthKind::BearerApiKey,
+        supports_streaming: true,
+        supports_usage_reporting: true,
+        supports_fallback_output: true,
+    }
+}
+
+/// Resolve a normalized adapter descriptor by provider id.
+#[must_use]
+pub fn ai_provider_adapter_descriptor_for_id(
+    provider_id: &str,
+) -> Option<AiProviderAdapterDescriptor> {
+    match provider_id.trim().to_ascii_lowercase().as_str() {
+        "mock" => Some(mock_ai_provider_adapter_descriptor()),
+        "openai" | "openai-compatible" => Some(openai_compatible_provider_adapter_descriptor()),
+        _ => None,
     }
 }
 
@@ -372,6 +450,10 @@ impl AiProvider for MockAiProvider {
         "mock"
     }
 
+    fn descriptor(&self) -> AiProviderAdapterDescriptor {
+        mock_ai_provider_adapter_descriptor()
+    }
+
     fn complete(
         &self,
         request: AiRequest,
@@ -441,6 +523,10 @@ impl AiProvider for MockAiProvider {
 impl AiProvider for OpenAiCompatibleProvider {
     fn id(&self) -> &'static str {
         "openai-compatible"
+    }
+
+    fn descriptor(&self) -> AiProviderAdapterDescriptor {
+        openai_compatible_provider_adapter_descriptor()
     }
 
     fn complete(

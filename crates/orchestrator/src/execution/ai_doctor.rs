@@ -1,6 +1,9 @@
 //! AI runtime diagnostics focused on provider profiles and execution readiness.
 
-use crate::execution::ai::OpenAiCompatibleProviderConfig;
+use crate::execution::ai::{
+    ai_provider_adapter_descriptor_for_id, AiProviderAdapterDescriptor,
+    OpenAiCompatibleProviderConfig,
+};
 use crate::execution::ai_profiles::{resolve_ai_provider_profile_from_env, AiProviderProfile};
 use crate::execution::ai_routing::{
     build_ai_provider_routing_plan, resolve_ai_provider_chain, resolve_ai_provider_timeout_budget,
@@ -97,6 +100,8 @@ pub struct AiDoctorResult {
     pub fallback_ready: bool,
     /// Effective routing strategy and scored provider order.
     pub routing_plan: AiProviderRoutingPlan,
+    /// Normalized adapter descriptors for the effective provider chain.
+    pub adapter_descriptors: Vec<AiProviderAdapterDescriptor>,
     /// Human-readable warnings for the operator.
     pub warnings: Vec<String>,
     /// Overall readiness status.
@@ -139,6 +144,11 @@ pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
         _ => false,
     };
     let fallback_ready = fallback_provider.is_some();
+    let adapter_descriptors = provider_chain
+        .providers
+        .iter()
+        .filter_map(|provider_id| ai_provider_adapter_descriptor_for_id(provider_id))
+        .collect::<Vec<_>>();
     let mut warnings = Vec::new();
 
     if active_profile.is_none() {
@@ -192,6 +202,7 @@ pub fn invoke_ai_doctor(_: &AiDoctorRequest) -> Result<AiDoctorResult, String> {
         live_provider_ready,
         fallback_ready,
         routing_plan,
+        adapter_descriptors,
         warnings,
         status,
     })
@@ -268,6 +279,20 @@ pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String {
             candidate.policy_fit_score
         ));
         lines.push(format!("  - {}", candidate.rationale));
+    }
+
+    lines.push(String::new());
+    lines.push("## Adapter Contracts".to_string());
+    for descriptor in &result.adapter_descriptors {
+        lines.push(format!(
+            "- `{}`: transport=`{:?}` auth=`{:?}` streaming=`{}` usage=`{}` fallback_output=`{}`",
+            descriptor.provider_id,
+            descriptor.transport,
+            descriptor.auth,
+            descriptor.supports_streaming,
+            descriptor.supports_usage_reporting,
+            descriptor.supports_fallback_output
+        ));
     }
 
     lines.push(String::new());
