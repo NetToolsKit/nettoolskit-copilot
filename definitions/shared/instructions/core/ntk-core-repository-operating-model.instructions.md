@@ -27,7 +27,8 @@ priority: high
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
 ## Instruction Source Of Truth And Projection
-- `definitions/shared/instructions/` is the canonical instruction content for repo-owned guidance.
+- `definitions/instructions/` is the canonical instruction content for repo-owned guidance.
+- `definitions/shared/instructions/` remains a legacy compatibility mirror only.
 - `.github/instructions/` is the projected runtime surface consumed by local agents, editors, and validation gates.
 - `definitions/providers/github/root/`, `definitions/providers/vscode/workspace/`, `definitions/providers/codex/`, and `definitions/providers/claude/` are provider-specific consumers of the canonical taxonomy.
 - Keep semantic folder names and stable `ntk-*` filenames aligned across canonical and projected surfaces.

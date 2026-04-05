@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-04 09:45
+- LastUpdated: 2026-04-05 11:35
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -19,8 +19,8 @@ Generated: 2026-03-29
   - `planning/specs/active/spec-repository-consolidation-continuity.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-  - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+  - `definitions/providers/github/root/instruction-routing.catalog.yml`
   - `.github/workflows/ci.yml`
   - `crates/cli/src/main.rs`
   - `crates/cli/src/runtime_commands.rs`
@@ -92,14 +92,14 @@ commands, wrong topology, and wrong test filters.
 
 Status: `[x]` Completed
 
-- Confirm whether `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` exists.
-- If it exists, the authoritative source is `definitions/shared/instructions/` and the `.github/instructions/` copy is a projection.
-- If it does not exist, the authoritative source is `.github/instructions/` directly.
+- Confirm the canonical authored source for the repository operating model under the shallow taxonomy.
+- The authoritative source is `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+- Provider/runtime projections consume that canonical file through `definitions/providers/*` and generated `.github/*` surfaces.
 - Commands:
-  - `Test-Path definitions\\shared\\instructions\\core\\ntk-core-repository-operating-model.instructions.md`
+  - `Test-Path definitions\\instructions\\governance\\ntk-governance-repository-operating-model.instructions.md`
 - Target paths confirmed post-check:
-  - `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` (if it exists — authoritative source)
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` (projection or direct if no definitions source)
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` (authoritative source)
+  - `definitions/providers/github/root/AGENTS.md` and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md` (consumer/projection surfaces)
 - Checkpoint: source of truth identified.
 
 #### Task W2.2: Rewrite Repository Topology Section
@@ -211,7 +211,7 @@ Status: `[x]` Completed
 
 Status: `[x]` Completed
 
-- If `definitions/shared/instructions/` was the authoritative source, trigger a re-render so `.github/instructions/` reflects the new content:
+- Trigger a re-render so provider/runtime consumer surfaces reflect the canonical definitions roots:
   - `ntk runtime bootstrap --repo-root . --mirror` or the equivalent `scripts/runtime/render-github-instruction-surfaces.ps1` invocation
 - Validate:
   - `& .\.build\target\debug\ntk.exe validation instructions --repo-root . --warning-only false`
@@ -221,8 +221,8 @@ Status: `[x]` Completed
   - `docs(instructions): re-render github instruction surfaces with updated operating model`
 
 **Checkpoint: W2 Operating Model Alignment Complete**
-- authoritative source confirmed at `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md`
-- projected GitHub copy re-rendered into `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+- authoritative source confirmed at `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+- projected GitHub copy now derives from the canonical `definitions/*` roots and lands under `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 - repository topology now describes the Rust multi-crate workspace instead of the old .NET monorepo layout
 - build/test/run guidance now points to `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt`, native `ntk validation`, runtime continuity commands, and the Rust vulnerability audit
 - style, testing, workflow patterns, and domain instruction map now align to the actual Rust workspace and retained PowerShell compatibility model
@@ -730,13 +730,13 @@ W5 phases must be sequential and depend on Phases 17 and 18 closing.
 
 | # | Risk | Fallback |
 |---|---|---|
-| R1 | Editing `definitions/shared/instructions/` triggers a cascade re-render that breaks unrelated surfaces | Run `ntk validation all` in warning-only mode first; verify diff before committing |
+| R1 | Editing canonical `definitions/instructions/` assets triggers a provider-surface re-render that breaks unrelated generated surfaces | Run `ntk validation all` in warning-only mode first; verify diff before committing |
 | R2 | `pwsh-parity` CI job fails on first run due to environment differences | Use `continue-on-error: true` for the initial merge; switch to `false` after baseline is stable |
 | R3 | Phase 19 common-script consumer sweep finds 12+ blockers | Accept a partial Phase 19 that deletes only zero-consumer scripts; document retained ones explicitly |
 | R4 | Phase 20 is too large for one PR review | Split into 20a/20b/20c sub-phases; each sub-phase has its own commit checkpoint |
 | R5 | Phase 21 security script deletion requires updating `shared-script-checksums.manifest.json` in a separate PR | Create the manifest update as a prerequisite commit before the deletion PR |
 | R6 | `copilot-instructions` Phase 8 scaffold breaks the existing PowerShell validation in that repo | Add `cargo build` after workspace creation; if `validate-planning-structure.ps1` fails, debug before proceeding |
-| R7 | `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` does not exist (no `definitions/` source) | Apply the fix directly to `.github/instructions/` and skip W2.6 re-render step |
+| R7 | A legacy consumer still assumes `definitions/shared/instructions/` is authored source | Keep the compatibility mirror available, but update only the canonical `definitions/instructions/` source and re-render consumer surfaces instead of editing legacy mirrors directly |
 
 ---
 

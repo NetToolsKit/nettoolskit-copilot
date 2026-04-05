@@ -8,7 +8,10 @@
 
 `definitions/providers/github/` stores the repository-authored provider surfaces that are rendered into `.github/`.
 
-Shared instructions and reusable templates live under `definitions/shared/`. GitHub-native repository assets that are intentionally maintained in place stay in `.github/` and are not projected from this tree.
+Canonical reusable assets now live under `definitions/instructions/`,
+`definitions/templates/`, `definitions/agents/`, `definitions/skills/`, and
+`definitions/hooks/`. `definitions/shared/` remains compatibility-only while
+older consumers finish cutting over.
 
 ---
 
@@ -16,7 +19,7 @@ Shared instructions and reusable templates live under `definitions/shared/`. Git
 
 - ✅ Authoritative source for GitHub/Copilot runtime surfaces
 - ✅ Separates managed root files, agents, chat modes, prompts, and hooks
-- ✅ Keeps shared instruction and prompt assets out of the provider-specific tree
+- ✅ Keeps canonical instruction, template, agent, skill, and hook assets out of the provider-specific tree
 - ✅ Renders into `.github/` through a single repository-owned entrypoint
 
 ---
@@ -38,6 +41,9 @@ Shared instructions and reusable templates live under `definitions/shared/`. Git
 - `definitions/providers/github/chatmodes/`
 - `definitions/providers/github/prompts/`
 - `definitions/providers/github/hooks/`
+- `definitions/README.md`
+- `definitions/instructions/README.md`
+- `definitions/templates/README.md`
 - `definitions/shared/README.md`
 - `scripts/runtime/render-github-instruction-surfaces.ps1`
 

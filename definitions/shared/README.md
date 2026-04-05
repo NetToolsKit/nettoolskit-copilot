@@ -6,8 +6,8 @@
 
 ## Introduction
 
-`definitions/shared/` remains available to avoid breaking existing consumers
-while the canonical roots move to:
+`definitions/shared/` remains available to avoid breaking legacy consumers
+while canonical authored roots have already moved to:
 
 - `definitions/instructions/`
 - `definitions/templates/`
@@ -75,13 +75,13 @@ graph TD
 
 ## Projection Contract
 
-Shared assets keep canonical authority even when projected into runtime
-surfaces.
+`definitions/shared/` is now compatibility-first.
 
 - Transitional compatibility source: `definitions/shared/`
 - Preferred canonical source: `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`
+- Remaining authored shared prompt lane: `definitions/shared/prompts/` and `definitions/shared/prompts/poml/`
 - Projected runtime surface: `.github/`, `.codex/`, `.claude/`, `.vscode/`
-- Ownership and projection rules: `.github/governance/provider-surface-projection.catalog.json`
+- Ownership and projection rules: `definitions/providers/github/governance/provider-surface-projection.catalog.json`
 - Naming contract: semantic domain folders plus stable `ntk-*` file names for
   instruction assets
 
@@ -103,8 +103,8 @@ have been realigned.
 - [definitions/shared/prompts/README.md](prompts/README.md)
 - [definitions/shared/prompts/poml/README.md](prompts/poml/README.md)
 - [Repository README Rules](../../.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md)
-- [README Template](../../.github/templates/readme-template.md)
-- [.github/governance/provider-surface-projection.catalog.json](../../.github/governance/provider-surface-projection.catalog.json)
+- [README Template](../templates/docs/readme-template.md)
+- [provider-surface-projection.catalog.json](../providers/github/governance/provider-surface-projection.catalog.json)
 
 ---
 

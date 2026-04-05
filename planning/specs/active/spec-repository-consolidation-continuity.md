@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-04 09:45
+- LastUpdated: 2026-04-05 11:35
 - Objective: define the design intent and safe execution conditions for the six consolidation workstreams identified after the triangulation analysis of `nettoolskit-copilot`, `nettoolskit-cli`, and `copilot-instructions`.
 - Planning Readiness: ready-for-plan
 - Related Plan: `planning/active/plan-repository-consolidation-continuity.md`
@@ -16,7 +16,7 @@ Generated: 2026-03-29
   - `planning/completed/plan-script-retirement-phase-20c-self-heal.md`
   - `planning/completed/script-retirement-safety-matrix.md`
   - `planning/completed/rust-script-parity-ledger.md`
-  - `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
   - `.github/workflows/ci.yml`
   - `crates/cli/src/main.rs`
   - `crates/cli/src/runtime_commands.rs`
@@ -29,7 +29,7 @@ Generated: 2026-03-29
 
 The triangulation analysis revealed six distinct consolidation concerns that are not covered by the current Phase 17 tactical plan:
 
-1. **Operating model desalignment**: `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` still describes a .NET monorepo with `src/`, `modules/`, `samples/src/Rent.Service.*`, `dotnet build`, and `dotnet test` topology. The actual workspace is a Rust multi-crate layout with `crates/{cli,core,ui,otel,orchestrator,commands,task-worker}` and `cargo build --workspace`. Every AI agent routing instruction that hits this file receives wrong build commands, wrong topology, and wrong domain instruction map references. This is the highest-priority correctness risk in the repository.
+1. **Operating model drift across canonical and projected surfaces**: the repository operating model now belongs to `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`, but historical plans and compatibility mirrors still mention the older `.github/instructions/core/*` and `definitions/shared/instructions/*` paths. If these stale references remain untreated, future work can reopen the wrong authority model even after the Rust workspace topology was fixed.
 
 2. **CLI surface documentation gap**: The `ntk` binary now exposes 12 `runtime` subcommands, 29 `validation` subcommands, `manifest` submenu, `service` mode (Axum HTTP + ChatOps), and `completions` (bash/zsh/fish/powershell). None of these surfaces are documented in the root `README.md` or `crates/cli/README.md`. The existing docs describe either the original interactive TUI model or just 3 bullet features.
 
@@ -39,7 +39,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 5. **`copilot-instructions` Phase 8 awaiting directives**: The `copilot-instructions` repo has a planning-ready spec (`spec-rust-runtime-engine-foundation-phase-8.md`) that is blocked on user-provided Rust directives. The spec defines the compatibility-first migration contract but does not create any Cargo files until directives arrive. Starting this migration would bring the instruction runtime into the same Rust-native model that `nettoolskit-copilot` already operates with.
 
-6. **`definitions/shared/instructions/` mirror synchronization**: The `ntk-core-repository-operating-model.instructions.md` exists in both `.github/instructions/` and `definitions/shared/instructions/`. Both copies must be updated together; updating only the `.github/` projection while leaving the authoritative `definitions/` source stale would cause the rendering pipeline to revert the fix on the next sync.
+6. **Canonical vs compatibility surface synchronization**: the repository now authors instructions in `definitions/instructions/*`, keeps `definitions/shared/*` only as compatibility, and renders provider/runtime consumers from `definitions/providers/*`. Historical references must stop treating `definitions/shared/instructions/*` or `.github/instructions/*` as the authored source, or future maintenance will drift back to the wrong root.
 
 7. **Pre-commit EOF hook command-line overflow on Windows**: the managed EOF hygiene hook currently forwards every staged file as its own `--literal-path` argument to `ntk runtime trim-trailing-blank-lines`. Large commits with hundreds of staged files can exceed Windows process invocation limits and fail before the commit completes.
 
@@ -52,7 +52,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 - The 23 PowerShell parity tests either run in CI with an explicit gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
 - Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 63 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
-- `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` stays in sync with the `.github/instructions/` projection after every update.
+- `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` remains the single authored source, while compatibility mirrors and `.github` projections stay renderer-derived.
 - Large staged commits remain committable on Windows because the managed EOF hygiene hook trims files in bounded batches instead of issuing one oversized process invocation.
 
 ---
@@ -61,17 +61,17 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 ### W2: Operating Model Alignment
 
-The authoritative source for `ntk-core-repository-operating-model.instructions.md` is `definitions/shared/instructions/`. The file in `.github/instructions/` is a projected copy. The correct fix sequence is:
+The authoritative source for the repository operating model is `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`. Provider/runtime copies are consumer surfaces. The correct fix sequence is:
 
-1. Edit `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` as the single authoritative change.
-2. Re-render `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` using the GitHub instruction surface renderer (`scripts/runtime/render-github-instruction-surfaces.ps1` or `ntk runtime bootstrap`).
+1. Edit `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` as the single authoritative change.
+2. Re-render downstream provider/runtime surfaces using the GitHub instruction surface renderer (`scripts/runtime/render-github-instruction-surfaces.ps1`) or `ntk runtime bootstrap`.
 3. Validate with `ntk validation instructions --repo-root . --warning-only false`.
 
-Changing only the `.github/` projection without updating the authoritative source is rejected because the next render pass would overwrite the fix.
+Changing only a projected or compatibility copy is rejected because the next render pass would overwrite the fix.
 
 Current execution checkpoint:
-- the authoritative `definitions/shared/instructions/core/ntk-core-repository-operating-model.instructions.md` has now been rewritten to the Rust workspace topology and command model
-- the `.github/instructions/` projection has been re-rendered from that authoritative source
+- the authoritative `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` has now been rewritten to the Rust workspace topology and command model
+- provider/runtime projections now derive from canonical `definitions/*` roots instead of treating `.github/*` as authored source
 - native validation confirmed the operating-model update without reopening planning-structure drift
 
 ### W3: CI PowerShell Test Coverage
@@ -121,7 +121,7 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 
 ### W2 alternatives
 
-1. Edit only `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` directly
+1. Edit only a projected `.github` copy directly
    - Rejected: the rendering pipeline would overwrite the fix on the next sync.
 2. Delete the file and inherit only from the global `%USERPROFILE%\.github` mirror
    - Rejected: would break workspace-adapter routing that depends on local override.
@@ -153,12 +153,12 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 
 | # | Risk | Severity | Mitigation |
 |---|---|---|---|
-| R1 | Editing the authoritative `definitions/shared/instructions/` file triggers a provider surface re-render that breaks unrelated instruction surfaces | Medium | Run `ntk validation instructions` and `ntk validation agent-hooks` before committing the re-render |
+| R1 | Editing the authoritative `definitions/instructions/` file triggers a provider surface re-render that breaks unrelated instruction surfaces | Medium | Run `ntk validation instructions` and `ntk validation agent-hooks` before committing the re-render |
 | R2 | Adding a Windows CI job for PowerShell parity tests increases CI cost and may fail due to environment differences | Low | Pin Pester version; use `continue-on-error: false` only after a trial run confirms stability; allow `warning-only` mode for first merge |
 | R3 | Phase 19 common-script consumer sweep finds unexpected consumers in test crates that re-lock deletion | Medium | Map all consumers with `rg` before touching any file; document blockers explicitly rather than forcing deletions |
 | R4 | Phase 20 runtime-script consumer sweep is too large for one PR; may need to split into 3–4 sub-phases | Low | Define sub-phase boundaries in the Phase 20 plan; each sub-phase closes its own consumer evidence set |
 | R5 | `copilot-instructions` Phase 8 diverges from `nettoolskit-copilot` Rust conventions mid-implementation | Medium | Lock a shared Rust edition, MSRV, deny list, and clippy flags between both repos before Phase 8 starts |
-| R6 | `definitions/shared/instructions/` file does not exist (the operating model file is native to `.github/instructions/` only) | High | Verified before plan execution; if no `definitions/` source exists, the authoritative source is `.github/instructions/` and the fix applies there directly |
+| R6 | A legacy consumer still assumes `definitions/shared/instructions/` or `.github/instructions/` is authored source | High | Keep compatibility mirrors available, but enforce the canonical-first rule through validators and provider-surface renderers |
 
 ---
 
