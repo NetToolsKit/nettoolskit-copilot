@@ -587,24 +587,24 @@ Status: `[x]` Completed (audit-only; zero deletions)
 
 #### Task W5.6: Create and Execute Phase 22 — `scripts/orchestration/**/*.ps1` (10)
 
-Status: `[~]` Partial / active Phase 22 plan opened
+Status: `[x]` Completed (audit-only; zero deletions)
 
-- Create `planning/specs/active/spec-script-retirement-phase-22-orchestration-sweep.md` and `planning/active/plan-script-retirement-phase-22-orchestration-sweep.md`.
+- Create `planning/specs/completed/spec-script-retirement-phase-22-orchestration-sweep.md` and `planning/completed/plan-script-retirement-phase-22-orchestration-sweep.md`.
 - The 10 orchestration scripts are staged-execution wrappers (`intake-stage.ps1`, `plan-stage.ps1`, `spec-stage.ps1`, `implement-stage.ps1`, `review-stage.ps1`, `validate-stage.ps1`, `closeout-stage.ps1`, `route-stage.ps1`, `invoke-codex-dispatch.ps1`, `invoke-task-worker.ps1`).
 - Consumer sweep commands:
   - `Get-ChildItem scripts\orchestration -Filter "*.ps1" -Recurse | ForEach-Object { rg $_.Name scripts, definitions, .github --count }`
 - The orchestration scripts are likely consumed by each other — the sweep must map the full dependency graph before deleting any leaf.
 - After sweep:
-  - Update the `crates/orchestrator` documentation to reflect that orchestration is now fully native.
-  - Update skill surfaces and authored runbooks that reference the stage scripts.
+  - No deletions were safe, so `crates/orchestrator` docs and skill surfaces did not need same-slice re-pointing.
+  - The blocker graph is now explicit for the entire orchestration domain.
 - Validation checklist:
-  - `cargo test -p nettoolskit-orchestrator --quiet`
+  - `cargo test -p nettoolskit-orchestrator --quiet` (known unrelated baseline failure in ChatOps tool-scope allowlist test)
   - `cargo test -p nettoolskit-cli --test test_suite --quiet`
   - `& .\.build\target\debug\ntk.exe validation all --repo-root . --warning-only false`
   - `pwsh -NoProfile -File scripts\security\Invoke-RustPackageVulnerabilityAudit.ps1 -RepoRoot $PWD -ProjectPath . -FailOnSeverities Critical,High`
   - `git diff --check`
 - Commit checkpoint:
-  - `chore(scripts): Phase 22 — retire confirmed-zero-consumer scripts/orchestration stage scripts`
+  - `docs(runtime-retirement): Phase 22 — record audit-only consumer proof for orchestration stage scripts`
 
 #### Task W5.7: Post-Phase-22 Retention Audit
 

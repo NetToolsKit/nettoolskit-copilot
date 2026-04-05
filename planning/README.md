@@ -58,7 +58,6 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)
 - [planning/active/plan-build-target-cleanup-and-artifact-pruning.md](planning/active/plan-build-target-cleanup-and-artifact-pruning.md)
 - [planning/active/plan-script-retirement-tail-cutover.md](planning/active/plan-script-retirement-tail-cutover.md)
-- [planning/active/plan-script-retirement-phase-22-orchestration-sweep.md](planning/active/plan-script-retirement-phase-22-orchestration-sweep.md)
 
 ---
 
@@ -112,6 +111,7 @@ Use `planning/` for versioned workstream control, not for transient scratch outp
 - [planning/completed/plan-script-retirement-phase-19.md](planning/completed/plan-script-retirement-phase-19.md)
 - [planning/completed/plan-script-retirement-phase-20-runtime-consumer-sweep.md](planning/completed/plan-script-retirement-phase-20-runtime-consumer-sweep.md)
 - [planning/completed/plan-script-retirement-phase-21-security-governance-sweep.md](planning/completed/plan-script-retirement-phase-21-security-governance-sweep.md)
+- [planning/completed/plan-script-retirement-phase-22-orchestration-sweep.md](planning/completed/plan-script-retirement-phase-22-orchestration-sweep.md)
 - [planning/completed/plan-script-retirement-phase-20c-self-heal.md](planning/completed/plan-script-retirement-phase-20c-self-heal.md)
 - [planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md](planning/completed/plan-script-retirement-phase-20d-provider-surface-dispatcher.md)
 - [planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md](planning/completed/plan-script-retirement-phase-20e-catalog-native-renderer-dispatch.md)
