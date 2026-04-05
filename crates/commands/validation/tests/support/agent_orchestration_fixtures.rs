@@ -11,6 +11,16 @@ pub fn write_file(path: &Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+pub fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 pub fn initialize_agent_hooks_repo(repo_root: &Path) {
     fs::create_dir_all(repo_root.join(".github/hooks/scripts"))
         .expect("hook script directory should be created");
@@ -206,11 +216,7 @@ pub fn write_agents_manifest(repo_root: &Path, contents: &str) {
 }
 
 pub fn write_permission_matrix(repo_root: &Path, contents: &str) {
-    write_repo_file(
-        repo_root,
-        ".github/governance/agent-skill-permissions.matrix.json",
-        contents,
-    );
+    write_governance_file(repo_root, "agent-skill-permissions.matrix.json", contents);
 }
 
 pub fn write_pipeline_manifest(repo_root: &Path, contents: &str) {
@@ -270,19 +276,11 @@ pub fn write_checkpoint_state_template(repo_root: &Path, contents: &str) {
 }
 
 pub fn write_runtime_policy_catalog(repo_root: &Path, contents: &str) {
-    write_repo_file(
-        repo_root,
-        ".github/governance/agent-runtime-policy.catalog.json",
-        contents,
-    );
+    write_governance_file(repo_root, "agent-runtime-policy.catalog.json", contents);
 }
 
 pub fn write_model_routing_catalog(repo_root: &Path, contents: &str) {
-    write_repo_file(
-        repo_root,
-        ".github/governance/agent-model-routing.catalog.json",
-        contents,
-    );
+    write_governance_file(repo_root, "agent-model-routing.catalog.json", contents);
 }
 
 pub fn write_agent_skill_markdown(repo_root: &Path, skill_name: &str, contents: &str) {
@@ -422,8 +420,8 @@ pub fn valid_pipeline_manifest_json() -> &'static str {
   "version": 1,
   "description": "Validation fixture for agent orchestration.",
   "runtime": {
-    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
-    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
+    "policyCatalogPath": "definitions/providers/github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": "definitions/providers/github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
     { "id": "intake", "agentId": "super-agent", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"], "onFailure": "retry-once" },

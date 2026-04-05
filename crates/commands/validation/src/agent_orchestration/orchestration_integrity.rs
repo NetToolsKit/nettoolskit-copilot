@@ -5,9 +5,9 @@ use std::path::PathBuf;
 
 use crate::agent_orchestration::common::{
     read_required_json_document, read_required_json_value, read_required_pipeline_manifest,
-    resolve_repo_relative_path, resolve_validation_repo_root, AgentManifest, EvalFixtures,
-    HandoffTemplate, PipelineDispatchMode, PipelineManifest, PipelineStageMode,
-    RunArtifactTemplate,
+    resolve_governance_default_path, resolve_repo_relative_path, resolve_validation_repo_root,
+    AgentManifest, EvalFixtures, HandoffTemplate, PipelineDispatchMode, PipelineManifest,
+    PipelineStageMode, RunArtifactTemplate,
 };
 use crate::error::ValidateAgentOrchestrationCommandError;
 use crate::operational_hygiene::common::derive_status;
@@ -75,8 +75,11 @@ const REQUIRED_FILES: &[&str] = &[
     ".codex/orchestration/templates/trace-record.template.json",
     ".codex/orchestration/templates/policy-evaluations.template.json",
     ".codex/orchestration/templates/checkpoint-state.template.json",
-    ".github/governance/agent-runtime-policy.catalog.json",
-    ".github/governance/agent-model-routing.catalog.json",
+];
+
+const REQUIRED_GOVERNANCE_FILES: &[&str] = &[
+    "agent-runtime-policy.catalog.json",
+    "agent-model-routing.catalog.json",
 ];
 
 /// Request payload for `validate-agent-orchestration`.
@@ -136,6 +139,14 @@ pub fn invoke_validate_agent_orchestration(
         let absolute_path = repo_root.join(relative_path);
         if !absolute_path.is_file() {
             failures.push(format!("Missing required file: {relative_path}"));
+        }
+    }
+    for file_name in REQUIRED_GOVERNANCE_FILES {
+        let absolute_path = resolve_governance_default_path(&repo_root, file_name);
+        if !absolute_path.is_file() {
+            failures.push(format!(
+                "Missing required file: definitions/providers/github/governance/{file_name}"
+            ));
         }
     }
 
@@ -262,7 +273,7 @@ pub fn invoke_validate_agent_orchestration(
     Ok(ValidateAgentOrchestrationResult {
         repo_root,
         required_directories_checked: REQUIRED_DIRECTORIES.len(),
-        required_files_checked: REQUIRED_FILES.len(),
+        required_files_checked: REQUIRED_FILES.len() + REQUIRED_GOVERNANCE_FILES.len(),
         agents_checked,
         stage_checks,
         warnings,

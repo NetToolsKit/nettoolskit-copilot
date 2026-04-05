@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added canonical GitHub governance definitions under `definitions/providers/github/governance/` for `instruction-ownership.manifest.json` and `authoritative-source-map.json`, so validation and audit commands can resolve authored policy without starting from `.github/governance/`.
 - Added an instruction-taxonomy migration checkpoint that defers `.github/.codex/.claude` projection cutover until canonical `definitions/` assets and validation/audit code are definitions-aware.
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
+
+### Changed
+- Changed agent-orchestration validation defaults, fixtures, and CLI test scaffolds to resolve the permission matrix and runtime/model routing catalogs from `definitions/providers/github/governance/*` first, while still materializing `.github/governance/*` mirrors for migration-time compatibility.
 - Added the first shallow projected instruction copies under `.github/instructions/{governance,development,operations,data}` while preserving the legacy projected taxonomy during migration.
 - Scaffolded shallow `definitions/instructions/{development,operations,security,data}` copies for backend, frontend, agentic, persistence, runtime, security, database, and privacy guidance while preserving the legacy instruction tree during migration.
 - Added the first canonical-root reorganization slice for `definitions/`, introducing scaffolded `instructions/`, `templates/`, `agents/`, `skills/`, and `hooks/` roots plus `docs/samples/manifests/` as the stable human-facing manifest sample lane.

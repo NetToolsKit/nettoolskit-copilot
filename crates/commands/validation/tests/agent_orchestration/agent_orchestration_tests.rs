@@ -52,8 +52,8 @@ fn test_invoke_validate_agent_orchestration_reports_invalid_pipeline_integrity()
   "version": 1,
   "description": "Invalid pipeline integrity fixture.",
   "runtime": {
-    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
-    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
+    "policyCatalogPath": "definitions/providers/github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": "definitions/providers/github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
     { "id": "intake", "agentId": "super-agent", "mode": "review", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"], "onFailure": "retry-once" },
@@ -91,8 +91,8 @@ fn test_invoke_validate_agent_orchestration_warns_for_eval_order_divergence() {
   "version": 1,
   "description": "Eval order divergence fixture.",
   "runtime": {
-    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
-    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
+    "policyCatalogPath": "definitions/providers/github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": "definitions/providers/github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
     { "id": "intake", "agentId": "super-agent", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"], "onFailure": "retry-once" },

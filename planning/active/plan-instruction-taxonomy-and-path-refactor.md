@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 00:30
+- LastUpdated: 2026-04-04 23:50
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -103,6 +103,7 @@ Generated: 2026-04-03 00:00
   - in progress; Rust validation tests and CLI validation command fixtures now scaffold canonical `definitions/` trees in temp repos so native checks pass without authored dependence on `.github/*`
   - in progress; provider-authored consumer surfaces under `definitions/providers/{claude,codex,github}` now resolve canonical `definitions/instructions/*`, `definitions/agents/*`, `definitions/templates/*`, and `definitions/providers/github/root/*` paths instead of linking back to projected `.github/*` authoring paths
   - in progress; runtime-facing provider docs, sync skills, and orchestration pipeline metadata now reference canonical governance catalogs under `definitions/providers/github/governance/*` instead of authored `.github/governance/*` paths
+  - in progress; agent-orchestration validators and their shared fixtures now resolve the permission matrix plus runtime/model routing catalogs from `definitions/providers/github/governance/*` first while still writing `.github/governance/*` mirrors for transition coverage
 - Commit checkpoint:
   - `refactor(instructions): update instruction routing and consumers`
 
@@ -310,6 +311,7 @@ Generated: 2026-04-03 00:00
   - in progress; core local-context and runtime-install-profile readers now prefer canonical governance catalogs under `definitions/providers/github/governance/*`, with explicit regression tests proving canonical preference and legacy fallback
   - in progress; `validate-instructions` now requires canonical governance assets under `definitions/providers/github/governance/*`, accepts either canonical or legacy JSON labels for known-contract checks, and prefers canonical governance documents when both mirrors exist
   - in progress; shared validation fixtures and CLI validation command fixtures now materialize authored governance JSON into both `definitions/providers/github/governance/*` and `.github/governance/*` so canonical-first validation can coexist with deferred generated-surface coverage
+  - in progress; `validate-agent-orchestration` and `validate-agent-permissions` now resolve agent governance catalogs from `definitions/providers/github/governance/*`, and their orchestration fixtures/CLI command scaffolds materialize canonical plus legacy governance mirrors so the canonical contract is enforced before projected-surface cutover
 - Commit checkpoint:
   - `refactor(validation): prioritize canonical definitions in validate-instructions`
 

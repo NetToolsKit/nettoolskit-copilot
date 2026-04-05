@@ -198,6 +198,17 @@ pub(crate) fn resolve_governance_default_path(repo_root: &Path, file_name: &str)
     }
 }
 
+pub(crate) fn resolve_governance_file_path(
+    repo_root: &Path,
+    override_path: Option<&Path>,
+    file_name: &str,
+) -> PathBuf {
+    match override_path {
+        Some(path) => resolve_full_path(repo_root, path),
+        None => resolve_governance_default_path(repo_root, file_name),
+    }
+}
+
 fn resolve_default_repo_path(repo_root: &Path, default_path: &str) -> PathBuf {
     let normalized = default_path.replace('\\', "/");
     if let Some(file_name) = normalized.strip_prefix(".github/governance/") {

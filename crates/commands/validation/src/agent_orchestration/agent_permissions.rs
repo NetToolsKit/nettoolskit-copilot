@@ -5,14 +5,14 @@ use std::path::PathBuf;
 
 use crate::agent_orchestration::common::{
     matches_any_glob, normalize_path, read_required_json_document, read_required_pipeline_manifest,
-    resolve_repo_relative_path, resolve_validation_repo_root, AgentContract, AgentManifest,
-    PermissionMatrix, PermissionMatrixAgent, PipelineManifest,
+    resolve_governance_file_path, resolve_repo_relative_path, resolve_validation_repo_root,
+    AgentContract, AgentManifest, PermissionMatrix, PermissionMatrixAgent, PipelineManifest,
 };
 use crate::error::ValidateAgentPermissionsCommandError;
 use crate::operational_hygiene::common::{derive_status, push_required_finding};
 use crate::ValidationCheckStatus;
 
-const DEFAULT_MATRIX_PATH: &str = ".github/governance/agent-skill-permissions.matrix.json";
+const DEFAULT_MATRIX_FILE_NAME: &str = "agent-skill-permissions.matrix.json";
 const DEFAULT_AGENT_MANIFEST_PATH: &str = ".codex/orchestration/agents.manifest.json";
 const DEFAULT_PIPELINE_PATH: &str = ".codex/orchestration/pipelines/default.pipeline.json";
 
@@ -81,10 +81,10 @@ pub fn invoke_validate_agent_permissions(
 ) -> Result<ValidateAgentPermissionsResult, ValidateAgentPermissionsCommandError> {
     let repo_root = resolve_validation_repo_root(request.repo_root.as_deref())
         .map_err(|source| ValidateAgentPermissionsCommandError::ResolveWorkspaceRoot { source })?;
-    let matrix_path = resolve_repo_relative_path(
+    let matrix_path = resolve_governance_file_path(
         &repo_root,
         request.matrix_path.as_deref(),
-        DEFAULT_MATRIX_PATH,
+        DEFAULT_MATRIX_FILE_NAME,
     );
     let agent_manifest_path = resolve_repo_relative_path(
         &repo_root,

@@ -1730,8 +1730,8 @@ fn valid_pipeline_manifest_json() -> &'static str {
   "version": 1,
   "description": "Validation fixture for agent orchestration.",
   "runtime": {
-    "policyCatalogPath": ".github/governance/agent-runtime-policy.catalog.json",
-    "modelRoutingCatalogPath": ".github/governance/agent-model-routing.catalog.json"
+    "policyCatalogPath": "definitions/providers/github/governance/agent-runtime-policy.catalog.json",
+    "modelRoutingCatalogPath": "definitions/providers/github/governance/agent-model-routing.catalog.json"
   },
   "stages": [
     { "id": "intake", "agentId": "super-agent", "mode": "plan", "execution": { "scriptPath": "scripts/orchestration/stages/intake-stage.ps1", "dispatchMode": "codex-exec", "promptTemplatePath": ".codex/orchestration/prompts/super-agent-intake-stage.prompt.md", "responseSchemaPath": ".github/schemas/agent.stage-intake-result.schema.json" }, "inputArtifacts": ["request"], "outputArtifacts": ["normalized-request", "intake-report"], "onFailure": "retry-once" },
@@ -1816,20 +1816,15 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
         &repo_root.join(".github/instructions/core/ntk-core-repository-operating-model.instructions.md"),
         "# Repository Operating Model\n",
     );
-    write_file(
-        &repo_root.join(".github/governance/agent-runtime-policy.catalog.json"),
-        r#"{ "version": 1, "rules": [] }"#,
-    );
-    write_file(
-        &repo_root.join(".github/governance/agent-model-routing.catalog.json"),
-        r#"{ "version": 1, "rules": [] }"#,
-    );
+    write_governance_file(repo_root, "agent-runtime-policy.catalog.json", r#"{ "version": 1, "rules": [] }"#);
+    write_governance_file(repo_root, "agent-model-routing.catalog.json", r#"{ "version": 1, "rules": [] }"#);
     write_file(
         &repo_root.join(".codex/orchestration/agents.manifest.json"),
         valid_agents_manifest_json(),
     );
-    write_file(
-        &repo_root.join(".github/governance/agent-skill-permissions.matrix.json"),
+    write_governance_file(
+        repo_root,
+        "agent-skill-permissions.matrix.json",
         valid_permission_matrix_json(),
     );
     write_file(
