@@ -35,12 +35,39 @@ This tree now separates five canonical authored lanes:
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Examples](#usage-examples)
   - [Architecture](#architecture)
   - [Canonical Roots](#canonical-roots)
   - [Provider Consumers](#provider-consumers)
   - [Migration Policy](#migration-policy)
+- [API Reference](#api-reference)
+- [Build and Tests](#build-and-tests)
+- [Contributing](#contributing)
+- [Dependencies](#dependencies)
 - [References](#references)
 - [License](#license)
+
+---
+
+## Installation
+
+No separate installation step is required. These assets are consumed directly from the repository root by workspace commands and provider-surface renderers.
+
+---
+
+## Quick Start
+
+Author canonical non-code assets under `definitions/` first, then project them outward with the repository runtime commands.
+
+---
+
+## Usage Examples
+
+- Inspect rules and governance assets under `definitions/instructions/`
+- Inspect reusable authored assets under `definitions/templates/`
+- Re-render provider surfaces with `ntk runtime render-provider-surfaces --repo-root .`
 
 ---
 
@@ -110,6 +137,47 @@ This root is mid-migration and currently preserves compatibility on purpose.
 - Root `templates/` remains available until its authored content is migrated into `definitions/templates/`.
 - The reorganization must prefer copy-then-cutover over destructive moves so documents are not lost during path normalization.
 - Human-facing examples belong in `docs/samples/`; canonical reusable authored assets belong in `definitions/templates/`.
+
+---
+
+## API Reference
+
+Canonical roots exposed by `definitions/`:
+
+- `instructions/`
+- `templates/`
+- `agents/`
+- `skills/`
+- `hooks/`
+- `providers/`
+
+---
+
+## Build and Tests
+
+Useful verification commands from the repository root:
+
+```powershell
+cargo run -q -p nettoolskit-cli -- validation instructions --repo-root . --warning-only false
+cargo run -q -p nettoolskit-cli -- validation template-standards --repo-root . --warning-only false
+cargo run -q -p nettoolskit-cli -- runtime render-provider-surfaces --repo-root .
+```
+
+---
+
+## Contributing
+
+Add or edit canonical assets in `definitions/` first. Update provider mirrors or generated runtime surfaces only after the authored source is correct and validation passes.
+
+---
+
+## Dependencies
+
+This tree is consumed by:
+
+- `crates/commands/runtime` render and projection commands
+- `crates/commands/validation` governance, README, and template validators
+- provider-specific consumers under `definitions/providers/*`
 
 ---
 

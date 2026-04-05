@@ -34,11 +34,38 @@ content when an equivalent canonical root already exists.
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Examples](#usage-examples)
   - [Architecture](#architecture)
   - [Shared Asset Boundaries](#shared-asset-boundaries)
   - [Projection Contract](#projection-contract)
+- [API Reference](#api-reference)
+- [Build and Tests](#build-and-tests)
+- [Contributing](#contributing)
+- [Dependencies](#dependencies)
 - [References](#references)
 - [License](#license)
+
+---
+
+## Installation
+
+No separate installation step is required. `definitions/shared/` remains a compatibility lane consumed by existing repository tooling while canonical roots complete cutover.
+
+---
+
+## Quick Start
+
+Prefer canonical authored roots under `definitions/`, and consult `definitions/shared/` only when a consumer has not been realigned yet.
+
+---
+
+## Usage Examples
+
+- Check the compatibility instruction lane in `definitions/shared/instructions/`
+- Check the remaining shared prompt lane in `definitions/shared/prompts/`
+- Use `ntk validation authoritative-source-policy --repo-root .` to verify migration-time source ownership
 
 ---
 
@@ -87,6 +114,43 @@ graph TD
 
 Do not delete or force-move existing shared content until all known consumers
 have been realigned.
+
+---
+
+## API Reference
+
+Compatibility-first subtrees currently kept under `definitions/shared/`:
+
+- `instructions/`
+- `prompts/`
+- `templates/`
+
+---
+
+## Build and Tests
+
+Useful verification commands from the repository root:
+
+```powershell
+cargo run -q -p nettoolskit-cli -- validation authoritative-source-policy --repo-root . --warning-only false
+cargo run -q -p nettoolskit-cli -- validation instructions --repo-root . --warning-only false
+```
+
+---
+
+## Contributing
+
+Do not add new long-lived authored roots here when an equivalent canonical path already exists under `definitions/`. Use copy-first migration steps so consumers can be cut over safely.
+
+---
+
+## Dependencies
+
+This compatibility tree is still read by:
+
+- older provider mirrors during migration
+- shared prompt projection flows
+- validation code that preserves temporary fallback behavior
 
 ---
 

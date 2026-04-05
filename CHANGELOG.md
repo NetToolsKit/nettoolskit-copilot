@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Expanded the root `README.md` and `crates/cli/README.md` so the live `ntk` command surface, runtime/validation groups, shell completions, service mode endpoints, and operator quick-start flows are documented from the current Clap command inventory instead of stale summary bullets.
 - Reduced `definitions/providers/github/root/AGENTS.md` and `definitions/providers/github/root/copilot-instructions.md` to thin bootstrap documents so instruction-architecture passes without global-core budget warnings while detailed policy stays in canonical governance and domain instructions.
 - Completed the generated provider-surface cutover: `.github`, `.codex`, and `.claude` are now regenerated from canonical `definitions/*` roots for governance, policies, prompts, chatmodes, templates, orchestration prompts, MCP artifacts, and skill/runtime mirrors.
 - Changed the GitHub projection pipeline to emit nested `.github/templates/{codegen,docs,manifests,prompts,workflows}` outputs, canonical governance/policy mirrors, and normalized projected relative links so provider consumers stop depending on legacy authored `.github/*` paths.

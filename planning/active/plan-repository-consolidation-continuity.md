@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:05
+- LastUpdated: 2026-04-05 11:42
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -308,7 +308,7 @@ Status: `[ ]` Pending (only if Option B was selected instead of W3.2)
 
 ### Workstream W4 — CLI Surface Documentation
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 **Problem being fixed:**
 The `ntk` binary exposes 50+ subcommands across 5 groups (`manifest`, `runtime`, `validation`,
@@ -317,7 +317,7 @@ in `crates/cli/README.md` and a features list in the root `README.md`.
 
 #### Task W4.1: Compile Full Command Reference
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Extract all command groups and subcommands from:
   - `crates/cli/src/main.rs` — top-level `Commands` enum
@@ -326,11 +326,11 @@ Status: `[ ]` Pending
 - Build the reference table with: `ntk <group> <subcommand>` form, one-line description.
 - Commands:
   - `rg "/// " crates/cli/src/main.rs crates/cli/src/runtime_commands.rs crates/cli/src/validation_commands.rs`
-- Checkpoint: command table in working notes, ready to insert into docs.
+- Checkpoint: command inventory compiled from live `--help` output and aligned with the current Clap command surfaces in `crates/cli/src/main.rs`, `crates/cli/src/runtime_commands.rs`, and `crates/cli/src/validation_commands.rs`.
 
 #### Task W4.2: Update Root `README.md` — Command Reference Section
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Target: `README.md`
 - Add a `### Command Reference` subsection inside `## Features` or as its own `## Command Reference` section (after `## Features`).
@@ -404,14 +404,14 @@ Status: `[ ]` Pending
   | --verbose / -v | bool | Enable verbose output |
   ```
 
-- Commands to validate after edit:
-  - `& .\.build\target\debug\ntk.exe validation readme-standards --repo-root .`
-- Commit checkpoint:
-  - `docs(readme): add full command reference and global flags section`
+- Outcome:
+  - `README.md` now exposes a dedicated `## Command Reference` section after `## Features`.
+  - The section documents the live top-level surface, manifest commands, AI usage commands, runtime commands, validation commands, and global flags.
+  - The contents index now links directly to the command reference section.
 
 #### Task W4.3: Update `crates/cli/README.md` — Expand Features and Add Subcommand Table
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Target: `crates/cli/README.md`
 - Replace the current 3-feature bullet list under `## Features` with a grouped table by command surface.
@@ -421,23 +421,41 @@ Status: `[ ]` Pending
   - `ntk runtime healthcheck --repo-root .`
   - `ntk service --port 8080`
   - `ntk completions powershell | Out-String | Invoke-Expression`
-- Add a `## Service Mode` section covering:
-  - `POST /task/submit` — authenticated task submission with `NTK_SERVICE_AUTH_TOKEN`
-  - `GET /health` — runtime health JSON
-  - `GET /ready` — readiness check
-  - ChatOps ingress: Telegram webhook (`/ntk/telegram`) and Discord interactions (`/ntk/discord`)
-  - Environment variables: `NTK_SERVICE_AUTH_TOKEN`, `NTK_CHATOPS_TELEGRAM_WEBHOOK_SECRET_TOKEN_ENV`, `NTK_CHATOPS_DISCORD_INTERACTIONS_PUBLIC_KEY_ENV`
-- Commit checkpoint:
-  - `docs(cli): expand README with full subcommand groups, service mode, and quick start`
+- Outcome:
+  - `crates/cli/README.md` now documents the `ntk` binary as a developer orchestrator entry point instead of a minimal library wrapper.
+  - The feature section is grouped by command surface.
+  - `## Quick Start` now covers the most common operator invocations.
+  - `## Command Surfaces` summarizes the top-level groups plus representative manifest, AI, runtime, and validation commands.
+  - `## Service Mode` now documents the real HTTP routes:
+    - `GET /`
+    - `GET /health`
+    - `GET /ready`
+    - `POST /task/submit`
+    - `POST /chatops/telegram/webhook`
+    - `POST /chatops/discord/interactions`
+  - The service-mode section now points to the real environment variables:
+    - `NTK_SERVICE_AUTH_TOKEN`
+    - `NTK_CHATOPS_TELEGRAM_WEBHOOK_SECRET_TOKEN`
+    - `NTK_CHATOPS_DISCORD_INTERACTIONS_PUBLIC_KEY`
+    - replay-protection and timeout controls
+  - Added a small Mermaid architecture section and preserved the embedded API contract for `interactive_mode`.
 
 #### Task W4.4: Validate All README Changes
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Run: `& .\.build\target\debug\ntk.exe validation readme-standards --repo-root . --warning-only false`
 - Run: `& .\.build\target\debug\ntk.exe validation planning-structure --repo-root . --warning-only false`
 - Run: `git diff --check`
-- Checkpoint: all validation checks pass; no trailing whitespace or merge conflicts.
+- Validation evidence:
+  - `cargo run -q -p nettoolskit-cli -- validation readme-standards --repo-root . --warning-only false` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation planning-structure --repo-root . --warning-only false` ✅
+  - `git diff --check` ✅
+
+**Checkpoint: W4 CLI Surface Documentation Complete**
+- `README.md` now exposes a durable command reference for the live `ntk` surface instead of a feature-only summary.
+- `crates/cli/README.md` now serves as the operator-facing reference for interactive use, service mode, shell completions, validation, and runtime maintenance.
+- Command tables were derived from the current Clap surfaces instead of stale documentation.
 
 ---
 

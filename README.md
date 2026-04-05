@@ -34,6 +34,7 @@ Objectives:
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contents](#contents)
+  - [Command Reference](#command-reference)
   - [Architecture](#architecture)
   - [Control Plane Model](#control-plane-model)
   - [Crates](#crates)
@@ -46,6 +47,106 @@ Objectives:
 - [Dependencies](#dependencies)
 - [References](#references)
 - [License](#license)
+
+---
+
+## Command Reference
+
+Run `ntk --help` for the current top-level surface. If no command is provided, `ntk [PROMPT]` starts the interactive CLI.
+
+### Top-Level Commands
+
+| Surface | Command | Description |
+| --- | --- | --- |
+| Interactive | `ntk [PROMPT]` | Launch the interactive CLI when no explicit subcommand is supplied |
+| Manifests | `ntk manifest` | Manage and apply manifests |
+| AI | `ntk ai` | Execute AI-focused command surfaces |
+| Runtime | `ntk runtime` | Execute repository runtime hook and maintenance surfaces |
+| Validation | `ntk validation` | Execute native repository validation checks |
+| Completions | `ntk completions <shell>` | Generate shell completions for `bash`, `elvish`, `fish`, `powershell`, or `zsh` |
+| Service | `ntk service` | Run background HTTP service mode |
+
+### Manifest Commands
+
+| Command | Description |
+| --- | --- |
+| `ntk manifest list` | Discover available manifests in the workspace |
+| `ntk manifest check` | Validate manifest structure and dependencies |
+| `ntk manifest render` | Preview generated files without applying changes |
+| `ntk manifest apply` | Apply a manifest file to generate or update files |
+
+### AI Commands
+
+| Command | Description |
+| --- | --- |
+| `ntk ai usage weekly` | Report one ISO week of persisted local AI usage history |
+| `ntk ai usage summary` | Report a bounded recent multi-week summary of persisted local AI usage history |
+
+### Runtime Commands
+
+| Command | Description |
+| --- | --- |
+| `ntk runtime pre-tool-use` | Normalize hook payloads for VS Code `PreToolUse` |
+| `ntk runtime doctor` | Run the native runtime doctor workflow |
+| `ntk runtime healthcheck` | Run the native runtime healthcheck workflow |
+| `ntk runtime self-heal` | Run the native runtime self-heal workflow |
+| `ntk runtime update-local-context-index` | Build or refresh the repository-owned local context index |
+| `ntk runtime query-local-context-index` | Query the repository-owned local context index |
+| `ntk runtime update-local-memory` | Build or refresh the repository-owned SQLite local memory snapshot |
+| `ntk runtime query-local-memory` | Query the repository-owned SQLite local memory snapshot |
+| `ntk runtime export-planning-summary` | Export a context handoff summary from active planning artifacts |
+| `ntk runtime export-enterprise-trends` | Export enterprise validation and vulnerability trends |
+| `ntk runtime apply-vscode-templates` | Apply tracked VS Code template files into active workspace files |
+| `ntk runtime render-vscode-mcp-template` | Render the tracked VS Code MCP template from the canonical catalog |
+| `ntk runtime render-provider-surfaces` | Render tracked provider surfaces from the canonical projection catalog |
+| `ntk runtime render-mcp-runtime-artifacts` | Render the tracked VS Code and Codex MCP artifacts from the canonical catalog |
+| `ntk runtime sync-codex-mcp-config` | Apply MCP server definitions into the local Codex `config.toml` |
+| `ntk runtime trim-trailing-blank-lines` | Trim trailing whitespace and blank lines from text files |
+| `ntk runtime pre-commit-eof-hygiene` | Apply staged-file EOF hygiene for repository pre-commit flows |
+| `ntk runtime setup-git-hooks` | Configure repository-local or managed-global Git hooks |
+| `ntk runtime setup-global-git-aliases` | Configure managed global Git aliases |
+
+### Validation Commands
+
+| Command | Description |
+| --- | --- |
+| `ntk validation all` | Run the full validation orchestration for one profile |
+| `ntk validation agent-orchestration` | Validate multi-agent orchestration contracts and runtime assets |
+| `ntk validation agent-permissions` | Validate agent permission matrix and stage command contracts |
+| `ntk validation agent-skill-alignment` | Validate agent skill references against manifests, pipeline, and evals |
+| `ntk validation agent-hooks` | Validate repository-owned VS Code/Codex hook assets |
+| `ntk validation audit-ledger` | Validate the audit ledger hash chain |
+| `ntk validation authoritative-source-policy` | Validate the centralized authoritative documentation policy and source map |
+| `ntk validation architecture-boundaries` | Validate repository architecture boundary baselines |
+| `ntk validation instruction-architecture` | Validate instruction architecture ownership and boundary rules |
+| `ntk validation instructions` | Validate repository instruction and authored guidance assets |
+| `ntk validation instruction-metadata` | Validate instruction, prompt, and chat mode frontmatter metadata |
+| `ntk validation compatibility-lifecycle-policy` | Validate `COMPATIBILITY.md` lifecycle and EOL semantics |
+| `ntk validation dotnet-standards` | Validate `.NET` template standards under `.github/templates` |
+| `ntk validation policy` | Validate repository policy contracts under `.github/policies` |
+| `ntk validation planning-structure` | Validate versioned planning workspace structure |
+| `ntk validation powershell-standards` | Validate PowerShell script standards across repository scripts |
+| `ntk validation readme-standards` | Validate README files against repository standards |
+| `ntk validation routing-coverage` | Validate routing catalog coverage against golden fixtures |
+| `ntk validation runtime-script-tests` | Validate runtime PowerShell smoke tests |
+| `ntk validation security-baseline` | Validate repository security baseline contracts |
+| `ntk validation shared-script-checksums` | Validate shared script checksum manifest integrity |
+| `ntk validation shell-hooks` | Validate shell hook syntax and semantic guards |
+| `ntk validation supply-chain` | Validate local supply-chain baseline and export SBOM evidence |
+| `ntk validation template-standards` | Validate shared repository template standards |
+| `ntk validation release-governance` | Validate release governance contracts and release guardrails |
+| `ntk validation release-provenance` | Validate release provenance evidence and git traceability |
+| `ntk validation warning-baseline` | Validate analyzer warning volume against the warning baseline |
+| `ntk validation workspace-efficiency` | Validate VS Code workspace efficiency and configuration hygiene |
+
+### Global Flags
+
+| Flag | Description |
+| --- | --- |
+| `--log-level <level>` | Set logging level: `off`, `error`, `warn`, `info`, `debug`, `trace` |
+| `--config <path>` | Point the CLI at an explicit configuration file |
+| `-v`, `--verbose` | Enable verbose output |
+| `-V`, `--version` | Print version |
 
 ---
 
