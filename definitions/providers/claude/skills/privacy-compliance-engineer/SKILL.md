@@ -9,14 +9,14 @@ description: Design and enforce privacy and data protection controls across appl
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Instruction pack
 
-- `.github/instructions/security/ntk-security-data-privacy-compliance.instructions.md`
+- `.github/instructions/data/ntk-data-privacy-compliance.instructions.md`
 - `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
 - `.github/instructions/data/ntk-data-database.instructions.md` (when data schema/queries are in scope)
-- `.github/instructions/data/ntk-data-orm.instructions.md` (when API/service logic is in scope)
+- `.github/instructions/development/ntk-development-persistence-orm.instructions.md` (when API/service logic is in scope)
 
 ## Claude-native execution
 

@@ -24,7 +24,7 @@
 - `global-runtime` mode:
   - active when the target workspace does not provide the local adapter files above
   - use the mirrored runtime baseline under `%USERPROFILE%\\.github`
-  - do not assume the runtime repository routing catalog or `instructions/core/ntk-core-repository-operating-model.instructions.md` applies to the target workspace
+  - do not assume the runtime repository routing catalog or `instructions/governance/ntk-governance-repository-operating-model.instructions.md` applies to the target workspace
   - build a minimal local context pack manually from the target repo structure
   - keep transient orchestration artifacts under `.build/super-agent/planning/` and `.build/super-agent/specs/`
 
@@ -64,22 +64,22 @@ Baseline workflow when the target workspace provides a local adapter and routing
 Use the **Mandatory Context Files** list above.
 
 2) Then select additional instruction files based on what you are changing
-- If editing `.github/**`: include `instructions/process/collaboration/ntk-process-pr.instructions.md` and `instructions/docs/ntk-docs-prompt-templates.instructions.md` when relevant.
-- If editing `instructions/**`: include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.
+- If editing `.github/**`: include `instructions/governance/ntk-governance-pr.instructions.md` and `instructions/governance/ntk-governance-prompt-templates.instructions.md` when relevant.
+- If editing `instructions/**`: include `instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`.
 - If editing code: select the domain instruction file(s) under `instructions/` that match the semantic folder and runtime/catalog route.
   - backend examples:
-    - `instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
-    - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-    - `instructions/architecture/backend/ntk-backend-architecture-platform.instructions.md`
+    - `instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+    - `instructions/development/ntk-development-backend-architecture-core.instructions.md`
+    - `instructions/development/ntk-development-backend-architecture-platform.instructions.md`
   - frontend examples:
-    - `instructions/architecture/frontend/ntk-frontend-architecture-core.instructions.md`
-    - `instructions/architecture/frontend/ntk-frontend-vue-quasar.instructions.md`
+    - `instructions/development/ntk-development-frontend-architecture-core.instructions.md`
+    - `instructions/development/ntk-development-frontend-vue-quasar.instructions.md`
   - data/security examples:
     - `instructions/data/ntk-data-database.instructions.md`
-    - `instructions/data/ntk-data-orm.instructions.md`
+    - `instructions/development/ntk-development-persistence-orm.instructions.md`
   - runtime/process examples:
-    - `instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
-    - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
+    - `instructions/operations/ntk-operations-powershell-execution.instructions.md`
+    - `instructions/development/ntk-development-backend-rust-testing.instructions.md`
 
 3) Precedence rules when instructions conflict
 - Follow the user prompt first.
@@ -114,7 +114,7 @@ Use the **Mandatory Context Files** list above.
   - `show status` — output the Current state block only
   - `show progress` — output Completed + Next step blocks
   - `resume from summary` — drop raw history, resume from last checkpoint
-- See `instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md` for the full protocol.
+- See `instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md` for the full protocol.
 
 # Context Preservation & Execution Patterns
 
@@ -150,11 +150,11 @@ Use the **Mandatory Context Files** list above.
   7. reviewer
   8. release-closeout
   9. planning update
-- Follow `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
-- Follow `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
-- Follow `instructions/process/delivery/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification evidence.
-- Follow `instructions/agents/ntk-agents-super-agent.instructions.md` for the mandatory lifecycle contract.
-- Follow `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
+- Follow `instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md` for planning structure, specialist routing, and closeout expectations.
+- Follow `instructions/governance/ntk-governance-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Follow `instructions/governance/ntk-governance-tdd-verification.instructions.md` for code-bearing work that needs explicit verification evidence.
+- Follow `agents/super-agent/ntk-agents-super-agent.instructions.md` for the mandatory lifecycle contract.
+- Follow `instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction before planning.
 
 ### For Multi-Task Requests
 - Apply Task-Based Execution Methodology (see below)
@@ -202,39 +202,31 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
 # Repository Operating Model
 - In `workspace-adapter` mode, repo-specific topology, commands, style, release process, and domain instruction map live in:
   - `copilot-instructions.md`
-  - `instructions/core/ntk-core-repository-operating-model.instructions.md`
+  - `instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 - Universal Super Agent instructions that still apply in `global-runtime` mode are:
-  - `instructions/agents/ntk-agents-super-agent.instructions.md`
-  - `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `instructions/core/ntk-core-artifact-layout.instructions.md`
-  - `instructions/core/ntk-core-authoritative-sources.instructions.md`
-  - `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
-  - `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`
-  - `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
-  - `instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
-  - `instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
-  - `instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`
-- `instructions/core/ntk-core-repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
+  - `agents/super-agent/ntk-agents-super-agent.instructions.md`
+  - `instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+  - `instructions/governance/ntk-governance-artifact-layout.instructions.md`
+  - `instructions/governance/ntk-governance-authoritative-sources.instructions.md`
+  - `instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`
+  - `instructions/governance/ntk-governance-worktree-isolation.instructions.md`
+  - `instructions/governance/ntk-governance-tdd-verification.instructions.md`
+  - `instructions/governance/ntk-governance-workflow-optimization.instructions.md`
+  - `instructions/operations/ntk-operations-powershell-execution.instructions.md`
+  - `instructions/governance/ntk-governance-feedback-changelog.instructions.md`
+- `instructions/governance/ntk-governance-repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
 - Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
 - Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `governance/authoritative-source-map.json`.
-- For `.github` authoring, include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.
+- For `.github` authoring, include `instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`.
 
 # Instruction Rules Board
 - Treat the instruction tree as a semantic rules board, not a lexically ordered checklist.
 - Folder order is not part of the contract. The runtime selects by route metadata, scope, and precedence.
 - Current board lanes:
   - `agents/`: mandatory agent-controller lifecycle and orchestration rules
-  - `core/`: mandatory repository-wide control, authority, artifact, and operating-model rules
-  - `process/`: planning, verification, PR, worktree, and workflow execution rules
-  - `architecture/backend/`: backend platform, language, and architecture rules
-  - `architecture/frontend/`: frontend stack, UX, and component architecture rules
-  - `architecture/agentic/`: context economy and agentic-surface rules
-  - `operations/devops/`: CI/CD platform policy, release controls, and workflow governance
-  - `operations/automation/`: PowerShell execution, script authoring, and workspace automation rules
-  - `operations/containers/`: Docker image/runtime and Kubernetes workload rules
-  - `operations/reliability/`: observability, resilience, and service/runtime performance rules
-  - `operations/quality/`: static analysis and quality-gate rules
-  - `data/`: schema, query, database operations, and ORM/database rules
-  - `security/`: API security, privacy/compliance, vulnerability, and hardening rules
-  - `docs/`: README, instruction-authoring, and prompt-template rules
+  - `governance/`: repository invariants, planning, verification, PR, worktree, README, changelog, and instruction-authoring rules
+  - `development/`: backend, frontend, agentic, persistence, and testing rules
+  - `operations/`: DevOps, platform, reliability, quality, and workspace automation rules
+  - `security/`: API hardening, supply-chain, secrets, vulnerability, and security guidance
+  - `data/`: schema, query, database operations, and privacy/data-governance rules
 - The taxonomy intentionally avoids numeric directory prefixes. Use semantic folders plus stable `ntk-*` file names.

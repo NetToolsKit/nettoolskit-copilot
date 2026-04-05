@@ -9,14 +9,14 @@ description: Plan and sequence complex implementation work into deterministic, t
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Planning instruction pack
 
-- `.github/instructions/process/planning/ntk-process-workflow-optimization.instructions.md`
-- `.github/instructions/process/planning/ntk-process-effort-estimation-ucp.instructions.md`
-- `.github/instructions/process/collaboration/ntk-process-pr.instructions.md` (when output is PR-oriented)
-- `.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md` (when release/change log impact exists)
+- `.github/instructions/governance/ntk-governance-workflow-optimization.instructions.md`
+- `.github/instructions/governance/ntk-governance-effort-estimation-ucp.instructions.md`
+- `.github/instructions/governance/ntk-governance-pr.instructions.md` (when output is PR-oriented)
+- `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md` (when release/change log impact exists)
 
 ## Claude-native execution
 

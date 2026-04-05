@@ -7,14 +7,14 @@ description: Implement, organize, and test Rust modules in this repository follo
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml`.
 3. Keep only mandatory files plus Rust pack.
 
 ## Rust instruction pack
 
-- `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-- `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
+- `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+- `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
 
 ## Prompt and chatmode accelerators
 

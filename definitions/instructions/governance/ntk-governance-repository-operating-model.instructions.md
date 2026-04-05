@@ -205,38 +205,38 @@ priority: high
 
 ## Domain Instruction Map
 - Development:
-  - `instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-  - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-  - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
-  - `instructions/data/ntk-data-orm.instructions.md`
+  - `instructions/development/ntk-development-backend-architecture-core.instructions.md`
+  - `instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+  - `instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `instructions/development/ntk-development-persistence-orm.instructions.md`
   - `instructions/security/ntk-security-api-high-performance.instructions.md`
 - Infrastructure:
-  - `instructions/operations/containers/ntk-runtime-docker.instructions.md`
-  - `instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md`
-  - `instructions/operations/devops/ntk-runtime-workflow-generation.instructions.md`
-  - `instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md`
-  - `instructions/operations/reliability/ntk-runtime-platform-reliability-resilience.instructions.md`
-  - `instructions/operations/automation/ntk-runtime-powershell-script-creation.instructions.md`
-  - `instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md`
+  - `instructions/operations/ntk-operations-docker.instructions.md`
+  - `instructions/operations/ntk-operations-ci-cd-devops.instructions.md`
+  - `instructions/operations/ntk-operations-workflow-generation.instructions.md`
+  - `instructions/operations/ntk-operations-observability-sre.instructions.md`
+  - `instructions/operations/ntk-operations-platform-reliability-resilience.instructions.md`
+  - `instructions/operations/ntk-operations-powershell-script-creation.instructions.md`
+  - `instructions/operations/ntk-operations-powershell-execution.instructions.md`
 - Security:
   - `instructions/security/ntk-security-cicd-supply-chain-hardening.instructions.md`
   - `instructions/security/ntk-security-vulnerabilities.instructions.md`
   - `instructions/security/ntk-security-api-high-performance.instructions.md`
-  - `instructions/security/ntk-security-data-privacy-compliance.instructions.md`
+  - `instructions/data/ntk-data-privacy-compliance.instructions.md`
 - Testing:
-  - `instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
-  - `instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-  - `instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
-  - `instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
-  - `instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
-  - `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
+  - `instructions/development/ntk-development-backend-integration-testing.instructions.md`
+  - `instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+  - `instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `instructions/development/ntk-development-frontend-e2e-testing.instructions.md`
+  - `instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
+  - `instructions/governance/ntk-governance-tdd-verification.instructions.md`
 - Documentation and process:
-  - `instructions/docs/ntk-docs-readme.instructions.md`
-  - `instructions/docs/ntk-docs-prompt-templates.instructions.md`
-  - `instructions/process/planning/ntk-process-effort-estimation-ucp.instructions.md`
-  - `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-  - `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
-  - `instructions/agents/ntk-agents-super-agent.instructions.md`
-  - `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`
-  - `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
-  - `instructions/process/collaboration/ntk-process-pr.instructions.md`
+  - `instructions/governance/ntk-governance-readme.instructions.md`
+  - `instructions/governance/ntk-governance-prompt-templates.instructions.md`
+  - `instructions/governance/ntk-governance-effort-estimation-ucp.instructions.md`
+  - `instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+  - `instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`
+  - `agents/super-agent/ntk-agents-super-agent.instructions.md`
+  - `instructions/governance/ntk-governance-worktree-isolation.instructions.md`
+  - `instructions/governance/ntk-governance-tdd-verification.instructions.md`
+  - `instructions/governance/ntk-governance-pr.instructions.md`

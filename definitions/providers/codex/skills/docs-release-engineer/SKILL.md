@@ -7,21 +7,21 @@ description: Produce and maintain repository documentation and release artifacts
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml`.
 3. Load documentation/process packs based on target file type.
 
 ## Documentation instruction packs
 
 - README documentation:
-  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
-  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
+  - `.github/instructions/governance/ntk-governance-readme.instructions.md`
+  - `.github/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
 - PR and release communication:
-  - `.github/instructions/process/collaboration/ntk-process-pr.instructions.md`
-  - `.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`
+  - `.github/instructions/governance/ntk-governance-pr.instructions.md`
+  - `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
-  - `.github/instructions/docs/ntk-docs-prompt-templates.instructions.md`
-  - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
+  - `.github/instructions/governance/ntk-governance-prompt-templates.instructions.md`
+  - `.github/instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`
 
 ## Execution workflow
 

@@ -9,17 +9,17 @@ description: Extend dev-software-engineer with .NET/C# backend specialization fo
 
 1. Load and apply `../dev-software-engineer/SKILL.md` as the base contract.
 2. Reuse the base workflow and safety rules unless this file defines a stricter override.
-3. Keep `.github/instructions/core/ntk-core-repository-operating-model.instructions.md` as the canonical repo-operating reference inherited from the base skill.
+3. Keep `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md` as the canonical repo-operating reference inherited from the base skill.
 4. Restrict domain scope to .NET backend, database, and ORM concerns only.
 
 ## Domain instruction delta (override base selection)
 
-- `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
-- `.github/instructions/architecture/backend/ntk-backend-architecture-core.instructions.md`
-- `.github/instructions/data/ntk-data-orm.instructions.md`
+- `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+- `.github/instructions/development/ntk-development-backend-architecture-core.instructions.md`
+- `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
 - `.github/instructions/data/ntk-data-database.instructions.md`
-- `.github/instructions/data/ntk-data-orm.instructions.md`
-- `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md` (when applicable)
+- `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `.github/instructions/operations/ntk-operations-microservices-performance.instructions.md` (when applicable)
 
 ## Prompt accelerator delta
 

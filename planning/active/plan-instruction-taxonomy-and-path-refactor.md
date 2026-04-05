@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-04 16:25
+- LastUpdated: 2026-04-04 21:50
 - Objective: refactor the repository definition system into a shallow, predictable layout rooted in `definitions/instructions/`, `definitions/templates/`, `definitions/agents/`, `definitions/skills/`, `definitions/hooks/`, and `definitions/providers/`, with stable file naming, preserved documents, and safe migration from legacy roots.
 - Normalized Request: reorganize the repository definition system while the workspace is still evolving so `definitions/` becomes the canonical root, `instructions/` keeps only five primary categories, templates are grouped by artifact type, docs gain stable manifest samples, and no existing document is lost during the migration.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -97,6 +97,7 @@ Generated: 2026-04-03 00:00
 - Status:
   - in progress; `validate-instructions` now prioritizes canonical `definitions/` assets and codex skill definitions
   - in progress; GitHub provider prompt/chatmode markdown references now target canonical `definitions/instructions/*`, `definitions/templates/*`, and `definitions/providers/github/root/*`
+  - in progress; canonical provider roots, orchestration prompts, and skill packs now resolve the shallow `definitions/instructions/{governance,development,operations,security,data}` taxonomy instead of the legacy `core/process/architecture/runtime-ops` path graph
 - Commit checkpoint:
   - `refactor(instructions): update instruction routing and consumers`
 
@@ -293,6 +294,7 @@ Generated: 2026-04-03 00:00
   - in progress; the first slice repoints `validate-instructions` to canonical definitions and codex skill definitions before generated surfaces
   - in progress; `validate-instruction-architecture` and `validate-authoritative-source-policy` now default to `definitions/providers/github/{governance,root,prompts}` plus `definitions/instructions/`, with canonical fixture coverage and compatibility regexes for transitional `core/` references
   - in progress; canonical GitHub governance copies now exist under `definitions/providers/github/governance/` for `instruction-ownership.manifest.json` and `authoritative-source-map.json`
+  - in progress; validator-backed canonical references now cover provider skill packs, codex orchestration prompts, and GitHub root governance assets against the shallow taxonomy without reintroducing generated-surface dependencies
 - Commit checkpoint:
   - `refactor(validation): prioritize canonical definitions in validate-instructions`
 

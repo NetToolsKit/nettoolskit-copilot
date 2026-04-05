@@ -9,13 +9,13 @@ description: Build and harden high-performance APIs with strong security control
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Instruction pack
 
 - `.github/instructions/security/ntk-security-api-high-performance.instructions.md`
-- `.github/instructions/data/ntk-data-orm.instructions.md`
-- `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md` (when .NET is in scope)
+- `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
+- `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md` (when .NET is in scope)
 - `.github/instructions/security/ntk-security-vulnerabilities.instructions.md`
 
 ## Claude-native execution

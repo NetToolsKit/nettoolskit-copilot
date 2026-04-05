@@ -7,10 +7,10 @@ description: Use for non-trivial feature, behavior, workflow, or architecture wo
 1. Load .github/AGENTS.md.
 2. Load .github/copilot-instructions.md.
 3. Load .github/instruction-routing.catalog.yml.
-4. Load .github/instructions/core/ntk-core-repository-operating-model.instructions.md.
-5. Load .github/instructions/agents/ntk-agents-super-agent.instructions.md.
-6. Load .github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md.
-7. Load .github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md.
+4. Load .github/instructions/governance/ntk-governance-repository-operating-model.instructions.md.
+5. Load .github/agents/super-agent/ntk-agents-super-agent.instructions.md.
+6. Load .github/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md.
+7. Load .github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md.
 8. Load planning/specs/README.md.
 9. Reuse $plan-active-work-planner after the spec is ready for planning.
 ## Responsibilities

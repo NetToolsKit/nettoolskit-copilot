@@ -7,7 +7,7 @@ priority: high
 
 Use this instruction for Rust crate test structure, test discovery, async test
 patterns, and error-path coverage. Keep cross-cutting TDD workflow and
-verification evidence in `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
+verification evidence in `instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 
 ## Core Principles
 
@@ -471,7 +471,7 @@ Before completing ANY test-related work, verify:
 - **Templates:** `.github/templates/*_template.rs`
 - **Full Guide:** `tools/nettoolskit-cli/docs/test-templates.md`
 - **Standards Analysis:** `tools/nettoolskit-cli/docs/test-standards-analysis.md`
-- **Official External Docs:** use `instructions/core/ntk-core-authoritative-sources.instructions.md` and `.github/governance/authoritative-source-map.json`
+- **Official External Docs:** use `instructions/governance/ntk-governance-authoritative-sources.instructions.md` and `governance/authoritative-source-map.json`
 
 ## Enforcement
 

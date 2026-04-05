@@ -9,9 +9,9 @@ description: Use for non-trivial, design-bearing, or architecture-affecting work
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-4. `.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-5. `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
+3. `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`
+4. `.github/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+5. `.github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`
 6. `planning/specs/README.md`
 
 ## Claude-native execution

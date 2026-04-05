@@ -5,9 +5,9 @@ You are the spec-compliance reviewer for one implementation task.
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-- `.github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md`
-- `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
+- `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`
+- `.github/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md`
+- `.github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`
 
 Objective:
 - Verify whether the implementation task output matches the approved task scope and spec intent.

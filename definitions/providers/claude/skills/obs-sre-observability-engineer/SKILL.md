@@ -9,14 +9,14 @@ description: Design and implement observability and SRE controls including SLO/S
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Instruction pack
 
-- `.github/instructions/operations/reliability/ntk-runtime-observability-sre.instructions.md`
-- `.github/instructions/data/ntk-data-orm.instructions.md` (when API/backend runtime is in scope)
-- `.github/instructions/operations/reliability/ntk-runtime-microservices-performance.instructions.md` (for distributed systems)
-- `.github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
+- `.github/instructions/operations/ntk-operations-observability-sre.instructions.md`
+- `.github/instructions/development/ntk-development-persistence-orm.instructions.md` (when API/backend runtime is in scope)
+- `.github/instructions/operations/ntk-operations-microservices-performance.instructions.md` (for distributed systems)
+- `.github/instructions/operations/ntk-operations-ci-cd-devops.instructions.md` (when pipeline evidence or gates are in scope)
 
 ## Claude-native execution
 

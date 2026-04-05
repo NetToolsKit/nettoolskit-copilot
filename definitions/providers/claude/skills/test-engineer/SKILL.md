@@ -9,23 +9,23 @@ description: Design, implement, and stabilize automated tests (unit, integration
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Testing instruction packs
 
 - Core .NET:
-  - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
-  - `.github/instructions/data/ntk-data-orm.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+  - `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
-  - `.github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-integration-testing.instructions.md`
+  - `.github/instructions/development/ntk-development-frontend-e2e-testing.instructions.md`
 - Rust:
-  - `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
-  - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
+  - `.github/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
 - TDD:
-  - `.github/instructions/process/delivery/ntk-process-tdd-verification.instructions.md`
+  - `.github/instructions/governance/ntk-governance-tdd-verification.instructions.md`
 
 ## Claude-native execution
 

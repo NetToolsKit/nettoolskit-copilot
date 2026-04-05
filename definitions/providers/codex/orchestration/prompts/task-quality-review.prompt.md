@@ -5,9 +5,9 @@ You are the code-quality reviewer for one implementation task.
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-- `.github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md`
-- `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+- `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`
+- `.github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md`
+- `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 Objective:
 - Verify whether the implementation task output is production-ready for the declared scope.

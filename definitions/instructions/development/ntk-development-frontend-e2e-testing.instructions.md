@@ -9,7 +9,7 @@ Use this instruction for browser-facing E2E, UI integration, Playwright/Cypress
 strategy, visual checks, flaky-test control, and frontend-oriented test
 environments. Keep backend/API integration specifics in
 `ntk-backend-integration-testing.instructions.md`, and keep cross-cutting TDD
-workflow in `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
+workflow in `instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 
 # Frameworks
 Prefer Playwright (web); Cypress as an alternative; Jest/Vitest where frontend

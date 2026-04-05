@@ -144,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- Canonical `definitions/providers/{github,codex,claude}` references now target the shallow `definitions/instructions/{governance,development,operations,security,data}` taxonomy and `definitions/agents/super-agent/`, removing the remaining provider-side dependency on the transitional `core/process/architecture/runtime-ops` path graph.
 - `validate-instruction-architecture` and `validate-authoritative-source-policy` now default to canonical `definitions/` assets (`definitions/providers/github/{governance,root,prompts}`, `definitions/templates/`, `definitions/instructions/`, and `definitions/providers/codex/skills`) while keeping compatibility regexes for transitional `core/` references during migration.
 - Repointed `definitions/providers/github/{chatmodes,prompts}` markdown references to canonical `definitions/instructions/*`, `definitions/templates/*`, and `definitions/providers/github/root/*`, which cleared the current `validation instructions` warning set for canonical surfaces.
 - Instruction taxonomy documentation now keeps lane discovery in root READMEs instead of adding `README.md` files to every instruction category folder.

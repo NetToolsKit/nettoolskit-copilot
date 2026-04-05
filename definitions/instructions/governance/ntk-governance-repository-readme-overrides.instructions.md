@@ -5,7 +5,7 @@ priority: high
 
 # NetToolsKit README Overrides
 
-Purpose: apply only the NetToolsKit-specific deltas that override the generic baseline in `.github/instructions/docs/ntk-docs-readme.instructions.md`.
+Purpose: apply only the NetToolsKit-specific deltas that override the generic baseline in `.github/instructions/governance/ntk-governance-readme.instructions.md`.
 Do not restate generic README rules here.
 
 ## Language Override

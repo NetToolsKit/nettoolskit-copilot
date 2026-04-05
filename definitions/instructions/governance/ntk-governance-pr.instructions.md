@@ -35,12 +35,12 @@ Migration: none
 ```
 
 # Applied Instructions
-List paths like .github/instructions/data/ntk-data-orm.instructions.md; .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md; summarize how each was applied; include any deviations and justification.
+List paths like .github/instructions/development/ntk-development-persistence-orm.instructions.md; .github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md; summarize how each was applied; include any deviations and justification.
 ```markdown
 Applied instructions:
-- .github/instructions/data/ntk-data-orm.instructions.md
-- .github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md
-- .github/instructions/operations/devops/ntk-runtime-ci-cd-devops.instructions.md
+- .github/instructions/development/ntk-development-persistence-orm.instructions.md
+- .github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md
+- .github/instructions/operations/ntk-operations-ci-cd-devops.instructions.md
 Applied: resilience (retry/jitter), CancellationToken, tests and pipeline gates
 Deviations: none
 ```

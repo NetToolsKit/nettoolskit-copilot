@@ -9,19 +9,19 @@ description: Produce and maintain repository documentation and release artifacts
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Documentation instruction packs
 
 - README:
-  - `.github/instructions/docs/ntk-docs-readme.instructions.md`
-  - `.github/instructions/docs/ntk-docs-repository-readme-overrides.instructions.md`
+  - `.github/instructions/governance/ntk-governance-readme.instructions.md`
+  - `.github/instructions/governance/ntk-governance-repository-readme-overrides.instructions.md`
 - PR and release:
-  - `.github/instructions/process/collaboration/ntk-process-pr.instructions.md`
-  - `.github/instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`
+  - `.github/instructions/governance/ntk-governance-pr.instructions.md`
+  - `.github/instructions/governance/ntk-governance-feedback-changelog.instructions.md`
 - Prompt and instruction authoring:
-  - `.github/instructions/docs/ntk-docs-prompt-templates.instructions.md`
-  - `.github/instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`
+  - `.github/instructions/governance/ntk-governance-prompt-templates.instructions.md`
+  - `.github/instructions/governance/ntk-governance-copilot-instruction-creation.instructions.md`
 
 ## Claude-native execution
 

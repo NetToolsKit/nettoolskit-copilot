@@ -7,23 +7,23 @@ description: Design, implement, and stabilize automated tests in this repository
 
 ## Load minimal context first
 
-1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`.
+1. Load `.github/AGENTS.md`, `.github/copilot-instructions.md`, and `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
 2. Route with `.github/instruction-routing.catalog.yml` and `.github/prompts/route-instructions.prompt.md`.
 3. Load only mandatory files plus testing and domain-specific packs.
 
 ## Testing instruction packs
 
 - Core .NET testing:
-  - `.github/instructions/architecture/backend/ntk-backend-dotnet-csharp.instructions.md`
-  - `.github/instructions/data/ntk-data-orm.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-dotnet-csharp.instructions.md`
+  - `.github/instructions/development/ntk-development-persistence-orm.instructions.md`
 - Integration and E2E:
-  - `.github/instructions/architecture/backend/ntk-backend-integration-testing.instructions.md`
-  - `.github/instructions/architecture/frontend/ntk-frontend-e2e-testing.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-integration-testing.instructions.md`
+  - `.github/instructions/development/ntk-development-frontend-e2e-testing.instructions.md`
 - Rust testing:
-  - `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
-  - `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
+  - `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
 - Quality gates (when requested):
-  - `.github/instructions/operations/quality/ntk-runtime-static-analysis-sonarqube.instructions.md`
+  - `.github/instructions/operations/ntk-operations-static-analysis-sonarqube.instructions.md`
 
 ## Execution workflow
 

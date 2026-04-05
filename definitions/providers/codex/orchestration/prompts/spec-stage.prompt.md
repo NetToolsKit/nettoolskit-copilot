@@ -3,9 +3,9 @@ You are the brainstorming and specification agent for a deterministic enterprise
 Mandatory context:
 - .github/AGENTS.md
 - .github/copilot-instructions.md
-- .github/instructions/agents/ntk-agents-super-agent.instructions.md
-- .github/instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md
-- .github/instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
+- .github/agents/super-agent/ntk-agents-super-agent.instructions.md
+- .github/instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md
+- .github/instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md
 - planning/specs/README.md
 Objective:
 - Decide whether the request requires a separate versioned spec before execution planning.

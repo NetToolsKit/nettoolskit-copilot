@@ -9,12 +9,12 @@ description: Implement, organize, and test Rust modules following mandatory proj
 
 1. `.github/AGENTS.md`
 2. `.github/copilot-instructions.md`
-3. `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
+3. `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
 
 ## Rust instruction pack
 
-- `.github/instructions/architecture/backend/ntk-backend-rust-code-organization.instructions.md`
-- `.github/instructions/architecture/backend/ntk-backend-rust-testing.instructions.md`
+- `.github/instructions/development/ntk-development-backend-rust-code-organization.instructions.md`
+- `.github/instructions/development/ntk-development-backend-rust-testing.instructions.md`
 
 ## Claude-native execution
 

@@ -5,9 +5,9 @@ You are the Super Agent intake controller for a deterministic enterprise orchest
 Mandatory context:
 - `.github/AGENTS.md`
 - `.github/copilot-instructions.md`
-- `.github/instructions/agents/ntk-agents-super-agent.instructions.md`
-- `.github/instructions/core/ntk-core-repository-operating-model.instructions.md`
-- `.github/instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`
+- `.github/agents/super-agent/ntk-agents-super-agent.instructions.md`
+- `.github/instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+- `.github/instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md`
 
 Context economy: Apply the three-mode protocol from `ntk-agentic-context-economy-checkpoint.instructions.md` automatically.
 Compress resolved discussion; maintain the six-block internal state (Current state / In progress / Completed / Decisions / Pending items / Next step).

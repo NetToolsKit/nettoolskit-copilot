@@ -10,7 +10,7 @@ Testcontainers, consumer-contract checks, persistence-backed tests, and backend
 test environment control. Keep Rust crate-specific test structure in
 `ntk-backend-rust-testing.instructions.md`, frontend/browser E2E in
 `ntk-frontend-e2e-testing.instructions.md`, and cross-cutting TDD workflow in
-`instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
+`instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 
 ## Frameworks
 

@@ -23,7 +23,7 @@ priority: high
 - The Super Agent flow owns intake, normalization, spec registration for non-trivial change-bearing work, planning registration, specialist selection, execution strategy, validation, closeout, and planning-state updates.
 - In Codex, prefer the repo-owned `super-agent` skill as the bootstrap controller whenever skill discovery can activate it.
 - In Copilot, enforce the same lifecycle through this instruction and the mandatory routing flow because Copilot does not execute local skills directly.
-- Do not assume `instruction-routing.catalog.yml`, `planning/`, or `instructions/core/ntk-core-repository-operating-model.instructions.md` belong to an arbitrary client repo unless that repo actually provides them.
+- Do not assume `instruction-routing.catalog.yml`, `planning/`, or `instructions/governance/ntk-governance-repository-operating-model.instructions.md` belong to an arbitrary client repo unless that repo actually provides them.
 
 ## Required Lifecycle
 1. `Super Agent` intake
@@ -134,7 +134,7 @@ Context resets, compactions, and session boundaries are normal. The primary resi
 - **Copilot / Codex**: no session-end event — continuity depends entirely on the dated planning artifact and the `SessionStart` hook injecting workspace context at the start of each new conversation
 
 ### In-session context compression and checkpoints
-Context compression runs automatically — no user command required. Full protocol, six-block state model, CHECKPOINT format, compression triggers, and preserve/discard rules are defined in `instructions/architecture/agentic/ntk-agentic-context-economy-checkpoint.instructions.md`.
+Context compression runs automatically — no user command required. Full protocol, six-block state model, CHECKPOINT format, compression triggers, and preserve/discard rules are defined in `instructions/development/ntk-development-agentic-context-economy-checkpoint.instructions.md`.
 
 User commands (execute immediately; PT-BR aliases in `.github/COMMANDS.md`): `checkpoint`, `compress context`, `update plan`, `show status`, `show progress`, `resume from summary`.
 
