@@ -2,7 +2,8 @@
 
 use crate::sync::provider_surface_test_support::initialize_minimal_provider_surface_projection;
 use nettoolskit_runtime::{
-    invoke_runtime_healthcheck, RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
+    build_runtime_healthcheck_control_schema, invoke_runtime_healthcheck,
+    RuntimeHealthcheckRequest, RuntimeHealthcheckStatus,
 };
 use std::fs;
 use tempfile::TempDir;
@@ -159,4 +160,27 @@ fn test_invoke_runtime_healthcheck_sync_runtime_uses_rust_bootstrap_path() {
         .iter()
         .any(|check| check.name == "runtime-bootstrap"
             && check.script == "rust:nettoolskit-runtime::bootstrap"));
+}
+
+#[test]
+fn test_build_runtime_healthcheck_control_schema_emits_typed_summary() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_repo_layout(repo.path());
+
+    let result = invoke_runtime_healthcheck(&RuntimeHealthcheckRequest {
+        repo_root: Some(repo.path().to_path_buf()),
+        runtime_profile: Some("none".to_string()),
+        ..RuntimeHealthcheckRequest::default()
+    })
+    .expect("healthcheck should execute");
+
+    let schema = build_runtime_healthcheck_control_schema(&result);
+    assert_eq!(schema.schema_kind, "runtime_healthcheck");
+    assert_eq!(schema.schema_version, 1);
+    assert_eq!(schema.runtime_profile_name, "none");
+    assert_eq!(schema.validation_profile, "dev");
+    assert_eq!(schema.total_checks, result.total_checks);
+    assert_eq!(schema.passed_checks, result.passed_checks);
+    assert_eq!(schema.checks.len(), result.checks.len());
+    assert_eq!(schema.exit_code, 0);
 }

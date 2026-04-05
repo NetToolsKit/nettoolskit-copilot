@@ -723,6 +723,32 @@ fn test_runtime_healthcheck_cli_writes_report_to_requested_output_path() {
 }
 
 #[test]
+fn test_runtime_healthcheck_cli_supports_json_output_with_control_schema() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_health_repo(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "healthcheck",
+            "--runtime-profile",
+            "none",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            r#""schema_kind": "runtime_healthcheck""#,
+        ))
+        .stdout(predicate::str::contains(
+            r#""runtime_profile_name": "none""#,
+        ))
+        .stdout(predicate::str::contains(r#""validation_profile": "dev""#))
+        .stdout(predicate::str::contains(r#""overall_status": "passed""#));
+}
+
+#[test]
 fn test_runtime_self_heal_cli_writes_report_to_requested_output_path() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_runtime_health_repo(repo.path());

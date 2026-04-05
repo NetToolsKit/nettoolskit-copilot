@@ -29,6 +29,19 @@
         "mapping counts and detailed file lists",
         "sync-attempt and sync-resolution state"
       ]
+    },
+    {
+      "id": "runtime-healthcheck",
+      "schemaKind": "runtime_healthcheck",
+      "entryPoints": ["ntk runtime healthcheck --json-output"],
+      "owner": "crates/commands/runtime/src/diagnostics/healthcheck.rs",
+      "contractType": "machine-readable diagnostics",
+      "guarantees": [
+        "stable schema version",
+        "runtime health summary counts",
+        "typed executed-check state",
+        "warning-mode and drift-policy options"
+      ]
     }
   ],
   "evolutionRules": {

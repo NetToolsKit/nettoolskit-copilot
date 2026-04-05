@@ -12,6 +12,11 @@
       "id": "runtime-doctor",
       "schemaKind": "runtime_doctor",
       "entryPoints": ["ntk runtime doctor --json-output"]
+    },
+    {
+      "id": "runtime-healthcheck",
+      "schemaKind": "runtime_healthcheck",
+      "entryPoints": ["ntk runtime healthcheck --json-output"]
     }
   ],
   "evolutionRules": {

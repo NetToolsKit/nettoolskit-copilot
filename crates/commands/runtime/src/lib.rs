@@ -30,8 +30,9 @@ pub use diagnostics::enterprise_trends::{
     RuntimeExportEnterpriseTrendsResult,
 };
 pub use diagnostics::healthcheck::{
-    invoke_runtime_healthcheck, RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest,
-    RuntimeHealthcheckResult, RuntimeHealthcheckStatus,
+    build_runtime_healthcheck_control_schema, invoke_runtime_healthcheck,
+    RuntimeHealthcheckCheckResult, RuntimeHealthcheckRequest, RuntimeHealthcheckResult,
+    RuntimeHealthcheckStatus,
 };
 pub use diagnostics::self_heal::{
     invoke_runtime_self_heal, RuntimeSelfHealRequest, RuntimeSelfHealResult, RuntimeSelfHealStatus,

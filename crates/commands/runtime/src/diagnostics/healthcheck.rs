@@ -1,8 +1,15 @@
 //! Runtime healthcheck orchestration for validation and drift audit flows.
 
 use anyhow::Context;
-use nettoolskit_core::path_utils::repository::resolve_full_path;
-use nettoolskit_core::runtime_execution::resolve_runtime_execution_context;
+use nettoolskit_core::{
+    control_plane::{
+        RuntimeHealthcheckControlCheck, RuntimeHealthcheckControlSchema,
+        RuntimeHealthcheckControlStatus,
+    },
+    path_utils::repository::resolve_full_path,
+    runtime_execution::resolve_runtime_execution_context,
+    NTK_CONTROL_SCHEMA_VERSION,
+};
 use nettoolskit_validation::{
     invoke_validate_all, ValidateAllRequest, ValidationCheckStatus as ValidateAllStatus,
 };
@@ -131,6 +138,16 @@ pub struct RuntimeHealthcheckResult {
     pub runtime_profile_name: String,
     /// Validation profile used by the run.
     pub validation_profile: String,
+    /// Whether runtime bootstrap ran before the remaining checks.
+    pub sync_runtime: bool,
+    /// Whether mirror mode was enabled during bootstrap.
+    pub mirror: bool,
+    /// Whether runtime doctor treated extra files as failures.
+    pub strict_extras: bool,
+    /// Warning-only mode applied to validation and overall exit handling.
+    pub warning_only: bool,
+    /// Whether runtime drift failures were downgraded to warnings.
+    pub treat_runtime_drift_as_warning: bool,
     /// Resolved JSON report path.
     pub output_path: PathBuf,
     /// Resolved plain-text log path.
@@ -151,6 +168,48 @@ pub struct RuntimeHealthcheckResult {
     pub exit_code: i32,
     /// Persisted JSON report payload.
     pub report_json: String,
+}
+
+/// Convert one runtime-healthcheck result into the stable machine-readable control schema.
+#[must_use]
+pub fn build_runtime_healthcheck_control_schema(
+    result: &RuntimeHealthcheckResult,
+) -> RuntimeHealthcheckControlSchema {
+    RuntimeHealthcheckControlSchema {
+        schema_version: NTK_CONTROL_SCHEMA_VERSION,
+        schema_kind: "runtime_healthcheck".to_string(),
+        repo_root: result.repo_root.clone(),
+        runtime_profile_name: result.runtime_profile_name.clone(),
+        validation_profile: result.validation_profile.clone(),
+        sync_runtime: result.sync_runtime,
+        mirror: result.mirror,
+        strict_extras: result.strict_extras,
+        warning_only: result.warning_only,
+        treat_runtime_drift_as_warning: result.treat_runtime_drift_as_warning,
+        output_path: result.output_path.clone(),
+        log_path: result.log_path.clone(),
+        total_checks: result.total_checks,
+        passed_checks: result.passed_checks,
+        warning_checks: result.warning_checks,
+        failed_checks: result.failed_checks,
+        overall_status: convert_healthcheck_status(result.overall_status),
+        exit_code: result.exit_code,
+        checks: result
+            .checks
+            .iter()
+            .map(|check| RuntimeHealthcheckControlCheck {
+                name: check.name.clone(),
+                script: check.script.clone(),
+                arguments: check.arguments.clone(),
+                status: convert_healthcheck_status(check.status),
+                exit_code: check.exit_code,
+                duration_ms: check.duration_ms,
+                started_at: check.started_at.clone(),
+                finished_at: check.finished_at.clone(),
+                error: check.error.clone(),
+            })
+            .collect(),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -360,6 +419,11 @@ pub fn invoke_runtime_healthcheck(
         repo_root: context.resolved_repo_root,
         runtime_profile_name: context.runtime_profile.name,
         validation_profile: request.validation_profile.clone(),
+        sync_runtime: request.sync_runtime,
+        mirror: request.mirror,
+        strict_extras: request.strict_extras,
+        warning_only: request.warning_only,
+        treat_runtime_drift_as_warning: request.treat_runtime_drift_as_warning,
         output_path,
         log_path,
         total_checks: checks.len(),
@@ -371,6 +435,14 @@ pub fn invoke_runtime_healthcheck(
         report_json,
         checks,
     })
+}
+
+fn convert_healthcheck_status(status: RuntimeHealthcheckStatus) -> RuntimeHealthcheckControlStatus {
+    match status {
+        RuntimeHealthcheckStatus::Passed => RuntimeHealthcheckControlStatus::Passed,
+        RuntimeHealthcheckStatus::Warning => RuntimeHealthcheckControlStatus::Warning,
+        RuntimeHealthcheckStatus::Failed => RuntimeHealthcheckControlStatus::Failed,
+    }
 }
 
 fn run_doctor_check(

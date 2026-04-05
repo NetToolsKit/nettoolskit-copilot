@@ -80,6 +80,84 @@ pub struct RuntimeDoctorControlSchema {
     pub mappings: Vec<RuntimeDoctorControlMapping>,
 }
 
+/// Machine-readable status for runtime healthcheck inspection.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum RuntimeHealthcheckControlStatus {
+    /// The check or overall run passed.
+    Passed,
+    /// The check or overall run completed with warnings.
+    Warning,
+    /// The check or overall run failed.
+    Failed,
+}
+
+/// One typed runtime healthcheck step payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeHealthcheckControlCheck {
+    /// Logical check name.
+    pub name: String,
+    /// Script path or Rust surface identifier.
+    pub script: String,
+    /// Formatted argument list.
+    pub arguments: Vec<String>,
+    /// Final check status.
+    pub status: RuntimeHealthcheckControlStatus,
+    /// Exit code equivalent used by the check.
+    pub exit_code: i32,
+    /// Elapsed execution time in milliseconds.
+    pub duration_ms: u128,
+    /// Start timestamp token.
+    pub started_at: String,
+    /// End timestamp token.
+    pub finished_at: String,
+    /// Optional error message recorded by the step.
+    pub error: Option<String>,
+}
+
+/// Stable machine-readable runtime healthcheck payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeHealthcheckControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Resolved repository root.
+    pub repo_root: PathBuf,
+    /// Effective runtime profile name.
+    pub runtime_profile_name: String,
+    /// Validation profile used by the run.
+    pub validation_profile: String,
+    /// Whether runtime bootstrap ran before health validation.
+    pub sync_runtime: bool,
+    /// Whether mirror mode was enabled during bootstrap.
+    pub mirror: bool,
+    /// Whether runtime doctor treated extra files as failures.
+    pub strict_extras: bool,
+    /// Warning-only mode applied to validation and overall exit handling.
+    pub warning_only: bool,
+    /// Whether runtime drift failures were downgraded to warnings.
+    pub treat_runtime_drift_as_warning: bool,
+    /// Resolved JSON report path.
+    pub output_path: PathBuf,
+    /// Resolved plain-text log path.
+    pub log_path: PathBuf,
+    /// Number of checks executed.
+    pub total_checks: usize,
+    /// Number of passed checks.
+    pub passed_checks: usize,
+    /// Number of warning checks.
+    pub warning_checks: usize,
+    /// Number of failed checks.
+    pub failed_checks: usize,
+    /// Overall healthcheck status.
+    pub overall_status: RuntimeHealthcheckControlStatus,
+    /// Process exit code equivalent for wrapper/CLI use.
+    pub exit_code: i32,
+    /// Ordered checks executed by the run.
+    pub checks: Vec<RuntimeHealthcheckControlCheck>,
+}
+
 /// Machine-readable readiness status for AI runtime inspection.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -284,7 +362,9 @@ mod tests {
             schema_kind: "runtime_doctor".to_string(),
             repo_root: PathBuf::from("C:/repo"),
             runtime_profile_name: "all".to_string(),
-            runtime_profile_catalog_path: PathBuf::from("definitions/providers/github/governance/runtime-install-profiles.json"),
+            runtime_profile_catalog_path: PathBuf::from(
+                "definitions/providers/github/governance/runtime-install-profiles.json",
+            ),
             mappings_checked: 1,
             has_drift: false,
             has_extras: false,
@@ -399,6 +479,46 @@ mod tests {
 
         let json = serde_json::to_string(&schema).expect("schema should serialize");
         let parsed: AiDoctorControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn runtime_healthcheck_control_schema_roundtrips_json() {
+        let schema = RuntimeHealthcheckControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "runtime_healthcheck".to_string(),
+            repo_root: PathBuf::from("C:/repo"),
+            runtime_profile_name: "none".to_string(),
+            validation_profile: "dev".to_string(),
+            sync_runtime: false,
+            mirror: false,
+            strict_extras: false,
+            warning_only: true,
+            treat_runtime_drift_as_warning: true,
+            output_path: PathBuf::from("C:/repo/.temp/healthcheck-report.json"),
+            log_path: PathBuf::from("C:/repo/.temp/logs/healthcheck.log"),
+            total_checks: 2,
+            passed_checks: 2,
+            warning_checks: 0,
+            failed_checks: 0,
+            overall_status: RuntimeHealthcheckControlStatus::Passed,
+            exit_code: 0,
+            checks: vec![RuntimeHealthcheckControlCheck {
+                name: "validate-all".to_string(),
+                script: "rust:nettoolskit-validation::validate-all".to_string(),
+                arguments: vec!["-ValidationProfile=dev".to_string()],
+                status: RuntimeHealthcheckControlStatus::Passed,
+                exit_code: 0,
+                duration_ms: 25,
+                started_at: "1".to_string(),
+                finished_at: "2".to_string(),
+                error: None,
+            }],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: RuntimeHealthcheckControlSchema =
             serde_json::from_str(&json).expect("schema should deserialize");
         assert_eq!(parsed, schema);
     }
