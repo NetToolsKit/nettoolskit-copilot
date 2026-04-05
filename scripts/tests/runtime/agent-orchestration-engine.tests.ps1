@@ -126,6 +126,9 @@ try {
     }
     $fakeCodexRunnerPath = Join-Path $tempRoot 'fake-codex-runner.ps1'
     $fakeCodexPath = Join-Path $tempRoot 'fake-codex.cmd'
+    $fakeNtkRunnerPath = Join-Path $tempRoot 'fake-ntk-runner.ps1'
+    $fakeNtkPath = Join-Path $tempRoot 'fake-ntk.cmd'
+    $previousRuntimeBinaryOverride = $env:CODEX_NTK_RUNTIME_BIN_PATH
     $fakeCodex = @'
 param(
     [Parameter(ValueFromPipeline = $true)] [string] $IgnoredPipelineInput,
@@ -389,6 +392,28 @@ end {
     Set-Content -LiteralPath $fakeCodexRunnerPath -Value $fakeCodex -Encoding UTF8 -NoNewline
     $fakeCodexCmd = "@echo off`r`nsetlocal`r`nset FAKE_CODEX_ARGS=%*`r`npwsh -NoProfile -File `"$fakeCodexRunnerPath`" -RawArgs `"%FAKE_CODEX_ARGS%`"`r`n"
     Set-Content -LiteralPath $fakeCodexPath -Value $fakeCodexCmd -Encoding ASCII -NoNewline
+    $fakeNtk = @'
+param(
+    [string] $RawArgs
+)
+
+$arguments = @()
+if (-not [string]::IsNullOrWhiteSpace($RawArgs)) {
+    $arguments = @($RawArgs.Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries))
+}
+
+if ($arguments.Count -ge 2 -and $arguments[0] -eq 'validation') {
+    Write-Output 'Status: passed'
+    exit 0
+}
+
+Write-Error ("Fake ntk does not support the requested command: {0}" -f $RawArgs)
+exit 1
+'@
+    Set-Content -LiteralPath $fakeNtkRunnerPath -Value $fakeNtk -Encoding UTF8 -NoNewline
+    $fakeNtkCmd = "@echo off`r`nsetlocal`r`nset FAKE_NTK_ARGS=%*`r`npwsh -NoProfile -File `"$fakeNtkRunnerPath`" -RawArgs `"%FAKE_NTK_ARGS%`"`r`n"
+    Set-Content -LiteralPath $fakeNtkPath -Value $fakeNtkCmd -Encoding ASCII -NoNewline
+    $env:CODEX_NTK_RUNTIME_BIN_PATH = $fakeNtkPath
 
     $runDirectory = Join-Path $tempRoot 'run'
     New-Item -ItemType Directory -Path (Join-Path $runDirectory 'artifacts') -Force | Out-Null
@@ -875,6 +900,13 @@ catch {
     $testExitCode = 1
 }
 finally {
+    if ($null -eq $previousRuntimeBinaryOverride) {
+        Remove-Item Env:CODEX_NTK_RUNTIME_BIN_PATH -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:CODEX_NTK_RUNTIME_BIN_PATH = $previousRuntimeBinaryOverride
+    }
+
     foreach ($relativePath in $planningArtifactPathsToPreserve) {
         $absolutePath = Join-Path $resolvedRepoRoot $relativePath
         if ($preservedPlanningArtifacts.Contains($absolutePath)) {

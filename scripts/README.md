@@ -40,6 +40,7 @@ Authoritative non-code assets live under `definitions/`. Provider and runtime fo
 ntk runtime doctor --repo-root . --detailed
 ntk runtime healthcheck --repo-root . --runtime-profile all --validation-profile dev
 ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras
+ntk validation runtime-script-tests --repo-root . --warning-only false
 ntk runtime render-mcp-runtime-artifacts
 ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.jsonc
 ntk runtime sync-codex-mcp-config --dry-run
@@ -58,6 +59,7 @@ ntk runtime render-vscode-mcp-template --output-path .\.vscode\mcp.tamplate.json
 ntk runtime sync-codex-mcp-config --dry-run
 ntk runtime self-heal --repo-root . --runtime-profile all --strict-extras
 ntk runtime doctor --repo-root . --detailed
+ntk validation runtime-script-tests --repo-root . --warning-only false
 ntk validation all --repo-root . --validation-profile release
 ntk validation readme-standards --repo-root .
 ```

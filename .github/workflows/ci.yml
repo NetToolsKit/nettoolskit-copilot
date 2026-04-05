@@ -176,6 +176,22 @@ jobs:
         if: always()
         run: docker compose -f deployments/docker-compose.local.yml down -v
 
+  # ─── PowerShell Runtime Parity ────────────────────────────────
+  pwsh-runtime-parity:
+    name: PowerShell Runtime Parity
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: pwsh-runtime-parity
+      - name: Build workspace
+        run: cargo build --workspace
+      - name: Run native runtime PowerShell parity validation
+        shell: pwsh
+        run: cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false
+
   # ─── Parallel Stress (templating) ─────────────────────────────
   templating-parallel-stress:
     name: Templating Parallel Stress

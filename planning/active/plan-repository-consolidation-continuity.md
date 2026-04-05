@@ -4,7 +4,7 @@ Generated: 2026-03-29
 
 ## Status
 
-- LastUpdated: 2026-04-05 11:42
+- LastUpdated: 2026-04-05 14:08
 - Objective: keep the repository consolidation baseline and point the remaining open gaps into focused category plans so token economy, SQLite memory, build-target hygiene, instruction governance, and the remaining script tail can each move independently.
 - Normalized Request: create a detailed and complete plan for all gaps and pending workstreams identified in the repository consolidation analysis conducted on 2026-03-29, then split the remaining open work into smaller category-specific planning tracks.
 - Active Branch: `main` (planning only; follow-on implementation branches TBD)
@@ -236,73 +236,80 @@ Status: `[x]` Completed
 
 ### Workstream W3 — CI PowerShell Parity Test Coverage
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 **Problem being fixed:**
 23 `scripts/tests/runtime/*.ps1` files are marked as `compatibility wrapper retained intentionally`
 and described as the canonical parity harness in the safety matrix. `ci.yml` has zero PowerShell
 test invocations; these tests only run on developer machines.
 
-#### Task W3.1: Audit Parity Test Scope and Pester Compatibility
+#### Task W3.1: Audit Parity Test Scope and Execution Model
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Review each of the 23 parity test files to determine:
   - Whether the test uses Pester syntax (`Describe`, `It`, `Should`) or is a standalone script.
   - Whether any test requires local file system access that would not be available in CI.
   - Whether any test depends on `ntk` being built and in PATH.
-- Confirm Pester version required (check existing invocation patterns in the scripts).
+- Audit result:
+  - the retained parity harness is a standalone PowerShell script suite, not a real Pester suite
+  - CI coverage should therefore use the native `ntk validation runtime-script-tests` surface instead of installing/running Pester
+  - the native validator now normalizes Windows extended-length paths before invoking PowerShell test files, which prevents `\\?\` path forwarding from breaking shared bootstrap resolution
 - Target paths: `scripts/tests/runtime/*.ps1`
 - Commands:
   - `rg "Describe|Context|It |Should " scripts/tests/runtime/ --count`
   - `rg "Invoke-Pester|Install-Module.*Pester" scripts/tests/runtime/`
-- Checkpoint: parity test inventory complete; Pester dependency confirmed.
+- Checkpoint: parity test inventory complete; native runtime-script-tests gate selected.
 
-#### Task W3.2: Add `pwsh-parity` Job to `ci.yml`
+#### Task W3.2: Add Windows Native Runtime Parity Job to `ci.yml`
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
 - Target: `.github/workflows/ci.yml`
-- Add a new job `pwsh-parity` using `windows-latest` runner.
+- Add a new job `pwsh-runtime-parity` using `windows-latest` runner.
 - Job structure:
   - Checkout
-  - Set up Rust toolchain (stable) — needed if any test invokes the `ntk` binary
+  - Set up Rust toolchain (stable)
   - Cache Rust build artifacts via `Swatinem/rust-cache@v2`
   - Build the workspace: `cargo build --workspace`
-  - Install Pester: `Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck`
-  - Run parity tests: `Invoke-Pester -Path scripts/tests/runtime/ -EnableExit -Output Detailed`
-  - Upload test output artifact on failure (`actions/upload-artifact@v4`)
+  - Run parity tests through the native validation boundary:
+    - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false`
 - The job runs on `push` and `pull_request` targeting `main` and `develop` (same triggers as existing jobs).
-- Use `continue-on-error: false` after a first stable run; accept `continue-on-error: true` for the initial merge to confirm baseline stability.
 - Commands to validate locally before merging:
-  - `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
-  - `Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck`
-  - `Invoke-Pester -Path scripts/tests/runtime/ -EnableExit -Output Detailed`
+  - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false`
 - Commit checkpoint:
-  - `ci(workflows): add pwsh-parity job to CI for PowerShell runtime parity tests`
+  - `ci(workflows): add windows runtime parity validation job for retained PowerShell tests`
 
 #### Task W3.3: Address Test Failures and Stabilize
 
-Status: `[ ]` Pending
+Status: `[x]` Completed
 
-- If Task W3.2 reveals test failures, fix root causes in the parity test files or in the underlying scripts.
-- For tests that cannot run in CI due to environment-specific resources (absolute paths, registry access, VS Code CLI presence), either:
-  - Parameterize the test to accept a skip condition when the resource is absent (`-Skip` in Pester), or
-  - Move the test into a `scripts/tests/runtime/local/` folder and exclude it from the CI invocation pattern.
+- Fixed the two remaining failing parity harness paths:
+  - `runtime-scripts.tests.ps1` now scaffolds canonical `definitions/providers/github/{governance,policies}` fixture roots required by `render-github-instruction-surfaces.ps1`
+  - `agent-orchestration-engine.tests.ps1` now isolates `validate-stage.ps1` from the live projected `.github` state by overriding the managed runtime binary with a fake success-only `ntk` shim for the orchestration smoke path
+- The native runtime validator now executes all 23 retained parity scripts successfully on Windows.
 - Commit checkpoint (if fixes needed):
   - `test(runtime): stabilize PowerShell parity tests for CI execution`
 
-#### Task W3.4: Document Parity Test Coverage Model (Optional Fallback to Option B)
+#### Task W3.4: Record Coverage Model and Evidence
 
-Status: `[ ]` Pending (only if Option B was selected instead of W3.2)
+Status: `[x]` Completed
 
-- If adding CI coverage was rejected, create `scripts/tests/runtime/README.md` with:
-  - Explicit statement that these tests are local-only.
-  - Rationale for local-only coverage.
-  - How to run them: `Invoke-Pester -Path scripts/tests/runtime/ -EnableExit -Output Detailed`.
-  - Known limitations: environment-specific resources, VS Code presence required, etc.
+- Updated `scripts/README.md` so the runtime/operator surface now documents `ntk validation runtime-script-tests --repo-root . --warning-only false` as the supported parity harness command.
+- Validation evidence:
+  - `cargo test -p nettoolskit-validation runtime_script_tests_tests --quiet` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false` ✅
 - Commit checkpoint:
-  - `docs(tests): document parity test local-only coverage model`
+  - `docs(runtime): document native PowerShell parity coverage model`
+
+**Checkpoint: W3 PowerShell Parity Coverage Complete**
+- the retained 23-script runtime parity harness now runs through the native `ntk validation runtime-script-tests` surface instead of an implied Pester dependency
+- Windows path normalization in the validator prevents `\\?\`-prefixed test script invocations from breaking shared bootstrap discovery
+- the remaining two smoke regressions were fixed by updating the canonical GitHub fixture roots in `runtime-scripts.tests.ps1` and isolating `validate-stage.ps1` with a fake managed runtime binary in `agent-orchestration-engine.tests.ps1`
+- `.github/workflows/ci.yml` now has a dedicated `pwsh-runtime-parity` Windows gate
+- validation evidence:
+  - `cargo test -p nettoolskit-validation runtime_script_tests_tests --quiet` ✅
+  - `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false` ✅
 
 ---
 

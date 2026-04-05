@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Added Windows path normalization to the native `runtime-script-tests` validator so retained PowerShell smoke tests execute correctly even when the repository root is resolved through `\\?\` extended-length paths during CI or commit-time automation.
+- Added a dedicated Windows CI gate, `pwsh-runtime-parity`, that runs `ntk validation runtime-script-tests --repo-root . --warning-only false` instead of relying on an implied local-only parity harness or a non-existent Pester suite.
+- Stabilized the last two retained runtime parity smoke tests by fixing canonical GitHub provider fixture roots in `scripts/tests/runtime/runtime-scripts.tests.ps1` and by isolating `validate-stage.ps1` from live projected `.github` state in `scripts/tests/runtime/agent-orchestration-engine.tests.ps1` through a fake managed runtime binary override.
+- Expanded `scripts/README.md` so the native PowerShell parity command is documented alongside the other supported runtime and validation entrypoints.
 - Expanded the root `README.md` and `crates/cli/README.md` so the live `ntk` command surface, runtime/validation groups, shell completions, service mode endpoints, and operator quick-start flows are documented from the current Clap command inventory instead of stale summary bullets.
 - Reduced `definitions/providers/github/root/AGENTS.md` and `definitions/providers/github/root/copilot-instructions.md` to thin bootstrap documents so instruction-architecture passes without global-core budget warnings while detailed policy stays in canonical governance and domain instructions.
 - Completed the generated provider-surface cutover: `.github`, `.codex`, and `.claude` are now regenerated from canonical `definitions/*` roots for governance, policies, prompts, chatmodes, templates, orchestration prompts, MCP artifacts, and skill/runtime mirrors.

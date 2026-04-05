@@ -574,6 +574,8 @@ try {
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'prompts') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'chatmodes') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'hooks\scripts') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'governance') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $githubProviderSourceRoot 'policies') -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'SKILL.md') -Value '# Demo Codex Skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexSkillSource 'agents\openai.yaml') -Value 'name: demo-skill' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $codexMcpSourceRoot 'README.md') -Value '# Demo Codex MCP' -Encoding UTF8 -NoNewline
@@ -613,6 +615,8 @@ try {
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\session-start.ps1') -Value '# hook session' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\subagent-start.ps1') -Value '# hook subagent' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'hooks\scripts\pre-tool-use.ps1') -Value '# hook pretool' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'governance\provider-surface-projection.catalog.json') -Value '{}' -Encoding UTF8 -NoNewline
+        Set-Content -LiteralPath (Join-Path $githubProviderSourceRoot 'policies\instruction-system.policy.json') -Value '{}' -Encoding UTF8 -NoNewline
         Set-Content -LiteralPath (Join-Path $definitionsRoot 'templates\docs\readme-template.md') -Value '# Readme Template' -Encoding UTF8 -NoNewline
 
         & $renderProviderSkillsScriptPath -RepoRoot $tempRepoRoot -Provider codex,claude | Out-Null

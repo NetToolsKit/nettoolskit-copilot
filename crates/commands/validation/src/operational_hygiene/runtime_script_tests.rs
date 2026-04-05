@@ -187,14 +187,16 @@ fn execute_runtime_test(
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) -> bool {
+    let normalized_test_script_path = normalize_powershell_argument_path(test_script_path);
+    let normalized_repo_root = normalize_powershell_argument_path(repo_root);
     let output = Command::new(powershell_path)
         .arg("-NoProfile")
         .arg("-ExecutionPolicy")
         .arg("Bypass")
         .arg("-File")
-        .arg(test_script_path)
+        .arg(&normalized_test_script_path)
         .arg("-RepoRoot")
-        .arg(repo_root)
+        .arg(&normalized_repo_root)
         .output();
 
     let script_name = test_script_path
@@ -232,4 +234,16 @@ fn execute_runtime_test(
         format!("Runtime test failed: {script_name} (exit code {exit_code}) :: {detail}"),
     );
     false
+}
+
+fn normalize_powershell_argument_path(path: &Path) -> PathBuf {
+    #[cfg(windows)]
+    {
+        let raw = path.to_string_lossy();
+        if let Some(stripped) = raw.strip_prefix(r"\\?\") {
+            return PathBuf::from(stripped);
+        }
+    }
+
+    path.to_path_buf()
 }

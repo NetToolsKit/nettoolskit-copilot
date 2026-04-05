@@ -33,7 +33,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 2. **CLI surface documentation gap**: The `ntk` binary now exposes 12 `runtime` subcommands, 29 `validation` subcommands, `manifest` submenu, `service` mode (Axum HTTP + ChatOps), and `completions` (bash/zsh/fish/powershell). None of these surfaces are documented in the root `README.md` or `crates/cli/README.md`. The existing docs describe either the original interactive TUI model or just 3 bullet features.
 
-3. **CI gap for PowerShell parity tests**: The 23 `scripts/tests/runtime/*.ps1` files are classified as `compatibility wrapper retained intentionally` in the safety matrix and described as the canonical parity harness. However, `ci.yml` contains zero PowerShell test invocations — these scripts run only on developer machines. If they regress silently, the parity evidence base becomes stale.
+3. **CI gap for PowerShell parity tests**: The 23 `scripts/tests/runtime/*.ps1` files are classified as `compatibility wrapper retained intentionally` in the safety matrix and described as the canonical parity harness. However, `ci.yml` contains zero runtime parity invocations — these scripts run only on developer machines. If they regress silently, the parity evidence base becomes stale.
 
 4. **Post-Phase-20f domain consumer migration**: After Phases 17, 18, the tactical `self-heal` runtime slice, the tactical provider-surface dispatcher slice, the tactical catalog-native renderer slice, and the tactical Codex orchestration renderer slice close, 63 scripts remain in the `retain until consumer migration completes` bucket across five domains (`scripts/common/`, `scripts/runtime/` excl. hooks, `scripts/security/`, `scripts/governance/`, `scripts/orchestration/`). Each domain has confirmed Rust ownership but no exact local-consumer proof. Without planned consumer sweeps, these scripts will remain indefinitely even though deletions are safe once consumer evidence is collected.
 
@@ -51,7 +51,7 @@ The triangulation analysis revealed six distinct consolidation concerns that are
 
 - Every AI agent that routes through `ntk-core-repository-operating-model.instructions.md` receives correct Rust workspace commands, correct topology, and correct domain instruction references.
 - Root `README.md` and `crates/cli/README.md` document the full `ntk` CLI surface with named subcommands, so feature discoverability matches implementation reality.
-- The 23 PowerShell parity tests either run in CI with an explicit gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
+- The 23 PowerShell parity tests run in CI through the native `ntk validation runtime-script-tests` gate or are explicitly documented as local-only with a rationale that is not ambiguous about their coverage model.
 - Phase 19 is closed with an audit-only result, and the remaining runtime/security/governance/orchestration sweeps still have concrete consumer-sweep plans so the remaining 63 `retain until` scripts can move to confirmed deletion candidates when evidence is collected.
 - `copilot-instructions` Phase 8 receives the Rust directives and creates the initial Cargo workspace scaffold with the first migration slice defined.
 - `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md` remains the single authored source, while compatibility mirrors and `.github` projections stay renderer-derived.
@@ -79,18 +79,18 @@ Current execution checkpoint:
 
 ### W3: CI PowerShell Test Coverage
 
-Option A — Add a CI job that runs the 23 parity tests via Pester and Windows runner:
-- Adds a `pwsh-parity` job to `ci.yml` under `jobs:`.
+Option A — Add a Windows CI job that runs the 23 parity tests through the native runtime validator:
+- Adds a `pwsh-runtime-parity` job to `ci.yml` under `jobs:`.
 - Uses `windows-latest` runner.
-- Invokes `Invoke-Pester -Path scripts/tests/runtime/ -EnableExit` after installing Pester.
-- Selected for parity harness workstreams that explicitly need shell-level contract verification in addition to Rust unit tests.
+- Invokes `cargo run -q -p nettoolskit-cli -- validation runtime-script-tests --repo-root . --warning-only false`.
+- Selected because the retained parity harness is already a standalone PowerShell suite and the native validator owns path normalization, exit-code aggregation, and CI-friendly reporting.
 
 Option B — Document parity tests as local-only with explicit rationale:
 - Adds a note to `scripts/tests/runtime/README.md` (or creates it).
 - States that these tests are an operator-compatible harness and are not expected to run in CI.
 - Chosen only if adding a second Windows CI job is considered too costly in CI minutes.
 
-Decision: Option A is the correct long-term answer because the parity harness is the evidence foundation for consumer migration decisions. However, if CI minutes are a constraint, Option B is acceptable as a documented interim state — but it must be an explicit decision, not a default silence. This spec designates Option A as the target and allows the plan to defer to Option B only with an explicit rationale recorded in the plan comment.
+Decision: Option A is the correct long-term answer because the parity harness is the evidence foundation for consumer migration decisions. The audit showed the suite is not a real Pester suite, so the correct gate is the native `runtime-script-tests` validator rather than a separate Pester installation step. Option B remains acceptable only as an explicitly documented fallback if CI minutes become a constraint.
 
 ### W4: CLI Documentation
 
@@ -157,7 +157,7 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 | # | Risk | Severity | Mitigation |
 |---|---|---|---|
 | R1 | Editing the authoritative `definitions/instructions/` file triggers a provider surface re-render that breaks unrelated instruction surfaces | Medium | Run `ntk validation instructions` and `ntk validation agent-hooks` before committing the re-render |
-| R2 | Adding a Windows CI job for PowerShell parity tests increases CI cost and may fail due to environment differences | Low | Pin Pester version; use `continue-on-error: false` only after a trial run confirms stability; allow `warning-only` mode for first merge |
+| R2 | Adding a Windows CI job for PowerShell parity tests increases CI cost and may fail due to environment differences | Low | Keep the gate on the native `runtime-script-tests` surface, fix harness fixtures instead of relying on local-machine state, and keep the job isolated on `windows-latest` |
 | R3 | Phase 19 common-script consumer sweep finds unexpected consumers in test crates that re-lock deletion | Medium | Map all consumers with `rg` before touching any file; document blockers explicitly rather than forcing deletions |
 | R4 | Phase 20 runtime-script consumer sweep is too large for one PR; may need to split into 3–4 sub-phases | Low | Define sub-phase boundaries in the Phase 20 plan; each sub-phase closes its own consumer evidence set |
 | R5 | `copilot-instructions` Phase 8 diverges from `nettoolskit-copilot` Rust conventions mid-implementation | Medium | Lock a shared Rust edition, MSRV, deny list, and clippy flags between both repos before Phase 8 starts |
@@ -173,7 +173,7 @@ The Cargo workspace scaffold for `copilot-instructions` must follow these constr
 - `ntk validation instructions --repo-root .` passes after the update.
 
 ### W3: CI PowerShell Test Coverage
-- Either the 23 parity tests are invoked in CI via a dedicated `pwsh-parity` job, or a decision record explicitly states they are local-only and why.
+- The 23 parity tests are invoked in CI via a dedicated Windows `pwsh-runtime-parity` job that runs `ntk validation runtime-script-tests`.
 - No silent coverage gap remains.
 
 ### W4: CLI Surface Documentation
