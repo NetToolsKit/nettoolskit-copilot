@@ -8,7 +8,7 @@ Generated: 2026-03-31 00:00
 - Objective: define a layered local-memory model that distinguishes concise always-loaded memory, topic files, and operational logs without collapsing them into one generic context store.
 - Normalized Request: create a workstream for file-based operational memory layering that complements the repository's RAG/CAG evolution and improves persistent recall discipline.
 - Active Branch: `docs/planning-gap-workstreams`
-- Planning Path: `planning/active/plan-memory-file-layering-and-operational-recall.md`
+- Planning Path: `planning/completed/plan-memory-file-layering-and-operational-recall.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---

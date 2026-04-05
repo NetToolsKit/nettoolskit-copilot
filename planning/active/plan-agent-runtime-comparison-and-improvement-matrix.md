@@ -19,7 +19,7 @@ Generated: 2026-03-31 00:00
 |---|---|---|---|
 | CLI fast-path startup | `ntk` is modular but startup decomposition is not yet explicit enough | Partial | `plan-cli-fast-path-and-startup-decomposition.md` |
 | MCP robustness | runtime projection exists but transport/auth/session lifecycle still needs hardening | Partial | `plan-mcp-transport-auth-and-session-resilience.md` |
-| Memory layering | local context exists, but layered operational memory is not fully defined | Partial | `plan-memory-file-layering-and-operational-recall.md` |
+| Memory layering | canonical entrypoint/topic/note layering now exists with retrieval-alignment guidance that keeps file memory distinct from planning and SQLite ownership | Substantial | `planning/completed/plan-memory-file-layering-and-operational-recall.md` |
 | Context reranking | deterministic recall exists, but cheap second-pass selection is still planned | Weak | `plan-context-selection-reranking-and-budgeted-recall.md` |
 | Token and cost tracking | weekly usage ledger and token policy exist, but richer tuning is still needed | Partial | `plan-token-economy-optimization.md` |
 | Task output spill-to-disk | large-output lifecycle is not yet formalized | Weak | `plan-task-output-spill-to-disk-and-retention-control.md` |

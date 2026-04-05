@@ -8,7 +8,7 @@ Generated: 2026-03-31 00:00
 - Objective: add a layered operational-memory model that distinguishes concise memory entrypoints, topic memory, and append-only operational logs while staying aligned with SQLite-based recall work.
 - Normalized Request: create a detailed workstream for layered local memory and operational recall discipline in the repository.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-memory-file-layering-and-operational-recall.md`
+- Spec Path: `planning/specs/completed/spec-memory-file-layering-and-operational-recall.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstreams:
   - `planning/active/plan-rag-cag-sqlite-evolution.md`

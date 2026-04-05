@@ -13,7 +13,7 @@ Generated: 2026-03-31 00:00
 - Related Workstreams:
   - `planning/active/plan-token-economy-optimization.md`
   - `planning/active/plan-rag-cag-sqlite-evolution.md`
-  - `planning/active/plan-memory-file-layering-and-operational-recall.md`
+  - `planning/completed/plan-memory-file-layering-and-operational-recall.md`
 - Inputs:
   - `crates/core/src/local-context/*`
   - `crates/orchestrator/src/execution/ai_request_context.rs`
