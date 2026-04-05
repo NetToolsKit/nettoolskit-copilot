@@ -8,7 +8,7 @@ Generated: 2026-03-31 00:00
 - Objective: define a coherent runtime diagnostics and observability model for operator-facing health, degradation, inspection, and troubleshooting.
 - Normalized Request: open a dedicated workstream for operational diagnostics because current runtime visibility exists but is not yet unified enough across CLI, service, MCP, AI, and task execution surfaces.
 - Active Branch: `docs/planning-gap-workstreams`
-- Planning Path: `planning/active/plan-runtime-operational-diagnostics-and-observability.md`
+- Planning Path: `planning/completed/plan-runtime-operational-diagnostics-and-observability.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 
 ---

@@ -8,7 +8,7 @@ Generated: 2026-03-31 00:00
 - Objective: unify operator-facing diagnostics and observability concepts across runtime, MCP, AI, task execution, and service surfaces.
 - Normalized Request: create a detailed workstream for runtime diagnostics and observability because the repository needs stronger operational visibility across its growing agent runtime.
 - Active Branch: `docs/planning-gap-workstreams`
-- Spec Path: `planning/specs/active/spec-runtime-operational-diagnostics-and-observability.md`
+- Spec Path: `planning/specs/completed/spec-runtime-operational-diagnostics-and-observability.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Current Slice: D1, D4, and D5 are now materially implemented through the canonical runtime-diagnostics taxonomy manifest, the operator playbook, and README/instruction updates; together with the existing `ntk ai doctor` proof for D2-D3, the workstream is materially complete and ready for archive.
 - Related Workstreams:

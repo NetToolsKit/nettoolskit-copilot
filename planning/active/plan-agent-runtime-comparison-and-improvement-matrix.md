@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 22:55
 - Objective: maintain a topic-by-topic improvement matrix that compares the repository against a stronger agent runtime model and links every gap to an owned workstream.
 - Normalized Request: compare the repository one-by-one across the ten most relevant runtime topics and create explicit planning coverage for the gaps.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -26,7 +26,7 @@ Generated: 2026-03-31 00:00
 | Typed control schemas | runtime inspection is still more internal than contract-driven | Weak | `plan-sdk-control-plane-schemas-and-runtime-introspection.md` |
 | Internal multi-agent runtime | delegation exists, but lineage/inheritance/cleanup need a stronger contract | Partial | `plan-multi-agent-runtime-lineage-and-a2a-readiness.md` |
 | Plugin and skill extensibility | skills exist, but extension contracts and governance are still underspecified | Partial | `plan-plugin-skill-extensibility-and-runtime-governance.md` |
-| Operational diagnostics | diagnostics exist, but runtime/operator visibility is not yet unified | Partial | `plan-runtime-operational-diagnostics-and-observability.md` |
+| Operational diagnostics | canonical runtime health taxonomy, operator playbook, and AI doctor/report baseline now exist; future subsystem-specific doctors can build on this shared model | Substantial | `planning/completed/plan-runtime-operational-diagnostics-and-observability.md` |
 
 ---
 

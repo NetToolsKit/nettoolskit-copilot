@@ -14,7 +14,7 @@ Generated: 2026-04-04 00:00
 - Inputs:
   - `planning/completed/plan-free-llm-provider-test-matrix.md`
   - `planning/active/plan-token-economy-optimization.md`
-  - `planning/active/plan-runtime-operational-diagnostics-and-observability.md`
+  - `planning/completed/plan-runtime-operational-diagnostics-and-observability.md`
   - `planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md`
   - `planning/active/plan-mcp-transport-auth-and-session-resilience.md`
   - `planning/active/plan-agent-runtime-comparison-and-improvement-matrix.md`
@@ -70,7 +70,7 @@ This workstream coordinates the development-operator experience for `ntk` as an 
 - Target paths:
   - `crates/cli/src/ai_commands.rs`
   - `crates/orchestrator/src/execution/`
-  - `planning/active/plan-runtime-operational-diagnostics-and-observability.md`
+  - `planning/completed/plan-runtime-operational-diagnostics-and-observability.md`
 - Commit checkpoint:
   - `feat(ai): add runtime doctor surfaces`
 
