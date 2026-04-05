@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 23:55
 - Objective: expose typed control-plane schemas and runtime introspection surfaces for operational, CLI, and future SDK consumers.
 - Normalized Request: create a detailed workstream for typed runtime control contracts and introspection APIs without coupling callers to internal structs.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -53,6 +53,9 @@ Generated: 2026-03-31 00:00
 - Create a dedicated contract set for runtime/control requests and responses.
 - Keep schema evolution separate from CLI formatting.
 - Version the contract and add test coverage for serialization and compatibility.
+- Status [2026-04-05 23:55]:
+  - Added `crates/core/src/control_plane.rs` with schema-versioned `ai_doctor` and `runtime_doctor` control contracts.
+  - Added serialization round-trip coverage in `nettoolskit-core`.
 - Commit checkpoint:
   - `feat(runtime): add typed control schemas`
 
@@ -61,6 +64,8 @@ Generated: 2026-03-31 00:00
 - Build services that gather normalized introspection state.
 - Keep collectors separate from renderers and commands.
 - Ensure status gathering is bounded and safe in degraded states.
+- Status [2026-04-05 23:55]:
+  - Added `build_ai_doctor_control_schema` and `build_runtime_doctor_control_schema` so machine-readable inspection is produced by dedicated adapters instead of CLI formatting.
 - Commit checkpoint:
   - `feat(runtime): add runtime introspection services`
 
@@ -69,6 +74,10 @@ Generated: 2026-03-31 00:00
 - Make CLI output a renderer over typed status objects.
 - Prepare service/SDK callers to reuse the same schemas.
 - Avoid parallel schema definitions in multiple surfaces.
+- Status [2026-04-05 23:55]:
+  - `ntk ai doctor --json-output` now emits the shared control schema instead of serializing internal orchestrator structs directly.
+  - `ntk runtime doctor --json-output` now exists and emits the shared control schema.
+  - CLI integration tests cover both machine-readable surfaces.
 - Commit checkpoint:
   - `refactor(cli): render runtime inspection from typed control schemas`
 

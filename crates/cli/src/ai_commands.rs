@@ -6,10 +6,11 @@ use nettoolskit_orchestrator::{
     list_ai_provider_profiles, query_ai_usage_summary, query_weekly_ai_usage_summary,
     render_ai_doctor_report, resolve_ai_model_routing_selection,
     resolve_ai_model_routing_selection_from_env, resolve_ai_provider_profile,
-    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult, AiModelRoutingLaneKind,
-    AiModelRoutingPolicy, AiModelRoutingSelection, AiProviderProfile, AiUsageSummaryReport,
-    AiUsageSummaryReportRequest, AiUsageWeeklyReport, AiUsageWeeklyReportRequest, ExitStatus,
-    NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV, NTK_AI_PROFILE_ENV,
+    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult,
+    AiModelRoutingLaneKind, AiModelRoutingPolicy, AiModelRoutingSelection, AiProviderProfile,
+    AiUsageSummaryReport, AiUsageSummaryReportRequest, AiUsageWeeklyReport,
+    AiUsageWeeklyReportRequest, ExitStatus, NTK_AI_ACTIVE_AGENT_ENV,
+    NTK_AI_ACTIVE_SKILL_ENV, NTK_AI_PROFILE_ENV, build_ai_doctor_control_schema,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -201,7 +202,8 @@ fn execute_ai_doctor(arguments: AiDoctorArgs) -> ExitStatus {
     }
 
     if arguments.json_output {
-        return print_json_or_error(&result);
+        let schema = build_ai_doctor_control_schema(&result);
+        return print_json_or_error(&schema);
     }
 
     print_ai_doctor(&result, arguments.report_path.as_deref());

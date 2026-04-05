@@ -31,6 +31,9 @@ pub mod local_context;
 /// Shared runtime contracts for CLI and background-service execution modes.
 pub mod runtime;
 
+/// Stable machine-readable control-plane inspection schemas.
+pub mod control_plane;
+
 /// Runtime execution context shared by bootstrap, doctor, and health flows.
 pub mod runtime_execution;
 
@@ -58,6 +61,13 @@ pub mod path_utils;
 
 // Re-export commonly used types
 pub use config::{AppConfig, ColorMode, UnicodeMode};
+pub use control_plane::{
+    AiDoctorAdapterSchema, AiDoctorControlSchema, AiDoctorControlStatus, AiDoctorLaneRef,
+    AiDoctorModelRoutingSchema, AiDoctorModelSelectionSchema, AiDoctorProfileRef,
+    AiDoctorProviderScoreSchema, AiDoctorResolvedValue, AiDoctorRoutingPlanSchema,
+    RuntimeDoctorControlMapping, RuntimeDoctorControlSchema, RuntimeDoctorControlStatus,
+    NTK_CONTROL_SCHEMA_VERSION,
+};
 pub use exit_status::ExitStatus;
 pub use features::Features;
 pub use menu::{CommandEntry, MenuEntry, MenuProvider};

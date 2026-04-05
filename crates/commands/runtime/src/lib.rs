@@ -22,8 +22,8 @@ pub use contracts::{
     RuntimeSurfaceKind, RUNTIME_SURFACE_CONTRACTS,
 };
 pub use diagnostics::doctor::{
-    invoke_runtime_doctor, RuntimeDoctorMappingReport, RuntimeDoctorRequest, RuntimeDoctorResult,
-    RuntimeDoctorStatus,
+    build_runtime_doctor_control_schema, invoke_runtime_doctor, RuntimeDoctorMappingReport,
+    RuntimeDoctorRequest, RuntimeDoctorResult, RuntimeDoctorStatus,
 };
 pub use diagnostics::enterprise_trends::{
     invoke_export_enterprise_trends, RuntimeExportEnterpriseTrendsRequest,

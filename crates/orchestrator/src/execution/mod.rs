@@ -48,8 +48,8 @@ pub use ai::{
     OpenAiCompatibleProvider, OpenAiCompatibleProviderConfig,
 };
 pub use ai_doctor::{
-    invoke_ai_doctor, render_ai_doctor_report, AiDoctorModelSelection, AiDoctorRequest,
-    AiDoctorResult, AiDoctorStatus,
+    build_ai_doctor_control_schema, invoke_ai_doctor, render_ai_doctor_report,
+    AiDoctorModelSelection, AiDoctorRequest, AiDoctorResult, AiDoctorStatus,
 };
 pub use ai_model_routing::{
     find_ai_model_routing_policy, list_ai_model_routing_policies,

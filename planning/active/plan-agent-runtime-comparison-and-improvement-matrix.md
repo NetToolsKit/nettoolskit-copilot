@@ -23,7 +23,7 @@ Generated: 2026-03-31 00:00
 | Context reranking | deterministic recall exists, but cheap second-pass selection is still planned | Weak | `plan-context-selection-reranking-and-budgeted-recall.md` |
 | Token and cost tracking | weekly usage ledger and token policy exist, but richer tuning is still needed | Partial | `plan-token-economy-optimization.md` |
 | Task output spill-to-disk | large-output lifecycle is not yet formalized | Weak | `plan-task-output-spill-to-disk-and-retention-control.md` |
-| Typed control schemas | runtime inspection is still more internal than contract-driven | Weak | `plan-sdk-control-plane-schemas-and-runtime-introspection.md` |
+| Typed control schemas | shared `ai_doctor` and `runtime_doctor` control schemas now exist in `nettoolskit-core`, but broader runtime/session/MCP/context contracts are still pending | Partial | `plan-sdk-control-plane-schemas-and-runtime-introspection.md` |
 | Internal multi-agent runtime | delegation exists, but lineage/inheritance/cleanup need a stronger contract | Partial | `plan-multi-agent-runtime-lineage-and-a2a-readiness.md` |
 | Plugin and skill extensibility | canonical extension taxonomy, authored-root governance, and loading boundaries now exist for agents, skills, hooks, prompts, projections, and future plugins | Substantial | `planning/completed/plan-plugin-skill-extensibility-and-runtime-governance.md` |
 | Operational diagnostics | canonical runtime health taxonomy, operator playbook, and AI doctor/report baseline now exist; future subsystem-specific doctors can build on this shared model | Substantial | `planning/completed/plan-runtime-operational-diagnostics-and-observability.md` |

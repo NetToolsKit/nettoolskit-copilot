@@ -16,6 +16,7 @@ It covers standardized exit status, menu traits, configuration loading, runtime 
 - ✅ Shared `ExitStatus`, `Result<T>`, and menu traits used across crates
 - ✅ Layered configuration with runtime mode, color, and Unicode policies
 - ✅ Runtime control-plane contracts for CLI and service execution modes
+- ✅ Versioned machine-readable control schemas for `ai_doctor` and `runtime_doctor`
 - ✅ Repository path, search, and local-context helpers for workspace automation
 
 ---
@@ -354,6 +355,19 @@ pub struct TaskAuditEvent {
     pub control: Option<ControlEnvelope>,
     pub timestamp_unix_ms: u64,
 }
+```
+
+```rust
+pub const NTK_CONTROL_SCHEMA_VERSION: u32;
+
+pub enum AiDoctorControlStatus {
+    LocalOnly,
+    Ready,
+    Degraded,
+}
+
+pub struct AiDoctorControlSchema { /* fields omitted */ }
+pub struct RuntimeDoctorControlSchema { /* fields omitted */ }
 ```
 
 | RuntimeMode | Meaning |

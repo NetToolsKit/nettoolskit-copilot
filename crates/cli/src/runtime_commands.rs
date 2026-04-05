@@ -3,7 +3,8 @@
 use clap::{ArgAction, Args, Subcommand};
 use nettoolskit_orchestrator::ExitStatus;
 use nettoolskit_runtime::{
-    export_planning_summary, invoke_apply_vscode_templates, invoke_export_enterprise_trends,
+    build_runtime_doctor_control_schema, export_planning_summary,
+    invoke_apply_vscode_templates, invoke_export_enterprise_trends,
     invoke_pre_commit_eof_hygiene, invoke_pre_tool_use, invoke_render_mcp_runtime_artifacts,
     invoke_render_provider_surfaces, invoke_render_vscode_mcp_template, invoke_runtime_doctor,
     invoke_runtime_healthcheck, invoke_runtime_self_heal, invoke_setup_git_hooks,
@@ -97,6 +98,9 @@ pub struct RuntimeDoctorArgs {
     /// Emit detailed mapping output.
     #[clap(long)]
     pub detailed: bool,
+    /// Emit JSON instead of the default human-readable summary.
+    #[clap(long)]
+    pub json_output: bool,
     /// Re-run bootstrap remediation when drift is detected.
     #[clap(long)]
     pub sync_on_drift: bool,
@@ -630,6 +634,24 @@ fn execute_runtime_doctor(arguments: RuntimeDoctorArgs) -> ExitStatus {
             return ExitStatus::Error;
         }
     };
+
+    if arguments.json_output {
+        let schema = build_runtime_doctor_control_schema(&result);
+        return match serde_json::to_string_pretty(&schema) {
+            Ok(payload) => {
+                println!("{payload}");
+                if result.has_drift {
+                    ExitStatus::Error
+                } else {
+                    ExitStatus::Success
+                }
+            }
+            Err(error) => {
+                eprintln!("{error}");
+                ExitStatus::Error
+            }
+        };
+    }
 
     println!("Status: {}", doctor_status_label(result.status));
     println!("Runtime profile: {}", result.runtime_profile_name);

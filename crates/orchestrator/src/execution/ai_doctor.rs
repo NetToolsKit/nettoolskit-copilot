@@ -12,6 +12,15 @@ use crate::execution::ai_routing::{
     build_ai_provider_routing_plan, resolve_ai_provider_chain, resolve_ai_provider_timeout_budget,
     AiProviderRoutingPlan,
 };
+use nettoolskit_core::{
+    control_plane::{
+        AiDoctorAdapterSchema, AiDoctorControlSchema, AiDoctorControlStatus,
+        AiDoctorLaneRef, AiDoctorModelRoutingSchema, AiDoctorModelSelectionSchema,
+        AiDoctorProfileRef, AiDoctorProviderScoreSchema, AiDoctorResolvedValue,
+        AiDoctorRoutingPlanSchema,
+    },
+    NTK_CONTROL_SCHEMA_VERSION,
+};
 use serde::Serialize;
 
 const DEFAULT_AI_ROUTE_TIMEOUT_MS: u64 = 45_000;
@@ -111,6 +120,76 @@ pub struct AiDoctorResult {
     pub warnings: Vec<String>,
     /// Overall readiness status.
     pub status: AiDoctorStatus,
+}
+
+/// Convert one AI-doctor result into the stable machine-readable control schema.
+#[must_use]
+pub fn build_ai_doctor_control_schema(result: &AiDoctorResult) -> AiDoctorControlSchema {
+    AiDoctorControlSchema {
+        schema_version: NTK_CONTROL_SCHEMA_VERSION,
+        schema_kind: "ai_doctor".to_string(),
+        status: match result.status {
+            AiDoctorStatus::LocalOnly => AiDoctorControlStatus::LocalOnly,
+            AiDoctorStatus::Ready => AiDoctorControlStatus::Ready,
+            AiDoctorStatus::Degraded => AiDoctorControlStatus::Degraded,
+        },
+        active_profile: result.active_profile.map(|profile| AiDoctorProfileRef {
+            id: profile.id.to_string(),
+            title: profile.title.to_string(),
+            summary: profile.summary.to_string(),
+            provider_mode: profile.provider_mode.to_string(),
+            support_tier: profile.support_tier.to_string(),
+            live_network_required: profile.live_network_required,
+        }),
+        active_profile_source: result.active_profile_source.clone(),
+        provider_chain: result.provider_chain.clone(),
+        provider_chain_source: result.provider_chain_source.clone(),
+        primary_provider: result.primary_provider.clone(),
+        fallback_provider: result.fallback_provider.clone(),
+        primary_timeout_ms: result.primary_timeout_ms,
+        secondary_timeout_ms: result.secondary_timeout_ms,
+        endpoint: resolved_value(result.endpoint.as_deref(), result.endpoint_source.as_deref()),
+        provider_default_model: resolved_value(
+            result.provider_default_model.as_deref(),
+            result.provider_default_model_source.as_deref(),
+        ),
+        api_key_present: result.api_key_present,
+        live_provider_ready: result.live_provider_ready,
+        fallback_ready: result.fallback_ready,
+        model_selection: AiDoctorModelSelectionSchema {
+            enabled: result.model_selection.enabled,
+            cheap_model: result.model_selection.cheap_model.clone(),
+            reasoning_model: result.model_selection.reasoning_model.clone(),
+            cheap_intents: result.model_selection.cheap_intents.clone(),
+            reasoning_intents: result.model_selection.reasoning_intents.clone(),
+        },
+        model_routing: convert_model_routing(&result.model_routing),
+        routing_plan: AiDoctorRoutingPlanSchema {
+            strategy: result.routing_plan.strategy.as_str().to_string(),
+            strategy_source: result.routing_plan.strategy_source.clone(),
+            ordered_provider_ids: result.routing_plan.ordered_provider_ids.clone(),
+            provider_scores: result
+                .routing_plan
+                .provider_scores
+                .iter()
+                .map(|candidate| AiDoctorProviderScoreSchema {
+                    provider_id: candidate.provider_id.clone(),
+                    total_score: candidate.total_score,
+                    latency_score: candidate.latency_score,
+                    cost_score: candidate.cost_score,
+                    reliability_score: candidate.reliability_score,
+                    policy_fit_score: candidate.policy_fit_score,
+                    rationale: candidate.rationale.clone(),
+                })
+                .collect(),
+        },
+        adapters: result
+            .adapter_descriptors
+            .iter()
+            .map(convert_adapter_descriptor)
+            .collect(),
+        warnings: result.warnings.clone(),
+    }
 }
 
 /// Diagnose the effective AI runtime configuration without executing a request.
@@ -475,6 +554,67 @@ fn resolve_model_selection(
         reasoning_model,
         cheap_intents,
         reasoning_intents,
+    }
+}
+
+fn convert_model_routing(selection: &AiModelRoutingSelection) -> AiDoctorModelRoutingSchema {
+    AiDoctorModelRoutingSchema {
+        active_agent: selection
+            .active_agent
+            .as_ref()
+            .map(|policy| AiDoctorLaneRef {
+                lane_kind: policy.lane_kind.as_str().to_string(),
+                lane_id: policy.lane_id.clone(),
+                title: policy.title.clone(),
+            }),
+        active_agent_source: selection.active_agent_source.clone(),
+        active_skill: selection
+            .active_skill
+            .as_ref()
+            .map(|policy| AiDoctorLaneRef {
+                lane_kind: policy.lane_kind.as_str().to_string(),
+                lane_id: policy.lane_id.clone(),
+                title: policy.title.clone(),
+            }),
+        active_skill_source: selection.active_skill_source.clone(),
+        effective_profile: selection.effective_profile.clone(),
+        effective_profile_source: selection.effective_profile_source.clone(),
+        effective_cheap_model: selection.effective_cheap_model.clone(),
+        effective_cheap_model_source: selection.effective_cheap_model_source.clone(),
+        effective_reasoning_model: selection.effective_reasoning_model.clone(),
+        effective_reasoning_model_source: selection.effective_reasoning_model_source.clone(),
+        effective_cheap_intents: selection.effective_cheap_intents.clone(),
+        effective_cheap_intents_source: selection.effective_cheap_intents_source.clone(),
+        effective_reasoning_intents: selection.effective_reasoning_intents.clone(),
+        effective_reasoning_intents_source: selection.effective_reasoning_intents_source.clone(),
+    }
+}
+
+fn resolved_value(value: Option<&str>, source: Option<&str>) -> Option<AiDoctorResolvedValue> {
+    value.map(|value| AiDoctorResolvedValue {
+        value: value.to_string(),
+        source: source.unwrap_or("unknown").to_string(),
+    })
+}
+
+fn convert_adapter_descriptor(descriptor: &AiProviderAdapterDescriptor) -> AiDoctorAdapterSchema {
+    AiDoctorAdapterSchema {
+        provider_id: descriptor.provider_id.to_string(),
+        transport: match descriptor.transport {
+            crate::execution::ai::AiProviderTransportKind::LocalMock => "local_mock".to_string(),
+            crate::execution::ai::AiProviderTransportKind::OpenAiCompatibleChat => {
+                "openai_compatible_chat".to_string()
+            }
+        },
+        auth: match descriptor.auth {
+            crate::execution::ai::AiProviderAuthKind::None => "none".to_string(),
+            crate::execution::ai::AiProviderAuthKind::BearerApiKey => {
+                "bearer_api_key".to_string()
+            }
+        },
+        supports_streaming: descriptor.supports_streaming,
+        supports_usage_reporting: descriptor.supports_usage_reporting,
+        supports_fallback_output: descriptor.supports_fallback_output,
     }
 }
 

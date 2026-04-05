@@ -25,6 +25,7 @@ Objectives:
 - ✅ Local RAG/CAG context index and weekly AI usage ledger for deterministic repo recall
 - ✅ Built-in AI provider profiles plus `ntk ai doctor` diagnostics, smart routing strategy scoring, normalized adapter contracts, canonical agent/skill model-routing defaults, and matrix-aware usage reporting for balanced, coding, cheap, latency, and local orchestrator presets
 - ✅ Explicit agentic surface separation for MCP, A2A, RAG, and CAG
+- ✅ Versioned control-plane inspection schemas for `ntk ai doctor` and `ntk runtime doctor` machine output
 - ✅ Deterministic planning, specification, and reference docs under `planning/`
 - ✅ Compatibility wrappers retained only where they still provide operator entry points
 
@@ -80,7 +81,7 @@ Run `ntk --help` for the current top-level surface. If no command is provided, `
 
 | Command | Description |
 | --- | --- |
-| `ntk ai doctor` | Diagnose active AI profile, provider chain, routing strategy, adapter contracts, timeout, and remote readiness without executing a request |
+| `ntk ai doctor` | Diagnose active AI profile, provider chain, routing strategy, adapter contracts, timeout, and remote readiness without executing a request, with a typed JSON control schema for machine consumers |
 | `ntk ai model-routing list` | List canonical agent and skill model-routing defaults consumed by the development orchestrator |
 | `ntk ai model-routing show` | Show the resolved active agent/skill routing selection or an explicit lane pairing |
 | `ntk ai profiles list` | List built-in AI provider profiles and their provider-mode classifications |
@@ -93,7 +94,7 @@ Run `ntk --help` for the current top-level surface. If no command is provided, `
 | Command | Description |
 | --- | --- |
 | `ntk runtime pre-tool-use` | Normalize hook payloads for VS Code `PreToolUse` |
-| `ntk runtime doctor` | Run the native runtime doctor workflow |
+| `ntk runtime doctor` | Run the native runtime doctor workflow, with human-readable output or a typed JSON control schema |
 | `ntk runtime healthcheck` | Run the native runtime healthcheck workflow |
 | `ntk runtime self-heal` | Run the native runtime self-heal workflow |
 | `ntk runtime update-local-context-index` | Build or refresh the repository-owned local context index |
@@ -236,9 +237,9 @@ Runtime health, degraded-state evidence, and subsystem ownership are versioned s
 | --- | --- | --- |
 | Diagnostics taxonomy | Defines `healthy`, `degraded`, `blocked`, `misconfigured`, and `recovering` plus subsystem ownership | `definitions/templates/manifests/runtime-diagnostics.taxonomy.json` |
 | Operator playbook | Human troubleshooting and remediation flow | `docs/operations/runtime-diagnostics-observability-playbook.md` |
-| Current doctor surface | Read-only runtime inspection for AI/runtime health | `ntk ai doctor` |
+| Current doctor surface | Read-only runtime inspection for AI/runtime health with versioned machine-readable contracts | `ntk ai doctor`, `ntk runtime doctor` |
 
-Future MCP, recall, task, and service doctor/report surfaces should reuse the same taxonomy instead of inventing per-command state names.
+Future MCP, recall, task, and service doctor/report surfaces should reuse the same taxonomy and the same typed control-schema style instead of inventing per-command state names or one-off JSON payloads.
 
 ---
 

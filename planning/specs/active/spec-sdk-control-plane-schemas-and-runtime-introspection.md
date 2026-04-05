@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 23:55
 - Objective: define typed control-plane schemas and runtime introspection surfaces for models, permissions, MCP status, and context usage.
 - Normalized Request: create a workstream for stronger SDK/control schemas and runtime inspection so tool callers and operators can reason about the system through stable contracts.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -55,6 +55,9 @@ The repository already exposes command and runtime surfaces, but several control
 - MCP status, context usage, permission mode, and model state can be inspected programmatically.
 - CLI rendering becomes an adapter over typed introspection, not the source of truth.
 - Future SDK or service consumers can reuse the same contracts.
+- Progress [2026-04-05 23:55]:
+  - The first shared control-schema boundary now exists in `nettoolskit-core` for `ai_doctor` and `runtime_doctor`.
+  - CLI JSON inspection for both doctor surfaces now goes through shared control schemas instead of crate-local structs.
 
 ---
 

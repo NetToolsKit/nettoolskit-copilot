@@ -1,8 +1,12 @@
 //! Runtime drift detection for repository-managed runtime surfaces.
 
 use anyhow::{Context, Result};
-use nettoolskit_core::runtime_execution::{
-    resolve_runtime_execution_context, RuntimeExecutionContext,
+use nettoolskit_core::{
+    control_plane::{
+        RuntimeDoctorControlMapping, RuntimeDoctorControlSchema, RuntimeDoctorControlStatus,
+    },
+    runtime_execution::{resolve_runtime_execution_context, RuntimeExecutionContext},
+    NTK_CONTROL_SCHEMA_VERSION,
 };
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
@@ -96,6 +100,48 @@ pub struct RuntimeDoctorResult {
     pub sync_resolved_drift: bool,
     /// Number of mappings audited for the active runtime profile.
     pub mappings_checked: usize,
+}
+
+/// Convert one runtime-doctor result into the stable machine-readable control schema.
+#[must_use]
+pub fn build_runtime_doctor_control_schema(
+    result: &RuntimeDoctorResult,
+) -> RuntimeDoctorControlSchema {
+    RuntimeDoctorControlSchema {
+        schema_version: NTK_CONTROL_SCHEMA_VERSION,
+        schema_kind: "runtime_doctor".to_string(),
+        repo_root: result.repo_root.clone(),
+        runtime_profile_name: result.runtime_profile_name.clone(),
+        runtime_profile_catalog_path: result.runtime_profile_catalog_path.clone(),
+        mappings_checked: result.mappings_checked,
+        has_drift: result.has_drift,
+        has_extras: result.has_extras,
+        status: match result.status {
+            RuntimeDoctorStatus::Clean => RuntimeDoctorControlStatus::Clean,
+            RuntimeDoctorStatus::CleanWithExtras => RuntimeDoctorControlStatus::CleanWithExtras,
+            RuntimeDoctorStatus::Detected => RuntimeDoctorControlStatus::Detected,
+        },
+        sync_attempted: result.sync_attempted,
+        sync_resolved_drift: result.sync_resolved_drift,
+        mappings: result
+            .reports
+            .iter()
+            .map(|report| RuntimeDoctorControlMapping {
+                name: report.name.clone(),
+                source_path: report.source_path.clone(),
+                target_path: report.target_path.clone(),
+                source_count: report.source_count,
+                target_count: report.target_count,
+                missing_count: report.missing_in_runtime.len(),
+                extra_count: report.extra_in_runtime.len(),
+                drift_count: report.drifted_files.len(),
+                missing_in_runtime: report.missing_in_runtime.clone(),
+                extra_in_runtime: report.extra_in_runtime.clone(),
+                drifted_files: report.drifted_files.clone(),
+                is_healthy: report.is_healthy,
+            })
+            .collect(),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

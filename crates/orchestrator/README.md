@@ -16,7 +16,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
 - ✅ Command routing and parsing through `MainAction` and `get_main_action`
 - ✅ Async command execution with progress and cancellation support
 - ✅ Shared AI session, ChatOps, plugin, and repository workflow orchestration helpers
-- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, normalized adapter contracts, and canonical agent/skill model-routing defaults for development-oriented preset selection
+- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, normalized adapter contracts, canonical agent/skill model-routing defaults, and versioned AI doctor control-schema output for development-oriented preset selection
 
 ---
 
@@ -216,6 +216,9 @@ pub async fn process_text(text: &str) -> nettoolskit_core::ExitStatus;
 pub struct AiDoctorRequest;
 pub enum AiDoctorStatus { /* variants omitted */ }
 pub struct AiDoctorResult { /* fields omitted */ }
+pub fn build_ai_doctor_control_schema(
+    result: &AiDoctorResult,
+) -> nettoolskit_core::AiDoctorControlSchema;
 
 pub fn invoke_ai_doctor(request: &AiDoctorRequest) -> Result<AiDoctorResult, String>;
 pub fn render_ai_doctor_report(result: &AiDoctorResult) -> String;

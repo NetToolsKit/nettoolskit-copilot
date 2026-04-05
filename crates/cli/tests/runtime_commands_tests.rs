@@ -766,6 +766,29 @@ fn test_runtime_doctor_cli_reports_clean_runtime_for_none_profile() {
 }
 
 #[test]
+fn test_runtime_doctor_cli_supports_json_output_with_control_schema() {
+    let repo = TempDir::new().expect("temporary repository should be created");
+    initialize_runtime_health_repo(repo.path());
+
+    ntk()
+        .current_dir(repo.path())
+        .args([
+            "runtime",
+            "doctor",
+            "--runtime-profile",
+            "none",
+            "--json-output",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
+        .stdout(predicate::str::contains(r#""schema_kind": "runtime_doctor""#))
+        .stdout(predicate::str::contains(r#""runtime_profile_name": "none""#))
+        .stdout(predicate::str::contains(r#""status": "clean""#))
+        .stdout(predicate::str::contains(r#""mappings": []"#));
+}
+
+#[test]
 fn test_runtime_export_enterprise_trends_cli_writes_dashboard_outputs() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_runtime_repo_root(repo.path());

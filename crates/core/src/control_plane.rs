@@ -1,0 +1,405 @@
+//! Typed control-plane schemas for machine-readable runtime introspection.
+//!
+//! These contracts intentionally sit above crate-local runtime/AI structs so
+//! CLI, service, and future SDK callers can reuse stable inspection payloads
+//! without binding themselves to internal implementation details.
+
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+
+/// Stable schema version for machine-readable control-plane documents.
+pub const NTK_CONTROL_SCHEMA_VERSION: u32 = 1;
+
+/// Machine-readable status for runtime doctor inspection.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum RuntimeDoctorControlStatus {
+    /// No drift or unmanaged extras were detected.
+    Clean,
+    /// Runtime is aligned but contains unmanaged extra files.
+    CleanWithExtras,
+    /// Missing or drifted files remain, or extras were treated as failures.
+    Detected,
+}
+
+/// One audited mapping within the runtime doctor control schema.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeDoctorControlMapping {
+    /// Human-readable mapping name.
+    pub name: String,
+    /// Canonical source root.
+    pub source_path: PathBuf,
+    /// Canonical target root.
+    pub target_path: PathBuf,
+    /// Number of filtered source files considered by the mapping.
+    pub source_count: usize,
+    /// Number of filtered target files considered by the mapping.
+    pub target_count: usize,
+    /// Number of missing source-managed files in the runtime target.
+    pub missing_count: usize,
+    /// Number of unmanaged extra files in the runtime target.
+    pub extra_count: usize,
+    /// Number of files whose content hashes differ.
+    pub drift_count: usize,
+    /// Source-managed files missing from the runtime target.
+    pub missing_in_runtime: Vec<String>,
+    /// Runtime files not tracked by the source mapping.
+    pub extra_in_runtime: Vec<String>,
+    /// Files present on both sides whose content hashes differ.
+    pub drifted_files: Vec<String>,
+    /// Whether the mapping is healthy under the chosen strictness mode.
+    pub is_healthy: bool,
+}
+
+/// Stable machine-readable runtime doctor payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeDoctorControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Resolved repository root.
+    pub repo_root: PathBuf,
+    /// Effective runtime profile name.
+    pub runtime_profile_name: String,
+    /// Runtime profile catalog used to resolve the profile.
+    pub runtime_profile_catalog_path: PathBuf,
+    /// Number of mappings audited for the active runtime profile.
+    pub mappings_checked: usize,
+    /// Whether any mapping is unhealthy.
+    pub has_drift: bool,
+    /// Whether any runtime extras were detected.
+    pub has_extras: bool,
+    /// Overall drift status.
+    pub status: RuntimeDoctorControlStatus,
+    /// Whether drift remediation sync was attempted.
+    pub sync_attempted: bool,
+    /// Whether remediation sync cleared all drift findings on the second pass.
+    pub sync_resolved_drift: bool,
+    /// Typed mapping-level inspection payloads.
+    pub mappings: Vec<RuntimeDoctorControlMapping>,
+}
+
+/// Machine-readable readiness status for AI runtime inspection.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AiDoctorControlStatus {
+    /// The active runtime is local-only and does not require remote readiness.
+    LocalOnly,
+    /// The active runtime is ready for remote execution.
+    Ready,
+    /// The runtime has a valid configuration shape but is missing remote readiness inputs.
+    Degraded,
+}
+
+/// Stable profile reference embedded in AI doctor output.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiDoctorProfileRef {
+    /// Stable profile identifier.
+    pub id: String,
+    /// Short title suitable for operator surfaces.
+    pub title: String,
+    /// Concise operator-facing summary.
+    pub summary: String,
+    /// Declared provider mode classification.
+    pub provider_mode: String,
+    /// Support-tier label for operator expectations.
+    pub support_tier: String,
+    /// Indicates whether the profile expects a live provider call.
+    pub live_network_required: bool,
+}
+
+/// Stable lane reference embedded in AI doctor output.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiDoctorLaneRef {
+    /// Stable lane category.
+    pub lane_kind: String,
+    /// Stable lane identifier.
+    pub lane_id: String,
+    /// Operator-facing title.
+    pub title: String,
+}
+
+/// One resolved configuration value plus its provenance.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiDoctorResolvedValue {
+    /// Effective value.
+    pub value: String,
+    /// Explains where the value came from.
+    pub source: String,
+}
+
+/// Effective model-selection policy summary.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiDoctorModelSelectionSchema {
+    /// Indicates whether model selection is enabled.
+    pub enabled: bool,
+    /// Effective cheap/lightweight model selection.
+    pub cheap_model: Option<String>,
+    /// Effective reasoning/heavier model selection.
+    pub reasoning_model: Option<String>,
+    /// Intents routed to the cheap model.
+    pub cheap_intents: Vec<String>,
+    /// Intents routed to the reasoning model.
+    pub reasoning_intents: Vec<String>,
+}
+
+/// Effective agent and skill routing state.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiDoctorModelRoutingSchema {
+    /// Active agent lane, when selected.
+    pub active_agent: Option<AiDoctorLaneRef>,
+    /// Explains how the active agent was resolved.
+    pub active_agent_source: String,
+    /// Active skill lane, when selected.
+    pub active_skill: Option<AiDoctorLaneRef>,
+    /// Explains how the active skill was resolved.
+    pub active_skill_source: String,
+    /// Effective profile default derived from the active lanes.
+    pub effective_profile: Option<String>,
+    /// Explains how the effective profile default was resolved.
+    pub effective_profile_source: String,
+    /// Effective cheap-model default derived from the active lanes.
+    pub effective_cheap_model: Option<String>,
+    /// Explains how the effective cheap model was resolved.
+    pub effective_cheap_model_source: String,
+    /// Effective reasoning-model default derived from the active lanes.
+    pub effective_reasoning_model: Option<String>,
+    /// Explains how the effective reasoning model was resolved.
+    pub effective_reasoning_model_source: String,
+    /// Effective cheap-intent defaults derived from the active lanes.
+    pub effective_cheap_intents: Vec<String>,
+    /// Explains how the effective cheap intents were resolved.
+    pub effective_cheap_intents_source: String,
+    /// Effective reasoning-intent defaults derived from the active lanes.
+    pub effective_reasoning_intents: Vec<String>,
+    /// Explains how the effective reasoning intents were resolved.
+    pub effective_reasoning_intents_source: String,
+}
+
+/// One scored provider candidate in the AI routing plan.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct AiDoctorProviderScoreSchema {
+    /// Stable provider identifier.
+    pub provider_id: String,
+    /// Total weighted score.
+    pub total_score: f64,
+    /// Provider latency subscore.
+    pub latency_score: f64,
+    /// Provider cost subscore.
+    pub cost_score: f64,
+    /// Provider reliability subscore.
+    pub reliability_score: f64,
+    /// Policy-fit subscore for the active profile/runtime mode.
+    pub policy_fit_score: f64,
+    /// Short operator-facing explanation for the score.
+    pub rationale: String,
+}
+
+/// Normalized routing-plan payload for AI doctor.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct AiDoctorRoutingPlanSchema {
+    /// Selected routing strategy.
+    pub strategy: String,
+    /// Explains how the strategy was resolved.
+    pub strategy_source: String,
+    /// Ordered provider identifiers after scoring.
+    pub ordered_provider_ids: Vec<String>,
+    /// Scored candidates in the same order as `ordered_provider_ids`.
+    pub provider_scores: Vec<AiDoctorProviderScoreSchema>,
+}
+
+/// Normalized provider-adapter contract summary.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiDoctorAdapterSchema {
+    /// Stable provider identifier.
+    pub provider_id: String,
+    /// Transport contract label.
+    pub transport: String,
+    /// Authentication contract label.
+    pub auth: String,
+    /// Indicates whether the adapter supports streaming.
+    pub supports_streaming: bool,
+    /// Indicates whether the adapter reports usage metadata.
+    pub supports_usage_reporting: bool,
+    /// Indicates whether the adapter can emit deterministic fallback output.
+    pub supports_fallback_output: bool,
+}
+
+/// Stable machine-readable AI doctor payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct AiDoctorControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Overall readiness status.
+    pub status: AiDoctorControlStatus,
+    /// Selected built-in profile, when configured.
+    pub active_profile: Option<AiDoctorProfileRef>,
+    /// Explains how the active profile was resolved.
+    pub active_profile_source: String,
+    /// Effective provider chain expressed in runtime ids.
+    pub provider_chain: Vec<String>,
+    /// Explains how the provider chain was resolved.
+    pub provider_chain_source: String,
+    /// First provider in the chain.
+    pub primary_provider: String,
+    /// Optional fallback provider.
+    pub fallback_provider: Option<String>,
+    /// Primary timeout budget in milliseconds.
+    pub primary_timeout_ms: u64,
+    /// Secondary timeout budget in milliseconds.
+    pub secondary_timeout_ms: u64,
+    /// Effective OpenAI-compatible endpoint when applicable.
+    pub endpoint: Option<AiDoctorResolvedValue>,
+    /// Effective provider default model when applicable.
+    pub provider_default_model: Option<AiDoctorResolvedValue>,
+    /// Whether an API key is present for live-provider execution.
+    pub api_key_present: bool,
+    /// Whether the current primary provider can execute without extra config.
+    pub live_provider_ready: bool,
+    /// Whether a fallback provider exists.
+    pub fallback_ready: bool,
+    /// Effective model-selection policy summary.
+    pub model_selection: AiDoctorModelSelectionSchema,
+    /// Effective agent/skill model-routing selection.
+    pub model_routing: AiDoctorModelRoutingSchema,
+    /// Effective routing strategy and scored provider order.
+    pub routing_plan: AiDoctorRoutingPlanSchema,
+    /// Normalized adapter descriptors for the effective provider chain.
+    pub adapters: Vec<AiDoctorAdapterSchema>,
+    /// Human-readable warnings for the operator.
+    pub warnings: Vec<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn runtime_doctor_control_schema_roundtrips_json() {
+        let schema = RuntimeDoctorControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "runtime_doctor".to_string(),
+            repo_root: PathBuf::from("C:/repo"),
+            runtime_profile_name: "all".to_string(),
+            runtime_profile_catalog_path: PathBuf::from("definitions/providers/github/governance/runtime-install-profiles.json"),
+            mappings_checked: 1,
+            has_drift: false,
+            has_extras: false,
+            status: RuntimeDoctorControlStatus::Clean,
+            sync_attempted: false,
+            sync_resolved_drift: false,
+            mappings: vec![RuntimeDoctorControlMapping {
+                name: ".github -> runtime".to_string(),
+                source_path: PathBuf::from("definitions/providers/github/root"),
+                target_path: PathBuf::from(".github"),
+                source_count: 2,
+                target_count: 2,
+                missing_count: 0,
+                extra_count: 0,
+                drift_count: 0,
+                missing_in_runtime: Vec::new(),
+                extra_in_runtime: Vec::new(),
+                drifted_files: Vec::new(),
+                is_healthy: true,
+            }],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: RuntimeDoctorControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn ai_doctor_control_schema_roundtrips_json() {
+        let schema = AiDoctorControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "ai_doctor".to_string(),
+            status: AiDoctorControlStatus::Ready,
+            active_profile: Some(AiDoctorProfileRef {
+                id: "balanced".to_string(),
+                title: "Balanced".to_string(),
+                summary: "summary".to_string(),
+                provider_mode: "gateway/openai-compatible".to_string(),
+                support_tier: "stable".to_string(),
+                live_network_required: true,
+            }),
+            active_profile_source: "env:NTK_AI_PROFILE".to_string(),
+            provider_chain: vec!["openai-compatible".to_string(), "mock".to_string()],
+            provider_chain_source: "profile:balanced".to_string(),
+            primary_provider: "openai-compatible".to_string(),
+            fallback_provider: Some("mock".to_string()),
+            primary_timeout_ms: 45_000,
+            secondary_timeout_ms: 20_000,
+            endpoint: Some(AiDoctorResolvedValue {
+                value: "https://example.test".to_string(),
+                source: "env:NTK_AI_ENDPOINT".to_string(),
+            }),
+            provider_default_model: Some(AiDoctorResolvedValue {
+                value: "gpt-4.1".to_string(),
+                source: "profile".to_string(),
+            }),
+            api_key_present: true,
+            live_provider_ready: true,
+            fallback_ready: true,
+            model_selection: AiDoctorModelSelectionSchema {
+                enabled: true,
+                cheap_model: Some("gpt-4.1-mini".to_string()),
+                reasoning_model: Some("gpt-4.1".to_string()),
+                cheap_intents: vec!["ask".to_string()],
+                reasoning_intents: vec!["plan".to_string()],
+            },
+            model_routing: AiDoctorModelRoutingSchema {
+                active_agent: Some(AiDoctorLaneRef {
+                    lane_kind: "agent".to_string(),
+                    lane_id: "planner".to_string(),
+                    title: "Planner".to_string(),
+                }),
+                active_agent_source: "env:NTK_AI_ACTIVE_AGENT".to_string(),
+                active_skill: None,
+                active_skill_source: "default".to_string(),
+                effective_profile: Some("coding".to_string()),
+                effective_profile_source: "agent:planner".to_string(),
+                effective_cheap_model: Some("gpt-4.1-mini".to_string()),
+                effective_cheap_model_source: "profile:coding".to_string(),
+                effective_reasoning_model: Some("gpt-4.1".to_string()),
+                effective_reasoning_model_source: "profile:coding".to_string(),
+                effective_cheap_intents: vec!["ask".to_string()],
+                effective_cheap_intents_source: "profile:coding".to_string(),
+                effective_reasoning_intents: vec!["plan".to_string()],
+                effective_reasoning_intents_source: "profile:coding".to_string(),
+            },
+            routing_plan: AiDoctorRoutingPlanSchema {
+                strategy: "balanced".to_string(),
+                strategy_source: "profile:balanced".to_string(),
+                ordered_provider_ids: vec!["openai-compatible".to_string(), "mock".to_string()],
+                provider_scores: vec![AiDoctorProviderScoreSchema {
+                    provider_id: "openai-compatible".to_string(),
+                    total_score: 0.9,
+                    latency_score: 0.8,
+                    cost_score: 0.7,
+                    reliability_score: 1.0,
+                    policy_fit_score: 1.0,
+                    rationale: "preferred".to_string(),
+                }],
+            },
+            adapters: vec![AiDoctorAdapterSchema {
+                provider_id: "openai-compatible".to_string(),
+                transport: "openai_compatible_chat".to_string(),
+                auth: "bearer_api_key".to_string(),
+                supports_streaming: true,
+                supports_usage_reporting: true,
+                supports_fallback_output: false,
+            }],
+            warnings: vec!["warning".to_string()],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: AiDoctorControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+}

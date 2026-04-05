@@ -377,7 +377,10 @@ fn test_ai_doctor_json_output_reports_local_profile_status() {
         .args(["ai", "doctor", "--json-output"])
         .assert()
         .success()
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
+        .stdout(predicate::str::contains(r#""schema_kind": "ai_doctor""#))
         .stdout(predicate::str::contains(r#""status": "local_only""#))
+        .stdout(predicate::str::contains(r#""routing_plan": {"#))
         .stdout(predicate::str::contains(r#""strategy": "latency""#))
         .stdout(predicate::str::contains(r#""provider_chain": ["#))
         .stdout(predicate::str::contains(r#""mock""#));
