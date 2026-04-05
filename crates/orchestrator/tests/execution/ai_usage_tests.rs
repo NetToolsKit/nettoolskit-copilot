@@ -4,8 +4,8 @@ use chrono::{Datelike, Duration, Utc};
 use nettoolskit_orchestrator::{
     query_ai_usage_summary, query_weekly_ai_usage_summary, record_ai_usage_event,
     AiUsageEventRecord, AiUsageEventSource, AiUsageSummaryReportRequest,
-    AiUsageWeeklyReportRequest, NTK_AI_USAGE_DB_PATH_ENV, NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV,
-    NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
+    AiUsageWeeklyReportRequest, NTK_AI_PROFILE_ENV, NTK_AI_USAGE_DB_PATH_ENV,
+    NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV, NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
 };
 use serial_test::serial;
 use std::env;
@@ -147,6 +147,10 @@ fn test_record_ai_usage_event_persists_provider_and_cache_rows_for_weekly_report
     assert_eq!(report.estimated_billable_tokens_total, 200);
     assert_eq!(report.estimated_cached_tokens_total, 160);
     assert_eq!(report.provider_totals.len(), 2);
+    assert!(
+        report.runtime_route.is_some(),
+        "usage reports should include a best-effort runtime route snapshot"
+    );
 }
 
 #[test]
@@ -421,5 +425,126 @@ fn test_query_ai_usage_summary_aggregates_recent_weeks() {
     assert_eq!(
         report.provider_totals[0].estimated_billable_tokens_total,
         600
+    );
+}
+
+#[test]
+#[serial]
+fn test_query_weekly_ai_usage_summary_classifies_provider_totals_against_free_provider_matrix() {
+    // Arrange
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+    let timestamp_unix_ms = u64::try_from(Utc::now().timestamp_millis()).expect("timestamp");
+
+    record_ai_usage_event(&AiUsageEventRecord {
+        timestamp_unix_ms,
+        provider: "openrouter".to_string(),
+        model: Some("qwen/qwen3-coder:free".to_string()),
+        intent: "ask".to_string(),
+        repo_root: Some(repo_root.clone()),
+        session_id: "session-openrouter".to_string(),
+        event_source: AiUsageEventSource::Provider,
+        billable: true,
+        input_tokens_estimated: 120,
+        output_tokens_estimated: 50,
+        input_tokens_actual: None,
+        output_tokens_actual: None,
+        estimated_cost_usd: 0.0,
+        actual_cost_usd: None,
+        status: "success".to_string(),
+    })
+    .expect("usage record should persist");
+
+    // Act
+    let report = query_weekly_ai_usage_summary(&AiUsageWeeklyReportRequest {
+        db_path: Some(db_path),
+        repo_root: Some(repo_root),
+        iso_year: None,
+        iso_week: None,
+        budget_config_path: None,
+        budget_profile: None,
+    })
+    .expect("weekly report should load");
+
+    // Assert
+    let provider_total = report
+        .provider_totals
+        .iter()
+        .find(|entry| entry.provider == "openrouter")
+        .expect("OpenRouter provider total should exist");
+    assert_eq!(
+        provider_total.provider_family_id.as_deref(),
+        Some("openrouter")
+    );
+    assert_eq!(
+        provider_total.provider_family_title.as_deref(),
+        Some("OpenRouter")
+    );
+    assert_eq!(
+        provider_total.provider_mode.as_deref(),
+        Some("gateway/openai-compatible")
+    );
+    assert_eq!(
+        provider_total.support_tier.as_deref(),
+        Some("best-effort-free")
+    );
+}
+
+#[test]
+#[serial]
+fn test_query_weekly_ai_usage_summary_surfaces_compatible_free_provider_candidates() {
+    // Arrange
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "balanced");
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+
+    record_ai_usage_event(&make_record(
+        u64::try_from(Utc::now().timestamp_millis()).expect("timestamp should fit"),
+        &repo_root,
+        (100, 30),
+        RecordFixture {
+            provider: "openai",
+            model: Some("gpt-5-mini"),
+            intent: "ask",
+            session_id: "session-route",
+            source: AiUsageEventSource::Provider,
+            billable: true,
+            estimated_cost_usd: 0.010,
+        },
+    ))
+    .expect("usage record should persist");
+
+    // Act
+    let report = query_weekly_ai_usage_summary(&AiUsageWeeklyReportRequest {
+        db_path: Some(db_path),
+        repo_root: Some(repo_root),
+        iso_year: None,
+        iso_week: None,
+        budget_config_path: None,
+        budget_profile: None,
+    })
+    .expect("weekly report should load");
+
+    // Assert
+    let runtime_route = report
+        .runtime_route
+        .expect("runtime route snapshot should be present");
+    assert_eq!(runtime_route.active_profile_id.as_deref(), Some("balanced"));
+    assert_eq!(
+        runtime_route.active_profile_mode.as_deref(),
+        Some("gateway/openai-compatible")
+    );
+    assert!(
+        report
+            .free_provider_candidates
+            .iter()
+            .any(|entry| entry.family_id == "openrouter"),
+        "compatible free-provider families should include OpenRouter for openai-compatible runtime mode"
     );
 }

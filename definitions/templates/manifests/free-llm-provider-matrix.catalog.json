@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "family_id": "openrouter",
+      "title": "OpenRouter",
+      "platform_type": "gateway",
+      "integration_mode": "gateway/openai-compatible",
+      "support_tier": "best-effort-free",
+      "stability_label": "stable",
+      "compatibility_tags": ["openai-compatible"],
+      "provider_aliases": ["openrouter"],
+      "endpoint_hosts": ["openrouter.ai"],
+      "quota_hint": "~50-200 req/day",
+      "operator_note": "Gateway-style free tier with broad model mix; limits can vary by model and day."
+    },
+    {
+      "family_id": "groq",
+      "title": "Groq",
+      "platform_type": "api",
+      "integration_mode": "api/openai-compatible",
+      "support_tier": "best-effort-free",
+      "stability_label": "stable",
+      "compatibility_tags": ["openai-compatible"],
+      "provider_aliases": ["groq"],
+      "endpoint_hosts": ["api.groq.com"],
+      "quota_hint": "~100-300 req/day",
+      "operator_note": "Fast inference surface with generous free usage, but model availability and limits can shift."
+    },
+    {
+      "family_id": "google-ai-studio",
+      "title": "Google AI Studio",
+      "platform_type": "api",
+      "integration_mode": "api/native",
+      "support_tier": "best-effort-free",
+      "stability_label": "stable",
+      "compatibility_tags": ["native-api"],
+      "provider_aliases": ["google-ai-studio", "gemini", "google-gemini"],
+      "endpoint_hosts": ["generativelanguage.googleapis.com", "aistudio.google.com"],
+      "quota_hint": "generous daily usage",
+      "operator_note": "Stable native Gemini surface; requires dedicated native adapter work instead of generic OpenAI-compatible routing."
+    },
+    {
+      "family_id": "together-ai",
+      "title": "Together AI",
+      "platform_type": "gateway",
+      "integration_mode": "gateway/openai-compatible",
+      "support_tier": "best-effort-free",
+      "stability_label": "stable",
+      "compatibility_tags": ["openai-compatible"],
+      "provider_aliases": ["together", "together-ai"],
+      "endpoint_hosts": ["api.together.xyz"],
+      "quota_hint": "~50-200 req/day",
+      "operator_note": "Balanced free gateway surface for open models; throughput can vary with public capacity."
+    },
+    {
+      "family_id": "hugging-face-inference",
+      "title": "Hugging Face Inference API",
+      "platform_type": "api",
+      "integration_mode": "api/inference",
+      "support_tier": "best-effort-free",
+      "stability_label": "simple",
+      "compatibility_tags": ["inference-api"],
+      "provider_aliases": ["hugging-face", "huggingface", "hf-inference", "hugging-face-inference"],
+      "endpoint_hosts": ["api-inference.huggingface.co"],
+      "quota_hint": "~30-100 req/day",
+      "operator_note": "Simple hosted inference surface with broad model access, but lower stability and less consistent latency."
+    },
+    {
+      "family_id": "nvidia-nim-preview",
+      "title": "NVIDIA NIM Preview",
+      "platform_type": "infra",
+      "integration_mode": "infra/openai-compatible",
+      "support_tier": "preview",
+      "stability_label": "preview",
+      "compatibility_tags": ["openai-compatible"],
+      "provider_aliases": ["nvidia-nim", "nim", "nvidia-nim-preview"],
+      "endpoint_hosts": ["integrate.api.nvidia.com"],
+      "quota_hint": "~20-100 req/day",
+      "operator_note": "Preview-grade infra surface; good for experiments, but should be treated as unstable in production-like checks."
+    },
+    {
+      "family_id": "opencode-ai",
+      "title": "OpenCode.ai",
+      "platform_type": "orchestrator",
+      "integration_mode": "orchestrator/proxy",
+      "support_tier": "best-effort-free",
+      "stability_label": "variable",
+      "compatibility_tags": ["orchestrator-proxy"],
+      "provider_aliases": ["opencode", "opencode-ai"],
+      "endpoint_hosts": ["opencode.ai"],
+      "quota_hint": "variable (~20-100 req/day)",
+      "operator_note": "Orchestration/proxy surface with hidden free limits; treat as control-plane evaluation, not as a model family."
+    }
+  ]
+}

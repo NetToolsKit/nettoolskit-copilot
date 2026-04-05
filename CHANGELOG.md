@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added an embedded free-provider matrix catalog under `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` plus an orchestrator `ai_provider_matrix` module so free-tier families, quota hints, compatibility tags, and operator caveats are versioned once and reused by runtime diagnostics/reporting.
 - Added canonical agent and skill model-routing policy manifests under `definitions/agents/*` and `definitions/skills/*`, plus a shared orchestrator `ai_model_routing` module, so the development runtime can resolve lane-aware profile/model defaults without hiding them inside provider adapters.
 - Added normalized AI provider adapter descriptors for transport, auth, streaming, usage, and fallback-output capabilities so provider-family contracts are inspectable without leaking vendor-specific transport details into orchestration code.
 - Added strategy-aware AI provider routing under `crates/orchestrator/src/execution/ai_routing.rs`, with explicit `latency`, `balanced`, and `cost` strategies, scored provider ordering, and shared timeout/provider-chain resolution for both the runtime pipeline and `ntk ai doctor`.
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 
 ### Changed
+- Changed AI weekly/summary usage reporting so `ntk ai usage weekly|summary` now surfaces a best-effort runtime route snapshot, compatible free-provider families with quota/fallback guidance, and matrix-aware provider classifications when persisted provider ids match a known family alias.
 - Closed the `development-agent-orchestrator-experience` umbrella as a completed workstream after profiles, runtime doctor/reporting, smart routing, normalized adapters, the AI operator playbook, and canonical agent/skill model-routing all landed with validated CLI and orchestrator surfaces.
 - Changed the AI development-orchestrator umbrella, the free-provider matrix, the multi-agent lineage plan, and token-economy notes to record that canonical agent-to-model routing is now materially implemented and inspectable.
 - Changed `ntk ai doctor`, `ntk ai model-routing`, the AI operator playbook, and root/crate READMEs so active agent/skill lanes and their derived profile/model defaults are visible to operators instead of remaining implicit runtime state.

@@ -10,6 +10,8 @@ pub mod ai_doctor;
 pub mod ai_model_routing;
 /// Built-in AI provider profiles and preset resolution helpers.
 pub mod ai_profiles;
+/// Canonical free-provider matrix for diagnostics and reporting.
+pub mod ai_provider_matrix;
 /// Provider routing strategy, scoring, and timeout resolution.
 pub mod ai_routing;
 /// Local AI session persistence and resume primitives.
@@ -58,6 +60,10 @@ pub use ai_profiles::{
     find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
     resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
 };
+pub use ai_provider_matrix::{
+    classify_ai_free_provider, list_ai_free_provider_matrix_entries,
+    list_compatible_ai_free_providers, AiFreeProviderCatalogEntry, AiFreeProviderMatrixDocument,
+};
 pub use ai_routing::{
     build_ai_provider_routing_plan, normalize_ai_provider_id, parse_ai_provider_chain_ids,
     resolve_ai_provider_chain, resolve_ai_provider_timeout_budget, resolve_ai_routing_strategy,
@@ -76,13 +82,13 @@ pub use ai_session::{
 pub use ai_usage::{
     current_ai_usage_iso_week, query_ai_usage_summary, query_weekly_ai_usage_summary,
     record_ai_usage_event, AiUsageBudgetConfigDocument, AiUsageBudgetProfile, AiUsageEventRecord,
-    AiUsageEventSource, AiUsageIsoWeek, AiUsageLedgerError, AiUsageSummaryReport,
-    AiUsageSummaryReportRequest, AiUsageSummaryWeekTotal, AiUsageWeeklyBudgetStatus,
-    AiUsageWeeklyProviderTotal, AiUsageWeeklyReport, AiUsageWeeklyReportRequest,
-    LOCAL_AI_USAGE_BUDGETS_FILE_NAME, LOCAL_AI_USAGE_DB_FILE_NAME, LOCAL_AI_USAGE_DIR_NAME,
-    NTK_AI_USAGE_BUDGET_CONFIG_PATH_ENV, NTK_AI_USAGE_DB_PATH_ENV,
-    NTK_AI_WEEKLY_BUDGET_PROFILE_ENV, NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV,
-    NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
+    AiUsageEventSource, AiUsageFreeProviderCompatibility, AiUsageIsoWeek, AiUsageLedgerError,
+    AiUsageRuntimeRouteSnapshot, AiUsageSummaryReport, AiUsageSummaryReportRequest,
+    AiUsageSummaryWeekTotal, AiUsageWeeklyBudgetStatus, AiUsageWeeklyProviderTotal,
+    AiUsageWeeklyReport, AiUsageWeeklyReportRequest, LOCAL_AI_USAGE_BUDGETS_FILE_NAME,
+    LOCAL_AI_USAGE_DB_FILE_NAME, LOCAL_AI_USAGE_DIR_NAME, NTK_AI_USAGE_BUDGET_CONFIG_PATH_ENV,
+    NTK_AI_USAGE_DB_PATH_ENV, NTK_AI_WEEKLY_BUDGET_PROFILE_ENV,
+    NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL_ENV, NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL_ENV,
 };
 pub use approval::{
     evaluate_approval, request_approval, ApprovalActionKind, ApprovalDecision, ApprovalRequest,

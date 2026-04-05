@@ -4,13 +4,13 @@ Generated: 2026-03-31 17:37
 
 ## Status
 
-- LastUpdated: 2026-04-05 14:05
+- LastUpdated: 2026-04-05 18:10
 - Objective: compare, classify, and prepare the free AI providers shown in `.docs/llm-free.png` for deterministic test coverage without coupling the runtime to a single vendor surface.
 - Normalized Request: create a planning workstream for evaluating all listed free providers and using them in repository tests through explicit, SOLID-aligned boundaries.
 - Active Branch: `docs/planning-gap-workstreams`
 - Spec Path: `planning/specs/active/spec-free-llm-provider-test-matrix.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
-- Current Slice: F2 now has a built-in provider-profile catalog, a strategy-aware routing plan, normalized adapter descriptors, and canonical agent/skill model-routing defaults that can bias evaluation lanes without coupling production routing to a single vendor.
+- Current Slice: F4 now has a canonical free-provider matrix catalog, usage-report enrichment for provider-family classification, and read-only runtime route snapshots that surface quota/fallback guidance through the existing weekly/summary commands.
 - Inputs:
   - `.docs/llm-free.png`
   - `crates/orchestrator/src/execution/ai.rs`
@@ -100,7 +100,14 @@ This workstream treats OpenCode.ai as an orchestration/control-plane surface, no
 - Define how free-tier quotas, hidden rate limits, and fallback behavior will be surfaced to operators.
 - Keep usage reporting separate from provider selection so the reporting path remains read-only.
 - Tie the matrix into the weekly/summary usage commands rather than creating a one-off reporting surface.
+- Implemented slice:
+  - `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` now freezes the canonic free-provider families, compatibility tags, quota hints, and operator caveats shown in `.docs/llm-free.png`.
+  - `crates/orchestrator/src/execution/ai_provider_matrix.rs` now exposes embedded matrix loading, alias/endpoint classification, and compatibility filtering for the active runtime mode without polluting the provider adapters.
+  - `crates/orchestrator/src/execution/ai_usage.rs` now enriches weekly/summary usage reports with matrix-aware provider classification, a best-effort runtime route snapshot, and compatible free-provider candidates that surface quota hints and fallback posture read-only.
+  - `crates/cli/src/ai_commands.rs` now renders configured route, compatible free-provider families, and classified provider totals in `ntk ai usage weekly|summary`.
 - Target paths:
+  - `definitions/templates/manifests/free-llm-provider-matrix.catalog.json`
+  - `crates/orchestrator/src/execution/ai_provider_matrix.rs`
   - `crates/orchestrator/src/execution/ai_usage.rs`
   - `crates/cli/src/ai_commands.rs`
   - `crates/orchestrator/tests/execution/ai_usage_tests.rs`

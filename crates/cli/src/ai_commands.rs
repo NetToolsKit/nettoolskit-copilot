@@ -776,19 +776,85 @@ fn print_weekly_usage_report(report: &AiUsageWeeklyReport) {
         }
     }
 
+    if let Some(runtime_route) = &report.runtime_route {
+        println!();
+        println!("Configured route");
+        println!(
+            "  profile: {} [{} / {}]",
+            runtime_route.active_profile_id.as_deref().unwrap_or("none"),
+            runtime_route
+                .active_profile_mode
+                .as_deref()
+                .unwrap_or("n/a"),
+            runtime_route
+                .active_profile_support_tier
+                .as_deref()
+                .unwrap_or("n/a")
+        );
+        println!(
+            "  strategy: {} | chain: {}",
+            runtime_route.routing_strategy,
+            runtime_route.provider_chain.join(" -> ")
+        );
+        println!(
+            "  primary: {} | fallback: {} | live_ready={} | fallback_ready={}",
+            runtime_route.primary_provider,
+            runtime_route.fallback_provider.as_deref().unwrap_or("none"),
+            runtime_route.live_provider_ready,
+            runtime_route.fallback_ready
+        );
+    }
+
+    if let Some(runtime_route_warning) = &report.runtime_route_warning {
+        println!();
+        println!("Configured route warning");
+        println!("  {runtime_route_warning}");
+    }
+
+    if !report.free_provider_candidates.is_empty() {
+        println!();
+        println!("Compatible free-provider families");
+        for candidate in &report.free_provider_candidates {
+            println!(
+                "- {} [{} / {} / {}]: quota={} | {}",
+                candidate.title,
+                candidate.platform_type,
+                candidate.integration_mode,
+                candidate.support_tier,
+                candidate.quota_hint,
+                candidate.operator_note
+            );
+        }
+    }
+
     println!();
     println!("Providers/models");
     for provider_total in &report.provider_totals {
         let model_label = provider_total.model.as_deref().unwrap_or("n/a");
+        let classification = match (
+            provider_total.provider_family_title.as_deref(),
+            provider_total.provider_mode.as_deref(),
+            provider_total.support_tier.as_deref(),
+        ) {
+            (Some(title), Some(mode), Some(tier)) => format!(" [{title} / {mode} / {tier}]"),
+            _ => String::new(),
+        };
+        let quota_hint = provider_total
+            .quota_hint
+            .as_deref()
+            .map(|value| format!(" quota={value}"))
+            .unwrap_or_default();
         println!(
-            "- {} / {}: events={} billable={} cache_hits={} estimated_tokens={} estimated_cost_usd={:.4}",
+            "- {} / {}{}: events={} billable={} cache_hits={} estimated_tokens={} estimated_cost_usd={:.4}{}",
             provider_total.provider,
             model_label,
+            classification,
             provider_total.total_events,
             provider_total.billable_events,
             provider_total.cache_hit_events,
             provider_total.estimated_tokens_total,
-            provider_total.estimated_cost_usd_total
+            provider_total.estimated_cost_usd_total,
+            quota_hint
         );
     }
 }
@@ -855,6 +921,57 @@ fn print_ai_usage_summary_report(report: &AiUsageSummaryReport) {
         }
     }
 
+    if let Some(runtime_route) = &report.runtime_route {
+        println!();
+        println!("Configured route");
+        println!(
+            "  profile: {} [{} / {}]",
+            runtime_route.active_profile_id.as_deref().unwrap_or("none"),
+            runtime_route
+                .active_profile_mode
+                .as_deref()
+                .unwrap_or("n/a"),
+            runtime_route
+                .active_profile_support_tier
+                .as_deref()
+                .unwrap_or("n/a")
+        );
+        println!(
+            "  strategy: {} | chain: {}",
+            runtime_route.routing_strategy,
+            runtime_route.provider_chain.join(" -> ")
+        );
+        println!(
+            "  primary: {} | fallback: {} | live_ready={} | fallback_ready={}",
+            runtime_route.primary_provider,
+            runtime_route.fallback_provider.as_deref().unwrap_or("none"),
+            runtime_route.live_provider_ready,
+            runtime_route.fallback_ready
+        );
+    }
+
+    if let Some(runtime_route_warning) = &report.runtime_route_warning {
+        println!();
+        println!("Configured route warning");
+        println!("  {runtime_route_warning}");
+    }
+
+    if !report.free_provider_candidates.is_empty() {
+        println!();
+        println!("Compatible free-provider families");
+        for candidate in &report.free_provider_candidates {
+            println!(
+                "- {} [{} / {} / {}]: quota={} | {}",
+                candidate.title,
+                candidate.platform_type,
+                candidate.integration_mode,
+                candidate.support_tier,
+                candidate.quota_hint,
+                candidate.operator_note
+            );
+        }
+    }
+
     println!();
     println!("Recent weeks");
     for week_total in &report.weekly_totals {
@@ -873,15 +990,30 @@ fn print_ai_usage_summary_report(report: &AiUsageSummaryReport) {
     println!("Providers/models in range");
     for provider_total in &report.provider_totals {
         let model_label = provider_total.model.as_deref().unwrap_or("n/a");
+        let classification = match (
+            provider_total.provider_family_title.as_deref(),
+            provider_total.provider_mode.as_deref(),
+            provider_total.support_tier.as_deref(),
+        ) {
+            (Some(title), Some(mode), Some(tier)) => format!(" [{title} / {mode} / {tier}]"),
+            _ => String::new(),
+        };
+        let quota_hint = provider_total
+            .quota_hint
+            .as_deref()
+            .map(|value| format!(" quota={value}"))
+            .unwrap_or_default();
         println!(
-            "- {} / {}: events={} billable={} cache_hits={} estimated_billable_tokens={} estimated_billable_cost_usd={:.4}",
+            "- {} / {}{}: events={} billable={} cache_hits={} estimated_billable_tokens={} estimated_billable_cost_usd={:.4}{}",
             provider_total.provider,
             model_label,
+            classification,
             provider_total.total_events,
             provider_total.billable_events,
             provider_total.cache_hit_events,
             provider_total.estimated_billable_tokens_total,
-            provider_total.estimated_billable_cost_usd_total
+            provider_total.estimated_billable_cost_usd_total,
+            quota_hint
         );
     }
 }

@@ -114,7 +114,8 @@ fn test_ai_usage_weekly_json_output_reports_local_history() {
         .success()
         .stdout(predicate::str::contains(r#""total_events": 1"#))
         .stdout(predicate::str::contains(r#""week_label":"#))
-        .stdout(predicate::str::contains(r#""provider": "openai""#));
+        .stdout(predicate::str::contains(r#""provider": "openai""#))
+        .stdout(predicate::str::contains(r#""runtime_route":"#));
 }
 
 #[test]
@@ -124,6 +125,7 @@ fn test_ai_usage_weekly_text_output_includes_budget_section_when_configured() {
     let temp_dir = TempDir::new().expect("temporary directory should be created");
     let db_path = usage_db_path(&temp_dir);
     let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "balanced");
     let _token_budget_guard = EnvVarGuard::set("NTK_AI_WEEKLY_TOKEN_BUDGET_TOTAL", "1000");
     let _cost_budget_guard = EnvVarGuard::set("NTK_AI_WEEKLY_COST_BUDGET_USD_TOTAL", "1.0");
     let repo_root = temp_dir.path().join("repo");
@@ -146,6 +148,10 @@ fn test_ai_usage_weekly_text_output_includes_budget_section_when_configured() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Configured weekly budget"))
+        .stdout(predicate::str::contains("Configured route"))
+        .stdout(predicate::str::contains(
+            "Compatible free-provider families",
+        ))
         .stdout(predicate::str::contains("Providers/models"))
         .stdout(predicate::str::contains("openai / gpt-5-mini"));
 }
@@ -181,7 +187,8 @@ fn test_ai_usage_summary_json_output_reports_recent_weeks() {
         .success()
         .stdout(predicate::str::contains(r#""week_count_requested": 2"#))
         .stdout(predicate::str::contains(r#""weekly_totals":"#))
-        .stdout(predicate::str::contains(r#""provider": "openai""#));
+        .stdout(predicate::str::contains(r#""provider": "openai""#))
+        .stdout(predicate::str::contains(r#""free_provider_candidates":"#));
 }
 
 #[test]
@@ -224,8 +231,54 @@ costBudgetUsdTotal = 1.2
         .assert()
         .success()
         .stdout(predicate::str::contains("Current week budget (team)"))
+        .stdout(predicate::str::contains("Configured route"))
         .stdout(predicate::str::contains("Recent weeks"))
         .stdout(predicate::str::contains("Providers/models in range"));
+}
+
+#[test]
+#[serial]
+fn test_ai_usage_weekly_text_output_classifies_provider_totals_when_matrix_alias_matches() {
+    let temp_dir = TempDir::new().expect("temporary directory should be created");
+    let db_path = usage_db_path(&temp_dir);
+    let _db_guard = EnvVarGuard::set(NTK_AI_USAGE_DB_PATH_ENV, &db_path);
+    let repo_root = temp_dir.path().join("repo");
+    std::fs::create_dir_all(&repo_root).expect("repo root should be created");
+
+    record_ai_usage_event(&AiUsageEventRecord {
+        timestamp_unix_ms: current_unix_timestamp_ms(),
+        provider: "openrouter".to_string(),
+        model: Some("qwen/qwen3-coder:free".to_string()),
+        intent: "ask".to_string(),
+        repo_root: Some(repo_root.clone()),
+        session_id: "session-openrouter-cli".to_string(),
+        event_source: AiUsageEventSource::Provider,
+        billable: true,
+        input_tokens_estimated: 150,
+        output_tokens_estimated: 40,
+        input_tokens_actual: None,
+        output_tokens_actual: None,
+        estimated_cost_usd: 0.0,
+        actual_cost_usd: None,
+        status: "success".to_string(),
+    })
+    .expect("usage record should persist");
+
+    ntk()
+        .args([
+            "ai",
+            "usage",
+            "weekly",
+            "--db-path",
+            db_path.to_string_lossy().as_ref(),
+            "--repo-root",
+            repo_root.to_string_lossy().as_ref(),
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "openrouter / qwen/qwen3-coder:free [OpenRouter / gateway/openai-compatible / best-effort-free]",
+        ));
 }
 
 #[test]

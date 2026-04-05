@@ -3,6 +3,10 @@
 //! This module stores repository-aware AI usage events in a user-local SQLite
 //! ledger and exposes weekly aggregation helpers for CLI/operator reporting.
 
+use crate::execution::ai_doctor::{invoke_ai_doctor, AiDoctorRequest};
+use crate::execution::ai_provider_matrix::{
+    classify_ai_free_provider, list_compatible_ai_free_providers, AiFreeProviderCatalogEntry,
+};
 use chrono::{Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use nettoolskit_core::AppConfig;
 use rusqlite::{params, Connection};
@@ -308,6 +312,50 @@ pub struct AiUsageWeeklyBudgetStatus {
     pub estimated_cost_burn_pct: Option<f64>,
 }
 
+/// Current runtime route snapshot embedded into AI usage reports.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiUsageRuntimeRouteSnapshot {
+    /// Active built-in profile id when one is configured.
+    pub active_profile_id: Option<String>,
+    /// Active provider-mode classification when one is configured.
+    pub active_profile_mode: Option<String>,
+    /// Active profile support tier when one is configured.
+    pub active_profile_support_tier: Option<String>,
+    /// Effective routing strategy.
+    pub routing_strategy: String,
+    /// Effective ordered provider chain.
+    pub provider_chain: Vec<String>,
+    /// Primary provider id.
+    pub primary_provider: String,
+    /// Optional fallback provider id.
+    pub fallback_provider: Option<String>,
+    /// Whether the live provider path is ready.
+    pub live_provider_ready: bool,
+    /// Whether a fallback path exists.
+    pub fallback_ready: bool,
+}
+
+/// Compatible free-provider family listed against the active runtime route.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiUsageFreeProviderCompatibility {
+    /// Stable family id.
+    pub family_id: String,
+    /// Human-readable title.
+    pub title: String,
+    /// High-level platform grouping.
+    pub platform_type: String,
+    /// Integration-mode summary.
+    pub integration_mode: String,
+    /// Operator-facing support tier.
+    pub support_tier: String,
+    /// Short stability label.
+    pub stability_label: String,
+    /// Estimated free-tier quota hint.
+    pub quota_hint: String,
+    /// Short operator note or caveat.
+    pub operator_note: String,
+}
+
 /// Provider/model breakdown entry for one weekly report.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AiUsageWeeklyProviderTotal {
@@ -333,6 +381,16 @@ pub struct AiUsageWeeklyProviderTotal {
     pub actual_tokens_total: Option<u64>,
     /// Actual total cost when provider usage was captured.
     pub actual_cost_usd_total: Option<f64>,
+    /// Classified free-provider family id when the provider can be matched to the matrix.
+    pub provider_family_id: Option<String>,
+    /// Classified free-provider title when the provider can be matched to the matrix.
+    pub provider_family_title: Option<String>,
+    /// Classified integration mode when the provider can be matched to the matrix.
+    pub provider_mode: Option<String>,
+    /// Classified support tier when the provider can be matched to the matrix.
+    pub support_tier: Option<String>,
+    /// Classified free-tier quota hint when the provider can be matched to the matrix.
+    pub quota_hint: Option<String>,
 }
 
 /// Weekly AI usage report.
@@ -382,6 +440,12 @@ pub struct AiUsageWeeklyReport {
     pub actual_cost_usd_total: Option<f64>,
     /// Optional budget burn status.
     pub budget_status: Option<AiUsageWeeklyBudgetStatus>,
+    /// Best-effort runtime route snapshot at report time.
+    pub runtime_route: Option<AiUsageRuntimeRouteSnapshot>,
+    /// Warning captured when the runtime route snapshot could not be resolved.
+    pub runtime_route_warning: Option<String>,
+    /// Compatible free-provider families for the active runtime mode.
+    pub free_provider_candidates: Vec<AiUsageFreeProviderCompatibility>,
     /// Provider/model breakdown for the selected week/filter.
     pub provider_totals: Vec<AiUsageWeeklyProviderTotal>,
 }
@@ -477,6 +541,12 @@ pub struct AiUsageSummaryReport {
     pub actual_cost_usd_total: Option<f64>,
     /// Weekly rollup entries ordered from newest to oldest.
     pub weekly_totals: Vec<AiUsageSummaryWeekTotal>,
+    /// Best-effort runtime route snapshot at report time.
+    pub runtime_route: Option<AiUsageRuntimeRouteSnapshot>,
+    /// Warning captured when the runtime route snapshot could not be resolved.
+    pub runtime_route_warning: Option<String>,
+    /// Compatible free-provider families for the active runtime mode.
+    pub free_provider_candidates: Vec<AiUsageFreeProviderCompatibility>,
     /// Aggregated provider/model totals across the selected range.
     pub provider_totals: Vec<AiUsageWeeklyProviderTotal>,
 }
@@ -791,6 +861,8 @@ fn build_weekly_report(
     budget_profile: Option<&ResolvedAiUsageBudgetProfile>,
 ) -> AiUsageWeeklyReport {
     let mut accumulator = WeeklyAccumulator::default();
+    let (runtime_route, runtime_route_warning, free_provider_candidates) =
+        capture_ai_usage_runtime_route_context();
 
     for row in rows {
         accumulator.total_events = accumulator.total_events.saturating_add(1);
@@ -886,23 +958,7 @@ fn build_weekly_report(
     let mut provider_totals = accumulator
         .providers
         .into_iter()
-        .map(|((provider, model), entry)| AiUsageWeeklyProviderTotal {
-            provider,
-            model,
-            total_events: entry.total_events,
-            billable_events: entry.billable_events,
-            cache_hit_events: entry.cache_hit_events,
-            estimated_tokens_total: entry.estimated_tokens_total,
-            estimated_billable_tokens_total: entry.estimated_billable_tokens_total,
-            estimated_cost_usd_total: entry.estimated_cost_usd_total,
-            estimated_billable_cost_usd_total: entry.estimated_billable_cost_usd_total,
-            actual_tokens_total: entry
-                .actual_tokens_present
-                .then_some(entry.actual_tokens_total),
-            actual_cost_usd_total: entry
-                .actual_cost_present
-                .then_some(entry.actual_cost_usd_total),
-        })
+        .map(|((provider, model), entry)| build_provider_total(provider, model, entry))
         .collect::<Vec<_>>();
 
     provider_totals.sort_by(|left, right| {
@@ -959,6 +1015,9 @@ fn build_weekly_report(
             .actual_cost_present
             .then_some(accumulator.actual_cost_usd_total),
         budget_status,
+        runtime_route,
+        runtime_route_warning,
+        free_provider_candidates,
         provider_totals,
     }
 }
@@ -1027,6 +1086,8 @@ fn build_ai_usage_summary_report(
     end_week: AiUsageIsoWeek,
     weekly_reports: Vec<AiUsageWeeklyReport>,
 ) -> AiUsageSummaryReport {
+    let (runtime_route, runtime_route_warning, free_provider_candidates) =
+        capture_ai_usage_runtime_route_context();
     let budget_profile_name = weekly_reports
         .first()
         .and_then(|report| report.budget_profile_name.clone());
@@ -1120,23 +1181,7 @@ fn build_ai_usage_summary_report(
 
     let mut provider_totals = providers
         .into_iter()
-        .map(|((provider, model), entry)| AiUsageWeeklyProviderTotal {
-            provider,
-            model,
-            total_events: entry.total_events,
-            billable_events: entry.billable_events,
-            cache_hit_events: entry.cache_hit_events,
-            estimated_tokens_total: entry.estimated_tokens_total,
-            estimated_billable_tokens_total: entry.estimated_billable_tokens_total,
-            estimated_cost_usd_total: entry.estimated_cost_usd_total,
-            estimated_billable_cost_usd_total: entry.estimated_billable_cost_usd_total,
-            actual_tokens_total: entry
-                .actual_tokens_present
-                .then_some(entry.actual_tokens_total),
-            actual_cost_usd_total: entry
-                .actual_cost_present
-                .then_some(entry.actual_cost_usd_total),
-        })
+        .map(|((provider, model), entry)| build_provider_total(provider, model, entry))
         .collect::<Vec<_>>();
     provider_totals.sort_by(|left, right| {
         right
@@ -1163,7 +1208,103 @@ fn build_ai_usage_summary_report(
         actual_tokens_total: actual_tokens_present.then_some(actual_tokens_total_sum),
         actual_cost_usd_total: actual_cost_present.then_some(actual_cost_usd_total),
         weekly_totals,
+        runtime_route,
+        runtime_route_warning,
+        free_provider_candidates,
         provider_totals,
+    }
+}
+
+fn build_provider_total(
+    provider: String,
+    model: Option<String>,
+    entry: ProviderAccumulator,
+) -> AiUsageWeeklyProviderTotal {
+    let classification = classify_ai_free_provider(&provider, None);
+
+    AiUsageWeeklyProviderTotal {
+        provider,
+        model,
+        total_events: entry.total_events,
+        billable_events: entry.billable_events,
+        cache_hit_events: entry.cache_hit_events,
+        estimated_tokens_total: entry.estimated_tokens_total,
+        estimated_billable_tokens_total: entry.estimated_billable_tokens_total,
+        estimated_cost_usd_total: entry.estimated_cost_usd_total,
+        estimated_billable_cost_usd_total: entry.estimated_billable_cost_usd_total,
+        actual_tokens_total: entry
+            .actual_tokens_present
+            .then_some(entry.actual_tokens_total),
+        actual_cost_usd_total: entry
+            .actual_cost_present
+            .then_some(entry.actual_cost_usd_total),
+        provider_family_id: classification.as_ref().map(|value| value.family_id.clone()),
+        provider_family_title: classification.as_ref().map(|value| value.title.clone()),
+        provider_mode: classification
+            .as_ref()
+            .map(|value| value.integration_mode.clone()),
+        support_tier: classification
+            .as_ref()
+            .map(|value| value.support_tier.clone()),
+        quota_hint: classification
+            .as_ref()
+            .map(|value| value.quota_hint.clone()),
+    }
+}
+
+fn capture_ai_usage_runtime_route_context() -> (
+    Option<AiUsageRuntimeRouteSnapshot>,
+    Option<String>,
+    Vec<AiUsageFreeProviderCompatibility>,
+) {
+    match invoke_ai_doctor(&AiDoctorRequest) {
+        Ok(result) => {
+            let runtime_route = AiUsageRuntimeRouteSnapshot {
+                active_profile_id: result
+                    .active_profile
+                    .as_ref()
+                    .map(|profile| profile.id.to_string()),
+                active_profile_mode: result
+                    .active_profile
+                    .as_ref()
+                    .map(|profile| profile.provider_mode.to_string()),
+                active_profile_support_tier: result
+                    .active_profile
+                    .as_ref()
+                    .map(|profile| profile.support_tier.to_string()),
+                routing_strategy: result.routing_plan.strategy.as_str().to_string(),
+                provider_chain: result.provider_chain.clone(),
+                primary_provider: result.primary_provider.clone(),
+                fallback_provider: result.fallback_provider.clone(),
+                live_provider_ready: result.live_provider_ready,
+                fallback_ready: result.fallback_ready,
+            };
+            let candidates = list_compatible_ai_free_providers(
+                runtime_route.active_profile_mode.as_deref(),
+                &runtime_route.provider_chain,
+            )
+            .into_iter()
+            .map(map_free_provider_compatibility)
+            .collect();
+
+            (Some(runtime_route), None, candidates)
+        }
+        Err(error) => (None, Some(error), Vec::new()),
+    }
+}
+
+fn map_free_provider_compatibility(
+    entry: AiFreeProviderCatalogEntry,
+) -> AiUsageFreeProviderCompatibility {
+    AiUsageFreeProviderCompatibility {
+        family_id: entry.family_id,
+        title: entry.title,
+        platform_type: entry.platform_type,
+        integration_mode: entry.integration_mode,
+        support_tier: entry.support_tier,
+        stability_label: entry.stability_label,
+        quota_hint: entry.quota_hint,
+        operator_note: entry.operator_note,
     }
 }
 
