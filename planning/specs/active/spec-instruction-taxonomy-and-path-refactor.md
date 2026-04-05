@@ -4,7 +4,7 @@ Generated: 2026-04-03 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-05 01:05
+- LastUpdated: 2026-04-05 09:20
 - Objective: refactor the repository definition system into a shallow root taxonomy centered on `definitions/`, separating `instructions/`, `templates/`, `agents/`, `skills/`, `hooks/`, and `providers/` while preserving stable naming, manifest samples, and migration safety.
 - Normalized Request: reorganize the definition system so it stays predictable across projects, uses shallow canonical roots under `definitions/`, separates repository instructions from agents, skills, hooks, and provider projections, and keeps documentation samples distinct from canonical templates.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -158,6 +158,7 @@ The second copy-first migration wave applies the same shallow model to the proje
 - Agent orchestration validation defaults and fixtures prefer canonical governance assets under `definitions/providers/github/governance/` for permission/runtime/model-routing contracts, while legacy `.github/governance/` files remain mirrored only for migration compatibility.
 - Shared governance-baseline validators and `validate-all` orchestration prefer canonical governance assets under `definitions/providers/github/governance/`, while template-fixture coverage also authors canonical examples under `definitions/templates/` and keeps `.github/templates/` only as a compatibility mirror during migration.
 - Security and release authored baselines prefer canonical evidence under `definitions/providers/github/{governance,root,hooks}/*` wherever those assets already exist, while transitional tests may still mirror `.github/governance/*` until projection cutover is complete.
+- Runtime/bootstrap/doctor/healthcheck/self-heal, hook, MCP, and local-context Rust test scaffolds author governance catalogs under `definitions/providers/github/governance/*` first, while `.github/governance/*` remains only a compatibility mirror until generated-surface cutover.
 
 ---
 

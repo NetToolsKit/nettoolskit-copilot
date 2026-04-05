@@ -20,6 +20,16 @@ fn write_file(path: &Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 fn initialize_git_repo(repo_root: &Path) {
     let output = std::process::Command::new("git")
         .arg("init")
@@ -35,22 +45,25 @@ fn initialize_runtime_repo_root(repo_root: &Path) {
 }
 
 fn write_runtime_install_profile_catalog(repo_root: &Path) {
-    write_file(
-        &repo_root.join(".github/governance/runtime-install-profiles.json"),
+    write_governance_file(
+        repo_root,
+        "runtime-install-profiles.json",
         r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}}}}"#,
     );
 }
 
 fn write_validation_profile_catalog(repo_root: &Path) {
-    write_file(
-        &repo_root.join(".github/governance/validation-profiles.json"),
+    write_governance_file(
+        repo_root,
+        "validation-profiles.json",
         r#"{"version":1,"defaultProfile":"dev","profiles":[{"id":"dev","warningOnly":false,"checkOrder":["validate-planning-structure"]}]}"#,
     );
 }
 
 fn write_mcp_runtime_catalog(repo_root: &Path) {
-    write_file(
-        &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "mcp-runtime.catalog.json",
         r#"{
   "version": 1,
   "inputs": [
@@ -93,8 +106,9 @@ fn write_mcp_runtime_catalog(repo_root: &Path) {
 }
 
 fn initialize_minimal_provider_surface_projection(repo_root: &Path) {
-    write_file(
-        &repo_root.join(".github/governance/provider-surface-projection.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "provider-surface-projection.catalog.json",
         r#"{"version":1,"renderers":[{"id":"github-instruction-surfaces","consumers":{"bootstrap":{"enabled":true,"order":10,"condition":"always"},"direct":{"enabled":true,"order":10}}},{"id":"vscode-profile-surfaces","consumers":{"bootstrap":{"enabled":true,"order":20,"condition":"always"},"direct":{"enabled":true,"order":20}}},{"id":"vscode-workspace-surfaces","consumers":{"bootstrap":{"enabled":true,"order":30,"condition":"always"},"direct":{"enabled":true,"order":30}}},{"id":"codex-compatibility-surfaces","consumers":{"bootstrap":{"enabled":true,"order":40,"condition":"codex"},"direct":{"enabled":true,"order":40}}},{"id":"codex-skill-surfaces","consumers":{"bootstrap":{"enabled":true,"order":50,"condition":"codex"},"direct":{"enabled":true,"order":50}}},{"id":"codex-orchestration-surfaces","consumers":{"bootstrap":{"enabled":true,"order":60,"condition":"codex"},"direct":{"enabled":true,"order":60}}},{"id":"claude-runtime-surfaces","consumers":{"bootstrap":{"enabled":true,"order":70,"condition":"claude"},"direct":{"enabled":true,"order":70}}},{"id":"claude-skill-surfaces","consumers":{"bootstrap":{"enabled":false,"order":80,"condition":"claude"},"direct":{"enabled":true,"order":80},"claudeSkillSync":{"enabled":true,"order":10}}},{"id":"mcp-runtime-artifacts","consumers":{"bootstrap":{"enabled":false,"order":90,"condition":"never"},"direct":{"enabled":true,"order":90}}}]}"#,
     );
 
@@ -221,8 +235,9 @@ fn initialize_runtime_health_repo(repo_root: &Path) {
 }
 
 fn write_local_context_catalog(repo_root: &Path) {
-    write_file(
-        &repo_root.join(".github/governance/local-context-index.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "local-context-index.catalog.json",
         r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":64,"chunking":{"maxChars":400,"maxLines":20},"queryDefaults":{"top":3},"includeGlobs":["README.md","planning/**/*.md","scripts/**/*.ps1",".github/**/*.md"],"excludeGlobs":[".temp/**"]}"#,
     );
 }

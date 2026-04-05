@@ -10,7 +10,8 @@ fn sample_document() -> LocalContextIndexDocument {
         version: 1,
         generated_at: "2026-03-26T20:00:00Z".to_string(),
         repo_root: "C:/repo".to_string(),
-        catalog_path: ".github/governance/local-context-index.catalog.json".to_string(),
+        catalog_path:
+            "definitions/providers/github/governance/local-context-index.catalog.json".to_string(),
         chunk_count: 2,
         files: Vec::new(),
         chunks: vec![

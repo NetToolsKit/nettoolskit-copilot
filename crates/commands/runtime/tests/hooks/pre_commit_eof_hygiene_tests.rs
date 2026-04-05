@@ -26,16 +26,29 @@ fn initialize_git_repo(repo_root: &Path) {
     assert!(output.status.success(), "git init should succeed");
 }
 
+fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 fn write_repo_baseline(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join("definitions/providers/github/governance"))
+        .expect("canonical governance directory should be created");
     fs::create_dir_all(repo_root.join(".github/governance"))
-        .expect("governance directory should be created");
+        .expect("legacy governance directory should be created");
     fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
     write_file(
         &repo_root.join(".editorconfig"),
         "root = true\n\n[*]\ninsert_final_newline = false\n\n[*.{rs,toml,lock}]\ninsert_final_newline = true\n",
     );
-    write_file(
-        &repo_root.join(".github/governance/git-hook-eof-modes.json"),
+    write_governance_file(
+        repo_root,
+        "git-hook-eof-modes.json",
         r#"{
   "schemaVersion": 1,
   "defaultMode": "manual",

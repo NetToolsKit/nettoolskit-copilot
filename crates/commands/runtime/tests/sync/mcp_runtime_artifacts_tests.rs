@@ -17,16 +17,29 @@ fn write_file(path: &Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
+fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
 fn initialize_repo_root(repo_root: &Path) {
+    fs::create_dir_all(repo_root.join("definitions/providers/github/governance"))
+        .expect("canonical governance directory should be created");
     fs::create_dir_all(repo_root.join(".github/governance"))
-        .expect(".github/governance should be created");
+        .expect("legacy governance directory should be created");
     fs::create_dir_all(repo_root.join(".codex/mcp")).expect(".codex/mcp should be created");
     fs::create_dir_all(repo_root.join(".vscode")).expect(".vscode should be created");
 }
 
 fn write_catalog(repo_root: &Path) {
-    write_file(
-        &repo_root.join(".github/governance/mcp-runtime.catalog.json"),
+    write_governance_file(
+        repo_root,
+        "mcp-runtime.catalog.json",
         r#"{
   "version": 1,
   "inputs": [

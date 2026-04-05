@@ -17,9 +17,20 @@ fn write_file(path: &Path, contents: &str) {
     fs::write(path, contents).expect("file should be written");
 }
 
-fn write_runtime_install_profile_catalog(repo_root: &Path) {
+fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
     write_file(
-        &repo_root.join(".github/governance/runtime-install-profiles.json"),
+        &repo_root
+            .join("definitions/providers/github/governance")
+            .join(file_name),
+        contents,
+    );
+    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+}
+
+fn write_runtime_install_profile_catalog(repo_root: &Path) {
+    write_governance_file(
+        repo_root,
+        "runtime-install-profiles.json",
         r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}},"github":{"description":"github profile","install":{"bootstrap":true,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":true},"runtime":{"github":true,"codex":false,"claude":false}},"codex":{"description":"codex profile","install":{"bootstrap":true,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":true},"runtime":{"github":false,"codex":true,"claude":false}},"all":{"description":"all profile","install":{"bootstrap":true,"globalVscodeSettings":true,"globalVscodeSnippets":true,"localGitHooks":true,"globalGitAliases":true,"healthcheck":true},"runtime":{"github":true,"codex":true,"claude":true}}}}"#,
     );
 }

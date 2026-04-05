@@ -28,6 +28,16 @@ fn sample_catalog() -> LocalContextIndexCatalog {
     }
 }
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    let canonical_dir = repo_root.join("definitions/providers/github/governance");
+    fs::create_dir_all(&canonical_dir).expect("canonical governance directory should be created");
+    fs::write(canonical_dir.join(file_name), contents).expect("canonical file should be written");
+
+    let legacy_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&legacy_dir).expect("legacy governance directory should be created");
+    fs::write(legacy_dir.join(file_name), contents).expect("legacy file should be written");
+}
+
 fn sqlite_counts(path: &std::path::Path) -> (u64, u64, u64) {
     let connection = Connection::open(path).expect("sqlite memory store should open");
     let document_count = connection
@@ -73,14 +83,14 @@ fn test_build_local_context_chunks_for_markdown_uses_heading_chunks() {
 fn test_build_local_context_index_reuses_unchanged_files() {
     let repo = TempDir::new().expect("temporary repository should be created");
     let catalog = sample_catalog();
-    let catalog_dir = repo.path().join(".github/governance");
-    fs::create_dir_all(&catalog_dir).expect("catalog directory should be created");
-    let catalog_path = catalog_dir.join("local-context-index.catalog.json");
-    fs::write(
-        &catalog_path,
+    let catalog_path = repo
+        .path()
+        .join("definitions/providers/github/governance/local-context-index.catalog.json");
+    write_governance_file(
+        repo.path(),
+        "local-context-index.catalog.json",
         r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":16,"chunking":{"maxChars":120,"maxLines":4},"queryDefaults":{"top":5},"includeGlobs":["planning/**/*.md","scripts/**/*.ps1"],"excludeGlobs":[".temp/**"]}"#,
-    )
-    .expect("catalog file should be written");
+    );
     fs::create_dir_all(repo.path().join("planning/active"))
         .expect("planning directory should be created");
     fs::write(
@@ -125,7 +135,8 @@ fn test_write_and_read_local_context_index_document_round_trip() {
         version: 1,
         generated_at: "2026-03-26T20:00:00Z".to_string(),
         repo_root: repo.path().to_string_lossy().to_string(),
-        catalog_path: ".github/governance/local-context-index.catalog.json".to_string(),
+        catalog_path:
+            "definitions/providers/github/governance/local-context-index.catalog.json".to_string(),
         chunk_count: 0,
         files: Vec::new(),
         chunks: Vec::new(),

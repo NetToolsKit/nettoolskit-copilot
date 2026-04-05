@@ -13,14 +13,22 @@ fn normalize_path(path: &std::path::Path) -> String {
         .replace('\\', "/")
 }
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    let canonical_dir = repo_root.join("definitions/providers/github/governance");
+    fs::create_dir_all(&canonical_dir).expect("canonical governance directory should be created");
+    fs::write(canonical_dir.join(file_name), contents).expect("canonical file should be written");
+
+    let legacy_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&legacy_dir).expect("legacy governance directory should be created");
+    fs::write(legacy_dir.join(file_name), contents).expect("legacy file should be written");
+}
+
 fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
-    let governance_dir = repo_root.join(".github/governance");
-    fs::create_dir_all(&governance_dir).expect("governance directory should be created");
-    fs::write(
-        governance_dir.join("runtime-install-profiles.json"),
+    write_governance_file(
+        repo_root,
+        "runtime-install-profiles.json",
         r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}},"github":{"description":"github profile","install":{"bootstrap":true,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":true},"runtime":{"github":true,"codex":false,"claude":false}}}}"#,
-    )
-    .expect("catalog should be written");
+    );
 }
 
 #[test]

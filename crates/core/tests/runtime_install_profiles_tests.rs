@@ -7,14 +7,28 @@ use nettoolskit_core::runtime_install_profiles::{
 use std::fs;
 use tempfile::TempDir;
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    let canonical_dir = repo_root.join("definitions/providers/github/governance");
+    fs::create_dir_all(&canonical_dir).expect("canonical governance directory should be created");
+    fs::write(canonical_dir.join(file_name), contents).expect("canonical file should be written");
+
+    let legacy_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&legacy_dir).expect("legacy governance directory should be created");
+    fs::write(legacy_dir.join(file_name), contents).expect("legacy file should be written");
+}
+
+fn write_legacy_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    let legacy_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&legacy_dir).expect("legacy governance directory should be created");
+    fs::write(legacy_dir.join(file_name), contents).expect("legacy file should be written");
+}
+
 fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {
-    let governance_dir = repo_root.join(".github/governance");
-    fs::create_dir_all(&governance_dir).expect("governance directory should be created");
-    fs::write(
-        governance_dir.join("runtime-install-profiles.json"),
+    write_governance_file(
+        repo_root,
+        "runtime-install-profiles.json",
         r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}},"all":{"description":"all profile","install":{"bootstrap":true,"globalVscodeSettings":true,"globalVscodeSnippets":true,"localGitHooks":true,"globalGitAliases":true,"healthcheck":true},"runtime":{"github":true,"codex":true,"claude":true}}}}"#,
-    )
-    .expect("catalog should be written");
+    );
 }
 
 #[test]
@@ -74,7 +88,11 @@ fn test_resolve_runtime_install_profile_rejects_unknown_profile() {
 #[test]
 fn test_read_runtime_install_profile_catalog_falls_back_to_legacy_governance_file() {
     let repo = TempDir::new().expect("temporary repository should be created");
-    write_runtime_install_profile_catalog(repo.path());
+    write_legacy_governance_file(
+        repo.path(),
+        "runtime-install-profiles.json",
+        r#"{"schemaVersion":1,"defaultProfile":"none","profiles":{"none":{"description":"none profile","install":{"bootstrap":false,"globalVscodeSettings":false,"globalVscodeSnippets":false,"localGitHooks":false,"globalGitAliases":false,"healthcheck":false},"runtime":{"github":false,"codex":false,"claude":false}},"all":{"description":"all profile","install":{"bootstrap":true,"globalVscodeSettings":true,"globalVscodeSnippets":true,"localGitHooks":true,"globalGitAliases":true,"healthcheck":true},"runtime":{"github":true,"codex":true,"claude":true}}}}"#,
+    );
 
     let catalog_path = runtime_install_profile_catalog_path(repo.path());
 

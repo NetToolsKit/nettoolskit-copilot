@@ -33,15 +33,24 @@ fn sample_catalog() -> LocalContextIndexCatalog {
     }
 }
 
+fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
+    let canonical_dir = repo_root.join("definitions/providers/github/governance");
+    fs::create_dir_all(&canonical_dir).expect("canonical catalog directory should be created");
+    fs::write(canonical_dir.join(file_name), contents).expect("canonical file should be written");
+
+    let legacy_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&legacy_dir).expect("legacy catalog directory should be created");
+    fs::write(legacy_dir.join(file_name), contents).expect("legacy file should be written");
+}
+
 fn write_catalog(repo_root: &std::path::Path) -> LocalContextIndexCatalogInfo {
-    let catalog_dir = repo_root.join(".github/governance");
-    fs::create_dir_all(&catalog_dir).expect("catalog directory should be created");
-    let catalog_path = catalog_dir.join("local-context-index.catalog.json");
-    fs::write(
-        &catalog_path,
+    let catalog_path = repo_root
+        .join("definitions/providers/github/governance/local-context-index.catalog.json");
+    write_governance_file(
+        repo_root,
+        "local-context-index.catalog.json",
         r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":32,"chunking":{"maxChars":160,"maxLines":6},"queryDefaults":{"top":5},"includeGlobs":["planning/**/*.md","scripts/**/*.ps1"],"excludeGlobs":[".temp/**"]}"#,
-    )
-    .expect("catalog file should be written");
+    );
 
     LocalContextIndexCatalogInfo {
         path: catalog_path,

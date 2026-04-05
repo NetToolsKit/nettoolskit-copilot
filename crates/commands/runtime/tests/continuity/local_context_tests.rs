@@ -9,10 +9,18 @@ use std::fs;
 use tempfile::TempDir;
 
 fn write_catalog(repo_root: &std::path::Path) {
-    let catalog_dir = repo_root.join(".github/governance");
-    fs::create_dir_all(&catalog_dir).expect("catalog directory should be created");
+    let canonical_dir = repo_root.join("definitions/providers/github/governance");
+    fs::create_dir_all(&canonical_dir).expect("canonical catalog directory should be created");
     fs::write(
-        catalog_dir.join("local-context-index.catalog.json"),
+        canonical_dir.join("local-context-index.catalog.json"),
+        r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":16,"chunking":{"maxChars":120,"maxLines":4},"queryDefaults":{"top":3},"includeGlobs":["planning/**/*.md","scripts/**/*.ps1"],"excludeGlobs":[".temp/**"]}"#,
+    )
+    .expect("canonical catalog should be written");
+
+    let legacy_dir = repo_root.join(".github/governance");
+    fs::create_dir_all(&legacy_dir).expect("legacy catalog directory should be created");
+    fs::write(
+        legacy_dir.join("local-context-index.catalog.json"),
         r#"{"version":1,"indexRoot":".temp/context-index","maxFileSizeKb":16,"chunking":{"maxChars":120,"maxLines":4},"queryDefaults":{"top":3},"includeGlobs":["planning/**/*.md","scripts/**/*.ps1"],"excludeGlobs":[".temp/**"]}"#,
     )
     .expect("catalog should be written");
