@@ -4,12 +4,13 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-06 01:35
+- LastUpdated: 2026-04-06 01:55
 - Objective: prevent `.build/target` and related transient artifacts from growing without bound and consuming excessive disk on the developer workstation.
 - Normalized Request: create a planning workstream for cargo target cleanup and generated-artifact pruning so the repository stops accumulating multi-gigabyte build state.
-- Active Branch: `main` (planning only; implementation branches TBD)
-- Spec Path: `planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md`
+- Active Branch: `docs/planning-gap-workstreams`
+- Spec Path: `planning/specs/completed/spec-build-target-cleanup-and-artifact-pruning.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Current Slice: B1 through B4 are materially complete; the workstream now has measured cleanup inventory, safe terminal artifact-boundary discovery, a native CLI cleanup entry point, and repo-level guidance, so the plan is ready for archive.
 - Inputs:
   - `.cargo/config.toml`
   - `.gitignore`

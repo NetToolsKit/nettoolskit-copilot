@@ -50,7 +50,6 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md](planning/active/plan-multi-agent-runtime-lineage-and-a2a-readiness.md)
 - [planning/active/plan-token-economy-optimization.md](planning/active/plan-token-economy-optimization.md)
 - [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)
-- [planning/active/plan-build-target-cleanup-and-artifact-pruning.md](planning/active/plan-build-target-cleanup-and-artifact-pruning.md)
 
 ---
 
@@ -89,6 +88,7 @@ Use `planning/` for versioned workstream control, not for transient scratch outp
 - [planning/completed/plan-runtime-operational-diagnostics-and-observability.md](planning/completed/plan-runtime-operational-diagnostics-and-observability.md)
 - [planning/completed/plan-plugin-skill-extensibility-and-runtime-governance.md](planning/completed/plan-plugin-skill-extensibility-and-runtime-governance.md)
 - [planning/completed/plan-memory-file-layering-and-operational-recall.md](planning/completed/plan-memory-file-layering-and-operational-recall.md)
+- [planning/completed/plan-build-target-cleanup-and-artifact-pruning.md](planning/completed/plan-build-target-cleanup-and-artifact-pruning.md)
 - [planning/completed/plan-script-retirement-phase-2.md](planning/completed/plan-script-retirement-phase-2.md)
 - [planning/completed/plan-script-retirement-phase-3.md](planning/completed/plan-script-retirement-phase-3.md)
 - [planning/completed/plan-script-retirement-phase-4.md](planning/completed/plan-script-retirement-phase-4.md)

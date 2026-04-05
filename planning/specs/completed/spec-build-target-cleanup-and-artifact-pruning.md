@@ -4,12 +4,13 @@ Generated: 2026-03-30 07:31
 
 ## Status
 
-- LastUpdated: 2026-04-06 01:35
+- LastUpdated: 2026-04-06 01:55
 - Objective: define the policy for keeping Cargo build output bounded and pruning stale artifacts safely on a Windows developer workstation.
 - Normalized Request: plan a cleanup system for cargo targets and generated build state so the repository does not accumulate multi-gigabyte artifact directories.
-- Active Branch: `main` (planning only; implementation branches TBD)
-- Planning Path: `planning/active/plan-build-target-cleanup-and-artifact-pruning.md`
+- Active Branch: `docs/planning-gap-workstreams`
+- Planning Path: `planning/completed/plan-build-target-cleanup-and-artifact-pruning.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
+- Current Slice: the workstream now exposes a native cleanup CLI, measured byte inventory, reclaimed-byte reporting, safe terminal artifact discovery, and repository guidance for scoped versus destructive cleanup; the design intent is materially complete.
 
 ---
 
@@ -58,6 +59,7 @@ The repository already redirects build output to `.build/target`, but that alone
   - CLI coverage now proves dry-run and forced-removal behavior on Windows-friendly temp repositories.
 - Progress [2026-04-06 01:35]:
   - The cleanup boundary now reports measured artifact-byte totals and reclaimed bytes so the operator can prove cleanup footprint before deletion.
+  - Artifact discovery now treats managed roots as terminal cleanup boundaries, preventing nested double-counting inside `.build`, `.deployment`, `bin`, and `obj`.
   - Artifact discovery now treats managed roots as terminal cleanup boundaries, preventing nested double-counting inside `.build`, `.deployment`, `bin`, and `obj`.
 
 ---

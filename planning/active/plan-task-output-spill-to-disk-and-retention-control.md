@@ -11,7 +11,7 @@ Generated: 2026-03-31 00:00
 - Spec Path: `planning/specs/active/spec-task-output-spill-to-disk-and-retention-control.md`
 - SDD Baseline: `planning/specs/active/spec-spec-driven-development-operating-model.md`
 - Related Workstreams:
-  - `planning/active/plan-build-target-cleanup-and-artifact-pruning.md`
+  - `planning/completed/plan-build-target-cleanup-and-artifact-pruning.md`
   - `planning/completed/plan-repository-consolidation-continuity.md`
 - Inputs:
   - `crates/orchestrator/src/execution/*`

@@ -49,7 +49,6 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/active/spec-multi-agent-runtime-lineage-and-a2a-readiness.md](planning/specs/active/spec-multi-agent-runtime-lineage-and-a2a-readiness.md)
 - [planning/specs/active/spec-token-economy-optimization.md](planning/specs/active/spec-token-economy-optimization.md)
 - [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)
-- [planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md)
 
 ---
 
@@ -87,6 +86,7 @@ Use `planning/specs/` to lock architecture and behavior intent before implementa
 - [planning/specs/completed/spec-runtime-operational-diagnostics-and-observability.md](planning/specs/completed/spec-runtime-operational-diagnostics-and-observability.md)
 - [planning/specs/completed/spec-plugin-skill-extensibility-and-runtime-governance.md](planning/specs/completed/spec-plugin-skill-extensibility-and-runtime-governance.md)
 - [planning/specs/completed/spec-memory-file-layering-and-operational-recall.md](planning/specs/completed/spec-memory-file-layering-and-operational-recall.md)
+- [planning/specs/completed/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/completed/spec-build-target-cleanup-and-artifact-pruning.md)
 - [planning/specs/completed/spec-script-retirement-phase-2.md](planning/specs/completed/spec-script-retirement-phase-2.md)
 - [planning/specs/completed/spec-script-retirement-phase-3.md](planning/specs/completed/spec-script-retirement-phase-3.md)
 - [planning/specs/completed/spec-script-retirement-phase-4.md](planning/specs/completed/spec-script-retirement-phase-4.md)
