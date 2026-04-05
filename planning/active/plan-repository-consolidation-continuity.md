@@ -567,9 +567,11 @@ Status: `[x]` Completed (all sub-slices audit-only; zero deletions)
 
 #### Task W5.5: Create and Execute Phase 21 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
 
-Status: `[ ]` Pending
+Status: `[~]` Partial / active Phase 21 plan opened
 
-- Create `planning/specs/active/spec-script-retirement-phase-21.md` and `planning/active/plan-script-retirement-phase-21.md`.
+- Created:
+  - `planning/active/plan-script-retirement-phase-21-security-governance-sweep.md`
+  - `planning/specs/active/spec-script-retirement-phase-21-security-governance-sweep.md`
 - Special constraint for `scripts/security/*.ps1` (6): `.github/governance/shared-script-checksums.manifest.json` explicitly tracks this domain. The Phase 21 plan must include a task to update the checksums manifest before deleting any security scripts.
 - Consumer sweep commands:
   - `Get-ChildItem scripts\security, scripts\governance -Filter "*.ps1" | ForEach-Object { rg $_.Name .github\governance, scripts --type ps1 --count }`

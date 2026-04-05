@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added an active `Phase 21 security and governance consumer sweep` plan/spec pair so the next eight `scripts/security/*.ps1` and `scripts/governance/*.ps1` leaves are tracked with an explicit checksum-manifest rule before any delete is allowed.
 - Added an active `Phase 20 runtime consumer sweep` plan/spec pair so the remaining 30 `scripts/runtime/*.ps1` leaves are now tracked under one dedicated runtime-domain workstream with internal Slice A/B/C boundaries instead of staying implicit under the umbrella continuity backlog.
 - Added canonical GitHub provider policy assets under `definitions/providers/github/policies/` so instruction-system and release/security governance can be projected from authored definitions instead of hand-maintained `.github/policies/*` copies.
 - Added a focused follow-up workstream, `plan-provider-surface-projection-cutover`, so the remaining generated/runtime `.github/.codex/.claude` cutover is tracked separately from the completed canonical taxonomy migration.

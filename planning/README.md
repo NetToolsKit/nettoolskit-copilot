@@ -58,6 +58,7 @@ This folder is part of the repository operating model, not disposable scratch st
 - [planning/active/plan-rag-cag-sqlite-evolution.md](planning/active/plan-rag-cag-sqlite-evolution.md)
 - [planning/active/plan-build-target-cleanup-and-artifact-pruning.md](planning/active/plan-build-target-cleanup-and-artifact-pruning.md)
 - [planning/active/plan-script-retirement-tail-cutover.md](planning/active/plan-script-retirement-tail-cutover.md)
+- [planning/active/plan-script-retirement-phase-21-security-governance-sweep.md](planning/active/plan-script-retirement-phase-21-security-governance-sweep.md)
 
 ---
 
