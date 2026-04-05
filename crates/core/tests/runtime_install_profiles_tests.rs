@@ -98,7 +98,8 @@ fn test_read_runtime_install_profile_catalog_falls_back_to_legacy_governance_fil
 
     assert_eq!(
         catalog_path,
-        repo.path().join(".github/governance/runtime-install-profiles.json")
+        repo.path()
+            .join(".github/governance/runtime-install-profiles.json")
     );
 }
 

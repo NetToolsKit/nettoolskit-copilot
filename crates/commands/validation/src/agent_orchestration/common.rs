@@ -17,8 +17,7 @@ use serde_json::Value;
 
 use crate::operational_hygiene::common::push_required_finding;
 
-pub(crate) const CANONICAL_GITHUB_GOVERNANCE_ROOT: &str =
-    "definitions/providers/github/governance";
+pub(crate) const CANONICAL_GITHUB_GOVERNANCE_ROOT: &str = "definitions/providers/github/governance";
 pub(crate) const LEGACY_GITHUB_GOVERNANCE_ROOT: &str = ".github/governance";
 
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
@@ -185,12 +184,16 @@ pub(crate) fn resolve_repo_relative_path(
 }
 
 pub(crate) fn resolve_governance_default_path(repo_root: &Path, file_name: &str) -> PathBuf {
-    let canonical_path = repo_root.join(CANONICAL_GITHUB_GOVERNANCE_ROOT).join(file_name);
+    let canonical_path = repo_root
+        .join(CANONICAL_GITHUB_GOVERNANCE_ROOT)
+        .join(file_name);
     if canonical_path.exists() {
         return canonical_path;
     }
 
-    let legacy_path = repo_root.join(LEGACY_GITHUB_GOVERNANCE_ROOT).join(file_name);
+    let legacy_path = repo_root
+        .join(LEGACY_GITHUB_GOVERNANCE_ROOT)
+        .join(file_name);
     if legacy_path.exists() {
         legacy_path
     } else {

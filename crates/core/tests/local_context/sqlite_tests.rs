@@ -44,8 +44,8 @@ fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents:
 }
 
 fn write_catalog(repo_root: &std::path::Path) -> LocalContextIndexCatalogInfo {
-    let catalog_path = repo_root
-        .join("definitions/providers/github/governance/local-context-index.catalog.json");
+    let catalog_path =
+        repo_root.join("definitions/providers/github/governance/local-context-index.catalog.json");
     write_governance_file(
         repo_root,
         "local-context-index.catalog.json",

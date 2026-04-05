@@ -12,8 +12,8 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
-use crate::error::ValidateAllCommandError;
 use crate::agent_orchestration::common::resolve_governance_default_path;
+use crate::error::ValidateAllCommandError;
 use crate::orchestration::profiles::{load_profiles_document, select_profile, ValidationProfile};
 use crate::{
     invoke_validate_agent_hooks, invoke_validate_agent_orchestration,

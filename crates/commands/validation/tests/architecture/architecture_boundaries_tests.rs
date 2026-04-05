@@ -6,8 +6,8 @@ use nettoolskit_validation::{
 };
 use tempfile::TempDir;
 
-use crate::support::architecture_fixtures::{initialize_architecture_boundaries_repo, write_file};
 use crate::support::architecture_fixtures::write_governance_file;
+use crate::support::architecture_fixtures::{initialize_architecture_boundaries_repo, write_file};
 
 #[test]
 fn test_invoke_validate_architecture_boundaries_passes_for_valid_baseline() {

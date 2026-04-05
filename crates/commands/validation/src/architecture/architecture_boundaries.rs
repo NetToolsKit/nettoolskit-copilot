@@ -108,7 +108,9 @@ pub fn invoke_validate_architecture_boundaries(
         })?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_repo_relative_path(&repo_root, Some(path), DEFAULT_BASELINE_PATH),
-        None => resolve_governance_default_path(&repo_root, "architecture-boundaries.baseline.json"),
+        None => {
+            resolve_governance_default_path(&repo_root, "architecture-boundaries.baseline.json")
+        }
     };
 
     let mut warnings = Vec::new();

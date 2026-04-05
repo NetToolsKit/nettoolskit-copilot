@@ -28,7 +28,10 @@ fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
             .join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/governance").join(file_name),
+        contents,
+    );
 }
 
 fn initialize_validation_repo_root(repo_root: &Path) {
@@ -37,7 +40,10 @@ fn initialize_validation_repo_root(repo_root: &Path) {
 }
 
 fn initialize_canonical_instruction_assets_repo_root(repo_root: &Path) {
-    write_file(&repo_root.join("definitions/instructions/README.md"), "# Instructions\n");
+    write_file(
+        &repo_root.join("definitions/instructions/README.md"),
+        "# Instructions\n",
+    );
     write_file(
         &repo_root
             .join("definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"),
@@ -55,8 +61,9 @@ Use community sources only as fallback.
 "#,
     );
     write_file(
-        &repo_root
-            .join("definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
+        &repo_root.join(
+            "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        ),
         "# Artifact Layout\n",
     );
     write_file(
@@ -70,8 +77,9 @@ Use community sources only as fallback.
         "# Workflow Optimization\n",
     );
     write_file(
-        &repo_root
-            .join("definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md"),
+        &repo_root.join(
+            "definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md",
+        ),
         "# Feedback Changelog\n",
     );
     write_file(
@@ -105,7 +113,8 @@ Use community sources only as fallback.
 }"#,
     );
     write_file(
-        &repo_root.join("definitions/providers/github/governance/instruction-ownership.manifest.json"),
+        &repo_root
+            .join("definitions/providers/github/governance/instruction-ownership.manifest.json"),
         r#"{
   "version": 1,
   "intentionalGlobalExceptions": [
@@ -858,7 +867,9 @@ fn initialize_authoritative_source_policy_repo_root(repo_root: &Path) {
 }"#,
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        ),
         r#"# Authoritative Sources
 
 Use `.github/governance/authoritative-source-map.json`.
@@ -1088,7 +1099,9 @@ Use the routing catalog.
         "# Repository Operating Model\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        ),
         "# Authoritative Sources\n",
     );
     write_file(
@@ -1096,7 +1109,8 @@ Use the routing catalog.
         "# Super Agent\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
+        &repo_root
+            .join(".github/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
         "# Artifact Layout\n",
     );
     write_file(
@@ -1104,15 +1118,21 @@ Use the routing catalog.
         "# Subagent Planning Workflow\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-workflow-optimization.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+        ),
         "# Workflow Optimization\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/operations/ntk-operations-powershell-execution.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/operations/ntk-operations-powershell-execution.instructions.md",
+        ),
         "# PowerShell Execution\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-feedback-changelog.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-feedback-changelog.instructions.md",
+        ),
         "# Feedback Changelog\n",
     );
     write_file(
@@ -1841,8 +1861,16 @@ fn initialize_agent_contract_command_repo_root(repo_root: &Path) {
         &repo_root.join(".github/instructions/governance/ntk-governance-repository-operating-model.instructions.md"),
         "# Repository Operating Model\n",
     );
-    write_governance_file(repo_root, "agent-runtime-policy.catalog.json", r#"{ "version": 1, "rules": [] }"#);
-    write_governance_file(repo_root, "agent-model-routing.catalog.json", r#"{ "version": 1, "rules": [] }"#);
+    write_governance_file(
+        repo_root,
+        "agent-runtime-policy.catalog.json",
+        r#"{ "version": 1, "rules": [] }"#,
+    );
+    write_governance_file(
+        repo_root,
+        "agent-model-routing.catalog.json",
+        r#"{ "version": 1, "rules": [] }"#,
+    );
     write_file(
         &repo_root.join(".codex/orchestration/agents.manifest.json"),
         valid_agents_manifest_json(),
@@ -2017,7 +2045,9 @@ fn test_validation_authoritative_source_policy_reports_failure_for_invalid_agent
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_authoritative_source_policy_repo_root(repo.path());
     write_file(
-        &repo.path().join("definitions/providers/github/root/AGENTS.md"),
+        &repo
+            .path()
+            .join("definitions/providers/github/root/AGENTS.md"),
         "# Temporary AGENTS\n\nThis file intentionally omits the required reference.\n",
     );
 

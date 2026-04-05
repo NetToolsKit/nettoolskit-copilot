@@ -11,9 +11,9 @@ use serde_json::{Map, Value};
 use walkdir::WalkDir;
 
 use crate::{
-    error::ValidateInstructionsCommandError, invoke_validate_routing_coverage,
+    error::ValidateInstructionsCommandError,
     governance::{resolve_catalog_reference_path, resolve_default_catalog_path},
-    ValidateRoutingCoverageRequest, ValidationCheckStatus,
+    invoke_validate_routing_coverage, ValidateRoutingCoverageRequest, ValidationCheckStatus,
 };
 
 const CANONICAL_REQUIRED_FILES: &[&str] = &[
@@ -834,7 +834,9 @@ fn test_skill_definitions(
     .unwrap_or_else(|| repo_root.join("definitions/providers/codex/skills"));
     let skills_root_label = to_repo_relative_path(repo_root, &skills_root);
     if !skills_root.is_dir() {
-        warnings.push(format!("Skipping skill lint: {skills_root_label} not found."));
+        warnings.push(format!(
+            "Skipping skill lint: {skills_root_label} not found."
+        ));
         return SkillValidationStats::default();
     }
 

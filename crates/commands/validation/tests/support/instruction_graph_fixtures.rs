@@ -18,7 +18,10 @@ fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
             .join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/governance").join(file_name),
+        contents,
+    );
 }
 
 pub fn initialize_instruction_architecture_repo(repo_root: &Path) {
@@ -272,8 +275,9 @@ Use community sources only as fallback.
 "#,
     );
     write_file(
-        &repo_root
-            .join("definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
+        &repo_root.join(
+            "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        ),
         "# Artifact Layout\n",
     );
     write_file(
@@ -287,8 +291,9 @@ Use community sources only as fallback.
         "# Workflow Optimization\n",
     );
     write_file(
-        &repo_root
-            .join("definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md"),
+        &repo_root.join(
+            "definitions/instructions/governance/ntk-governance-feedback-changelog.instructions.md",
+        ),
         "# Feedback Changelog\n",
     );
     write_file(
@@ -310,8 +315,7 @@ Use `governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
-        &repo_root
-            .join("definitions/providers/github/root/copilot-instructions.md"),
+        &repo_root.join("definitions/providers/github/root/copilot-instructions.md"),
         r#"# Global Instructions
 
 Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
@@ -320,8 +324,7 @@ Use `governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
-        &repo_root
-            .join("definitions/providers/github/root/instruction-routing.catalog.yml"),
+        &repo_root.join("definitions/providers/github/root/instruction-routing.catalog.yml"),
         r#"always:
   - path: AGENTS.md
   - path: copilot-instructions.md
@@ -363,8 +366,7 @@ routing:
 }"#,
     );
     write_file(
-        &repo_root
-            .join("definitions/providers/github/prompts/route-instructions.prompt.md"),
+        &repo_root.join("definitions/providers/github/prompts/route-instructions.prompt.md"),
         r#"---
 description: Route a request
 mode: ask
@@ -377,8 +379,7 @@ Hard cap: at most 5 selected instruction files (excluding mandatory).
 "#,
     );
     write_file(
-        &repo_root
-            .join("definitions/providers/github/prompts/example.prompt.md"),
+        &repo_root.join("definitions/providers/github/prompts/example.prompt.md"),
         r#"---
 description: Example prompt
 mode: ask
@@ -391,8 +392,7 @@ Use the routing catalog.
 "#,
     );
     write_file(
-        &repo_root
-            .join("definitions/providers/github/chatmodes/example.chatmode.md"),
+        &repo_root.join("definitions/providers/github/chatmodes/example.chatmode.md"),
         "# Example Chatmode\n\nSee [Route Prompt](../prompts/route-instructions.prompt.md).\n",
     );
     write_file(
@@ -404,8 +404,7 @@ Use the routing catalog.
         "[mcp]\nenabled = true\n",
     );
     write_file(
-        &repo_root
-            .join("definitions/providers/codex/skills/sample/agents/openai.yaml"),
+        &repo_root.join("definitions/providers/codex/skills/sample/agents/openai.yaml"),
         "display_name: Sample Skill\nshort_description: Example\ndefault_prompt: $sample\n",
     );
     write_file(
@@ -428,7 +427,8 @@ Load `ntk-governance-repository-operating-model.instructions.md`.
 
 pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     write_file(
-        &repo_root.join("definitions/providers/github/governance/instruction-ownership.manifest.json"),
+        &repo_root
+            .join("definitions/providers/github/governance/instruction-ownership.manifest.json"),
         r#"{
   "version": 1,
   "intentionalGlobalExceptions": [
@@ -628,7 +628,9 @@ Use the routing catalog.
         "# Repository Operating Model\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        ),
         "# Authoritative Sources\n",
     );
     write_file(
@@ -636,7 +638,8 @@ Use the routing catalog.
         "# Super Agent\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
+        &repo_root
+            .join(".github/instructions/governance/ntk-governance-artifact-layout.instructions.md"),
         "# Artifact Layout\n",
     );
     write_file(
@@ -644,15 +647,21 @@ Use the routing catalog.
         "# Subagent Planning Workflow\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-workflow-optimization.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+        ),
         "# Workflow Optimization\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/operations/ntk-operations-powershell-execution.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/operations/ntk-operations-powershell-execution.instructions.md",
+        ),
         "# PowerShell Execution\n",
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-feedback-changelog.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-feedback-changelog.instructions.md",
+        ),
         "# Feedback Changelog\n",
     );
     write_file(

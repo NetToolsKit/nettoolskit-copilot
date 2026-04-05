@@ -274,7 +274,9 @@ pub fn invoke_validate_authoritative_source_policy(
         test_text_contains_patterns(
             routing_text,
             "instruction routing catalog",
-            &[r"path:\s*instructions/(?:core/ntk-core|governance/ntk-governance)-authoritative-sources\.instructions\.md"],
+            &[
+                r"path:\s*instructions/(?:core/ntk-core|governance/ntk-governance)-authoritative-sources\.instructions\.md",
+            ],
             request.warning_only,
             &mut warnings,
             &mut failures,

@@ -21,7 +21,10 @@ fn write_governance_file(repo_root: &Path, file_name: &str, contents: &str) {
             .join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/governance").join(file_name),
+        contents,
+    );
 }
 
 fn initialize_repo_root(repo_root: &Path) {

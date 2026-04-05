@@ -74,7 +74,9 @@ fn test_invoke_validate_instruction_architecture_reports_missing_agents_referenc
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
     write_file(
-        &repo.path().join("definitions/providers/github/root/AGENTS.md"),
+        &repo
+            .path()
+            .join("definitions/providers/github/root/AGENTS.md"),
         "# Temporary AGENTS\n\nThis file intentionally omits the required reference.\n",
     );
 
@@ -223,8 +225,11 @@ fn test_invoke_validate_instruction_architecture_warns_for_template_ownership_ma
 fn test_invoke_validate_instruction_architecture_converts_failures_to_warnings() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
-    fs::remove_file(repo.path().join("definitions/providers/github/root/AGENTS.md"))
-        .expect("temporary AGENTS file should be removed");
+    fs::remove_file(
+        repo.path()
+            .join("definitions/providers/github/root/AGENTS.md"),
+    )
+    .expect("temporary AGENTS file should be removed");
 
     let result =
         invoke_validate_instruction_architecture(&ValidateInstructionArchitectureRequest {

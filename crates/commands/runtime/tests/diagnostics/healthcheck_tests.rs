@@ -22,7 +22,10 @@ fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents:
             .join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/governance").join(file_name),
+        contents,
+    );
 }
 
 fn write_runtime_install_profile_catalog(repo_root: &std::path::Path) {

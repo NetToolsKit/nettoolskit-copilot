@@ -16,10 +16,8 @@ fn write_file(path: &std::path::Path, contents: &str) {
 }
 
 fn initialize_repo_layout(repo_root: &std::path::Path) {
-    fs::create_dir_all(repo_root.join(".github"))
-        .expect(".github directory should be created");
-    fs::create_dir_all(repo_root.join(".codex"))
-        .expect(".codex directory should be created");
+    fs::create_dir_all(repo_root.join(".github")).expect(".github directory should be created");
+    fs::create_dir_all(repo_root.join(".codex")).expect(".codex directory should be created");
     fs::create_dir_all(repo_root.join("definitions/providers/github/governance"))
         .expect("governance directory should be created");
     fs::create_dir_all(repo_root.join("definitions/instructions/governance"))
@@ -216,8 +214,11 @@ fn test_invoke_validate_authoritative_source_policy_converts_required_findings_t
     initialize_repo_layout(repo.path());
     write_valid_source_map(repo.path());
     write_valid_instruction_assets(repo.path());
-    fs::remove_file(repo.path().join("definitions/providers/github/root/AGENTS.md"))
-        .expect("temporary AGENTS file should be removed");
+    fs::remove_file(
+        repo.path()
+            .join("definitions/providers/github/root/AGENTS.md"),
+    )
+    .expect("temporary AGENTS file should be removed");
 
     let result =
         invoke_validate_authoritative_source_policy(&ValidateAuthoritativeSourcePolicyRequest {

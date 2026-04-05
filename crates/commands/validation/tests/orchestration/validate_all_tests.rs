@@ -49,7 +49,10 @@ fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents:
             .join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/governance").join(file_name),
+        contents,
+    );
 }
 
 fn write_template_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
@@ -57,7 +60,10 @@ fn write_template_file(repo_root: &std::path::Path, file_name: &str, contents: &
         &repo_root.join("definitions/templates/docs").join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/templates").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/templates").join(file_name),
+        contents,
+    );
 }
 
 fn write_validation_profile_catalog(repo_root: &std::path::Path, check_order: &[&str]) {
@@ -254,7 +260,11 @@ fn write_template_standards_fixture(repo_root: &std::path::Path) {
   ]
 }"#,
     );
-    write_template_file(repo_root, "example.md", "# Example\n\nValidation content.\n");
+    write_template_file(
+        repo_root,
+        "example.md",
+        "# Example\n\nValidation content.\n",
+    );
 }
 
 fn write_authoritative_source_policy_fixtures(repo_root: &std::path::Path) {
@@ -333,7 +343,9 @@ Use `governance/authoritative-source-map.json`.
 }"#,
     );
     write_file(
-        &repo_root.join(".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
+        &repo_root.join(
+            ".github/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        ),
         r#"# Authoritative Sources
 
 Use `.github/governance/authoritative-source-map.json`.

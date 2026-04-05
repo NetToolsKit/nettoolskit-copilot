@@ -135,8 +135,8 @@ fn test_write_and_read_local_context_index_document_round_trip() {
         version: 1,
         generated_at: "2026-03-26T20:00:00Z".to_string(),
         repo_root: repo.path().to_string_lossy().to_string(),
-        catalog_path:
-            "definitions/providers/github/governance/local-context-index.catalog.json".to_string(),
+        catalog_path: "definitions/providers/github/governance/local-context-index.catalog.json"
+            .to_string(),
         chunk_count: 0,
         files: Vec::new(),
         chunks: Vec::new(),

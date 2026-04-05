@@ -98,8 +98,8 @@ pub fn invoke_validate_dotnet_standards(
 
     if !template_directory.is_dir() {
         failures.push(format!(
-                "Template directory not found: {}",
-                request.template_directory.as_ref().map_or_else(
+            "Template directory not found: {}",
+            request.template_directory.as_ref().map_or_else(
                 || {
                     if repo_root.join(CANONICAL_TEMPLATE_DIRECTORY).is_dir() {
                         CANONICAL_TEMPLATE_DIRECTORY.to_string()

@@ -21,7 +21,10 @@ fn write_governance_file(repo_root: &std::path::Path, file_name: &str, contents:
             .join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/governance").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/governance").join(file_name),
+        contents,
+    );
 }
 
 fn write_template_file(repo_root: &std::path::Path, file_name: &str, contents: &str) {
@@ -29,7 +32,10 @@ fn write_template_file(repo_root: &std::path::Path, file_name: &str, contents: &
         &repo_root.join("definitions/templates/docs").join(file_name),
         contents,
     );
-    write_file(&repo_root.join(".github/templates").join(file_name), contents);
+    write_file(
+        &repo_root.join(".github/templates").join(file_name),
+        contents,
+    );
 }
 
 fn initialize_repo_layout(repo_root: &std::path::Path) {
@@ -64,7 +70,11 @@ fn test_invoke_validate_template_standards_passes_for_valid_templates() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_repo_layout(repo.path());
     write_baseline(repo.path());
-    write_template_file(repo.path(), "example.md", "# Example\n\nValidation content.\n");
+    write_template_file(
+        repo.path(),
+        "example.md",
+        "# Example\n\nValidation content.\n",
+    );
 
     let result = invoke_validate_template_standards(&ValidateTemplateStandardsRequest {
         repo_root: Some(repo.path().to_path_buf()),

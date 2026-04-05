@@ -1153,12 +1153,11 @@ fn test_skill_canonical_references(
         return;
     }
 
-    let required_regex = RegexBuilder::new(
-        r"ntk-(?:core|governance)-repository-operating-model\.instructions\.md",
-    )
-    .case_insensitive(true)
-    .build()
-    .expect("skill canonical reference regex should compile");
+    let required_regex =
+        RegexBuilder::new(r"ntk-(?:core|governance)-repository-operating-model\.instructions\.md")
+            .case_insensitive(true)
+            .build()
+            .expect("skill canonical reference regex should compile");
 
     for skill_file in skill_files.iter().filter(|path| {
         path.file_name()
