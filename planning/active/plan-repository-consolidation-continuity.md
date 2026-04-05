@@ -567,27 +567,27 @@ Status: `[x]` Completed (all sub-slices audit-only; zero deletions)
 
 #### Task W5.5: Create and Execute Phase 21 — `scripts/security/*.ps1` + `scripts/governance/*.ps1` (8)
 
-Status: `[~]` Partial / active Phase 21 plan opened
+Status: `[x]` Completed (audit-only; zero deletions)
 
 - Created:
-  - `planning/active/plan-script-retirement-phase-21-security-governance-sweep.md`
-  - `planning/specs/active/spec-script-retirement-phase-21-security-governance-sweep.md`
+  - `planning/completed/plan-script-retirement-phase-21-security-governance-sweep.md`
+  - `planning/specs/completed/spec-script-retirement-phase-21-security-governance-sweep.md`
 - Special constraint for `scripts/security/*.ps1` (6): `.github/governance/shared-script-checksums.manifest.json` explicitly tracks this domain. The Phase 21 plan must include a task to update the checksums manifest before deleting any security scripts.
 - Consumer sweep commands:
   - `Get-ChildItem scripts\security, scripts\governance -Filter "*.ps1" | ForEach-Object { rg $_.Name .github\governance, scripts --type ps1 --count }`
 - After sweep:
-  - Update `.github/governance/shared-script-checksums.manifest.json` to remove deleted security script entries.
-  - Re-validate with `ntk validation supply-chain --repo-root . --warning-only false`.
+  - No deletions were safe, so `definitions/providers/github/governance/shared-script-checksums.manifest.json` stayed unchanged.
+  - The blocker graph is now explicit for both the security and governance domains.
 - Validation checklist:
   - `cargo test -p nettoolskit-validation --quiet`
   - `& .\.build\target\debug\ntk.exe validation all --repo-root . --warning-only false`
   - `git diff --check`
 - Commit checkpoint:
-  - `chore(scripts): Phase 21 — retire confirmed-zero-consumer scripts/security and scripts/governance scripts`
+  - `docs(runtime-retirement): Phase 21 — record audit-only consumer proof for security and governance scripts`
 
 #### Task W5.6: Create and Execute Phase 22 — `scripts/orchestration/**/*.ps1` (10)
 
-Status: `[ ]` Pending (blocked on Phase 21 complete)
+Status: `[ ]` Pending
 
 - Create `planning/specs/active/spec-script-retirement-phase-22.md` and `planning/active/plan-script-retirement-phase-22.md`.
 - The 10 orchestration scripts are staged-execution wrappers (`intake-stage.ps1`, `plan-stage.ps1`, `spec-stage.ps1`, `implement-stage.ps1`, `review-stage.ps1`, `validate-stage.ps1`, `closeout-stage.ps1`, `route-stage.ps1`, `invoke-codex-dispatch.ps1`, `invoke-task-worker.ps1`).
