@@ -2,15 +2,15 @@
 
 use clap::{Args, Subcommand};
 use nettoolskit_orchestrator::{
-    find_ai_model_routing_policy, invoke_ai_doctor, list_ai_model_routing_policies,
-    list_ai_provider_profiles, query_ai_usage_summary, query_weekly_ai_usage_summary,
-    render_ai_doctor_report, resolve_ai_model_routing_selection,
+    build_ai_doctor_control_schema, build_ai_provider_profile_control_schema,
+    build_ai_provider_profiles_control_schema, find_ai_model_routing_policy, invoke_ai_doctor,
+    list_ai_model_routing_policies, list_ai_provider_profiles, query_ai_usage_summary,
+    query_weekly_ai_usage_summary, render_ai_doctor_report, resolve_ai_model_routing_selection,
     resolve_ai_model_routing_selection_from_env, resolve_ai_provider_profile,
-    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult,
-    AiModelRoutingLaneKind, AiModelRoutingPolicy, AiModelRoutingSelection, AiProviderProfile,
-    AiUsageSummaryReport, AiUsageSummaryReportRequest, AiUsageWeeklyReport,
-    AiUsageWeeklyReportRequest, ExitStatus, NTK_AI_ACTIVE_AGENT_ENV,
-    NTK_AI_ACTIVE_SKILL_ENV, NTK_AI_PROFILE_ENV, build_ai_doctor_control_schema,
+    resolve_ai_provider_profile_from_env, AiDoctorRequest, AiDoctorResult, AiModelRoutingLaneKind,
+    AiModelRoutingPolicy, AiModelRoutingSelection, AiProviderProfile, AiUsageSummaryReport,
+    AiUsageSummaryReportRequest, AiUsageWeeklyReport, AiUsageWeeklyReportRequest, ExitStatus,
+    NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV, NTK_AI_PROFILE_ENV,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -233,9 +233,26 @@ fn execute_ai_usage_command(command: AiUsageCommand) -> ExitStatus {
 
 fn execute_ai_profiles_list(arguments: AiProfilesListArgs) -> ExitStatus {
     let profiles = list_ai_provider_profiles();
+    let active_profile = match resolve_ai_provider_profile_from_env() {
+        Ok(profile) => profile,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitStatus::Error;
+        }
+    };
 
     if arguments.json_output {
-        return print_json_or_error(profiles);
+        let active_profile_source = if active_profile.is_some() {
+            format!("env:{NTK_AI_PROFILE_ENV}")
+        } else {
+            "none".to_string()
+        };
+        let schema = build_ai_provider_profiles_control_schema(
+            profiles,
+            active_profile,
+            &active_profile_source,
+        );
+        return print_json_or_error(&schema);
     }
 
     println!("AI provider profiles");
@@ -248,24 +265,20 @@ fn execute_ai_profiles_list(arguments: AiProfilesListArgs) -> ExitStatus {
         println!("  chain: {}", profile.provider_chain.join(" -> "));
     }
 
-    match resolve_ai_provider_profile_from_env() {
-        Ok(Some(active_profile)) => {
+    match active_profile {
+        Some(active_profile) => {
             println!();
             println!(
                 "Active profile: {} (from {})",
                 active_profile.id, NTK_AI_PROFILE_ENV
             );
         }
-        Ok(None) => {
+        None => {
             println!();
             println!(
                 "Active profile: none (set {} to activate a preset)",
                 NTK_AI_PROFILE_ENV
             );
-        }
-        Err(error) => {
-            eprintln!("{error}");
-            return ExitStatus::Error;
         }
     }
 
@@ -273,9 +286,10 @@ fn execute_ai_profiles_list(arguments: AiProfilesListArgs) -> ExitStatus {
 }
 
 fn execute_ai_profiles_show(arguments: AiProfilesShowArgs) -> ExitStatus {
-    let profile = match arguments.profile.as_deref() {
+    let requested_profile_id = arguments.profile.clone();
+    let (profile, resolved_profile_source) = match arguments.profile.as_deref() {
         Some(profile_id) => match resolve_ai_provider_profile(Some(profile_id)) {
-            Ok(Some(profile)) => profile,
+            Ok(Some(profile)) => (profile, "argument:profile".to_string()),
             Ok(None) => {
                 eprintln!("AI profile id is required");
                 return ExitStatus::Error;
@@ -286,7 +300,7 @@ fn execute_ai_profiles_show(arguments: AiProfilesShowArgs) -> ExitStatus {
             }
         },
         None => match resolve_ai_provider_profile_from_env() {
-            Ok(Some(profile)) => profile,
+            Ok(Some(profile)) => (profile, format!("env:{NTK_AI_PROFILE_ENV}")),
             Ok(None) => {
                 eprintln!(
                     "No active AI profile is set. Pass a profile id or configure {}.",
@@ -302,7 +316,12 @@ fn execute_ai_profiles_show(arguments: AiProfilesShowArgs) -> ExitStatus {
     };
 
     if arguments.json_output {
-        return print_json_or_error(profile);
+        let schema = build_ai_provider_profile_control_schema(
+            profile,
+            requested_profile_id.as_deref(),
+            &resolved_profile_source,
+        );
+        return print_json_or_error(&schema);
     }
 
     print_ai_profile(profile);

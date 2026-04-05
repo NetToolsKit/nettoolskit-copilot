@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-06 09:55
+- LastUpdated: 2026-04-06 10:25
 - Objective: expose typed control-plane schemas and runtime introspection surfaces for operational, CLI, and future SDK consumers.
 - Normalized Request: create a detailed workstream for typed runtime control contracts and introspection APIs without coupling callers to internal structs.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -72,6 +72,8 @@ Generated: 2026-03-31 00:00
   - Added `build_runtime_self_heal_control_schema` so runtime recovery and follow-up health validation now expose a shared typed inspection boundary instead of relying only on the persisted crate-local report payload.
 - Status [2026-04-06 09:55]:
   - Added `build_local_context_query_control_schema` and `build_local_memory_query_control_schema` so repository recall surfaces expose the same shared typed control-plane family instead of ad-hoc JSON payloads.
+- Status [2026-04-06 10:25]:
+  - Added `build_ai_provider_profiles_control_schema` and `build_ai_provider_profile_control_schema` so AI profile inventory surfaces expose shared typed control-plane contracts instead of serializing orchestrator structs directly.
 - Commit checkpoint:
   - `feat(runtime): add runtime introspection services`
 
@@ -92,6 +94,9 @@ Generated: 2026-03-31 00:00
   - `ntk runtime query-local-context-index --json-output` now emits the shared `local_context_query` control schema.
   - `ntk runtime query-local-memory --json-output` now emits the shared `local_memory_query` control schema.
   - Runtime and CLI tests now assert the canonical `schema_version`/`schema_kind` shape for both local recall surfaces.
+- Status [2026-04-06 10:25]:
+  - `ntk ai profiles list --json-output` now emits the shared `ai_provider_profiles` control schema with active-profile provenance.
+  - `ntk ai profiles show --json-output` now emits the shared `ai_provider_profile` control schema with requested-profile echo and resolved-source attribution.
 - Commit checkpoint:
   - `refactor(cli): render runtime inspection from typed control schemas`
 
@@ -110,6 +115,8 @@ Generated: 2026-03-31 00:00
   - Expanded the canonical control-plane catalog, sample manifest, and README coverage to include the typed `runtime_self_heal` surface.
 - Status [2026-04-06 09:55]:
   - Expanded the canonical control-plane catalog, sample manifest, root/crate READMEs, and architecture guidance to include the typed `local_context_query` and `local_memory_query` surfaces.
+- Status [2026-04-06 10:25]:
+  - Expanded the canonical control-plane catalog, sample manifest, root/crate READMEs, and architecture guidance to include the typed `ai_provider_profiles` and `ai_provider_profile` surfaces.
 - Commit checkpoint:
   - `docs(runtime): document control schemas and introspection model`
 

@@ -318,6 +318,69 @@ pub struct AiDoctorProfileRef {
     pub live_network_required: bool,
 }
 
+/// Full built-in AI provider profile contract for machine-readable surfaces.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiProviderProfileControl {
+    /// Stable profile identifier.
+    pub id: String,
+    /// Short title suitable for operator surfaces.
+    pub title: String,
+    /// Concise operator-facing summary.
+    pub summary: String,
+    /// Declared provider mode classification.
+    pub provider_mode: String,
+    /// Support-tier label for operator expectations.
+    pub support_tier: String,
+    /// Indicates whether the profile expects a live provider call.
+    pub live_network_required: bool,
+    /// Ordered provider chain expressed in provider ids.
+    pub provider_chain: Vec<String>,
+    /// Primary route timeout budget in milliseconds.
+    pub primary_timeout_ms: u64,
+    /// Secondary route timeout budget in milliseconds.
+    pub secondary_timeout_ms: u64,
+    /// Cheap/default model preference for lightweight intents.
+    pub cheap_model: Option<String>,
+    /// Reasoning/deeper model preference for heavier intents.
+    pub reasoning_model: Option<String>,
+    /// Intents that should prefer the cheap model.
+    pub cheap_intents: Vec<String>,
+    /// Intents that should prefer the reasoning model.
+    pub reasoning_intents: Vec<String>,
+}
+
+/// Stable machine-readable AI profile catalog payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiProviderProfilesControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Environment variable used to resolve the active profile.
+    pub active_profile_env: String,
+    /// Active built-in profile id, when configured.
+    pub active_profile_id: Option<String>,
+    /// Explains how the active profile was resolved.
+    pub active_profile_source: String,
+    /// Built-in profile inventory.
+    pub profiles: Vec<AiProviderProfileControl>,
+}
+
+/// Stable machine-readable AI profile detail payload.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AiProviderProfileControlSchema {
+    /// Stable schema version.
+    pub schema_version: u32,
+    /// Stable schema kind identifier.
+    pub schema_kind: String,
+    /// Explicit requested profile id when the caller provided one.
+    pub requested_profile_id: Option<String>,
+    /// Explains how the profile was resolved.
+    pub resolved_profile_source: String,
+    /// Resolved built-in profile contract.
+    pub profile: AiProviderProfileControl,
+}
+
 /// Stable lane reference embedded in AI doctor output.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AiDoctorLaneRef {
@@ -739,6 +802,75 @@ mod tests {
 
         let json = serde_json::to_string(&schema).expect("schema should serialize");
         let parsed: LocalMemoryQueryControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn ai_provider_profiles_control_schema_roundtrips_json() {
+        let schema = AiProviderProfilesControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "ai_provider_profiles".to_string(),
+            active_profile_env: "NTK_AI_PROFILE".to_string(),
+            active_profile_id: Some("balanced".to_string()),
+            active_profile_source: "env:NTK_AI_PROFILE".to_string(),
+            profiles: vec![AiProviderProfileControl {
+                id: "balanced".to_string(),
+                title: "Balanced".to_string(),
+                summary: "Stable remote preset".to_string(),
+                provider_mode: "gateway/openai-compatible".to_string(),
+                support_tier: "stable".to_string(),
+                live_network_required: true,
+                provider_chain: vec!["openai-compatible".to_string(), "mock".to_string()],
+                primary_timeout_ms: 45_000,
+                secondary_timeout_ms: 20_000,
+                cheap_model: Some("gpt-4.1-mini".to_string()),
+                reasoning_model: Some("gpt-4.1".to_string()),
+                cheap_intents: vec!["ask".to_string()],
+                reasoning_intents: vec![
+                    "plan".to_string(),
+                    "explain".to_string(),
+                    "apply-dry-run".to_string(),
+                ],
+            }],
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: AiProviderProfilesControlSchema =
+            serde_json::from_str(&json).expect("schema should deserialize");
+        assert_eq!(parsed, schema);
+    }
+
+    #[test]
+    fn ai_provider_profile_control_schema_roundtrips_json() {
+        let schema = AiProviderProfileControlSchema {
+            schema_version: NTK_CONTROL_SCHEMA_VERSION,
+            schema_kind: "ai_provider_profile".to_string(),
+            requested_profile_id: Some("coding".to_string()),
+            resolved_profile_source: "argument:profile".to_string(),
+            profile: AiProviderProfileControl {
+                id: "coding".to_string(),
+                title: "Coding".to_string(),
+                summary: "Development preset".to_string(),
+                provider_mode: "gateway/openai-compatible".to_string(),
+                support_tier: "stable".to_string(),
+                live_network_required: true,
+                provider_chain: vec!["openai-compatible".to_string(), "mock".to_string()],
+                primary_timeout_ms: 60_000,
+                secondary_timeout_ms: 25_000,
+                cheap_model: Some("gpt-4.1-mini".to_string()),
+                reasoning_model: Some("gpt-4.1".to_string()),
+                cheap_intents: vec!["ask".to_string()],
+                reasoning_intents: vec![
+                    "plan".to_string(),
+                    "explain".to_string(),
+                    "apply-dry-run".to_string(),
+                ],
+            },
+        };
+
+        let json = serde_json::to_string(&schema).expect("schema should serialize");
+        let parsed: AiProviderProfileControlSchema =
             serde_json::from_str(&json).expect("schema should deserialize");
         assert_eq!(parsed, schema);
     }

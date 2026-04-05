@@ -59,8 +59,10 @@ pub use ai_model_routing::{
     NTK_AI_ACTIVE_SKILL_ENV,
 };
 pub use ai_profiles::{
-    find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
-    resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
+    build_ai_provider_profile_control, build_ai_provider_profile_control_schema,
+    build_ai_provider_profiles_control_schema, find_ai_provider_profile, list_ai_provider_profiles,
+    resolve_ai_provider_profile, resolve_ai_provider_profile_from_env, AiProviderProfile,
+    NTK_AI_PROFILE_ENV,
 };
 pub use ai_provider_harness::{
     embedded_ai_free_provider_harness, find_ai_free_provider_harness_case,

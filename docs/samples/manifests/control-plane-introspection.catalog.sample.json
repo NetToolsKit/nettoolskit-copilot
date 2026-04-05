@@ -9,6 +9,16 @@
       "entryPoints": ["ntk ai doctor --json-output"]
     },
     {
+      "id": "ai-provider-profiles",
+      "schemaKind": "ai_provider_profiles",
+      "entryPoints": ["ntk ai profiles list --json-output"]
+    },
+    {
+      "id": "ai-provider-profile",
+      "schemaKind": "ai_provider_profile",
+      "entryPoints": ["ntk ai profiles show --json-output"]
+    },
+    {
       "id": "runtime-doctor",
       "schemaKind": "runtime_doctor",
       "entryPoints": ["ntk runtime doctor --json-output"]

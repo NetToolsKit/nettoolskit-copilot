@@ -284,15 +284,46 @@ fn test_ai_usage_weekly_text_output_classifies_provider_totals_when_matrix_alias
 #[test]
 #[serial]
 fn test_ai_profiles_list_json_output_reports_builtin_profiles() {
+    let _profile_guard = EnvVarGuard::set(NTK_AI_PROFILE_ENV, "local");
+
     ntk()
         .args(["ai", "profiles", "list", "--json-output"])
         .assert()
         .success()
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
+        .stdout(predicate::str::contains(
+            r#""schema_kind": "ai_provider_profiles""#,
+        ))
+        .stdout(predicate::str::contains(r#""active_profile_id": "local""#))
+        .stdout(predicate::str::contains(
+            r#""active_profile_source": "env:NTK_AI_PROFILE""#,
+        ))
         .stdout(predicate::str::contains(r#""id": "balanced""#))
         .stdout(predicate::str::contains(r#""id": "local""#))
         .stdout(predicate::str::contains(
             r#""provider_mode": "gateway/openai-compatible""#,
         ));
+}
+
+#[test]
+#[serial]
+fn test_ai_profiles_show_json_output_emits_typed_control_schema() {
+    ntk()
+        .args(["ai", "profiles", "show", "coding", "--json-output"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""schema_version": 1"#))
+        .stdout(predicate::str::contains(
+            r#""schema_kind": "ai_provider_profile""#,
+        ))
+        .stdout(predicate::str::contains(
+            r#""requested_profile_id": "coding""#,
+        ))
+        .stdout(predicate::str::contains(
+            r#""resolved_profile_source": "argument:profile""#,
+        ))
+        .stdout(predicate::str::contains(r#""id": "coding""#))
+        .stdout(predicate::str::contains(r#""reasoning_model": "gpt-4.1""#));
 }
 
 #[test]

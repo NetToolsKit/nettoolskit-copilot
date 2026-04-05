@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-04-06 09:55
+- LastUpdated: 2026-04-06 10:25
 - Objective: define typed control-plane schemas and runtime introspection surfaces for models, permissions, MCP status, and context usage.
 - Normalized Request: create a workstream for stronger SDK/control schemas and runtime inspection so tool callers and operators can reason about the system through stable contracts.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -71,6 +71,10 @@ The repository already exposes command and runtime surfaces, but several control
   - The shared control-plane boundary now also covers `local_context_query` and `local_memory_query`, so repository recall no longer relies on ad-hoc JSON when consumed programmatically.
   - `ntk runtime query-local-context-index --json-output` and `ntk runtime query-local-memory --json-output` now emit the shared schemas while preserving the existing human-readable operator flow.
   - The canonical control-plane catalog and samples now register both local recall surfaces as first-class schema kinds and entry points.
+- Progress [2026-04-06 10:25]:
+  - The shared control-plane boundary now also covers `ai_provider_profiles` and `ai_provider_profile`, so AI preset inventory no longer relies on direct orchestrator struct serialization when consumed programmatically.
+  - `ntk ai profiles list --json-output` and `ntk ai profiles show --json-output` now emit the shared schemas while preserving the existing human-readable operator flow.
+  - The canonical control-plane catalog and samples now register both AI profile surfaces as first-class schema kinds and entry points.
 
 ---
 

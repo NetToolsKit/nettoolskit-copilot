@@ -30,7 +30,9 @@ pub use execution::{
         NTK_AI_ACTIVE_AGENT_ENV, NTK_AI_ACTIVE_SKILL_ENV,
     },
     ai_profiles::{
-        find_ai_provider_profile, list_ai_provider_profiles, resolve_ai_provider_profile,
+        build_ai_provider_profile_control, build_ai_provider_profile_control_schema,
+        build_ai_provider_profiles_control_schema, find_ai_provider_profile,
+        list_ai_provider_profiles, resolve_ai_provider_profile,
         resolve_ai_provider_profile_from_env, AiProviderProfile, NTK_AI_PROFILE_ENV,
     },
     ai_provider_harness::{

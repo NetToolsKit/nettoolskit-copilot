@@ -16,7 +16,7 @@ It provides command parsing, async execution primitives, AI session helpers, Cha
 - ✅ Command routing and parsing through `MainAction` and `get_main_action`
 - ✅ Async command execution with progress and cancellation support
 - ✅ Shared AI session, ChatOps, plugin, and repository workflow orchestration helpers
-- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, normalized adapter contracts, canonical agent/skill model-routing defaults, and versioned AI doctor control-schema output for development-oriented preset selection
+- ✅ Built-in AI provider profiles plus AI doctor diagnostics, strategy-aware provider routing, normalized adapter contracts, canonical agent/skill model-routing defaults, and versioned AI profile/doctor control-schema output for development-oriented preset selection
 
 ---
 
@@ -260,6 +260,16 @@ pub fn resolve_ai_profile_and_model_routing_from_env()
 pub const NTK_AI_PROFILE_ENV: &str;
 
 pub struct AiProviderProfile { /* fields omitted */ }
+pub fn build_ai_provider_profile_control_schema(
+    profile: &AiProviderProfile,
+    requested_profile_id: Option<&str>,
+    resolved_profile_source: &str,
+) -> nettoolskit_core::AiProviderProfileControlSchema;
+pub fn build_ai_provider_profiles_control_schema(
+    profiles: &[AiProviderProfile],
+    active_profile: Option<&AiProviderProfile>,
+    active_profile_source: &str,
+) -> nettoolskit_core::AiProviderProfilesControlSchema;
 
 pub fn list_ai_provider_profiles() -> &'static [AiProviderProfile];
 pub fn find_ai_provider_profile(profile_id: &str) -> Option<&'static AiProviderProfile>;

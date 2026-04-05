@@ -16,7 +16,7 @@ It covers standardized exit status, menu traits, configuration loading, runtime 
 - ✅ Shared `ExitStatus`, `Result<T>`, and menu traits used across crates
 - ✅ Layered configuration with runtime mode, color, and Unicode policies
 - ✅ Runtime control-plane contracts for CLI and service execution modes
-- ✅ Versioned machine-readable control schemas for `ai_doctor`, `runtime_doctor`, `runtime_healthcheck`, `runtime_self_heal`, `local_context_query`, and `local_memory_query`
+- ✅ Versioned machine-readable control schemas for `ai_doctor`, `ai_provider_profiles`, `ai_provider_profile`, `runtime_doctor`, `runtime_healthcheck`, `runtime_self_heal`, `local_context_query`, and `local_memory_query`
 - ✅ Repository path, search, and local-context helpers for workspace automation
 
 ---

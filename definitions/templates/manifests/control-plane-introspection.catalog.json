@@ -18,6 +18,32 @@
       ]
     },
     {
+      "id": "ai-provider-profiles",
+      "schemaKind": "ai_provider_profiles",
+      "entryPoints": ["ntk ai profiles list --json-output"],
+      "owner": "crates/orchestrator/src/execution/ai_profiles.rs",
+      "contractType": "machine-readable control inventory",
+      "guarantees": [
+        "stable schema version",
+        "active profile env/source context",
+        "full built-in profile inventory",
+        "renderer-independent profile metadata"
+      ]
+    },
+    {
+      "id": "ai-provider-profile",
+      "schemaKind": "ai_provider_profile",
+      "entryPoints": ["ntk ai profiles show --json-output"],
+      "owner": "crates/orchestrator/src/execution/ai_profiles.rs",
+      "contractType": "machine-readable control inventory",
+      "guarantees": [
+        "stable schema version",
+        "requested-profile echo",
+        "resolved source attribution",
+        "full built-in profile detail"
+      ]
+    },
+    {
       "id": "runtime-doctor",
       "schemaKind": "runtime_doctor",
       "entryPoints": ["ntk runtime doctor --json-output"],
