@@ -236,6 +236,7 @@ Runtime health, degraded-state evidence, and subsystem ownership are versioned s
 | Element | Role | Canonical entry point |
 | --- | --- | --- |
 | Diagnostics taxonomy | Defines `healthy`, `degraded`, `blocked`, `misconfigured`, and `recovering` plus subsystem ownership | `definitions/templates/manifests/runtime-diagnostics.taxonomy.json` |
+| Control-schema catalog | Defines machine-readable doctor schema kinds, entry points, and versioning rules | `definitions/templates/manifests/control-plane-introspection.catalog.json` |
 | Operator playbook | Human troubleshooting and remediation flow | `docs/operations/runtime-diagnostics-observability-playbook.md` |
 | Current doctor surface | Read-only runtime inspection for AI/runtime health with versioned machine-readable contracts | `ntk ai doctor`, `ntk runtime doctor` |
 
@@ -277,6 +278,7 @@ RAG may retrieve these files and CAG may compact them, but `planning/` remains t
 Formal control-plane, session, and operator contracts are documented in:
 
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
+- [Control-Plane Introspection Model](docs/architecture/control-plane-introspection-model.md)
 
 This document defines the current local-first runtime boundary and the target contract for future gateway/operator expansion. Local CLI `/task submit`, HTTP `/task/submit`, and ChatOps task commands derive the same typed control-plane metadata, with normalized request, operator, session, and audit attribution across submit and non-submit ingress paths.
 
@@ -426,6 +428,7 @@ We follow semantic versioning and conventional commits. Please ensure your contr
 - [Scripts](scripts/README.md)
 - [Template Assets](templates/README.md)
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
+- [Control-Plane Introspection Model](docs/architecture/control-plane-introspection-model.md)
 - [Extension Governance Model](docs/architecture/extension-governance-model.md)
 - [Operational Memory Layering Model](docs/architecture/operational-memory-layering-model.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)

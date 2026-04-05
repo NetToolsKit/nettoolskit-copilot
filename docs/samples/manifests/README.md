@@ -12,6 +12,7 @@ Canonical reusable manifest templates belong under `definitions/templates/manife
 
 Current samples:
 
+- `control-plane-introspection.catalog.sample.json` - trimmed example of the typed machine-readable doctor schema catalog for AI and runtime inspection surfaces
 - `extension-governance.catalog.sample.json` - trimmed example of the canonical extension taxonomy and ownership model for agents, skills, hooks, prompts, and future plugins
 - `free-llm-provider-matrix.sample.json` - trimmed example of the free-provider matrix shape used by runtime diagnostics and AI usage reporting
 - `operational-memory-layering.catalog.sample.json` - trimmed example of the layered file-memory model for entrypoint memory, topic memory, and append-only operational notes

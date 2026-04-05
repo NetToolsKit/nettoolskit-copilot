@@ -86,6 +86,10 @@ Generated: 2026-03-31 00:00
 - Update README and instructions with the control-plane inspection model.
 - Document versioning expectations for schemas and adapters.
 - Record how these schemas align with future service/SDK integration.
+- Status [2026-04-06 00:20]:
+  - Added `definitions/templates/manifests/control-plane-introspection.catalog.json` as the canonical catalog for schema kinds, entry points, and versioning rules.
+  - Added `docs/architecture/control-plane-introspection-model.md` plus a matching sample manifest.
+  - Updated root/crate/docs/template READMEs to point at the new control-plane introspection model.
 - Commit checkpoint:
   - `docs(runtime): document control schemas and introspection model`
 

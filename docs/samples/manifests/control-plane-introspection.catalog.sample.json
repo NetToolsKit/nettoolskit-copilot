@@ -1,0 +1,21 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "control-plane-introspection-catalog",
+  "schemaVersion": 1,
+  "surfaces": [
+    {
+      "id": "ai-doctor",
+      "schemaKind": "ai_doctor",
+      "entryPoints": ["ntk ai doctor --json-output"]
+    },
+    {
+      "id": "runtime-doctor",
+      "schemaKind": "runtime_doctor",
+      "entryPoints": ["ntk runtime doctor --json-output"]
+    }
+  ],
+  "evolutionRules": {
+    "versionField": "schema_version",
+    "kindField": "schema_kind"
+  }
+}

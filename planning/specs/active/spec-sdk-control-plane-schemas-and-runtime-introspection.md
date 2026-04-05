@@ -58,6 +58,7 @@ The repository already exposes command and runtime surfaces, but several control
 - Progress [2026-04-05 23:55]:
   - The first shared control-schema boundary now exists in `nettoolskit-core` for `ai_doctor` and `runtime_doctor`.
   - CLI JSON inspection for both doctor surfaces now goes through shared control schemas instead of crate-local structs.
+  - The versioning and schema-kind catalog now lives under `definitions/templates/manifests/control-plane-introspection.catalog.json` with matching architecture guidance in `docs/architecture/control-plane-introspection-model.md`.
 
 ---
 

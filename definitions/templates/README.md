@@ -44,6 +44,7 @@ graph TD
 - `definitions/shared/templates/` remains as a temporary compatibility surface only while canonical consumers finish switching to `definitions/templates/`.
 - Human-facing examples belong in `docs/samples/`; canonical authored templates belong here.
 - Runtime diagnostics and provider-family catalogs should stay versioned under `definitions/templates/manifests/` and only be mirrored into docs as samples, never duplicated as authored operator truth.
+- Control-plane introspection catalogs should stay versioned under `definitions/templates/manifests/` so AI/runtime machine-readable doctors share one explicit schema-kind and versioning policy.
 - Extension taxonomy, discovery, and loading-boundary contracts should also stay under `definitions/templates/manifests/` so future plugins, skills, hooks, and provider prompts share one governed classification model.
 - File-based operational memory layering should stay versioned under `definitions/templates/manifests/` so curated memory, topic memory, and append-only notes remain distinct from planning and retrieval storage.
 

@@ -59,6 +59,7 @@ graph TD
 ## Documentation Domains
 
 - `architecture/` contains control-plane and operator-model references.
+- `architecture/` also contains the control-plane introspection model for typed AI/runtime doctor JSON contracts.
 - `operations/` contains runbooks for incident response, release verification, reverse proxy routing, and service mode.
 - `operations/` also contains the AI development operator playbook for profile selection, diagnostics, and degraded-state troubleshooting.
 - `operations/` also contains the runtime diagnostics playbook that defines health-state meaning, degraded-state evidence, and subsystem troubleshooting ownership.
@@ -85,6 +86,7 @@ When a manifest or document is meant to be consumed by generation or runtime too
 
 - [Repository README](../README.md)
 - [docs/architecture/control-plane-session-operator-model.md](architecture/control-plane-session-operator-model.md)
+- [docs/architecture/control-plane-introspection-model.md](architecture/control-plane-introspection-model.md)
 - [docs/architecture/extension-governance-model.md](architecture/extension-governance-model.md)
 - [docs/architecture/operational-memory-layering-model.md](architecture/operational-memory-layering-model.md)
 - [docs/operations/incident-response-playbook.md](operations/incident-response-playbook.md)
@@ -96,6 +98,7 @@ When a manifest or document is meant to be consumed by generation or runtime too
 - [docs/samples/README.md](samples/README.md)
 - [docs/samples/manifests/README.md](samples/manifests/README.md)
 - [docs/samples/manifests/extension-governance.catalog.sample.json](samples/manifests/extension-governance.catalog.sample.json)
+- [docs/samples/manifests/control-plane-introspection.catalog.sample.json](samples/manifests/control-plane-introspection.catalog.sample.json)
 - [docs/samples/manifests/operational-memory-layering.catalog.sample.json](samples/manifests/operational-memory-layering.catalog.sample.json)
 - [docs/samples/manifests/runtime-diagnostics.taxonomy.sample.json](samples/manifests/runtime-diagnostics.taxonomy.sample.json)
 - [planning/README.md](../planning/README.md)

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added `crates/core/src/control_plane.rs` with schema-versioned typed control-plane inspection contracts for `ai_doctor` and `runtime_doctor`, plus JSON round-trip coverage in `nettoolskit-core`.
+- Added `definitions/templates/manifests/control-plane-introspection.catalog.json` plus a matching architecture doc and sample manifest so machine-readable doctor schema kinds, entry points, and versioning rules are governed outside crate-local code.
 - Added `definitions/templates/manifests/operational-memory-layering.catalog.json` plus a matching architecture doc and sample manifest so concise entrypoint memory, topic memory, append-only operational notes, distillation flow, and retrieval alignment are versioned once for file-based operational recall.
 - Added `definitions/templates/manifests/extension-governance.catalog.json` plus a matching architecture doc and sample manifest so extension classes, authored roots, discovery expectations, and runtime-loading boundaries are versioned once for agents, skills, hooks, provider prompts/projections, and future plugins.
 - Added an embedded free-provider harness catalog plus orchestrator validation helpers so every family in the free-provider matrix now shares the same prompt fixture, output contract, latency/error-path expectations, and deterministic offline contract checks before any live smoke test is enabled.

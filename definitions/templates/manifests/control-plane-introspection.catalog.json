@@ -1,0 +1,40 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "control-plane-introspection-catalog",
+  "title": "NetToolsKit Control-Plane Introspection Catalog",
+  "schemaVersion": 1,
+  "surfaces": [
+    {
+      "id": "ai-doctor",
+      "schemaKind": "ai_doctor",
+      "entryPoints": ["ntk ai doctor --json-output"],
+      "owner": "crates/orchestrator/src/execution/ai_doctor.rs",
+      "contractType": "machine-readable diagnostics",
+      "guarantees": [
+        "stable schema version",
+        "provider/profile/routing readiness",
+        "adapter contract summary",
+        "lane-aware model-routing state"
+      ]
+    },
+    {
+      "id": "runtime-doctor",
+      "schemaKind": "runtime_doctor",
+      "entryPoints": ["ntk runtime doctor --json-output"],
+      "owner": "crates/commands/runtime/src/diagnostics/doctor.rs",
+      "contractType": "machine-readable diagnostics",
+      "guarantees": [
+        "stable schema version",
+        "projection drift state",
+        "mapping counts and detailed file lists",
+        "sync-attempt and sync-resolution state"
+      ]
+    }
+  ],
+  "evolutionRules": {
+    "versionField": "schema_version",
+    "kindField": "schema_kind",
+    "breakingChangePolicy": "increment schemaVersion before removing or renaming fields",
+    "rendererRule": "CLI human output may change independently; machine-readable output must remain bound to the typed contract"
+  }
+}
