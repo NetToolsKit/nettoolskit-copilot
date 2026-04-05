@@ -57,6 +57,7 @@ This workspace separates design intent from execution planning so non-trivial wo
 - [planning/specs/active/spec-rag-cag-sqlite-evolution.md](planning/specs/active/spec-rag-cag-sqlite-evolution.md)
 - [planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md](planning/specs/active/spec-build-target-cleanup-and-artifact-pruning.md)
 - [planning/specs/active/spec-script-retirement-tail-cutover.md](planning/specs/active/spec-script-retirement-tail-cutover.md)
+- [planning/specs/active/spec-script-retirement-phase-22-orchestration-sweep.md](planning/specs/active/spec-script-retirement-phase-22-orchestration-sweep.md)
 
 ---
 

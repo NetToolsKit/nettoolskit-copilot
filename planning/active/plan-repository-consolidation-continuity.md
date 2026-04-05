@@ -587,9 +587,9 @@ Status: `[x]` Completed (audit-only; zero deletions)
 
 #### Task W5.6: Create and Execute Phase 22 — `scripts/orchestration/**/*.ps1` (10)
 
-Status: `[ ]` Pending
+Status: `[~]` Partial / active Phase 22 plan opened
 
-- Create `planning/specs/active/spec-script-retirement-phase-22.md` and `planning/active/plan-script-retirement-phase-22.md`.
+- Create `planning/specs/active/spec-script-retirement-phase-22-orchestration-sweep.md` and `planning/active/plan-script-retirement-phase-22-orchestration-sweep.md`.
 - The 10 orchestration scripts are staged-execution wrappers (`intake-stage.ps1`, `plan-stage.ps1`, `spec-stage.ps1`, `implement-stage.ps1`, `review-stage.ps1`, `validate-stage.ps1`, `closeout-stage.ps1`, `route-stage.ps1`, `invoke-codex-dispatch.ps1`, `invoke-task-worker.ps1`).
 - Consumer sweep commands:
   - `Get-ChildItem scripts\orchestration -Filter "*.ps1" -Recurse | ForEach-Object { rg $_.Name scripts, definitions, .github --count }`
