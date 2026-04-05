@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added canonical GitHub governance definitions under `definitions/providers/github/governance/` for `instruction-ownership.manifest.json` and `authoritative-source-map.json`, so validation and audit commands can resolve authored policy without starting from `.github/governance/`.
 - Added an instruction-taxonomy migration checkpoint that defers `.github/.codex/.claude` projection cutover until canonical `definitions/` assets and validation/audit code are definitions-aware.
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
 - Added the first shallow projected instruction copies under `.github/instructions/{governance,development,operations,data}` while preserving the legacy projected taxonomy during migration.
@@ -143,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- `validate-instruction-architecture` and `validate-authoritative-source-policy` now default to canonical `definitions/` assets (`definitions/providers/github/{governance,root,prompts}`, `definitions/templates/`, `definitions/instructions/`, and `definitions/providers/codex/skills`) while keeping compatibility regexes for transitional `core/` references during migration.
 - Repointed `definitions/providers/github/{chatmodes,prompts}` markdown references to canonical `definitions/instructions/*`, `definitions/templates/*`, and `definitions/providers/github/root/*`, which cleared the current `validation instructions` warning set for canonical surfaces.
 - Instruction taxonomy documentation now keeps lane discovery in root READMEs instead of adding `README.md` files to every instruction category folder.
 - Instruction governance taxonomy now keeps cross-cutting TDD and verification workflow in `process/` while moving Rust crate testing into backend, backend integration/API testing into backend, and browser E2E automation into frontend.

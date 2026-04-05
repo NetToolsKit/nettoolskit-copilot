@@ -24,21 +24,21 @@ always:
     reason: Global rules and domain mapping
 
   # Mandatory instruction files (always applied)
-  - path: instructions/agents/ntk-agents-super-agent.instructions.md
+  - path: agents/super-agent/ntk-agents-super-agent.instructions.md
     reason: Repository-owned Super Agent lifecycle for intake, planning, specialist routing, validation, review, and closeout
-  - path: instructions/core/ntk-core-repository-operating-model.instructions.md
+  - path: instructions/governance/ntk-governance-repository-operating-model.instructions.md
     reason: Repository topology, build/test/run commands, style, and domain instruction map
-  - path: instructions/core/ntk-core-artifact-layout.instructions.md
+  - path: instructions/governance/ntk-governance-artifact-layout.instructions.md
     reason: Canonical non-versioned artifact layout for build, generated, and deployment outputs
-  - path: instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md
+  - path: instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md
     reason: Mandatory planning lifecycle and sub-agent chain for non-trivial work
-  - path: instructions/process/planning/ntk-process-workflow-optimization.instructions.md
+  - path: instructions/governance/ntk-governance-workflow-optimization.instructions.md
     reason: Task breakdown and token efficiency
-  - path: instructions/core/ntk-core-authoritative-sources.instructions.md
+  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md
     reason: Resolve external technical behavior with repository context first and official docs second
-  - path: instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md
+  - path: instructions/operations/ntk-operations-powershell-execution.instructions.md
     reason: When running or writing PowerShell
-  - path: instructions/process/delivery/ntk-process-feedback-changelog.instructions.md
+  - path: instructions/governance/ntk-governance-feedback-changelog.instructions.md
     reason: When changing CHANGELOG/feedback
 
 routing:

@@ -12,14 +12,18 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::{error::ValidateInstructionArchitectureCommandError, ValidationCheckStatus};
 
-const DEFAULT_MANIFEST_PATH: &str = ".github/governance/instruction-ownership.manifest.json";
-const DEFAULT_AGENTS_PATH: &str = ".github/AGENTS.md";
-const DEFAULT_GLOBAL_INSTRUCTIONS_PATH: &str = ".github/copilot-instructions.md";
-const DEFAULT_ROUTING_CATALOG_PATH: &str = ".github/instruction-routing.catalog.yml";
-const DEFAULT_ROUTE_PROMPT_PATH: &str = ".github/prompts/route-instructions.prompt.md";
-const DEFAULT_PROMPT_ROOT: &str = ".github/prompts";
-const DEFAULT_TEMPLATE_ROOT: &str = ".github/templates";
-const DEFAULT_SKILL_ROOT: &str = ".codex/skills";
+const DEFAULT_MANIFEST_PATH: &str =
+    "definitions/providers/github/governance/instruction-ownership.manifest.json";
+const DEFAULT_AGENTS_PATH: &str = "definitions/providers/github/root/AGENTS.md";
+const DEFAULT_GLOBAL_INSTRUCTIONS_PATH: &str =
+    "definitions/providers/github/root/copilot-instructions.md";
+const DEFAULT_ROUTING_CATALOG_PATH: &str =
+    "definitions/providers/github/root/instruction-routing.catalog.yml";
+const DEFAULT_ROUTE_PROMPT_PATH: &str =
+    "definitions/providers/github/prompts/route-instructions.prompt.md";
+const DEFAULT_PROMPT_ROOT: &str = "definitions/providers/github/prompts";
+const DEFAULT_TEMPLATE_ROOT: &str = "definitions/templates";
+const DEFAULT_SKILL_ROOT: &str = "definitions/providers/codex/skills";
 const REQUIRED_LAYER_IDS: &[&str] = &[
     "global-core",
     "agent-control",
@@ -911,8 +915,8 @@ fn test_global_core_references(
     failures: &mut Vec<String>,
 ) {
     for pattern in [
-        r"instructions/core/ntk-core-repository-operating-model\.instructions\.md",
-        r"instructions/core/ntk-core-authoritative-sources\.instructions\.md",
+        r"instructions/(?:core/ntk-core|governance/ntk-governance)-repository-operating-model\.instructions\.md",
+        r"instructions/(?:core/ntk-core|governance/ntk-governance)-authoritative-sources\.instructions\.md",
     ] {
         test_required_pattern(
             agents_content,
@@ -1149,11 +1153,12 @@ fn test_skill_canonical_references(
         return;
     }
 
-    let required_regex =
-        RegexBuilder::new(r"ntk-core-repository-operating-model\.instructions\.md")
-        .case_insensitive(true)
-        .build()
-        .expect("skill canonical reference regex should compile");
+    let required_regex = RegexBuilder::new(
+        r"ntk-(?:core|governance)-repository-operating-model\.instructions\.md",
+    )
+    .case_insensitive(true)
+    .build()
+    .expect("skill canonical reference regex should compile");
 
     for skill_file in skill_files.iter().filter(|path| {
         path.file_name()

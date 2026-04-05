@@ -10,6 +10,10 @@
 - Always include BOTH of these files first when selecting context for Copilot Chat:
   1. AGENTS.md (this file)
   2. copilot-instructions.md
+- Canonical governance references for this provider surface:
+  - `instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+  - `instructions/governance/ntk-governance-authoritative-sources.instructions.md`
+  - `governance/authoritative-source-map.json`
 
 # Super Agent Workspace Modes
 - `workspace-adapter` mode:
@@ -212,7 +216,7 @@ After changes: Code compiles, tests pass, architecture maintained, documentation
   - `instructions/process/delivery/ntk-process-feedback-changelog.instructions.md`
 - `instructions/core/ntk-core-repository-operating-model.instructions.md` is mandatory only when the target workspace provides its own local adapter and repo-specific operating model.
 - Repository-owned VS Code session bootstrap hooks live under `.github/hooks/` and are mirrored to `%USERPROFILE%\\.github\\hooks` for Copilot and Codex sessions running inside VS Code.
-- Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `.github/governance/authoritative-source-map.json`.
+- Resolve project-specific uncertainty from repository context first; resolve external technology behavior from the official domains defined in `governance/authoritative-source-map.json`.
 - For `.github` authoring, include `instructions/docs/ntk-docs-copilot-instruction-creation.instructions.md`.
 
 # Instruction Rules Board

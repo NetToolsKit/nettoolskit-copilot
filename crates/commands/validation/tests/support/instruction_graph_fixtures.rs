@@ -266,8 +266,9 @@ fn write_canonical_instruction_documents(repo_root: &Path) {
         &repo_root.join("definitions/providers/github/root/AGENTS.md"),
         r#"# AGENTS
 
-Use `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-Use `definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
@@ -275,8 +276,9 @@ Use `definitions/instructions/governance/ntk-governance-authoritative-sources.in
             .join("definitions/providers/github/root/copilot-instructions.md"),
         r#"# Global Instructions
 
-Use `definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
-Use `definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `instructions/governance/ntk-governance-repository-operating-model.instructions.md`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
@@ -285,13 +287,42 @@ Use `definitions/instructions/governance/ntk-governance-authoritative-sources.in
         r#"always:
   - path: AGENTS.md
   - path: copilot-instructions.md
+  - path: agents/super-agent/ntk-agents-super-agent.instructions.md
+  - path: instructions/governance/ntk-governance-repository-operating-model.instructions.md
+  - path: instructions/governance/ntk-governance-artifact-layout.instructions.md
+  - path: instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md
+  - path: instructions/governance/ntk-governance-workflow-optimization.instructions.md
+  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md
+  - path: instructions/operations/ntk-operations-powershell-execution.instructions.md
+  - path: instructions/governance/ntk-governance-feedback-changelog.instructions.md
 routing:
   - id: repo-guidance
     triggers:
       - repository
     include:
-      - path: ../prompts/route-instructions.prompt.md
+      - path: instructions/governance/ntk-governance-repository-operating-model.instructions.md
 "#,
+    );
+    write_file(
+        &repo_root.join("definitions/providers/github/governance/authoritative-source-map.json"),
+        r#"{
+  "version": 1,
+  "defaultPolicy": {
+    "repositoryContextFirst": true
+  },
+  "stackRules": [
+    { "id": "dotnet", "displayName": ".NET", "keywords": ["dotnet"], "officialDomains": ["learn.microsoft.com"] },
+    { "id": "github-copilot", "displayName": "GitHub Copilot", "keywords": ["copilot"], "officialDomains": ["docs.github.com"] },
+    { "id": "vscode", "displayName": "VS Code", "keywords": ["vscode"], "officialDomains": ["code.visualstudio.com"] },
+    { "id": "rust", "displayName": "Rust", "keywords": ["rust"], "officialDomains": ["doc.rust-lang.org"] },
+    { "id": "vue", "displayName": "Vue", "keywords": ["vue"], "officialDomains": ["vuejs.org"] },
+    { "id": "quasar", "displayName": "Quasar", "keywords": ["quasar"], "officialDomains": ["quasar.dev"] },
+    { "id": "docker", "displayName": "Docker", "keywords": ["docker"], "officialDomains": ["docs.docker.com"] },
+    { "id": "kubernetes", "displayName": "Kubernetes", "keywords": ["kubernetes"], "officialDomains": ["kubernetes.io"] },
+    { "id": "postgresql", "displayName": "PostgreSQL", "keywords": ["postgresql"], "officialDomains": ["postgresql.org"] },
+    { "id": "openai", "displayName": "OpenAI", "keywords": ["openai"], "officialDomains": ["platform.openai.com"] }
+  ]
+}"#,
     );
     write_file(
         &repo_root
@@ -305,6 +336,20 @@ tools: ['readFile']
 # Route Instructions
 
 Hard cap: at most 5 selected instruction files (excluding mandatory).
+"#,
+    );
+    write_file(
+        &repo_root
+            .join("definitions/providers/github/prompts/example.prompt.md"),
+        r#"---
+description: Example prompt
+mode: ask
+tools: ['readFile']
+---
+
+# Example Prompt
+
+Use the routing catalog.
 "#,
     );
     write_file(
@@ -337,11 +382,15 @@ description: sample skill
 Load `ntk-governance-repository-operating-model.instructions.md`.
 "#,
     );
+    write_file(
+        &repo_root.join("definitions/templates/docs/example.md"),
+        "# Example Template\n\nUse this as a reusable artifact.\n",
+    );
 }
 
 pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     write_file(
-        &repo_root.join(".github/governance/instruction-ownership.manifest.json"),
+        &repo_root.join("definitions/providers/github/governance/instruction-ownership.manifest.json"),
         r#"{
   "version": 1,
   "intentionalGlobalExceptions": [
@@ -361,14 +410,14 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
       "requiredAlwaysPaths": [
         "AGENTS.md",
         "copilot-instructions.md",
-        "instructions/agents/ntk-agents-super-agent.instructions.md",
-        "instructions/core/ntk-core-repository-operating-model.instructions.md",
-        "instructions/core/ntk-core-artifact-layout.instructions.md",
-        "instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md",
-        "instructions/process/planning/ntk-process-workflow-optimization.instructions.md",
-        "instructions/core/ntk-core-authoritative-sources.instructions.md",
-        "instructions/operations/automation/ntk-runtime-powershell-execution.instructions.md",
-        "instructions/process/delivery/ntk-process-feedback-changelog.instructions.md"
+        "agents/super-agent/ntk-agents-super-agent.instructions.md",
+        "instructions/governance/ntk-governance-repository-operating-model.instructions.md",
+        "instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md",
+        "instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+        "instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "instructions/operations/ntk-operations-powershell-execution.instructions.md",
+        "instructions/governance/ntk-governance-feedback-changelog.instructions.md"
       ]
     }
   },
@@ -376,45 +425,45 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     {
       "id": "global-core",
       "pathPatterns": [
-        ".github/AGENTS.md",
-        ".github/copilot-instructions.md"
+        "definitions/providers/github/root/AGENTS.md",
+        "definitions/providers/github/root/copilot-instructions.md"
       ]
     },
     {
       "id": "agent-control",
       "pathPatterns": [
-        ".github/instructions/agents/*.instructions.md"
+        "definitions/agents/*/*.instructions.md"
       ]
     },
     {
       "id": "repository-operating-model",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
+        "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "cross-cutting-policies",
       "pathPatterns": [
-        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/governance/*",
-        ".github/policies/*"
+        "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "definitions/providers/github/governance/*"
       ]
     },
     {
       "id": "domain-instructions",
       "pathPatterns": [
-        ".github/instructions/*.instructions.md"
+        "definitions/instructions/**/*.instructions.md"
       ],
       "excludePatterns": [
-        ".github/instructions/core/ntk-core-authoritative-sources.instructions.md",
-        ".github/instructions/agents/ntk-agents-super-agent.instructions.md",
-        ".github/instructions/core/ntk-core-repository-operating-model.instructions.md"
+        "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
       ]
     },
     {
       "id": "prompts",
       "pathPatterns": [
-        ".github/prompts/*"
+        "definitions/providers/github/prompts/*"
       ],
       "forbiddenOwnershipMarkers": [
         "single source of truth",
@@ -425,8 +474,9 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     {
       "id": "templates",
       "pathPatterns": [
-        ".github/templates/*",
-        ".vscode/*.tamplate.jsonc"
+        "definitions/templates/**/*",
+        "definitions/providers/vscode/workspace/*.tamplate.jsonc",
+        "definitions/providers/vscode/workspace/snippets/*.tamplate.code-snippets"
       ],
       "forbiddenOwnershipMarkers": [
         "single source of truth",
@@ -437,7 +487,7 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     {
       "id": "codex-skills",
       "pathPatterns": [
-        ".codex/skills/*/SKILL.md"
+        "definitions/providers/codex/skills/*/SKILL.md"
       ],
       "forbiddenOwnershipMarkers": [
         "single source of truth",
@@ -447,6 +497,7 @@ pub fn write_valid_instruction_architecture_manifest(repo_root: &Path) {
     {
       "id": "orchestration",
       "pathPatterns": [
+        "definitions/providers/codex/orchestration/**/*",
         "scripts/orchestration/*"
       ]
     },

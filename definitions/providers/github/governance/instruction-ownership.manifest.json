@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "intentionalGlobalExceptions": [
+    {
+      "concern": "Agent selection, mandatory context bootstrap, and instruction precedence must remain globally visible.",
+      "ownedBy": "global-core"
+    },
+    {
+      "concern": "Enterprise-first default behavior and universal execution quality gates must remain globally visible.",
+      "ownedBy": "global-core"
+    },
+    {
+      "concern": "Repository-level routing entry point and minimal-context contract must remain globally visible.",
+      "ownedBy": "global-core"
+    },
+    {
+      "concern": "Super Agent lifecycle orchestration must remain globally visible so change-bearing work cannot bypass planning, testing, review, or closeout.",
+      "ownedBy": "agent-control"
+    }
+  ],
+  "architectureConstraints": {
+    "globalCoreMaxChars": {
+      "AGENTS.md": 14000,
+      "copilot-instructions.md": 14000
+    },
+    "routing": {
+      "maxAlwaysFiles": 10,
+      "maxSelectedFiles": 5,
+      "requiredAlwaysPaths": [
+        "AGENTS.md",
+        "copilot-instructions.md",
+        "agents/super-agent/ntk-agents-super-agent.instructions.md",
+        "instructions/governance/ntk-governance-repository-operating-model.instructions.md",
+        "instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md",
+        "instructions/governance/ntk-governance-workflow-optimization.instructions.md",
+        "instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "instructions/operations/ntk-operations-powershell-execution.instructions.md",
+        "instructions/governance/ntk-governance-feedback-changelog.instructions.md"
+      ]
+    }
+  },
+  "projectionContract": {
+    "canonicalInstructionRoot": "definitions/instructions",
+    "canonicalTemplateRoot": "definitions/templates",
+    "canonicalAgentRoot": "definitions/agents",
+    "projectedInstructionRoot": ".github/instructions",
+    "providerRoots": [
+      "definitions/providers/github/root",
+      "definitions/providers/vscode/workspace",
+      "definitions/providers/codex",
+      "definitions/providers/claude"
+    ],
+    "naming": {
+      "folderPolicy": "shallow-domain-roots",
+      "disallowNumericPrefixes": true,
+      "filePrefix": "ntk-"
+    },
+    "driftRules": [
+      "Treat definitions/instructions as the canonical instruction content for repo-owned guidance.",
+      "Treat definitions/templates, definitions/agents, definitions/skills, and definitions/hooks as the canonical non-provider definition roots.",
+      "Treat .github, .codex, .claude, and .vscode as projected runtime surfaces updated only after canonical definition paths stabilize.",
+      "Do not sync from the external copilot-instructions repository by blind overwrite; review drift explicitly and record intentional divergences."
+    ]
+  },
+  "layers": [
+    {
+      "id": "global-core",
+      "description": "Thin provider-root context loaded first for every task.",
+      "pathPatterns": [
+        "definitions/providers/github/root/AGENTS.md",
+        "definitions/providers/github/root/copilot-instructions.md"
+      ]
+    },
+    {
+      "id": "agent-control",
+      "description": "Agent-controller lifecycle rules that stay globally visible but are not repository invariants.",
+      "pathPatterns": [
+        "definitions/agents/*/*.instructions.md"
+      ]
+    },
+    {
+      "id": "repository-operating-model",
+      "description": "Repository-specific operating rules and command map.",
+      "pathPatterns": [
+        "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
+      ]
+    },
+    {
+      "id": "cross-cutting-policies",
+      "description": "Centralized policy and governance contracts that cut across domains.",
+      "pathPatterns": [
+        "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "definitions/providers/github/governance/*"
+      ]
+    },
+    {
+      "id": "domain-instructions",
+      "description": "Canonical shallow instruction lanes grouped by responsibility.",
+      "pathPatterns": [
+        "definitions/instructions/**/*.instructions.md"
+      ],
+      "excludePatterns": [
+        "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md",
+        "definitions/instructions/governance/ntk-governance-artifact-layout.instructions.md",
+        "definitions/instructions/governance/ntk-governance-repository-operating-model.instructions.md"
+      ]
+    },
+    {
+      "id": "prompts",
+      "description": "Operational prompt helpers used for routing and generation.",
+      "pathPatterns": [
+        "definitions/providers/github/prompts/*"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here",
+        "always applied"
+      ]
+    },
+    {
+      "id": "templates",
+      "description": "Concrete artifact skeletons that must not become normative policy owners.",
+      "pathPatterns": [
+        "definitions/templates/**/*",
+        "definitions/providers/vscode/workspace/*.tamplate.jsonc",
+        "definitions/providers/vscode/workspace/snippets/*.tamplate.code-snippets",
+        "definitions/providers/codex/mcp/*.template.*"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here",
+        "always applied"
+      ]
+    },
+    {
+      "id": "codex-skills",
+      "description": "Execution-specialized Codex skills that must reference canonical repository policy.",
+      "pathPatterns": [
+        "definitions/providers/codex/skills/*/SKILL.md"
+      ],
+      "forbiddenOwnershipMarkers": [
+        "single source of truth",
+        "global rules live here"
+      ]
+    },
+    {
+      "id": "orchestration",
+      "description": "Pipeline contracts, evals, and handoff artifacts.",
+      "pathPatterns": [
+        "definitions/providers/codex/orchestration/**/*",
+        "scripts/orchestration/*"
+      ]
+    },
+    {
+      "id": "runtime-projection",
+      "description": "Scripts that render the versioned source of truth into local runtime locations.",
+      "pathPatterns": [
+        "scripts/runtime/*"
+      ]
+    }
+  ]
+}

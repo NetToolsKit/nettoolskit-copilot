@@ -15,19 +15,19 @@ priority: high
   - `AGENTS.md`
   - `copilot-instructions.md`
 - Cross-cutting policies remain centralized:
-  - `instructions/core/ntk-core-authoritative-sources.instructions.md`
-  - `instructions/core/ntk-core-artifact-layout.instructions.md`
-  - `.github/governance/authoritative-source-map.json`
-- Planning lifecycle rules are centralized in `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` and `planning/README.md`.
-- Brainstorm/spec rules are centralized in `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
-- Super Agent lifecycle rules are centralized in `instructions/agents/ntk-agents-super-agent.instructions.md` under the dedicated `agents/` lane.
-- Worktree isolation rules are centralized in `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md`.
-- TDD and verification rules are centralized in `instructions/process/delivery/ntk-process-tdd-verification.instructions.md`.
+  - `instructions/governance/ntk-governance-authoritative-sources.instructions.md`
+  - `instructions/governance/ntk-governance-artifact-layout.instructions.md`
+  - `governance/authoritative-source-map.json`
+- Planning lifecycle rules are centralized in `instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md` and `planning/README.md`.
+- Brainstorm/spec rules are centralized in `instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md` and `planning/specs/README.md`.
+- Super Agent lifecycle rules are centralized in `agents/super-agent/ntk-agents-super-agent.instructions.md`.
+- Worktree isolation rules are centralized in `instructions/governance/ntk-governance-worktree-isolation.instructions.md`.
+- TDD and verification rules are centralized in `instructions/governance/ntk-governance-tdd-verification.instructions.md`.
 - For GitHub Actions in external repositories, consume pinned shared scripts from `https://github.com/ThiagoGuislotti/copilot-instructions` instead of copying scripts into target repositories.
 - Validate remote script integrity using `.github/governance/shared-script-checksums.manifest.json`.
 
 ## Instruction Source Of Truth And Projection
-- `definitions/shared/instructions/` is the canonical instruction content for repo-owned guidance.
+- `definitions/instructions/` is the canonical instruction content for repo-owned guidance.
 - `.github/instructions/` is the projected runtime surface consumed by local agents, editors, and validation gates.
 - `definitions/providers/github/root/`, `definitions/providers/vscode/workspace/`, `definitions/providers/codex/`, and `definitions/providers/claude/` are provider-specific consumers of the canonical taxonomy.
 - Keep semantic folder names and stable `ntk-*` filenames aligned across canonical and projected surfaces.
@@ -66,11 +66,11 @@ priority: high
   - `planning/specs/` versioned design/spec workspace with `active/` and `completed/`
 
 ## Planning Workspace
-- Use `instructions/agents/ntk-agents-super-agent.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
-- Use `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
-- Use `instructions/process/planning/ntk-process-subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
-- Use `instructions/process/collaboration/ntk-process-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
-- Use `instructions/process/delivery/ntk-process-tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
+- Use `agents/super-agent/ntk-agents-super-agent.instructions.md` for the mandatory intake-to-closeout lifecycle on change-bearing work.
+- Use `instructions/governance/ntk-governance-brainstorm-spec-workflow.instructions.md` when non-trivial work needs design direction locked before execution planning.
+- Use `instructions/governance/ntk-governance-subagent-planning-workflow.instructions.md` for the planning and sub-agent workflow on non-trivial work.
+- Use `instructions/governance/ntk-governance-worktree-isolation.instructions.md` when the workstream should move into an isolated git worktree.
+- Use `instructions/governance/ntk-governance-tdd-verification.instructions.md` for code-bearing work that needs explicit verification checkpoints.
 - Active plans live in `planning/active/`.
 - Completed plans move to `planning/completed/` only after implementation, validation, review, and release closeout are materially complete.
 - Active specs live in `planning/specs/active/`.

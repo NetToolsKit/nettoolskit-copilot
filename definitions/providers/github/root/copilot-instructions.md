@@ -35,6 +35,10 @@ Language: pt-BR for chat; EN for code/commits/docs/UI/database; pt-BR i18n outpu
 
 # Hierarchy and Scope
 - Global rules live here and are always applied.
+- Canonical governance references for this provider surface:
+  - `instructions/governance/ntk-governance-repository-operating-model.instructions.md`
+  - `instructions/governance/ntk-governance-authoritative-sources.instructions.md`
+  - `governance/authoritative-source-map.json`
 - The Super Agent lifecycle lives in `instructions/agents/ntk-agents-super-agent.instructions.md` and is always applied for change-bearing work.
 - The canonical non-versioned artifact layout lives in `instructions/core/ntk-core-artifact-layout.instructions.md`.
 - Non-trivial design-bearing work also uses `instructions/process/planning/ntk-process-brainstorm-spec-workflow.instructions.md` before execution planning.
@@ -114,7 +118,7 @@ Follow this order of operations on every task:
 # Authoritative Sources Policy
 - Use repository context first for project-specific behavior, architecture, scripts, templates, and conventions.
 - For external platform, framework, SDK, API, CLI, or tool behavior, follow `instructions/core/ntk-core-authoritative-sources.instructions.md`.
-- Use `.github/governance/authoritative-source-map.json` as the single source of truth for stack-specific official documentation domains.
+- Use `governance/authoritative-source-map.json` as the single source of truth for stack-specific official documentation domains.
 - Do not duplicate official domain lists across domain instruction files.
 
 # Validation Checklist Policy

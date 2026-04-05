@@ -26,7 +26,7 @@ fn test_invoke_validate_instruction_architecture_passes_for_valid_assets() {
 
     assert_eq!(result.status, ValidationCheckStatus::Passed);
     assert_eq!(result.exit_code, 0);
-    assert_eq!(result.layers_checked, 9);
+    assert_eq!(result.layers_checked, 10);
     assert_eq!(result.prompt_files_scanned, 2);
     assert_eq!(result.template_files_scanned, 1);
     assert_eq!(result.skill_files_scanned, 1);
@@ -41,13 +41,13 @@ fn test_invoke_validate_instruction_architecture_reports_invalid_manifest() {
     write_file(
         &repo
             .path()
-            .join(".github/governance/instruction-ownership.manifest.json"),
+            .join("definitions/providers/github/governance/instruction-ownership.manifest.json"),
         r#"{
   "version": 1,
   "layers": [
     {
       "id": "prompts",
-      "pathPatterns": [".github/prompts/*"]
+      "pathPatterns": ["definitions/providers/github/prompts/*"]
     }
   ]
 }"#,
@@ -74,7 +74,7 @@ fn test_invoke_validate_instruction_architecture_reports_missing_agents_referenc
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
     write_file(
-        &repo.path().join(".github/AGENTS.md"),
+        &repo.path().join("definitions/providers/github/root/AGENTS.md"),
         "# Temporary AGENTS\n\nThis file intentionally omits the required reference.\n",
     );
 
@@ -98,7 +98,7 @@ fn test_invoke_validate_instruction_architecture_reports_missing_agents_referenc
 fn test_invoke_validate_instruction_architecture_reports_missing_skill_reference() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
-    let custom_skill_root = repo.path().join("skills");
+    let custom_skill_root = repo.path().join("definitions/providers/codex/skills");
     write_file(
         &custom_skill_root.join("sample/SKILL.md"),
         r#"---
@@ -108,7 +108,7 @@ description: temporary skill
 
 # Sample Skill
 
-Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
+Load `AGENTS.md` and `copilot-instructions.md`.
 "#,
     );
 
@@ -132,7 +132,7 @@ Load `.github/AGENTS.md` and `.github/copilot-instructions.md`.
 fn test_invoke_validate_instruction_architecture_warns_for_prompt_ownership_markers() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
-    let prompt_root = repo.path().join("prompts");
+    let prompt_root = repo.path().join("definitions/providers/github/prompts");
     write_file(
         &prompt_root.join("ownership.prompt.md"),
         "# Prompt\n\nThis prompt is the single source of truth for the whole repository.\n",
@@ -163,7 +163,7 @@ fn test_invoke_validate_instruction_architecture_reports_missing_route_hard_cap(
     write_file(
         &repo
             .path()
-            .join(".github/prompts/route-instructions.prompt.md"),
+            .join("definitions/providers/github/prompts/route-instructions.prompt.md"),
         r#"---
 description: Temporary route prompt
 mode: ask
@@ -195,9 +195,9 @@ Use the routing catalog and return JSON.
 fn test_invoke_validate_instruction_architecture_warns_for_template_ownership_markers() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
-    let template_root = repo.path().join("templates");
+    let template_root = repo.path().join("definitions/templates");
     write_file(
-        &template_root.join("settings.tamplate.jsonc"),
+        &template_root.join("docs/settings.tamplate.jsonc"),
         "{\n  \"//\": \"global rules live here\"\n}\n",
     );
 
@@ -223,7 +223,7 @@ fn test_invoke_validate_instruction_architecture_warns_for_template_ownership_ma
 fn test_invoke_validate_instruction_architecture_converts_failures_to_warnings() {
     let repo = TempDir::new().expect("temporary repository should be created");
     initialize_instruction_architecture_repo(repo.path());
-    fs::remove_file(repo.path().join(".github/AGENTS.md"))
+    fs::remove_file(repo.path().join("definitions/providers/github/root/AGENTS.md"))
         .expect("temporary AGENTS file should be removed");
 
     let result =

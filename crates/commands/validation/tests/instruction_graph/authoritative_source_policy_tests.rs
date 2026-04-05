@@ -16,16 +16,21 @@ fn write_file(path: &std::path::Path, contents: &str) {
 }
 
 fn initialize_repo_layout(repo_root: &std::path::Path) {
-    fs::create_dir_all(repo_root.join(".github/governance"))
+    fs::create_dir_all(repo_root.join(".github"))
+        .expect(".github directory should be created");
+    fs::create_dir_all(repo_root.join(".codex"))
+        .expect(".codex directory should be created");
+    fs::create_dir_all(repo_root.join("definitions/providers/github/governance"))
         .expect("governance directory should be created");
-    fs::create_dir_all(repo_root.join(".github/instructions"))
+    fs::create_dir_all(repo_root.join("definitions/instructions/governance"))
         .expect("instruction directory should be created");
-    fs::create_dir_all(repo_root.join(".codex")).expect("codex directory should be created");
+    fs::create_dir_all(repo_root.join("definitions/providers/github/root"))
+        .expect("provider root directory should be created");
 }
 
 fn write_valid_source_map(repo_root: &std::path::Path) {
     write_file(
-        &repo_root.join(".github/governance/authoritative-source-map.json"),
+        &repo_root.join("definitions/providers/github/governance/authoritative-source-map.json"),
         r#"{
   "version": 1,
   "defaultPolicy": {
@@ -49,34 +54,34 @@ fn write_valid_source_map(repo_root: &std::path::Path) {
 
 fn write_valid_instruction_assets(repo_root: &std::path::Path) {
     write_file(
-        &repo_root.join(".github/instructions/core/ntk-core-authoritative-sources.instructions.md"),
+        &repo_root.join("definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md"),
         r#"# Authoritative Sources
 
-Use `.github/governance/authoritative-source-map.json`.
+Use `governance/authoritative-source-map.json`.
 Repository context first.
 Use official documentation.
 Use community sources only as fallback.
 "#,
     );
     write_file(
-        &repo_root.join(".github/AGENTS.md"),
+        &repo_root.join("definitions/providers/github/root/AGENTS.md"),
         r#"# AGENTS
 
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
-Use `.github/governance/authoritative-source-map.json`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
-        &repo_root.join(".github/copilot-instructions.md"),
+        &repo_root.join("definitions/providers/github/root/copilot-instructions.md"),
         r#"# Global Instructions
 
-Use `instructions/core/ntk-core-authoritative-sources.instructions.md`.
-Use `.github/governance/authoritative-source-map.json`.
+Use `instructions/governance/ntk-governance-authoritative-sources.instructions.md`.
+Use `governance/authoritative-source-map.json`.
 "#,
     );
     write_file(
-        &repo_root.join(".github/instruction-routing.catalog.yml"),
-        "always:\n  - path: instructions/core/ntk-core-authoritative-sources.instructions.md\n",
+        &repo_root.join("definitions/providers/github/root/instruction-routing.catalog.yml"),
+        "always:\n  - path: instructions/governance/ntk-governance-authoritative-sources.instructions.md\n",
     );
 }
 
@@ -110,7 +115,7 @@ fn test_invoke_validate_authoritative_source_policy_reports_invalid_source_map()
     write_file(
         &repo
             .path()
-            .join(".github/governance/authoritative-source-map.json"),
+            .join("definitions/providers/github/governance/authoritative-source-map.json"),
         r#"{
   "version": 1,
   "defaultPolicy": {
@@ -150,7 +155,7 @@ fn test_invoke_validate_authoritative_source_policy_reports_missing_agents_refer
     write_valid_source_map(repo.path());
     write_valid_instruction_assets(repo.path());
     write_file(
-        &repo.path().join(".github/AGENTS.md"),
+        &repo.path().join("definitions/providers/github/root/AGENTS.md"),
         "# Temporary AGENTS\n\nThis file intentionally omits the authoritative source instruction reference.\n",
     );
 
@@ -179,7 +184,7 @@ fn test_invoke_validate_authoritative_source_policy_warns_for_duplicate_official
     write_file(
         &repo
             .path()
-            .join(".github/instructions/duplicate.instructions.md"),
+            .join("definitions/instructions/development/duplicate.instructions.md"),
         r#"---
 applyTo: "**/*.rs"
 priority: medium
@@ -211,7 +216,7 @@ fn test_invoke_validate_authoritative_source_policy_converts_required_findings_t
     initialize_repo_layout(repo.path());
     write_valid_source_map(repo.path());
     write_valid_instruction_assets(repo.path());
-    fs::remove_file(repo.path().join(".github/AGENTS.md"))
+    fs::remove_file(repo.path().join("definitions/providers/github/root/AGENTS.md"))
         .expect("temporary AGENTS file should be removed");
 
     let result =

@@ -13,12 +13,16 @@ use walkdir::WalkDir;
 
 use crate::{error::ValidateAuthoritativeSourcePolicyCommandError, ValidationCheckStatus};
 
-const DEFAULT_SOURCE_MAP_PATH: &str = ".github/governance/authoritative-source-map.json";
-const DEFAULT_INSTRUCTION_PATH: &str = ".github/instructions/core/ntk-core-authoritative-sources.instructions.md";
-const DEFAULT_AGENTS_PATH: &str = ".github/AGENTS.md";
-const DEFAULT_GLOBAL_INSTRUCTIONS_PATH: &str = ".github/copilot-instructions.md";
-const DEFAULT_ROUTING_CATALOG_PATH: &str = ".github/instruction-routing.catalog.yml";
-const DEFAULT_INSTRUCTION_SEARCH_ROOT: &str = ".github/instructions";
+const DEFAULT_SOURCE_MAP_PATH: &str =
+    "definitions/providers/github/governance/authoritative-source-map.json";
+const DEFAULT_INSTRUCTION_PATH: &str =
+    "definitions/instructions/governance/ntk-governance-authoritative-sources.instructions.md";
+const DEFAULT_AGENTS_PATH: &str = "definitions/providers/github/root/AGENTS.md";
+const DEFAULT_GLOBAL_INSTRUCTIONS_PATH: &str =
+    "definitions/providers/github/root/copilot-instructions.md";
+const DEFAULT_ROUTING_CATALOG_PATH: &str =
+    "definitions/providers/github/root/instruction-routing.catalog.yml";
+const DEFAULT_INSTRUCTION_SEARCH_ROOT: &str = "definitions/instructions";
 const REQUIRED_STACK_IDS: &[&str] = &[
     "dotnet",
     "github-copilot",
@@ -206,7 +210,7 @@ pub fn invoke_validate_authoritative_source_policy(
             instruction_text,
             "authoritative sources instruction",
             &[
-                r"\.github/governance/authoritative-source-map\.json",
+                r"(?:\.github/)?governance/authoritative-source-map\.json",
                 "repository context first",
                 "official documentation",
                 "community sources",
@@ -229,8 +233,8 @@ pub fn invoke_validate_authoritative_source_policy(
             agents_text,
             "AGENTS.md",
             &[
-                r"instructions/core/ntk-core-authoritative-sources\.instructions\.md",
-                r"\.github/governance/authoritative-source-map\.json",
+                r"instructions/(?:core/ntk-core|governance/ntk-governance)-authoritative-sources\.instructions\.md",
+                r"(?:\.github/)?governance/authoritative-source-map\.json",
             ],
             request.warning_only,
             &mut warnings,
@@ -250,8 +254,8 @@ pub fn invoke_validate_authoritative_source_policy(
             global_instructions_text,
             "copilot-instructions.md",
             &[
-                r"instructions/core/ntk-core-authoritative-sources\.instructions\.md",
-                r"\.github/governance/authoritative-source-map\.json",
+                r"instructions/(?:core/ntk-core|governance/ntk-governance)-authoritative-sources\.instructions\.md",
+                r"(?:\.github/)?governance/authoritative-source-map\.json",
             ],
             request.warning_only,
             &mut warnings,
@@ -270,7 +274,7 @@ pub fn invoke_validate_authoritative_source_policy(
         test_text_contains_patterns(
             routing_text,
             "instruction routing catalog",
-            &[r"path:\s*instructions/core/ntk-core-authoritative-sources\.instructions\.md"],
+            &[r"path:\s*instructions/(?:core/ntk-core|governance/ntk-governance)-authoritative-sources\.instructions\.md"],
             request.warning_only,
             &mut warnings,
             &mut failures,
