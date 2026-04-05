@@ -11,8 +11,11 @@ use walkdir::WalkDir;
 
 use crate::{error::ValidateTemplateStandardsCommandError, ValidationCheckStatus};
 
-const DEFAULT_BASELINE_PATH: &str = ".github/governance/template-standards.baseline.json";
-const DEFAULT_TEMPLATE_DIRECTORY: &str = ".github/templates";
+const CANONICAL_BASELINE_PATH: &str =
+    "definitions/providers/github/governance/template-standards.baseline.json";
+const LEGACY_BASELINE_PATH: &str = ".github/governance/template-standards.baseline.json";
+const CANONICAL_TEMPLATE_DIRECTORY: &str = "definitions/templates";
+const LEGACY_TEMPLATE_DIRECTORY: &str = ".github/templates";
 
 /// Request payload for `validate-template-standards`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -100,11 +103,19 @@ pub fn invoke_validate_template_standards(
         .map_err(|source| ValidateTemplateStandardsCommandError::ResolveWorkspaceRoot { source })?;
     let baseline_path = match request.baseline_path.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
-        None => repo_root.join(DEFAULT_BASELINE_PATH),
+        None => resolve_default_repo_path(
+            &repo_root,
+            &[CANONICAL_BASELINE_PATH, LEGACY_BASELINE_PATH],
+            CANONICAL_BASELINE_PATH,
+        ),
     };
     let template_directory = match request.template_directory.as_deref() {
         Some(path) => resolve_full_path(&repo_root, path),
-        None => repo_root.join(DEFAULT_TEMPLATE_DIRECTORY),
+        None => resolve_default_repo_path(
+            &repo_root,
+            &[CANONICAL_TEMPLATE_DIRECTORY, LEGACY_TEMPLATE_DIRECTORY],
+            CANONICAL_TEMPLATE_DIRECTORY,
+        ),
     };
 
     let mut warnings = Vec::new();
@@ -329,6 +340,17 @@ pub fn invoke_validate_template_standards(
         status,
         exit_code,
     })
+}
+
+fn resolve_default_repo_path(repo_root: &Path, candidates: &[&str], default_path: &str) -> PathBuf {
+    for candidate in candidates {
+        let resolved = repo_root.join(candidate);
+        if resolved.exists() {
+            return resolved;
+        }
+    }
+
+    repo_root.join(default_path)
 }
 
 fn read_baseline_document(

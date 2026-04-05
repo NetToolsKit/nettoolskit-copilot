@@ -17,7 +17,7 @@ and orchestration surfaces.
 
 ## Required Starting Point
 
-- Start from `.github/templates/powershell-script-template.ps1` for every new script.
+- Start from `definitions/templates/codegen/powershell-script-template.ps1` for every new script.
 - Do not assemble a full script from inline examples alone.
 - For AI-assisted generation, prefer `.github/prompts/create-powershell-script.prompt.md` first.
 

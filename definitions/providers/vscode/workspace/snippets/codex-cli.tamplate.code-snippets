@@ -97,14 +97,14 @@
         "prefix": "codexreadme",
         "description": "Create or update README following ntk-docs-readme.instructions.md",
         "body": [
-            "codex \"README task: ${1:short description}; Follow definitions/providers/github/root/copilot-instructions.md; definitions/instructions/governance/ntk-governance-readme.instructions.md; Use template .github/templates/readme-template.md; File ${2:src/Project/README.md}; concise and practical; no trailing blank line\"$3 ;exit"
+            "codex \"README task: ${1:short description}; Follow definitions/providers/github/root/copilot-instructions.md; definitions/instructions/governance/ntk-governance-readme.instructions.md; Use template definitions/templates/docs/readme-template.md; File ${2:src/Project/README.md}; concise and practical; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex Prompt Template Task": {
         "prefix": "codexprompt",
         "description": "Create/update prompt templates per ntk-docs-prompt-templates.instructions.md",
         "body": [
-            "codex \"Prompt template task: ${1:short description}; Follow definitions/instructions/governance/ntk-governance-prompt-templates.instructions.md; Use templates under .github/templates/; provide Context | Objective | Requirements | Acceptance | Expected output; File ${2:.github/templates/changelog-entry-template.md}; no trailing blank line\"$3 ;exit"
+            "codex \"Prompt template task: ${1:short description}; Follow definitions/instructions/governance/ntk-governance-prompt-templates.instructions.md; Use templates under definitions/templates/; provide Context | Objective | Requirements | Acceptance | Expected output; File ${2:definitions/templates/docs/changelog-entry-template.md}; no trailing blank line\"$3 ;exit"
         ]
     },
     "Codex K8s Task": {
@@ -174,7 +174,7 @@
         "prefix": "codexpr",
         "description": "Create/curate PR description per ntk-process-pr.instructions.md",
         "body": [
-            "codex \"PR task: ${1:short description}; Follow definitions/instructions/governance/ntk-governance-pr.instructions.md; include sections Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration; add Applied instructions; English; File ${2:.github/templates/github-change-checklist-template.md}; no trailing blank line\"$3 ;exit"
+            "codex \"PR task: ${1:short description}; Follow definitions/instructions/governance/ntk-governance-pr.instructions.md; include sections Context | Changes | Rationale | Risks | Testing | Docs | Breaking Changes | Migration; add Applied instructions; English; File ${2:definitions/templates/docs/github-change-checklist-template.md}; no trailing blank line\"$3 ;exit"
         ]
     }
 }

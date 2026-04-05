@@ -12,9 +12,11 @@ use crate::error::ValidateDotnetStandardsCommandError;
 use crate::operational_hygiene::common::derive_status;
 use crate::ValidationCheckStatus;
 
-const DEFAULT_TEMPLATE_DIRECTORY: &str = ".github/templates";
-const REQUIRED_TEMPLATE_RULES: &[(&str, &[&str])] = &[
+const CANONICAL_TEMPLATE_DIRECTORY: &str = "definitions/templates/codegen";
+const LEGACY_TEMPLATE_DIRECTORY: &str = ".github/templates";
+const REQUIRED_TEMPLATE_RULES: &[(&str, &str, &[&str])] = &[
     (
+        "definitions/templates/codegen/dotnet-class-template.cs",
         ".github/templates/dotnet-class-template.cs",
         &[
             r"public\s+class\s+\[ClassName\]",
@@ -22,6 +24,7 @@ const REQUIRED_TEMPLATE_RULES: &[(&str, &[&str])] = &[
         ],
     ),
     (
+        "definitions/templates/codegen/dotnet-interface-template.cs",
         ".github/templates/dotnet-interface-template.cs",
         &[
             r"public\s+interface\s+\[InterfaceName\]",
@@ -29,10 +32,12 @@ const REQUIRED_TEMPLATE_RULES: &[(&str, &[&str])] = &[
         ],
     ),
     (
+        "definitions/templates/codegen/dotnet-unit-test-template.cs",
         ".github/templates/dotnet-unit-test-template.cs",
         &[r"\[TEST_CLASS\]", r"(\[Fact\]|\[Test\]|\[Theory\])"],
     ),
     (
+        "definitions/templates/codegen/dotnet-integration-test-template.cs",
         ".github/templates/dotnet-integration-test-template.cs",
         &[r"IMediator", r"\[Test\]"],
     ),
@@ -80,7 +85,11 @@ pub fn invoke_validate_dotnet_standards(
     let template_directory = resolve_repo_relative_path(
         &repo_root,
         request.template_directory.as_deref(),
-        DEFAULT_TEMPLATE_DIRECTORY,
+        if repo_root.join(CANONICAL_TEMPLATE_DIRECTORY).is_dir() {
+            CANONICAL_TEMPLATE_DIRECTORY
+        } else {
+            LEGACY_TEMPLATE_DIRECTORY
+        },
     );
 
     let mut warnings = Vec::new();
@@ -89,9 +98,15 @@ pub fn invoke_validate_dotnet_standards(
 
     if !template_directory.is_dir() {
         failures.push(format!(
-            "Template directory not found: {}",
-            request.template_directory.as_ref().map_or_else(
-                || DEFAULT_TEMPLATE_DIRECTORY.to_string(),
+                "Template directory not found: {}",
+                request.template_directory.as_ref().map_or_else(
+                || {
+                    if repo_root.join(CANONICAL_TEMPLATE_DIRECTORY).is_dir() {
+                        CANONICAL_TEMPLATE_DIRECTORY.to_string()
+                    } else {
+                        LEGACY_TEMPLATE_DIRECTORY.to_string()
+                    }
+                },
                 |path| { path.to_string_lossy().to_string() }
             )
         ));
@@ -153,8 +168,12 @@ fn validate_required_templates(
     warnings: &mut Vec<String>,
     failures: &mut Vec<String>,
 ) {
-    for (relative_path, required_patterns) in REQUIRED_TEMPLATE_RULES {
-        let template_path = repo_root.join(relative_path);
+    for (canonical_path, legacy_path, required_patterns) in REQUIRED_TEMPLATE_RULES {
+        let (relative_path, template_path) = if repo_root.join(canonical_path).is_file() {
+            (*canonical_path, repo_root.join(canonical_path))
+        } else {
+            (*legacy_path, repo_root.join(legacy_path))
+        };
         if !template_path.is_file() {
             failures.push(format!("Required .NET template not found: {relative_path}"));
             continue;

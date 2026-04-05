@@ -4,7 +4,7 @@ priority: medium
 ---
 
 # README Baseline
-Use `.github/templates/readme-template.md` as the default starting point.
+Use `definitions/templates/docs/readme-template.md` as the default starting point.
 This file defines the generic README baseline only.
 If a higher-priority repository-specific README instruction exists, that file may narrow or override section set, order, and examples policy.
 Do not assemble a README directly from this instruction file; use the template for concrete structure and placeholders.
@@ -42,4 +42,4 @@ If a section does not apply, remove it instead of filling it with weak placehold
 - Use fenced code blocks with correct language tags.
 - Use section separators (`---`) when they improve readability and match repository style.
 - Prefer real examples over invented APIs or placeholder prose.
-- Keep concrete placeholders, subsection anchors, and example scaffolding in `.github/templates/readme-template.md` instead of duplicating them here.
+- Keep concrete placeholders, subsection anchors, and example scaffolding in `definitions/templates/docs/readme-template.md` instead of duplicating them here.

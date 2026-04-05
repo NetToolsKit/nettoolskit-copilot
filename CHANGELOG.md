@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added canonical template copies under `definitions/templates/{docs,codegen}` for the shared docs/codegen assets plus the mirrored root `.NET` scaffold tree, so authoring can continue under `definitions/templates/*` while legacy roots remain compatibility-only.
 - Added canonical GitHub governance definitions under `definitions/providers/github/governance/` for `instruction-ownership.manifest.json` and `authoritative-source-map.json`, so validation and audit commands can resolve authored policy without starting from `.github/governance/`.
 - Added an instruction-taxonomy migration checkpoint that defers `.github/.codex/.claude` projection cutover until canonical `definitions/` assets and validation/audit code are definitions-aware.
 - Added the first canonical template copies under `definitions/templates/codegen/` and `definitions/templates/docs/` so provider-facing prompts can stop depending on `.github/templates/`.
@@ -144,6 +145,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical ADR files from `docs/adr/` were retired and consolidated into this section.
 
 ### Changed
+- Canonical governance, development, and operations instructions now reference `definitions/templates/*` instead of authored `.github/templates/*` paths, and VS Code provider snippets now point at the same canonical template roots.
+- `validate-template-standards` and `validate-dotnet-standards` now prefer canonical template content under `definitions/templates/*` and the canonical template baseline at `definitions/providers/github/governance/template-standards.baseline.json`, while retaining legacy `.github/templates/*` fallback compatibility during migration.
 - Provider-authored consumer surfaces in `definitions/providers/{claude,codex,github}` now resolve canonical `definitions/instructions/*`, `definitions/templates/*`, `definitions/agents/*`, and `definitions/providers/github/root/*` paths instead of authored `.github/*` references, keeping generated runtime surfaces deferred until the final projection cutover.
 - Canonical support assets now follow the shallow `definitions/` taxonomy: routing golden tests, active planning index references, and VS Code provider snippets point to `definitions/instructions/{governance,development,operations,security,data}` and `definitions/agents/super-agent/` instead of the legacy `core/process/architecture/runtime-ops` layout.
 - Canonical `definitions/providers/{github,codex,claude}` references now target the shallow `definitions/instructions/{governance,development,operations,security,data}` taxonomy and `definitions/agents/super-agent/`, removing the remaining provider-side dependency on the transitional `core/process/architecture/runtime-ops` path graph.

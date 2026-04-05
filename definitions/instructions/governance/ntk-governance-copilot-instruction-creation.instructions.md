@@ -1,5 +1,5 @@
 ---
-applyTo: ".github/instructions/*"
+applyTo: "definitions/instructions/**/*.instructions.md"
 priority: high
 ---
 
@@ -11,7 +11,7 @@ priority: high
 - Use markdown headings with a simple, consistent hierarchy
 - Use inline code for paths, commands, globs, filenames, identifiers, and types when it improves precision
 - Header must follow template exactly
-- Start new instruction files from `.github/templates/copilot-instruction-creation.instructions-template.md` when creating or restructuring an instruction
+- Start new instruction files from `definitions/templates/docs/copilot-instruction-creation.instructions-template.md` when creating or restructuring an instruction
 - Do not assemble a final instruction directly from the inline examples in this file; use the template as the concrete structure and treat examples here as partial guidance only
 - Actionable information only
 - Pattern [area].instructions.md
@@ -226,7 +226,7 @@ Example metrics to track:
 - Test integration with existing workflows
 ```markdown
 # Update pattern in copilot-instructions.md
-- New area: `.github/instructions/<domain>/ntk-<domain>-<topic>.instructions.md` (description, examples)
+- New area: `definitions/instructions/<category>/ntk-<category>-<topic>.instructions.md` (description, examples)
 ```
 
 ## GitHub Changes Protocol

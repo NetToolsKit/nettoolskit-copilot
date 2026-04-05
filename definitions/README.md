@@ -25,6 +25,7 @@ This tree now separates five canonical authored lanes:
 - ✅ Canonical roots for instructions, templates, agents, skills, and hooks
 - ✅ Clear separation between authored definitions and provider-specific consumers
 - ✅ Stable path contract for crate-driven generation and projection flows
+- ✅ Canonical `definitions/templates/` now carries migrated docs/codegen templates plus the mirrored .NET scaffold tree
 - ✅ Transitional compatibility while legacy `definitions/shared/` and root `templates/` are retired safely
 
 ---

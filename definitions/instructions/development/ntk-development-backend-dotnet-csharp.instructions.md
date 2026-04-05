@@ -17,8 +17,8 @@ constraint changes how they must be implemented.
 ## Code Organization
 
 - Follow the repository class and interface templates:
-  - `.github/templates/dotnet-class-template.cs`
-  - `.github/templates/dotnet-interface-template.cs`
+  - `definitions/templates/codegen/dotnet-class-template.cs`
+  - `definitions/templates/codegen/dotnet-interface-template.cs`
 - Keep namespaces aligned with folder structure.
 - Use small, focused types and methods.
 - Avoid god classes, mixed concerns, and deep utility dumping grounds.
@@ -80,8 +80,8 @@ Formatting rules:
 
 ### Templates And Layout
 
-- Unit tests: `.github/templates/dotnet-unit-test-template.cs`
-- Integration tests: `.github/templates/dotnet-integration-test-template.cs`
+- Unit tests: `definitions/templates/codegen/dotnet-unit-test-template.cs`
+- Integration tests: `definitions/templates/codegen/dotnet-integration-test-template.cs`
 - File layout:
   - `tests/<Project>.UnitTests/Tests/*Tests.cs`
   - `tests/<Project>.IntegrationTests/Tests/*Tests.cs`
