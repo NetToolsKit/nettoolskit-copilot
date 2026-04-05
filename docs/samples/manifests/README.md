@@ -12,6 +12,7 @@ Canonical reusable manifest templates belong under `definitions/templates/manife
 
 Current samples:
 
+- `extension-governance.catalog.sample.json` - trimmed example of the canonical extension taxonomy and ownership model for agents, skills, hooks, prompts, and future plugins
 - `free-llm-provider-matrix.sample.json` - trimmed example of the free-provider matrix shape used by runtime diagnostics and AI usage reporting
 - `runtime-diagnostics.taxonomy.sample.json` - trimmed example of the runtime diagnostics taxonomy consumed by operator playbooks and future doctor/report surfaces
 

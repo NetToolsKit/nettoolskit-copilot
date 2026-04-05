@@ -85,6 +85,7 @@ When a manifest or document is meant to be consumed by generation or runtime too
 
 - [Repository README](../README.md)
 - [docs/architecture/control-plane-session-operator-model.md](architecture/control-plane-session-operator-model.md)
+- [docs/architecture/extension-governance-model.md](architecture/extension-governance-model.md)
 - [docs/operations/incident-response-playbook.md](operations/incident-response-playbook.md)
 - [docs/operations/ai-development-operator-playbook.md](operations/ai-development-operator-playbook.md)
 - [docs/operations/runtime-diagnostics-observability-playbook.md](operations/runtime-diagnostics-observability-playbook.md)
@@ -93,6 +94,7 @@ When a manifest or document is meant to be consumed by generation or runtime too
 - [docs/ui/tui-ux-guidelines.md](ui/tui-ux-guidelines.md)
 - [docs/samples/README.md](samples/README.md)
 - [docs/samples/manifests/README.md](samples/manifests/README.md)
+- [docs/samples/manifests/extension-governance.catalog.sample.json](samples/manifests/extension-governance.catalog.sample.json)
 - [docs/samples/manifests/runtime-diagnostics.taxonomy.sample.json](samples/manifests/runtime-diagnostics.taxonomy.sample.json)
 - [planning/README.md](../planning/README.md)
 - [definitions/templates/README.md](../definitions/templates/README.md)

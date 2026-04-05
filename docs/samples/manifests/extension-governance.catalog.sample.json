@@ -1,0 +1,22 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "extension-governance-catalog",
+  "classes": [
+    {
+      "id": "agent",
+      "authoredRoot": "definitions/agents/"
+    },
+    {
+      "id": "skill",
+      "authoredRoot": "definitions/skills/"
+    },
+    {
+      "id": "hook",
+      "authoredRoot": "definitions/hooks/"
+    }
+  ],
+  "governanceRules": [
+    "Author canonical extension roots under definitions/ first.",
+    "Do not treat provider mirrors as authored sources."
+  ]
+}

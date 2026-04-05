@@ -68,6 +68,7 @@ unless it truly implements that interoperability boundary.
 - Keep A2A separate from internal workflow routing unless a protocol contract exists.
 - Keep agent-to-model routing separate from MCP and A2A. Lane defaults are internal orchestration metadata, not transport or interoperability.
 - Keep free-provider evaluation matrices separate from MCP/A2A/RAG/CAG. Provider-family cataloging, quota hints, and evaluation compatibility belong in their own reporting/documentation boundary.
+- Keep extension taxonomy separate from agentic surface taxonomy. `agents`, `skills`, `hooks`, provider prompts, and runtime projections are governed extension classes, not replacements for MCP/A2A/RAG/CAG boundaries.
 - When multiple surfaces interact, document the handoff explicitly instead of merging responsibilities.
 
 ## Repository Mapping
@@ -84,6 +85,7 @@ Apply these repository ownership expectations by default:
 
 - README and architecture docs must name MCP, A2A, RAG, and CAG separately when the repository uses them.
 - When the repository owns a free-provider matrix or provider-family catalog, document it as a separate subsection instead of redefining it as MCP.
+- When the repository owns a canonical extension taxonomy, document it as a separate `Extension Model` subsection instead of blending it into MCP or runtime projection text.
 - Do not describe A2A as supported when the repo only has internal delegation.
 - Do not describe MCP as the repository memory system.
 - Do not describe RAG as prompt-budget policy.

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added `definitions/templates/manifests/extension-governance.catalog.json` plus a matching architecture doc and sample manifest so extension classes, authored roots, discovery expectations, and runtime-loading boundaries are versioned once for agents, skills, hooks, provider prompts/projections, and future plugins.
 - Added an embedded free-provider harness catalog plus orchestrator validation helpers so every family in the free-provider matrix now shares the same prompt fixture, output contract, latency/error-path expectations, and deterministic offline contract checks before any live smoke test is enabled.
 - Added an embedded free-provider matrix catalog under `definitions/templates/manifests/free-llm-provider-matrix.catalog.json` plus an orchestrator `ai_provider_matrix` module so free-tier families, quota hints, compatibility tags, and operator caveats are versioned once and reused by runtime diagnostics/reporting.
 - Added canonical agent and skill model-routing policy manifests under `definitions/agents/*` and `definitions/skills/*`, plus a shared orchestrator `ai_model_routing` module, so the development runtime can resolve lane-aware profile/model defaults without hiding them inside provider adapters.
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `definitions/templates/manifests/runtime-diagnostics.taxonomy.json` plus a matching docs sample and operator playbook so health states, subsystem ownership, degraded-state evidence, and future doctor/report expectations are versioned once for runtime diagnostics.
 
 ### Changed
+- Changed the root README, definitions tree, docs architecture lane, and agentic/README instructions so the repository now documents a distinct extension model instead of blending agents, skills, hooks, prompts, and provider projections into MCP or generic plugin language.
 - Changed the root README, the AI development operator playbook, docs manifest samples, and the canonical README/agentic-surface instructions so the free-provider matrix is documented as its own architecture/reporting boundary instead of being conflated with MCP, A2A, RAG, or CAG.
 - Changed the root README, docs tree, template manifests, and observability/README instructions so runtime diagnostics now have a canonical taxonomy manifest, a dedicated operator playbook, and an explicit architecture boundary separate from validation and raw logs.
 - Changed AI weekly/summary usage reporting so `ntk ai usage weekly|summary` now surfaces a best-effort runtime route snapshot, compatible free-provider families with quota/fallback guidance, and matrix-aware provider classifications when persisted provider ids match a known family alias.

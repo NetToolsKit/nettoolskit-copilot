@@ -1,0 +1,95 @@
+{
+  "apiVersion": "ntk/v1",
+  "kind": "extension-governance-catalog",
+  "title": "NetToolsKit Extension Governance Catalog",
+  "classes": [
+    {
+      "id": "agent",
+      "title": "Agent lane",
+      "authoredRoot": "definitions/agents/",
+      "requiredFiles": ["README.md"],
+      "optionalFiles": ["model-routing.policy.json"],
+      "ownership": "repository-owned",
+      "loadingBoundary": "Agents declare orchestration roles and defaults, but do not own provider projection or runtime transport policy."
+    },
+    {
+      "id": "skill",
+      "title": "Skill lane",
+      "authoredRoot": "definitions/skills/",
+      "requiredFiles": ["README.md"],
+      "optionalFiles": ["model-routing.policy.json"],
+      "ownership": "repository-owned",
+      "loadingBoundary": "Skills provide reusable specialist capability packs and must stay behind runtime routing and instruction governance."
+    },
+    {
+      "id": "hook",
+      "title": "Hook lane",
+      "authoredRoot": "definitions/hooks/",
+      "requiredFiles": ["README.md"],
+      "optionalFiles": [],
+      "ownership": "repository-owned",
+      "loadingBoundary": "Hooks define lifecycle entrypoints and must remain explicit, auditable, and runtime-bound."
+    },
+    {
+      "id": "prompt",
+      "title": "Prompt lane",
+      "authoredRoot": "definitions/providers/*/prompts/",
+      "requiredFiles": [],
+      "optionalFiles": [".prompt.md", ".instructions.md"],
+      "ownership": "provider-consumer",
+      "loadingBoundary": "Prompts are consumer-facing assets and must not silently redefine canonical instructions or runtime policy."
+    },
+    {
+      "id": "runtime-projection",
+      "title": "Runtime projection lane",
+      "authoredRoot": "definitions/providers/*/",
+      "requiredFiles": [],
+      "optionalFiles": ["catalogs", "root assets", "governance mirrors"],
+      "ownership": "provider-consumer",
+      "loadingBoundary": "Projected runtime surfaces consume canonical definitions but do not become new authored sources of truth."
+    },
+    {
+      "id": "plugin",
+      "title": "Future plugin package lane",
+      "authoredRoot": "reserved-future-root",
+      "requiredFiles": ["plugin manifest"],
+      "optionalFiles": ["README.md", "runtime policy"],
+      "ownership": "planned",
+      "loadingBoundary": "Plugins remain a planned extension class and must not bypass runtime, MCP, instruction, or validation governance when introduced."
+    }
+  ],
+  "governanceRules": [
+    "Canonical authored extension roots live under definitions/ before any provider projection or generated mirror.",
+    "Agents, skills, and hooks are repository-owned lanes; provider prompts and runtime projections are consumer lanes.",
+    "Runtime projections may consume canonical definitions but cannot redefine repository-owned policy.",
+    "Future plugins require an explicit manifest contract and validator coverage before they become a first-class runtime loading surface.",
+    "Extension loading must stay explicit and auditable; no hidden discovery roots are allowed."
+  ],
+  "runtimeLoadingBoundaries": [
+    {
+      "classId": "agent",
+      "mustNotBypass": ["instructions", "token economy", "provider routing"],
+      "activationModel": "selected by orchestrator lane routing"
+    },
+    {
+      "classId": "skill",
+      "mustNotBypass": ["instructions", "MCP governance", "runtime validation"],
+      "activationModel": "selected by agent/runtime routing"
+    },
+    {
+      "classId": "hook",
+      "mustNotBypass": ["runtime command boundaries", "safety checks"],
+      "activationModel": "bound to explicit lifecycle events"
+    },
+    {
+      "classId": "prompt",
+      "mustNotBypass": ["canonical instructions", "provider governance"],
+      "activationModel": "consumed by provider-specific render/load flows"
+    },
+    {
+      "classId": "runtime-projection",
+      "mustNotBypass": ["canonical authored definitions", "authoritative source policy"],
+      "activationModel": "rendered by repository-owned projection commands"
+    }
+  ]
+}

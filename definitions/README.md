@@ -17,6 +17,7 @@ This tree now separates five canonical authored lanes:
 - `hooks/` for lifecycle-triggered runtime behaviors
 
 `providers/` remains the consumer and projection side of the model.
+The canonical extension-class contract is versioned in `definitions/templates/manifests/extension-governance.catalog.json`.
 
 ---
 
@@ -111,6 +112,7 @@ graph TD
 - `agents/` holds controller and specialist agent definitions such as `super-agent`, `planner`, `reviewer`, and `implementer`.
 - `skills/` holds reusable capability packs grouped by engineering role.
 - `hooks/` holds lifecycle entrypoints such as `session-start`, `pre-tool-use`, `subagent-start`, and `stop`.
+- `templates/manifests/extension-governance.catalog.json` defines the shared extension taxonomy, authored roots, and loading boundaries across those lanes.
 
 Each canonical root should be authored here first, then projected or consumed elsewhere.
 
@@ -137,6 +139,7 @@ This root is mid-migration and currently preserves compatibility on purpose.
 - Root `templates/` remains available until its authored content is migrated into `definitions/templates/`.
 - The reorganization must prefer copy-then-cutover over destructive moves so documents are not lost during path normalization.
 - Human-facing examples belong in `docs/samples/`; canonical reusable authored assets belong in `definitions/templates/`.
+- Future plugin packages remain a planned class and should not appear as ad-hoc roots until they have a manifest-backed contract and validation coverage.
 
 ---
 
@@ -190,6 +193,7 @@ This tree is consumed by:
 - [definitions/hooks/README.md](hooks/README.md)
 - [definitions/providers/README.md](providers/README.md)
 - [definitions/shared/README.md](shared/README.md)
+- [definitions/templates/manifests/extension-governance.catalog.json](templates/manifests/extension-governance.catalog.json)
 - [provider-surface-projection.catalog.json](providers/github/governance/provider-surface-projection.catalog.json)
 - `ntk runtime render-provider-surfaces --repo-root .`
 

@@ -4,7 +4,7 @@ Generated: 2026-03-31 00:00
 
 ## Status
 
-- LastUpdated: 2026-03-31 00:00
+- LastUpdated: 2026-04-05 23:20
 - Objective: define a repository-owned extensibility model for plugins, skills, prompts, and runtime extensions so new capabilities can be added without blurring ownership or weakening governance.
 - Normalized Request: open a dedicated workstream for plugin and skill extensibility because the repository already has skills and routing, but still lacks a stronger extension contract.
 - Active Branch: `docs/planning-gap-workstreams`
@@ -56,3 +56,4 @@ The repository already contains skill systems, routed instructions, runtime surf
 
 - Ready for planning now.
 - The first slice should freeze the extension taxonomy and current ownership model.
+- The repository now has a canonical extension-governance catalog plus README and architecture guidance that separate repository-owned extension roots from provider-consumer projections and reserve plugins as a future manifest-backed class.

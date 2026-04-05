@@ -33,6 +33,7 @@ Do not restate generic README rules here.
 - When the repository model includes agentic technologies, add a `### Agentic Surfaces` subsection under `Architecture` that separates MCP, A2A, RAG, and CAG with repo entry points and support status.
 - When the repository owns a versioned AI provider matrix, add a short `### AI Provider Matrix` subsection under `Architecture` that lists the major provider families, the canonical catalog path, and the operator surfaces that consume it.
 - When the repository exposes canonical doctor/report surfaces for runtime health, add a short `### Runtime Diagnostics Model` subsection under `Architecture` that points to the taxonomy manifest and operator playbook rather than duplicating the full state model inline.
+- When the repository owns canonical `definitions/agents`, `definitions/skills`, and `definitions/hooks` lanes, add a short `### Extension Model` subsection under `Architecture` that points to the extension-governance catalog and clarifies authored roots versus provider-consumer projections.
 - Do not include code examples in the root README.
 - Do not include Installation, Quick Start, Usage Examples, or API Reference in the root README.
 - The root `Crates` section must list every package README under `crates/*`.

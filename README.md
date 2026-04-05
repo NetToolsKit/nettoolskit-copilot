@@ -242,6 +242,21 @@ Future MCP, recall, task, and service doctor/report surfaces should reuse the sa
 
 ---
 
+### Extension Model
+
+Extension classes are governed separately from agentic surfaces so agents, skills, hooks, prompts, and runtime projections do not collapse into one ambiguous plugin layer.
+
+| Class | Canonical authored root | Governance contract |
+| --- | --- | --- |
+| Agents | `definitions/agents/` | `definitions/templates/manifests/extension-governance.catalog.json` |
+| Skills | `definitions/skills/` | `definitions/templates/manifests/extension-governance.catalog.json` |
+| Hooks | `definitions/hooks/` | `definitions/templates/manifests/extension-governance.catalog.json` |
+| Provider prompts and projections | `definitions/providers/*/` | `definitions/templates/manifests/extension-governance.catalog.json` |
+
+Provider mirrors consume these roots, but they do not replace them as authored sources of truth.
+
+---
+
 ### Control Plane Model
 
 Formal control-plane, session, and operator contracts are documented in:
@@ -396,6 +411,7 @@ We follow semantic versioning and conventional commits. Please ensure your contr
 - [Scripts](scripts/README.md)
 - [Template Assets](templates/README.md)
 - [Control Plane, Session, and Operator Model](docs/architecture/control-plane-session-operator-model.md)
+- [Extension Governance Model](docs/architecture/extension-governance-model.md)
 - [Incident Response and Troubleshooting Playbook](docs/operations/incident-response-playbook.md)
 - [AI Development Operator Playbook](docs/operations/ai-development-operator-playbook.md)
 - [Release Artifact Verification Guide](docs/operations/release-artifact-verification.md)
